@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('titleMeta'){{ $movements->total() }} {{ $movements->total() === 1 ? 'movimentação' : 'movimentações' }}@endsection
 @section('title','Estoque')
 @section('description','Controle de entradas, saídas e ajustes com histórico completo por produto.')
 @section('content')
@@ -37,7 +38,7 @@
 @php($labels=['entry'=>'Entrada','exit'=>'Saída','adjustment'=>'Ajuste','sale'=>'Venda','sale_cancel'=>'Estorno'])
 <span class="status {{ in_array($movement->type,['entry','sale_cancel'])?'status-ok':($movement->type==='sale'?'status-blue':'status-muted') }}">{{ $labels[$movement->type] ?? $movement->type }}</span></td><td class="nowrap {{ (float)$movement->quantity_delta>0?'positive':'negative' }}">{{ (float)$movement->quantity_delta>0?'+':'' }}{{ number_format((float)$movement->quantity_delta,3,',','.') }}</td><td>{{ number_format((float)$movement->previous_quantity,3,',','.') }}</td><td class="price-strong">{{ number_format((float)$movement->new_quantity,3,',','.') }}</td><td>{{ $movement->reason }}</td><td>{{ $movement->user?->name ?? 'Sistema' }}</td></tr>
 @empty<tr><td class="empty-cell" colspan="9">Nenhuma movimentação registrada.</td></tr>@endforelse
-</tbody></table></div><div class="card-pagination">{{ $movements->links('partials.pagination') }}</div></section>
+</tbody></table></div><div class="table-footerbar"><span>Exibindo {{ $movements->firstItem() ?? 0 }}–{{ $movements->lastItem() ?? 0 }} de {{ $movements->total() }}</span><div class="card-pagination">{{ $movements->links('partials.pagination') }}</div></div></section>
 <dialog class="erp-dialog" id="stock-add"><form action="{{ route('stock.store') }}" method="post">@csrf
 <div class="dialog-header"><div><h2>Nova movimentação</h2><p>Atualize as quantidades disponíveis</p></div><button type="button" data-dialog-close class="close-dialog">@include('partials.icon',['name'=>'x'])</button></div>
 <div class="dialog-body"><div class="form-grid">
