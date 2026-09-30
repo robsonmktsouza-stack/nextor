@@ -23,6 +23,11 @@
     const id=button.getAttribute('data-dialog-open');document.getElementById(id)?.showModal();
   }));
   document.querySelectorAll('[data-dialog-close]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog')?.close()));
+  document.querySelectorAll('[data-filter-toggle]').forEach(button=>button.addEventListener('click',()=>{
+    const panel=document.getElementById(button.getAttribute('data-filter-toggle'));
+    if(panel) panel.hidden=!panel.hidden;
+  }));
+  document.querySelectorAll('[data-print-page]').forEach(button=>button.addEventListener('click',()=>window.print()));
   document.getElementById('stock-type')?.addEventListener('change',e=>{
     const el=document.getElementById('stock-qty-label'); if(el) el.textContent=e.target.value==='adjustment'?'Novo saldo final *':'Quantidade *';
   });
