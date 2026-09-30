@@ -76,7 +76,8 @@
     }
     if(notifyTimer) clearTimeout(notifyTimer);
     box.className='nextor-notification type-'+type;
-    box.querySelector('.nextor-notification-title').textContent=title || (type==='error'?'Não foi possível concluir':'Aviso');
+    const defaultTitles={success:'Concluído',error:'Não foi possível concluir',warning:'Atenção',info:'Informação'};
+    box.querySelector('.nextor-notification-title').textContent=title || defaultTitles[type] || 'Aviso';
     box.querySelector('.nextor-notification-message').textContent=message;
     const actions=box.querySelector('.nextor-notification-actions');
     actions.innerHTML='';
