@@ -210,7 +210,7 @@
   });
 
   // Ao voltar pelo histórico/bfcache, nunca mantém a tela bloqueada.
-  window.addEventListener('pageshow',resetLoading);
+  window.addEventListener('pageshow',event=>{if(event.persisted) resetLoading();});
 
   let uiSelectSeq=0;
   const closeUiSelects=(except=null)=>{
