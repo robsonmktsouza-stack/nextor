@@ -11,6 +11,15 @@
       <button class="grid-tool" type="button" data-export-table="estoque.csv" title="Exportar CSV">@include('partials.icon',['name'=>'download','size'=>18])</button>
       <button class="grid-tool" type="button" data-refresh-page title="Atualizar">@include('partials.icon',['name'=>'refresh','size'=>18])</button>
     </div>
+    <div class="bulk-actions">
+      <select class="bulk-action-select" data-bulk-menu disabled aria-label="Ações em massa">
+        <option value="">Ações em massa</option>
+        <option value="local:export">Exportar selecionadas</option>
+        <option value="local:print">Imprimir selecionadas</option>
+      </select>
+      <button class="bulk-apply" type="button" data-bulk-apply disabled>Aplicar</button>
+    </div>
+    <span class="selection-count" data-selection-count hidden></span>
   </div>
   <div class="grid-actions-right">
     <a class="period-current" href="{{ route('stock.index', array_merge(request()->except('page','month'), ['month'=>now()->format('Y-m')])) }}">Mês atual</a>
@@ -23,11 +32,11 @@
 <div class="grid-filter-panel" id="stock-filters" @if(!$productId) hidden @endif>
 <form method="get" class="toolbar-filters"><input type="hidden" name="month" value="{{ $month }}"><select class="input-filter" name="product_id"><option value="">Todos os produtos</option>@foreach($products as $product)<option value="{{ $product->id }}" @selected($productId===$product->id)>{{ $product->name }} ({{ $product->sku }})</option>@endforeach</select><button class="btn btn-secondary">Filtrar</button>@if($productId)<a class="btn btn-light" href="{{ route('stock.index',['month'=>$month]) }}">Limpar</a>@endif</form>
 </div>
-<div class="table-scroll"><table class="cms-table"><thead><tr><th>Data</th><th>Produto</th><th>Operação</th><th>Alteração</th><th>Saldo anterior</th><th>Saldo novo</th><th>Motivo</th><th>Responsável</th></tr></thead><tbody>
-@forelse($movements as $movement)<tr><td class="nowrap">{{ $movement->created_at?->format('d/m/Y H:i') }}</td><td><strong class="table-title">{{ $movement->product?->name }}</strong><small class="table-subtitle">{{ $movement->product?->sku }}</small></td><td>
+<div class="table-scroll"><table class="cms-table"><thead><tr><th class="select-cell"><input type="checkbox" data-check-all aria-label="Selecionar todos"></th><th>Data</th><th>Produto</th><th>Operação</th><th>Alteração</th><th>Saldo anterior</th><th>Saldo novo</th><th>Motivo</th><th>Responsável</th></tr></thead><tbody>
+@forelse($movements as $movement)<tr><td class="select-cell"><input type="checkbox" data-row-select value="{{ $movement->id }}" aria-label="Selecionar movimentação {{ $movement->id }}"></td><td class="nowrap">{{ $movement->created_at?->format('d/m/Y H:i') }}</td><td><strong class="table-title">{{ $movement->product?->name }}</strong><small class="table-subtitle">{{ $movement->product?->sku }}</small></td><td>
 @php($labels=['entry'=>'Entrada','exit'=>'Saída','adjustment'=>'Ajuste','sale'=>'Venda','sale_cancel'=>'Estorno'])
 <span class="status {{ in_array($movement->type,['entry','sale_cancel'])?'status-ok':($movement->type==='sale'?'status-blue':'status-muted') }}">{{ $labels[$movement->type] ?? $movement->type }}</span></td><td class="nowrap {{ (float)$movement->quantity_delta>0?'positive':'negative' }}">{{ (float)$movement->quantity_delta>0?'+':'' }}{{ number_format((float)$movement->quantity_delta,3,',','.') }}</td><td>{{ number_format((float)$movement->previous_quantity,3,',','.') }}</td><td class="price-strong">{{ number_format((float)$movement->new_quantity,3,',','.') }}</td><td>{{ $movement->reason }}</td><td>{{ $movement->user?->name ?? 'Sistema' }}</td></tr>
-@empty<tr><td class="empty-cell" colspan="8">Nenhuma movimentação registrada.</td></tr>@endforelse
+@empty<tr><td class="empty-cell" colspan="9">Nenhuma movimentação registrada.</td></tr>@endforelse
 </tbody></table></div><div class="card-pagination">{{ $movements->links('partials.pagination') }}</div></section>
 <dialog class="erp-dialog" id="stock-add"><form action="{{ route('stock.store') }}" method="post">@csrf
 <div class="dialog-header"><div><h2>Nova movimentação</h2><p>Atualize as quantidades disponíveis</p></div><button type="button" data-dialog-close class="close-dialog">@include('partials.icon',['name'=>'x'])</button></div>
