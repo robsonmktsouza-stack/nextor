@@ -203,14 +203,11 @@
     }
   }
   document.querySelectorAll('[data-uf-select]').forEach(select=>{
-    select.addEventListener('change',()=>loadCities(select,''));
     const preferred=select.closest('[data-address-scope]')?.querySelector('[data-city-select]')?.dataset.currentCity||'';
     if(select.value) loadCities(select,preferred);
   });
   document.addEventListener('change',e=>{
-    if(e.target.matches('[data-uf-select]') && !e.target.dataset.boundUf){
-      loadCities(e.target,'');
-    }
+    if(e.target.matches('[data-uf-select]') && !e.detail?.skipCities) loadCities(e.target,'');
   });
 
   // Busca de CEP
@@ -234,7 +231,7 @@
       if(district) district.value=data.bairro||'';
       if(uf){
         uf.value=data.uf||'';
-        uf.dispatchEvent(new Event('change',{bubbles:true}));
+        uf.dispatchEvent(new CustomEvent('change',{bubbles:true,detail:{skipCities:true}}));
         await loadCities(uf,data.localidade||'');
       }else if(city) city.value=data.localidade||'';
     }catch(err){
@@ -269,7 +266,7 @@
       const uf=form.querySelector('[name="state"]');
       if(uf){
         uf.value=data.uf||'';
-        uf.dispatchEvent(new Event('change',{bubbles:true}));
+        uf.dispatchEvent(new CustomEvent('change',{bubbles:true,detail:{skipCities:true}}));
         await loadCities(uf,data.municipio||'');
       }
     }catch(err){
