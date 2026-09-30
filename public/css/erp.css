@@ -318,3 +318,8 @@ html,body{height:100%;overflow:hidden}
 .nextor-notification-close{align-self:start;width:30px;height:30px;margin:7px 6px 0 0;border:0;border-radius:4px;background:transparent;color:#cbd7e1;font-size:20px;line-height:1}
 .nextor-notification-close:hover{background:#ffffff10;color:#fff}
 @media(max-width:760px){.nextor-notification{top:66px;width:calc(100vw - 20px)}}
+
+.nextor-notification.type-success .nextor-notification-action{background:#2fa766}
+.nextor-notification.type-warning .nextor-notification-action{background:#d99a2b}
+.nextor-notification.type-info .nextor-notification-action{background:#4d93e6}
+.nextor-notification.type-error .nextor-notification-action{background:#ef4a3c}
