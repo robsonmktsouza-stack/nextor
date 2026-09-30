@@ -56,8 +56,7 @@
       @include('partials.icon',['name'=>'stock'])<span>Estoque</span></a>
     <a href="{{ route('sales.index') }}" class="sidebar-link {{ request()->routeIs('sales.*') ? 'active' : '' }}" title="Vendas">
       @include('partials.icon',['name'=>'sales'])<span>Vendas</span></a>
-    <div class="sidebar-footer"><span class="status-dot"></span><span>Sistema independente • Sem HUB</span></div>
-  </aside>
+      </aside>
   <main class="cms-page-shell" id="pageShell">
     <div class="main-content">
       <div class="page-heading">
@@ -71,7 +70,7 @@
       @if($errors->any())<div class="alert danger" role="alert">@include('partials.icon',['name'=>'alert','size'=>17])<div><strong>Verifique os campos:</strong><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div></div>@endif
       @yield('content')
     </div>
-    <footer class="page-footer">ERP Estoque e Vendas <span>•</span> Laravel <span>•</span> Sem HUB</footer>
+    <footer class="page-footer">Nextor ERP</footer>
   </main>
 </div>
 @stack('scripts')
