@@ -1,3 +1,7 @@
+# Nextor — ERP de Estoque e Vendas
+
+**Repositório do código-fonte Laravel, sem HUB.** A pasta `vendor/`, o arquivo `.env` e dados locais não são versionados. Para instalar a partir do GitHub, execute `composer install` antes dos comandos Artisan descritos abaixo.
+
 # ERP Estoque e Vendas — Laravel (independente, sem HUB)
 
 Primeira versão funcional de um ERP de estoque e vendas em **Laravel 13**. Interface inspirada no painel administrativo do Away CMS enviado para referência: barra superior azul-escura com linha laranja, menu lateral recolhível, cartões claros, tabelas compactas, formulários e modais.
