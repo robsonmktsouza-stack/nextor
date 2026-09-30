@@ -33,7 +33,7 @@
   </div>
 </div>
 <div class="grid-filter-panel" id="customer-filters" @if(!$term) hidden @endif>
-<form class="toolbar-filters" method="get"><label class="table-search">@include('partials.icon',['name'=>'search','size'=>16])<input name="search" value="{{ $term }}" placeholder="Buscar cliente ou CPF/CNPJ..."></label><button class="btn btn-secondary">Pesquisar</button>@if($term)<a class="btn btn-light" href="{{ route('customers.index') }}">Limpar</a>@endif</form>
+<form class="toolbar-filters" method="get"><div class="table-search-group"><input name="search" value="{{ $term }}" placeholder="Buscar cliente ou CPF/CNPJ..." aria-label="Buscar clientes"><button type="submit" class="table-search-submit" title="Pesquisar" aria-label="Pesquisar">@include('partials.icon',['name'=>'search','size'=>17])</button></div>@if($term)<a class="btn btn-light" href="{{ route('customers.index') }}">Limpar</a>@endif</form>
 </div>
 <div class="table-scroll"><table class="cms-table"><thead><tr><th class="select-cell"><input type="checkbox" data-check-all aria-label="Selecionar todos"></th><th>Cliente</th><th>Documento</th><th>E-mail</th><th>Telefone</th><th class="action-cell">Ações</th></tr></thead><tbody>
 @forelse($customers as $customer)<tr><td class="select-cell"><input type="checkbox" data-row-select value="{{ $customer->id }}" aria-label="Selecionar {{ $customer->name }}"></td><td><strong class="table-title">{{ $customer->name }}</strong></td><td>{{ $customer->document ?: '—' }}</td><td>{{ $customer->email ?: '—' }}</td><td>{{ $customer->phone ?: '—' }}</td><td class="action-cell"><button type="button" class="btn-icon" data-dialog-open="customer-edit-{{ $customer->id }}" title="Editar cliente">@include('partials.icon',['name'=>'edit','size'=>16])</button></td></tr>
