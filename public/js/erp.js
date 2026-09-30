@@ -61,6 +61,39 @@
   document.addEventListener('scroll',hideNextorTooltip,true);
   window.addEventListener('resize',hideNextorTooltip);
 
+  // Notificações próprias do Nextor (substitui alerts nativos do navegador)
+  let notifyTimer=null;
+  const nextorNotify=(message,{type='info',title='',duration=4200,actionLabel='',onAction=null}={})=>{
+    let box=document.getElementById('nextorNotification');
+    if(!box){
+      box=document.createElement('div');
+      box.id='nextorNotification';
+      box.className='nextor-notification';
+      box.hidden=true;
+      box.innerHTML='<div class="nextor-notification-accent"></div><div class="nextor-notification-content"><strong class="nextor-notification-title"></strong><div class="nextor-notification-message"></div><div class="nextor-notification-actions"></div></div><button type="button" class="nextor-notification-close" aria-label="Fechar notificação">×</button>';
+      document.body.appendChild(box);
+      box.querySelector('.nextor-notification-close').addEventListener('click',()=>{box.hidden=true;});
+    }
+    if(notifyTimer) clearTimeout(notifyTimer);
+    box.className='nextor-notification type-'+type;
+    box.querySelector('.nextor-notification-title').textContent=title || (type==='error'?'Não foi possível concluir':'Aviso');
+    box.querySelector('.nextor-notification-message').textContent=message;
+    const actions=box.querySelector('.nextor-notification-actions');
+    actions.innerHTML='';
+    if(actionLabel){
+      const button=document.createElement('button');
+      button.type='button';
+      button.className='nextor-notification-action';
+      button.textContent=actionLabel;
+      button.addEventListener('click',()=>{box.hidden=true;onAction?.();},{once:true});
+      actions.appendChild(button);
+    }
+    box.hidden=false;
+    requestAnimationFrame(()=>box.classList.add('show'));
+    if(duration>0) notifyTimer=setTimeout(()=>{box.classList.remove('show');setTimeout(()=>{box.hidden=true;},160);},duration);
+  };
+  window.NextorNotify=nextorNotify;
+
   let uiSelectSeq=0;
   const closeUiSelects=(except=null)=>{
     document.querySelectorAll('.ui-select.open').forEach(wrapper=>{
@@ -295,7 +328,7 @@
         await loadCities(uf,data.localidade||'');
       }else if(city) city.value=data.localidade||'';
     }catch(err){
-      window.alert(err.message||'Não foi possível consultar o CEP.');
+      nextorNotify('Não foi possível consultar o CEP agora. Verifique sua conexão e tente novamente.',{type:'error',title:'Consulta de CEP'});
     }finally{button.disabled=false;}
   });
 
@@ -330,7 +363,7 @@
         await loadCities(uf,data.municipio||'');
       }
     }catch(err){
-      window.alert(err.message||'Não foi possível consultar o CNPJ.');
+      nextorNotify('Não foi possível consultar o CNPJ agora. Verifique sua conexão e tente novamente.',{type:'error',title:'Consulta de CNPJ'});
     }finally{
       button.disabled=false;
       if(button.querySelector('span')) button.querySelector('span').textContent=oldText||'Autopreencher';
