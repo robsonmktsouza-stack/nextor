@@ -195,3 +195,32 @@ body{font-size:13.5px;font-weight:400;color:#4d5968}
  .col-2,.col-3,.col-4,.col-5,.col-6,.col-7,.col-8,.col-9,.col-10,.col-12{grid-column:1}
  .editor-savebar{margin:0 -14px -20px;padding:10px 14px}
 }
+
+/* Rolagem limpa do ERP: mantém scroll, esconde barras visuais */
+html,body{height:100%;overflow:hidden}
+.cms-page-shell{
+  height:calc(100vh - 60px);
+  min-height:0;
+  overflow:hidden;
+}
+.main-content{
+  height:100%;
+  overflow-y:auto;
+  overflow-x:hidden;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+.main-content::-webkit-scrollbar{width:0;height:0;display:none}
+.table-scroll{
+  scrollbar-width:thin;
+  scrollbar-color:#c8d1db transparent;
+}
+.table-scroll::-webkit-scrollbar{height:7px}
+.table-scroll::-webkit-scrollbar-track{background:transparent}
+.table-scroll::-webkit-scrollbar-thumb{background:#c8d1db;border-radius:999px}
+.table-scroll::-webkit-scrollbar-thumb:hover{background:#aebbc8}
+@media(max-width:760px){
+  html,body{overflow:hidden}
+  .cms-page-shell{height:calc(100vh - 60px)}
+  .main-content{overflow-y:auto;overflow-x:hidden}
+}
