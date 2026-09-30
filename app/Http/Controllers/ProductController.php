@@ -55,6 +55,17 @@ class ProductController extends Controller {
         return redirect()->route('products.index')->with('success',"{$count} produto(s) duplicado(s). O estoque das cópias inicia zerado.");
     }
 
+    public function bulkStatus(Request $request) {
+        $data=$request->validate([
+            'ids'=>['required','array','min:1'],
+            'ids.*'=>['integer','exists:products,id'],
+            'status'=>['required','in:active,inactive'],
+        ]);
+        $active=$data['status']==='active';
+        $count=Product::whereIn('id',$data['ids'])->update(['is_active'=>$active]);
+        return redirect()->route('products.index')->with('success',"{$count} produto(s) ".($active?'ativado(s).':'inativado(s).'));
+    }
+
     public function bulkDelete(Request $request) {
         $ids=$request->validate(['ids'=>['required','array','min:1'],'ids.*'=>['integer','exists:products,id']])['ids'];
         $deleted=0;$blocked=0;
