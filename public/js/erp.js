@@ -136,6 +136,149 @@
     if(!e.target.closest('.ui-select')) closeUiSelects();
   });
   document.querySelectorAll('select').forEach(enhanceSelect);
+  window.NextorUI={enhanceSelect};
+
+  // Abas de formulários
+  document.querySelectorAll('[data-tabs]').forEach(tabs=>{
+    const buttons=[...tabs.querySelectorAll('[data-tab-target]')];
+    buttons.forEach(button=>button.addEventListener('click',()=>{
+      const target=button.getAttribute('data-tab-target');
+      buttons.forEach(b=>b.classList.toggle('active',b===button));
+      document.querySelectorAll('[data-tab-panel]').forEach(panel=>{
+        const active=panel.getAttribute('data-tab-panel')===target;
+        panel.classList.toggle('active',active);
+        panel.hidden=!active;
+      });
+    }));
+  });
+
+  // Switches
+  document.querySelectorAll('.switch-field input[type="checkbox"]').forEach(input=>{
+    const label=input.closest('.switch-field')?.querySelector('[data-switch-label]');
+    const sync=()=>{if(label) label.textContent=input.checked?'Sim':'Não';};
+    input.addEventListener('change',sync); sync();
+  });
+
+  // Endereços de entrega dinâmicos
+  const deliveryList=document.querySelector('[data-delivery-list]');
+  const deliveryTemplate=document.getElementById('deliveryAddressTemplate');
+  let deliverySeq=document.querySelectorAll('[data-delivery-card]').length;
+  document.querySelector('[data-add-delivery]')?.addEventListener('click',()=>{
+    if(!deliveryList || !deliveryTemplate) return;
+    const html=deliveryTemplate.innerHTML.replaceAll('__INDEX__',String(deliverySeq++));
+    const holder=document.createElement('div');
+    holder.innerHTML=html.trim();
+    const card=holder.firstElementChild;
+    deliveryList.appendChild(card);
+    card.querySelectorAll('select').forEach(enhanceSelect);
+    card.scrollIntoView({behavior:'smooth',block:'nearest'});
+  });
+  document.addEventListener('click',e=>{
+    const remove=e.target.closest('[data-remove-delivery]');
+    if(remove) remove.closest('[data-delivery-card]')?.remove();
+  });
+
+  // Cidades por UF
+  async function loadCities(ufSelect,preferred=''){
+    const scope=ufSelect.closest('[data-address-scope]');
+    const citySelect=scope?.querySelector('[data-city-select]');
+    if(!citySelect) return;
+    const uf=ufSelect.value;
+    citySelect.innerHTML='<option value="">'+(uf?'Carregando...':'Selecione o estado')+'</option>';
+    if(!uf) return;
+    try{
+      const response=await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados/'+encodeURIComponent(uf)+'/municipios?orderBy=nome');
+      if(!response.ok) throw new Error('Falha ao carregar cidades');
+      const cities=await response.json();
+      citySelect.innerHTML='<option value="">Selecione a cidade</option>';
+      cities.forEach(city=>{
+        const option=document.createElement('option');
+        option.value=city.nome; option.textContent=city.nome;
+        if(preferred && city.nome.toLocaleLowerCase('pt-BR')===preferred.toLocaleLowerCase('pt-BR')) option.selected=true;
+        citySelect.appendChild(option);
+      });
+      citySelect.dispatchEvent(new Event('change',{bubbles:true}));
+    }catch(_){
+      citySelect.innerHTML='<option value="'+preferred+'">'+(preferred||'Não foi possível carregar')+'</option>';
+    }
+  }
+  document.querySelectorAll('[data-uf-select]').forEach(select=>{
+    select.addEventListener('change',()=>loadCities(select,''));
+    const preferred=select.closest('[data-address-scope]')?.querySelector('[data-city-select]')?.dataset.currentCity||'';
+    if(select.value) loadCities(select,preferred);
+  });
+  document.addEventListener('change',e=>{
+    if(e.target.matches('[data-uf-select]') && !e.target.dataset.boundUf){
+      loadCities(e.target,'');
+    }
+  });
+
+  // Busca de CEP
+  document.addEventListener('click',async e=>{
+    const button=e.target.closest('[data-cep-search]');
+    if(!button) return;
+    const scope=button.closest('[data-address-scope]');
+    const cepInput=scope?.querySelector('[data-cep-input]');
+    const cep=(cepInput?.value||'').replace(/\D/g,'');
+    if(cep.length!==8){cepInput?.focus();return;}
+    button.disabled=true;
+    try{
+      const response=await fetch('https://viacep.com.br/ws/'+cep+'/json/');
+      const data=await response.json();
+      if(data.erro) throw new Error('CEP não encontrado');
+      const address=scope.querySelector('[data-address-input]');
+      const district=scope.querySelector('[data-district-input]');
+      const uf=scope.querySelector('[data-uf-select]');
+      const city=scope.querySelector('[data-city-select]');
+      if(address) address.value=data.logradouro||'';
+      if(district) district.value=data.bairro||'';
+      if(uf){
+        uf.value=data.uf||'';
+        uf.dispatchEvent(new Event('change',{bubbles:true}));
+        await loadCities(uf,data.localidade||'');
+      }else if(city) city.value=data.localidade||'';
+    }catch(err){
+      window.alert(err.message||'Não foi possível consultar o CEP.');
+    }finally{button.disabled=false;}
+  });
+
+  // Autopreenchimento de CNPJ
+  document.querySelector('[data-cnpj-autofill]')?.addEventListener('click',async e=>{
+    const button=e.currentTarget;
+    const form=button.closest('form');
+    const documentInput=form?.querySelector('[data-cnpj-document]');
+    const cnpj=(documentInput?.value||'').replace(/\D/g,'');
+    if(cnpj.length!==14){documentInput?.focus();return;}
+    const set=(name,value)=>{const field=form.querySelector('[name="'+name+'"]');if(field && value!==undefined && value!==null) field.value=value;};
+    button.disabled=true;
+    const oldText=button.querySelector('span')?.textContent;
+    if(button.querySelector('span')) button.querySelector('span').textContent='Buscando...';
+    try{
+      const response=await fetch('https://brasilapi.com.br/api/cnpj/v1/'+cnpj);
+      if(!response.ok) throw new Error('CNPJ não encontrado.');
+      const data=await response.json();
+      set('name',data.razao_social);
+      set('trade_name',data.nome_fantasia);
+      set('email',data.email);
+      set('phone',data.ddd_telefone_1);
+      set('zip_code',data.cep);
+      set('address',data.logradouro);
+      set('address_number',data.numero);
+      set('address_complement',data.complemento);
+      set('district',data.bairro);
+      const uf=form.querySelector('[name="state"]');
+      if(uf){
+        uf.value=data.uf||'';
+        uf.dispatchEvent(new Event('change',{bubbles:true}));
+        await loadCities(uf,data.municipio||'');
+      }
+    }catch(err){
+      window.alert(err.message||'Não foi possível consultar o CNPJ.');
+    }finally{
+      button.disabled=false;
+      if(button.querySelector('span')) button.querySelector('span').textContent=oldText||'Autopreencher';
+    }
+  });
 
   const app = document.getElementById('appRoot');
   if (app) {
