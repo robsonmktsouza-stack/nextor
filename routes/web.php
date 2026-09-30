@@ -16,7 +16,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class,'logout'])->name('logout');
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/products',[ProductController::class,'index'])->name('products.index');
+    Route::get('/products/create',[ProductController::class,'create'])->name('products.create');
     Route::post('/products',[ProductController::class,'store'])->name('products.store');
+    Route::get('/products/{product}/edit',[ProductController::class,'edit'])->name('products.edit');
     Route::put('/products/{product}',[ProductController::class,'update'])->name('products.update');
     Route::post('/products/bulk-duplicate',[ProductController::class,'bulkDuplicate'])->name('products.bulk-duplicate');
     Route::post('/products/bulk-status',[ProductController::class,'bulkStatus'])->name('products.bulk-status');
