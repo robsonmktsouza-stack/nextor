@@ -1,6 +1,66 @@
 (() => {
   'use strict';
 
+  // Tooltip próprio do Nextor
+  const nextorTooltip=document.createElement('div');
+  nextorTooltip.className='nextor-tooltip';
+  nextorTooltip.hidden=true;
+  nextorTooltip.setAttribute('role','tooltip');
+  document.body.appendChild(nextorTooltip);
+  let tooltipTarget=null;
+  const hideNextorTooltip=()=>{
+    tooltipTarget=null;
+    nextorTooltip.hidden=true;
+    nextorTooltip.classList.remove('below');
+  };
+  const showNextorTooltip=target=>{
+    const text=(target?.getAttribute('data-tooltip')||'').trim();
+    if(!text) return;
+    tooltipTarget=target;
+    nextorTooltip.textContent=text;
+    nextorTooltip.hidden=false;
+    nextorTooltip.classList.remove('below');
+    nextorTooltip.style.left='0px';
+    nextorTooltip.style.top='0px';
+    requestAnimationFrame(()=>{
+      if(tooltipTarget!==target) return;
+      const rect=target.getBoundingClientRect();
+      const tip=nextorTooltip.getBoundingClientRect();
+      const gap=8;
+      let top=rect.top-tip.height-gap;
+      let below=false;
+      if(top<8){
+        top=rect.bottom+gap;
+        below=true;
+      }
+      let left=rect.left+(rect.width-tip.width)/2;
+      left=Math.max(8,Math.min(left,window.innerWidth-tip.width-8));
+      top=Math.max(8,Math.min(top,window.innerHeight-tip.height-8));
+      nextorTooltip.style.left=Math.round(left)+'px';
+      nextorTooltip.style.top=Math.round(top)+'px';
+      nextorTooltip.classList.toggle('below',below);
+    });
+  };
+  document.addEventListener('pointerover',e=>{
+    const target=e.target.closest?.('[data-tooltip]');
+    if(target && target!==tooltipTarget) showNextorTooltip(target);
+  });
+  document.addEventListener('pointerout',e=>{
+    if(!tooltipTarget) return;
+    const from=e.target.closest?.('[data-tooltip]');
+    const to=e.relatedTarget?.closest?.('[data-tooltip]');
+    if(from===tooltipTarget && to!==tooltipTarget) hideNextorTooltip();
+  });
+  document.addEventListener('focusin',e=>{
+    const target=e.target.closest?.('[data-tooltip]');
+    if(target) showNextorTooltip(target);
+  });
+  document.addEventListener('focusout',e=>{
+    if(e.target.closest?.('[data-tooltip]')===tooltipTarget) hideNextorTooltip();
+  });
+  document.addEventListener('scroll',hideNextorTooltip,true);
+  window.addEventListener('resize',hideNextorTooltip);
+
   let uiSelectSeq=0;
   const closeUiSelects=(except=null)=>{
     document.querySelectorAll('.ui-select.open').forEach(wrapper=>{
@@ -409,7 +469,7 @@
   function row(productId='', quantity='1') {
     const idx=seq++;
     const tr=document.createElement('tr');
-    tr.innerHTML='<td><select aria-label="Produto" required><option value="">Selecione o produto</option></select><small class="row-stock table-subtitle"></small></td><td><input aria-label="Quantidade" required type="number" min="0.001" step="0.001" value="1"></td><td class="readonly-price">R$ 0,00</td><td class="price-strong row-subtotal">R$ 0,00</td><td><button type="button" class="btn-icon" aria-label="Remover item" title="Remover item">×</button></td>';
+    tr.innerHTML='<td><select aria-label="Produto" required><option value="">Selecione o produto</option></select><small class="row-stock table-subtitle"></small></td><td><input aria-label="Quantidade" required type="number" min="0.001" step="0.001" value="1"></td><td class="readonly-price">R$ 0,00</td><td class="price-strong row-subtotal">R$ 0,00</td><td><button type="button" class="btn-icon" aria-label="Remover item" data-tooltip="Remover item">×</button></td>';
     const select=tr.querySelector('select'),qty=tr.querySelector('input');
     select.name=`items[${idx}][product_id]`;qty.name=`items[${idx}][quantity]`;
     for (const p of products) {const o=document.createElement('option');o.value=String(p.id);o.textContent=`${p.sku} — ${p.name}`;if(String(p.id)===String(productId))o.selected=true;select.appendChild(o);}
