@@ -7,7 +7,9 @@
   <div class="grid-actions-left">
     <button class="grid-primary-action" type="button" data-dialog-open="stock-add">@include('partials.icon',['name'=>'plus','size'=>17]) <span>Nova</span></button>
     <div class="grid-tool-group">
-      <button class="grid-tool" type="button" data-print-page title="Imprimir" aria-label="Imprimir">@include('partials.icon',['name'=>'print','size'=>18])</button>
+      <button class="grid-tool" type="button" data-print-page title="Imprimir">@include('partials.icon',['name'=>'print','size'=>18])</button>
+      <button class="grid-tool" type="button" data-export-table="estoque.csv" title="Exportar CSV">@include('partials.icon',['name'=>'download','size'=>18])</button>
+      <button class="grid-tool" type="button" data-refresh-page title="Atualizar">@include('partials.icon',['name'=>'refresh','size'=>18])</button>
     </div>
   </div>
   <div class="grid-actions-right">
