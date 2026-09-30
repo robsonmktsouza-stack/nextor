@@ -18,9 +18,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/products',[ProductController::class,'index'])->name('products.index');
     Route::post('/products',[ProductController::class,'store'])->name('products.store');
     Route::put('/products/{product}',[ProductController::class,'update'])->name('products.update');
+    Route::post('/products/bulk-duplicate',[ProductController::class,'bulkDuplicate'])->name('products.bulk-duplicate');
+    Route::delete('/products/bulk-delete',[ProductController::class,'bulkDelete'])->name('products.bulk-delete');
     Route::get('/customers',[CustomerController::class,'index'])->name('customers.index');
     Route::post('/customers',[CustomerController::class,'store'])->name('customers.store');
     Route::put('/customers/{customer}',[CustomerController::class,'update'])->name('customers.update');
+    Route::post('/customers/bulk-duplicate',[CustomerController::class,'bulkDuplicate'])->name('customers.bulk-duplicate');
+    Route::delete('/customers/bulk-delete',[CustomerController::class,'bulkDelete'])->name('customers.bulk-delete');
     Route::get('/stock',[StockController::class,'index'])->name('stock.index');
     Route::post('/stock',[StockController::class,'store'])->name('stock.store');
     Route::get('/sales',[SaleController::class,'index'])->name('sales.index');
