@@ -416,3 +416,103 @@ body.is-loading *{cursor:wait!important}
 
 .product-editor .field-disabled{opacity:.55}
 .product-editor .field-disabled input{background:#f4f6f8!important;cursor:not-allowed}
+
+/* Confirmações padronizadas do Nextor */
+.nextor-confirm{
+  position:fixed;
+  inset:0;
+  z-index:21000;
+  display:grid;
+  place-items:center;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .12s ease;
+}
+.nextor-confirm.show{opacity:1;pointer-events:auto}
+.nextor-confirm[hidden]{display:none!important}
+.nextor-confirm-backdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(12,24,36,.56);
+  backdrop-filter:blur(1.5px);
+  -webkit-backdrop-filter:blur(1.5px);
+}
+.nextor-confirm-dialog{
+  position:relative;
+  z-index:1;
+  width:min(470px,calc(100vw - 28px));
+  border:1px solid #cfd8e2;
+  border-radius:7px;
+  background:#fff;
+  box-shadow:0 22px 60px #0f172a3b;
+  overflow:hidden;
+  transform:translateY(-6px) scale(.99);
+  transition:transform .12s ease;
+}
+.nextor-confirm.show .nextor-confirm-dialog{transform:translateY(0) scale(1)}
+.nextor-confirm-head{
+  min-height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:0 14px 0 16px;
+  border-bottom:1px solid #e2e7ec;
+  background:#f8fafc;
+}
+.nextor-confirm-title{
+  color:#26394b;
+  font-size:14px;
+  font-weight:700;
+}
+.nextor-confirm-x{
+  width:30px;
+  height:30px;
+  display:grid;
+  place-items:center;
+  border:0;
+  border-radius:4px;
+  background:transparent;
+  color:#8793a0;
+  font-size:20px;
+}
+.nextor-confirm-x:hover{background:#edf1f5;color:#4b5968}
+.nextor-confirm-body{padding:20px 18px}
+.nextor-confirm-message{
+  margin:0;
+  color:#526171;
+  font-size:13px;
+  line-height:1.55;
+}
+.nextor-confirm-footer{
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  padding:12px 14px;
+  border-top:1px solid #e2e7ec;
+  background:#fbfcfd;
+}
+.nextor-confirm-footer .btn{min-width:92px}
+.nextor-confirm-ok{
+  border:1px solid #2877c7;
+  background:#2877c7;
+  color:#fff;
+}
+.nextor-confirm-ok:hover{background:#236ab3;border-color:#236ab3}
+.nextor-confirm.type-danger .nextor-confirm-ok{
+  border-color:#cf4952;
+  background:#cf4952;
+}
+.nextor-confirm.type-danger .nextor-confirm-ok:hover{
+  border-color:#b83f48;
+  background:#b83f48;
+}
+.nextor-confirm.type-warning .nextor-confirm-ok{
+  border-color:#d99a2b;
+  background:#d99a2b;
+}
+.nextor-confirm.type-warning .nextor-confirm-ok:hover{
+  border-color:#bf8420;
+  background:#bf8420;
+}
+body.has-confirm-open{overflow:hidden}
