@@ -18,6 +18,10 @@
 @case('money')<rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 12h.01M18 12h.01"/>@break
 @case('arrow-left')<path d="m12 19-7-7 7-7M5 12h14"/>@break
 @case('trash')<path d="M3 6h18M8 6V4h8v2M5 6l1 15h12l1-15M10 10v7M14 10v7"/>@break
+@case('copy')<rect x="8" y="8" width="11" height="11" rx="1"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/>@break
+@case('print')<path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/><path d="M18 12h.01"/>@break
+@case('filter')<path d="M4 5h16l-6 7v5l-4 2v-7L4 5Z"/>@break
+@case('chevron-left')<path d="m15 18-6-6 6-6"/>@break
 @case('edit')<path d="m16 4 4 4M3 17l-.5 4.5L7 21 20 8a2.8 2.8 0 0 0-4-4L3 17Z"/>@break
 @case('clock')<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>@break
 @case('settings')<path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/><circle cx="12" cy="12" r="5"/>@break
