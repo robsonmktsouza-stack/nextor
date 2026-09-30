@@ -13,6 +13,16 @@
       <button class="grid-tool" type="button" data-export-table="clientes.csv" title="Exportar CSV">@include('partials.icon',['name'=>'download','size'=>18])</button>
       <button class="grid-tool" type="button" data-refresh-page title="Atualizar">@include('partials.icon',['name'=>'refresh','size'=>18])</button>
     </div>
+    <div class="bulk-actions">
+      <select class="bulk-action-select" data-bulk-menu disabled aria-label="Ações em massa">
+        <option value="">Ações em massa</option>
+        <option value="customers-duplicate">Duplicar selecionados</option>
+        <option value="local:export">Exportar selecionados</option>
+        <option value="local:print">Imprimir selecionados</option>
+        <option value="customers-delete" data-confirm="Excluir os clientes selecionados? Clientes com vendas vinculadas serão preservados.">Excluir selecionados</option>
+      </select>
+      <button class="bulk-apply" type="button" data-bulk-apply disabled>Aplicar</button>
+    </div>
     <span class="selection-count" data-selection-count hidden></span>
     <form id="customers-duplicate" method="post" action="{{ route('customers.bulk-duplicate') }}" hidden>@csrf</form>
     <form id="customers-delete" method="post" action="{{ route('customers.bulk-delete') }}" hidden>@csrf @method('DELETE')</form>
