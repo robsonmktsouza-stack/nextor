@@ -176,7 +176,7 @@ $deliveryAddresses=collect(old('delivery_addresses',$customer->exists ? $custome
 
  <div class="editor-savebar">
    <button class="btn btn-success" type="submit">Salvar</button>
-   <a class="btn btn-secondary" href="{{ route('customers.index') }}">Voltar</a>
+   <a class="btn btn-secondary" href="{{ route('customers.index') }}">Cancelar</a>
  </div>
 </form>
 
