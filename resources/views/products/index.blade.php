@@ -6,7 +6,7 @@
 <section class="cms-card">
  <div class="grid-actionbar">
    <div class="grid-actions-left">
-     <button class="grid-primary-action" type="button" data-dialog-open="product-create">@include('partials.icon',['name'=>'plus','size'=>17]) <span>Novo</span></button>
+     <a class="grid-primary-action" href="{{ route('products.create') }}">@include('partials.icon',['name'=>'plus','size'=>17]) <span>Novo</span></a>
      <div class="grid-tool-group">
        <button class="grid-tool grid-tool-wide" type="button" data-bulk-submit="products-duplicate" disabled>@include('partials.icon',['name'=>'copy','size'=>18])<span>Duplicar</span></button>
        <button class="grid-tool grid-tool-danger" type="button" data-bulk-submit="products-delete" data-confirm="Excluir os produtos selecionados? Produtos com estoque ou movimentações serão preservados." disabled data-tooltip="Excluir selecionados">@include('partials.icon',['name'=>'trash','size'=>18])</button>
@@ -52,7 +52,7 @@
    <div class="row-actions">
      <a class="btn-icon" href="{{ route('stock.index',['product_id'=>$product->id,'open'=>1]) }}" data-tooltip="Movimentar estoque" aria-label="Movimentar estoque de {{ $product->name }}">@include('partials.icon',['name'=>'stock','size'=>16])</a>
      <form method="post" action="{{ route('products.bulk-duplicate') }}" class="row-action-form">@csrf<input type="hidden" name="ids[]" value="{{ $product->id }}"><button type="submit" class="btn-icon" data-tooltip="Duplicar produto" aria-label="Duplicar produto {{ $product->name }}">@include('partials.icon',['name'=>'copy','size'=>16])</button></form>
-     <button type="button" class="btn-icon" data-tooltip="Editar produto" aria-label="Editar produto {{ $product->name }}" data-dialog-open="product-edit-{{ $product->id }}">@include('partials.icon',['name'=>'edit','size'=>16])</button>
+     <a class="btn-icon" href="{{ route('products.edit',$product) }}" data-tooltip="Editar produto" aria-label="Editar produto {{ $product->name }}">@include('partials.icon',['name'=>'edit','size'=>16])</a>
      <form method="post" action="{{ route('products.bulk-delete') }}" class="row-action-form" data-confirm-submit="Excluir este produto? Se ele tiver estoque ou histórico de movimentação, será preservado.">@csrf @method('DELETE')<input type="hidden" name="ids[]" value="{{ $product->id }}"><button type="submit" class="btn-icon row-action-danger" data-tooltip="Excluir produto" aria-label="Excluir produto {{ $product->name }}">@include('partials.icon',['name'=>'trash','size'=>16])</button></form>
    </div>
  </td></tr>
@@ -60,37 +60,4 @@
  </tbody></table></div>
  <div class="table-footerbar"><span>Exibindo {{ $products->firstItem() ?? 0 }}–{{ $products->lastItem() ?? 0 }} de {{ $products->total() }}</span><div class="card-pagination">{{ $products->links('partials.pagination') }}</div></div>
 </section>
-<dialog class="erp-dialog" id="product-create" aria-labelledby="new-product-title"><form method="POST" action="{{ route('products.store') }}">@csrf
-<div class="dialog-header"><div><h2 id="new-product-title">Novo produto</h2><p>Dados cadastrais e comerciais</p></div><button type="button" class="close-dialog" data-dialog-close aria-label="Fechar">@include('partials.icon',['name'=>'x'])</button></div>
-<div class="dialog-body"><div class="form-grid">
-<label class="field"><span>SKU / código *</span><input name="sku" value="{{ old('sku') }}" required maxlength="80" placeholder="Ex.: PROD-001"></label>
-<label class="field"><span>Nome do produto *</span><input name="name" value="{{ old('name') }}" required maxlength="190"></label>
-<label class="field"><span>Categoria</span><input name="category" value="{{ old('category') }}"></label>
-<label class="field"><span>Unidade *</span><select name="unit"><option value="UN">UN — Unidade</option><option value="KG">KG — Quilograma</option><option value="M">M — Metro</option><option value="CX">CX — Caixa</option><option value="L">L — Litro</option><option value="M2">M2 — Metro quadrado</option><option value="M3">M3 — Metro cúbico</option></select></label>
-<label class="field"><span>Custo unitário (R$) *</span><input type="number" step="0.01" min="0" name="cost_price" value="{{ old('cost_price','0.00') }}" required></label>
-<label class="field"><span>Preço de venda (R$) *</span><input type="number" step="0.01" min="0" name="sale_price" value="{{ old('sale_price','0.00') }}" required></label>
-<label class="field"><span>Estoque mínimo *</span><input type="number" step="0.001" min="0" name="minimum_stock" value="{{ old('minimum_stock','0') }}" required></label>
-<div class="field"><span>Estoque disponível</span><div class="readonly-field">0,000 <small>Faça a entrada no módulo Estoque</small></div></div>
-<label class="field wide"><span>Descrição</span><textarea name="description" rows="2">{{ old('description') }}</textarea></label>
-<input type="hidden" name="is_active" value="1">
-</div></div><div class="dialog-footer"><button type="button" class="btn btn-secondary" data-dialog-close>Cancelar</button><button class="btn btn-primary">Salvar produto</button></div>
-</form></dialog>
-@foreach($products as $product)
-<dialog class="erp-dialog" id="product-edit-{{ $product->id }}" aria-labelledby="edit-title-{{ $product->id }}"><form method="POST" action="{{ route('products.update',$product) }}">@csrf @method('PUT')
-<div class="dialog-header"><div><h2 id="edit-title-{{ $product->id }}">Editar produto</h2><p>{{ $product->name }}</p></div><button type="button" class="close-dialog" data-dialog-close aria-label="Fechar">@include('partials.icon',['name'=>'x'])</button></div>
-<div class="dialog-body"><div class="form-grid">
-<label class="field"><span>SKU / código *</span><input name="sku" value="{{ $product->sku }}" required maxlength="80"></label>
-<label class="field"><span>Nome *</span><input name="name" value="{{ $product->name }}" required></label>
-<label class="field"><span>Categoria</span><input name="category" value="{{ $product->category }}"></label>
-<label class="field"><span>Unidade *</span><select name="unit">@foreach(['UN','KG','M','CX','L','M2','M3'] as $unit)<option value="{{ $unit }}" @selected($product->unit===$unit)>{{ $unit }}</option>@endforeach</select></label>
-<label class="field"><span>Custo unitário (R$) *</span><input type="number" step="0.01" min="0" name="cost_price" value="{{ $product->cost_price }}" required></label>
-<label class="field"><span>Preço de venda (R$) *</span><input type="number" step="0.01" min="0" name="sale_price" value="{{ $product->sale_price }}" required></label>
-<label class="field"><span>Estoque mínimo *</span><input type="number" step="0.001" min="0" name="minimum_stock" value="{{ $product->minimum_stock }}" required></label>
-<label class="field"><span>Status</span><select name="is_active"><option value="1" @selected($product->is_active)>Ativo</option><option value="0" @selected(!$product->is_active)>Inativo</option></select></label>
-<label class="field wide"><span>Descrição</span><textarea name="description" rows="2">{{ $product->description }}</textarea></label>
-</div><p class="inline-note">Para alterar a quantidade disponível, use uma entrada, saída ou ajuste no módulo Estoque.</p></div>
-<div class="dialog-footer"><button type="button" class="btn btn-secondary" data-dialog-close>Cancelar</button><button class="btn btn-primary">Salvar alterações</button></div></form></dialog>
-@endforeach
-@if($errors->any())@push('scripts')<script>document.addEventListener('DOMContentLoaded',()=>document.getElementById('product-create')?.showModal());</script>@endpush
-@endif
 @endsection
