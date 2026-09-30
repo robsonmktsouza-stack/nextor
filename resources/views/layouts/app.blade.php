@@ -47,17 +47,17 @@
   <div class="mobile-overlay" id="mobileOverlay" hidden></div>
   <aside class="cms-sidebar" id="sidebar">
     <div class="sidebar-section-label">PRINCIPAL</div>
-    <a href="{{ route('dashboard') }}" class="sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" data-tooltip="Painel">
+    <a href="{{ route('dashboard') }}" class="sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'panel'])<span>Painel</span></a>
     <div class="sidebar-section-label">CADASTROS</div>
-    <a href="{{ route('products.index') }}" class="sidebar-link {{ request()->routeIs('products.*') ? 'active' : '' }}" data-tooltip="Produtos">
+    <a href="{{ route('products.index') }}" class="sidebar-link {{ request()->routeIs('products.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'products'])<span>Produtos</span></a>
-    <a href="{{ route('customers.index') }}" class="sidebar-link {{ request()->routeIs('customers.*') ? 'active' : '' }}" data-tooltip="Clientes">
+    <a href="{{ route('customers.index') }}" class="sidebar-link {{ request()->routeIs('customers.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'customers'])<span>Clientes</span></a>
     <div class="sidebar-section-label">OPERAÇÕES</div>
-    <a href="{{ route('stock.index') }}" class="sidebar-link {{ request()->routeIs('stock.*') ? 'active' : '' }}" data-tooltip="Estoque">
+    <a href="{{ route('stock.index') }}" class="sidebar-link {{ request()->routeIs('stock.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'stock'])<span>Estoque</span></a>
-    <a href="{{ route('sales.index') }}" class="sidebar-link {{ request()->routeIs('sales.*') ? 'active' : '' }}" data-tooltip="Vendas">
+    <a href="{{ route('sales.index') }}" class="sidebar-link {{ request()->routeIs('sales.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'sales'])<span>Vendas</span></a>
       </aside>
   <main class="cms-page-shell" id="pageShell">
