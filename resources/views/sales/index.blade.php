@@ -7,7 +7,9 @@
   <div class="grid-actions-left">
     <a class="grid-primary-action" href="{{ route('sales.create') }}">@include('partials.icon',['name'=>'plus','size'=>17]) <span>Nova</span></a>
     <div class="grid-tool-group">
-      <button class="grid-tool" type="button" data-print-page title="Imprimir" aria-label="Imprimir">@include('partials.icon',['name'=>'print','size'=>18])</button>
+      <button class="grid-tool" type="button" data-print-page title="Imprimir">@include('partials.icon',['name'=>'print','size'=>18])</button>
+      <button class="grid-tool" type="button" data-export-table="vendas.csv" title="Exportar CSV">@include('partials.icon',['name'=>'download','size'=>18])</button>
+      <button class="grid-tool" type="button" data-refresh-page title="Atualizar">@include('partials.icon',['name'=>'refresh','size'=>18])</button>
     </div>
   </div>
   <div class="grid-actions-right">
