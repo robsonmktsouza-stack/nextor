@@ -5,12 +5,26 @@ use App\Models\Product;
 use App\Models\Sale;
 use App\Services\SalesService;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 class SaleController extends Controller {
     public function index(Request $request) {
         $status=$request->query('status','');
-        $sales=Sale::with(['customer','user'])->when(in_array($status,['completed','cancelled'],true),fn($q)=>$q->where('status',$status))
+        $month=(string)$request->query('month',now()->format('Y-m'));
+        try {
+            $period=Carbon::createFromFormat('Y-m',$month)->startOfMonth();
+        } catch (\Throwable $e) {
+            $period=now()->startOfMonth();
+        }
+        $month=$period->format('Y-m');
+        $prevMonth=$period->copy()->subMonth()->format('Y-m');
+        $nextMonth=$period->copy()->addMonth()->format('Y-m');
+        $monthLabel=ucfirst($period->locale('pt_BR')->translatedFormat('F Y'));
+        $sales=Sale::with(['customer','user'])
+            ->whereYear('created_at',$period->year)
+            ->whereMonth('created_at',$period->month)
+            ->when(in_array($status,['completed','cancelled'],true),fn($q)=>$q->where('status',$status))
             ->latest()->paginate(15)->withQueryString();
-        return view('sales.index',compact('sales','status'));
+        return view('sales.index',compact('sales','status','month','prevMonth','nextMonth','monthLabel'));
     }
     public function create() {
         return view('sales.create',[
