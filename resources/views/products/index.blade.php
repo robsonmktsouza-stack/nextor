@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('titleMeta'){{ $products->total() }} {{ $products->total() === 1 ? 'registro' : 'registros' }}@endsection
 @section('title','Produtos')
 @section('description','Cadastre e organize os itens comercializados, com controle de preços e quantidades.')
 @section('content')
@@ -50,7 +51,7 @@
  <td class="action-cell"><button type="button" class="btn-icon" title="Editar produto" aria-label="Editar produto {{ $product->name }}" data-dialog-open="product-edit-{{ $product->id }}">@include('partials.icon',['name'=>'edit','size'=>16])</button></td></tr>
  @empty<tr><td colspan="9" class="empty-cell">Nenhum produto encontrado. Cadastre o primeiro produto.</td></tr>@endforelse
  </tbody></table></div>
- <div class="card-pagination">{{ $products->links('partials.pagination') }}</div>
+ <div class="table-footerbar"><span>Exibindo {{ $products->firstItem() ?? 0 }}–{{ $products->lastItem() ?? 0 }} de {{ $products->total() }}</span><div class="card-pagination">{{ $products->links('partials.pagination') }}</div></div>
 </section>
 <dialog class="erp-dialog" id="product-create" aria-labelledby="new-product-title"><form method="POST" action="{{ route('products.store') }}">@csrf
 <div class="dialog-header"><div><h2 id="new-product-title">Novo produto</h2><p>Dados cadastrais e comerciais</p></div><button type="button" class="close-dialog" data-dialog-close aria-label="Fechar">@include('partials.icon',['name'=>'x'])</button></div>
