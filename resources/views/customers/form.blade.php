@@ -40,7 +40,7 @@ $deliveryAddresses=collect(old('delivery_addresses',$customer->exists ? $custome
          <label class="field col-5"><span>CPF / CNPJ</span>
            <div class="input-action-group">
              <input name="document" value="{{ old('document',$customer->document) }}" maxlength="20" data-cnpj-document>
-             <button type="button" class="input-action-button" data-cnpj-autofill title="Autopreencher pelo CNPJ">@include('partials.icon',['name'=>'search','size'=>15]) <span>Autopreencher</span></button>
+             <button type="button" class="input-action-button" data-cnpj-autofill data-tooltip="Autopreencher pelo CNPJ">@include('partials.icon',['name'=>'search','size'=>15]) <span>Autopreencher</span></button>
            </div>
          </label>
          <label class="field col-7"><span>Nome fantasia</span><input name="trade_name" value="{{ old('trade_name',$customer->trade_name) }}"></label>
@@ -60,7 +60,7 @@ $deliveryAddresses=collect(old('delivery_addresses',$customer->exists ? $custome
        <label class="field col-3"><span>CEP</span>
          <div class="input-action-group compact-action">
            <input name="zip_code" value="{{ old('zip_code',$customer->zip_code) }}" maxlength="10" data-cep-input>
-           <button type="button" class="input-action-button" data-cep-search title="Buscar CEP">@include('partials.icon',['name'=>'search','size'=>15])</button>
+           <button type="button" class="input-action-button" data-cep-search data-tooltip="Buscar CEP">@include('partials.icon',['name'=>'search','size'=>15])</button>
          </div>
        </label>
        <label class="field col-3"><span>Estado</span>
