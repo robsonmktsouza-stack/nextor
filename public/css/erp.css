@@ -342,18 +342,15 @@ html,body{height:100%;overflow:hidden}
 .nextor-loading.show{opacity:1}
 .nextor-loading[hidden]{display:none!important}
 .nextor-loading-center{
-  min-width:96px;
-  min-height:86px;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  gap:11px;
-  padding:16px 20px;
-  border:1px solid #d7e0e8;
-  border-radius:8px;
-  background:rgba(255,255,255,.94);
-  box-shadow:0 14px 40px #1424371f;
+  gap:10px;
+  padding:0;
+  background:transparent;
+  border:0;
+  box-shadow:none;
 }
 .nextor-spinner{
   width:34px;
@@ -364,10 +361,11 @@ html,body{height:100%;overflow:hidden}
   animation:nextorSpin .68s linear infinite;
 }
 .nextor-loading-text{
-  color:#546579;
+  color:#40566d;
   font-size:11px;
   font-weight:600;
   white-space:nowrap;
+  text-shadow:0 1px 1px #fff;
 }
 body.is-loading{cursor:wait!important}
 body.is-loading *{cursor:wait!important}
