@@ -169,7 +169,7 @@ $deliveryAddresses=collect(old('delivery_addresses',$customer->exists ? $custome
      </div>
    </div>
 
-   <div class="editor-panel plain-panel">
+   <div class="editor-panel notes-panel">
      <label class="field"><span>Observações</span><textarea name="notes" rows="4">{{ old('notes',$customer->notes) }}</textarea></label>
    </div>
  </section>
