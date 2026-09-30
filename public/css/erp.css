@@ -141,7 +141,7 @@ body{font-size:13.5px;font-weight:400;color:#4d5968}
 .check-option input[type=checkbox]{width:15px;height:15px;accent-color:#2877c7}
 
 .editor-panel{background:#f1f2f4;border:1px solid #e0e3e7;border-radius:5px;padding:24px 28px}
-.editor-panel.plain-panel{background:#fff;padding:14px 0 0;border:0}
+.editor-panel.notes-panel{background:#f1f2f4;border:1px solid #e0e3e7;padding:20px 28px 22px}
 .editor-grid{display:grid;gap:16px 18px}
 .editor-grid.cols-12{grid-template-columns:repeat(12,minmax(0,1fr))}
 .col-2{grid-column:span 2}.col-3{grid-column:span 3}.col-4{grid-column:span 4}.col-5{grid-column:span 5}.col-6{grid-column:span 6}.col-7{grid-column:span 7}.col-8{grid-column:span 8}.col-9{grid-column:span 9}.col-10{grid-column:span 10}.col-12{grid-column:span 12}
@@ -231,3 +231,6 @@ html,body{height:100%;overflow:hidden}
   .editor-savebar,.app-root.sidebar-collapsed .editor-savebar{left:0}
   .customer-editor{padding-bottom:72px}
 }
+
+.editor-panel.notes-panel .field{width:100%}
+.editor-panel.notes-panel textarea{width:100%;min-height:110px;display:block}
