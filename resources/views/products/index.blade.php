@@ -13,8 +13,22 @@
        <button class="grid-tool" type="button" data-export-table="products.csv" title="Exportar CSV">@include('partials.icon',['name'=>'download','size'=>18])</button>
        <button class="grid-tool" type="button" data-refresh-page title="Atualizar">@include('partials.icon',['name'=>'refresh','size'=>18])</button>
      </div>
+     <div class="bulk-actions">
+       <select class="bulk-action-select" data-bulk-menu disabled aria-label="Ações em massa">
+         <option value="">Ações em massa</option>
+         <option value="products-active">Ativar selecionados</option>
+         <option value="products-inactive">Inativar selecionados</option>
+         <option value="products-duplicate">Duplicar selecionados</option>
+         <option value="local:export">Exportar selecionados</option>
+         <option value="local:print">Imprimir selecionados</option>
+         <option value="products-delete" data-confirm="Excluir os produtos selecionados? Produtos com estoque ou movimentações serão preservados.">Excluir selecionados</option>
+       </select>
+       <button class="bulk-apply" type="button" data-bulk-apply disabled>Aplicar</button>
+     </div>
      <span class="selection-count" data-selection-count hidden></span>
      <form id="products-duplicate" method="post" action="{{ route('products.bulk-duplicate') }}" hidden>@csrf</form>
+     <form id="products-active" method="post" action="{{ route('products.bulk-status') }}" hidden>@csrf<input type="hidden" name="status" value="active"></form>
+     <form id="products-inactive" method="post" action="{{ route('products.bulk-status') }}" hidden>@csrf<input type="hidden" name="status" value="inactive"></form>
      <form id="products-delete" method="post" action="{{ route('products.bulk-delete') }}" hidden>@csrf @method('DELETE')</form>
    </div>
    <div class="grid-actions-right">
