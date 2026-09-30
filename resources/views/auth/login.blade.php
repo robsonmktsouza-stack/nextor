@@ -11,5 +11,5 @@
  <label class="field">Senha<input name="password" type="password" autocomplete="current-password" required placeholder="Sua senha"></label>
  <label class="checkline"><input type="checkbox" name="remember" value="1"> Manter conectado</label>
  <button class="btn btn-primary btn-block">Entrar no sistema</button>
- </form><div class="login-foot">Acesso restrito • Sem dependência de HUB</div>
+ </form><div class="login-foot">Acesso restrito</div>
  </main></body></html>
