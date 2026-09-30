@@ -1,27 +1,129 @@
 <?php
 namespace App\Http\Controllers;
+
 use App\Models\Customer;
-use Illuminate\Http\Request;
 use App\Models\Sale;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+
 class CustomerController extends Controller {
     public function index(Request $request) {
         $term=trim((string)$request->query('search',''));
-        $customers=Customer::query()->when($term,fn($q)=>$q->where(fn($t)=>$t->where('name','like',"%{$term}%")->orWhere('document','like',"%{$term}%")))
+        $customers=Customer::query()
+            ->when($term,fn($q)=>$q->where(fn($t)=>$t
+                ->where('name','like',"%{$term}%")
+                ->orWhere('trade_name','like',"%{$term}%")
+                ->orWhere('document','like',"%{$term}%")
+                ->orWhere('email','like',"%{$term}%")))
             ->orderBy('name')->paginate(12)->withQueryString();
         return view('customers.index',compact('term','customers'));
     }
-    private function rules(): array { return [
-        'name'=>['required','string','max:190'], 'document'=>['nullable','string','max:20'],
-        'email'=>['nullable','email','max:255'], 'phone'=>['nullable','string','max:25'],
-        'notes'=>['nullable','string','max:5000'],
-    ]; }
+
+    public function create() {
+        return view('customers.form',[
+            'customer'=>new Customer([
+                'is_customer'=>true,
+                'ie_indicator'=>'non_contributor',
+                'lgpd_legal_basis'=>'default',
+            ]),
+            'editing'=>false,
+        ]);
+    }
+
+    public function edit(Customer $customer) {
+        $customer->load('deliveryAddresses');
+        return view('customers.form',compact('customer')+['editing'=>true]);
+    }
+
+    private function rules(): array {
+        return [
+            'name'=>['required','string','max:190'],
+            'trade_name'=>['nullable','string','max:190'],
+            'document'=>['nullable','string','max:20'],
+            'contact_name'=>['nullable','string','max:190'],
+            'is_customer'=>['nullable','boolean'],
+            'is_supplier'=>['nullable','boolean'],
+            'is_carrier'=>['nullable','boolean'],
+            'email'=>['nullable','email','max:255'],
+            'phone'=>['nullable','string','max:25'],
+
+            'zip_code'=>['nullable','string','max:10'],
+            'state'=>['nullable','string','size:2'],
+            'city'=>['nullable','string','max:120'],
+            'address'=>['nullable','string','max:190'],
+            'address_number'=>['nullable','string','max:30'],
+            'address_complement'=>['nullable','string','max:120'],
+            'district'=>['nullable','string','max:120'],
+
+            'final_consumer'=>['nullable','boolean'],
+            'ie_indicator'=>['nullable','string','max:32'],
+            'state_registration'=>['nullable','string','max:40'],
+            'substitute_state_registration'=>['nullable','string','max:40'],
+            'municipal_registration'=>['nullable','string','max:40'],
+            'suframa'=>['nullable','string','max:40'],
+            'government_entity'=>['nullable','string','max:40'],
+            'rntrc'=>['nullable','string','max:40'],
+            'carrier_type'=>['nullable','string','max:40'],
+            'driver_license'=>['nullable','string','max:40'],
+
+            'birth_date'=>['nullable','date'],
+            'keywords'=>['nullable','string','max:500'],
+            'celebration_date'=>['nullable','date'],
+            'celebration_note'=>['nullable','string','max:190'],
+            'lgpd_legal_basis'=>['nullable','string','max:80'],
+            'notes'=>['nullable','string','max:5000'],
+
+            'delivery_addresses'=>['nullable','array','max:20'],
+            'delivery_addresses.*.name'=>['nullable','string','max:190'],
+            'delivery_addresses.*.document'=>['nullable','string','max:20'],
+            'delivery_addresses.*.state_registration'=>['nullable','string','max:40'],
+            'delivery_addresses.*.zip_code'=>['nullable','string','max:10'],
+            'delivery_addresses.*.state'=>['nullable','string','size:2'],
+            'delivery_addresses.*.city'=>['nullable','string','max:120'],
+            'delivery_addresses.*.address'=>['nullable','string','max:190'],
+            'delivery_addresses.*.address_number'=>['nullable','string','max:30'],
+            'delivery_addresses.*.address_complement'=>['nullable','string','max:120'],
+            'delivery_addresses.*.district'=>['nullable','string','max:120'],
+            'delivery_addresses.*.email'=>['nullable','email','max:255'],
+            'delivery_addresses.*.phone'=>['nullable','string','max:25'],
+        ];
+    }
+
+    private function persist(Request $request, ?Customer $customer=null): Customer {
+        $data=$request->validate($this->rules());
+        $addresses=$data['delivery_addresses'] ?? [];
+        unset($data['delivery_addresses']);
+
+        foreach(['is_customer','is_supplier','is_carrier','final_consumer'] as $flag) {
+            $data[$flag]=$request->boolean($flag);
+        }
+        if(!$data['is_customer'] && !$data['is_supplier'] && !$data['is_carrier']) {
+            $data['is_customer']=true;
+        }
+
+        return DB::transaction(function() use ($customer,$data,$addresses) {
+            if($customer) {
+                $customer->update($data);
+                $customer->deliveryAddresses()->delete();
+            } else {
+                $customer=Customer::create($data);
+            }
+
+            foreach($addresses as $address) {
+                $hasData=collect($address)->filter(fn($v)=>$v!==null && $v!=='')->isNotEmpty();
+                if($hasData) $customer->deliveryAddresses()->create($address);
+            }
+            return $customer;
+        });
+    }
+
     public function store(Request $request) {
-        Customer::create($request->validate($this->rules()));
+        $this->persist($request);
         return redirect()->route('customers.index')->with('success','Cliente cadastrado.');
     }
+
     public function update(Request $request,Customer $customer) {
-        $customer->update($request->validate($this->rules()));
+        $this->persist($request,$customer);
         return redirect()->route('customers.index')->with('success','Cliente atualizado.');
     }
 
@@ -29,11 +131,17 @@ class CustomerController extends Controller {
         $ids=$request->validate(['ids'=>['required','array','min:1'],'ids.*'=>['integer','exists:customers,id']])['ids'];
         $count=0;
         DB::transaction(function() use ($ids,&$count) {
-            Customer::whereIn('id',$ids)->orderBy('id')->get()->each(function(Customer $customer) use (&$count) {
+            Customer::with('deliveryAddresses')->whereIn('id',$ids)->orderBy('id')->get()->each(function(Customer $customer) use (&$count) {
                 $copy=$customer->replicate();
                 $copy->name=$customer->name.' (cópia)';
                 $copy->document=null;
                 $copy->save();
+                foreach($customer->deliveryAddresses as $address) {
+                    $copy->deliveryAddresses()->create($address->only([
+                        'name','document','state_registration','zip_code','state','city','address',
+                        'address_number','address_complement','district','email','phone'
+                    ]));
+                }
                 $count++;
             });
         });
