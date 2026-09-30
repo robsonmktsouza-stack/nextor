@@ -369,6 +369,65 @@
     const sync=()=>{if(label) label.textContent=input.checked?'Sim':'Não';};
     input.addEventListener('change',sync); sync();
   });
+  document.querySelectorAll('.inverse-switch input[type="checkbox"]').forEach(input=>{
+    const label=input.closest('.inverse-switch')?.querySelector('[data-active-label]');
+    const sync=()=>{if(label) label.textContent=input.checked?'Não':'Sim';};
+    input.addEventListener('change',sync); sync();
+  });
+
+  // Cadastro de produtos
+  document.querySelectorAll('[data-price-area]').forEach(area=>{
+    const cost=area.querySelector('[data-cost-price]');
+    const sale=area.querySelector('[data-sale-price]');
+    const output=area.querySelector('[data-margin-output]');
+    const calc=()=>{
+      const c=parseFloat(cost?.value||'0')||0;
+      const s=parseFloat(sale?.value||'0')||0;
+      const margin=s>0?((s-c)/s)*100:0;
+      if(output) output.value=margin.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+    };
+    cost?.addEventListener('input',calc);
+    sale?.addEventListener('input',calc);
+    calc();
+  });
+
+  document.querySelectorAll('[data-stock-control]').forEach(toggle=>{
+    const form=toggle.closest('form');
+    const sync=()=>{
+      form?.querySelectorAll('[data-stock-field]').forEach(field=>{
+        field.readOnly=!toggle.checked;
+        field.closest('.field')?.classList.toggle('field-disabled',!toggle.checked);
+      });
+    };
+    toggle.addEventListener('change',sync);sync();
+  });
+
+  document.querySelectorAll('[data-tax-unit-toggle]').forEach(toggle=>{
+    const form=toggle.closest('form');
+    const select=form?.querySelector('[data-tax-unit-field]');
+    const sync=()=>{
+      if(select) select.disabled=!toggle.checked;
+    };
+    toggle.addEventListener('change',sync);sync();
+  });
+
+  document.querySelectorAll('[data-product-image]').forEach(input=>{
+    input.addEventListener('change',()=>{
+      const file=input.files?.[0];
+      if(!file) return;
+      const preview=input.closest('.editor-panel')?.querySelector('[data-product-photo-preview]');
+      if(!preview) return;
+      const reader=new FileReader();
+      reader.addEventListener('load',()=>{
+        preview.innerHTML='';
+        const img=document.createElement('img');
+        img.src=String(reader.result||'');
+        img.alt='Prévia do produto';
+        preview.appendChild(img);
+      },{once:true});
+      reader.readAsDataURL(file);
+    });
+  });
 
   // Endereços de entrega dinâmicos
   const deliveryList=document.querySelector('[data-delivery-list]');
