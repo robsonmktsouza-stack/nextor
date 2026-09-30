@@ -96,6 +96,80 @@
   window.NextorNotify=nextorNotify;
   window.alert=(message)=>nextorNotify(String(message),{type:'info',title:'Aviso'});
 
+  // Confirmações próprias do Nextor
+  let confirmResolver=null;
+  const nextorConfirm=(message,{title='Confirmar ação',confirmLabel='Confirmar',cancelLabel='Cancelar',type='danger'}={})=>{
+    if(confirmResolver){
+      confirmResolver(false);
+      confirmResolver=null;
+    }
+
+    let modal=document.getElementById('nextorConfirm');
+    if(!modal){
+      modal=document.createElement('div');
+      modal.id='nextorConfirm';
+      modal.className='nextor-confirm';
+      modal.hidden=true;
+      modal.innerHTML=
+        '<div class="nextor-confirm-backdrop" data-confirm-cancel></div>'+
+        '<div class="nextor-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="nextorConfirmTitle">'+
+          '<div class="nextor-confirm-head">'+
+            '<strong id="nextorConfirmTitle" class="nextor-confirm-title"></strong>'+
+            '<button type="button" class="nextor-confirm-x" data-confirm-cancel aria-label="Fechar">×</button>'+
+          '</div>'+
+          '<div class="nextor-confirm-body"><p class="nextor-confirm-message"></p></div>'+
+          '<div class="nextor-confirm-footer">'+
+            '<button type="button" class="btn btn-secondary nextor-confirm-cancel" data-confirm-cancel></button>'+
+            '<button type="button" class="btn nextor-confirm-ok" data-confirm-ok></button>'+
+          '</div>'+
+        '</div>';
+      document.body.appendChild(modal);
+    }
+
+    modal.className='nextor-confirm type-'+type;
+    modal.querySelector('.nextor-confirm-title').textContent=title;
+    modal.querySelector('.nextor-confirm-message').textContent=String(message||'');
+    modal.querySelector('.nextor-confirm-cancel').textContent=cancelLabel;
+    modal.querySelector('.nextor-confirm-ok').textContent=confirmLabel;
+    modal.hidden=false;
+    document.body.classList.add('has-confirm-open');
+
+    return new Promise(resolve=>{
+      confirmResolver=resolve;
+      const finish=result=>{
+        if(!confirmResolver) return;
+        const resolver=confirmResolver;
+        confirmResolver=null;
+        modal.classList.remove('show');
+        document.body.classList.remove('has-confirm-open');
+        setTimeout(()=>{modal.hidden=true;resolver(result);},120);
+      };
+
+      modal.querySelectorAll('[data-confirm-cancel]').forEach(button=>{
+        button.onclick=()=>finish(false);
+      });
+      modal.querySelector('[data-confirm-ok]').onclick=()=>finish(true);
+
+      requestAnimationFrame(()=>{
+        modal.classList.add('show');
+        modal.querySelector('[data-confirm-ok]')?.focus();
+      });
+
+      const onKey=e=>{
+        if(modal.hidden) return;
+        if(e.key==='Escape'){e.preventDefault();finish(false);}
+        if(e.key==='Enter' && !e.target.matches('textarea,input,select')){e.preventDefault();finish(true);}
+      };
+      document.addEventListener('keydown',onKey,{once:false});
+      const cleanup=()=>document.removeEventListener('keydown',onKey);
+      const originalFinish=finish;
+      const wrapped=result=>{cleanup();originalFinish(result);};
+      modal.querySelectorAll('[data-confirm-cancel]').forEach(button=>button.onclick=()=>wrapped(false));
+      modal.querySelector('[data-confirm-ok]').onclick=()=>wrapped(true);
+    });
+  };
+  window.NextorConfirm=nextorConfirm;
+
   document.querySelectorAll('[data-system-notification]').forEach(node=>{
     const items=[...node.querySelectorAll('[data-notification-item]')].map(item=>item.textContent.trim()).filter(Boolean);
     const message=items.length ? items.join(' • ') : node.textContent.trim();
@@ -576,9 +650,23 @@
   }));
   document.querySelectorAll('[data-print-page]').forEach(button=>button.addEventListener('click',()=>window.print()));
   document.querySelectorAll('[data-refresh-page]').forEach(button=>button.addEventListener('click',()=>window.location.reload()));
-  document.querySelectorAll('[data-confirm-submit]').forEach(form=>form.addEventListener('submit',e=>{
+  document.querySelectorAll('[data-confirm-submit]').forEach(form=>form.addEventListener('submit',async e=>{
+    if(form.dataset.confirmBypass==='1'){
+      delete form.dataset.confirmBypass;
+      return;
+    }
     const message=form.getAttribute('data-confirm-submit');
-    if(message && !window.confirm(message)) e.preventDefault();
+    if(!message) return;
+    e.preventDefault();
+    const confirmed=await nextorConfirm(message,{
+      title:'Confirmar exclusão',
+      confirmLabel:'Excluir',
+      cancelLabel:'Cancelar',
+      type:'danger'
+    });
+    if(!confirmed) return;
+    form.dataset.confirmBypass='1';
+    form.requestSubmit();
   }));
 
   const selectedChecks=card=>[...card.querySelectorAll('[data-row-select]')].filter(x=>x.checked);
@@ -636,19 +724,35 @@
     all.addEventListener('change',()=>{rows.forEach(x=>x.checked=all.checked);update();});
     rows.forEach(x=>x.addEventListener('change',update));
     menu?.addEventListener('change',update);
-    card.querySelectorAll('[data-bulk-submit]').forEach(button=>button.addEventListener('click',()=>{
+    card.querySelectorAll('[data-bulk-submit]').forEach(button=>button.addEventListener('click',async()=>{
       const selected=rows.filter(x=>x.checked).map(x=>x.value);
       if(!selected.length) return;
       const msg=button.getAttribute('data-confirm');
-      if(msg && !window.confirm(msg)) return;
+      if(msg){
+        const confirmed=await nextorConfirm(msg,{
+          title:'Confirmar ação',
+          confirmLabel:'Confirmar',
+          cancelLabel:'Cancelar',
+          type:button.classList.contains('grid-tool-danger')?'danger':'warning'
+        });
+        if(!confirmed) return;
+      }
       submitBulkForm(button.getAttribute('data-bulk-submit'),selected);
     }));
-    apply?.addEventListener('click',()=>{
+    apply?.addEventListener('click',async()=>{
       const selected=rows.filter(x=>x.checked);
       if(!selected.length || !menu?.value) return;
       const option=menu.selectedOptions[0];
       const msg=option?.dataset.confirm;
-      if(msg && !window.confirm(msg)) return;
+      if(msg){
+        const confirmed=await nextorConfirm(msg,{
+          title:'Confirmar ação',
+          confirmLabel:'Confirmar',
+          cancelLabel:'Cancelar',
+          type:'danger'
+        });
+        if(!confirmed) return;
+      }
       if(menu.value==='local:export'){
         exportTable(card,(card.querySelector('[data-export-table]')?.getAttribute('data-export-table')||'selecionados.csv').replace('.csv','-selecionados.csv'),true);
         return;
