@@ -84,6 +84,11 @@
       trigger.setAttribute('aria-expanded',willOpen?'true':'false');
       menu.hidden=!willOpen;
       if(willOpen){
+        wrapper.classList.remove('drop-up');
+        requestAnimationFrame(()=>{
+          const rect=menu.getBoundingClientRect();
+          if(rect.bottom>window.innerHeight-12 && trigger.getBoundingClientRect().top>rect.height+12) wrapper.classList.add('drop-up');
+        });
         const selected=menu.querySelector('.ui-select-option.selected:not(:disabled)');
         selected?.scrollIntoView({block:'nearest'});
       }
@@ -94,7 +99,12 @@
       const items=[...menu.querySelectorAll('.ui-select-option:not(:disabled)')];
       if(!items.length) return;
       if(e.key==='Escape'){e.preventDefault();closeUiSelects();return;}
-      if(e.key==='Enter'||e.key===' '){e.preventDefault();open();return;}
+      if(e.key==='Enter'||e.key===' '){
+        e.preventDefault();
+        const focused=menu.querySelector('.ui-select-option.focused');
+        if(wrapper.classList.contains('open') && focused){focused.click();return;}
+        open();return;
+      }
       if(e.key==='ArrowDown'||e.key==='ArrowUp'){
         e.preventDefault();
         if(!wrapper.classList.contains('open')) open();
