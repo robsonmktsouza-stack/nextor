@@ -42,12 +42,12 @@
 <dialog class="erp-dialog" id="stock-add"><form action="{{ route('stock.store') }}" method="post">@csrf
 <div class="dialog-header"><div><h2>Nova movimentação</h2><p>Atualize as quantidades disponíveis</p></div><button type="button" data-dialog-close class="close-dialog">@include('partials.icon',['name'=>'x'])</button></div>
 <div class="dialog-body"><div class="form-grid">
-<label class="field wide"><span>Produto *</span><select name="product_id" required><option value="">Selecione um produto</option>@foreach($products as $product)<option value="{{ $product->id }}" @selected(old('product_id')==$product->id)>{{ $product->sku }} — {{ $product->name }} ({{ number_format((float)$product->stock_quantity,3,',','.') }} {{ $product->unit }})</option>@endforeach</select></label>
+<label class="field wide"><span>Produto *</span><select name="product_id" required><option value="">Selecione um produto</option>@foreach($products as $product)<option value="{{ $product->id }}" @selected(old('product_id', request('product_id'))==$product->id)>{{ $product->sku }} — {{ $product->name }} ({{ number_format((float)$product->stock_quantity,3,',','.') }} {{ $product->unit }})</option>@endforeach</select></label>
 <label class="field"><span>Tipo de movimentação *</span><select name="type" id="stock-type"><option value="entry">Entrada</option><option value="exit">Saída</option><option value="adjustment">Ajuste de saldo</option></select></label>
 <label class="field"><span id="stock-qty-label">Quantidade *</span><input name="quantity" type="number" min="0" step="0.001" required value="{{ old('quantity') }}"></label>
 <label class="field wide"><span>Motivo / observação *</span><input name="reason" required maxlength="255" value="{{ old('reason') }}" placeholder="Ex.: Compra de mercadorias, ajuste de inventário..."></label>
 </div><p class="inline-note">Em um ajuste, informe a quantidade final desejada. O sistema calculará a diferença e registrará a operação.</p></div>
 <div class="dialog-footer"><button type="button" data-dialog-close class="btn btn-secondary">Cancelar</button><button class="btn btn-primary">Registrar movimentação</button></div></form></dialog>
-@if($errors->any())@push('scripts')<script>document.addEventListener('DOMContentLoaded',()=>document.getElementById('stock-add')?.showModal());</script>@endpush
+@if($errors->any() || request('open'))@push('scripts')<script>document.addEventListener('DOMContentLoaded',()=>document.getElementById('stock-add')?.showModal());</script>@endpush
 @endif
 @endsection
