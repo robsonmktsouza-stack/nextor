@@ -37,7 +37,7 @@
    </div>
  </div>
  <div class="grid-filter-panel" id="product-filters" @if(!$term) hidden @endif>
-   <form method="get" class="toolbar-filters"><label class="table-search">@include('partials.icon',['name'=>'search','size'=>16])<input name="search" value="{{ $term }}" placeholder="Buscar por nome ou código..."></label><button class="btn btn-secondary">Pesquisar</button>@if($term)<a class="btn btn-light" href="{{ route('products.index') }}">Limpar</a>@endif</form>
+   <form method="get" class="toolbar-filters"><div class="table-search-group"><input name="search" value="{{ $term }}" placeholder="Buscar por nome ou código..." aria-label="Buscar produtos"><button type="submit" class="table-search-submit" title="Pesquisar" aria-label="Pesquisar">@include('partials.icon',['name'=>'search','size'=>17])</button></div>@if($term)<a class="btn btn-light" href="{{ route('products.index') }}">Limpar</a>@endif</form>
  </div>
  <div class="table-scroll"><table class="cms-table"><thead><tr><th class="select-cell"><input type="checkbox" data-check-all aria-label="Selecionar todos"></th><th>Código / SKU</th><th>Produto</th><th>Un.</th><th>Preço de custo</th><th>Preço de venda</th><th>Estoque</th><th>Status</th><th class="action-cell">Ações</th></tr></thead><tbody>
  @forelse($products as $product)
