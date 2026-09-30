@@ -234,3 +234,51 @@ html,body{height:100%;overflow:hidden}
 
 .editor-panel.notes-panel .field{width:100%}
 .editor-panel.notes-panel textarea{width:100%;min-height:110px;display:block}
+
+/* Tooltips próprios do Nextor */
+.nextor-tooltip{
+  position:fixed;
+  z-index:10000;
+  max-width:260px;
+  padding:6px 9px;
+  border:1px solid #1b2b3b;
+  border-radius:4px;
+  background:#24374a;
+  color:#fff;
+  box-shadow:0 8px 22px #0f172a2e;
+  font-size:11px;
+  font-weight:600;
+  line-height:1.25;
+  letter-spacing:.01em;
+  white-space:nowrap;
+  pointer-events:none;
+  opacity:1;
+  transform:translateY(0);
+  animation:nextorTooltipIn .11s ease-out;
+}
+.nextor-tooltip[hidden]{display:none!important}
+.nextor-tooltip:after{
+  content:'';
+  position:absolute;
+  left:50%;
+  top:100%;
+  width:7px;
+  height:7px;
+  background:#24374a;
+  border-right:1px solid #1b2b3b;
+  border-bottom:1px solid #1b2b3b;
+  transform:translate(-50%,-4px) rotate(45deg);
+}
+.nextor-tooltip.below:after{
+  top:auto;
+  bottom:100%;
+  border-right:0;
+  border-bottom:0;
+  border-left:1px solid #1b2b3b;
+  border-top:1px solid #1b2b3b;
+  transform:translate(-50%,4px) rotate(45deg);
+}
+@keyframes nextorTooltipIn{
+  from{opacity:0;transform:translateY(2px)}
+  to{opacity:1;transform:translateY(0)}
+}
