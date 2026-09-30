@@ -99,7 +99,7 @@
       const msg=option?.dataset.confirm;
       if(msg && !window.confirm(msg)) return;
       if(menu.value==='local:export'){
-        exportTable(card,(document.querySelector('[data-export-table]')?.getAttribute('data-export-table')||'selecionados.csv').replace('.csv','-selecionados.csv'),true);
+        exportTable(card,(card.querySelector('[data-export-table]')?.getAttribute('data-export-table')||'selecionados.csv').replace('.csv','-selecionados.csv'),true);
         return;
       }
       if(menu.value==='local:print'){
