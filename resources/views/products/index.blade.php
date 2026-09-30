@@ -8,7 +8,7 @@
    <div class="grid-actions-left">
      <button class="grid-primary-action" type="button" data-dialog-open="product-create">@include('partials.icon',['name'=>'plus','size'=>17]) <span>Novo</span></button>
      <div class="grid-tool-group">
-       <button class="grid-tool grid-tool-wide" type="button" data-bulk-submit="products-duplicate" disabled data-tooltip="Duplicar selecionados">@include('partials.icon',['name'=>'copy','size'=>18])<span>Duplicar</span></button>
+       <button class="grid-tool grid-tool-wide" type="button" data-bulk-submit="products-duplicate" disabled>@include('partials.icon',['name'=>'copy','size'=>18])<span>Duplicar</span></button>
        <button class="grid-tool grid-tool-danger" type="button" data-bulk-submit="products-delete" data-confirm="Excluir os produtos selecionados? Produtos com estoque ou movimentações serão preservados." disabled data-tooltip="Excluir selecionados">@include('partials.icon',['name'=>'trash','size'=>18])</button>
        <button class="grid-tool" type="button" data-print-page data-tooltip="Imprimir">@include('partials.icon',['name'=>'print','size'=>18])</button>
        <button class="grid-tool" type="button" data-export-table="products.csv" data-tooltip="Exportar CSV">@include('partials.icon',['name'=>'download','size'=>18])</button>
