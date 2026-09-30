@@ -6,7 +6,7 @@
 <section class="cms-card">
 <div class="grid-actionbar">
   <div class="grid-actions-left">
-    <button class="grid-primary-action" type="button" data-dialog-open="customer-create">@include('partials.icon',['name'=>'plus','size'=>17]) <span>Novo</span></button>
+    <a class="grid-primary-action" href="{{ route('customers.create') }}">@include('partials.icon',['name'=>'plus','size'=>17]) <span>Novo</span></a>
     <div class="grid-tool-group">
       <button class="grid-tool grid-tool-wide" type="button" data-bulk-submit="customers-duplicate" disabled title="Duplicar selecionados">@include('partials.icon',['name'=>'copy','size'=>18])<span>Duplicar</span></button>
       <button class="grid-tool grid-tool-danger" type="button" data-bulk-submit="customers-delete" data-confirm="Excluir os clientes selecionados? Clientes com vendas vinculadas serão preservados." disabled title="Excluir selecionados">@include('partials.icon',['name'=>'trash','size'=>18])</button>
@@ -35,30 +35,17 @@
 <div class="grid-filter-panel" id="customer-filters" @if(!$term) hidden @endif>
 <form class="toolbar-filters" method="get"><div class="table-search-group"><input name="search" value="{{ $term }}" placeholder="Buscar cliente ou CPF/CNPJ..." aria-label="Buscar clientes"><button type="submit" class="table-search-submit" title="Pesquisar" aria-label="Pesquisar">@include('partials.icon',['name'=>'search','size'=>17])</button></div>@if($term)<a class="btn btn-light" href="{{ route('customers.index') }}">Limpar</a>@endif</form>
 </div>
-<div class="table-scroll"><table class="cms-table"><thead><tr><th class="select-cell"><input type="checkbox" data-check-all aria-label="Selecionar todos"></th><th>Cliente</th><th>Documento</th><th>E-mail</th><th>Telefone</th><th class="action-cell">Ações</th></tr></thead><tbody>
-@forelse($customers as $customer)<tr><td class="select-cell"><input type="checkbox" data-row-select value="{{ $customer->id }}" aria-label="Selecionar {{ $customer->name }}"></td><td><strong class="table-title">{{ $customer->name }}</strong></td><td>{{ $customer->document ?: '—' }}</td><td>{{ $customer->email ?: '—' }}</td><td>{{ $customer->phone ?: '—' }}</td><td class="action-cell"><button type="button" class="btn-icon" data-dialog-open="customer-edit-{{ $customer->id }}" title="Editar cliente">@include('partials.icon',['name'=>'edit','size'=>16])</button></td></tr>
-@empty<tr><td class="empty-cell" colspan="6">Nenhum cliente encontrado.</td></tr>@endforelse
+<div class="table-scroll"><table class="cms-table"><thead><tr><th class="select-cell"><input type="checkbox" data-check-all aria-label="Selecionar todos"></th><th>Cód.</th><th>Nome</th><th>Documento</th><th>Fone</th><th>Palavras-chave</th><th>Cidade/UF</th><th class="action-cell">Ações</th></tr></thead><tbody>
+@forelse($customers as $customer)<tr>
+<td class="select-cell"><input type="checkbox" data-row-select value="{{ $customer->id }}" aria-label="Selecionar {{ $customer->name }}"></td>
+<td class="nowrap">{{ $customer->id }}</td>
+<td><strong class="table-title">{{ $customer->name }}</strong>@if($customer->trade_name)<small class="table-subtitle">{{ $customer->trade_name }}</small>@endif</td>
+<td>{{ $customer->document ?: '—' }}</td>
+<td>{{ $customer->phone ?: '—' }}</td>
+<td>{{ $customer->keywords ?: '—' }}</td>
+<td>{{ $customer->city ? $customer->city.($customer->state ? '/'.$customer->state : '') : '—' }}</td>
+<td class="action-cell"><div class="row-actions"><a class="btn-icon" href="{{ route('customers.edit',$customer) }}" title="Editar cliente" aria-label="Editar cliente {{ $customer->name }}">@include('partials.icon',['name'=>'edit','size'=>16])</a></div></td>
+</tr>
+@empty<tr><td class="empty-cell" colspan="8">Nenhum cliente encontrado.</td></tr>@endforelse
 </tbody></table></div><div class="table-footerbar"><span>Exibindo {{ $customers->firstItem() ?? 0 }}–{{ $customers->lastItem() ?? 0 }} de {{ $customers->total() }}</span><div class="card-pagination">{{ $customers->links('partials.pagination') }}</div></div></section>
-<dialog class="erp-dialog" id="customer-create"><form action="{{ route('customers.store') }}" method="post">@csrf
-<div class="dialog-header"><div><h2>Novo cliente</h2><p>Dados cadastrais</p></div><button type="button" data-dialog-close class="close-dialog">@include('partials.icon',['name'=>'x'])</button></div>
-<div class="dialog-body"><div class="form-grid">
-<label class="field wide"><span>Nome / razão social *</span><input name="name" value="{{ old('name') }}" required></label>
-<label class="field"><span>CPF/CNPJ</span><input name="document" value="{{ old('document') }}" maxlength="20"></label>
-<label class="field"><span>Telefone</span><input name="phone" value="{{ old('phone') }}" maxlength="25"></label>
-<label class="field wide"><span>E-mail</span><input name="email" type="email" value="{{ old('email') }}"></label>
-<label class="field wide"><span>Observações</span><textarea name="notes" rows="3">{{ old('notes') }}</textarea></label>
-</div></div><div class="dialog-footer"><button type="button" data-dialog-close class="btn btn-secondary">Cancelar</button><button class="btn btn-primary">Salvar cliente</button></div></form></dialog>
-@foreach($customers as $customer)
-<dialog class="erp-dialog" id="customer-edit-{{ $customer->id }}"><form action="{{ route('customers.update',$customer) }}" method="post">@csrf @method('PUT')
-<div class="dialog-header"><div><h2>Editar cliente</h2><p>{{ $customer->name }}</p></div><button type="button" data-dialog-close class="close-dialog">@include('partials.icon',['name'=>'x'])</button></div>
-<div class="dialog-body"><div class="form-grid">
-<label class="field wide"><span>Nome / razão social *</span><input name="name" value="{{ $customer->name }}" required></label>
-<label class="field"><span>CPF/CNPJ</span><input name="document" value="{{ $customer->document }}" maxlength="20"></label>
-<label class="field"><span>Telefone</span><input name="phone" value="{{ $customer->phone }}"></label>
-<label class="field wide"><span>E-mail</span><input name="email" type="email" value="{{ $customer->email }}"></label>
-<label class="field wide"><span>Observações</span><textarea name="notes" rows="3">{{ $customer->notes }}</textarea></label>
-</div></div><div class="dialog-footer"><button type="button" data-dialog-close class="btn btn-secondary">Cancelar</button><button class="btn btn-primary">Salvar alterações</button></div></form></dialog>
-@endforeach
-@if($errors->any())@push('scripts')<script>document.addEventListener('DOMContentLoaded',()=>document.getElementById('customer-create')?.showModal());</script>@endpush
-@endif
 @endsection
