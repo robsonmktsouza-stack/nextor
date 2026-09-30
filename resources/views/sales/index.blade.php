@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('titleMeta'){{ $sales->total() }} {{ $sales->total() === 1 ? 'venda' : 'vendas' }}@endsection
 @section('title','Vendas')
 @section('description','Histórico de pedidos e operações comerciais com baixa automática de estoque.')
 @section('content')
@@ -35,5 +36,5 @@
 <div class="table-scroll"><table class="cms-table"><thead><tr><th class="select-cell"><input type="checkbox" data-check-all aria-label="Selecionar todos"></th><th>Nº venda</th><th>Data</th><th>Cliente</th><th>Responsável</th><th>Valor total</th><th>Status</th><th class="action-cell">Detalhes</th></tr></thead><tbody>
 @forelse($sales as $sale)<tr><td class="select-cell"><input type="checkbox" data-row-select value="{{ $sale->id }}" aria-label="Selecionar venda {{ $sale->id }}"></td><td><a class="table-link" href="{{ route('sales.show',$sale) }}">#{{ str_pad($sale->id,5,'0',STR_PAD_LEFT) }}</a></td><td class="nowrap">{{ $sale->created_at->format('d/m/Y H:i') }}</td><td>{{ $sale->customer?->name ?? 'Consumidor não identificado' }}</td><td>{{ $sale->user?->name ?? '—' }}</td><td class="price-strong nowrap">R$ {{ number_format((float)$sale->total,2,',','.') }}</td><td><span class="status {{ $sale->status==='completed'?'status-ok':'status-muted' }}">{{ $sale->status==='completed'?'Concluída':'Cancelada' }}</span></td><td class="action-cell"><a class="btn-icon" href="{{ route('sales.show',$sale) }}" aria-label="Abrir venda">@include('partials.icon',['name'=>'chevron','size'=>17])</a></td></tr>
 @empty<tr><td class="empty-cell" colspan="8">Nenhuma venda cadastrada. Crie a primeira venda.</td></tr>@endforelse
-</tbody></table></div><div class="card-pagination">{{ $sales->links('partials.pagination') }}</div></section>
+</tbody></table></div><div class="table-footerbar"><span>Exibindo {{ $sales->firstItem() ?? 0 }}–{{ $sales->lastItem() ?? 0 }} de {{ $sales->total() }}</span><div class="card-pagination">{{ $sales->links('partials.pagination') }}</div></div></section>
 @endsection
