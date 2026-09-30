@@ -30,53 +30,89 @@
   document.querySelectorAll('[data-print-page]').forEach(button=>button.addEventListener('click',()=>window.print()));
   document.querySelectorAll('[data-refresh-page]').forEach(button=>button.addEventListener('click',()=>window.location.reload()));
 
-  document.querySelectorAll('.cms-card').forEach(card=>{
-    const all=card.querySelector('[data-check-all]');
-    const rows=[...card.querySelectorAll('[data-row-select]')];
-    if(!all || !rows.length) return;
-    const count=card.querySelector('[data-selection-count]');
-    const update=()=>{
-      const selected=rows.filter(x=>x.checked);
-      all.checked=selected.length===rows.length;
-      all.indeterminate=selected.length>0 && selected.length<rows.length;
-      card.querySelectorAll('[data-bulk-submit]').forEach(b=>b.disabled=selected.length===0);
-      if(count){count.hidden=selected.length===0;count.textContent=selected.length+' selecionado'+(selected.length===1?'':'s');}
-    };
-    all.addEventListener('change',()=>{rows.forEach(x=>x.checked=all.checked);update();});
-    rows.forEach(x=>x.addEventListener('change',update));
-    card.querySelectorAll('[data-bulk-submit]').forEach(button=>button.addEventListener('click',()=>{
-      const selected=rows.filter(x=>x.checked).map(x=>x.value);
-      if(!selected.length) return;
-      const msg=button.getAttribute('data-confirm');
-      if(msg && !window.confirm(msg)) return;
-      const form=document.getElementById(button.getAttribute('data-bulk-submit'));
-      if(!form) return;
-      form.querySelectorAll('[data-generated-bulk]').forEach(el=>el.remove());
-      selected.forEach(id=>{
-        const input=document.createElement('input');
-        input.type='hidden'; input.name='ids[]'; input.value=id; input.dataset.generatedBulk='1';
-        form.appendChild(input);
-      });
-      form.submit();
-    }));
-    update();
-  });
-
-  document.querySelectorAll('[data-export-table]').forEach(button=>button.addEventListener('click',()=>{
-    const card=button.closest('.cms-card');
+  const selectedChecks=card=>[...card.querySelectorAll('[data-row-select]')].filter(x=>x.checked);
+  const exportTable=(card,filename,selectedOnly=false)=>{
     const table=card?.querySelector('.cms-table');
     if(!table) return;
-    const rows=[...table.querySelectorAll('tr')].map(tr=>
+    const selectedRows=new Set(selectedChecks(card).map(x=>x.closest('tr')));
+    const tableRows=[...table.querySelectorAll('tr')].filter((tr,index)=>index===0||!selectedOnly||selectedRows.has(tr));
+    const lines=tableRows.map(tr=>
       [...tr.children].filter(cell=>!cell.classList.contains('select-cell')&&!cell.classList.contains('action-cell')).map(cell=>{
         const value=cell.innerText.replace(/\s+/g,' ').trim().replace(/"/g,'""');
         return '"'+value+'"';
       }).join(';')
     );
-    const blob=new Blob(['\uFEFF'+rows.join('\r\n')],{type:'text/csv;charset=utf-8;'});
+    const blob=new Blob(['\uFEFF'+lines.join('\r\n')],{type:'text/csv;charset=utf-8;'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
-    a.href=url;a.download=button.getAttribute('data-export-table')||'exportacao.csv';
+    a.href=url;a.download=filename||'exportacao.csv';
     document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+  };
+  const printSelected=card=>{
+    const selectedRows=new Set(selectedChecks(card).map(x=>x.closest('tr')));
+    card.querySelectorAll('.cms-table tbody tr').forEach(tr=>tr.classList.toggle('print-excluded',!selectedRows.has(tr)));
+    window.print();
+    card.querySelectorAll('.print-excluded').forEach(tr=>tr.classList.remove('print-excluded'));
+  };
+  const submitBulkForm=(formId,ids)=>{
+    const form=document.getElementById(formId);
+    if(!form) return;
+    form.querySelectorAll('[data-generated-bulk]').forEach(el=>el.remove());
+    ids.forEach(id=>{
+      const input=document.createElement('input');
+      input.type='hidden';input.name='ids[]';input.value=id;input.dataset.generatedBulk='1';
+      form.appendChild(input);
+    });
+    form.submit();
+  };
+
+  document.querySelectorAll('.cms-card').forEach(card=>{
+    const all=card.querySelector('[data-check-all]');
+    const rows=[...card.querySelectorAll('[data-row-select]')];
+    if(!all || !rows.length) return;
+    const count=card.querySelector('[data-selection-count]');
+    const menu=card.querySelector('[data-bulk-menu]');
+    const apply=card.querySelector('[data-bulk-apply]');
+    const update=()=>{
+      const selected=rows.filter(x=>x.checked);
+      all.checked=selected.length===rows.length;
+      all.indeterminate=selected.length>0 && selected.length<rows.length;
+      card.querySelectorAll('[data-bulk-submit]').forEach(b=>b.disabled=selected.length===0);
+      if(menu) menu.disabled=selected.length===0;
+      if(apply) apply.disabled=selected.length===0 || !menu?.value;
+      if(count){count.hidden=selected.length===0;count.textContent=selected.length+' selecionado'+(selected.length===1?'':'s');}
+    };
+    all.addEventListener('change',()=>{rows.forEach(x=>x.checked=all.checked);update();});
+    rows.forEach(x=>x.addEventListener('change',update));
+    menu?.addEventListener('change',update);
+    card.querySelectorAll('[data-bulk-submit]').forEach(button=>button.addEventListener('click',()=>{
+      const selected=rows.filter(x=>x.checked).map(x=>x.value);
+      if(!selected.length) return;
+      const msg=button.getAttribute('data-confirm');
+      if(msg && !window.confirm(msg)) return;
+      submitBulkForm(button.getAttribute('data-bulk-submit'),selected);
+    }));
+    apply?.addEventListener('click',()=>{
+      const selected=rows.filter(x=>x.checked);
+      if(!selected.length || !menu?.value) return;
+      const option=menu.selectedOptions[0];
+      const msg=option?.dataset.confirm;
+      if(msg && !window.confirm(msg)) return;
+      if(menu.value==='local:export'){
+        exportTable(card,(document.querySelector('[data-export-table]')?.getAttribute('data-export-table')||'selecionados.csv').replace('.csv','-selecionados.csv'),true);
+        return;
+      }
+      if(menu.value==='local:print'){
+        printSelected(card);
+        return;
+      }
+      submitBulkForm(menu.value,selected.map(x=>x.value));
+    });
+    update();
+  });
+
+  document.querySelectorAll('[data-export-table]').forEach(button=>button.addEventListener('click',()=>{
+    exportTable(button.closest('.cms-card'),button.getAttribute('data-export-table')||'exportacao.csv',false);
   }));
 
   document.getElementById('stock-type')?.addEventListener('change',e=>{
