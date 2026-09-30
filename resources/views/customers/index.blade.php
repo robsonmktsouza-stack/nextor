@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('titleMeta'){{ $customers->total() }} {{ $customers->total() === 1 ? 'registro' : 'registros' }}@endsection
 @section('title','Clientes')
 @section('description','Mantenha os dados dos compradores organizados para registrar vendas.')
 @section('content')
@@ -37,7 +38,7 @@
 <div class="table-scroll"><table class="cms-table"><thead><tr><th class="select-cell"><input type="checkbox" data-check-all aria-label="Selecionar todos"></th><th>Cliente</th><th>Documento</th><th>E-mail</th><th>Telefone</th><th class="action-cell">Ações</th></tr></thead><tbody>
 @forelse($customers as $customer)<tr><td class="select-cell"><input type="checkbox" data-row-select value="{{ $customer->id }}" aria-label="Selecionar {{ $customer->name }}"></td><td><strong class="table-title">{{ $customer->name }}</strong></td><td>{{ $customer->document ?: '—' }}</td><td>{{ $customer->email ?: '—' }}</td><td>{{ $customer->phone ?: '—' }}</td><td class="action-cell"><button type="button" class="btn-icon" data-dialog-open="customer-edit-{{ $customer->id }}" title="Editar cliente">@include('partials.icon',['name'=>'edit','size'=>16])</button></td></tr>
 @empty<tr><td class="empty-cell" colspan="6">Nenhum cliente encontrado.</td></tr>@endforelse
-</tbody></table></div><div class="card-pagination">{{ $customers->links('partials.pagination') }}</div></section>
+</tbody></table></div><div class="table-footerbar"><span>Exibindo {{ $customers->firstItem() ?? 0 }}–{{ $customers->lastItem() ?? 0 }} de {{ $customers->total() }}</span><div class="card-pagination">{{ $customers->links('partials.pagination') }}</div></div></section>
 <dialog class="erp-dialog" id="customer-create"><form action="{{ route('customers.store') }}" method="post">@csrf
 <div class="dialog-header"><div><h2>Novo cliente</h2><p>Dados cadastrais</p></div><button type="button" data-dialog-close class="close-dialog">@include('partials.icon',['name'=>'x'])</button></div>
 <div class="dialog-body"><div class="form-grid">
