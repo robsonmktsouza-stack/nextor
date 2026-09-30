@@ -8,7 +8,7 @@
   <div class="grid-actions-left">
     <a class="grid-primary-action" href="{{ route('customers.create') }}">@include('partials.icon',['name'=>'plus','size'=>17]) <span>Novo</span></a>
     <div class="grid-tool-group">
-      <button class="grid-tool grid-tool-wide" type="button" data-bulk-submit="customers-duplicate" disabled data-tooltip="Duplicar selecionados">@include('partials.icon',['name'=>'copy','size'=>18])<span>Duplicar</span></button>
+      <button class="grid-tool grid-tool-wide" type="button" data-bulk-submit="customers-duplicate" disabled>@include('partials.icon',['name'=>'copy','size'=>18])<span>Duplicar</span></button>
       <button class="grid-tool grid-tool-danger" type="button" data-bulk-submit="customers-delete" data-confirm="Excluir os clientes selecionados? Clientes com vendas vinculadas serão preservados." disabled data-tooltip="Excluir selecionados">@include('partials.icon',['name'=>'trash','size'=>18])</button>
       <button class="grid-tool" type="button" data-print-page data-tooltip="Imprimir">@include('partials.icon',['name'=>'print','size'=>18])</button>
       <button class="grid-tool" type="button" data-export-table="clientes.csv" data-tooltip="Exportar CSV">@include('partials.icon',['name'=>'download','size'=>18])</button>
