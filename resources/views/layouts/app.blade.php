@@ -61,7 +61,10 @@
     <div class="main-content">
       <div class="page-heading">
         <div class="page-heading-main">
-          <h1>@yield('title','Painel')</h1>
+          <div class="page-title-wrap">
+            <h1>@yield('title','Painel')</h1>
+            @hasSection('titleMeta')<span class="page-title-meta">@yield('titleMeta')</span>@endif
+          </div>
           <div class="page-actions">@yield('actions')</div>
         </div>
       </div>
@@ -69,7 +72,6 @@
       @if($errors->any())<div class="alert danger" role="alert">@include('partials.icon',['name'=>'alert','size'=>17])<div><strong>Verifique os campos:</strong><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div></div>@endif
       @yield('content')
     </div>
-    <footer class="page-footer">Nextor ERP</footer>
   </main>
 </div>
 @stack('scripts')
