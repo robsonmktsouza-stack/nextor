@@ -40,7 +40,7 @@ $deliveryAddresses=collect(old('delivery_addresses',$customer->exists ? $custome
          <label class="field col-5"><span>CPF / CNPJ</span>
            <div class="input-action-group">
              <input name="document" value="{{ old('document',$customer->document) }}" maxlength="20" data-cnpj-document>
-             <button type="button" class="input-action-button" data-cnpj-autofill data-tooltip="Autopreencher pelo CNPJ">@include('partials.icon',['name'=>'search','size'=>15]) <span>Autopreencher</span></button>
+             <button type="button" class="input-action-button" data-cnpj-autofill>@include('partials.icon',['name'=>'search','size'=>15]) <span>Autopreencher</span></button>
            </div>
          </label>
          <label class="field col-7"><span>Nome fantasia</span><input name="trade_name" value="{{ old('trade_name',$customer->trade_name) }}"></label>
