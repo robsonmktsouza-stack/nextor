@@ -71,3 +71,9 @@
 .code-tag{background:#f5f7fa;border-color:#e0e6ed;color:#4a6178}
 .status{box-shadow:inset 0 0 0 1px currentColor10}
 @media(max-width:760px){.page-title-meta{display:none}.table-footerbar{align-items:flex-start;flex-direction:column}}
+
+.row-actions{display:inline-flex;align-items:center;justify-content:flex-end;gap:4px}
+.row-action-form{display:inline-flex;margin:0}
+.row-actions .btn-icon{margin-left:0!important}
+.row-action-danger{color:#a9545b!important}
+.row-action-danger:hover{background:#fff3f4!important;border-color:#e7c7ca!important;color:#b83f49!important}
