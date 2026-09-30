@@ -166,6 +166,10 @@
   }));
   document.querySelectorAll('[data-print-page]').forEach(button=>button.addEventListener('click',()=>window.print()));
   document.querySelectorAll('[data-refresh-page]').forEach(button=>button.addEventListener('click',()=>window.location.reload()));
+  document.querySelectorAll('[data-confirm-submit]').forEach(form=>form.addEventListener('submit',e=>{
+    const message=form.getAttribute('data-confirm-submit');
+    if(message && !window.confirm(message)) e.preventDefault();
+  }));
 
   const selectedChecks=card=>[...card.querySelectorAll('[data-row-select]')].filter(x=>x.checked);
   const exportTable=(card,filename,selectedOnly=false)=>{
