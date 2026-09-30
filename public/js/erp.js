@@ -107,6 +107,111 @@
     });
   });
 
+  // Loading global do Nextor: bloqueia a interface enquanto qualquer operação está em andamento.
+  let loadingCount=0;
+  let loadingTimer=null;
+  const loadingOverlay=document.createElement('div');
+  loadingOverlay.id='nextorLoading';
+  loadingOverlay.className='nextor-loading';
+  loadingOverlay.hidden=true;
+  loadingOverlay.setAttribute('role','status');
+  loadingOverlay.setAttribute('aria-live','polite');
+  loadingOverlay.setAttribute('aria-label','Carregando');
+  loadingOverlay.innerHTML='<div class="nextor-loading-center"><span class="nextor-spinner" aria-hidden="true"></span><span class="nextor-loading-text">Carregando...</span></div>';
+  document.body.appendChild(loadingOverlay);
+
+  const setLoadingState=active=>{
+    const appRoot=document.getElementById('appRoot');
+    document.body.classList.toggle('is-loading',active);
+    document.body.setAttribute('aria-busy',active?'true':'false');
+    if(appRoot) appRoot.inert=active;
+  };
+
+  const beginLoading=(message='Carregando...')=>{
+    loadingCount++;
+    const text=loadingOverlay.querySelector('.nextor-loading-text');
+    if(text) text.textContent=message;
+    setLoadingState(true);
+    if(!loadingTimer){
+      loadingTimer=setTimeout(()=>{
+        loadingTimer=null;
+        if(loadingCount>0){
+          loadingOverlay.hidden=false;
+          requestAnimationFrame(()=>loadingOverlay.classList.add('show'));
+        }
+      },80);
+    }
+  };
+
+  const endLoading=()=>{
+    loadingCount=Math.max(0,loadingCount-1);
+    if(loadingCount>0) return;
+    if(loadingTimer){clearTimeout(loadingTimer);loadingTimer=null;}
+    loadingOverlay.classList.remove('show');
+    setLoadingState(false);
+    setTimeout(()=>{if(loadingCount===0) loadingOverlay.hidden=true;},120);
+  };
+
+  const resetLoading=()=>{
+    loadingCount=0;
+    if(loadingTimer){clearTimeout(loadingTimer);loadingTimer=null;}
+    loadingOverlay.classList.remove('show');
+    loadingOverlay.hidden=true;
+    setLoadingState(false);
+  };
+
+  window.NextorLoading={show:beginLoading,hide:endLoading,reset:resetLoading};
+
+  // Toda chamada fetch passa automaticamente pelo loading global.
+  const nativeFetch=window.fetch.bind(window);
+  window.fetch=async(...args)=>{
+    beginLoading('Carregando...');
+    try{return await nativeFetch(...args);}
+    finally{endLoading();}
+  };
+
+  // Requisições XMLHttpRequest futuras também seguem o mesmo padrão.
+  const nativeXhrSend=XMLHttpRequest.prototype.send;
+  XMLHttpRequest.prototype.send=function(...args){
+    beginLoading('Carregando...');
+    this.addEventListener('loadend',endLoading,{once:true});
+    try{return nativeXhrSend.apply(this,args);}
+    catch(error){endLoading();throw error;}
+  };
+
+  // Submissões comuns de formulários.
+  document.addEventListener('submit',event=>{
+    const form=event.target;
+    if(!(form instanceof HTMLFormElement) || form.hasAttribute('data-no-loading')) return;
+    beginLoading('Salvando...');
+    setTimeout(()=>{if(event.defaultPrevented) endLoading();},0);
+  });
+
+  // form.submit() não dispara o evento submit; cobre ações em massa e submits programáticos.
+  const nativeFormSubmit=HTMLFormElement.prototype.submit;
+  HTMLFormElement.prototype.submit=function(){
+    if(!this.hasAttribute('data-no-loading')) beginLoading('Processando...');
+    return nativeFormSubmit.call(this);
+  };
+
+  // Navegação interna também exibe o bloqueio.
+  document.addEventListener('click',event=>{
+    const link=event.target.closest?.('a[href]');
+    if(!link || link.hasAttribute('data-no-loading') || link.hasAttribute('download')) return;
+    if(link.target && link.target!=='_self') return;
+    if(event.ctrlKey||event.metaKey||event.shiftKey||event.altKey||event.button!==0) return;
+    const raw=link.getAttribute('href')||'';
+    if(!raw || raw.startsWith('#') || raw.startsWith('javascript:') || raw.startsWith('mailto:') || raw.startsWith('tel:')) return;
+    let url;
+    try{url=new URL(link.href,window.location.href);}catch(_){return;}
+    if(url.origin!==window.location.origin) return;
+    beginLoading('Carregando...');
+    setTimeout(()=>{if(event.defaultPrevented) endLoading();},0);
+  });
+
+  // Ao voltar pelo histórico/bfcache, nunca mantém a tela bloqueada.
+  window.addEventListener('pageshow',resetLoading);
+
   let uiSelectSeq=0;
   const closeUiSelects=(except=null)=>{
     document.querySelectorAll('.ui-select.open').forEach(wrapper=>{
