@@ -1,11 +1,22 @@
 @extends('layouts.app')
 @section('title','Produtos')
 @section('description','Cadastre e organize os itens comercializados, com controle de preços e quantidades.')
-@section('actions')<button class="btn btn-primary" type="button" data-dialog-open="product-create">@include('partials.icon',['name'=>'plus','size'=>16]) Novo produto</button>@endsection
 @section('content')
 <section class="cms-card">
- <div class="table-toolbar"><div><h2>Produtos cadastrados</h2><p>Gerenciamento de catálogo</p></div>
- <form method="get" class="toolbar-filters"><label class="table-search">@include('partials.icon',['name'=>'search','size'=>16])<input name="search" value="{{ $term }}" placeholder="Buscar por nome ou código..."></label><button class="btn btn-secondary">Pesquisar</button>@if($term)<a class="btn btn-light" href="{{ route('products.index') }}">Limpar</a>@endif</form></div>
+ <div class="grid-actionbar">
+   <div class="grid-actions-left">
+     <button class="grid-primary-action" type="button" data-dialog-open="product-create">@include('partials.icon',['name'=>'plus','size'=>17]) <span>Novo</span></button>
+     <div class="grid-tool-group">
+       <button class="grid-tool" type="button" data-print-page title="Imprimir" aria-label="Imprimir">@include('partials.icon',['name'=>'print','size'=>18])</button>
+     </div>
+   </div>
+   <div class="grid-actions-right">
+     <button class="grid-filter-button" type="button" data-filter-toggle="product-filters" title="Filtro avançado" aria-label="Filtro avançado">@include('partials.icon',['name'=>'search','size'=>18])</button>
+   </div>
+ </div>
+ <div class="grid-filter-panel" id="product-filters" @if(!$term) hidden @endif>
+   <form method="get" class="toolbar-filters"><label class="table-search">@include('partials.icon',['name'=>'search','size'=>16])<input name="search" value="{{ $term }}" placeholder="Buscar por nome ou código..."></label><button class="btn btn-secondary">Pesquisar</button>@if($term)<a class="btn btn-light" href="{{ route('products.index') }}">Limpar</a>@endif</form>
+ </div>
  <div class="table-scroll"><table class="cms-table"><thead><tr><th>Código / SKU</th><th>Produto</th><th>Un.</th><th>Preço de custo</th><th>Preço de venda</th><th>Estoque</th><th>Status</th><th class="action-cell">Ações</th></tr></thead><tbody>
  @forelse($products as $product)
  <tr><td><span class="code-tag">{{ $product->sku }}</span></td>
