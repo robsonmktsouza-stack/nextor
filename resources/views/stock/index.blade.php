@@ -8,9 +8,9 @@
   <div class="grid-actions-left">
     <button class="grid-primary-action" type="button" data-dialog-open="stock-add">@include('partials.icon',['name'=>'plus','size'=>17]) <span>Nova</span></button>
     <div class="grid-tool-group">
-      <button class="grid-tool" type="button" data-print-page title="Imprimir">@include('partials.icon',['name'=>'print','size'=>18])</button>
-      <button class="grid-tool" type="button" data-export-table="estoque.csv" title="Exportar CSV">@include('partials.icon',['name'=>'download','size'=>18])</button>
-      <button class="grid-tool" type="button" data-refresh-page title="Atualizar">@include('partials.icon',['name'=>'refresh','size'=>18])</button>
+      <button class="grid-tool" type="button" data-print-page data-tooltip="Imprimir">@include('partials.icon',['name'=>'print','size'=>18])</button>
+      <button class="grid-tool" type="button" data-export-table="estoque.csv" data-tooltip="Exportar CSV">@include('partials.icon',['name'=>'download','size'=>18])</button>
+      <button class="grid-tool" type="button" data-refresh-page data-tooltip="Atualizar">@include('partials.icon',['name'=>'refresh','size'=>18])</button>
     </div>
     <div class="bulk-actions">
       <select class="bulk-action-select" data-bulk-menu disabled aria-label="Ações em massa">
@@ -27,7 +27,7 @@
     <a class="period-arrow" href="{{ route('stock.index', array_merge(request()->except('page','month'), ['month'=>$prevMonth])) }}" aria-label="Mês anterior">@include('partials.icon',['name'=>'chevron-left','size'=>19])</a>
     <span class="period-label">{{ $monthLabel }}</span>
     <a class="period-arrow" href="{{ route('stock.index', array_merge(request()->except('page','month'), ['month'=>$nextMonth])) }}" aria-label="Próximo mês">@include('partials.icon',['name'=>'chevron','size'=>19])</a>
-    <button class="grid-filter-button" type="button" data-filter-toggle="stock-filters" title="Filtro avançado" aria-label="Filtro avançado">@include('partials.icon',['name'=>'search','size'=>18])</button>
+    <button class="grid-filter-button" type="button" data-filter-toggle="stock-filters" data-tooltip="Filtro avançado" aria-label="Filtro avançado">@include('partials.icon',['name'=>'search','size'=>18])</button>
   </div>
 </div>
 <div class="grid-filter-panel" id="stock-filters" @if(!$productId) hidden @endif>
