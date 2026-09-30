@@ -1,10 +1,26 @@
 @extends('layouts.app')
 @section('title','Estoque')
 @section('description','Controle de entradas, saídas e ajustes com histórico completo por produto.')
-@section('actions')<button class="btn btn-primary" type="button" data-dialog-open="stock-add">@include('partials.icon',['name'=>'plus','size'=>16]) Nova movimentação</button>@endsection
 @section('content')
-<section class="cms-card"><div class="table-toolbar"><div><h2>Histórico de movimentações</h2><p>Registros auditáveis de alteração de quantidade</p></div>
-<form method="get" class="toolbar-filters"><select class="input-filter" name="product_id"><option value="">Todos os produtos</option>@foreach($products as $product)<option value="{{ $product->id }}" @selected($productId===$product->id)>{{ $product->name }} ({{ $product->sku }})</option>@endforeach</select><button class="btn btn-secondary">Filtrar</button>@if($productId)<a class="btn btn-light" href="{{ route('stock.index') }}">Limpar</a>@endif</form></div>
+<section class="cms-card">
+<div class="grid-actionbar">
+  <div class="grid-actions-left">
+    <button class="grid-primary-action" type="button" data-dialog-open="stock-add">@include('partials.icon',['name'=>'plus','size'=>17]) <span>Nova</span></button>
+    <div class="grid-tool-group">
+      <button class="grid-tool" type="button" data-print-page title="Imprimir" aria-label="Imprimir">@include('partials.icon',['name'=>'print','size'=>18])</button>
+    </div>
+  </div>
+  <div class="grid-actions-right">
+    <a class="period-current" href="{{ route('stock.index', array_merge(request()->except('page','month'), ['month'=>now()->format('Y-m')])) }}">Mês atual</a>
+    <a class="period-arrow" href="{{ route('stock.index', array_merge(request()->except('page','month'), ['month'=>$prevMonth])) }}" aria-label="Mês anterior">@include('partials.icon',['name'=>'chevron-left','size'=>19])</a>
+    <span class="period-label">{{ $monthLabel }}</span>
+    <a class="period-arrow" href="{{ route('stock.index', array_merge(request()->except('page','month'), ['month'=>$nextMonth])) }}" aria-label="Próximo mês">@include('partials.icon',['name'=>'chevron','size'=>19])</a>
+    <button class="grid-filter-button" type="button" data-filter-toggle="stock-filters" title="Filtro avançado" aria-label="Filtro avançado">@include('partials.icon',['name'=>'search','size'=>18])</button>
+  </div>
+</div>
+<div class="grid-filter-panel" id="stock-filters" @if(!$productId) hidden @endif>
+<form method="get" class="toolbar-filters"><input type="hidden" name="month" value="{{ $month }}"><select class="input-filter" name="product_id"><option value="">Todos os produtos</option>@foreach($products as $product)<option value="{{ $product->id }}" @selected($productId===$product->id)>{{ $product->name }} ({{ $product->sku }})</option>@endforeach</select><button class="btn btn-secondary">Filtrar</button>@if($productId)<a class="btn btn-light" href="{{ route('stock.index',['month'=>$month]) }}">Limpar</a>@endif</form>
+</div>
 <div class="table-scroll"><table class="cms-table"><thead><tr><th>Data</th><th>Produto</th><th>Operação</th><th>Alteração</th><th>Saldo anterior</th><th>Saldo novo</th><th>Motivo</th><th>Responsável</th></tr></thead><tbody>
 @forelse($movements as $movement)<tr><td class="nowrap">{{ $movement->created_at?->format('d/m/Y H:i') }}</td><td><strong class="table-title">{{ $movement->product?->name }}</strong><small class="table-subtitle">{{ $movement->product?->sku }}</small></td><td>
 @php($labels=['entry'=>'Entrada','exit'=>'Saída','adjustment'=>'Ajuste','sale'=>'Venda','sale_cancel'=>'Estorno'])
