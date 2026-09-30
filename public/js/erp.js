@@ -1,5 +1,132 @@
 (() => {
   'use strict';
+
+  let uiSelectSeq=0;
+  const closeUiSelects=(except=null)=>{
+    document.querySelectorAll('.ui-select.open').forEach(wrapper=>{
+      if(wrapper===except) return;
+      wrapper.classList.remove('open');
+      const trigger=wrapper.querySelector('.ui-select-trigger');
+      const menu=wrapper.querySelector('.ui-select-menu');
+      if(trigger) trigger.setAttribute('aria-expanded','false');
+      if(menu) menu.hidden=true;
+    });
+  };
+  const enhanceSelect=select=>{
+    if(!select || select.dataset.uiSelectReady==='1' || select.multiple) return;
+    select.dataset.uiSelectReady='1';
+    select.classList.add('ui-select-native');
+
+    const wrapper=document.createElement('div');
+    wrapper.className='ui-select';
+    const trigger=document.createElement('button');
+    trigger.type='button';
+    trigger.className='ui-select-trigger';
+    trigger.setAttribute('aria-haspopup','listbox');
+    trigger.setAttribute('aria-expanded','false');
+
+    const value=document.createElement('span');
+    value.className='ui-select-value';
+    trigger.appendChild(value);
+
+    const menu=document.createElement('div');
+    menu.className='ui-select-menu';
+    menu.hidden=true;
+    menu.setAttribute('role','listbox');
+    menu.id='ui-select-menu-'+(++uiSelectSeq);
+    trigger.setAttribute('aria-controls',menu.id);
+
+    select.insertAdjacentElement('afterend',wrapper);
+    wrapper.appendChild(trigger);
+    wrapper.appendChild(menu);
+
+    const buildOptions=()=>{
+      menu.innerHTML='';
+      [...select.options].forEach(option=>{
+        const item=document.createElement('button');
+        item.type='button';
+        item.className='ui-select-option';
+        item.setAttribute('role','option');
+        item.dataset.value=option.value;
+        item.textContent=option.textContent;
+        item.disabled=option.disabled;
+        if(option.selected){
+          item.classList.add('selected');
+          item.setAttribute('aria-selected','true');
+        } else item.setAttribute('aria-selected','false');
+        item.addEventListener('click',()=>{
+          if(item.disabled) return;
+          select.value=option.value;
+          select.dispatchEvent(new Event('change',{bubbles:true}));
+          sync();
+          closeUiSelects();
+          trigger.focus();
+        });
+        menu.appendChild(item);
+      });
+    };
+    const sync=()=>{
+      const option=select.options[select.selectedIndex];
+      value.textContent=option?.textContent || select.getAttribute('placeholder') || 'Selecione';
+      trigger.disabled=select.disabled;
+      wrapper.classList.toggle('disabled',select.disabled);
+      [...menu.querySelectorAll('.ui-select-option')].forEach(item=>{
+        const active=item.dataset.value===select.value;
+        item.classList.toggle('selected',active);
+        item.setAttribute('aria-selected',active?'true':'false');
+      });
+    };
+    const open=()=>{
+      if(select.disabled) return;
+      const willOpen=!wrapper.classList.contains('open');
+      closeUiSelects(wrapper);
+      wrapper.classList.toggle('open',willOpen);
+      trigger.setAttribute('aria-expanded',willOpen?'true':'false');
+      menu.hidden=!willOpen;
+      if(willOpen){
+        const selected=menu.querySelector('.ui-select-option.selected:not(:disabled)');
+        selected?.scrollIntoView({block:'nearest'});
+      }
+    };
+
+    trigger.addEventListener('click',open);
+    trigger.addEventListener('keydown',e=>{
+      const items=[...menu.querySelectorAll('.ui-select-option:not(:disabled)')];
+      if(!items.length) return;
+      if(e.key==='Escape'){e.preventDefault();closeUiSelects();return;}
+      if(e.key==='Enter'||e.key===' '){e.preventDefault();open();return;}
+      if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+        e.preventDefault();
+        if(!wrapper.classList.contains('open')) open();
+        const current=menu.querySelector('.ui-select-option.focused') || menu.querySelector('.ui-select-option.selected');
+        let index=Math.max(0,items.indexOf(current));
+        index=e.key==='ArrowDown'?Math.min(items.length-1,index+1):Math.max(0,index-1);
+        menu.querySelectorAll('.ui-select-option').forEach(x=>x.classList.remove('focused'));
+        items[index].classList.add('focused');
+        items[index].scrollIntoView({block:'nearest'});
+      }
+    });
+    select.addEventListener('change',sync);
+    select.addEventListener('invalid',()=>{
+      trigger.focus();
+      wrapper.classList.add('open');
+      menu.hidden=false;
+      trigger.setAttribute('aria-expanded','true');
+    });
+    new MutationObserver(mutations=>{
+      if(mutations.some(m=>m.type==='childList'||m.target.tagName==='OPTION')) buildOptions();
+      sync();
+    }).observe(select,{attributes:true,childList:true,subtree:true,attributeFilter:['disabled','selected','label']});
+
+    buildOptions();
+    sync();
+  };
+
+  document.addEventListener('click',e=>{
+    if(!e.target.closest('.ui-select')) closeUiSelects();
+  });
+  document.querySelectorAll('select').forEach(enhanceSelect);
+
   const app = document.getElementById('appRoot');
   if (app) {
     const mobile = () => window.innerWidth <= 760;
@@ -132,7 +259,7 @@
     const select=tr.querySelector('select'),qty=tr.querySelector('input');
     select.name=`items[${idx}][product_id]`;qty.name=`items[${idx}][quantity]`;
     for (const p of products) {const o=document.createElement('option');o.value=String(p.id);o.textContent=`${p.sku} — ${p.name}`;if(String(p.id)===String(productId))o.selected=true;select.appendChild(o);}
-    qty.value=String(quantity);select.addEventListener('change',recalc);qty.addEventListener('input',recalc);
+    qty.value=String(quantity);select.addEventListener('change',recalc);qty.addEventListener('input',recalc);enhanceSelect(select);
     tr.querySelector('button').addEventListener('click',()=>{tr.remove();recalc();});saleBody.appendChild(tr);recalc();
   }
   function recalc() {
