@@ -88,6 +88,7 @@ class ProductController extends Controller {
 
         $data['control_stock']=$request->boolean('control_stock');
         $data['different_tax_unit']=$request->boolean('different_tax_unit');
+        if(!$data['different_tax_unit']) $data['tax_unit']=null;
         $data['is_active']=$request->boolean('is_active',true);
         $data['sku']=trim((string)($data['sku'] ?? ''));
         if($data['sku']==='') $data['sku']=$product?->sku ?: $this->generateSku();
