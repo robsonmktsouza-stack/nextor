@@ -48,7 +48,14 @@
  <td class="nowrap price-strong">R$ {{ number_format((float)$product->sale_price,2,',','.') }}</td>
  <td><span class="{{ (float)$product->stock_quantity <= (float)$product->minimum_stock ? 'stock-low':'stock-normal' }}">{{ number_format((float)$product->stock_quantity,3,',','.') }}</span></td>
  <td><span class="status {{ $product->is_active?'status-ok':'status-muted' }}">{{ $product->is_active?'Ativo':'Inativo' }}</span></td>
- <td class="action-cell"><button type="button" class="btn-icon" title="Editar produto" aria-label="Editar produto {{ $product->name }}" data-dialog-open="product-edit-{{ $product->id }}">@include('partials.icon',['name'=>'edit','size'=>16])</button></td></tr>
+ <td class="action-cell">
+   <div class="row-actions">
+     <a class="btn-icon" href="{{ route('stock.index',['product_id'=>$product->id,'open'=>1]) }}" title="Movimentar estoque" aria-label="Movimentar estoque de {{ $product->name }}">@include('partials.icon',['name'=>'stock','size'=>16])</a>
+     <form method="post" action="{{ route('products.bulk-duplicate') }}" class="row-action-form">@csrf<input type="hidden" name="ids[]" value="{{ $product->id }}"><button type="submit" class="btn-icon" title="Duplicar produto" aria-label="Duplicar produto {{ $product->name }}">@include('partials.icon',['name'=>'copy','size'=>16])</button></form>
+     <button type="button" class="btn-icon" title="Editar produto" aria-label="Editar produto {{ $product->name }}" data-dialog-open="product-edit-{{ $product->id }}">@include('partials.icon',['name'=>'edit','size'=>16])</button>
+     <form method="post" action="{{ route('products.bulk-delete') }}" class="row-action-form" data-confirm-submit="Excluir este produto? Se ele tiver estoque ou histórico de movimentação, será preservado.">@csrf @method('DELETE')<input type="hidden" name="ids[]" value="{{ $product->id }}"><button type="submit" class="btn-icon row-action-danger" title="Excluir produto" aria-label="Excluir produto {{ $product->name }}">@include('partials.icon',['name'=>'trash','size'=>16])</button></form>
+   </div>
+ </td></tr>
  @empty<tr><td colspan="9" class="empty-cell">Nenhum produto encontrado. Cadastre o primeiro produto.</td></tr>@endforelse
  </tbody></table></div>
  <div class="table-footerbar"><span>Exibindo {{ $products->firstItem() ?? 0 }}–{{ $products->lastItem() ?? 0 }} de {{ $products->total() }}</span><div class="card-pagination">{{ $products->links('partials.pagination') }}</div></div>
