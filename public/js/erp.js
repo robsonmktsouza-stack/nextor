@@ -93,6 +93,18 @@
     if(duration>0) notifyTimer=setTimeout(()=>{box.classList.remove('show');setTimeout(()=>{box.hidden=true;},160);},duration);
   };
   window.NextorNotify=nextorNotify;
+  window.alert=(message)=>nextorNotify(String(message),{type:'info',title:'Aviso'});
+
+  document.querySelectorAll('[data-system-notification]').forEach(node=>{
+    const items=[...node.querySelectorAll('[data-notification-item]')].map(item=>item.textContent.trim()).filter(Boolean);
+    const message=items.length ? items.join(' • ') : node.textContent.trim();
+    if(!message) return;
+    nextorNotify(message,{
+      type:node.dataset.type || 'info',
+      title:node.dataset.notificationTitle || '',
+      duration:(node.dataset.type==='error' ? 6500 : 4200)
+    });
+  });
 
   let uiSelectSeq=0;
   const closeUiSelects=(except=null)=>{
