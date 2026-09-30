@@ -92,7 +92,9 @@ class ProductController extends Controller {
         $data['sku']=trim((string)($data['sku'] ?? ''));
         if($data['sku']==='') $data['sku']=$product?->sku ?: $this->generateSku();
 
-        return DB::transaction(function() use ($request,$product,$data,$requestedStock) {
+        $isNew=$product===null;
+
+        return DB::transaction(function() use ($request,$product,$data,$requestedStock,$isNew) {
             $oldImage=$product?->image_path;
 
             if($request->hasFile('image')) {
@@ -117,7 +119,7 @@ class ProductController extends Controller {
                     'quantity_delta'=>$requestedStock-$previous,
                     'previous_quantity'=>$previous,
                     'new_quantity'=>$requestedStock,
-                    'reason'=>$previous==0.0 && !$product->wasChanged('id')
+                    'reason'=>$isNew
                         ? 'Estoque inicial pelo cadastro do produto'
                         : 'Ajuste pelo cadastro do produto',
                 ]);
