@@ -413,3 +413,6 @@ body.is-loading *{cursor:wait!important}
   .product-photo-preview{height:200px}
   .product-editor .editor-savebar,.app-root.sidebar-collapsed .product-editor .editor-savebar{left:0}
 }
+
+.product-editor .field-disabled{opacity:.55}
+.product-editor .field-disabled input{background:#f4f6f8!important;cursor:not-allowed}
