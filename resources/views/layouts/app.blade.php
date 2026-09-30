@@ -60,11 +60,10 @@
   <main class="cms-page-shell" id="pageShell">
     <div class="main-content">
       <div class="page-heading">
-        <nav class="cms-breadcrumb"><span>ERP</span><span>/</span><strong>@yield('title','Painel')</strong></nav>
-        <div class="page-heading-main"><div>
+        <div class="page-heading-main">
           <h1>@yield('title','Painel')</h1>
-          <p>@yield('description')</p>
-        </div><div class="page-actions">@yield('actions')</div></div>
+          <div class="page-actions">@yield('actions')</div>
+        </div>
       </div>
       @if(session('success'))<div class="alert success" role="status">@include('partials.icon',['name'=>'check','size'=>17]){{ session('success') }}</div>@endif
       @if($errors->any())<div class="alert danger" role="alert">@include('partials.icon',['name'=>'alert','size'=>17])<div><strong>Verifique os campos:</strong><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div></div>@endif
