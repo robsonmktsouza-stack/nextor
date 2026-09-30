@@ -8,11 +8,11 @@
    <div class="grid-actions-left">
      <button class="grid-primary-action" type="button" data-dialog-open="product-create">@include('partials.icon',['name'=>'plus','size'=>17]) <span>Novo</span></button>
      <div class="grid-tool-group">
-       <button class="grid-tool grid-tool-wide" type="button" data-bulk-submit="products-duplicate" disabled title="Duplicar selecionados">@include('partials.icon',['name'=>'copy','size'=>18])<span>Duplicar</span></button>
-       <button class="grid-tool grid-tool-danger" type="button" data-bulk-submit="products-delete" data-confirm="Excluir os produtos selecionados? Produtos com estoque ou movimentações serão preservados." disabled title="Excluir selecionados">@include('partials.icon',['name'=>'trash','size'=>18])</button>
-       <button class="grid-tool" type="button" data-print-page title="Imprimir">@include('partials.icon',['name'=>'print','size'=>18])</button>
-       <button class="grid-tool" type="button" data-export-table="products.csv" title="Exportar CSV">@include('partials.icon',['name'=>'download','size'=>18])</button>
-       <button class="grid-tool" type="button" data-refresh-page title="Atualizar">@include('partials.icon',['name'=>'refresh','size'=>18])</button>
+       <button class="grid-tool grid-tool-wide" type="button" data-bulk-submit="products-duplicate" disabled data-tooltip="Duplicar selecionados">@include('partials.icon',['name'=>'copy','size'=>18])<span>Duplicar</span></button>
+       <button class="grid-tool grid-tool-danger" type="button" data-bulk-submit="products-delete" data-confirm="Excluir os produtos selecionados? Produtos com estoque ou movimentações serão preservados." disabled data-tooltip="Excluir selecionados">@include('partials.icon',['name'=>'trash','size'=>18])</button>
+       <button class="grid-tool" type="button" data-print-page data-tooltip="Imprimir">@include('partials.icon',['name'=>'print','size'=>18])</button>
+       <button class="grid-tool" type="button" data-export-table="products.csv" data-tooltip="Exportar CSV">@include('partials.icon',['name'=>'download','size'=>18])</button>
+       <button class="grid-tool" type="button" data-refresh-page data-tooltip="Atualizar">@include('partials.icon',['name'=>'refresh','size'=>18])</button>
      </div>
      <div class="bulk-actions">
        <select class="bulk-action-select" data-bulk-menu disabled aria-label="Ações em massa">
@@ -33,11 +33,11 @@
      <form id="products-delete" method="post" action="{{ route('products.bulk-delete') }}" hidden>@csrf @method('DELETE')</form>
    </div>
    <div class="grid-actions-right">
-     <button class="grid-filter-button" type="button" data-filter-toggle="product-filters" title="Filtro avançado" aria-label="Filtro avançado">@include('partials.icon',['name'=>'search','size'=>18])</button>
+     <button class="grid-filter-button" type="button" data-filter-toggle="product-filters" data-tooltip="Filtro avançado" aria-label="Filtro avançado">@include('partials.icon',['name'=>'search','size'=>18])</button>
    </div>
  </div>
  <div class="grid-filter-panel" id="product-filters" @if(!$term) hidden @endif>
-   <form method="get" class="toolbar-filters"><div class="table-search-group"><input name="search" value="{{ $term }}" placeholder="Buscar por nome ou código..." aria-label="Buscar produtos"><button type="submit" class="table-search-submit" title="Pesquisar" aria-label="Pesquisar">@include('partials.icon',['name'=>'search','size'=>17])</button></div>@if($term)<a class="btn btn-light" href="{{ route('products.index') }}">Limpar</a>@endif</form>
+   <form method="get" class="toolbar-filters"><div class="table-search-group"><input name="search" value="{{ $term }}" placeholder="Buscar por nome ou código..." aria-label="Buscar produtos"><button type="submit" class="table-search-submit" data-tooltip="Pesquisar" aria-label="Pesquisar">@include('partials.icon',['name'=>'search','size'=>17])</button></div>@if($term)<a class="btn btn-light" href="{{ route('products.index') }}">Limpar</a>@endif</form>
  </div>
  <div class="table-scroll"><table class="cms-table"><thead><tr><th class="select-cell"><input type="checkbox" data-check-all aria-label="Selecionar todos"></th><th>Código / SKU</th><th>Produto</th><th>Un.</th><th>Preço de custo</th><th>Preço de venda</th><th>Estoque</th><th>Status</th><th class="action-cell">Ações</th></tr></thead><tbody>
  @forelse($products as $product)
@@ -50,10 +50,10 @@
  <td><span class="status {{ $product->is_active?'status-ok':'status-muted' }}">{{ $product->is_active?'Ativo':'Inativo' }}</span></td>
  <td class="action-cell">
    <div class="row-actions">
-     <a class="btn-icon" href="{{ route('stock.index',['product_id'=>$product->id,'open'=>1]) }}" title="Movimentar estoque" aria-label="Movimentar estoque de {{ $product->name }}">@include('partials.icon',['name'=>'stock','size'=>16])</a>
-     <form method="post" action="{{ route('products.bulk-duplicate') }}" class="row-action-form">@csrf<input type="hidden" name="ids[]" value="{{ $product->id }}"><button type="submit" class="btn-icon" title="Duplicar produto" aria-label="Duplicar produto {{ $product->name }}">@include('partials.icon',['name'=>'copy','size'=>16])</button></form>
-     <button type="button" class="btn-icon" title="Editar produto" aria-label="Editar produto {{ $product->name }}" data-dialog-open="product-edit-{{ $product->id }}">@include('partials.icon',['name'=>'edit','size'=>16])</button>
-     <form method="post" action="{{ route('products.bulk-delete') }}" class="row-action-form" data-confirm-submit="Excluir este produto? Se ele tiver estoque ou histórico de movimentação, será preservado.">@csrf @method('DELETE')<input type="hidden" name="ids[]" value="{{ $product->id }}"><button type="submit" class="btn-icon row-action-danger" title="Excluir produto" aria-label="Excluir produto {{ $product->name }}">@include('partials.icon',['name'=>'trash','size'=>16])</button></form>
+     <a class="btn-icon" href="{{ route('stock.index',['product_id'=>$product->id,'open'=>1]) }}" data-tooltip="Movimentar estoque" aria-label="Movimentar estoque de {{ $product->name }}">@include('partials.icon',['name'=>'stock','size'=>16])</a>
+     <form method="post" action="{{ route('products.bulk-duplicate') }}" class="row-action-form">@csrf<input type="hidden" name="ids[]" value="{{ $product->id }}"><button type="submit" class="btn-icon" data-tooltip="Duplicar produto" aria-label="Duplicar produto {{ $product->name }}">@include('partials.icon',['name'=>'copy','size'=>16])</button></form>
+     <button type="button" class="btn-icon" data-tooltip="Editar produto" aria-label="Editar produto {{ $product->name }}" data-dialog-open="product-edit-{{ $product->id }}">@include('partials.icon',['name'=>'edit','size'=>16])</button>
+     <form method="post" action="{{ route('products.bulk-delete') }}" class="row-action-form" data-confirm-submit="Excluir este produto? Se ele tiver estoque ou histórico de movimentação, será preservado.">@csrf @method('DELETE')<input type="hidden" name="ids[]" value="{{ $product->id }}"><button type="submit" class="btn-icon row-action-danger" data-tooltip="Excluir produto" aria-label="Excluir produto {{ $product->name }}">@include('partials.icon',['name'=>'trash','size'=>16])</button></form>
    </div>
  </td></tr>
  @empty<tr><td colspan="9" class="empty-cell">Nenhum produto encontrado. Cadastre o primeiro produto.</td></tr>@endforelse
