@@ -51,3 +51,5 @@
 .bulk-apply{height:38px;align-self:stretch}
 .selection-count{align-self:center}
 @media(max-width:760px){.bulk-actions .ui-select{width:160px;min-width:160px}.ui-select-menu{max-width:calc(100vw - 28px)}}
+
+.ui-select.drop-up .ui-select-menu{top:auto;bottom:calc(100% + 4px)}
