@@ -71,8 +71,26 @@
           <div class="page-actions">@yield('actions')</div>
         </div>
       </div>
-      @if(session('success'))<div class="alert success" role="status">@include('partials.icon',['name'=>'check','size'=>17]){{ session('success') }}</div>@endif
-      @if($errors->any())<div class="alert danger" role="alert">@include('partials.icon',['name'=>'alert','size'=>17])<div><strong>Verifique os campos:</strong><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div></div>@endif
+      @if(session('success'))
+        <div data-system-notification data-type="success" data-notification-title="Concluído" hidden>{{ session('success') }}</div>
+      @endif
+      @if(session('error'))
+        <div data-system-notification data-type="error" data-notification-title="Não foi possível concluir" hidden>{{ session('error') }}</div>
+      @endif
+      @if(session('warning'))
+        <div data-system-notification data-type="warning" data-notification-title="Atenção" hidden>{{ session('warning') }}</div>
+      @endif
+      @if(session('info'))
+        <div data-system-notification data-type="info" data-notification-title="Informação" hidden>{{ session('info') }}</div>
+      @endif
+      @if(session('status'))
+        <div data-system-notification data-type="success" data-notification-title="Concluído" hidden>{{ session('status') }}</div>
+      @endif
+      @if($errors->any())
+        <div data-system-notification data-type="error" data-notification-title="Verifique os campos" hidden>
+          @foreach($errors->all() as $error)<span data-notification-item>{{ $error }}</span>@endforeach
+        </div>
+      @endif
       @yield('content')
     </div>
   </main>
