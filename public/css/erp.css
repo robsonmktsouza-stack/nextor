@@ -124,3 +124,74 @@ body{font-size:13.5px;font-weight:400;color:#4d5968}
 .table-search-group:focus-within .table-search-submit{border-color:#78a7d8}
 .grid-filter-panel .toolbar-filters{width:100%;justify-content:flex-end}
 @media(max-width:760px){.table-search-group{width:100%}}
+
+/* Cadastro completo de clientes */
+.customer-editor{display:grid;gap:14px;padding-bottom:62px}
+.editor-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:7px;background:#e9edf1;border:1px solid #d7dee6;border-radius:5px;box-shadow:inset 0 1px 2px #1424370d}
+.editor-tab{height:42px;border:0;border-radius:4px;background:transparent;color:#4d93e6;font-size:13px;font-weight:500;text-transform:uppercase}
+.editor-tab:hover{background:#ffffff70}
+.editor-tab.active{background:#5d9ff1;color:#fff;box-shadow:0 1px 2px #2b6fb81c}
+.editor-tab-panel{display:grid;gap:14px}
+.editor-tab-panel[hidden]{display:none!important}
+
+.customer-data-layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:18px;align-items:start}
+.contact-types{padding:5px 10px 10px 4px}
+.contact-types h3,.editor-panel h3{font-size:15px;font-weight:600;color:#596676;margin-bottom:18px}
+.check-option{display:flex;align-items:center;gap:8px;min-height:38px;color:#5f6b78;font-size:13px;font-weight:500;cursor:pointer}
+.check-option input[type=checkbox]{width:15px;height:15px;accent-color:#2877c7}
+
+.editor-panel{background:#f1f2f4;border:1px solid #e0e3e7;border-radius:5px;padding:24px 28px}
+.editor-panel.plain-panel{background:#fff;padding:14px 0 0;border:0}
+.editor-grid{display:grid;gap:16px 18px}
+.editor-grid.cols-12{grid-template-columns:repeat(12,minmax(0,1fr))}
+.col-2{grid-column:span 2}.col-3{grid-column:span 3}.col-4{grid-column:span 4}.col-5{grid-column:span 5}.col-6{grid-column:span 6}.col-7{grid-column:span 7}.col-8{grid-column:span 8}.col-9{grid-column:span 9}.col-10{grid-column:span 10}.col-12{grid-column:span 12}
+.customer-editor .field{gap:7px;color:#5d6773}
+.customer-editor .field>span{font-size:12px;font-weight:600}
+.customer-editor .field input,.customer-editor .field textarea{min-height:39px;border:1px solid #c9d0d8;border-radius:4px;background:#fff;color:#4b5969;padding:8px 11px;font-size:13px}
+.customer-editor .field textarea{min-height:90px}
+.customer-editor .ui-select-trigger{height:39px;border-color:#c9d0d8;background:#fff;font-size:13px}
+.customer-editor .field input:focus,.customer-editor .field textarea:focus{border-color:#5c9ff1;box-shadow:0 0 0 1px #5c9ff1}
+
+.input-action-group{display:flex;align-items:stretch;width:100%}
+.input-action-group>input{border-radius:4px 0 0 4px!important;border-right:0!important;min-width:0;flex:1}
+.input-action-button{height:39px;display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid #c9d0d8;border-radius:0 4px 4px 0;background:#f6f7f8;color:#5d6875;padding:0 10px;font-size:11px;font-weight:600;white-space:nowrap}
+.input-action-button:hover:not(:disabled){background:#edf2f7;color:#2d6fae}
+.input-action-button:disabled{opacity:.65}
+.compact-action .input-action-button{width:42px;padding:0}
+
+.delivery-toolbar{padding:16px 20px;background:#f1f2f4;border:1px solid #e0e3e7;border-radius:5px}
+.delivery-addresses{display:grid;gap:14px}
+.delivery-card-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.delivery-card-title h3{margin-bottom:0;font-size:15px;font-weight:500}
+.remove-delivery{width:30px;height:30px;display:grid;place-items:center;border:0;background:transparent;color:#7f8790;border-radius:4px}
+.remove-delivery:hover{background:#e6e8eb;color:#b4434b}
+
+.switch-field{height:39px;display:flex;align-items:center;gap:10px;border:1px solid #c9d0d8;border-radius:4px;background:#e8eaec;padding:0 12px;cursor:pointer}
+.switch-field input[type=checkbox]{position:absolute;opacity:0;pointer-events:none}
+.switch-track{position:relative;width:34px;height:18px;border-radius:999px;background:#c2c8cf;transition:.15s}
+.switch-track:after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0003;transition:.15s}
+.switch-field input:checked+.switch-track{background:#4f9ce9}
+.switch-field input:checked+.switch-track:after{transform:translateX(16px)}
+.switch-field strong{font-size:12px;font-weight:600;color:#65717e}
+
+.editor-savebar{position:sticky;bottom:0;z-index:20;display:flex;justify-content:flex-end;gap:8px;margin:0 -18px -22px;padding:12px 18px;border-top:1px solid #dfe5eb;background:#ffffffeb;backdrop-filter:blur(6px)}
+.btn-success{background:#2fa766;border-color:#2fa766;color:#fff}
+.btn-success:hover{background:#288f58;border-color:#288f58}
+
+@media(max-width:1100px){
+ .customer-data-layout{grid-template-columns:180px minmax(0,1fr)}
+ .editor-panel{padding:20px}
+ .col-2,.col-3{grid-column:span 4}.col-4,.col-5{grid-column:span 6}.col-7,.col-8,.col-9,.col-10{grid-column:span 12}
+}
+@media(max-width:760px){
+ .editor-tabs{grid-template-columns:1fr;padding:5px}
+ .editor-tab{height:36px}
+ .customer-data-layout{grid-template-columns:1fr}
+ .contact-types{display:flex;flex-wrap:wrap;gap:10px;padding:0}
+ .contact-types h3{width:100%;margin-bottom:0}
+ .check-option{min-height:30px}
+ .editor-panel{padding:15px}
+ .editor-grid.cols-12{grid-template-columns:1fr}
+ .col-2,.col-3,.col-4,.col-5,.col-6,.col-7,.col-8,.col-9,.col-10,.col-12{grid-column:1}
+ .editor-savebar{margin:0 -14px -20px;padding:10px 14px}
+}
