@@ -431,6 +431,8 @@
     };
 
     search.addEventListener('input',()=>{
+      lastResults=[];
+      resultIndex=-1;
       clearTimeout(searchTimer);
       searchTimer=setTimeout(()=>performSearch(false),180);
     });
