@@ -1220,3 +1220,81 @@ input[type="number"]::-webkit-outer-spin-button{
 .sale-cart-table tfoot td{
   vertical-align:middle!important;
 }
+
+/* Correção estrutural das grades de venda e financeiro */
+.sale-cart-table td.sale-row-actions{
+  display:table-cell!important;
+  height:auto!important;
+  vertical-align:top!important;
+  text-align:center!important;
+  white-space:nowrap;
+}
+
+.sale-cart-table td.sale-row-actions .btn-icon{
+  display:inline-flex!important;
+  vertical-align:top;
+  width:40px;
+  height:40px;
+  margin:0 2px!important;
+}
+
+.sale-cart-table .sale-line-total{
+  display:table-cell!important;
+  height:auto!important;
+  vertical-align:top!important;
+  padding-top:20px!important;
+  font-weight:650;
+  white-space:nowrap;
+}
+
+.sale-cart-table th:nth-child(1){width:42%}
+.sale-cart-table th:nth-child(2){width:15%}
+.sale-cart-table th:nth-child(3){width:13%}
+.sale-cart-table th:nth-child(4){width:12%}
+.sale-cart-table th:nth-child(5){width:10%}
+.sale-cart-table th:nth-child(6){width:8%}
+
+.sale-finance-table th:nth-child(1){width:10%}
+.sale-finance-table th:nth-child(2){width:18%}
+.sale-finance-table th:nth-child(3){width:20%}
+.sale-finance-table th:nth-child(4){width:27%}
+.sale-finance-table th:nth-child(5){width:15%}
+.sale-finance-table th:nth-child(6){width:10%}
+
+.sale-finance-table td{
+  vertical-align:middle!important;
+}
+
+.sale-finance-table td:last-child{
+  text-align:center;
+  white-space:nowrap;
+}
+
+.sale-finance-table tfoot td:last-child{
+  text-align:right;
+  padding-right:12px;
+}
+
+.sale-finance-table tfoot .btn{
+  min-width:138px;
+  max-width:100%;
+  padding-left:12px;
+  padding-right:12px;
+}
+
+.sale-finance-table .ui-select-trigger,
+.sale-finance-table input[type="date"],
+.sale-finance-table .numeric-input,
+.payment-receivable{
+  height:40px!important;
+  min-height:40px!important;
+}
+
+.payment-receivable{
+  width:100%;
+}
+
+@media(max-width:1300px){
+  .sale-cart-table{min-width:1080px}
+  .sale-finance-table{min-width:1050px}
+}
