@@ -143,7 +143,7 @@
     line-height:1.4;
   }
   @page{
-    size:80mm auto;
+    size:80mm {{ $receiptHeightMm }}mm;
     margin:0;
   }
 
@@ -153,6 +153,7 @@
       width:80mm!important;
       min-width:80mm!important;
       max-width:80mm!important;
+      min-height:{{ $receiptHeightMm }}mm!important;
       margin:0!important;
       padding:0!important;
       background:#fff!important;
@@ -187,6 +188,22 @@
       return rtrim(rtrim($formatted,'0'),',');
   };
   $paymentIsCash=$sale->payments->contains(fn($payment)=>$payment->payment_method==='cash');
+
+  /*
+   * Altura física aproximada da bobina.
+   * O CSS @page não aceita "auto" de forma confiável no Chromium.
+   * Calculamos uma página estreita o bastante para conter todo o comprovante.
+   */
+  $discountRows=$sale->items->filter(fn($item)=>(float)$item->discount>0)->count();
+  $receiptHeightMm=
+      82
+      + ($sale->items->count()*8)
+      + ($discountRows*5)
+      + ($sale->payments->count()*5)
+      + ($sale->customer ? 6 : 3)
+      + ($sale->notes ? 16 : 0);
+
+  $receiptHeightMm=max(120,min(420,$receiptHeightMm));
 @endphp
 
 <div class="screen-actions">
