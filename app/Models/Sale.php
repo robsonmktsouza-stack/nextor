@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Sale extends Model {
     protected $fillable=[
-        'customer_id','user_id','operation_type','operation_date','final_consumer','keyword',
+        'customer_id','user_id','operation_type','source','operation_date','final_consumer','keyword',
         'status','subtotal','discount_total','total','notes','completed_at','cancelled_at'
     ];
 
