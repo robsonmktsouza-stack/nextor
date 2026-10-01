@@ -553,7 +553,8 @@ input[type="number"]::-webkit-outer-spin-button{
   width:17px;
   height:17px;
 }
-.numeric-input>input[type="number"]{
+.numeric-input>input[type="number"],
+.numeric-input>input[data-money-ready="1"]{
   flex:1;
   min-width:0;
   height:39px;
@@ -564,7 +565,8 @@ input[type="number"]::-webkit-outer-spin-button{
   border-color:#5c9ff1;
   color:#2877c7;
 }
-.numeric-input:focus-within>input[type="number"]{
+.numeric-input:focus-within>input[type="number"],
+.numeric-input:focus-within>input[data-money-ready="1"]{
   border-color:#5c9ff1!important;
   box-shadow:0 0 0 1px #5c9ff1;
 }
@@ -581,7 +583,8 @@ input[type="number"]::-webkit-outer-spin-button{
   width:38px;
   min-width:38px;
 }
-.sale-items-table .numeric-input>input[type="number"]{
+.sale-items-table .numeric-input>input[type="number"],
+.sale-items-table .numeric-input>input[data-money-ready="1"]{
   height:37px;
 }
 
