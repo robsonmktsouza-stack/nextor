@@ -121,7 +121,10 @@
         <span class="pdv-eyebrow">VENDA ATUAL</span>
         <h2>Carrinho</h2>
       </div>
-      <span class="pdv-item-count" id="pdvItemCount">0 itens</span>
+      <div class="pdv-cart-head-actions">
+        <span class="pdv-cart-nav-hint"><kbd>Alt</kbd> + <kbd>↑</kbd><kbd>↓</kbd> selecionar</span>
+        <span class="pdv-item-count" id="pdvItemCount">0 itens</span>
+      </div>
     </div>
 
     <div class="pdv-cart" id="pdvCart">
