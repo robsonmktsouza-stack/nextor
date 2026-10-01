@@ -33,6 +33,7 @@
 @case('receipt')<path d="M5 3h14v18l-3-2-4 2-4-2-3 2V3ZM8 8h8M8 12h8"/>@break
 @case('pdv')<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M7 20h10M12 16v4M7 8h4M7 12h7"/>@break
 @case('barcode')<path d="M3 5v14M6 5v14M9 5v14M13 5v14M16 5v14M20 5v14"/>@break
+@case('expand')<path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5"/>@break
 @case('layers')<path d="m12 3 9 5-9 5-9-5 9-5ZM3 12l9 5 9-5M3 16l9 5 9-5"/>@break
 @default<circle cx="12" cy="12" r="9"/>@endswitch
 </svg>
