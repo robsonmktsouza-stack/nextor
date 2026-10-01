@@ -56,23 +56,74 @@
       </div>
     </div>
 
-    @if($recentSales->isNotEmpty())
-    <div class="pdv-recent">
-      <div class="pdv-recent-head">
-        <h3>Últimas vendas do PDV</h3>
-        <a href="{{ route('sales.index') }}">Ver histórico</a>
+    <section class="pdv-command-center" aria-label="Comandos rápidos do caixa">
+      <div class="pdv-command-head">
+        <div>
+          <strong>Comandos do caixa</strong>
+          <span>Use as teclas de função ou clique nos botões.</span>
+        </div>
+        <span class="pdv-command-hint">Operação por teclado</span>
       </div>
-      <div class="pdv-recent-list">
-        @foreach($recentSales as $recent)
-          <a href="{{ route('sales.show',$recent) }}" class="pdv-recent-item">
-            <span>#{{ str_pad((string)$recent->id,5,'0',STR_PAD_LEFT) }}</span>
-            <span>{{ $recent->customer?->name ?? 'Consumidor não identificado' }}</span>
-            <strong>R$ {{ number_format((float)$recent->total,2,',','.') }}</strong>
-          </a>
-        @endforeach
+
+      <div class="pdv-command-grid">
+        <button type="button" class="pdv-command-button" id="pdvActionSearch">
+          <span class="pdv-command-icon">@include('partials.icon',['name'=>'search','size'=>22])</span>
+          <span class="pdv-command-copy"><strong>Buscar item</strong><small>Produto, serviço ou código</small></span>
+          <kbd>F2</kbd>
+        </button>
+
+        <button type="button" class="pdv-command-button" id="pdvActionQuantity">
+          <span class="pdv-command-icon">@include('partials.icon',['name'=>'stock','size'=>22])</span>
+          <span class="pdv-command-copy"><strong>Quantidade</strong><small>Alterar item selecionado</small></span>
+          <kbd>F3</kbd>
+        </button>
+
+        <button type="button" class="pdv-command-button" id="pdvActionCustomer">
+          <span class="pdv-command-icon">@include('partials.icon',['name'=>'customers','size'=>22])</span>
+          <span class="pdv-command-copy"><strong>Cliente</strong><small id="pdvActionCustomerValue">Consumidor não identificado</small></span>
+          <kbd>F4</kbd>
+        </button>
+
+        <button type="button" class="pdv-command-button" id="pdvActionDiscount">
+          <span class="pdv-command-icon">@include('partials.icon',['name'=>'tag','size'=>22])</span>
+          <span class="pdv-command-copy"><strong>Desconto</strong><small>Alterar item selecionado</small></span>
+          <kbd>F5</kbd>
+        </button>
+
+        <button type="button" class="pdv-command-button" id="pdvActionPayment">
+          <span class="pdv-command-icon">@include('partials.icon',['name'=>'receipt','size'=>22])</span>
+          <span class="pdv-command-copy"><strong>Pagamento</strong><small id="pdvActionPaymentValue">Dinheiro</small></span>
+          <kbd>F6</kbd>
+        </button>
+
+        <button type="button" class="pdv-command-button" id="pdvActionCash">
+          <span class="pdv-command-icon">@include('partials.icon',['name'=>'money','size'=>22])</span>
+          <span class="pdv-command-copy">
+            <strong>Recebido / Troco</strong>
+            <small><span id="pdvActionCashValue">R$ 0,00</span> · troco <span id="pdvActionChangeValue">R$ 0,00</span></small>
+          </span>
+          <kbd>F7</kbd>
+        </button>
+
+        <button type="button" class="pdv-command-button danger" id="pdvActionRemove">
+          <span class="pdv-command-icon">@include('partials.icon',['name'=>'trash','size'=>22])</span>
+          <span class="pdv-command-copy"><strong>Remover item</strong><small>Remove o item selecionado</small></span>
+          <kbd>F8</kbd>
+        </button>
+
+        <button type="button" class="pdv-command-button success" id="pdvActionFinish">
+          <span class="pdv-command-icon">@include('partials.icon',['name'=>'check','size'=>22])</span>
+          <span class="pdv-command-copy"><strong>Finalizar venda</strong><small>Concluir operação atual</small></span>
+          <kbd>F9</kbd>
+        </button>
+
+        <button type="button" class="pdv-command-button" id="pdvActionNotes">
+          <span class="pdv-command-icon">@include('partials.icon',['name'=>'edit','size'=>22])</span>
+          <span class="pdv-command-copy"><strong>Observação</strong><small id="pdvActionNotesValue">Sem observação</small></span>
+          <kbd>F10</kbd>
+        </button>
       </div>
-    </div>
-    @endif
+    </section>
   </section>
 
   <aside class="pdv-checkout">
@@ -98,41 +149,10 @@
       <div class="pdv-grand-total"><span>Total</span><strong id="pdvTotal">R$ 0,00</strong></div>
     </div>
 
-    <div class="pdv-checkout-fields">
-      <label class="field">
-        <span>Cliente <small>F4</small></span>
-        <input type="hidden" name="customer_id" id="pdvCustomer" value="">
-        <button type="button" class="pdv-picker-button" id="pdvCustomerButton">
-          <span id="pdvCustomerLabel">Consumidor não identificado</span>
-          <kbd>F4</kbd>
-        </button>
-      </label>
-
-      <label class="field">
-        <span>Forma de pagamento <small>F6</small></span>
-        <input type="hidden" name="payment_method" id="pdvPaymentMethod" value="cash">
-        <button type="button" class="pdv-picker-button" id="pdvPaymentButton">
-          <span id="pdvPaymentLabel">Dinheiro</span>
-          <kbd>F6</kbd>
-        </button>
-      </label>
-
-      <label class="field pdv-cash-field" id="pdvCashField">
-        <span>Valor recebido <small>F7</small></span>
-        <input type="number" name="cash_received" id="pdvCashReceived"
-               min="0" step="0.01" value="0" data-number-kind="money">
-      </label>
-
-      <div class="pdv-change" id="pdvChangeBox">
-        <span>Troco</span>
-        <strong id="pdvChange">R$ 0,00</strong>
-      </div>
-
-      <label class="field pdv-notes-field">
-        <span>Observação</span>
-        <input name="notes" maxlength="2000" placeholder="Opcional">
-      </label>
-    </div>
+    <input type="hidden" name="customer_id" id="pdvCustomer" value="">
+    <input type="hidden" name="payment_method" id="pdvPaymentMethod" value="cash">
+    <input type="hidden" name="cash_received" id="pdvCashReceived" value="0.00">
+    <input type="hidden" name="notes" id="pdvNotes" value="">
 
     <div id="pdvItemsPayload"></div>
 
@@ -141,16 +161,7 @@
       <kbd>F9</kbd>
     </button>
 
-    <div class="pdv-shortcuts">
-      <span><kbd>F2</kbd> Buscar</span>
-      <span><kbd>F3</kbd> Quantidade</span>
-      <span><kbd>F4</kbd> Cliente</span>
-      <span><kbd>F5</kbd> Desconto</span>
-      <span><kbd>F6</kbd> Pagamento</span>
-      <span><kbd>F7</kbd> Recebido</span>
-      <span><kbd>F8</kbd> Remover</span>
-      <span><kbd>F9</kbd> Finalizar</span>
-    </div>
+
   </aside>
 </div>
 
@@ -213,6 +224,66 @@
     <span><kbd>1–7</kbd> Selecionar</span>
     <span><kbd>↑</kbd><kbd>↓</kbd> Navegar</span>
     <span><kbd>Enter</kbd> Confirmar</span>
+    <span><kbd>Esc</kbd> Fechar</span>
+  </div>
+</dialog>
+
+<dialog class="pdv-quick-modal pdv-cash-modal" id="pdvCashModal">
+  <div class="pdv-modal-head">
+    <div>
+      <span>F7</span>
+      <h2>Valor recebido</h2>
+      <p>Informe quanto o cliente entregou em dinheiro.</p>
+    </div>
+    <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+  </div>
+
+  <div class="pdv-cash-modal-body">
+    <div class="pdv-cash-total">
+      <span>Total da venda</span>
+      <strong id="pdvCashModalTotal">R$ 0,00</strong>
+    </div>
+
+    <label>
+      <span>Valor recebido</span>
+      <input type="text" inputmode="decimal" id="pdvCashModalInput" autocomplete="off" value="0,00">
+    </label>
+
+    <div class="pdv-cash-change">
+      <span>Troco</span>
+      <strong id="pdvCashModalChange">R$ 0,00</strong>
+    </div>
+
+    <button type="button" class="pdv-modal-primary" id="pdvCashApply">
+      @include('partials.icon',['name'=>'check','size'=>18]) Aplicar valor
+    </button>
+  </div>
+
+  <div class="pdv-modal-help">
+    <span><kbd>Enter</kbd> Aplicar</span>
+    <span><kbd>Esc</kbd> Fechar</span>
+  </div>
+</dialog>
+
+<dialog class="pdv-quick-modal pdv-notes-modal" id="pdvNotesModal">
+  <div class="pdv-modal-head">
+    <div>
+      <span>F10</span>
+      <h2>Observação da venda</h2>
+      <p>Anotação opcional vinculada à operação atual.</p>
+    </div>
+    <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+  </div>
+
+  <div class="pdv-notes-modal-body">
+    <textarea id="pdvNotesModalInput" rows="6" maxlength="2000" placeholder="Digite a observação..."></textarea>
+    <button type="button" class="pdv-modal-primary" id="pdvNotesApply">
+      @include('partials.icon',['name'=>'check','size'=>18]) Salvar observação
+    </button>
+  </div>
+
+  <div class="pdv-modal-help">
+    <span><kbd>Ctrl</kbd> + <kbd>Enter</kbd> Salvar</span>
     <span><kbd>Esc</kbd> Fechar</span>
   </div>
 </dialog>
