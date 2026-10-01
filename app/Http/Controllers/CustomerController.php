@@ -29,19 +29,37 @@ class CustomerController extends Controller {
             ],422);
         }
 
+        $request=Http::acceptJson()
+            ->withHeaders([
+                'User-Agent'=>'NextorERP/1.0',
+            ])
+            ->connectTimeout(5)
+            ->timeout(10);
+
         try {
-            $response=Http::acceptJson()
-                ->withHeaders([
-                    'User-Agent'=>'NextorERP/1.0',
-                ])
-                ->connectTimeout(5)
-                ->timeout(10)
-                ->get('https://brasilapi.com.br/api/cnpj/v1/'.$cnpj);
+            $response=$request->get('https://brasilapi.com.br/api/cnpj/v1/'.$cnpj);
         } catch (\Throwable $e) {
             report($e);
-            return response()->json([
-                'message'=>'O serviço de consulta de CNPJ não respondeu. Tente novamente em alguns instantes.',
-            ],503);
+
+            // Em Laragon/Windows é comum o PHP local estar sem um CA bundle configurado.
+            // Mantemos verificação SSL normal em produção e usamos este fallback apenas no ambiente local.
+            if(app()->environment('local')) {
+                try {
+                    $response=$request
+                        ->withoutVerifying()
+                        ->get('https://brasilapi.com.br/api/cnpj/v1/'.$cnpj);
+                } catch (\Throwable $localException) {
+                    report($localException);
+
+                    return response()->json([
+                        'message'=>'Falha ao acessar a BrasilAPI pelo PHP local: '.$localException->getMessage(),
+                    ],503);
+                }
+            } else {
+                return response()->json([
+                    'message'=>'O serviço de consulta de CNPJ não respondeu. Tente novamente em alguns instantes.',
+                ],503);
+            }
         }
 
         if($response->successful()) {
