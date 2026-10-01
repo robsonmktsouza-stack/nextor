@@ -9,6 +9,7 @@ use Carbon\Carbon;
 class StockController extends Controller {
     public function index(Request $request) {
         $productId=$request->integer('product_id');
+        $perPage=in_array($request->integer('per_page'),[10,25,50,100],true) ? $request->integer('per_page') : 25;
         $month=(string)$request->query('month',now()->format('Y-m'));
         try {
             $period=Carbon::createFromFormat('Y-m',$month)->startOfMonth();
@@ -23,7 +24,7 @@ class StockController extends Controller {
             ->whereYear('created_at',$period->year)
             ->whereMonth('created_at',$period->month)
             ->when($productId,fn($q)=>$q->where('product_id',$productId))
-            ->orderByDesc('id')->paginate(15)->withQueryString();
+            ->orderByDesc('id')->paginate($perPage)->withQueryString();
         $products=Product::orderBy('name')->get(['id','name','sku','stock_quantity','unit']);
         return view('stock.index',compact('movements','products','productId','month','prevMonth','nextMonth','monthLabel'));
     }
