@@ -236,7 +236,7 @@ class PdvController extends Controller
         $sale->load([
             'customer:id,name,document',
             'user:id,name',
-            'items',
+            'items.product:id,unit',
             'payments',
         ]);
 
@@ -252,6 +252,8 @@ class PdvController extends Controller
 
         $cashReceived=(float)session('pdv_cash_received',(float)$sale->total);
         $change=(float)session('pdv_change',0);
+
+        session()->keep(['pdv_last_sale','pdv_change']);
 
         return view('pdv.receipt',[
             'sale'=>$sale,
