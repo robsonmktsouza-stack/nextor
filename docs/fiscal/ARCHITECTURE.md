@@ -169,3 +169,138 @@ A contingência offline fica deliberadamente fora do primeiro caminho de homolog
 8. Cancelamento e inutilização.
 9. Contingência offline.
 10. Integração transacional com PDV/estoque e, por último, produção.
+
+
+---
+
+## Reauditoria documental — 01/10/2026
+
+Esta fase revalidou a documentação antes de implementar documento, snapshot, XML e XSD.
+
+| Documento oficial | Versão/data auditada | Impacto no Nextor Fiscal |
+|---|---|---|
+| MOC NF-e/NFC-e + Anexo I | MOC 7.00, leiaute 4.00 | Base estrutural dos grupos `ide`, `emit`, `dest`, `det`, `total`, `transp` e `pag`. |
+| Portal Nacional — Schemas XML NF-e/NFC-e | PL_010f_v1.04, publicado em 31/08/2026 | Substitui o `010e_v1.02` registrado na Fundação como pacote ativo. Os XSDs passam a ser resolvidos por manifesto e SHA-256. |
+| NT 2025.002 RTC | v1.52, publicada em 01/10/2026 | Mantém a RTC/IBS/CBS como requisito de domínio. Como é posterior ao pacote 010f, não alteramos XSD manualmente. |
+| NT 2026.002 RTC | v1.11, publicada em 01/10/2026 | Alterações relacionadas às operações presenciais/não presenciais e DANFE Simplificado Tipo 2; rastreada sem antecipar regras fora do pacote XSD vigente. |
+| NT 2026.007 | v1.10, publicada em 01/10/2026 | Regras/cadastros de contribuintes; rastreada separadamente das validações puramente XSD. |
+| NT 2026.008 | v1.00, publicada em 01/10/2026 | Anuncia campos de valor líquido do produto. Eles não são emitidos enquanto não constarem do pacote XSD oficial ativo. |
+| NT 2026.004 | v1.01, 08/06/2026 | Mantém suporte ao CNPJ alfanumérico e formação de chave já preparado na Fundação. |
+| DOC-ICP-04 / ICP-Brasil | revalidado em 01/10/2026 | Extração do documento do titular A1 passa a priorizar `subjectAltName/otherName`: OID 2.16.76.1.3.3 (CNPJ PJ) e OID 2.16.76.1.3.1 (dados PF/CPF). |
+
+Fontes oficiais consultadas:
+- Portal Nacional NF-e — schemas: https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=BMPFMBoln3w%3D
+- Portal SVRS NF-e — documentos e Notas Técnicas: https://dfe-portal.svrs.rs.gov.br/Nfe/Documentos
+- ICP-Brasil / ITI — DOC-ICP-04: https://www.gov.br/iti/pt-br/assuntos/legislacao/resolucoes/resolucoes-old/resolucao179_doc-icp-04.htm
+
+### Mudança explícita de baseline XSD
+
+A Fundação, em 01/10/2026, registrou `010e_v1.02` porque era a referência anteriormente auditada. A reauditoria desta fase encontrou no Portal Nacional o pacote posterior **PL_010f_v1.04**, publicado em **31/08/2026**. O Nextor passa a considerar `PL_010f_v1.04` o pacote ativo.
+
+Nenhuma Nota Técnica publicada depois de 31/08/2026 é convertida automaticamente em alteração de XSD. Enquanto um novo pacote oficial não for publicado/importado, o 010f permanece íntegro e as NTs posteriores são tratadas no catálogo documental/de regras.
+
+## Fase Documento + Schema + XML
+
+Fluxo implementado nesta etapa:
+
+```text
+dados fiscais já resolvidos
+        |
+        v
+NfceSnapshot (imutável / sem float)
+        |
+        v
+FiscalDocumentCreator
+        |
+        +-- reserva nNF com lock
+        +-- gera cNF
+        +-- gera chave
+        +-- grava snapshot + SHA-256
+        v
+fiscal_documents
+        |
+        v
+NfceXmlGenerator (DOMDocument)
+        |
+        v
+XML NFC-e 4.00 NÃO ASSINADO
+        |
+        v
+SchemaRegistry
+  -> SchemaResolver
+  -> verifica manifesto + SHA-256
+  -> SchemaValidator/libxml
+        |
+        v
+SchemaValidationResult { valid, errors[] }
+```
+
+### Snapshot fiscal imutável
+
+O snapshot não decide tributação. Ele recebe valores fiscais **já resolvidos** por uma camada de domínio futura/externa ao gerador, incluindo CFOP, grupos ICMS, PIS, COFINS, IBS/CBS e demais valores quando aplicáveis.
+
+Regras desta fase:
+- nenhum `float` é aceito no snapshot fiscal;
+- valores decimais devem chegar como strings;
+- o emitente é copiado de `fiscal_companies`;
+- data/hora com offset é preservada no snapshot;
+- o JSON armazenado recebe SHA-256;
+- identidade do documento, vínculo, chave, numeração, ambiente e snapshot não podem ser alterados depois da criação;
+- o gerador XML apenas serializa os grupos resolvidos em DOM;
+- XSD valida estrutura, não substitui regras tributárias/validações SEFAZ.
+
+### Persistência
+
+`fiscal_documents` foi criada separada de `sales` com:
+- empresa e venda opcional;
+- modelo, série, número e ambiente;
+- chave, cNF e tpEmis;
+- estado e versão do leiaute;
+- snapshot + hash;
+- XML gerado/assinado/protocolado separados;
+- cStat/xMotivo/protocolo e datas reservados para fases posteriores;
+- unicidade da chave;
+- unicidade empresa + modelo + série + número + ambiente.
+
+`Sale` recebeu apenas a relação `fiscalDocuments()`. O `SalesService` e o PDV permanecem inalterados.
+
+### Limite oficial: XSD e assinatura
+
+O tipo oficial `TNFe` do pacote `PL_010f_v1.04` exige `ds:Signature` após `infNFe`/informações suplementares. Portanto, **um XML NFe/NFC-e realmente não assinado não pode retornar `valid=true` no `schemaValidate()` do XSD oficial**.
+
+Como esta fase proíbe implementar assinatura, o Nextor:
+1. gera o XML 4.00 sem assinatura;
+2. executa o validador oficial normalmente;
+3. retorna erro estruturado informando a ausência de `Signature`;
+4. não adultera XSD;
+5. não cria assinatura fictícia;
+6. não promove o documento para `validated` artificialmente.
+
+A validação integral `valid=true` do elemento `NFe` será atingida na fase XMLDSig, usando o mesmo pacote XSD e o mesmo validador já implementados aqui.
+
+### Responsabilidades de classes
+
+```text
+app/Fiscal/
+├── Certificate/
+│   ├── A1CertificateReader
+│   ├── Asn1DerReader
+│   └── IcpBrasilSubjectDocumentExtractor
+├── DTO/
+│   └── NfceSnapshot
+├── Models/
+│   └── FiscalDocument
+├── Nfce/
+│   └── FiscalDocumentCreator
+├── Schema/
+│   ├── SchemaManifest
+│   ├── SchemaRegistry
+│   ├── SchemaResolver
+│   ├── ResolvedSchema
+│   ├── SchemaValidationError
+│   ├── SchemaValidationResult
+│   └── SchemaValidator
+└── Xml/
+    ├── NfceXmlGenerator
+    └── NfceXmlService
+```

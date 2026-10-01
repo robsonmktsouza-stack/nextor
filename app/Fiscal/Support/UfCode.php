@@ -26,4 +26,11 @@ final class UfCode
     {
         return self::STATES[$code] ?? null;
     }
+
+    public static function codeForUf(string $uf): ?string
+    {
+        $code = array_search(strtoupper(trim($uf)), self::STATES, true);
+
+        return $code === false ? null : $code;
+    }
 }

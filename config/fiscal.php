@@ -26,9 +26,11 @@ return [
 
     'schemas' => [
         'audited_at' => '2026-10-01',
-        'core_package' => '010e_v.1.02',
-        'cnpj_alphanumeric_package' => '010d_v.1.03',
-        'rtc_event_package' => 'NT2025.002_v1.40_events',
+        'core_package' => 'PL_010f_v1.04',
+        'previous_core_package' => '010e_v1.02',
+        'cnpj_alphanumeric_package' => '010d_v1.03',
+        'rtc_validation_note' => 'NT2025.002_v1.52',
+        'sales_operation_validation_note' => 'NT2026.002_v1.11',
         'path' => resource_path('fiscal/schemas'),
     ],
 ];

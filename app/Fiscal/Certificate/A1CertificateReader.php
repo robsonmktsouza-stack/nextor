@@ -10,6 +10,11 @@ use OpenSSLCertificate;
 
 final class A1CertificateReader
 {
+    public function __construct(
+        private readonly IcpBrasilSubjectDocumentExtractor $documentExtractor = new IcpBrasilSubjectDocumentExtractor(),
+    ) {
+    }
+
     /**
      * @return array{info: CertificateInfo, certificate: OpenSSLCertificate|string, private_key: OpenSSLAsymmetricKey|string}
      */
@@ -39,7 +44,7 @@ final class A1CertificateReader
             issuer: $this->flattenDn($parsed['issuer'] ?? null),
             serialNumber: $parsed['serialNumberHex'] ?? ($parsed['serialNumber'] ?? null),
             fingerprintSha256: openssl_x509_fingerprint($store['cert'], 'sha256') ?: null,
-            subjectDocument: $this->extractSubjectDocument($parsed['subject'] ?? []),
+            subjectDocument: $this->documentExtractor->extract($store['cert'], $parsed),
             validFrom: isset($parsed['validFrom_time_t'])
                 ? (new DateTimeImmutable())->setTimestamp((int) $parsed['validFrom_time_t'])
                 : null,
@@ -69,22 +74,5 @@ final class A1CertificateReader
         }
 
         return $parts ? implode(', ', $parts) : null;
-    }
-
-    private function extractSubjectDocument(array $subject): ?string
-    {
-        foreach ($subject as $value) {
-            if (!is_scalar($value)) {
-                continue;
-            }
-
-            $normalized = strtoupper(preg_replace('/[^A-Z0-9]/i', '', (string) $value) ?? '');
-
-            if (preg_match('/([A-Z0-9]{12}[0-9]{2})/', $normalized, $matches)) {
-                return $matches[1];
-            }
-        }
-
-        return null;
     }
 }

@@ -33,4 +33,9 @@ class FiscalCompany extends Model
     {
         return $this->hasMany(FiscalSequence::class);
     }
+
+    public function documents(): HasMany
+    {
+        return $this->hasMany(FiscalDocument::class);
+    }
 }
