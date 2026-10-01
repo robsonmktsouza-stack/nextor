@@ -5,47 +5,50 @@
       $formatted=number_format((float)$value,3,',','.');
       return rtrim(rtrim($formatted,'0'),',');
   };
+
   $paymentIsCash=$sale->payments->contains(fn($payment)=>$payment->payment_method==='cash');
+  $discountRows=$sale->items->filter(fn($item)=>(float)$item->discount>0)->count();
+
+  $issuerName=trim((string)config('fiscal.issuer_name',config('app.name','NEXTOR')));
+  $issuerCnpj=trim((string)config('fiscal.issuer_cnpj',''));
+  $issuerAddress=trim((string)config('fiscal.issuer_address',''));
+
+  $consumerDocument=preg_replace('/\D+/','',(string)($sale->customer?->document ?? ''));
+  $consumerDocumentLabel=strlen($consumerDocument)===11 ? 'CPF' : (strlen($consumerDocument)===14 ? 'CNPJ' : 'CPF/CNPJ');
 
   /*
-   * Altura física aproximada da bobina.
-   * O CSS @page não aceita "auto" de forma confiável no Chromium.
-   * Calculamos uma página estreita o bastante para conter todo o comprovante.
+   * Altura física da bobina para o Chromium. O DANFE NFC-e não possui
+   * altura fixa; apenas a largura/margens são relevantes. Como o Chrome
+   * não respeita "auto" no @page, reservamos altura suficiente por conteúdo.
    */
-  $discountRows=$sale->items->filter(fn($item)=>(float)$item->discount>0)->count();
   $receiptHeightMm=
-      118
+      185
       + ($sale->items->count()*9)
-      + ($discountRows*6)
+      + ($discountRows*5)
       + ($sale->payments->count()*6)
       + ($sale->customer ? 8 : 4)
-      + ($sale->notes ? 18 : 0);
+      + ($sale->notes ? 16 : 0);
 
-  /*
-   * Chromium arredonda medidas físicas e pode deslocar o rodapé
-   * para uma segunda página quando o conteúdo fica muito justo.
-   * Mantemos uma folga mínima para garantir uma única página.
-   */
-  $receiptHeightMm=max(160,min(600,$receiptHeightMm));
+  $receiptHeightMm=max(205,min(650,$receiptHeightMm));
 @endphp
-
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Comprovante da venda #{{ str_pad((string)$sale->id,5,'0',STR_PAD_LEFT) }}</title>
+<title>DANFE NFC-e — modelo sem valor fiscal — venda #{{ $sale->id }}</title>
 <style>
   *{box-sizing:border-box}
-  html,body{margin:0;padding:0;background:#eef1f4;color:#000;font-family:Arial,Helvetica,sans-serif}
-  body{font-size:10px}
+  html,body{margin:0;padding:0;background:#e7e9ec;color:#000;font-family:Arial,Helvetica,sans-serif}
+  body{font-size:9px}
+
   .screen-actions{
     width:80mm;
     max-width:calc(100vw - 24px);
-    margin:18px auto 10px;
+    margin:16px auto 10px;
     display:flex;
     gap:8px;
   }
-  .screen-actions button,.screen-actions a{
+  .screen-actions a,.screen-actions button{
     flex:1;
     min-height:38px;
     display:flex;
@@ -54,132 +57,266 @@
     border:1px solid #cbd4dc;
     border-radius:5px;
     background:#fff;
-    color:#28465f;
+    color:#29455e;
     font:600 11px Arial,sans-serif;
     text-decoration:none;
     cursor:pointer;
   }
-  .screen-actions button{background:#2877c7;color:#fff;border-color:#2877c7}
-  .receipt{
+  .screen-actions button{background:#2877c7;border-color:#2877c7;color:#fff}
+
+  .danfe{
     width:80mm;
     max-width:100%;
     margin:0 auto 24px;
-    padding:4mm 4mm 6mm;
+    padding:3mm 3mm 5mm;
     background:#fff;
   }
+
   .center{text-align:center}
-  .issuer{padding-bottom:7px}
-  .issuer-name{display:block;font-size:14px;font-weight:700;line-height:1.2}
-  .issuer-sub{display:block;margin-top:3px;font-size:9px}
-  .doc-title{
-    margin:5px 0 0;
-    padding:6px 4px;
-    border-top:1px dashed #000;
-    border-bottom:1px dashed #000;
+  .dash-top{border-top:1px dashed #000}
+  .section{padding:2.1mm 0}
+  .section + .section{border-top:1px dashed #000}
+
+  /* Divisão I — Cabeçalho */
+  .issuer{
     text-align:center;
-    font-size:10px;
-    font-weight:700;
     line-height:1.35;
+    padding-bottom:2mm;
   }
-  .non-fiscal{
+  .issuer-name{
     display:block;
-    margin-top:2px;
-    font-size:12px;
-    font-weight:800;
+    font-size:11px;
+    font-weight:700;
+    text-transform:uppercase;
   }
-  .items{width:100%;border-collapse:collapse;margin-top:7px;table-layout:fixed}
+  .issuer-cnpj{
+    display:block;
+    margin-top:1px;
+    font-size:8.5px;
+  }
+  .issuer-address{
+    display:block;
+    margin-top:1px;
+    font-size:8px;
+  }
+  .official-title{
+    margin-top:2mm;
+    padding-top:2mm;
+    border-top:1px dashed #000;
+    font-size:9px;
+    font-weight:700;
+    line-height:1.25;
+    text-transform:uppercase;
+  }
+  .non-fiscal-top{
+    margin-top:1.5mm;
+    padding:1.2mm 1mm;
+    border:1px solid #000;
+    font-size:10px;
+    font-weight:800;
+    line-height:1.25;
+    text-align:center;
+  }
+
+  /* Divisão II — Detalhe da venda */
+  .items{
+    width:100%;
+    border-collapse:collapse;
+    table-layout:fixed;
+  }
   .items th{
-    padding:3px 1px;
+    padding:1.1mm .4mm .9mm;
     border-bottom:1px solid #000;
-    font-size:7px;
+    font-size:6.5px;
+    line-height:1.1;
     font-weight:700;
     text-align:right;
     vertical-align:bottom;
   }
   .items th:nth-child(1),.items th:nth-child(2){text-align:left}
   .items td{
-    padding:4px 1px;
-    border-bottom:1px dotted #aaa;
-    font-size:8px;
+    padding:1mm .4mm;
+    border-bottom:1px dotted #888;
+    font-size:7.2px;
+    line-height:1.2;
     text-align:right;
     vertical-align:top;
     overflow-wrap:anywhere;
   }
   .items td:nth-child(1),.items td:nth-child(2){text-align:left}
-  .items .code{width:14%}
-  .items .description{width:31%}
-  .items .qty{width:11%}
-  .items .unit{width:8%}
-  .items .unit-price{width:17%}
-  .items .line-total{width:19%}
-  .summary{margin-top:7px}
-  .summary-row{
-    min-height:16px;
-    display:flex;
-    align-items:flex-start;
-    justify-content:space-between;
-    gap:10px;
-    padding:1px 0;
+  .col-code{width:14%}
+  .col-description{width:32%}
+  .col-qty{width:10%}
+  .col-unit{width:8%}
+  .col-unit-price{width:17%}
+  .col-total{width:19%}
+  .item-adjustment td{
+    padding-top:.6mm;
+    padding-bottom:.6mm;
+    border-bottom:0;
+    font-size:6.8px;
   }
-  .summary-row span:first-child{flex:1}
-  .summary-row strong,.summary-row span:last-child{white-space:nowrap;text-align:right}
-  .summary-row.total{
-    margin-top:3px;
-    padding-top:4px;
-    border-top:1px dashed #000;
-    font-size:12px;
-    font-weight:700;
+
+  /* Divisão III — Totais */
+  .totals{
+    display:grid;
+    gap:.6mm;
+    font-size:8.3px;
   }
-  .section{
-    margin-top:7px;
-    padding-top:6px;
-    border-top:1px dashed #000;
+  .total-line,.payment-line{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:5mm;
+    align-items:baseline;
   }
-  .section-title{
-    margin-bottom:4px;
-    text-align:center;
-    font-size:9px;
-    font-weight:700;
+  .total-line strong,.payment-line strong{
+    text-align:right;
+    white-space:nowrap;
   }
-  .payment-line{
-    display:flex;
-    justify-content:space-between;
-    gap:8px;
-    padding:1px 0;
-  }
-  .consumer{
-    font-size:9px;
-    line-height:1.45;
-    text-align:center;
-  }
-  .operation{
-    font-size:9px;
-    line-height:1.5;
-    text-align:center;
-  }
-  .warning{
-    margin-top:7px;
-    padding:7px 4px;
-    border:1px solid #000;
-    text-align:center;
+  .payable{
+    margin-top:.8mm;
     font-size:10px;
-    font-weight:800;
-    line-height:1.4;
+    font-weight:700;
   }
-  .footer{
-    margin-top:7px;
+  .payment-header{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    margin-top:2mm;
+    padding-top:1.4mm;
+    border-top:1px solid #000;
+    font-size:7.2px;
+    font-weight:700;
+  }
+
+  /* Divisão IV — Consulta por chave */
+  .access-key{
     text-align:center;
-    font-size:8px;
+    font-size:7.4px;
     line-height:1.4;
   }
+  .access-key strong{
+    display:block;
+    margin-top:1mm;
+    font-size:8px;
+    letter-spacing:.02em;
+  }
+  .fiscal-placeholder{
+    display:block;
+    margin-top:1mm;
+    font-weight:700;
+    text-transform:uppercase;
+  }
+
+  /* Divisão VI — Consumidor */
+  .consumer{
+    text-align:center;
+    font-size:7.6px;
+    line-height:1.4;
+  }
+  .consumer-title{
+    display:block;
+    margin-bottom:.7mm;
+    font-weight:700;
+    text-transform:uppercase;
+  }
+
+  /* Divisão VII — Identificação */
+  .identification{
+    text-align:center;
+    font-size:7.4px;
+    line-height:1.45;
+  }
+  .nfce-line{
+    font-weight:700;
+  }
+  .via{
+    display:block;
+    margin-top:.7mm;
+    font-size:7px;
+  }
+
+  /* Divisão V + VII — QR e protocolo */
+  .qr-protocol{
+    display:grid;
+    grid-template-columns:27mm minmax(0,1fr);
+    align-items:center;
+    gap:2.5mm;
+  }
+  .qr-placeholder{
+    width:25mm;
+    height:25mm;
+    display:grid;
+    place-items:center;
+    margin:0 auto;
+    border:1px solid #000;
+    position:relative;
+    text-align:center;
+    font-size:6.5px;
+    font-weight:700;
+    line-height:1.25;
+  }
+  .qr-placeholder:before,.qr-placeholder:after{
+    content:"";
+    position:absolute;
+    left:2mm;
+    right:2mm;
+    top:50%;
+    height:1px;
+    background:#000;
+    transform-origin:center;
+  }
+  .qr-placeholder:before{transform:rotate(45deg)}
+  .qr-placeholder:after{transform:rotate(-45deg)}
+  .qr-placeholder span{
+    position:relative;
+    z-index:1;
+    padding:1mm;
+    background:#fff;
+  }
+  .protocol{
+    font-size:7px;
+    line-height:1.45;
+  }
+  .protocol strong{
+    display:block;
+    margin-bottom:.8mm;
+    font-size:7.2px;
+  }
+
+  /* Divisão VIII e IX */
+  .fiscal-message{
+    text-align:center;
+    font-size:7.3px;
+    font-weight:700;
+    line-height:1.4;
+  }
+  .contributor-message{
+    font-size:7px;
+    line-height:1.4;
+    text-align:center;
+  }
+  .legal-tax{
+    font-size:6.8px;
+    line-height:1.35;
+    text-align:center;
+  }
+  .final-warning{
+    margin-top:1.8mm;
+    padding:1.5mm 1mm;
+    border:1px solid #000;
+    font-size:8.5px;
+    font-weight:800;
+    line-height:1.35;
+    text-align:center;
+  }
+
   @page{
     size:80mm {{ $receiptHeightMm }}mm;
     margin:0;
   }
 
   @media print{
-    html,
-    body{
+    html,body{
       width:80mm!important;
       min-width:80mm!important;
       max-width:80mm!important;
@@ -188,28 +325,17 @@
       padding:0!important;
       background:#fff!important;
     }
-
-    body{
-      overflow:visible!important;
-    }
-
-    .screen-actions{
-      display:none!important;
-    }
-
-    .receipt{
+    body{overflow:visible!important}
+    .screen-actions{display:none!important}
+    .danfe{
       width:80mm!important;
       min-width:80mm!important;
       max-width:80mm!important;
       margin:0!important;
-      padding:3mm 3mm 5mm!important;
+      padding:3mm 3mm 4mm!important;
       box-shadow:none!important;
-      page-break-before:avoid!important;
-      page-break-after:avoid!important;
-      page-break-inside:avoid!important;
-      break-before:avoid-page!important;
-      break-after:avoid-page!important;
       break-inside:avoid-page!important;
+      page-break-inside:avoid!important;
     }
   }
 </style>
@@ -218,82 +344,97 @@
 
 <div class="screen-actions">
   <a href="{{ route('pdv.index') }}">Voltar ao PDV</a>
-  <button type="button" onclick="window.print()">Imprimir novamente</button>
+  <button type="button">Imprimir novamente</button>
 </div>
 
-<main class="receipt">
-  <header class="issuer center">
-    <strong class="issuer-name">{{ strtoupper(config('app.name','NEXTOR')) }}</strong>
-    <span class="issuer-sub">COMPROVANTE DE VENDA</span>
-  </header>
+<main class="danfe">
+  {{-- DIVISÃO I — INFORMAÇÕES DO CABEÇALHO --}}
+  <section class="issuer">
+    <strong class="issuer-name">{{ $issuerName ?: 'EMITENTE NÃO CONFIGURADO' }}</strong>
+    <span class="issuer-cnpj">
+      CNPJ: {{ $issuerCnpj !== '' ? $issuerCnpj : 'NÃO CONFIGURADO' }}
+    </span>
+    <span class="issuer-address">
+      {{ $issuerAddress !== '' ? $issuerAddress : 'ENDEREÇO DO EMITENTE NÃO CONFIGURADO' }}
+    </span>
 
-  <div class="doc-title">
-    MODELO VISUAL BASEADO NO DANFE NFC-e
-    <span class="non-fiscal">SEM VALOR FISCAL</span>
-    NÃO É DOCUMENTO FISCAL
-  </div>
+    <div class="official-title">
+      Documento Auxiliar da Nota Fiscal de Consumidor Eletrônica
+    </div>
 
-  <table class="items" aria-label="Itens da venda">
-    <thead>
-      <tr>
-        <th class="code">CÓD.</th>
-        <th class="description">DESCRIÇÃO</th>
-        <th class="qty">QTD.</th>
-        <th class="unit">UN</th>
-        <th class="unit-price">VL UNIT.</th>
-        <th class="line-total">VL TOTAL</th>
-      </tr>
-    </thead>
-    <tbody>
-      @foreach($sale->items as $item)
+    <div class="non-fiscal-top">
+      SEM VALOR FISCAL<br>
+      NFC-e NÃO EMITIDA
+    </div>
+  </section>
+
+  {{-- DIVISÃO II — DETALHE DE PRODUTOS/SERVIÇOS --}}
+  <section class="section">
+    <table class="items" aria-label="Detalhe da venda">
+      <thead>
         <tr>
-          <td>{{ $item->product_sku ?: '-' }}</td>
-          <td>{{ $item->product_name }}</td>
-          <td>{{ $formatQty($item->quantity) }}</td>
-          <td>{{ $item->product?->unit ?? 'UN' }}</td>
-          <td>{{ $formatMoney($item->unit_price) }}</td>
-          <td>{{ $formatMoney($item->line_total) }}</td>
+          <th class="col-code">Código</th>
+          <th class="col-description">Descrição</th>
+          <th class="col-qty">Qtde</th>
+          <th class="col-unit">UN</th>
+          <th class="col-unit-price">Vl Unit</th>
+          <th class="col-total">Vl Total</th>
         </tr>
-        @if((float)$item->discount>0)
+      </thead>
+      <tbody>
+        @foreach($sale->items as $item)
           <tr>
-            <td></td>
-            <td colspan="4">Desconto do item</td>
-            <td>-{{ $formatMoney($item->discount) }}</td>
+            <td>{{ $item->product_sku ?: '-' }}</td>
+            <td>{{ $item->product_name }}</td>
+            <td>{{ $formatQty($item->quantity) }}</td>
+            <td>{{ $item->product?->unit ?? 'UN' }}</td>
+            <td>{{ $formatMoney($item->unit_price) }}</td>
+            <td>{{ $formatMoney($item->line_total + $item->discount) }}</td>
           </tr>
-        @endif
-      @endforeach
-    </tbody>
-  </table>
+          @if((float)$item->discount>0)
+            <tr class="item-adjustment">
+              <td></td>
+              <td colspan="4">Desconto</td>
+              <td>-{{ $formatMoney($item->discount) }}</td>
+            </tr>
+          @endif
+        @endforeach
+      </tbody>
+    </table>
+  </section>
 
-  <section class="summary">
-    <div class="summary-row">
+  {{-- DIVISÃO III — TOTAIS --}}
+  <section class="section totals">
+    <div class="total-line">
       <span>Qtde. total de itens</span>
       <strong>{{ $sale->items->count() }}</strong>
     </div>
-    <div class="summary-row">
+    <div class="total-line">
       <span>Valor total R$</span>
       <strong>{{ $formatMoney($sale->subtotal) }}</strong>
     </div>
     @if((float)$sale->discount_total>0)
-      <div class="summary-row">
+      <div class="total-line">
         <span>Desconto R$</span>
-        <strong>-{{ $formatMoney($sale->discount_total) }}</strong>
+        <strong>{{ $formatMoney($sale->discount_total) }}</strong>
       </div>
     @endif
-    <div class="summary-row total">
-      <span>VALOR A PAGAR R$</span>
-      <strong>{{ $formatMoney($sale->total) }}</strong>
-    </div>
-  </section>
+    @if((float)$sale->discount_total>0)
+      <div class="total-line payable">
+        <span>Valor a Pagar R$</span>
+        <strong>{{ $formatMoney($sale->total) }}</strong>
+      </div>
+    @endif
 
-  <section class="section">
-    <div class="section-title">FORMA DE PAGAMENTO</div>
+    <div class="payment-header">
+      <span>FORMA PAGAMENTO</span>
+      <span>VALOR PAGO R$</span>
+    </div>
+
     @foreach($sale->payments as $payment)
       <div class="payment-line">
         <span>{{ $paymentLabels[$payment->payment_method] ?? 'Outro' }}</span>
-        <strong>
-          {{ $formatMoney($payment->payment_method==='cash' ? $cashReceived : $payment->amount) }}
-        </strong>
+        <strong>{{ $formatMoney($payment->payment_method==='cash' ? $cashReceived : $payment->amount) }}</strong>
       </div>
     @endforeach
 
@@ -305,47 +446,84 @@
     @endif
   </section>
 
+  {{-- DIVISÃO IV — CONSULTA VIA CHAVE DE ACESSO --}}
+  <section class="section access-key">
+    Consulte pela Chave de Acesso em
+    <strong>ENDEREÇO DE CONSULTA INDISPONÍVEL</strong>
+    <span class="fiscal-placeholder">CHAVE DE ACESSO NÃO GERADA — NFC-e NÃO EMITIDA</span>
+  </section>
+
+  {{-- DIVISÃO VI — CONSUMIDOR --}}
   <section class="section consumer">
-    <div class="section-title">CONSUMIDOR</div>
+    <span class="consumer-title">CONSUMIDOR</span>
     @if($sale->customer)
-      <strong>{{ $sale->customer->name }}</strong><br>
       @if($sale->customer->document)
-        CPF/CNPJ: {{ $sale->customer->document }}
+        {{ $consumerDocumentLabel }}: {{ $sale->customer->document }}
+      @endif
+      @if($sale->customer->name)
+        {{ $sale->customer->document ? ' - ' : '' }}{{ $sale->customer->name }}
       @endif
     @else
       CONSUMIDOR NÃO IDENTIFICADO
     @endif
   </section>
 
-  <section class="section operation">
-    <strong>VENDA Nº {{ str_pad((string)$sale->id,9,'0',STR_PAD_LEFT) }}</strong><br>
-    {{ optional($sale->completed_at)->format('d/m/Y H:i:s') ?? now()->format('d/m/Y H:i:s') }}<br>
+  {{-- DIVISÃO VII — IDENTIFICAÇÃO DA NFC-e E PROTOCOLO --}}
+  <section class="section identification">
+    <div class="nfce-line">
+      NFC-e nº — &nbsp;&nbsp; Série — &nbsp;&nbsp; Emissão —
+    </div>
+    <span class="via">Via Consumidor</span>
+  </section>
+
+  {{-- DIVISÃO V — QR CODE / DIVISÃO VII — PROTOCOLO --}}
+  <section class="section qr-protocol">
+    <div class="qr-placeholder" aria-label="QR Code não gerado">
+      <span>QR CODE<br>NÃO GERADO</span>
+    </div>
+    <div class="protocol">
+      <strong>Consulta via leitor de QR Code</strong>
+      Protocolo de Autorização:<br>
+      <b>NÃO GERADO</b><br><br>
+      Data de autorização:<br>
+      <b>NÃO AUTORIZADA</b>
+    </div>
+  </section>
+
+  {{-- DIVISÃO VIII — MENSAGEM FISCAL --}}
+  <section class="section fiscal-message">
+    SEM VALOR FISCAL — NFC-e NÃO EMITIDA<br>
+    NENHUMA AUTORIZAÇÃO FOI SOLICITADA À SEFAZ
+  </section>
+
+  {{-- DIVISÃO IX — MENSAGEM DE INTERESSE DO CONTRIBUINTE --}}
+  <section class="section contributor-message">
+    Venda interna nº {{ str_pad((string)$sale->id,9,'0',STR_PAD_LEFT) }}
+    — {{ optional($sale->completed_at)->format('d/m/Y H:i:s') ?? now()->format('d/m/Y H:i:s') }}
     @if($sale->user)
-      Operador: {{ $sale->user->name }}
+      <br>Operador: {{ $sale->user->name }}
+    @endif
+
+    @if($sale->notes)
+      <br>{{ $sale->notes }}
     @endif
   </section>
 
-  @if($sale->notes)
-    <section class="section">
-      <div class="section-title">OBSERVAÇÃO</div>
-      <div class="center">{{ $sale->notes }}</div>
-    </section>
-  @endif
+  <section class="section legal-tax">
+    Tributos Totais Incidentes (Lei Federal 12.741/2012):
+    não calculados neste comprovante sem valor fiscal.
+  </section>
 
-  <div class="warning">
+  <div class="final-warning">
     COMPROVANTE NÃO FISCAL — SEM VALOR FISCAL<br>
     NÃO SUBSTITUI NFC-e, NF-e OU NFS-e
   </div>
-
-  <footer class="footer">
-    Documento interno gerado pelo {{ config('app.name','Nextor') }}.<br>
-    Nenhuma autorização fiscal foi solicitada à SEFAZ.
-  </footer>
 </main>
 
 <script>
 (()=>{
   let automatic=true;
+  const printButton=document.querySelector('.screen-actions button');
 
   window.addEventListener('load',()=>{
     window.setTimeout(()=>{
@@ -361,8 +539,9 @@
     },120);
   });
 
-  document.querySelector('.screen-actions button')?.addEventListener('click',()=>{
+  printButton?.addEventListener('click',()=>{
     automatic=false;
+    window.print();
   });
 })();
 </script>
