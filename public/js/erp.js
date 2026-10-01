@@ -1418,7 +1418,8 @@
     });
     date.addEventListener('change',recalcPayments);
     receive.addEventListener('change',recalcPayments);
-    tr.querySelector('button').addEventListener('click',()=>{
+    const removePayment=tr.querySelector('.row-action-danger');
+    removePayment?.addEventListener('click',()=>{
       tr.remove();
       if(!paymentRows().length) addPayment({amount:currentSaleTotal},true);
       splitAutomaticPayments();
