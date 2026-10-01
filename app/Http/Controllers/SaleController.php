@@ -52,7 +52,7 @@ class SaleController extends Controller
         return view('sales.create',[
             'products'=>Product::where('is_active',true)
                 ->orderBy('name')
-                ->get(['id','name','sku','unit','sale_price','stock_quantity']),
+                ->get(['id','name','sku','unit','sale_price','stock_quantity','control_stock']),
             'services'=>Service::where('is_active',true)
                 ->orderBy('name')
                 ->get(['id','name','sale_price','service_list_item','cnae']),
