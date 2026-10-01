@@ -1034,39 +1034,482 @@
     const el=document.getElementById('stock-qty-label'); if(el) el.textContent=e.target.value==='adjustment'?'Novo saldo final *':'Quantidade *';
   });
 
-  const saleBody = document.getElementById('saleItems');
-  if (!saleBody) return;
+  const saleBody=document.getElementById('saleItems');
+  if(!saleBody) return;
+
   const products=JSON.parse(document.getElementById('sale-products')?.textContent||'[]');
+  const services=JSON.parse(document.getElementById('sale-services')?.textContent||'[]');
   const oldRows=JSON.parse(document.getElementById('sale-old-items')?.textContent||'[]');
-  const money=value=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(value);
-  let seq=0;
-  function row(productId='', quantity='1') {
-    const idx=seq++;
-    const tr=document.createElement('tr');
-    tr.innerHTML='<td><select aria-label="Produto" required><option value="">Selecione o produto</option></select><small class="row-stock table-subtitle"></small></td><td><input aria-label="Quantidade" required type="number" min="0.001" step="0.001" value="1"></td><td class="readonly-price">R$ 0,00</td><td class="price-strong row-subtotal">R$ 0,00</td><td><button type="button" class="btn-icon" aria-label="Remover item" data-tooltip="Remover item">×</button></td>';
-    const select=tr.querySelector('select'),qty=tr.querySelector('input');
-    select.name=`items[${idx}][product_id]`;qty.name=`items[${idx}][quantity]`;
-    for (const p of products) {const o=document.createElement('option');o.value=String(p.id);o.textContent=`${p.sku} — ${p.name}`;if(String(p.id)===String(productId))o.selected=true;select.appendChild(o);}
-    qty.value=String(quantity);select.addEventListener('change',recalc);qty.addEventListener('input',recalc);enhanceSelect(select);enhanceNumberInput(qty);
-    tr.querySelector('button').addEventListener('click',()=>{tr.remove();recalc();});saleBody.appendChild(tr);recalc();
-  }
-  function recalc() {
-    let total=0,items=0,qtySum=0;const selected=[];
-    saleBody.querySelectorAll('tr').forEach(tr=>{
-      const id=tr.querySelector('select').value,qty=Number(tr.querySelector('input').value)||0;
-      const p=products.find(x=>String(x.id)===id);const price=p?Number(p.sale_price):0;
-      tr.querySelector('.readonly-price').textContent=money(price);
-      tr.querySelector('.row-subtotal').textContent=money(price*qty);
-      tr.querySelector('.row-stock').textContent=p?`Disponível: ${Number(p.stock_quantity).toLocaleString('pt-BR',{minimumFractionDigits:3})} ${p.unit}`:'';
-      if(p && qty>0){items++;qtySum+=qty;total+=price*qty;selected.push(id);}
-      tr.querySelector('input').setCustomValidity(p&&qty>Number(p.stock_quantity)?'Quantidade superior ao estoque disponível.':'');
+  const oldPayments=JSON.parse(document.getElementById('sale-old-payments')?.textContent||'[]');
+  const paymentBody=document.getElementById('salePayments');
+  const operationType=document.getElementById('saleOperationType');
+  const operationDate=document.querySelector('[name="operation_date"]');
+  const submitSale=document.getElementById('submitSale');
+  const saleCurrency=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'});
+  let saleSeq=0;
+  let paymentSeq=0;
+  let currentSaleTotal=0;
+
+  const moneyValue=input=>{
+    if(!input) return 0;
+    const hidden=input.nextElementSibling?.matches?.('[data-money-hidden="1"]') ? input.nextElementSibling : null;
+    return Number(hidden?.value||input.dataset.moneyValue||input.value||0)||0;
+  };
+
+  const setMoneyValue=(input,value)=>{
+    if(!input) return;
+    const amount=Math.max(0,Number(value)||0);
+    input.value=moneyFormatter.format(amount);
+    input.dataset.moneyValue=amount.toFixed(2);
+    const hidden=input.nextElementSibling?.matches?.('[data-money-hidden="1"]') ? input.nextElementSibling : null;
+    if(hidden) hidden.value=amount.toFixed(2);
+  };
+
+  const itemSource=type=>type==='product' ? products : type==='service' ? services : [];
+
+  const closeSaleSuggestions=(except=null)=>{
+    document.querySelectorAll('.sale-item-suggestions').forEach(menu=>{
+      if(menu===except) return;
+      menu.hidden=true;
     });
-    const duplicate=selected.length!==new Set(selected).size;
-    document.getElementById('summaryItems').textContent=String(items);
-    document.getElementById('summaryQty').textContent=qtySum.toLocaleString('pt-BR',{maximumFractionDigits:3});
-    document.getElementById('summaryTotal').textContent=money(total);
-    document.getElementById('submitSale').disabled=items===0||duplicate;
+  };
+
+  const saleItemMeta=(type,item)=>{
+    if(type==='product'){
+      const stock=Number(item.stock_quantity||0).toLocaleString('pt-BR',{maximumFractionDigits:3});
+      return [item.sku, saleCurrency.format(Number(item.sale_price||0)), 'Estoque '+stock+' '+(item.unit||'UN')]
+        .filter(Boolean).join(' · ');
+    }
+    return [
+      item.service_list_item ? 'Item '+item.service_list_item : null,
+      item.cnae ? 'CNAE '+item.cnae : null,
+      saleCurrency.format(Number(item.sale_price||0))
+    ].filter(Boolean).join(' · ');
+  };
+
+  function addSaleRow(initial={}){
+    const idx=saleSeq++;
+    const type=initial.item_type||'product';
+    const tr=document.createElement('tr');
+    tr.className='sale-item-row';
+    tr.innerHTML=
+      '<td class="sale-item-main">'+
+        '<div class="sale-item-picker">'+
+          '<select class="sale-item-kind" aria-label="Tipo do item">'+
+            '<option value="product">Produto</option>'+
+            '<option value="service">Serviço</option>'+
+            '<option value="freight">Frete</option>'+
+            '<option value="expense">Outras despesas</option>'+
+          '</select>'+
+          '<div class="sale-item-search-wrap">'+
+            '<input class="sale-item-search" type="text" autocomplete="off" placeholder="Adicionar item">'+
+            '<div class="sale-item-suggestions" hidden></div>'+
+          '</div>'+
+          '<input class="sale-product-id" type="hidden">'+
+          '<input class="sale-service-id" type="hidden">'+
+        '</div>'+
+        '<input class="sale-item-note" type="text" placeholder="Observações adicionais">'+
+      '</td>'+
+      '<td><input class="sale-unit-price" type="number" min="0" step="0.01" data-number-kind="money" value="0"></td>'+
+      '<td><input class="sale-qty" type="number" min="0.001" step="0.001" value="1"></td>'+
+      '<td><input class="sale-discount" type="number" min="0" step="0.01" data-number-kind="money" value="0"></td>'+
+      '<td class="sale-line-total">R$ 0,00</td>'+
+      '<td class="sale-row-actions"><button type="button" class="btn-icon row-action-danger" data-tooltip="Remover item" aria-label="Remover item">×</button></td>';
+
+    const kind=tr.querySelector('.sale-item-kind');
+    const search=tr.querySelector('.sale-item-search');
+    const suggestions=tr.querySelector('.sale-item-suggestions');
+    const productId=tr.querySelector('.sale-product-id');
+    const serviceId=tr.querySelector('.sale-service-id');
+    const price=tr.querySelector('.sale-unit-price');
+    const qty=tr.querySelector('.sale-qty');
+    const discount=tr.querySelector('.sale-discount');
+    const note=tr.querySelector('.sale-item-note');
+
+    kind.name=`items[${idx}][item_type]`;
+    search.name=`items[${idx}][description]`;
+    productId.name=`items[${idx}][product_id]`;
+    serviceId.name=`items[${idx}][service_id]`;
+    price.name=`items[${idx}][unit_price]`;
+    qty.name=`items[${idx}][quantity]`;
+    discount.name=`items[${idx}][discount]`;
+    note.name=`items[${idx}][notes]`;
+
+    kind.value=type;
+    qty.value=String(initial.quantity||1);
+    price.value=String(initial.unit_price||0);
+    discount.value=String(initial.discount||0);
+    note.value=initial.notes||'';
+    productId.value=initial.product_id||'';
+    serviceId.value=initial.service_id||'';
+
+    const initialSource=itemSource(type);
+    const initialId=type==='product' ? initial.product_id : type==='service' ? initial.service_id : null;
+    const selected=initialSource.find(item=>String(item.id)===String(initialId||''));
+
+    if(selected){
+      search.value=selected.name;
+      search.dataset.selectedLabel=selected.name;
+      if(initial.unit_price===undefined || initial.unit_price===null || initial.unit_price==='') price.value=String(selected.sale_price||0);
+    } else if(type==='freight' || type==='expense'){
+      search.value=initial.description || (type==='freight'?'Frete':'Outras despesas');
+    } else {
+      search.value=initial.description||'';
+    }
+
+    const configureType=()=>{
+      const current=kind.value;
+      const free=current==='freight'||current==='expense';
+      search.placeholder=free ? 'Descrição' : current==='service' ? 'Buscar serviço...' : 'Buscar produto...';
+      search.classList.toggle('free-description',free);
+
+      if(free){
+        productId.value='';
+        serviceId.value='';
+        suggestions.hidden=true;
+        if(!search.value || search.dataset.selectedLabel===search.value){
+          search.value=current==='freight'?'Frete':'Outras despesas';
+        }
+        delete search.dataset.selectedLabel;
+      } else if(search.value && !search.dataset.selectedLabel){
+        renderSuggestions();
+      }
+
+      recalcSale();
+    };
+
+    const chooseItem=item=>{
+      search.value=item.name;
+      search.dataset.selectedLabel=item.name;
+      if(kind.value==='product'){
+        productId.value=item.id;
+        serviceId.value='';
+      } else {
+        serviceId.value=item.id;
+        productId.value='';
+      }
+      setMoneyValue(price,Number(item.sale_price||0));
+      suggestions.hidden=true;
+      search.setCustomValidity('');
+      recalcSale();
+    };
+
+    const renderSuggestions=()=>{
+      const typeNow=kind.value;
+      const source=itemSource(typeNow);
+      if(!source.length){
+        suggestions.hidden=true;
+        return;
+      }
+
+      const term=search.value.trim().toLocaleLowerCase('pt-BR');
+      const matches=source.filter(item=>{
+        const hay=[
+          item.name,
+          item.sku,
+          item.service_list_item,
+          item.cnae
+        ].filter(Boolean).join(' ').toLocaleLowerCase('pt-BR');
+        return !term || hay.includes(term);
+      }).slice(0,10);
+
+      suggestions.innerHTML='';
+      if(!matches.length){
+        const empty=document.createElement('div');
+        empty.className='sale-suggestion-empty';
+        empty.textContent='Nenhum item encontrado';
+        suggestions.appendChild(empty);
+      } else {
+        matches.forEach(item=>{
+          const option=document.createElement('button');
+          option.type='button';
+          option.className='sale-suggestion';
+          option.innerHTML='<strong></strong><small></small>';
+          option.querySelector('strong').textContent=item.name;
+          option.querySelector('small').textContent=saleItemMeta(typeNow,item);
+          option.addEventListener('mousedown',event=>{
+            event.preventDefault();
+            chooseItem(item);
+          });
+          suggestions.appendChild(option);
+        });
+      }
+
+      closeSaleSuggestions(suggestions);
+      suggestions.hidden=false;
+    };
+
+    search.addEventListener('focus',()=>{
+      if(kind.value==='product'||kind.value==='service') renderSuggestions();
+    });
+    search.addEventListener('input',()=>{
+      if(search.dataset.selectedLabel && search.value!==search.dataset.selectedLabel){
+        productId.value='';
+        serviceId.value='';
+        delete search.dataset.selectedLabel;
+      }
+      if(kind.value==='product'||kind.value==='service') renderSuggestions();
+      recalcSale();
+    });
+
+    kind.addEventListener('change',()=>{
+      productId.value='';
+      serviceId.value='';
+      search.value=kind.value==='freight'?'Frete':kind.value==='expense'?'Outras despesas':'';
+      delete search.dataset.selectedLabel;
+      setMoneyValue(price,0);
+      configureType();
+    });
+
+    qty.addEventListener('input',recalcSale);
+    price.addEventListener('input',recalcSale);
+    discount.addEventListener('input',recalcSale);
+
+    tr.querySelector('.sale-row-actions button').addEventListener('click',()=>{
+      tr.remove();
+      if(!saleBody.querySelector('tr')) addSaleRow();
+      recalcSale();
+    });
+
+    saleBody.appendChild(tr);
+    enhanceSelect(kind);
+    enhanceNumberInput(price);
+    enhanceNumberInput(qty);
+    enhanceNumberInput(discount);
+
+    if(selected){
+      setMoneyValue(price,Number(initial.unit_price!==undefined && initial.unit_price!=='' ? initial.unit_price : selected.sale_price||0));
+    } else {
+      setMoneyValue(price,Number(initial.unit_price||0));
+    }
+    setMoneyValue(discount,Number(initial.discount||0));
+
+    configureType();
+    recalcSale();
   }
-  document.getElementById('addSaleItem')?.addEventListener('click',()=>row());
-  if(oldRows.length)oldRows.forEach(item=>row(item.product_id,item.quantity)); else row();
+
+  function paymentRows(){
+    return [...paymentBody.querySelectorAll('[data-payment-row]')];
+  }
+
+  function setPaymentIndexes(){
+    const rows=paymentRows();
+    rows.forEach((row,index)=>{
+      row.querySelector('.payment-position').textContent=(index+1)+'/'+rows.length;
+    });
+  }
+
+  function addPayment(initial={},auto=false){
+    if(!paymentBody) return;
+    const idx=paymentSeq++;
+    const tr=document.createElement('tr');
+    tr.dataset.paymentRow='1';
+    tr.dataset.auto=auto?'1':'0';
+    tr.innerHTML=
+      '<td class="payment-position"></td>'+
+      '<td><input class="payment-amount" type="number" min="0" step="0.01" data-number-kind="money" value="0"></td>'+
+      '<td><input class="payment-date" type="date"></td>'+
+      '<td><select class="payment-method">'+
+        '<option value="">Selecione</option>'+
+        '<option value="cash">Dinheiro</option>'+
+        '<option value="pix">PIX</option>'+
+        '<option value="debit_card">Cartão de débito</option>'+
+        '<option value="credit_card">Cartão de crédito</option>'+
+        '<option value="bank_slip">Boleto</option>'+
+        '<option value="bank_transfer">Transferência</option>'+
+        '<option value="other">Outro</option>'+
+      '</select></td>'+
+      '<td><label class="payment-receivable"><input type="hidden" value="0"><input type="checkbox" value="1" checked><span>A receber</span></label></td>'+
+      '<td><button type="button" class="btn-icon row-action-danger" data-tooltip="Remover parcela" aria-label="Remover parcela">×</button></td>';
+
+    const amount=tr.querySelector('.payment-amount');
+    const date=tr.querySelector('.payment-date');
+    const method=tr.querySelector('.payment-method');
+    const hiddenReceive=tr.querySelector('.payment-receivable input[type="hidden"]');
+    const receive=tr.querySelector('.payment-receivable input[type="checkbox"]');
+
+    amount.name=`payments[${idx}][amount]`;
+    date.name=`payments[${idx}][due_date]`;
+    method.name=`payments[${idx}][payment_method]`;
+    hiddenReceive.name=`payments[${idx}][receivable]`;
+    receive.name=`payments[${idx}][receivable]`;
+
+    amount.value=String(initial.amount??currentSaleTotal??0);
+    date.value=initial.due_date || operationDate?.value || '';
+    method.value=initial.payment_method||'';
+    receive.checked=String(initial.receivable??'1')!=='0';
+
+    paymentBody.appendChild(tr);
+    enhanceNumberInput(amount);
+    enhanceSelect(method);
+    setMoneyValue(amount,Number(initial.amount??currentSaleTotal??0));
+
+    amount.addEventListener('input',()=>{
+      tr.dataset.auto='0';
+      recalcPayments();
+    });
+    date.addEventListener('change',recalcPayments);
+    receive.addEventListener('change',recalcPayments);
+    tr.querySelector('button').addEventListener('click',()=>{
+      tr.remove();
+      if(!paymentRows().length) addPayment({amount:currentSaleTotal},true);
+      splitAutomaticPayments();
+      recalcPayments();
+    });
+
+    setPaymentIndexes();
+    recalcPayments();
+  }
+
+  function splitAutomaticPayments(){
+    const rows=paymentRows();
+    if(!rows.length) return;
+    const totalCents=Math.round(currentSaleTotal*100);
+    const base=Math.floor(totalCents/rows.length);
+    let remainder=totalCents-(base*rows.length);
+
+    rows.forEach(row=>{
+      const cents=base+(remainder>0?1:0);
+      if(remainder>0) remainder--;
+      row.dataset.auto='1';
+      setMoneyValue(row.querySelector('.payment-amount'),cents/100);
+    });
+    recalcPayments();
+  }
+
+  function recalcPayments(){
+    if(!paymentBody) return;
+    const total=paymentRows().reduce((sum,row)=>sum+moneyValue(row.querySelector('.payment-amount')),0);
+    const output=document.getElementById('paymentsTotal');
+    if(output) output.textContent=saleCurrency.format(total);
+
+    const mismatch=Math.abs(total-currentSaleTotal)>0.011;
+    paymentBody.closest('.sale-finance-table-wrap')?.classList.toggle('payment-mismatch',mismatch);
+    if(submitSale) submitSale.dataset.paymentMismatch=mismatch?'1':'0';
+
+    updateSaleSubmitState();
+  }
+
+  function updateSaleSubmitState(){
+    const rows=[...saleBody.querySelectorAll('.sale-item-row')];
+    const validItems=rows.filter(row=>{
+      const type=row.querySelector('.sale-item-kind')?.value;
+      const qty=Number(row.querySelector('.sale-qty')?.value||0);
+      const selected=type==='product'
+        ? !!row.querySelector('.sale-product-id')?.value
+        : type==='service'
+          ? !!row.querySelector('.sale-service-id')?.value
+          : !!row.querySelector('.sale-item-search')?.value.trim();
+      return qty>0 && selected;
+    }).length;
+
+    const paymentMismatch=submitSale?.dataset.paymentMismatch==='1';
+    if(submitSale) submitSale.disabled=validItems===0||paymentMismatch;
+  }
+
+  function recalcSale(){
+    let total=0;
+    let discountTotal=0;
+    let qtyTotal=0;
+    const isSale=(operationType?.value||'sale')==='sale';
+
+    saleBody.querySelectorAll('.sale-item-row').forEach(row=>{
+      const type=row.querySelector('.sale-item-kind').value;
+      const qtyInput=row.querySelector('.sale-qty');
+      const priceInput=row.querySelector('.sale-unit-price');
+      const discountInput=row.querySelector('.sale-discount');
+      const search=row.querySelector('.sale-item-search');
+      const qty=Number(qtyInput.value)||0;
+      const price=moneyValue(priceInput);
+      const discount=moneyValue(discountInput);
+      const gross=price*qty;
+      const line=Math.max(0,gross-discount);
+
+      discountInput.setCustomValidity(discount>gross?'O desconto não pode ser maior que o valor do item.':'');
+      search.setCustomValidity('');
+
+      if(type==='product'){
+        const id=row.querySelector('.sale-product-id').value;
+        const item=products.find(product=>String(product.id)===String(id));
+        if(!item) search.setCustomValidity('Selecione um produto da lista.');
+        const controlsStock=String(item?.control_stock??'1')!=='0';
+        const stock=Number(item?.stock_quantity||0);
+        qtyInput.setCustomValidity(isSale && item && controlsStock && qty>stock ? 'Quantidade superior ao estoque disponível.' : '');
+      } else if(type==='service'){
+        if(!row.querySelector('.sale-service-id').value) search.setCustomValidity('Selecione um serviço da lista.');
+        qtyInput.setCustomValidity('');
+      } else {
+        if(!search.value.trim()) search.setCustomValidity('Informe a descrição do item.');
+        qtyInput.setCustomValidity('');
+      }
+
+      row.querySelector('.sale-line-total').textContent=saleCurrency.format(line);
+      total+=line;
+      discountTotal+=discount;
+      qtyTotal+=qty;
+    });
+
+    currentSaleTotal=total;
+
+    document.getElementById('summaryQty').textContent=qtyTotal.toLocaleString('pt-BR',{maximumFractionDigits:3});
+    document.getElementById('summaryDiscount').textContent=saleCurrency.format(discountTotal);
+    document.getElementById('summaryTotal').textContent=saleCurrency.format(total);
+    document.getElementById('saleSaveTotal').textContent=saleCurrency.format(total);
+
+    const label=(operationType?.value||'sale')==='quote'?'Orçamento':'Venda';
+    document.getElementById('saleOperationLabel').textContent=label;
+
+    const rows=paymentRows();
+    if(rows.length===1 && rows[0].dataset.auto==='1'){
+      setMoneyValue(rows[0].querySelector('.payment-amount'),total);
+    }
+    recalcPayments();
+    updateSaleSubmitState();
+  }
+
+  document.addEventListener('click',event=>{
+    if(!event.target.closest('.sale-item-search-wrap')) closeSaleSuggestions();
+  });
+
+  document.getElementById('addSaleItem')?.addEventListener('click',()=>addSaleRow());
+
+  document.getElementById('addSalePayment')?.addEventListener('click',()=>{
+    addPayment({amount:0,due_date:operationDate?.value||''},true);
+    splitAutomaticPayments();
+  });
+
+  operationType?.addEventListener('change',recalcSale);
+  operationDate?.addEventListener('change',()=>{
+    paymentRows().forEach(row=>{
+      const date=row.querySelector('.payment-date');
+      if(!date.value) date.value=operationDate.value;
+    });
+  });
+
+  document.getElementById('saleCustomer')?.addEventListener('change',event=>{
+    const option=event.target.selectedOptions?.[0];
+    if(!option || !option.value) return;
+    const finalConsumer=document.getElementById('saleFinalConsumer');
+    if(finalConsumer){
+      finalConsumer.checked=option.dataset.finalConsumer!=='0';
+      finalConsumer.dispatchEvent(new Event('change',{bubbles:true}));
+    }
+  });
+
+  if(oldRows.length){
+    oldRows.forEach(item=>addSaleRow(item));
+  } else {
+    addSaleRow();
+  }
+
+  if(oldPayments.length){
+    oldPayments.forEach(payment=>addPayment(payment,false));
+  } else {
+    addPayment({
+      amount:currentSaleTotal,
+      due_date:operationDate?.value||''
+    },true);
+  }
+
+  recalcSale();
 })();
