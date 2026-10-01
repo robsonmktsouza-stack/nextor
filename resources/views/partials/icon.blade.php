@@ -31,6 +31,8 @@
 @case('settings')<path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/><circle cx="12" cy="12" r="5"/>@break
 @case('shield')<path d="m12 22-7-4V5l7-3 7 3v13l-7 4ZM9 12l2 2 4-4"/>@break
 @case('receipt')<path d="M5 3h14v18l-3-2-4 2-4-2-3 2V3ZM8 8h8M8 12h8"/>@break
+@case('pdv')<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M7 20h10M12 16v4M7 8h4M7 12h7"/>@break
+@case('barcode')<path d="M3 5v14M6 5v14M9 5v14M13 5v14M16 5v14M20 5v14"/>@break
 @case('layers')<path d="m12 3 9 5-9 5-9-5 9-5ZM3 12l9 5 9-5M3 16l9 5 9-5"/>@break
 @default<circle cx="12" cy="12" r="9"/>@endswitch
 </svg>
