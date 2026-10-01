@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('css/erp.css') }}">
+<link rel="stylesheet" href="{{ asset('css/pdv.css') }}">
 <script defer src="{{ asset('js/erp.js') }}"></script>
 </head>
 <body class="pdv-body">
