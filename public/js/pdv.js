@@ -12,7 +12,16 @@
     const cart=document.getElementById('pdvCart');
     const payload=document.getElementById('pdvItemsPayload');
     const customer=document.getElementById('pdvCustomer');
+    const customerButton=document.getElementById('pdvCustomerButton');
+    const customerLabel=document.getElementById('pdvCustomerLabel');
+    const customerModal=document.getElementById('pdvCustomerModal');
+    const customerSearch=document.getElementById('pdvCustomerSearch');
+    const customerList=document.getElementById('pdvCustomerList');
     const payment=document.getElementById('pdvPaymentMethod');
+    const paymentButton=document.getElementById('pdvPaymentButton');
+    const paymentLabel=document.getElementById('pdvPaymentLabel');
+    const paymentModal=document.getElementById('pdvPaymentModal');
+    const paymentOptions=document.getElementById('pdvPaymentOptions');
     const cashField=document.getElementById('pdvCashField');
     const cashInput=document.getElementById('pdvCashReceived');
     const changeBox=document.getElementById('pdvChangeBox');
@@ -215,6 +224,11 @@
         renderCart();
       });
 
+      const qtyWrap=document.createElement('label');
+      qtyWrap.className='pdv-cart-qty-cell';
+      const qtyLabel=document.createElement('span');
+      qtyLabel.textContent='Quantidade';
+
       const qtyBox=document.createElement('div');
       qtyBox.className='pdv-qty';
       const minus=document.createElement('button');
@@ -231,6 +245,7 @@
       plus.textContent='+';
       plus.setAttribute('aria-label','Aumentar quantidade');
       qtyBox.append(minus,qty,plus);
+      qtyWrap.append(qtyLabel,qtyBox);
 
       minus.addEventListener('click',()=>{
         const next=item.quantity-1;
@@ -280,7 +295,7 @@
       remove.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M5 6l1 15h12l1-15M10 10v7M14 10v7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
       remove.addEventListener('click',()=>removeItem(key));
 
-      row.append(title,qtyBox,discountWrap,line,remove);
+      row.append(title,qtyWrap,discountWrap,line,remove);
       return row;
     };
 
@@ -473,12 +488,154 @@
     cashInput?.addEventListener('input',()=>setTimeout(updatePaymentState,0));
     cashInput?.addEventListener('blur',updatePaymentState);
 
-    const openCustomSelect=select=>{
-      const wrapper=select?.nextElementSibling;
-      const trigger=wrapper?.querySelector('.ui-select-trigger');
-      trigger?.focus();
-      trigger?.click();
+    const normalizeText=value=>String(value||'')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g,'')
+      .toLocaleLowerCase('pt-BR');
+
+    let customerIndex=0;
+    let paymentIndex=0;
+
+    const visibleCustomerOptions=()=>[...customerList.querySelectorAll('.pdv-client-option:not([hidden])')];
+
+    const updateCustomerHighlight=()=>{
+      const options=visibleCustomerOptions();
+      if(!options.length) return;
+      customerIndex=Math.max(0,Math.min(customerIndex,options.length-1));
+      options.forEach((option,index)=>option.classList.toggle('keyboard-selected',index===customerIndex));
+      options[customerIndex]?.scrollIntoView({block:'nearest'});
     };
+
+    const filterCustomers=()=>{
+      const term=normalizeText(customerSearch.value);
+      [...customerList.querySelectorAll('.pdv-client-option')].forEach(option=>{
+        option.hidden=term && !normalizeText(option.dataset.customerSearch).includes(term);
+      });
+      const visible=visibleCustomerOptions();
+      const selectedIndex=visible.findIndex(option=>String(option.dataset.customerId||'')===String(customer.value||''));
+      customerIndex=selectedIndex>=0?selectedIndex:0;
+      updateCustomerHighlight();
+    };
+
+    const selectCustomerOption=option=>{
+      if(!option) return;
+      customer.value=option.dataset.customerId||'';
+      customerLabel.textContent=option.querySelector('strong')?.textContent||'Consumidor não identificado';
+      customer.dispatchEvent(new Event('change',{bubbles:true}));
+      customerModal.close();
+    };
+
+    const openCustomerModal=()=>{
+      if(paymentModal?.open) paymentModal.close();
+      if(!customerModal.open) customerModal.showModal();
+      customerSearch.value='';
+      filterCustomers();
+      requestAnimationFrame(()=>{
+        customerSearch.focus();
+        customerSearch.select();
+      });
+    };
+
+    const paymentButtons=()=>[...paymentOptions.querySelectorAll('[data-payment-value]')];
+
+    const updatePaymentHighlight=()=>{
+      const options=paymentButtons();
+      if(!options.length) return;
+      paymentIndex=Math.max(0,Math.min(paymentIndex,options.length-1));
+      options.forEach((option,index)=>option.classList.toggle('keyboard-selected',index===paymentIndex));
+      options[paymentIndex]?.scrollIntoView({block:'nearest'});
+    };
+
+    const selectPaymentOption=option=>{
+      if(!option) return;
+      payment.value=option.dataset.paymentValue||'cash';
+      paymentLabel.textContent=option.dataset.paymentLabel||option.textContent.trim();
+      payment.dispatchEvent(new Event('change',{bubbles:true}));
+      paymentModal.close();
+    };
+
+    const openPaymentModal=()=>{
+      if(customerModal?.open) customerModal.close();
+      if(!paymentModal.open) paymentModal.showModal();
+      const options=paymentButtons();
+      const selectedIndex=options.findIndex(option=>option.dataset.paymentValue===payment.value);
+      paymentIndex=selectedIndex>=0?selectedIndex:0;
+      updatePaymentHighlight();
+      requestAnimationFrame(()=>options[paymentIndex]?.focus());
+    };
+
+    customerButton?.addEventListener('click',openCustomerModal);
+    paymentButton?.addEventListener('click',openPaymentModal);
+
+    customerSearch?.addEventListener('input',filterCustomers);
+    customerSearch?.addEventListener('keydown',event=>{
+      const options=visibleCustomerOptions();
+      if(event.key==='ArrowDown'){
+        event.preventDefault();
+        customerIndex=Math.min(options.length-1,customerIndex+1);
+        updateCustomerHighlight();
+      }else if(event.key==='ArrowUp'){
+        event.preventDefault();
+        customerIndex=Math.max(0,customerIndex-1);
+        updateCustomerHighlight();
+      }else if(event.key==='Enter'){
+        event.preventDefault();
+        selectCustomerOption(options[customerIndex]);
+      }
+    });
+
+    customerList?.addEventListener('click',event=>{
+      const option=event.target.closest('.pdv-client-option');
+      if(option) selectCustomerOption(option);
+    });
+
+    customerList?.addEventListener('mousemove',event=>{
+      const option=event.target.closest('.pdv-client-option:not([hidden])');
+      if(!option) return;
+      const options=visibleCustomerOptions();
+      const index=options.indexOf(option);
+      if(index>=0){
+        customerIndex=index;
+        updateCustomerHighlight();
+      }
+    });
+
+    paymentOptions?.addEventListener('click',event=>{
+      const option=event.target.closest('[data-payment-value]');
+      if(option) selectPaymentOption(option);
+    });
+
+    paymentModal?.addEventListener('keydown',event=>{
+      const options=paymentButtons();
+      if(/^[1-7]$/.test(event.key)){
+        event.preventDefault();
+        const option=options.find(button=>button.dataset.paymentKey===event.key);
+        selectPaymentOption(option);
+        return;
+      }
+      if(event.key==='ArrowDown'||event.key==='ArrowRight'){
+        event.preventDefault();
+        paymentIndex=Math.min(options.length-1,paymentIndex+1);
+        updatePaymentHighlight();
+      }else if(event.key==='ArrowUp'||event.key==='ArrowLeft'){
+        event.preventDefault();
+        paymentIndex=Math.max(0,paymentIndex-1);
+        updatePaymentHighlight();
+      }else if(event.key==='Enter'){
+        event.preventDefault();
+        selectPaymentOption(options[paymentIndex]);
+      }
+    });
+
+    document.querySelectorAll('[data-pdv-modal-close]').forEach(button=>{
+      button.addEventListener('click',()=>button.closest('dialog')?.close());
+    });
+
+    [customerModal,paymentModal].forEach(modal=>{
+      modal?.addEventListener('close',()=>{
+        setTimeout(()=>search.focus(),0);
+      });
+    });
 
     const activeCartKey=()=>{
       const explicit=app.dataset.activeCartKey;
@@ -534,6 +691,8 @@
     document.addEventListener('keydown',event=>{
       if(event.altKey||event.ctrlKey||event.metaKey) return;
 
+      if(customerModal?.open || paymentModal?.open) return;
+
       if(event.key==='Escape'){
         event.preventDefault();
         search.focus();
@@ -550,18 +709,18 @@
         focusCartField('.pdv-qty input');
       }else if(event.key==='F4'){
         event.preventDefault();
-        openCustomSelect(customer);
+        openCustomerModal();
       }else if(event.key==='F5'){
         event.preventDefault();
         focusCartField('.pdv-cart-discount input');
       }else if(event.key==='F6'){
         event.preventDefault();
-        openCustomSelect(payment);
+        openPaymentModal();
       }else if(event.key==='F7'){
         event.preventDefault();
         if(payment.value!=='cash'){
           notify('F7 é usado para valor recebido quando o pagamento é em dinheiro.','info');
-          openCustomSelect(payment);
+          openPaymentModal();
         }else{
           cashInput?.focus();
           cashInput?.select?.();
