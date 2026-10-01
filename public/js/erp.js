@@ -624,16 +624,22 @@
     const button=e.currentTarget;
     const form=button.closest('form');
     const documentInput=form?.querySelector('[data-cnpj-document]');
-    const cnpj=(documentInput?.value||'').replace(/\D/g,'');
-    if(cnpj.length!==14){documentInput?.focus();return;}
+    const cnpj=(documentInput?.value||'').toUpperCase().replace(/[^0-9A-Z]/g,'');
+    if(cnpj.length!==14){
+      documentInput?.focus();
+      nextorNotify('Informe um CNPJ válido com 14 caracteres.',{type:'warning',title:'Consulta de CNPJ'});
+      return;
+    }
     const set=(name,value)=>{const field=form.querySelector('[name="'+name+'"]');if(field && value!==undefined && value!==null) field.value=value;};
     button.disabled=true;
     const oldText=button.querySelector('span')?.textContent;
     if(button.querySelector('span')) button.querySelector('span').textContent='Buscando...';
     try{
-      const response=await fetch('https://brasilapi.com.br/api/cnpj/v1/'+cnpj);
-      if(!response.ok) throw new Error('CNPJ não encontrado.');
-      const data=await response.json();
+      const response=await fetch('/customers/cnpj/'+encodeURIComponent(cnpj),{
+        headers:{'Accept':'application/json'}
+      });
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok) throw new Error(data.message||'Não foi possível consultar o CNPJ.');
       set('name',data.razao_social);
       set('trade_name',data.nome_fantasia);
       set('email',data.email);
@@ -650,7 +656,7 @@
         await loadCities(uf,data.municipio||'');
       }
     }catch(err){
-      nextorNotify('Não foi possível consultar o CNPJ agora. Verifique sua conexão e tente novamente.',{type:'error',title:'Consulta de CNPJ'});
+      nextorNotify(err.message||'Não foi possível consultar o CNPJ agora.',{type:'error',title:'Consulta de CNPJ'});
     }finally{
       button.disabled=false;
       if(button.querySelector('span')) button.querySelector('span').textContent=oldText||'Autopreencher';
