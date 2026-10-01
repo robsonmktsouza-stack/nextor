@@ -47,5 +47,6 @@
 <td class="action-cell"><div class="row-actions"><a class="btn-icon" href="{{ route('customers.edit',$customer) }}" data-tooltip="Editar cliente" aria-label="Editar cliente {{ $customer->name }}">@include('partials.icon',['name'=>'edit','size'=>16])</a></div></td>
 </tr>
 @empty<tr><td class="empty-cell" colspan="8">Nenhum cliente encontrado.</td></tr>@endforelse
-</tbody></table></div><div class="table-footerbar"><span>Exibindo {{ $customers->firstItem() ?? 0 }}–{{ $customers->lastItem() ?? 0 }} de {{ $customers->total() }}</span><div class="card-pagination">{{ $customers->links('partials.pagination') }}</div></div></section>
+</tbody></table></div>@include('partials.table-footer',['paginator'=>$customers])
+</section>
 @endsection
