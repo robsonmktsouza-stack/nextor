@@ -5,6 +5,7 @@ use App\Models\Customer;
 use App\Models\Sale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 
 class CustomerController extends Controller {
     public function index(Request $request) {
@@ -17,6 +18,57 @@ class CustomerController extends Controller {
                 ->orWhere('email','like',"%{$term}%")))
             ->orderBy('name')->paginate(12)->withQueryString();
         return view('customers.index',compact('term','customers'));
+    }
+
+    public function lookupCnpj(string $cnpj) {
+        $cnpj=strtoupper(preg_replace('/[^0-9A-Z]/','',$cnpj));
+
+        if(strlen($cnpj)!==14) {
+            return response()->json([
+                'message'=>'Informe um CNPJ válido com 14 caracteres.',
+            ],422);
+        }
+
+        try {
+            $response=Http::acceptJson()
+                ->withHeaders([
+                    'User-Agent'=>'NextorERP/1.0',
+                ])
+                ->connectTimeout(5)
+                ->timeout(10)
+                ->get('https://brasilapi.com.br/api/cnpj/v1/'.$cnpj);
+        } catch (\Throwable $e) {
+            report($e);
+            return response()->json([
+                'message'=>'O serviço de consulta de CNPJ não respondeu. Tente novamente em alguns instantes.',
+            ],503);
+        }
+
+        if($response->successful()) {
+            return response()->json($response->json());
+        }
+
+        if($response->status()===404) {
+            return response()->json([
+                'message'=>'CNPJ não encontrado.',
+            ],404);
+        }
+
+        if($response->status()===400) {
+            return response()->json([
+                'message'=>'CNPJ inválido ou mal formatado.',
+            ],422);
+        }
+
+        if(in_array($response->status(),[403,429],true)) {
+            return response()->json([
+                'message'=>'O serviço de consulta está temporariamente limitando requisições. Tente novamente em instantes.',
+            ],503);
+        }
+
+        return response()->json([
+            'message'=>'Não foi possível consultar o CNPJ agora.',
+        ],503);
     }
 
     public function create() {
