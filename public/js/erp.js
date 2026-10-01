@@ -1501,14 +1501,14 @@
       if(type==='product'){
         const id=row.querySelector('.sale-product-id').value;
         const item=products.find(product=>String(product.id)===String(id));
-        if(!item) search.setCustomValidity('Selecione um produto da lista.');
+        if(!item && search.value.trim()) search.setCustomValidity('Selecione um produto da lista.');
         const controlsStock=String(item?.control_stock??'1')!=='0';
         const stock=Number(item?.stock_quantity||0);
         qtyInput.setCustomValidity(isSale && item && controlsStock && qty>stock ? 'Quantidade superior ao estoque disponível.' : '');
         valid=!!item && qty>0;
       } else if(type==='service'){
         const serviceId=row.querySelector('.sale-service-id').value;
-        if(!serviceId) search.setCustomValidity('Selecione um serviço da lista.');
+        if(!serviceId && search.value.trim()) search.setCustomValidity('Selecione um serviço da lista.');
         qtyInput.setCustomValidity('');
         valid=!!serviceId && qty>0;
       } else {
@@ -1555,6 +1555,23 @@
     recalcPayments();
     updateSaleSubmitState();
   }
+
+  document.getElementById('sale-form')?.addEventListener('submit',()=>{
+    saleBody.querySelectorAll('.sale-item-row').forEach(row=>{
+      const type=row.querySelector('.sale-item-kind')?.value;
+      const search=row.querySelector('.sale-item-search');
+      const hasSelected=type==='product'
+        ? !!row.querySelector('.sale-product-id')?.value
+        : type==='service'
+          ? !!row.querySelector('.sale-service-id')?.value
+          : !!search?.value.trim();
+
+      const isVisualPlaceholder=(type==='product'||type==='service') && !hasSelected && !search?.value.trim();
+      if(isVisualPlaceholder){
+        row.querySelectorAll('[name]').forEach(control=>control.disabled=true);
+      }
+    });
+  });
 
   document.addEventListener('click',event=>{
     if(!event.target.closest('.sale-item-search-wrap')) closeSaleSuggestions();
