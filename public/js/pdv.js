@@ -228,6 +228,22 @@
       if(actionCashValue) actionCashValue.textContent=cash?money.format(received):'Não se aplica';
       if(actionChangeValue) actionChangeValue.textContent=money.format(change);
 
+      if(actionPayment){
+        const label=payment.value
+          ? 'Forma de pagamento: '+paymentName(payment.value)
+          : 'Forma de pagamento pendente';
+        actionPayment.dataset.tooltip=label;
+        actionPayment.setAttribute('aria-label',label);
+      }
+
+      if(actionCash){
+        const label=cash
+          ? 'Recebido '+money.format(received)+' · Troco '+money.format(change)
+          : 'Valor recebido e troco';
+        actionCash.dataset.tooltip=label;
+        actionCash.setAttribute('aria-label',label);
+      }
+
       updateFinishState();
     };
 
