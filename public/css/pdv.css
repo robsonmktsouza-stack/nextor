@@ -2153,3 +2153,105 @@
   background:#eaf4fd!important;
   box-shadow:0 0 0 2px #2877c724!important;
 }
+
+/* Resultados do PDV em lista vertical */
+.pdv-results{
+  display:block!important;
+  padding:0!important;
+  overflow-y:auto;
+  border:1px solid #d6e0e8;
+  border-radius:6px;
+  background:#fff;
+}
+
+.pdv-results>.pdv-result-card{
+  width:100%;
+  min-height:64px;
+  display:grid!important;
+  grid-template-columns:44px minmax(0,1fr) 130px 38px!important;
+  align-items:center;
+  gap:12px;
+  margin:0;
+  padding:8px 12px!important;
+  border:0!important;
+  border-bottom:1px solid #e7ecf1!important;
+  border-radius:0!important;
+  background:#fff;
+  box-shadow:none!important;
+}
+
+.pdv-results>.pdv-result-card:last-child{
+  border-bottom:0!important;
+}
+
+.pdv-results>.pdv-result-card:hover,
+.pdv-results>.pdv-result-card:focus,
+.pdv-results>.pdv-result-card.keyboard-selected{
+  background:#f2f8fe!important;
+  outline:0;
+}
+
+.pdv-results>.pdv-result-card.keyboard-selected{
+  box-shadow:inset 4px 0 0 #2877c7!important;
+}
+
+.pdv-results .pdv-result-thumb{
+  width:42px!important;
+  height:42px!important;
+  border-radius:4px;
+  font-size:12px!important;
+}
+
+.pdv-results .pdv-result-info{
+  min-width:0;
+  gap:3px!important;
+}
+
+.pdv-results .pdv-result-info strong{
+  font-size:13px!important;
+  font-weight:700;
+  color:#263f56;
+}
+
+.pdv-results .pdv-result-info small{
+  font-size:9.5px!important;
+  color:#8291a0;
+}
+
+.pdv-results .pdv-result-price{
+  justify-self:end;
+  color:#183a55;
+  font-size:14px!important;
+  font-weight:700;
+}
+
+.pdv-results .pdv-result-add{
+  width:34px!important;
+  height:34px!important;
+  justify-self:end;
+  border-radius:4px;
+  font-size:20px!important;
+}
+
+.pdv-results>.pdv-empty-state{
+  min-height:240px;
+  border:0!important;
+  border-radius:0!important;
+}
+
+@media(max-width:760px){
+  .pdv-results>.pdv-result-card{
+    grid-template-columns:40px minmax(0,1fr) 92px 34px!important;
+    gap:8px;
+    padding:8px!important;
+  }
+
+  .pdv-results .pdv-result-thumb{
+    width:38px!important;
+    height:38px!important;
+  }
+
+  .pdv-results .pdv-result-price{
+    font-size:12px!important;
+  }
+}
