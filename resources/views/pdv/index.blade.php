@@ -23,7 +23,7 @@
       <div class="pdv-search-box">
         <span class="pdv-search-icon">@include('partials.icon',['name'=>'barcode','size'=>22])</span>
         <input id="pdvSearch" type="search" autocomplete="off"
-               placeholder="Código, código de barras ou nome do produto..." aria-label="Buscar item no PDV">
+               placeholder="Código, código de barras, produto ou serviço..." aria-label="Buscar item no PDV">
         <kbd>F2</kbd>
       </div>
 
@@ -39,7 +39,7 @@
         <h2>Itens</h2>
         <p id="pdvResultsCaption">Digite para localizar um produto ou serviço.</p>
       </div>
-      <span class="pdv-scan-status">@include('partials.icon',['name'=>'barcode','size'=>15]) Leitor pronto</span>
+      <span class="pdv-scan-status">@include('partials.icon',['name'=>'barcode','size'=>15]) Busca / leitor prontos</span>
     </div>
 
     <div class="pdv-results" id="pdvResults">
