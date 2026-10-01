@@ -2147,3 +2147,9 @@
   color:#2877c7;
   outline:0;
 }
+
+.pdv-command-button.shortcut-fired{
+  border-color:#2877c7!important;
+  background:#eaf4fd!important;
+  box-shadow:0 0 0 2px #2877c724!important;
+}
