@@ -122,8 +122,9 @@
         <tr>
           <td><strong>TOTAL</strong></td>
           <td><strong id="paymentsTotal">R$ 0,00</strong></td>
-          <td colspan="3"></td>
-          <td><button type="button" class="btn btn-secondary" id="addSalePayment">@include('partials.icon',['name'=>'plus','size'=>15]) Adicionar parcela</button></td>
+          <td colspan="4" class="payment-add-cell">
+            <button type="button" class="btn btn-secondary" id="addSalePayment">@include('partials.icon',['name'=>'plus','size'=>15]) Adicionar parcela</button>
+          </td>
         </tr>
       </tfoot>
     </table>
