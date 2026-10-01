@@ -27,6 +27,7 @@
           <a href="{{ route('services.index') }}">Serviços</a>
           <a href="{{ route('stock.index') }}">Movimentações de estoque</a>
           <a href="{{ route('customers.index') }}">Clientes</a>
+          <a href="{{ route('pdv.index') }}">PDV</a>
           <a href="{{ route('sales.index') }}">Vendas</a>
           <a href="{{ route('sales.create') }}">Nova venda</a>
         </div>
@@ -60,6 +61,8 @@
     <div class="sidebar-section-label">OPERAÇÕES</div>
     <a href="{{ route('stock.index') }}" class="sidebar-link {{ request()->routeIs('stock.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'stock'])<span>Estoque</span></a>
+    <a href="{{ route('pdv.index') }}" class="sidebar-link {{ request()->routeIs('pdv.*') ? 'active' : '' }}">
+      @include('partials.icon',['name'=>'pdv'])<span>PDV</span></a>
     <a href="{{ route('sales.index') }}" class="sidebar-link {{ request()->routeIs('sales.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'sales'])<span>Vendas</span></a>
       </aside>
