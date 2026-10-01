@@ -2024,3 +2024,93 @@
 #pdvDiscountModalInput:focus{
   border-color:#2877c7;
 }
+
+/* Carrinho PDV sem rolagem horizontal */
+.pdv-cart{
+  overflow-x:hidden!important;
+}
+
+.pdv-cart-row{
+  width:100%;
+  min-width:0!important;
+  grid-template-columns:minmax(0,1fr) 116px 104px 92px 38px!important;
+  gap:8px!important;
+  padding-left:10px!important;
+  padding-right:10px!important;
+}
+
+.pdv-cart-item{
+  min-width:0!important;
+}
+
+.pdv-cart-item>div{
+  min-width:0!important;
+}
+
+.pdv-cart-item strong,
+.pdv-cart-item small{
+  max-width:100%;
+}
+
+.pdv-cart-qty-cell{
+  width:116px;
+  min-width:0!important;
+}
+
+.pdv-qty{
+  width:116px!important;
+  grid-template-columns:34px 48px 34px!important;
+}
+
+.pdv-cart-discount-button{
+  width:104px;
+  min-width:0!important;
+  padding:0 8px!important;
+}
+
+.pdv-cart-discount-button span{
+  min-width:0;
+  flex:1;
+  text-align:center;
+}
+
+.pdv-cart-line-total{
+  width:92px;
+  min-width:0!important;
+}
+
+.pdv-cart-remove{
+  width:38px!important;
+  min-width:38px!important;
+}
+
+@media(max-width:1450px){
+  .pdv-cart-row{
+    grid-template-columns:minmax(0,1fr) 108px 96px 86px 36px!important;
+    gap:6px!important;
+    padding-left:8px!important;
+    padding-right:8px!important;
+  }
+
+  .pdv-cart-qty-cell{
+    width:108px;
+  }
+
+  .pdv-qty{
+    width:108px!important;
+    grid-template-columns:32px 44px 32px!important;
+  }
+
+  .pdv-cart-discount-button{
+    width:96px;
+  }
+
+  .pdv-cart-line-total{
+    width:86px;
+  }
+
+  .pdv-cart-remove{
+    width:36px!important;
+    min-width:36px!important;
+  }
+}
