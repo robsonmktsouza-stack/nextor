@@ -56,70 +56,59 @@
       </div>
     </div>
 
-    <section class="pdv-command-center" aria-label="Comandos rápidos do caixa">
-      <div class="pdv-command-head">
-        <div>
-          <strong>Comandos do caixa</strong>
-          <span>Use as teclas de função ou clique nos botões.</span>
-        </div>
-        <span class="pdv-command-hint">Operação por teclado</span>
-      </div>
-
+    <section class="pdv-command-center" aria-label="Atalhos rápidos do caixa">
       <div class="pdv-command-grid">
-        <button type="button" class="pdv-command-button" id="pdvActionSearch">
-          <span class="pdv-command-icon">@include('partials.icon',['name'=>'search','size'=>22])</span>
-          <span class="pdv-command-copy"><strong>Buscar item</strong><small>Produto, serviço ou código</small></span>
+        <button type="button" class="pdv-command-button" id="pdvActionSearch"
+                data-tooltip="Buscar item" aria-label="Buscar item">
+          <span class="pdv-command-icon">@include('partials.icon',['name'=>'search','size'=>25])</span>
           <kbd>F2</kbd>
         </button>
 
-        <button type="button" class="pdv-command-button" id="pdvActionQuantity">
-          <span class="pdv-command-icon">@include('partials.icon',['name'=>'stock','size'=>22])</span>
-          <span class="pdv-command-copy"><strong>Quantidade</strong><small>Alterar item selecionado</small></span>
+        <button type="button" class="pdv-command-button" id="pdvActionQuantity"
+                data-tooltip="Alterar quantidade" aria-label="Alterar quantidade">
+          <span class="pdv-command-icon">@include('partials.icon',['name'=>'stock','size'=>25])</span>
           <kbd>F3</kbd>
         </button>
 
-        <button type="button" class="pdv-command-button" id="pdvActionCustomer">
-          <span class="pdv-command-icon">@include('partials.icon',['name'=>'customers','size'=>22])</span>
-          <span class="pdv-command-copy"><strong>Cliente</strong><small id="pdvActionCustomerValue">Consumidor não identificado</small></span>
+        <button type="button" class="pdv-command-button" id="pdvActionCustomer"
+                data-tooltip="Selecionar cliente" aria-label="Selecionar cliente">
+          <span class="pdv-command-icon">@include('partials.icon',['name'=>'customers','size'=>25])</span>
           <kbd>F4</kbd>
         </button>
 
-        <button type="button" class="pdv-command-button" id="pdvActionDiscount">
-          <span class="pdv-command-icon">@include('partials.icon',['name'=>'tag','size'=>22])</span>
-          <span class="pdv-command-copy"><strong>Desconto</strong><small>Alterar item selecionado</small></span>
+        <button type="button" class="pdv-command-button" id="pdvActionDiscount"
+                data-tooltip="Aplicar desconto" aria-label="Aplicar desconto">
+          <span class="pdv-command-icon">@include('partials.icon',['name'=>'tag','size'=>25])</span>
           <kbd>F5</kbd>
         </button>
 
-        <button type="button" class="pdv-command-button" id="pdvActionPayment">
-          <span class="pdv-command-icon">@include('partials.icon',['name'=>'receipt','size'=>22])</span>
-          <span class="pdv-command-copy"><strong>Pagamento</strong><small id="pdvActionPaymentValue">Dinheiro</small></span>
+        <button type="button" class="pdv-command-button" id="pdvActionPayment"
+                data-tooltip="Forma de pagamento" aria-label="Forma de pagamento">
+          <span class="pdv-command-icon">@include('partials.icon',['name'=>'receipt','size'=>25])</span>
           <kbd>F6</kbd>
         </button>
 
-        <button type="button" class="pdv-command-button" id="pdvActionCash">
-          <span class="pdv-command-icon">@include('partials.icon',['name'=>'money','size'=>22])</span>
-          <span class="pdv-command-copy">
-            <strong>Recebido / Troco</strong>
-            <small><span id="pdvActionCashValue">R$ 0,00</span> · troco <span id="pdvActionChangeValue">R$ 0,00</span></small>
-          </span>
+        <button type="button" class="pdv-command-button" id="pdvActionCash"
+                data-tooltip="Valor recebido e troco" aria-label="Valor recebido e troco">
+          <span class="pdv-command-icon">@include('partials.icon',['name'=>'money','size'=>25])</span>
           <kbd>F7</kbd>
         </button>
 
-        <button type="button" class="pdv-command-button danger" id="pdvActionRemove">
-          <span class="pdv-command-icon">@include('partials.icon',['name'=>'trash','size'=>22])</span>
-          <span class="pdv-command-copy"><strong>Remover item</strong><small>Remove o item selecionado</small></span>
+        <button type="button" class="pdv-command-button danger" id="pdvActionRemove"
+                data-tooltip="Remover item selecionado" aria-label="Remover item selecionado">
+          <span class="pdv-command-icon">@include('partials.icon',['name'=>'trash','size'=>25])</span>
           <kbd>F8</kbd>
         </button>
 
-        <button type="button" class="pdv-command-button success" id="pdvActionFinish">
-          <span class="pdv-command-icon">@include('partials.icon',['name'=>'check','size'=>22])</span>
-          <span class="pdv-command-copy"><strong>Finalizar venda</strong><small>Concluir operação atual</small></span>
+        <button type="button" class="pdv-command-button success" id="pdvActionFinish"
+                data-tooltip="Finalizar venda" aria-label="Finalizar venda">
+          <span class="pdv-command-icon">@include('partials.icon',['name'=>'check','size'=>25])</span>
           <kbd>F9</kbd>
         </button>
 
-        <button type="button" class="pdv-command-button" id="pdvActionNotes">
-          <span class="pdv-command-icon">@include('partials.icon',['name'=>'edit','size'=>22])</span>
-          <span class="pdv-command-copy"><strong>Observação</strong><small id="pdvActionNotesValue">Sem observação</small></span>
+        <button type="button" class="pdv-command-button" id="pdvActionNotes"
+                data-tooltip="Observação da venda" aria-label="Observação da venda">
+          <span class="pdv-command-icon">@include('partials.icon',['name'=>'edit','size'=>25])</span>
           <kbd>F10</kbd>
         </button>
       </div>
