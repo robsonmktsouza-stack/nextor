@@ -5,6 +5,8 @@
 @case('search')<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>@break
 @case('panel')<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M9 9h12"/>@break
 @case('products')<path d="m3 7 9-4 9 4v10l-9 4-9-4V7ZM3 7l9 4 9-4M12 11v10"/>@break
+@case('services')<path d="M9 6V4h6v2M4 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z"/><path d="M2 12h20M9 12v2h6v-2"/>@break
+@case('tag')<path d="M20 13 13 20 4 11V4h7l9 9Z"/><circle cx="8.5" cy="8.5" r="1.2"/>@break
 @case('stock')<rect x="3" y="5" width="18" height="14" rx="1"/><path d="M3 10h18M8 14h8"/>@break
 @case('sales')<circle cx="9" cy="20" r="1"/><circle cx="19" cy="20" r="1"/><path d="M2 3h2l2.4 12.1a2 2 0 0 0 2 1.6h9.9a2 2 0 0 0 2-1.6L22 7H5"/>@break
 @case('customers')<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M16 3a4 4 0 0 1 0 8M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/>@break
