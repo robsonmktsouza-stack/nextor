@@ -2255,3 +2255,77 @@
     font-size:12px!important;
   }
 }
+
+/* Seleção explícita do item ativo no carrinho */
+.pdv-cart-head-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.pdv-cart-nav-hint{
+  display:flex;
+  align-items:center;
+  gap:3px;
+  color:#7b8b9b;
+  font-size:8.5px;
+  white-space:nowrap;
+}
+
+.pdv-cart-nav-hint kbd{
+  min-width:20px;
+  height:19px;
+  padding:0 4px;
+  font-size:7px;
+}
+
+.pdv-cart-row{
+  cursor:pointer;
+  transition:background .1s,border-color .1s,box-shadow .1s;
+}
+
+.pdv-cart-row:hover{
+  background:#f8fbfe;
+}
+
+.pdv-cart-row.keyboard-active{
+  border-left-color:#2877c7!important;
+  background:#eaf4fd!important;
+  box-shadow:inset 0 0 0 1px #2877c71f;
+}
+
+.pdv-cart-row.keyboard-active .pdv-cart-marker{
+  background:#2877c7!important;
+  color:#fff!important;
+}
+
+.pdv-cart-selected-badge{
+  display:none;
+  flex:0 0 auto;
+  align-items:center;
+  height:20px;
+  padding:0 6px;
+  border:1px solid #8eb9df;
+  border-radius:999px;
+  background:#fff;
+  color:#2877c7;
+  font-size:7px;
+  font-weight:700;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+
+.pdv-cart-row.keyboard-active .pdv-cart-selected-badge{
+  display:inline-flex;
+}
+
+@media(max-width:1450px){
+  .pdv-cart-nav-hint{
+    display:none;
+  }
+
+  .pdv-cart-selected-badge{
+    display:none!important;
+  }
+}
