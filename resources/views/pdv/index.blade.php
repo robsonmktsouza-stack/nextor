@@ -139,7 +139,7 @@
     </div>
 
     <input type="hidden" name="customer_id" id="pdvCustomer" value="">
-    <input type="hidden" name="payment_method" id="pdvPaymentMethod" value="cash">
+    <input type="hidden" name="payment_method" id="pdvPaymentMethod" value="">
     <input type="hidden" name="cash_received" id="pdvCashReceived" value="0.00">
     <input type="hidden" name="notes" id="pdvNotes" value="">
 
@@ -269,6 +269,10 @@
       <span>Valor recebido</span>
       <input type="text" inputmode="decimal" id="pdvCashModalInput" autocomplete="off" value="0,00">
     </label>
+
+    <button type="button" class="pdv-cash-exact" id="pdvCashExact">
+      Usar valor exato da venda
+    </button>
 
     <div class="pdv-cash-change">
       <span>Troco</span>
