@@ -24,6 +24,7 @@
         <div class="command-results" id="commandResults" hidden>
           <a href="{{ route('dashboard') }}">Painel geral</a>
           <a href="{{ route('products.index') }}">Produtos</a>
+          <a href="{{ route('services.index') }}">Serviços</a>
           <a href="{{ route('stock.index') }}">Movimentações de estoque</a>
           <a href="{{ route('customers.index') }}">Clientes</a>
           <a href="{{ route('sales.index') }}">Vendas</a>
@@ -52,6 +53,8 @@
     <div class="sidebar-section-label">CADASTROS</div>
     <a href="{{ route('products.index') }}" class="sidebar-link {{ request()->routeIs('products.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'products'])<span>Produtos</span></a>
+    <a href="{{ route('services.index') }}" class="sidebar-link {{ request()->routeIs('services.*') ? 'active' : '' }}">
+      @include('partials.icon',['name'=>'services'])<span>Serviços</span></a>
     <a href="{{ route('customers.index') }}" class="sidebar-link {{ request()->routeIs('customers.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'customers'])<span>Clientes</span></a>
     <div class="sidebar-section-label">OPERAÇÕES</div>
