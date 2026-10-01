@@ -1779,3 +1779,38 @@
   display:none!important;
 }
 
+
+/* Destaque do item no carrinho para leitura pelo cliente */
+.pdv-cart-row{
+  grid-template-columns:minmax(240px,1.35fr) 128px 110px 108px 42px!important;
+}
+
+.pdv-cart-item strong{
+  font-size:16px!important;
+  line-height:1.25;
+  font-weight:700!important;
+  color:#183650!important;
+}
+
+.pdv-cart-item small{
+  margin-top:5px!important;
+  font-size:10.5px!important;
+  color:#7f8e9d!important;
+}
+
+.pdv-cart-marker{
+  width:38px!important;
+  height:38px!important;
+  flex-basis:38px!important;
+  font-size:11px!important;
+}
+
+@media(max-width:1450px){
+  .pdv-cart-row{
+    grid-template-columns:minmax(210px,1.25fr) 120px 100px 96px 40px!important;
+  }
+
+  .pdv-cart-item strong{
+    font-size:15px!important;
+  }
+}
