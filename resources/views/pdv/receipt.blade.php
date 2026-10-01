@@ -14,14 +14,19 @@
    */
   $discountRows=$sale->items->filter(fn($item)=>(float)$item->discount>0)->count();
   $receiptHeightMm=
-      82
-      + ($sale->items->count()*8)
-      + ($discountRows*5)
-      + ($sale->payments->count()*5)
-      + ($sale->customer ? 6 : 3)
-      + ($sale->notes ? 16 : 0);
+      118
+      + ($sale->items->count()*9)
+      + ($discountRows*6)
+      + ($sale->payments->count()*6)
+      + ($sale->customer ? 8 : 4)
+      + ($sale->notes ? 18 : 0);
 
-  $receiptHeightMm=max(120,min(420,$receiptHeightMm));
+  /*
+   * Chromium arredonda medidas físicas e pode deslocar o rodapé
+   * para uma segunda página quando o conteúdo fica muito justo.
+   * Mantemos uma folga mínima para garantir uma única página.
+   */
+  $receiptHeightMm=max(160,min(600,$receiptHeightMm));
 @endphp
 
 <html lang="pt-BR">
@@ -199,8 +204,12 @@
       margin:0!important;
       padding:3mm 3mm 5mm!important;
       box-shadow:none!important;
+      page-break-before:avoid!important;
       page-break-after:avoid!important;
+      page-break-inside:avoid!important;
+      break-before:avoid-page!important;
       break-after:avoid-page!important;
+      break-inside:avoid-page!important;
     }
   }
 </style>
