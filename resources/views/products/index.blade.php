@@ -58,6 +58,6 @@
  </td></tr>
  @empty<tr><td colspan="9" class="empty-cell">Nenhum produto encontrado. Cadastre o primeiro produto.</td></tr>@endforelse
  </tbody></table></div>
- <div class="table-footerbar"><span>Exibindo {{ $products->firstItem() ?? 0 }}–{{ $products->lastItem() ?? 0 }} de {{ $products->total() }}</span><div class="card-pagination">{{ $products->links('partials.pagination') }}</div></div>
+ @include('partials.table-footer',['paginator'=>$products])
 </section>
 @endsection
