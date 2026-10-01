@@ -3,6 +3,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\PdvController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\StockController;
@@ -42,6 +43,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/customers/bulk-delete',[CustomerController::class,'bulkDelete'])->name('customers.bulk-delete');
     Route::get('/stock',[StockController::class,'index'])->name('stock.index');
     Route::post('/stock',[StockController::class,'store'])->name('stock.store');
+    Route::get('/pdv',[PdvController::class,'index'])->name('pdv.index');
+    Route::get('/pdv/search',[PdvController::class,'search'])->name('pdv.search');
+    Route::post('/pdv',[PdvController::class,'store'])->name('pdv.store');
     Route::get('/sales',[SaleController::class,'index'])->name('sales.index');
     Route::get('/sales/create',[SaleController::class,'create'])->name('sales.create');
     Route::post('/sales',[SaleController::class,'store'])->name('sales.store');
