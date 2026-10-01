@@ -457,7 +457,150 @@
   });
   numberObserver.observe(document.body,{childList:true,subtree:true});
 
-  window.NextorUI={enhanceSelect,enhanceNumberInput};
+  // Máscaras de texto padronizadas do Nextor
+  const onlyDigits=(value,max=Infinity)=>String(value||'').replace(/\D/g,'').slice(0,max);
+  const onlyAlphaNum=(value,max=Infinity)=>String(value||'').toUpperCase().replace(/[^0-9A-Z]/g,'').slice(0,max);
+
+  const maskCpfCnpj=value=>{
+    const raw=onlyAlphaNum(value,14);
+    if(!raw) return '';
+
+    const numeric=/^\d+$/.test(raw);
+    if(numeric && raw.length<=11){
+      const d=raw.slice(0,11);
+      if(d.length<=3) return d;
+      if(d.length<=6) return d.slice(0,3)+'.'+d.slice(3);
+      if(d.length<=9) return d.slice(0,3)+'.'+d.slice(3,6)+'.'+d.slice(6);
+      return d.slice(0,3)+'.'+d.slice(3,6)+'.'+d.slice(6,9)+'-'+d.slice(9);
+    }
+
+    const d=raw.slice(0,14);
+    let out=d.slice(0,2);
+    if(d.length>2) out+='.'+d.slice(2,5);
+    if(d.length>5) out+='.'+d.slice(5,8);
+    if(d.length>8) out+='/'+d.slice(8,12);
+    if(d.length>12) out+='-'+d.slice(12,14);
+    return out;
+  };
+
+  const maskCep=value=>{
+    const d=onlyDigits(value,8);
+    return d.length>5 ? d.slice(0,5)+'-'+d.slice(5) : d;
+  };
+
+  const maskPhone=value=>{
+    const d=onlyDigits(value,11);
+    if(!d) return '';
+    if(d.length<=2) return '('+d;
+    const ddd='('+d.slice(0,2)+') ';
+    if(d.length<=6) return ddd+d.slice(2);
+    if(d.length<=10) return ddd+d.slice(2,6)+'-'+d.slice(6);
+    return ddd+d.slice(2,7)+'-'+d.slice(7);
+  };
+
+  const maskCnae=value=>{
+    const d=onlyDigits(value,7);
+    if(d.length<=4) return d;
+    if(d.length<=5) return d.slice(0,4)+'-'+d.slice(4);
+    return d.slice(0,4)+'-'+d.slice(4,5)+'/'+d.slice(5);
+  };
+
+  const maskNcm=value=>{
+    const d=onlyDigits(value,8);
+    if(d.length<=4) return d;
+    if(d.length<=6) return d.slice(0,4)+'.'+d.slice(4);
+    return d.slice(0,4)+'.'+d.slice(4,6)+'.'+d.slice(6);
+  };
+
+  const maskCest=value=>{
+    const d=onlyDigits(value,7);
+    if(d.length<=2) return d;
+    if(d.length<=5) return d.slice(0,2)+'.'+d.slice(2);
+    return d.slice(0,2)+'.'+d.slice(2,5)+'.'+d.slice(5);
+  };
+
+  const maskNbs=value=>{
+    const d=onlyDigits(value,9);
+    if(d.length<=1) return d;
+    if(d.length<=5) return d.slice(0,1)+'.'+d.slice(1);
+    if(d.length<=7) return d.slice(0,1)+'.'+d.slice(1,5)+'.'+d.slice(5);
+    return d.slice(0,1)+'.'+d.slice(1,5)+'.'+d.slice(5,7)+'.'+d.slice(7);
+  };
+
+  const maskServiceItem=value=>{
+    const d=onlyDigits(value,4);
+    return d.length>2 ? d.slice(0,2)+'.'+d.slice(2) : d;
+  };
+
+  const textMasks={
+    'cpf-cnpj':maskCpfCnpj,
+    'cep':maskCep,
+    'phone':maskPhone,
+    'cnae':maskCnae,
+    'ncm':maskNcm,
+    'cest':maskCest,
+    'nbs':maskNbs,
+    'service-item':maskServiceItem,
+    'gtin':value=>onlyDigits(value,14),
+    'digits8':value=>onlyDigits(value,8),
+    'digits9':value=>onlyDigits(value,9),
+    'digits11':value=>onlyDigits(value,11),
+  };
+
+  const inferTextMask=input=>{
+    if(input.dataset.mask) return input.dataset.mask;
+    const name=(input.name||'').toLowerCase();
+    if(name.endsWith('[document]') || name==='document') return 'cpf-cnpj';
+    if(name.endsWith('[zip_code]') || name==='zip_code') return 'cep';
+    if(name.endsWith('[phone]') || name==='phone') return 'phone';
+    if(name==='cnae') return 'cnae';
+    if(name==='ncm') return 'ncm';
+    if(name==='cest') return 'cest';
+    if(name==='ean_gtin') return 'gtin';
+    if(name==='nbs') return 'nbs';
+    if(name==='service_list_item') return 'service-item';
+    if(name==='rntrc') return 'digits8';
+    if(name==='driver_license') return 'digits11';
+    if(name==='suframa') return 'digits9';
+    return '';
+  };
+
+  const enhanceTextMask=input=>{
+    if(!(input instanceof HTMLInputElement) || input.dataset.maskReady==='1') return;
+    const maskName=inferTextMask(input);
+    const formatter=textMasks[maskName];
+    if(!formatter) return;
+
+    input.dataset.maskReady='1';
+    input.dataset.mask=maskName;
+    if(!input.inputMode && maskName!=='cpf-cnpj') input.inputMode='numeric';
+    input.autocomplete=input.autocomplete||'off';
+
+    const apply=()=>{
+      const before=input.value;
+      const formatted=formatter(before);
+      if(before!==formatted) input.value=formatted;
+    };
+
+    input.addEventListener('input',apply);
+    input.addEventListener('blur',apply);
+    apply();
+  };
+
+  document.querySelectorAll('input').forEach(enhanceTextMask);
+
+  const textMaskObserver=new MutationObserver(mutations=>{
+    mutations.forEach(mutation=>{
+      mutation.addedNodes.forEach(node=>{
+        if(!(node instanceof Element)) return;
+        if(node.matches?.('input')) enhanceTextMask(node);
+        node.querySelectorAll?.('input').forEach(enhanceTextMask);
+      });
+    });
+  });
+  textMaskObserver.observe(document.body,{childList:true,subtree:true});
+
+  window.NextorUI={enhanceSelect,enhanceNumberInput,enhanceTextMask};
 
   // Abas de formulários
   document.querySelectorAll('[data-tabs]').forEach(tabs=>{
