@@ -1,8 +1,4 @@
-@extends('layouts.app')
-@section('title','PDV')
-@section('actions')
-<a class="btn btn-secondary" href="{{ route('sales.index') }}">@include('partials.icon',['name'=>'receipt','size'=>16]) Histórico de vendas</a>
-@endsection
+@extends('layouts.pdv')
 
 @section('content')
 <form id="pdvForm" method="post" action="{{ route('pdv.store') }}">
