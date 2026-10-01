@@ -1316,3 +1316,131 @@ input[type="number"]::-webkit-outer-spin-button{
   height:58px;
   vertical-align:middle!important;
 }
+
+/* Rodapé padrão das tabelas: quantidade por página + navegação completa */
+.table-footer-controls{
+  min-height:58px;
+  display:grid;
+  grid-template-columns:minmax(190px,1fr) auto minmax(190px,1fr);
+  align-items:center;
+  gap:16px;
+  padding:10px 14px;
+  background:#fff;
+}
+
+.table-page-size-form{
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  min-width:0;
+}
+
+.table-page-size-select{
+  width:190px;
+  height:36px;
+}
+
+.table-page-size-form .ui-select{
+  width:190px;
+  min-width:190px;
+}
+
+.table-page-size-form .ui-select-trigger{
+  height:36px;
+  border-color:#cfd6de;
+  background:#fff;
+  color:#435466;
+  font-size:11.5px;
+  font-weight:600;
+}
+
+.table-records-count{
+  justify-self:center;
+  color:#8290a0;
+  font-size:10.5px;
+  white-space:nowrap;
+}
+
+.table-pager-compact{
+  justify-self:end;
+  display:flex;
+  align-items:center;
+  border:1px solid #d7dde4;
+  border-radius:4px;
+  overflow:hidden;
+  background:#fff;
+}
+
+.table-pager-button,
+.table-pager-current{
+  height:36px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-right:1px solid #e1e6eb;
+  background:#fff;
+  color:#5a6b7d;
+}
+
+.table-pager-button{
+  width:38px;
+  flex:0 0 38px;
+}
+
+.table-pager-button svg{
+  width:17px;
+  height:17px;
+}
+
+.table-pager-button:hover{
+  background:#f3f7fb;
+  color:#2877c7;
+}
+
+.table-pager-button.disabled{
+  background:#f8f9fa;
+  color:#b4bdc7;
+  pointer-events:none;
+}
+
+.table-pager-current{
+  min-width:58px;
+  padding:0 10px;
+  color:#44566a;
+  font-size:11.5px;
+  font-weight:650;
+  font-variant-numeric:tabular-nums;
+}
+
+.table-pager-compact>*:last-child{
+  border-right:0;
+}
+
+@media(max-width:800px){
+  .table-footer-controls{
+    grid-template-columns:1fr auto;
+    gap:10px;
+  }
+  .table-records-count{
+    grid-column:1/-1;
+    grid-row:2;
+    justify-self:start;
+  }
+}
+
+@media(max-width:520px){
+  .table-footer-controls{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:space-between;
+  }
+  .table-page-size-form .ui-select,
+  .table-page-size-select{
+    width:170px;
+    min-width:170px;
+  }
+  .table-records-count{
+    width:100%;
+    order:3;
+  }
+}
