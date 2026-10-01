@@ -11,13 +11,14 @@ use Illuminate\Validation\Rule;
 class ProductController extends Controller {
     public function index(Request $r) {
         $term=trim((string)$r->query('search',''));
+        $perPage=in_array($r->integer('per_page'),[10,25,50,100],true) ? $r->integer('per_page') : 25;
         $products=Product::query()
             ->when($term,fn($q)=>$q->where(fn($t)=>$t
                 ->where('name','like',"%{$term}%")
                 ->orWhere('sku','like',"%{$term}%")
                 ->orWhere('ncm','like',"%{$term}%")
                 ->orWhere('ean_gtin','like',"%{$term}%")))
-            ->orderBy('name')->paginate(12)->withQueryString();
+            ->orderBy('name')->paginate($perPage)->withQueryString();
         return view('products.index', compact('products','term'));
     }
 
