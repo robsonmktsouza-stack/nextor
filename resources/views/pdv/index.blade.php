@@ -217,6 +217,38 @@
   </div>
 </dialog>
 
+<dialog class="pdv-quick-modal pdv-discount-modal" id="pdvDiscountModal">
+  <div class="pdv-modal-head">
+    <div>
+      <span>F5</span>
+      <h2>Desconto do item</h2>
+      <p id="pdvDiscountItemName">Item selecionado</p>
+    </div>
+    <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+  </div>
+
+  <div class="pdv-discount-modal-body">
+    <div class="pdv-discount-summary">
+      <div><span>Valor do item</span><strong id="pdvDiscountGross">R$ 0,00</strong></div>
+      <div><span>Após desconto</span><strong id="pdvDiscountNet">R$ 0,00</strong></div>
+    </div>
+
+    <label>
+      <span>Desconto em reais</span>
+      <input type="text" inputmode="decimal" id="pdvDiscountModalInput" autocomplete="off" value="0,00">
+    </label>
+
+    <button type="button" class="pdv-modal-primary" id="pdvDiscountApply">
+      @include('partials.icon',['name'=>'check','size'=>18]) Aplicar desconto
+    </button>
+  </div>
+
+  <div class="pdv-modal-help">
+    <span><kbd>Enter</kbd> Aplicar</span>
+    <span><kbd>Esc</kbd> Fechar</span>
+  </div>
+</dialog>
+
 <dialog class="pdv-quick-modal pdv-cash-modal" id="pdvCashModal">
   <div class="pdv-modal-head">
     <div>
