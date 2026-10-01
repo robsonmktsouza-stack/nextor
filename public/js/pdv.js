@@ -33,6 +33,7 @@
     const cashModalInput=document.getElementById('pdvCashModalInput');
     const cashModalTotal=document.getElementById('pdvCashModalTotal');
     const cashModalChange=document.getElementById('pdvCashModalChange');
+    const cashExact=document.getElementById('pdvCashExact');
     const cashApply=document.getElementById('pdvCashApply');
 
     const notesInput=document.getElementById('pdvNotes');
@@ -69,6 +70,8 @@
     let resultIndex=-1;
     let searchTimer=null;
     let searchController=null;
+    let finishFlowPending=false;
+    let bypassFinalizeValidation=false;
 
     const notify=(message,type='info')=>{
       if(window.NextorNotify) window.NextorNotify(message,{type,title:type==='error'?'PDV':'PDV'});
@@ -213,7 +216,7 @@
       bank_slip:'Boleto',
       bank_transfer:'Transferência',
       other:'Outro',
-    }[value]||'Outro');
+    }[value]||'Não selecionado');
 
     const updatePaymentState=()=>{
       const t=totals();
@@ -229,12 +232,16 @@
     };
 
     const updateFinishState=()=>{
-      const t=totals();
-      const hasItems=state.size>0 && t.total>=0;
-      const cashOk=payment.value!=='cash' || moneyInputValue(cashInput)+0.0001>=t.total;
-      const disabled=!hasItems || !cashOk;
-      finish.disabled=disabled;
-      if(actionFinish) actionFinish.disabled=disabled;
+      const hasItems=state.size>0;
+      finish.disabled=!hasItems;
+      if(actionFinish) actionFinish.disabled=!hasItems;
+
+      const hasPayment=!!payment.value;
+      actionPayment?.classList.toggle('is-set',hasPayment);
+
+      const cashReady=payment.value==='cash' &&
+        moneyInputValue(cashInput)+0.0001>=totals().total;
+      actionCash?.classList.toggle('is-set',cashReady);
     };
 
     const createCartRow=item=>{
@@ -601,10 +608,18 @@
 
     const selectPaymentOption=option=>{
       if(!option) return;
-      payment.value=option.dataset.paymentValue||'cash';
+      payment.value=option.dataset.paymentValue||'';
       if(actionPaymentValue) actionPaymentValue.textContent=option.dataset.paymentLabel||option.textContent.trim();
       payment.dispatchEvent(new Event('change',{bubbles:true}));
       paymentModal.close();
+
+      if(finishFlowPending){
+        if(payment.value==='cash'){
+          setTimeout(()=>openCashModal(),0);
+        }else{
+          setTimeout(()=>requestFinalize(),0);
+        }
+      }
     };
 
     const openPaymentModal=()=>{
@@ -690,6 +705,7 @@
     const openCashModal=()=>{
       if(payment.value!=='cash'){
         notify('Selecione Dinheiro como forma de pagamento para informar valor recebido.','info');
+        finishFlowPending=true;
         openPaymentModal();
         return;
       }
@@ -706,9 +722,38 @@
     };
 
     const applyCashModal=()=>{
-      setCashReceived(cashModalInput.value);
+      const total=totals().total;
+      const received=setCashReceived(cashModalInput.value);
+
+      if(received+0.0001<total){
+        notify('O valor recebido é menor que o total da venda.','warning');
+        updateCashModalPreview();
+        requestAnimationFrame(()=>{
+          cashModalInput?.focus();
+          cashModalInput?.select?.();
+        });
+        return;
+      }
+
       cashModal.close();
+
+      if(finishFlowPending){
+        setTimeout(()=>requestFinalize(),0);
+      }
     };
+
+    cashExact?.addEventListener('click',()=>{
+      const total=totals().total;
+      cashModalInput.value=total.toLocaleString('pt-BR',{
+        minimumFractionDigits:2,
+        maximumFractionDigits:2
+      });
+      updateCashModalPreview();
+      requestAnimationFrame(()=>{
+        cashModalInput?.focus();
+        cashModalInput?.select?.();
+      });
+    });
 
     cashModalInput?.addEventListener('input',updateCashModalPreview);
     cashModalInput?.addEventListener('keydown',event=>{
@@ -747,6 +792,38 @@
       }
     });
 
+    const requestFinalize=()=>{
+      const t=totals();
+
+      if(!state.size){
+        finishFlowPending=false;
+        notify('Adicione pelo menos um item ao carrinho.','warning');
+        search.focus();
+        return;
+      }
+
+      if(!payment.value){
+        finishFlowPending=true;
+        notify('Selecione a forma de pagamento para continuar.','info');
+        openPaymentModal();
+        return;
+      }
+
+      if(payment.value==='cash'){
+        const received=moneyInputValue(cashInput);
+        if(received+0.0001<t.total){
+          finishFlowPending=true;
+          openCashModal();
+          return;
+        }
+      }
+
+      finishFlowPending=false;
+      syncPayload();
+      bypassFinalizeValidation=true;
+      form.requestSubmit();
+    };
+
     actionSearch?.addEventListener('click',()=>{search.focus();search.select();});
     actionQuantity?.addEventListener('click',()=>focusCartField('.pdv-qty input'));
     actionCustomer?.addEventListener('click',openCustomerModal);
@@ -754,7 +831,7 @@
     actionPayment?.addEventListener('click',openPaymentModal);
     actionCash?.addEventListener('click',openCashModal);
     actionRemove?.addEventListener('click',removeActiveCartItem);
-    actionFinish?.addEventListener('click',()=>{if(!finish.disabled) form.requestSubmit();});
+    actionFinish?.addEventListener('click',requestFinalize);
     actionNotes?.addEventListener('click',openNotesModal);
 
     customerSearch?.addEventListener('input',filterCustomers);
@@ -914,8 +991,7 @@
         removeActiveCartItem();
       }else if(event.key==='F9'){
         event.preventDefault();
-        if(!finish.disabled) form.requestSubmit();
-        else notify('Complete os dados da venda antes de finalizar.','warning');
+        requestFinalize();
       }else if(event.key==='F10'){
         event.preventDefault();
         openNotesModal();
@@ -923,22 +999,14 @@
     });
 
     form.addEventListener('submit',event=>{
-      const t=totals();
-      if(!state.size){
-        event.preventDefault();
-        notify('Adicione pelo menos um item ao carrinho.','warning');
-        search.focus();
+      if(bypassFinalizeValidation){
+        bypassFinalizeValidation=false;
+        syncPayload();
         return;
       }
 
-      if(payment.value==='cash' && moneyInputValue(cashInput)+0.0001<t.total){
-        event.preventDefault();
-        notify('O valor recebido é menor que o total da venda.','warning');
-        openCashModal();
-        return;
-      }
-
-      syncPayload();
+      event.preventDefault();
+      requestFinalize();
     });
 
     renderCart();
