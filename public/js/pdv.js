@@ -840,15 +840,71 @@
       form.requestSubmit();
     };
 
-    actionSearch?.addEventListener('click',()=>{search.focus();search.select();});
-    actionQuantity?.addEventListener('click',()=>focusCartField('.pdv-qty input'));
-    actionCustomer?.addEventListener('click',openCustomerModal);
-    actionDiscount?.addEventListener('click',()=>openDiscountModal());
-    actionPayment?.addEventListener('click',openPaymentModal);
-    actionCash?.addEventListener('click',openCashModal);
-    actionRemove?.addEventListener('click',removeActiveCartItem);
-    actionFinish?.addEventListener('click',requestFinalize);
-    actionNotes?.addEventListener('click',openNotesModal);
+    const runCommand=command=>{
+      switch(command){
+        case 'search':
+          search.focus();
+          search.select();
+          break;
+        case 'quantity':
+          focusCartField('.pdv-qty input');
+          break;
+        case 'customer':
+          openCustomerModal();
+          break;
+        case 'discount':
+          openDiscountModal();
+          break;
+        case 'payment':
+          openPaymentModal();
+          break;
+        case 'cash':
+          openCashModal();
+          break;
+        case 'remove':
+          removeActiveCartItem();
+          break;
+        case 'finalize':
+          requestFinalize();
+          break;
+        case 'notes':
+          openNotesModal();
+          break;
+      }
+
+      const button={
+        search:actionSearch,
+        quantity:actionQuantity,
+        customer:actionCustomer,
+        discount:actionDiscount,
+        payment:actionPayment,
+        cash:actionCash,
+        remove:actionRemove,
+        finalize:actionFinish,
+        notes:actionNotes,
+      }[command];
+
+      if(button){
+        button.classList.remove('shortcut-fired');
+        void button.offsetWidth;
+        button.classList.add('shortcut-fired');
+        setTimeout(()=>button.classList.remove('shortcut-fired'),180);
+      }
+    };
+
+    [
+      [actionSearch,'search'],
+      [actionQuantity,'quantity'],
+      [actionCustomer,'customer'],
+      [actionDiscount,'discount'],
+      [actionPayment,'payment'],
+      [actionCash,'cash'],
+      [actionRemove,'remove'],
+      [actionFinish,'finalize'],
+      [actionNotes,'notes'],
+    ].forEach(([button,command])=>{
+      button?.addEventListener('click',()=>runCommand(command));
+    });
 
     customerSearch?.addEventListener('input',filterCustomers);
     customerSearch?.addEventListener('keydown',event=>{
@@ -971,48 +1027,78 @@
       if(label) label.textContent=document.fullscreenElement?'Sair da tela cheia':'Tela cheia';
     });
 
-    document.addEventListener('keydown',event=>{
-      if(event.altKey||event.ctrlKey||event.metaKey) return;
+    const functionShortcutMap={
+      F2:'search',
+      F3:'quantity',
+      F4:'customer',
+      F5:'discount',
+      F6:'payment',
+      F7:'cash',
+      F8:'remove',
+      F9:'finalize',
+      F10:'notes',
+    };
 
-      if(customerModal?.open || paymentModal?.open || discountModal?.open || cashModal?.open || notesModal?.open) return;
+    const altShortcutMap={
+      Digit1:'search',
+      Digit2:'quantity',
+      Digit3:'customer',
+      Digit4:'discount',
+      Digit5:'payment',
+      Digit6:'cash',
+      Digit7:'remove',
+      Digit8:'finalize',
+      Digit9:'notes',
+      Numpad1:'search',
+      Numpad2:'quantity',
+      Numpad3:'customer',
+      Numpad4:'discount',
+      Numpad5:'payment',
+      Numpad6:'cash',
+      Numpad7:'remove',
+      Numpad8:'finalize',
+      Numpad9:'notes',
+    };
 
-      if(event.key==='Escape'){
+    const shortcutHandler=event=>{
+      const modalOpen=
+        customerModal?.open ||
+        paymentModal?.open ||
+        discountModal?.open ||
+        cashModal?.open ||
+        notesModal?.open;
+
+      if(modalOpen) return;
+
+      if(event.key==='Escape' || event.code==='Escape'){
         event.preventDefault();
+        event.stopPropagation();
         search.focus();
         search.select();
         return;
       }
 
-      if(event.key==='F2'){
-        event.preventDefault();
-        search.focus();
-        search.select();
-      }else if(event.key==='F3'){
-        event.preventDefault();
-        focusCartField('.pdv-qty input');
-      }else if(event.key==='F4'){
-        event.preventDefault();
-        openCustomerModal();
-      }else if(event.key==='F5'){
-        event.preventDefault();
-        openDiscountModal();
-      }else if(event.key==='F6'){
-        event.preventDefault();
-        openPaymentModal();
-      }else if(event.key==='F7'){
-        event.preventDefault();
-        openCashModal();
-      }else if(event.key==='F8'){
-        event.preventDefault();
-        removeActiveCartItem();
-      }else if(event.key==='F9'){
-        event.preventDefault();
-        requestFinalize();
-      }else if(event.key==='F10'){
-        event.preventDefault();
-        openNotesModal();
+      if(event.ctrlKey || event.metaKey) return;
+
+      let command=
+        functionShortcutMap[event.code] ||
+        functionShortcutMap[event.key] ||
+        null;
+
+      if(!command && event.altKey){
+        command=altShortcutMap[event.code]||null;
       }
-    });
+
+      if(!command) return;
+      if(event.repeat) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation?.();
+      runCommand(command);
+    };
+
+    window.addEventListener('keydown',shortcutHandler,true);
 
     form.addEventListener('submit',event=>{
       if(bypassFinalizeValidation){
