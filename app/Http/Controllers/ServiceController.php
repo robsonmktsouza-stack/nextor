@@ -11,6 +11,7 @@ class ServiceController extends Controller
     public function index(Request $request)
     {
         $term=trim((string)$request->query('search',''));
+        $perPage=in_array($request->integer('per_page'),[10,25,50,100],true) ? $request->integer('per_page') : 25;
 
         $services=Service::query()
             ->when($term,fn($q)=>$q->where(fn($t)=>$t
@@ -21,7 +22,7 @@ class ServiceController extends Controller
                 ->orWhere('municipal_tax_code','like',"%{$term}%")
                 ->orWhere('national_tax_code','like',"%{$term}%")))
             ->orderBy('name')
-            ->paginate(12)
+            ->paginate($perPage)
             ->withQueryString();
 
         return view('services.index',compact('services','term'));
