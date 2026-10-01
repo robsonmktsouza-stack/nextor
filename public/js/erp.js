@@ -773,7 +773,13 @@
       nextorNotify('Informe um CNPJ válido com 14 caracteres.',{type:'warning',title:'Consulta de CNPJ'});
       return;
     }
-    const set=(name,value)=>{const field=form.querySelector('[name="'+name+'"]');if(field && value!==undefined && value!==null) field.value=value;};
+    const set=(name,value)=>{
+      const field=form.querySelector('[name="'+name+'"]');
+      if(field && value!==undefined && value!==null){
+        field.value=value;
+        field.dispatchEvent(new Event('input',{bubbles:true}));
+      }
+    };
     button.disabled=true;
     const oldText=button.querySelector('span')?.textContent;
     if(button.querySelector('span')) button.querySelector('span').textContent='Buscando...';
