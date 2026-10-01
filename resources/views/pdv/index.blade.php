@@ -59,55 +59,55 @@
     <section class="pdv-command-center" aria-label="Atalhos rápidos do caixa">
       <div class="pdv-command-grid">
         <button type="button" class="pdv-command-button" id="pdvActionSearch"
-                data-tooltip="Buscar item" aria-label="Buscar item">
+                data-tooltip="Buscar item — F2 / Alt+1" aria-label="Buscar item">
           <span class="pdv-command-icon">@include('partials.icon',['name'=>'search','size'=>25])</span>
           <kbd>F2</kbd>
         </button>
 
         <button type="button" class="pdv-command-button" id="pdvActionQuantity"
-                data-tooltip="Alterar quantidade" aria-label="Alterar quantidade">
+                data-tooltip="Alterar quantidade — F3 / Alt+2" aria-label="Alterar quantidade">
           <span class="pdv-command-icon">@include('partials.icon',['name'=>'stock','size'=>25])</span>
           <kbd>F3</kbd>
         </button>
 
         <button type="button" class="pdv-command-button" id="pdvActionCustomer"
-                data-tooltip="Selecionar cliente" aria-label="Selecionar cliente">
+                data-tooltip="Selecionar cliente — F4 / Alt+3" aria-label="Selecionar cliente">
           <span class="pdv-command-icon">@include('partials.icon',['name'=>'customers','size'=>25])</span>
           <kbd>F4</kbd>
         </button>
 
         <button type="button" class="pdv-command-button" id="pdvActionDiscount"
-                data-tooltip="Aplicar desconto" aria-label="Aplicar desconto">
+                data-tooltip="Aplicar desconto — F5 / Alt+4" aria-label="Aplicar desconto">
           <span class="pdv-command-icon">@include('partials.icon',['name'=>'tag','size'=>25])</span>
           <kbd>F5</kbd>
         </button>
 
         <button type="button" class="pdv-command-button" id="pdvActionPayment"
-                data-tooltip="Forma de pagamento" aria-label="Forma de pagamento">
+                data-tooltip="Forma de pagamento — F6 / Alt+5" aria-label="Forma de pagamento">
           <span class="pdv-command-icon">@include('partials.icon',['name'=>'receipt','size'=>25])</span>
           <kbd>F6</kbd>
         </button>
 
         <button type="button" class="pdv-command-button" id="pdvActionCash"
-                data-tooltip="Valor recebido e troco" aria-label="Valor recebido e troco">
+                data-tooltip="Valor recebido e troco — F7 / Alt+6" aria-label="Valor recebido e troco">
           <span class="pdv-command-icon">@include('partials.icon',['name'=>'money','size'=>25])</span>
           <kbd>F7</kbd>
         </button>
 
         <button type="button" class="pdv-command-button danger" id="pdvActionRemove"
-                data-tooltip="Remover item selecionado" aria-label="Remover item selecionado">
+                data-tooltip="Remover item selecionado — F8 / Alt+7" aria-label="Remover item selecionado">
           <span class="pdv-command-icon">@include('partials.icon',['name'=>'trash','size'=>25])</span>
           <kbd>F8</kbd>
         </button>
 
         <button type="button" class="pdv-command-button success" id="pdvActionFinish"
-                data-tooltip="Finalizar venda" aria-label="Finalizar venda">
+                data-tooltip="Finalizar venda — F9 / Alt+8" aria-label="Finalizar venda">
           <span class="pdv-command-icon">@include('partials.icon',['name'=>'check','size'=>25])</span>
           <kbd>F9</kbd>
         </button>
 
         <button type="button" class="pdv-command-button" id="pdvActionNotes"
-                data-tooltip="Observação da venda" aria-label="Observação da venda">
+                data-tooltip="Observação da venda — F10 / Alt+9" aria-label="Observação da venda">
           <span class="pdv-command-icon">@include('partials.icon',['name'=>'edit','size'=>25])</span>
           <kbd>F10</kbd>
         </button>
