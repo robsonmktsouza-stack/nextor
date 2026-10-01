@@ -1,0 +1,2 @@
+resources/fiscal/schemas/**/*.xsd -text
+resources/fiscal/schemas/**/*.json text eol=lf
