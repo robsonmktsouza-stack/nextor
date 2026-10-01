@@ -1814,3 +1814,213 @@
     font-size:15px!important;
   }
 }
+
+/* Controles do item no carrinho: caixa, não formulário */
+.pdv-cart-row{
+  grid-template-columns:minmax(240px,1.35fr) 132px 118px 108px 42px!important;
+  align-items:center!important;
+}
+
+.pdv-cart-qty-cell{
+  min-width:0;
+  height:46px;
+  display:flex!important;
+  align-items:center;
+  align-self:center!important;
+}
+
+.pdv-cart-qty-cell>span{
+  display:none!important;
+}
+
+.pdv-qty{
+  width:100%;
+  height:46px!important;
+  display:grid;
+  grid-template-columns:38px minmax(0,1fr) 38px!important;
+  overflow:hidden;
+  border:1px solid #cbd6e0!important;
+  border-radius:6px!important;
+  background:#fff;
+}
+
+.pdv-qty button{
+  border:0!important;
+  background:#f3f6f9!important;
+  color:#49637c!important;
+  font-size:20px!important;
+  font-weight:500;
+}
+
+.pdv-qty button:hover,
+.pdv-qty button:focus-visible{
+  background:#e9f2fa!important;
+  color:#2877c7!important;
+  outline:0;
+}
+
+.pdv-qty input{
+  min-width:0;
+  width:100%;
+  height:100%!important;
+  padding:0!important;
+  border:0!important;
+  border-left:1px solid #dce4eb!important;
+  border-right:1px solid #dce4eb!important;
+  outline:0!important;
+  box-shadow:none!important;
+  background:#fff!important;
+  color:#203a52!important;
+  text-align:center;
+  font-size:17px!important;
+  font-weight:700!important;
+}
+
+.pdv-cart-discount-button{
+  min-width:0;
+  height:46px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  align-self:center;
+  padding:0 10px;
+  border:1px solid #d2dce5;
+  border-radius:6px;
+  background:#fff;
+  color:#63768a;
+  white-space:nowrap;
+}
+
+.pdv-cart-discount-button:hover,
+.pdv-cart-discount-button:focus-visible{
+  border-color:#7daedb;
+  background:#f2f8fe;
+  color:#2877c7;
+  outline:0;
+}
+
+.pdv-cart-discount-button.has-discount{
+  border-color:#e0bf6e;
+  background:#fffaf0;
+  color:#9b6b0d;
+}
+
+.pdv-cart-discount-button svg{
+  width:17px;
+  height:17px;
+  flex:0 0 17px;
+}
+
+.pdv-cart-discount-button span{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  color:inherit;
+  font-size:11.5px;
+  font-weight:700;
+}
+
+.pdv-cart-line-total{
+  min-width:0;
+  display:flex!important;
+  flex-direction:column;
+  align-items:flex-end;
+  justify-content:center;
+  gap:2px;
+  align-self:center!important;
+}
+
+.pdv-cart-line-total>span{
+  height:auto!important;
+  color:#95a1ad!important;
+  font-size:8px!important;
+}
+
+.pdv-cart-line-total strong{
+  height:auto!important;
+  min-height:24px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  font-size:14px!important;
+}
+
+.pdv-cart-remove{
+  align-self:center!important;
+  height:46px!important;
+}
+
+@media(max-width:1450px){
+  .pdv-cart-row{
+    grid-template-columns:minmax(210px,1.25fr) 124px 108px 96px 40px!important;
+  }
+
+  .pdv-qty{
+    grid-template-columns:35px minmax(0,1fr) 35px!important;
+  }
+}
+
+/* Modal de desconto */
+.pdv-discount-modal-body{
+  display:grid;
+  gap:14px;
+  padding:18px;
+}
+
+.pdv-discount-summary{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.pdv-discount-summary>div{
+  min-height:58px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:4px;
+  padding:10px 13px;
+  border:1px solid #d9e2ea;
+  border-radius:5px;
+  background:#f8fafc;
+}
+
+.pdv-discount-summary span{
+  color:#738396;
+  font-size:9.5px;
+  font-weight:650;
+}
+
+.pdv-discount-summary strong{
+  color:#29445d;
+  font-size:18px;
+}
+
+.pdv-discount-modal-body label{
+  display:grid;
+  gap:7px;
+}
+
+.pdv-discount-modal-body label>span{
+  color:#53697e;
+  font-size:10.5px;
+  font-weight:700;
+}
+
+#pdvDiscountModalInput{
+  width:100%;
+  height:58px;
+  padding:0 15px;
+  border:2px solid #91b9df;
+  border-radius:5px;
+  outline:0;
+  background:#fff;
+  color:#173a56;
+  text-align:right;
+  font-size:24px;
+  font-weight:700;
+}
+
+#pdvDiscountModalInput:focus{
+  border-color:#2877c7;
+}
