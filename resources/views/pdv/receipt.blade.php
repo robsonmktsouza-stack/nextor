@@ -142,11 +142,40 @@
     font-size:8px;
     line-height:1.4;
   }
+  @page{
+    size:80mm auto;
+    margin:0;
+  }
+
   @media print{
-    @page{margin:0}
-    html,body{width:80mm;background:#fff}
-    .screen-actions{display:none!important}
-    .receipt{width:80mm;margin:0;padding:3mm 4mm 5mm}
+    html,
+    body{
+      width:80mm!important;
+      min-width:80mm!important;
+      max-width:80mm!important;
+      margin:0!important;
+      padding:0!important;
+      background:#fff!important;
+    }
+
+    body{
+      overflow:visible!important;
+    }
+
+    .screen-actions{
+      display:none!important;
+    }
+
+    .receipt{
+      width:80mm!important;
+      min-width:80mm!important;
+      max-width:80mm!important;
+      margin:0!important;
+      padding:3mm 3mm 5mm!important;
+      box-shadow:none!important;
+      page-break-after:avoid!important;
+      break-after:avoid-page!important;
+    }
   }
 </style>
 </head>
