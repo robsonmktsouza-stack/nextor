@@ -129,9 +129,6 @@
     </table>
   </div>
 
-  <div class="table-footerbar">
-    <span>Exibindo {{ $services->firstItem() ?? 0 }}–{{ $services->lastItem() ?? 0 }} de {{ $services->total() }}</span>
-    <div class="card-pagination">{{ $services->links('partials.pagination') }}</div>
-  </div>
+  @include('partials.table-footer',['paginator'=>$services])
 </section>
 @endsection
