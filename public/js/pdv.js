@@ -12,20 +12,40 @@
     const cart=document.getElementById('pdvCart');
     const payload=document.getElementById('pdvItemsPayload');
     const customer=document.getElementById('pdvCustomer');
-    const customerButton=document.getElementById('pdvCustomerButton');
-    const customerLabel=document.getElementById('pdvCustomerLabel');
     const customerModal=document.getElementById('pdvCustomerModal');
     const customerSearch=document.getElementById('pdvCustomerSearch');
     const customerList=document.getElementById('pdvCustomerList');
+
     const payment=document.getElementById('pdvPaymentMethod');
-    const paymentButton=document.getElementById('pdvPaymentButton');
-    const paymentLabel=document.getElementById('pdvPaymentLabel');
     const paymentModal=document.getElementById('pdvPaymentModal');
     const paymentOptions=document.getElementById('pdvPaymentOptions');
-    const cashField=document.getElementById('pdvCashField');
+
     const cashInput=document.getElementById('pdvCashReceived');
-    const changeBox=document.getElementById('pdvChangeBox');
-    const changeOutput=document.getElementById('pdvChange');
+    const cashModal=document.getElementById('pdvCashModal');
+    const cashModalInput=document.getElementById('pdvCashModalInput');
+    const cashModalTotal=document.getElementById('pdvCashModalTotal');
+    const cashModalChange=document.getElementById('pdvCashModalChange');
+    const cashApply=document.getElementById('pdvCashApply');
+
+    const notesInput=document.getElementById('pdvNotes');
+    const notesModal=document.getElementById('pdvNotesModal');
+    const notesModalInput=document.getElementById('pdvNotesModalInput');
+    const notesApply=document.getElementById('pdvNotesApply');
+
+    const actionSearch=document.getElementById('pdvActionSearch');
+    const actionQuantity=document.getElementById('pdvActionQuantity');
+    const actionCustomer=document.getElementById('pdvActionCustomer');
+    const actionCustomerValue=document.getElementById('pdvActionCustomerValue');
+    const actionDiscount=document.getElementById('pdvActionDiscount');
+    const actionPayment=document.getElementById('pdvActionPayment');
+    const actionPaymentValue=document.getElementById('pdvActionPaymentValue');
+    const actionCash=document.getElementById('pdvActionCash');
+    const actionCashValue=document.getElementById('pdvActionCashValue');
+    const actionChangeValue=document.getElementById('pdvActionChangeValue');
+    const actionRemove=document.getElementById('pdvActionRemove');
+    const actionFinish=document.getElementById('pdvActionFinish');
+    const actionNotes=document.getElementById('pdvActionNotes');
+    const actionNotesValue=document.getElementById('pdvActionNotesValue');
     const finish=document.getElementById('pdvFinish');
     const fullscreenButton=document.getElementById('pdvFullscreen');
     const itemCount=document.getElementById('pdvItemCount');
@@ -177,15 +197,25 @@
       updatePaymentState();
     };
 
+    const paymentName=value=>({
+      cash:'Dinheiro',
+      pix:'PIX',
+      debit_card:'Cartão de débito',
+      credit_card:'Cartão de crédito',
+      bank_slip:'Boleto',
+      bank_transfer:'Transferência',
+      other:'Outro',
+    }[value]||'Outro');
+
     const updatePaymentState=()=>{
       const t=totals();
       const cash=payment.value==='cash';
-      cashField.hidden=!cash;
-      changeBox.hidden=!cash;
+      const received=cash?moneyInputValue(cashInput):0;
+      const change=cash?Math.max(0,received-t.total):0;
 
-      const received=cash?moneyInputValue(cashInput):t.total;
-      const change=Math.max(0,received-t.total);
-      changeOutput.textContent=money.format(change);
+      if(actionPaymentValue) actionPaymentValue.textContent=paymentName(payment.value);
+      if(actionCashValue) actionCashValue.textContent=cash?money.format(received):'Não se aplica';
+      if(actionChangeValue) actionChangeValue.textContent=money.format(change);
 
       updateFinishState();
     };
@@ -194,7 +224,9 @@
       const t=totals();
       const hasItems=state.size>0 && t.total>=0;
       const cashOk=payment.value!=='cash' || moneyInputValue(cashInput)+0.0001>=t.total;
-      finish.disabled=!hasItems || !cashOk;
+      const disabled=!hasItems || !cashOk;
+      finish.disabled=disabled;
+      if(actionFinish) actionFinish.disabled=disabled;
     };
 
     const createCartRow=item=>{
@@ -485,9 +517,6 @@
     });
 
     payment.addEventListener('change',updatePaymentState);
-    cashInput?.addEventListener('input',()=>setTimeout(updatePaymentState,0));
-    cashInput?.addEventListener('blur',updatePaymentState);
-
     const normalizeText=value=>String(value||'')
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g,'')
@@ -520,13 +549,15 @@
     const selectCustomerOption=option=>{
       if(!option) return;
       customer.value=option.dataset.customerId||'';
-      customerLabel.textContent=option.querySelector('strong')?.textContent||'Consumidor não identificado';
+      if(actionCustomerValue) actionCustomerValue.textContent=option.querySelector('strong')?.textContent||'Consumidor não identificado';
       customer.dispatchEvent(new Event('change',{bubbles:true}));
       customerModal.close();
     };
 
     const openCustomerModal=()=>{
       if(paymentModal?.open) paymentModal.close();
+      if(cashModal?.open) cashModal.close();
+      if(notesModal?.open) notesModal.close();
       if(!customerModal.open) customerModal.showModal();
       customerSearch.value='';
       filterCustomers();
@@ -549,13 +580,15 @@
     const selectPaymentOption=option=>{
       if(!option) return;
       payment.value=option.dataset.paymentValue||'cash';
-      paymentLabel.textContent=option.dataset.paymentLabel||option.textContent.trim();
+      if(actionPaymentValue) actionPaymentValue.textContent=option.dataset.paymentLabel||option.textContent.trim();
       payment.dispatchEvent(new Event('change',{bubbles:true}));
       paymentModal.close();
     };
 
     const openPaymentModal=()=>{
       if(customerModal?.open) customerModal.close();
+      if(cashModal?.open) cashModal.close();
+      if(notesModal?.open) notesModal.close();
       if(!paymentModal.open) paymentModal.showModal();
       const options=paymentButtons();
       const selectedIndex=options.findIndex(option=>option.dataset.paymentValue===payment.value);
@@ -564,8 +597,89 @@
       requestAnimationFrame(()=>options[paymentIndex]?.focus());
     };
 
-    customerButton?.addEventListener('click',openCustomerModal);
-    paymentButton?.addEventListener('click',openPaymentModal);
+    const setCashReceived=value=>{
+      const amount=parseDecimal(value);
+      cashInput.value=amount.toFixed(2);
+      updatePaymentState();
+      return amount;
+    };
+
+    const updateCashModalPreview=()=>{
+      const total=totals().total;
+      const received=parseDecimal(cashModalInput?.value);
+      if(cashModalTotal) cashModalTotal.textContent=money.format(total);
+      if(cashModalChange) cashModalChange.textContent=money.format(Math.max(0,received-total));
+    };
+
+    const openCashModal=()=>{
+      if(payment.value!=='cash'){
+        notify('Selecione Dinheiro como forma de pagamento para informar valor recebido.','info');
+        openPaymentModal();
+        return;
+      }
+      [customerModal,paymentModal,notesModal].forEach(modal=>{if(modal?.open) modal.close();});
+      const current=moneyInputValue(cashInput);
+      const suggested=current>0?current:totals().total;
+      cashModalInput.value=suggested.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+      updateCashModalPreview();
+      if(!cashModal.open) cashModal.showModal();
+      requestAnimationFrame(()=>{
+        cashModalInput.focus();
+        cashModalInput.select();
+      });
+    };
+
+    const applyCashModal=()=>{
+      setCashReceived(cashModalInput.value);
+      cashModal.close();
+    };
+
+    cashModalInput?.addEventListener('input',updateCashModalPreview);
+    cashModalInput?.addEventListener('keydown',event=>{
+      if(event.key==='Enter'){
+        event.preventDefault();
+        applyCashModal();
+      }
+    });
+    cashApply?.addEventListener('click',applyCashModal);
+
+    const openNotesModal=()=>{
+      [customerModal,paymentModal,cashModal].forEach(modal=>{if(modal?.open) modal.close();});
+      notesModalInput.value=notesInput.value||'';
+      if(!notesModal.open) notesModal.showModal();
+      requestAnimationFrame(()=>{
+        notesModalInput.focus();
+        notesModalInput.setSelectionRange(notesModalInput.value.length,notesModalInput.value.length);
+      });
+    };
+
+    const applyNotesModal=()=>{
+      notesInput.value=notesModalInput.value.trim();
+      if(actionNotesValue){
+        actionNotesValue.textContent=notesInput.value
+          ? (notesInput.value.length>38?notesInput.value.slice(0,38)+'…':notesInput.value)
+          : 'Sem observação';
+      }
+      notesModal.close();
+    };
+
+    notesApply?.addEventListener('click',applyNotesModal);
+    notesModalInput?.addEventListener('keydown',event=>{
+      if(event.ctrlKey && event.key==='Enter'){
+        event.preventDefault();
+        applyNotesModal();
+      }
+    });
+
+    actionSearch?.addEventListener('click',()=>{search.focus();search.select();});
+    actionQuantity?.addEventListener('click',()=>focusCartField('.pdv-qty input'));
+    actionCustomer?.addEventListener('click',openCustomerModal);
+    actionDiscount?.addEventListener('click',()=>focusCartField('.pdv-cart-discount input'));
+    actionPayment?.addEventListener('click',openPaymentModal);
+    actionCash?.addEventListener('click',openCashModal);
+    actionRemove?.addEventListener('click',removeActiveCartItem);
+    actionFinish?.addEventListener('click',()=>{if(!finish.disabled) form.requestSubmit();});
+    actionNotes?.addEventListener('click',openNotesModal);
 
     customerSearch?.addEventListener('input',filterCustomers);
     customerSearch?.addEventListener('keydown',event=>{
@@ -631,7 +745,7 @@
       button.addEventListener('click',()=>button.closest('dialog')?.close());
     });
 
-    [customerModal,paymentModal].forEach(modal=>{
+    [customerModal,paymentModal,cashModal,notesModal].forEach(modal=>{
       modal?.addEventListener('close',()=>{
         setTimeout(()=>search.focus(),0);
       });
@@ -691,7 +805,7 @@
     document.addEventListener('keydown',event=>{
       if(event.altKey||event.ctrlKey||event.metaKey) return;
 
-      if(customerModal?.open || paymentModal?.open) return;
+      if(customerModal?.open || paymentModal?.open || cashModal?.open || notesModal?.open) return;
 
       if(event.key==='Escape'){
         event.preventDefault();
@@ -718,13 +832,7 @@
         openPaymentModal();
       }else if(event.key==='F7'){
         event.preventDefault();
-        if(payment.value!=='cash'){
-          notify('F7 é usado para valor recebido quando o pagamento é em dinheiro.','info');
-          openPaymentModal();
-        }else{
-          cashInput?.focus();
-          cashInput?.select?.();
-        }
+        openCashModal();
       }else if(event.key==='F8'){
         event.preventDefault();
         removeActiveCartItem();
@@ -732,6 +840,9 @@
         event.preventDefault();
         if(!finish.disabled) form.requestSubmit();
         else notify('Complete os dados da venda antes de finalizar.','warning');
+      }else if(event.key==='F10'){
+        event.preventDefault();
+        openNotesModal();
       }
     });
 
@@ -747,7 +858,7 @@
       if(payment.value==='cash' && moneyInputValue(cashInput)+0.0001<t.total){
         event.preventDefault();
         notify('O valor recebido é menor que o total da venda.','warning');
-        cashInput.focus();
+        openCashModal();
         return;
       }
 
