@@ -1018,3 +1018,54 @@ input[type="number"]::-webkit-outer-spin-button{
 .input-action-group{
   box-shadow:none!important;
 }
+
+/* Ícones nos selects e ações do carrinho */
+.ui-select-value.has-icon,
+.ui-select-option.has-icon{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  min-width:0;
+}
+.ui-select-value.has-icon>span:last-child{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.ui-select-option-icon{
+  width:17px;
+  height:17px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 17px;
+}
+.ui-select-option-icon svg{
+  width:17px;
+  height:17px;
+}
+.sale-item-picker>.ui-select .ui-select-value{
+  font-weight:600;
+}
+.sale-row-actions{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+}
+.sale-row-actions .btn-icon svg,
+.sale-finance-table .btn-icon svg{
+  width:16px;
+  height:16px;
+}
+.sale-row-edit{
+  color:#65788c;
+}
+.sale-row-edit:hover{
+  color:#2877c7;
+  border-color:#bfd3e6;
+  background:#eef6fd;
+}
+.sale-finance-section[hidden]{
+  display:none!important;
+}
