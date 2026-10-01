@@ -14,6 +14,7 @@ class SaleController extends Controller
     public function index(Request $request)
     {
         $status=$request->query('status','');
+        $perPage=in_array($request->integer('per_page'),[10,25,50,100],true) ? $request->integer('per_page') : 25;
         $month=(string)$request->query('month',now()->format('Y-m'));
 
         try {
@@ -41,7 +42,7 @@ class SaleController extends Controller
             })
             ->when(in_array($status,['completed','cancelled'],true),fn($q)=>$q->where('status',$status))
             ->latest()
-            ->paginate(15)
+            ->paginate($perPage)
             ->withQueryString();
 
         return view('sales.index',compact('sales','status','month','prevMonth','nextMonth','monthLabel'));
