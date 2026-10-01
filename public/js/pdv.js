@@ -18,6 +18,7 @@
     const changeBox=document.getElementById('pdvChangeBox');
     const changeOutput=document.getElementById('pdvChange');
     const finish=document.getElementById('pdvFinish');
+    const fullscreenButton=document.getElementById('pdvFullscreen');
     const itemCount=document.getElementById('pdvItemCount');
     const subtotalOutput=document.getElementById('pdvSubtotal');
     const discountOutput=document.getElementById('pdvDiscountTotal');
@@ -424,6 +425,24 @@
       const wrapper=select?.nextElementSibling;
       wrapper?.querySelector('.ui-select-trigger')?.click();
     };
+
+    fullscreenButton?.addEventListener('click',async()=>{
+      try{
+        if(!document.fullscreenElement){
+          await document.documentElement.requestFullscreen?.();
+        }else{
+          await document.exitFullscreen?.();
+        }
+      }catch(_){
+        notify('O navegador não permitiu entrar em tela cheia.','warning');
+      }
+    });
+
+    document.addEventListener('fullscreenchange',()=>{
+      if(!fullscreenButton) return;
+      const label=fullscreenButton.querySelector('span');
+      if(label) label.textContent=document.fullscreenElement?'Sair da tela cheia':'Tela cheia';
+    });
 
     document.addEventListener('keydown',event=>{
       if(event.altKey||event.ctrlKey||event.metaKey) return;
