@@ -92,7 +92,7 @@ final class IcpBrasilSubjectDocumentExtractor
 
     private function extractFromCertificate(OpenSSLCertificate|string $certificate): ?string
     {
-        if (!openssl_x509_export($certificate, $pem, false)) {
+        if (!openssl_x509_export($certificate, $pem, true)) {
             return null;
         }
 
