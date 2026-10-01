@@ -1388,7 +1388,7 @@
         '<option value="other">Outro</option>'+
       '</select></td>'+
       '<td><label class="payment-receivable"><input type="hidden" value="0"><input type="checkbox" value="1" checked><span>A receber</span></label></td>'+
-      '<td><button type="button" class="btn-icon row-action-danger" data-tooltip="Remover parcela" aria-label="Remover parcela">×</button></td>';
+      '<td><button type="button" class="btn-icon row-action-danger" data-tooltip="Remover parcela" aria-label="Remover parcela"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M5 6l1 15h12l1-15M10 10v7M14 10v7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></td>';
 
     const amount=tr.querySelector('.payment-amount');
     const date=tr.querySelector('.payment-date');
