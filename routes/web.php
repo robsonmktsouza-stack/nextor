@@ -24,6 +24,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/products/bulk-status',[ProductController::class,'bulkStatus'])->name('products.bulk-status');
     Route::delete('/products/bulk-delete',[ProductController::class,'bulkDelete'])->name('products.bulk-delete');
     Route::get('/customers',[CustomerController::class,'index'])->name('customers.index');
+    Route::get('/customers/cnpj/{cnpj}',[CustomerController::class,'lookupCnpj'])->where('cnpj','[0-9A-Za-z.\\/-]+')->name('customers.lookup-cnpj');
     Route::get('/customers/create',[CustomerController::class,'create'])->name('customers.create');
     Route::post('/customers',[CustomerController::class,'store'])->name('customers.store');
     Route::get('/customers/{customer}/edit',[CustomerController::class,'edit'])->name('customers.edit');
