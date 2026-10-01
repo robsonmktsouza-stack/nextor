@@ -45,6 +45,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/stock',[StockController::class,'store'])->name('stock.store');
     Route::get('/pdv',[PdvController::class,'index'])->name('pdv.index');
     Route::get('/pdv/search',[PdvController::class,'search'])->name('pdv.search');
+    Route::get('/pdv/receipt/{sale}',[PdvController::class,'receipt'])->name('pdv.receipt');
     Route::post('/pdv',[PdvController::class,'store'])->name('pdv.store');
     Route::get('/sales',[SaleController::class,'index'])->name('sales.index');
     Route::get('/sales/create',[SaleController::class,'create'])->name('sales.create');
