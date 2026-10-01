@@ -97,7 +97,7 @@
   </label>
 </section>
 
-<section class="sale-finance-section" id="saleFinanceSection">
+<section class="sale-finance-section" id="saleFinanceSection" hidden>
   <div class="sale-section-title">
     <div>
       <h2>Financeiro</h2>
