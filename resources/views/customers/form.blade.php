@@ -131,9 +131,12 @@ $deliveryAddresses=collect(old('delivery_addresses',$customer->exists ? $custome
        <label class="field col-3"><span>Suframa</span><input name="suframa" value="{{ old('suframa',$customer->suframa) }}"></label>
        <label class="field col-3"><span>Ente governamental</span>
          <select name="government_entity">
-           <option value="">Não informado</option>
-           <option value="no" @selected(old('government_entity',$customer->government_entity)==='no')>Não</option>
-           <option value="yes" @selected(old('government_entity',$customer->government_entity)==='yes')>Sim</option>
+           <option value=""></option>
+           <option value="union" @selected(old('government_entity',$customer->government_entity)==='union')>União</option>
+           <option value="state" @selected(old('government_entity',$customer->government_entity)==='state')>Estado</option>
+           <option value="federal_district" @selected(old('government_entity',$customer->government_entity)==='federal_district')>Distrito Federal</option>
+           <option value="municipality" @selected(old('government_entity',$customer->government_entity)==='municipality')>Município</option>
+           <option value="other" @selected(old('government_entity',$customer->government_entity)==='other')>Outros</option>
          </select>
        </label>
 
@@ -161,9 +164,15 @@ $deliveryAddresses=collect(old('delivery_addresses',$customer->exists ? $custome
          <select name="lgpd_legal_basis">
            <option value="default" @selected(old('lgpd_legal_basis',$customer->lgpd_legal_basis)==='default')>Utilizar configuração padrão</option>
            <option value="consent" @selected(old('lgpd_legal_basis',$customer->lgpd_legal_basis)==='consent')>Consentimento</option>
-           <option value="contract" @selected(old('lgpd_legal_basis',$customer->lgpd_legal_basis)==='contract')>Execução de contrato</option>
-           <option value="legal_obligation" @selected(old('lgpd_legal_basis',$customer->lgpd_legal_basis)==='legal_obligation')>Obrigação legal/regulatória</option>
-           <option value="legitimate_interest" @selected(old('lgpd_legal_basis',$customer->lgpd_legal_basis)==='legitimate_interest')>Legítimo interesse</option>
+           <option value="legal_obligation" @selected(old('lgpd_legal_basis',$customer->lgpd_legal_basis)==='legal_obligation')>Obrigação Legal</option>
+           <option value="public_policy" @selected(old('lgpd_legal_basis',$customer->lgpd_legal_basis)==='public_policy')>Políticas Públicas</option>
+           <option value="research" @selected(old('lgpd_legal_basis',$customer->lgpd_legal_basis)==='research')>Pesquisa e estudo</option>
+           <option value="contract" @selected(old('lgpd_legal_basis',$customer->lgpd_legal_basis)==='contract')>Execução contratual</option>
+           <option value="legal_claims" @selected(old('lgpd_legal_basis',$customer->lgpd_legal_basis)==='legal_claims')>Exercício Regular de Direito em Processo</option>
+           <option value="life_protection" @selected(old('lgpd_legal_basis',$customer->lgpd_legal_basis)==='life_protection')>Proteção à vida</option>
+           <option value="health" @selected(old('lgpd_legal_basis',$customer->lgpd_legal_basis)==='health')>Tutela da Saúde</option>
+           <option value="credit_protection" @selected(old('lgpd_legal_basis',$customer->lgpd_legal_basis)==='credit_protection')>Proteção ao Crédito</option>
+           <option value="legitimate_interest" @selected(old('lgpd_legal_basis',$customer->lgpd_legal_basis)==='legitimate_interest')>Legítimo Interesse</option>
          </select>
        </label>
      </div>
