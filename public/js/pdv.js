@@ -324,6 +324,7 @@
       const discountWrap=document.createElement('button');
       discountWrap.type='button';
       discountWrap.className='pdv-cart-discount-button';
+      if(item.discount>0) discountWrap.classList.add('has-discount');
       discountWrap.setAttribute('aria-label','Alterar desconto');
       discountWrap.setAttribute('data-tooltip','Alterar desconto (F5)');
       discountWrap.innerHTML=
