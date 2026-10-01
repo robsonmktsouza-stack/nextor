@@ -29,6 +29,7 @@
     const state=new Map();
     let currentKind='all';
     let lastResults=[];
+    let resultIndex=-1;
     let searchTimer=null;
     let searchController=null;
 
@@ -97,6 +98,7 @@
         });
       }
 
+      app.dataset.activeCartKey=key;
       renderCart();
       search.value='';
       caption.textContent='Item adicionado. Busque o próximo produto ou serviço.';
@@ -105,6 +107,8 @@
 
     const removeItem=key=>{
       state.delete(key);
+      const keys=[...state.keys()];
+      app.dataset.activeCartKey=keys.at(-1)||'';
       renderCart();
       search.focus();
     };
@@ -189,6 +193,7 @@
       const row=document.createElement('div');
       row.className='pdv-cart-row';
       row.dataset.key=key;
+      if(app.dataset.activeCartKey===key) row.classList.add('keyboard-active');
 
       const title=document.createElement('div');
       title.className='pdv-cart-item';
@@ -204,6 +209,11 @@
       small.textContent=(item.code||'Sem código')+' · '+money.format(item.price)+' / '+(item.unit||'UN');
       details.append(strong,small);
       title.append(marker,details);
+      title.tabIndex=0;
+      title.addEventListener('click',()=>{
+        app.dataset.activeCartKey=key;
+        renderCart();
+      });
 
       const qtyBox=document.createElement('div');
       qtyBox.className='pdv-qty';
@@ -235,6 +245,7 @@
         item.quantity=next;
         renderCart();
       });
+      qty.addEventListener('focus',()=>{app.dataset.activeCartKey=key;row.classList.add('keyboard-active');});
       qty.addEventListener('change',()=>setQuantity(key,qty.value));
       qty.addEventListener('keydown',event=>{
         if(event.key==='Enter'){event.preventDefault();setQuantity(key,qty.value);search.focus();}
@@ -250,6 +261,7 @@
       discount.value=item.discount.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
       discount.setAttribute('aria-label','Desconto do item');
       discountWrap.append(discountLabel,discount);
+      discount.addEventListener('focus',()=>{app.dataset.activeCartKey=key;row.classList.add('keyboard-active');});
       discount.addEventListener('change',()=>setDiscount(key,discount.value));
       discount.addEventListener('keydown',event=>{
         if(event.key==='Enter'){event.preventDefault();setDiscount(key,discount.value);search.focus();}
@@ -331,9 +343,24 @@
       return button;
     };
 
+    const updateResultSelection=()=>{
+      const cards=[...results.querySelectorAll('.pdv-result-card')];
+      cards.forEach((card,index)=>card.classList.toggle('keyboard-selected',index===resultIndex));
+      const current=cards[resultIndex];
+      current?.scrollIntoView({block:'nearest'});
+    };
+
+    const moveResultSelection=direction=>{
+      if(!lastResults.length) return;
+      if(resultIndex<0) resultIndex=0;
+      else resultIndex=Math.max(0,Math.min(lastResults.length-1,resultIndex+direction));
+      updateResultSelection();
+    };
+
     const renderResults=items=>{
       results.innerHTML='';
       lastResults=items;
+      resultIndex=items.length?0:-1;
 
       if(!items.length){
         const empty=document.createElement('div');
@@ -344,14 +371,23 @@
         return;
       }
 
-      items.forEach(item=>results.appendChild(resultCard(item)));
-      caption.textContent=items.length+' '+(items.length===1?'resultado':'resultados')+'. Clique para adicionar ao carrinho.';
+      items.forEach((item,index)=>{
+        const card=resultCard(item);
+        card.addEventListener('mouseenter',()=>{
+          resultIndex=index;
+          updateResultSelection();
+        });
+        results.appendChild(card);
+      });
+      updateResultSelection();
+      caption.textContent=items.length+' '+(items.length===1?'resultado':'resultados')+'. Use ↑/↓ e Enter para adicionar.';
     };
 
     const performSearch=async(addOnExact=false)=>{
       const term=search.value.trim();
       if(!term){
         lastResults=[];
+        resultIndex=-1;
         results.innerHTML='<div class="pdv-empty-state"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m20 20-4-4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><strong>Localize um item para começar</strong><span>Use nome, SKU, EAN/GTIN ou item de serviço.</span></div>';
         caption.textContent='Digite para localizar um produto ou serviço.';
         return;
@@ -400,10 +436,24 @@
     });
 
     search.addEventListener('keydown',event=>{
+      if(event.key==='ArrowDown'){
+        event.preventDefault();
+        moveResultSelection(1);
+        return;
+      }
+      if(event.key==='ArrowUp'){
+        event.preventDefault();
+        moveResultSelection(-1);
+        return;
+      }
       if(event.key==='Enter'){
         event.preventDefault();
         clearTimeout(searchTimer);
-        performSearch(true);
+        if(lastResults.length && resultIndex>=0){
+          addItem(lastResults[resultIndex]);
+        }else{
+          performSearch(true);
+        }
       }
     });
 
@@ -423,7 +473,42 @@
 
     const openCustomSelect=select=>{
       const wrapper=select?.nextElementSibling;
-      wrapper?.querySelector('.ui-select-trigger')?.click();
+      const trigger=wrapper?.querySelector('.ui-select-trigger');
+      trigger?.focus();
+      trigger?.click();
+    };
+
+    const activeCartKey=()=>{
+      const explicit=app.dataset.activeCartKey;
+      if(explicit && state.has(explicit)) return explicit;
+      return [...state.keys()].at(-1)||'';
+    };
+
+    const focusCartField=selector=>{
+      const key=activeCartKey();
+      if(!key){
+        notify('Adicione um item ao carrinho primeiro.','warning');
+        search.focus();
+        return;
+      }
+      app.dataset.activeCartKey=key;
+      renderCart();
+      requestAnimationFrame(()=>{
+        const row=cart.querySelector('.pdv-cart-row[data-key="'+CSS.escape(key)+'"]');
+        const input=row?.querySelector(selector);
+        input?.focus();
+        input?.select?.();
+      });
+    };
+
+    const removeActiveCartItem=()=>{
+      const key=activeCartKey();
+      if(!key){
+        notify('Não há item para remover.','warning');
+        return;
+      }
+      removeItem(key);
+      notify('Último item removido.','info');
     };
 
     fullscreenButton?.addEventListener('click',async()=>{
@@ -447,19 +532,45 @@
     document.addEventListener('keydown',event=>{
       if(event.altKey||event.ctrlKey||event.metaKey) return;
 
+      if(event.key==='Escape'){
+        event.preventDefault();
+        search.focus();
+        search.select();
+        return;
+      }
+
       if(event.key==='F2'){
         event.preventDefault();
         search.focus();
         search.select();
+      }else if(event.key==='F3'){
+        event.preventDefault();
+        focusCartField('.pdv-qty input');
       }else if(event.key==='F4'){
         event.preventDefault();
         openCustomSelect(customer);
+      }else if(event.key==='F5'){
+        event.preventDefault();
+        focusCartField('.pdv-cart-discount input');
       }else if(event.key==='F6'){
         event.preventDefault();
         openCustomSelect(payment);
+      }else if(event.key==='F7'){
+        event.preventDefault();
+        if(payment.value!=='cash'){
+          notify('F7 é usado para valor recebido quando o pagamento é em dinheiro.','info');
+          openCustomSelect(payment);
+        }else{
+          cashInput?.focus();
+          cashInput?.select?.();
+        }
+      }else if(event.key==='F8'){
+        event.preventDefault();
+        removeActiveCartItem();
       }else if(event.key==='F9'){
         event.preventDefault();
         if(!finish.disabled) form.requestSubmit();
+        else notify('Complete os dados da venda antes de finalizar.','warning');
       }
     });
 
