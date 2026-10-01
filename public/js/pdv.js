@@ -127,9 +127,7 @@
       if(!item) return;
       const gross=item.price*item.quantity;
       item.discount=Math.min(gross,parseDecimal(value));
-      renderSummary();
-      syncPayload();
-      updateFinishState();
+      renderCart();
     };
 
     const syncPayload=()=>{
