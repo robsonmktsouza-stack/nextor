@@ -1069,3 +1069,85 @@ input[type="number"]::-webkit-outer-spin-button{
 .sale-finance-section[hidden]{
   display:none!important;
 }
+
+/* Campo numérico unificado: uma única caixa para prefixo + valor */
+.numeric-input{
+  height:40px;
+  display:flex;
+  align-items:stretch;
+  overflow:hidden;
+  border:1px solid #c9d0d8!important;
+  border-radius:4px;
+  background:#fff;
+  box-shadow:none!important;
+  transition:border-color .12s ease,background .12s ease;
+}
+
+.numeric-input-prefix{
+  width:42px;
+  min-width:42px;
+  height:auto!important;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:0!important;
+  border-right:1px solid #d8dee5!important;
+  border-radius:0!important;
+  background:#f6f7f8;
+  color:#526171;
+}
+
+.numeric-input>input[type="number"],
+.numeric-input>input[data-money-ready="1"]{
+  flex:1;
+  min-width:0;
+  width:100%;
+  height:100%!important;
+  min-height:0!important;
+  margin:0;
+  padding:0 10px!important;
+  border:0!important;
+  border-radius:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+  background:#fff!important;
+  color:#3f4f61;
+}
+
+.numeric-input>input[type="number"]:focus,
+.numeric-input>input[data-money-ready="1"]:focus,
+.numeric-input>input[type="number"]:focus-visible,
+.numeric-input>input[data-money-ready="1"]:focus-visible{
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+}
+
+.numeric-input:focus-within{
+  border-color:#5c9ff1!important;
+  box-shadow:none!important;
+}
+
+.numeric-input:focus-within .numeric-input-prefix{
+  border-color:#d8dee5!important;
+  color:#2877c7;
+}
+
+.sale-cart-table .numeric-input,
+.sale-finance-table .numeric-input{
+  height:40px;
+}
+
+.sale-cart-table .numeric-input-prefix,
+.sale-finance-table .numeric-input-prefix{
+  width:42px;
+  min-width:42px;
+  height:auto!important;
+}
+
+.sale-cart-table .numeric-input input,
+.sale-finance-table .numeric-input input{
+  height:100%!important;
+  text-align:right;
+  font-variant-numeric:tabular-nums;
+}
