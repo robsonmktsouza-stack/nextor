@@ -417,41 +417,110 @@
   });
   document.querySelectorAll('select').forEach(enhanceSelect);
 
-  // Campos numéricos padronizados do Nextor
+  // Campos numéricos e monetários padronizados do Nextor
   const numberIconSvg='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 6h10M10 12h10M10 18h10M4 6h1M4 12h1M4 18h1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+  const moneyFormatter=new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+
   const numberKind=input=>{
     const explicit=(input.dataset.numberKind||'').trim();
     if(explicit) return explicit;
-    const key=((input.name||'')+' '+(input.id||'')+' '+(input.getAttribute('aria-label')||'')).toLowerCase();
+    const key=((input.name||input.dataset.moneyName||'')+' '+(input.id||'')+' '+(input.getAttribute('aria-label')||'')).toLowerCase();
     if(/percent|percentage|margin|margem|rate|tax_rate|aliquota|alíquota/.test(key)) return 'percent';
     if(/price|cost|amount|total|value|valor|preco|preço/.test(key)) return 'money';
     return 'number';
   };
+
+  const initialMoneyValue=value=>{
+    let text=String(value??'').trim();
+    if(!text) return 0;
+
+    if(text.includes(',')){
+      text=text.replace(/\./g,'').replace(',','.');
+    }
+    const parsed=Number(text);
+    return Number.isFinite(parsed) ? Math.max(0,parsed) : 0;
+  };
+
+  const enhanceMoneyInput=input=>{
+    if(!input || input.dataset.moneyReady==='1') return;
+    const originalName=input.name;
+    if(!originalName) return;
+
+    input.dataset.moneyReady='1';
+    input.dataset.moneyName=originalName;
+
+    const hidden=document.createElement('input');
+    hidden.type='hidden';
+    hidden.name=originalName;
+    hidden.dataset.moneyHidden='1';
+
+    const initial=initialMoneyValue(input.value);
+    hidden.value=initial.toFixed(2);
+
+    input.removeAttribute('name');
+    input.type='text';
+    input.inputMode='numeric';
+    input.autocomplete='off';
+    input.value=moneyFormatter.format(initial);
+
+    input.insertAdjacentElement('afterend',hidden);
+
+    const apply=()=>{
+      const digits=String(input.value||'').replace(/\D/g,'').slice(0,15);
+      const cents=digits ? Number(digits) : 0;
+      const value=cents/100;
+      input.value=moneyFormatter.format(value);
+      hidden.value=value.toFixed(2);
+      input.dataset.moneyValue=hidden.value;
+    };
+
+    input.addEventListener('input',apply);
+    input.addEventListener('focus',()=>{
+      requestAnimationFrame(()=>input.select());
+    });
+    input.addEventListener('click',()=>{
+      if(document.activeElement===input && input.selectionStart===input.selectionEnd){
+        input.select();
+      }
+    });
+    input.addEventListener('keydown',event=>{
+      if(event.key==='ArrowUp'||event.key==='ArrowDown') event.preventDefault();
+    });
+
+    input.dataset.moneyValue=hidden.value;
+  };
+
   const enhanceNumberInput=input=>{
-    if(!input || input.type!=='number' || input.dataset.numberReady==='1') return;
-    if(input.closest('.input-prefix,.numeric-input')){input.dataset.numberReady='1';return;}
-    input.dataset.numberReady='1';
+    if(!input || input.dataset.numberReady==='1') return;
+    if(input.type!=='number' && input.dataset.numberKind!=='money') return;
 
     const kind=numberKind(input);
-    const wrapper=document.createElement('div');
-    wrapper.className='numeric-input numeric-'+kind;
-    const prefix=document.createElement('span');
-    prefix.className='numeric-input-prefix';
-    prefix.setAttribute('aria-hidden','true');
-    prefix.innerHTML=kind==='money'?'R$':kind==='percent'?'%':numberIconSvg;
+    input.dataset.numberReady='1';
 
-    input.insertAdjacentElement('beforebegin',wrapper);
-    wrapper.appendChild(prefix);
-    wrapper.appendChild(input);
+    if(!input.closest('.input-prefix,.numeric-input')){
+      const wrapper=document.createElement('div');
+      wrapper.className='numeric-input numeric-'+kind;
+      const prefix=document.createElement('span');
+      prefix.className='numeric-input-prefix';
+      prefix.setAttribute('aria-hidden','true');
+      prefix.innerHTML=kind==='money'?'R$':kind==='percent'?'%':numberIconSvg;
+
+      input.insertAdjacentElement('beforebegin',wrapper);
+      wrapper.appendChild(prefix);
+      wrapper.appendChild(input);
+    }
+
+    if(kind==='money') enhanceMoneyInput(input);
   };
-  document.querySelectorAll('input[type="number"]').forEach(enhanceNumberInput);
+
+  document.querySelectorAll('input[type="number"],input[data-number-kind="money"]').forEach(enhanceNumberInput);
 
   const numberObserver=new MutationObserver(mutations=>{
     mutations.forEach(mutation=>{
       mutation.addedNodes.forEach(node=>{
         if(!(node instanceof Element)) return;
-        if(node.matches?.('input[type="number"]')) enhanceNumberInput(node);
-        node.querySelectorAll?.('input[type="number"]').forEach(enhanceNumberInput);
+        if(node.matches?.('input[type="number"],input[data-number-kind="money"]')) enhanceNumberInput(node);
+        node.querySelectorAll?.('input[type="number"],input[data-number-kind="money"]').forEach(enhanceNumberInput);
       });
     });
   });
@@ -600,7 +669,7 @@
   });
   textMaskObserver.observe(document.body,{childList:true,subtree:true});
 
-  window.NextorUI={enhanceSelect,enhanceNumberInput,enhanceTextMask};
+  window.NextorUI={enhanceSelect,enhanceNumberInput,enhanceMoneyInput,enhanceTextMask};
 
   // Abas de formulários
   document.querySelectorAll('[data-tabs]').forEach(tabs=>{
@@ -634,8 +703,8 @@
     const sale=area.querySelector('[data-sale-price]');
     const output=area.querySelector('[data-margin-output]');
     const calc=()=>{
-      const c=parseFloat(cost?.value||'0')||0;
-      const s=parseFloat(sale?.value||'0')||0;
+      const c=parseFloat(cost?.dataset.moneyValue||cost?.value||'0')||0;
+      const s=parseFloat(sale?.dataset.moneyValue||sale?.value||'0')||0;
       const margin=s>0?((s-c)/s)*100:0;
       if(output) output.value=margin.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
     };
