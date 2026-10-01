@@ -233,6 +233,7 @@
 
   // Toda chamada fetch passa automaticamente pelo loading global.
   const nativeFetch=window.fetch.bind(window);
+  window.NextorFetch=nativeFetch;
   window.fetch=async(...args)=>{
     beginLoading('Carregando...');
     try{return await nativeFetch(...args);}
