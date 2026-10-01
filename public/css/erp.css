@@ -967,3 +967,54 @@ input[type="number"]::-webkit-outer-spin-button{
   .app-root.sidebar-collapsed .sale-savebar{left:0}
   .sale-save-summary{display:none}
 }
+
+/* Controles com uma única borda visual — remove efeito de moldura dupla */
+.field input:focus,
+.field textarea:focus,
+.field select:focus,
+.ui-select-trigger:focus,
+.input-filter:focus,
+.table-search input:focus,
+.sale-item-search:focus,
+.sale-finance-table input:focus,
+.sale-cart-table input:focus{
+  outline:none!important;
+  box-shadow:none!important;
+}
+
+.customer-editor .field input:focus,
+.customer-editor .field textarea:focus{
+  border-color:#5c9ff1!important;
+  box-shadow:none!important;
+}
+
+.product-editor .field input:focus,
+.product-editor .field textarea:focus{
+  border-color:#20aaa4!important;
+  box-shadow:none!important;
+}
+
+.service-editor .field input:focus,
+.service-editor .field textarea:focus{
+  border-color:#96358d!important;
+  box-shadow:none!important;
+}
+
+.numeric-input:focus-within>input[type="number"],
+.numeric-input:focus-within>input[data-money-ready="1"]{
+  box-shadow:none!important;
+}
+
+.input-prefix:focus-within>input,
+.input-icon-group:focus-within>input,
+.input-action-group:focus-within>input{
+  outline:none!important;
+  box-shadow:none!important;
+}
+
+.numeric-input,
+.input-prefix,
+.input-icon-group,
+.input-action-group{
+  box-shadow:none!important;
+}
