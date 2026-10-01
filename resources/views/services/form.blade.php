@@ -5,7 +5,7 @@
 <form class="service-editor" method="post" action="{{ $editing ? route('services.update',$service) : route('services.store') }}">
   @csrf
   @if($editing) @method('PUT') @endif
-  <input type="hidden" name="is_active" value="{{ old('is_active',$service->is_active ?? true) ? 1 : 0 }}">
+  <input type="hidden" name="is_active" value="{{ (string) old('is_active',($service->is_active ?? true) ? '1' : '0') === '0' ? 0 : 1 }}">
 
   <div class="editor-tabs service-tabs" data-tabs>
     <button type="button" class="editor-tab active" data-tab-target="service-data">Dados do serviço</button>
