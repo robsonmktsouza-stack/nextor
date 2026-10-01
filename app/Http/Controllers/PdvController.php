@@ -223,9 +223,41 @@ class PdvController extends Controller
             : 0;
 
         return redirect()
-            ->route('pdv.index')
-            ->with('success','Venda #'.str_pad((string)$sale->id,5,'0',STR_PAD_LEFT).' finalizada no PDV.')
+            ->route('pdv.receipt',$sale)
             ->with('pdv_last_sale',$sale->id)
+            ->with('pdv_cash_received',$data['payment_method']==='cash' ? $cashReceived : $total)
             ->with('pdv_change',$change);
+    }
+
+    public function receipt(Sale $sale)
+    {
+        abort_unless($sale->source==='pdv',404);
+
+        $sale->load([
+            'customer:id,name,document',
+            'user:id,name',
+            'items',
+            'payments',
+        ]);
+
+        $paymentLabels=[
+            'cash'=>'Dinheiro',
+            'pix'=>'PIX',
+            'debit_card'=>'Cartão de débito',
+            'credit_card'=>'Cartão de crédito',
+            'bank_slip'=>'Boleto',
+            'bank_transfer'=>'Transferência',
+            'other'=>'Outro',
+        ];
+
+        $cashReceived=(float)session('pdv_cash_received',(float)$sale->total);
+        $change=(float)session('pdv_change',0);
+
+        return view('pdv.receipt',[
+            'sale'=>$sale,
+            'paymentLabels'=>$paymentLabels,
+            'cashReceived'=>$cashReceived,
+            'change'=>$change,
+        ]);
     }
 }
