@@ -20,6 +20,14 @@
     const paymentModal=document.getElementById('pdvPaymentModal');
     const paymentOptions=document.getElementById('pdvPaymentOptions');
 
+    const discountModal=document.getElementById('pdvDiscountModal');
+    const discountModalInput=document.getElementById('pdvDiscountModalInput');
+    const discountItemName=document.getElementById('pdvDiscountItemName');
+    const discountGross=document.getElementById('pdvDiscountGross');
+    const discountNet=document.getElementById('pdvDiscountNet');
+    const discountApply=document.getElementById('pdvDiscountApply');
+    let discountModalKey='';
+
     const cashInput=document.getElementById('pdvCashReceived');
     const cashModal=document.getElementById('pdvCashModal');
     const cashModalInput=document.getElementById('pdvCashModalInput');
@@ -256,10 +264,8 @@
         renderCart();
       });
 
-      const qtyWrap=document.createElement('label');
+      const qtyWrap=document.createElement('div');
       qtyWrap.className='pdv-cart-qty-cell';
-      const qtyLabel=document.createElement('span');
-      qtyLabel.textContent='Quantidade';
 
       const qtyBox=document.createElement('div');
       qtyBox.className='pdv-qty';
@@ -267,51 +273,66 @@
       minus.type='button';
       minus.textContent='−';
       minus.setAttribute('aria-label','Diminuir quantidade');
+      minus.setAttribute('data-tooltip','Diminuir quantidade');
+
       const qty=document.createElement('input');
       qty.type='text';
       qty.inputMode='decimal';
       qty.value=number.format(item.quantity);
       qty.setAttribute('aria-label','Quantidade');
+      qty.setAttribute('data-tooltip','Quantidade');
+
       const plus=document.createElement('button');
       plus.type='button';
       plus.textContent='+';
       plus.setAttribute('aria-label','Aumentar quantidade');
+      plus.setAttribute('data-tooltip','Aumentar quantidade');
+
       qtyBox.append(minus,qty,plus);
-      qtyWrap.append(qtyLabel,qtyBox);
+      qtyWrap.appendChild(qtyBox);
 
       minus.addEventListener('click',()=>{
         const next=item.quantity-1;
         if(next<=0){removeItem(key);return;}
         item.quantity=next;
         if(item.discount>item.price*item.quantity) item.discount=item.price*item.quantity;
+        app.dataset.activeCartKey=key;
         renderCart();
       });
+
       plus.addEventListener('click',()=>{
         const next=item.quantity+1;
         if(!canIncrease(item,next)) return;
         item.quantity=next;
+        app.dataset.activeCartKey=key;
         renderCart();
       });
-      qty.addEventListener('focus',()=>{app.dataset.activeCartKey=key;row.classList.add('keyboard-active');});
+
+      qty.addEventListener('focus',()=>{
+        app.dataset.activeCartKey=key;
+        row.classList.add('keyboard-active');
+      });
       qty.addEventListener('change',()=>setQuantity(key,qty.value));
       qty.addEventListener('keydown',event=>{
-        if(event.key==='Enter'){event.preventDefault();setQuantity(key,qty.value);search.focus();}
+        if(event.key==='Enter'){
+          event.preventDefault();
+          setQuantity(key,qty.value);
+          search.focus();
+        }
       });
 
-      const discountWrap=document.createElement('label');
-      discountWrap.className='pdv-cart-discount';
-      const discountLabel=document.createElement('span');
-      discountLabel.textContent='Desconto';
-      const discount=document.createElement('input');
-      discount.type='text';
-      discount.inputMode='decimal';
-      discount.value=item.discount.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-      discount.setAttribute('aria-label','Desconto do item');
-      discountWrap.append(discountLabel,discount);
-      discount.addEventListener('focus',()=>{app.dataset.activeCartKey=key;row.classList.add('keyboard-active');});
-      discount.addEventListener('change',()=>setDiscount(key,discount.value));
-      discount.addEventListener('keydown',event=>{
-        if(event.key==='Enter'){event.preventDefault();setDiscount(key,discount.value);search.focus();}
+      const discountWrap=document.createElement('button');
+      discountWrap.type='button';
+      discountWrap.className='pdv-cart-discount-button';
+      discountWrap.setAttribute('aria-label','Alterar desconto');
+      discountWrap.setAttribute('data-tooltip','Alterar desconto (F5)');
+      discountWrap.innerHTML=
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13 13 20 4 11V4h7l9 9Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8.5" cy="8.5" r="1.2" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>'+
+        '<span>'+money.format(item.discount)+'</span>';
+
+      discountWrap.addEventListener('click',()=>{
+        app.dataset.activeCartKey=key;
+        openDiscountModal(key);
       });
 
       const line=document.createElement('div');
@@ -597,6 +618,60 @@
       requestAnimationFrame(()=>options[paymentIndex]?.focus());
     };
 
+    const updateDiscountPreview=()=>{
+      const item=state.get(discountModalKey);
+      if(!item) return;
+      const gross=item.price*item.quantity;
+      const discount=Math.min(gross,parseDecimal(discountModalInput?.value));
+      if(discountGross) discountGross.textContent=money.format(gross);
+      if(discountNet) discountNet.textContent=money.format(Math.max(0,gross-discount));
+    };
+
+    const openDiscountModal=(key=activeCartKey())=>{
+      const item=state.get(key);
+      if(!item){
+        notify('Adicione um item ao carrinho primeiro.','warning');
+        search.focus();
+        return;
+      }
+
+      [customerModal,paymentModal,discountModal,cashModal,notesModal].forEach(modal=>{
+        if(modal?.open) modal.close();
+      });
+
+      discountModalKey=key;
+      app.dataset.activeCartKey=key;
+      if(discountItemName) discountItemName.textContent=item.name;
+      if(discountModalInput){
+        discountModalInput.value=item.discount.toLocaleString('pt-BR',{
+          minimumFractionDigits:2,
+          maximumFractionDigits:2
+        });
+      }
+      updateDiscountPreview();
+
+      if(!discountModal.open) discountModal.showModal();
+      requestAnimationFrame(()=>{
+        discountModalInput?.focus();
+        discountModalInput?.select?.();
+      });
+    };
+
+    const applyDiscountModal=()=>{
+      if(!discountModalKey) return;
+      setDiscount(discountModalKey,discountModalInput?.value||0);
+      discountModal.close();
+    };
+
+    discountModalInput?.addEventListener('input',updateDiscountPreview);
+    discountModalInput?.addEventListener('keydown',event=>{
+      if(event.key==='Enter'){
+        event.preventDefault();
+        applyDiscountModal();
+      }
+    });
+    discountApply?.addEventListener('click',applyDiscountModal);
+
     const setCashReceived=value=>{
       const amount=parseDecimal(value);
       cashInput.value=amount.toFixed(2);
@@ -617,7 +692,7 @@
         openPaymentModal();
         return;
       }
-      [customerModal,paymentModal,notesModal].forEach(modal=>{if(modal?.open) modal.close();});
+      [customerModal,paymentModal,discountModal,notesModal].forEach(modal=>{if(modal?.open) modal.close();});
       const current=moneyInputValue(cashInput);
       const suggested=current>0?current:totals().total;
       cashModalInput.value=suggested.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -644,7 +719,7 @@
     cashApply?.addEventListener('click',applyCashModal);
 
     const openNotesModal=()=>{
-      [customerModal,paymentModal,cashModal].forEach(modal=>{if(modal?.open) modal.close();});
+      [customerModal,paymentModal,discountModal,cashModal].forEach(modal=>{if(modal?.open) modal.close();});
       notesModalInput.value=notesInput.value||'';
       if(!notesModal.open) notesModal.showModal();
       requestAnimationFrame(()=>{
@@ -674,7 +749,7 @@
     actionSearch?.addEventListener('click',()=>{search.focus();search.select();});
     actionQuantity?.addEventListener('click',()=>focusCartField('.pdv-qty input'));
     actionCustomer?.addEventListener('click',openCustomerModal);
-    actionDiscount?.addEventListener('click',()=>focusCartField('.pdv-cart-discount input'));
+    actionDiscount?.addEventListener('click',()=>openDiscountModal());
     actionPayment?.addEventListener('click',openPaymentModal);
     actionCash?.addEventListener('click',openCashModal);
     actionRemove?.addEventListener('click',removeActiveCartItem);
@@ -805,7 +880,7 @@
     document.addEventListener('keydown',event=>{
       if(event.altKey||event.ctrlKey||event.metaKey) return;
 
-      if(customerModal?.open || paymentModal?.open || cashModal?.open || notesModal?.open) return;
+      if(customerModal?.open || paymentModal?.open || discountModal?.open || cashModal?.open || notesModal?.open) return;
 
       if(event.key==='Escape'){
         event.preventDefault();
@@ -826,7 +901,7 @@
         openCustomerModal();
       }else if(event.key==='F5'){
         event.preventDefault();
-        focusCartField('.pdv-cart-discount input');
+        openDiscountModal();
       }else if(event.key==='F6'){
         event.preventDefault();
         openPaymentModal();
