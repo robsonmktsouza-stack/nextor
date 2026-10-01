@@ -351,9 +351,6 @@
         cart.querySelectorAll('.pdv-cart-row').forEach(other=>{
           if(other!==row) other.classList.remove('keyboard-active');
         });
-        cart.querySelectorAll('.pdv-cart-row').forEach(other=>{
-          if(other!==row) other.classList.remove('keyboard-active');
-        });
       });
 
       title.addEventListener('keydown',event=>{
