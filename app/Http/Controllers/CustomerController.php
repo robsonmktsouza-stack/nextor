@@ -10,13 +10,14 @@ use Illuminate\Support\Facades\Http;
 class CustomerController extends Controller {
     public function index(Request $request) {
         $term=trim((string)$request->query('search',''));
+        $perPage=in_array($request->integer('per_page'),[10,25,50,100],true) ? $request->integer('per_page') : 25;
         $customers=Customer::query()
             ->when($term,fn($q)=>$q->where(fn($t)=>$t
                 ->where('name','like',"%{$term}%")
                 ->orWhere('trade_name','like',"%{$term}%")
                 ->orWhere('document','like',"%{$term}%")
                 ->orWhere('email','like',"%{$term}%")))
-            ->orderBy('name')->paginate(12)->withQueryString();
+            ->orderBy('name')->paginate($perPage)->withQueryString();
         return view('customers.index',compact('term','customers'));
     }
 
