@@ -584,3 +584,98 @@ input[type="number"]::-webkit-outer-spin-button{
 .sale-items-table .numeric-input>input[type="number"]{
   height:37px;
 }
+
+/* Cadastro de serviços */
+.service-editor{
+  display:grid;
+  gap:14px;
+  padding-bottom:74px;
+}
+.service-tabs .editor-tab{
+  color:#96358d;
+}
+.service-tabs .editor-tab.active{
+  background:#96358d;
+  color:#fff;
+}
+.service-editor .editor-panel{
+  background:#f1f2f4;
+}
+.service-editor .field{
+  gap:7px;
+  color:#5d6773;
+}
+.service-editor .field>span{
+  font-size:12px;
+  font-weight:600;
+}
+.service-editor .field input,
+.service-editor .field textarea{
+  min-height:39px;
+  border:1px solid #c9d0d8;
+  border-radius:4px;
+  background:#fff;
+  color:#4b5969;
+  padding:8px 11px;
+  font-size:13px;
+}
+.service-editor .field textarea{
+  min-height:110px;
+}
+.service-editor .field input:focus,
+.service-editor .field textarea:focus{
+  border-color:#96358d;
+  box-shadow:0 0 0 1px #96358d;
+}
+.service-editor .editor-panel.notes-panel{
+  background:#fff;
+  border:0;
+  padding:0 14px 8px;
+}
+.service-editor .tax-group-panel{
+  min-height:104px;
+  display:flex;
+  align-items:center;
+}
+.service-editor .editor-savebar{
+  left:200px;
+}
+.app-root.sidebar-collapsed .service-editor .editor-savebar{
+  left:56px;
+}
+.input-icon-group{
+  display:flex;
+  align-items:stretch;
+  width:100%;
+}
+.input-icon-group .input-icon{
+  width:44px;
+  min-width:44px;
+  height:39px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid #c9d0d8;
+  border-right:0;
+  border-radius:4px 0 0 4px;
+  background:#f6f7f8;
+  color:#526171;
+}
+.input-icon-group>input{
+  flex:1;
+  min-width:0;
+  border-radius:0 4px 4px 0!important;
+}
+.input-icon-group:focus-within .input-icon{
+  border-color:#96358d;
+  color:#96358d;
+}
+@media(max-width:760px){
+  .service-editor{
+    padding-bottom:72px;
+  }
+  .service-editor .editor-savebar,
+  .app-root.sidebar-collapsed .service-editor .editor-savebar{
+    left:0;
+  }
+}
