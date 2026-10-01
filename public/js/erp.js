@@ -281,6 +281,30 @@
   // Ao voltar pelo histórico/bfcache, nunca mantém a tela bloqueada.
   window.addEventListener('pageshow',event=>{if(event.persisted) resetLoading();});
 
+  const uiSelectIconSvg={
+    product:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 7 9-4 9 4v10l-9 4-9-4V7ZM3 7l9 4 9-4M12 11v10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    service:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6V4h6v2M4 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2ZM2 12h20M9 12v2h6v-2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    freight:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h11v11H3V6Zm11 4h4l3 3v4h-7v-7ZM7 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm11 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    expense:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M6 12h.01M18 12h.01" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'
+  };
+  const setUiSelectOptionContent=(target,option)=>{
+    target.textContent='';
+    const iconName=option?.dataset?.icon||'';
+    const icon=uiSelectIconSvg[iconName];
+    if(icon){
+      target.classList.add('has-icon');
+      const iconWrap=document.createElement('span');
+      iconWrap.className='ui-select-option-icon';
+      iconWrap.innerHTML=icon;
+      const label=document.createElement('span');
+      label.textContent=option?.textContent||'';
+      target.append(iconWrap,label);
+    }else{
+      target.classList.remove('has-icon');
+      target.textContent=option?.textContent||'';
+    }
+  };
+
   let uiSelectSeq=0;
   const closeUiSelects=(except=null)=>{
     document.querySelectorAll('.ui-select.open').forEach(wrapper=>{
@@ -328,7 +352,7 @@
         item.className='ui-select-option';
         item.setAttribute('role','option');
         item.dataset.value=option.value;
-        item.textContent=option.textContent;
+        setUiSelectOptionContent(item,option);
         item.disabled=option.disabled;
         if(option.selected){
           item.classList.add('selected');
@@ -347,7 +371,8 @@
     };
     const sync=()=>{
       const option=select.options[select.selectedIndex];
-      value.textContent=option?.textContent || select.getAttribute('placeholder') || 'Selecione';
+      if(option) setUiSelectOptionContent(value,option);
+      else value.textContent=select.getAttribute('placeholder') || 'Selecione';
       trigger.disabled=select.disabled;
       wrapper.classList.toggle('disabled',select.disabled);
       [...menu.querySelectorAll('.ui-select-option')].forEach(item=>{
@@ -441,6 +466,31 @@
     return Number.isFinite(parsed) ? Math.max(0,parsed) : 0;
   };
 
+  const parseMoneyText=value=>{
+    let text=String(value??'').trim().replace(/[^0-9,.-]/g,'').replace(/-/g,'');
+    if(!text) return 0;
+
+    if(text.includes(',')){
+      const comma=text.lastIndexOf(',');
+      const whole=text.slice(0,comma).replace(/[.,]/g,'')||'0';
+      const decimals=text.slice(comma+1).replace(/\D/g,'').slice(0,2);
+      const parsed=Number(whole+'.'+(decimals||'0'));
+      return Number.isFinite(parsed) ? Math.max(0,parsed) : 0;
+    }
+
+    const dots=(text.match(/\./g)||[]).length;
+    if(dots===1){
+      const [whole,decimals='']=text.split('.');
+      if(decimals.length>0 && decimals.length<=2){
+        const parsed=Number((whole||'0')+'.'+decimals);
+        return Number.isFinite(parsed) ? Math.max(0,parsed) : 0;
+      }
+    }
+
+    const parsed=Number(text.replace(/\./g,''));
+    return Number.isFinite(parsed) ? Math.max(0,parsed) : 0;
+  };
+
   const enhanceMoneyInput=input=>{
     if(!input || input.dataset.moneyReady==='1') return;
     const originalName=input.name;
@@ -459,22 +509,27 @@
 
     input.removeAttribute('name');
     input.type='text';
-    input.inputMode='numeric';
+    input.inputMode='decimal';
     input.autocomplete='off';
     input.value=moneyFormatter.format(initial);
+    input.dataset.moneyValue=hidden.value;
 
     input.insertAdjacentElement('afterend',hidden);
 
-    const apply=()=>{
-      const digits=String(input.value||'').replace(/\D/g,'').slice(0,15);
-      const cents=digits ? Number(digits) : 0;
-      const value=cents/100;
-      input.value=moneyFormatter.format(value);
+    const sync=()=>{
+      const value=parseMoneyText(input.value);
       hidden.value=value.toFixed(2);
       input.dataset.moneyValue=hidden.value;
+      return value;
     };
 
-    input.addEventListener('input',apply);
+    const format=()=>{
+      const value=sync();
+      input.value=moneyFormatter.format(value);
+    };
+
+    input.addEventListener('input',sync);
+    input.addEventListener('blur',format);
     input.addEventListener('focus',()=>{
       requestAnimationFrame(()=>input.select());
     });
@@ -485,9 +540,8 @@
     });
     input.addEventListener('keydown',event=>{
       if(event.key==='ArrowUp'||event.key==='ArrowDown') event.preventDefault();
+      if(event.key==='Enter') format();
     });
-
-    input.dataset.moneyValue=hidden.value;
   };
 
   const enhanceNumberInput=input=>{
@@ -1049,11 +1103,12 @@
   let saleSeq=0;
   let paymentSeq=0;
   let currentSaleTotal=0;
+  let saleHydrating=true;
 
   const moneyValue=input=>{
     if(!input) return 0;
-    const hidden=input.nextElementSibling?.matches?.('[data-money-hidden="1"]') ? input.nextElementSibling : null;
-    return Number(hidden?.value||input.dataset.moneyValue||input.value||0)||0;
+    if(input.dataset.moneyReady==='1') return parseMoneyText(input.value);
+    return Number(input.value||0)||0;
   };
 
   const setMoneyValue=(input,value)=>{
@@ -1096,10 +1151,10 @@
       '<td class="sale-item-main">'+
         '<div class="sale-item-picker">'+
           '<select class="sale-item-kind" aria-label="Tipo do item">'+
-            '<option value="product">Produto</option>'+
-            '<option value="service">Serviço</option>'+
-            '<option value="freight">Frete</option>'+
-            '<option value="expense">Outras despesas</option>'+
+            '<option value="product" data-icon="product">Produto</option>'+
+            '<option value="service" data-icon="service">Serviço</option>'+
+            '<option value="freight" data-icon="freight">Frete</option>'+
+            '<option value="expense" data-icon="expense">Outras despesas</option>'+
           '</select>'+
           '<div class="sale-item-search-wrap">'+
             '<input class="sale-item-search" type="text" autocomplete="off" placeholder="Adicionar item">'+
@@ -1114,7 +1169,10 @@
       '<td><input class="sale-qty" type="number" min="0.001" step="0.001" value="1"></td>'+
       '<td><input class="sale-discount" type="number" min="0" step="0.01" data-number-kind="money" value="0"></td>'+
       '<td class="sale-line-total">R$ 0,00</td>'+
-      '<td class="sale-row-actions"><button type="button" class="btn-icon row-action-danger" data-tooltip="Remover item" aria-label="Remover item">×</button></td>';
+      '<td class="sale-row-actions">'+
+        '<button type="button" class="btn-icon sale-row-edit" data-tooltip="Editar item" aria-label="Editar item"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m16 4 4 4M3 17l-.5 4.5L7 21 20 8a2.8 2.8 0 0 0-4-4L3 17Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'+
+        '<button type="button" class="btn-icon row-action-danger sale-row-remove" data-tooltip="Remover item" aria-label="Remover item"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M5 6l1 15h12l1-15M10 10v7M14 10v7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'+
+      '</td>';
 
     const kind=tr.querySelector('.sale-item-kind');
     const search=tr.querySelector('.sale-item-search');
@@ -1192,6 +1250,10 @@
       suggestions.hidden=true;
       search.setCustomValidity('');
       recalcSale();
+
+      if(tr===saleBody.lastElementChild){
+        addSaleRow();
+      }
     };
 
     const renderSuggestions=()=>{
@@ -1265,7 +1327,13 @@
     price.addEventListener('input',recalcSale);
     discount.addEventListener('input',recalcSale);
 
-    tr.querySelector('.sale-row-actions button').addEventListener('click',()=>{
+    tr.querySelector('.sale-row-edit').addEventListener('click',()=>{
+      search.focus();
+      if(kind.value==='product'||kind.value==='service') renderSuggestions();
+      else search.select();
+    });
+
+    tr.querySelector('.sale-row-remove').addEventListener('click',()=>{
       tr.remove();
       if(!saleBody.querySelector('tr')) addSaleRow();
       recalcSale();
@@ -1411,6 +1479,7 @@
     let total=0;
     let discountTotal=0;
     let qtyTotal=0;
+    let validItems=0;
     const isSale=(operationType?.value||'sale')==='sale';
 
     saleBody.querySelectorAll('.sale-item-row').forEach(row=>{
@@ -1424,6 +1493,7 @@
       const discount=moneyValue(discountInput);
       const gross=price*qty;
       const line=Math.max(0,gross-discount);
+      let valid=false;
 
       discountInput.setCustomValidity(discount>gross?'O desconto não pode ser maior que o valor do item.':'');
       search.setCustomValidity('');
@@ -1435,18 +1505,26 @@
         const controlsStock=String(item?.control_stock??'1')!=='0';
         const stock=Number(item?.stock_quantity||0);
         qtyInput.setCustomValidity(isSale && item && controlsStock && qty>stock ? 'Quantidade superior ao estoque disponível.' : '');
+        valid=!!item && qty>0;
       } else if(type==='service'){
-        if(!row.querySelector('.sale-service-id').value) search.setCustomValidity('Selecione um serviço da lista.');
+        const serviceId=row.querySelector('.sale-service-id').value;
+        if(!serviceId) search.setCustomValidity('Selecione um serviço da lista.');
         qtyInput.setCustomValidity('');
+        valid=!!serviceId && qty>0;
       } else {
         if(!search.value.trim()) search.setCustomValidity('Informe a descrição do item.');
         qtyInput.setCustomValidity('');
+        valid=!!search.value.trim() && qty>0;
       }
 
-      row.querySelector('.sale-line-total').textContent=saleCurrency.format(line);
-      total+=line;
-      discountTotal+=discount;
-      qtyTotal+=qty;
+      row.querySelector('.sale-line-total').textContent=saleCurrency.format(valid?line:0);
+
+      if(valid){
+        validItems++;
+        total+=line;
+        discountTotal+=discount;
+        qtyTotal+=qty;
+      }
     });
 
     currentSaleTotal=total;
@@ -1459,10 +1537,21 @@
     const label=(operationType?.value||'sale')==='quote'?'Orçamento':'Venda';
     document.getElementById('saleOperationLabel').textContent=label;
 
+    const finance=document.getElementById('saleFinanceSection');
+    if(finance) finance.hidden=validItems===0;
+
+    if(!saleHydrating && validItems>0 && paymentRows().length===0){
+      addPayment({
+        amount:total,
+        due_date:operationDate?.value||''
+      },true);
+    }
+
     const rows=paymentRows();
     if(rows.length===1 && rows[0].dataset.auto==='1'){
       setMoneyValue(rows[0].querySelector('.payment-amount'),total);
     }
+
     recalcPayments();
     updateSaleSubmitState();
   }
@@ -1504,12 +1593,8 @@
 
   if(oldPayments.length){
     oldPayments.forEach(payment=>addPayment(payment,false));
-  } else {
-    addPayment({
-      amount:currentSaleTotal,
-      due_date:operationDate?.value||''
-    },true);
   }
 
+  saleHydrating=false;
   recalcSale();
 })();
