@@ -1151,3 +1151,72 @@ input[type="number"]::-webkit-outer-spin-button{
   text-align:right;
   font-variant-numeric:tabular-nums;
 }
+
+/* Alinhamento horizontal do carrinho */
+.sale-cart-table tbody td{
+  vertical-align:top!important;
+  padding-top:10px!important;
+  padding-bottom:10px!important;
+}
+
+.sale-item-picker{
+  height:40px;
+  align-items:stretch;
+}
+
+.sale-item-picker>.ui-select,
+.sale-item-picker>.ui-select .ui-select-trigger,
+.sale-item-search-wrap,
+.sale-item-search{
+  height:40px!important;
+  min-height:40px!important;
+}
+
+.sale-item-picker>.ui-select .ui-select-trigger{
+  display:flex;
+  align-items:center;
+}
+
+.sale-item-search{
+  padding-top:0!important;
+  padding-bottom:0!important;
+}
+
+.sale-cart-table .numeric-input{
+  height:40px!important;
+  margin:0!important;
+}
+
+.sale-line-total{
+  height:40px;
+  display:flex;
+  align-items:center;
+  padding:0;
+}
+
+.sale-row-actions{
+  height:40px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+}
+
+.sale-row-actions .btn-icon{
+  width:40px;
+  height:40px;
+  margin:0!important;
+}
+
+.sale-item-note{
+  display:block;
+  height:20px;
+  min-height:20px;
+  margin:2px 0 0;
+  padding:2px 2px 0;
+  line-height:16px;
+}
+
+.sale-cart-table tfoot td{
+  vertical-align:middle!important;
+}
