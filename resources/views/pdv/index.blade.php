@@ -101,25 +101,20 @@
     <div class="pdv-checkout-fields">
       <label class="field">
         <span>Cliente <small>F4</small></span>
-        <select name="customer_id" id="pdvCustomer">
-          <option value="">Consumidor não identificado</option>
-          @foreach($customers as $customer)
-            <option value="{{ $customer->id }}">{{ $customer->name }}{{ $customer->document ? ' — '.$customer->document : '' }}</option>
-          @endforeach
-        </select>
+        <input type="hidden" name="customer_id" id="pdvCustomer" value="">
+        <button type="button" class="pdv-picker-button" id="pdvCustomerButton">
+          <span id="pdvCustomerLabel">Consumidor não identificado</span>
+          <kbd>F4</kbd>
+        </button>
       </label>
 
       <label class="field">
         <span>Forma de pagamento <small>F6</small></span>
-        <select name="payment_method" id="pdvPaymentMethod" required>
-          <option value="cash">Dinheiro</option>
-          <option value="pix">PIX</option>
-          <option value="debit_card">Cartão de débito</option>
-          <option value="credit_card">Cartão de crédito</option>
-          <option value="bank_slip">Boleto</option>
-          <option value="bank_transfer">Transferência</option>
-          <option value="other">Outro</option>
-        </select>
+        <input type="hidden" name="payment_method" id="pdvPaymentMethod" value="cash">
+        <button type="button" class="pdv-picker-button" id="pdvPaymentButton">
+          <span id="pdvPaymentLabel">Dinheiro</span>
+          <kbd>F6</kbd>
+        </button>
       </label>
 
       <label class="field pdv-cash-field" id="pdvCashField">
@@ -158,6 +153,69 @@
     </div>
   </aside>
 </div>
+
+<dialog class="pdv-quick-modal pdv-client-modal" id="pdvCustomerModal">
+  <div class="pdv-modal-head">
+    <div>
+      <span>F4</span>
+      <h2>Selecionar cliente</h2>
+      <p>Pesquise por nome ou documento.</p>
+    </div>
+    <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+  </div>
+  <div class="pdv-modal-search">
+    @include('partials.icon',['name'=>'search','size'=>18])
+    <input type="search" id="pdvCustomerSearch" autocomplete="off" placeholder="Digite o nome ou CPF/CNPJ...">
+  </div>
+  <div class="pdv-client-list" id="pdvCustomerList">
+    <button type="button" class="pdv-client-option" data-customer-id="" data-customer-search="consumidor não identificado">
+      <span class="pdv-client-avatar">CF</span>
+      <span><strong>Consumidor não identificado</strong><small>Venda sem cliente vinculado</small></span>
+    </button>
+    @foreach($customers as $customer)
+      <button type="button" class="pdv-client-option"
+              data-customer-id="{{ $customer->id }}"
+              data-customer-search="{{ mb_strtolower($customer->name.' '.$customer->document) }}">
+        <span class="pdv-client-avatar">{{ strtoupper(substr($customer->name,0,2)) }}</span>
+        <span>
+          <strong>{{ $customer->name }}</strong>
+          <small>{{ $customer->document ?: 'Sem documento informado' }}</small>
+        </span>
+      </button>
+    @endforeach
+  </div>
+  <div class="pdv-modal-help">
+    <span><kbd>↑</kbd><kbd>↓</kbd> Navegar</span>
+    <span><kbd>Enter</kbd> Selecionar</span>
+    <span><kbd>Esc</kbd> Fechar</span>
+  </div>
+</dialog>
+
+<dialog class="pdv-quick-modal pdv-payment-modal" id="pdvPaymentModal">
+  <div class="pdv-modal-head">
+    <div>
+      <span>F6</span>
+      <h2>Forma de pagamento</h2>
+      <p>Use o número da opção ou as setas e Enter.</p>
+    </div>
+    <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+  </div>
+  <div class="pdv-payment-options" id="pdvPaymentOptions">
+    <button type="button" data-payment-value="cash" data-payment-label="Dinheiro" data-payment-key="1"><kbd>1</kbd><span>Dinheiro</span></button>
+    <button type="button" data-payment-value="pix" data-payment-label="PIX" data-payment-key="2"><kbd>2</kbd><span>PIX</span></button>
+    <button type="button" data-payment-value="debit_card" data-payment-label="Cartão de débito" data-payment-key="3"><kbd>3</kbd><span>Cartão de débito</span></button>
+    <button type="button" data-payment-value="credit_card" data-payment-label="Cartão de crédito" data-payment-key="4"><kbd>4</kbd><span>Cartão de crédito</span></button>
+    <button type="button" data-payment-value="bank_slip" data-payment-label="Boleto" data-payment-key="5"><kbd>5</kbd><span>Boleto</span></button>
+    <button type="button" data-payment-value="bank_transfer" data-payment-label="Transferência" data-payment-key="6"><kbd>6</kbd><span>Transferência</span></button>
+    <button type="button" data-payment-value="other" data-payment-label="Outro" data-payment-key="7"><kbd>7</kbd><span>Outro</span></button>
+  </div>
+  <div class="pdv-modal-help">
+    <span><kbd>1–7</kbd> Selecionar</span>
+    <span><kbd>↑</kbd><kbd>↓</kbd> Navegar</span>
+    <span><kbd>Enter</kbd> Confirmar</span>
+    <span><kbd>Esc</kbd> Fechar</span>
+  </div>
+</dialog>
 </form>
 @endsection
 
