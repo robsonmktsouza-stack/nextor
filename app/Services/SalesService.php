@@ -143,6 +143,7 @@ class SalesService
                 'customer_id'=>$data['customer_id'] ?? null,
                 'user_id'=>$userId,
                 'operation_type'=>$operationType,
+                'source'=>$data['source'] ?? 'manual',
                 'operation_date'=>$data['operation_date'] ?? now()->toDateString(),
                 'final_consumer'=>(bool)($data['final_consumer'] ?? true),
                 'keyword'=>$data['keyword'] ?? null,
