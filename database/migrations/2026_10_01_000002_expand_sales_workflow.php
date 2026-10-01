@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
@@ -15,6 +16,10 @@ return new class extends Migration {
             $table->decimal('subtotal',14,2)->default(0)->after('status');
             $table->decimal('discount_total',14,2)->default(0)->after('subtotal');
         });
+
+        DB::table('sales')->update([
+            'subtotal'=>DB::raw('total'),
+        ]);
 
         Schema::table('sale_items', function (Blueprint $table) {
             $table->string('item_type',20)->default('product')->after('sale_id')->index();
