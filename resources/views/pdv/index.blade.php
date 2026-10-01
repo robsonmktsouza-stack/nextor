@@ -27,10 +27,16 @@
         <kbd>F2</kbd>
       </div>
 
-      <div class="pdv-kind-tabs" role="group" aria-label="Tipo de item">
-        <button type="button" class="active" data-pdv-kind="all">Todos</button>
-        <button type="button" data-pdv-kind="product">@include('partials.icon',['name'=>'products','size'=>15]) Produtos</button>
-        <button type="button" data-pdv-kind="service">@include('partials.icon',['name'=>'services','size'=>15]) Serviços</button>
+      <div class="pdv-search-tools">
+        <div class="pdv-kind-tabs" role="group" aria-label="Tipo de item">
+          <button type="button" class="active" data-pdv-kind="all">Todos</button>
+          <button type="button" data-pdv-kind="product">@include('partials.icon',['name'=>'products','size'=>15]) Produtos</button>
+          <button type="button" data-pdv-kind="service">@include('partials.icon',['name'=>'services','size'=>15]) Serviços</button>
+        </div>
+        <div class="pdv-search-keyboard">
+          <span><kbd>↑</kbd><kbd>↓</kbd> Navegar</span>
+          <span><kbd>Enter</kbd> Adicionar</span>
+        </div>
       </div>
     </div>
 
@@ -117,7 +123,7 @@
       </label>
 
       <label class="field pdv-cash-field" id="pdvCashField">
-        <span>Valor recebido</span>
+        <span>Valor recebido <small>F7</small></span>
         <input type="number" name="cash_received" id="pdvCashReceived"
                min="0" step="0.01" value="0" data-number-kind="money">
       </label>
@@ -142,8 +148,12 @@
 
     <div class="pdv-shortcuts">
       <span><kbd>F2</kbd> Buscar</span>
+      <span><kbd>F3</kbd> Quantidade</span>
       <span><kbd>F4</kbd> Cliente</span>
+      <span><kbd>F5</kbd> Desconto</span>
       <span><kbd>F6</kbd> Pagamento</span>
+      <span><kbd>F7</kbd> Recebido</span>
+      <span><kbd>F8</kbd> Remover</span>
       <span><kbd>F9</kbd> Finalizar</span>
     </div>
   </aside>
