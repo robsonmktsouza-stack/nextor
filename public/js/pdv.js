@@ -146,11 +146,27 @@
     };
 
     const removeItem=key=>{
+      const before=[...state.keys()];
+      const removedIndex=Math.max(0,before.indexOf(key));
+
       state.delete(key);
-      const keys=[...state.keys()];
-      app.dataset.activeCartKey=keys.at(-1)||'';
+
+      const after=[...state.keys()];
+      const nextKey=after.length
+        ? after[Math.min(removedIndex,after.length-1)]
+        : '';
+
+      app.dataset.activeCartKey=nextKey;
       renderCart();
-      search.focus();
+
+      if(nextKey){
+        requestAnimationFrame(()=>{
+          cart.querySelector('.pdv-cart-row[data-key="'+CSS.escape(nextKey)+'"]')
+            ?.scrollIntoView({block:'nearest'});
+        });
+      }else{
+        search.focus();
+      }
     };
 
     const setQuantity=(key,value)=>{
@@ -260,6 +276,45 @@
       actionCash?.classList.toggle('is-set',cashReady);
     };
 
+    const cartKeys=()=>[...state.keys()];
+
+    const selectCartItem=(key,{render=true,scroll=true}={})=>{
+      if(!key || !state.has(key)) return false;
+      app.dataset.activeCartKey=key;
+
+      if(render){
+        renderCart();
+      }else{
+        cart.querySelectorAll('.pdv-cart-row').forEach(row=>{
+          row.classList.toggle('keyboard-active',row.dataset.key===key);
+        });
+      }
+
+      if(scroll){
+        requestAnimationFrame(()=>{
+          cart.querySelector('.pdv-cart-row[data-key="'+CSS.escape(key)+'"]')
+            ?.scrollIntoView({block:'nearest'});
+        });
+      }
+
+      return true;
+    };
+
+    const moveCartSelection=direction=>{
+      const keys=cartKeys();
+      if(!keys.length){
+        notify('O carrinho está vazio.','warning');
+        return;
+      }
+
+      const current=activeCartKey();
+      let index=keys.indexOf(current);
+      if(index<0) index=0;
+      else index=Math.max(0,Math.min(keys.length-1,index+direction));
+
+      selectCartItem(keys[index],{render:true,scroll:true});
+    };
+
     const createCartRow=item=>{
       const key=itemKey(item);
       const row=document.createElement('div');
@@ -280,11 +335,32 @@
       const small=document.createElement('small');
       small.textContent=(item.code||'Sem código')+' · '+money.format(item.price)+' / '+(item.unit||'UN');
       details.append(strong,small);
-      title.append(marker,details);
+
+      const selectedBadge=document.createElement('span');
+      selectedBadge.className='pdv-cart-selected-badge';
+      selectedBadge.textContent='Selecionado';
+
+      title.append(marker,details,selectedBadge);
       title.tabIndex=0;
-      title.addEventListener('click',()=>{
+
+      row.addEventListener('pointerdown',event=>{
+        if(event.button!==0) return;
+        if(app.dataset.activeCartKey===key) return;
         app.dataset.activeCartKey=key;
-        renderCart();
+        row.classList.add('keyboard-active');
+        cart.querySelectorAll('.pdv-cart-row').forEach(other=>{
+          if(other!==row) other.classList.remove('keyboard-active');
+        });
+        cart.querySelectorAll('.pdv-cart-row').forEach(other=>{
+          if(other!==row) other.classList.remove('keyboard-active');
+        });
+      });
+
+      title.addEventListener('keydown',event=>{
+        if(event.key==='Enter' || event.key===' '){
+          event.preventDefault();
+          selectCartItem(key);
+        }
       });
 
       const qtyWrap=document.createElement('div');
@@ -319,16 +395,14 @@
         if(next<=0){removeItem(key);return;}
         item.quantity=next;
         if(item.discount>item.price*item.quantity) item.discount=item.price*item.quantity;
-        app.dataset.activeCartKey=key;
-        renderCart();
+        selectCartItem(key);
       });
 
       plus.addEventListener('click',()=>{
         const next=item.quantity+1;
         if(!canIncrease(item,next)) return;
         item.quantity=next;
-        app.dataset.activeCartKey=key;
-        renderCart();
+        selectCartItem(key);
       });
 
       qty.addEventListener('focus',()=>{
@@ -355,7 +429,7 @@
         '<span>'+money.format(item.discount)+'</span>';
 
       discountWrap.addEventListener('click',()=>{
-        app.dataset.activeCartKey=key;
+        selectCartItem(key,{render:false,scroll:false});
         openDiscountModal(key);
       });
 
@@ -970,7 +1044,7 @@
       button.addEventListener('click',()=>button.closest('dialog')?.close());
     });
 
-    [customerModal,paymentModal,cashModal,notesModal].forEach(modal=>{
+    [customerModal,paymentModal,discountModal,cashModal,notesModal].forEach(modal=>{
       modal?.addEventListener('close',()=>{
         setTimeout(()=>search.focus(),0);
       });
@@ -979,7 +1053,10 @@
     const activeCartKey=()=>{
       const explicit=app.dataset.activeCartKey;
       if(explicit && state.has(explicit)) return explicit;
-      return [...state.keys()].at(-1)||'';
+
+      const fallback=[...state.keys()].at(-1)||'';
+      if(fallback) app.dataset.activeCartKey=fallback;
+      return fallback;
     };
 
     const focusCartField=selector=>{
@@ -1005,8 +1082,9 @@
         notify('Não há item para remover.','warning');
         return;
       }
+      const item=state.get(key);
       removeItem(key);
-      notify('Último item removido.','info');
+      notify((item?.name||'Item')+' removido do carrinho.','info');
     };
 
     fullscreenButton?.addEventListener('click',async()=>{
@@ -1075,6 +1153,28 @@
         event.stopPropagation();
         search.focus();
         search.select();
+        return;
+      }
+
+      if(event.altKey && (event.key==='ArrowUp' || event.code==='ArrowUp')){
+        event.preventDefault();
+        event.stopPropagation();
+        moveCartSelection(-1);
+        return;
+      }
+
+      if(event.altKey && (event.key==='ArrowDown' || event.code==='ArrowDown')){
+        event.preventDefault();
+        event.stopPropagation();
+        moveCartSelection(1);
+        return;
+      }
+
+      if((event.key==='Delete' || event.code==='Delete') &&
+         !['INPUT','TEXTAREA'].includes(document.activeElement?.tagName)){
+        event.preventDefault();
+        event.stopPropagation();
+        removeActiveCartItem();
         return;
       }
 
