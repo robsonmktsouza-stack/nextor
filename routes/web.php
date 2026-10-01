@@ -4,6 +4,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SaleController;
+use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\StockController;
 use Illuminate\Support\Facades\Route;
 
@@ -23,6 +24,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/products/bulk-duplicate',[ProductController::class,'bulkDuplicate'])->name('products.bulk-duplicate');
     Route::post('/products/bulk-status',[ProductController::class,'bulkStatus'])->name('products.bulk-status');
     Route::delete('/products/bulk-delete',[ProductController::class,'bulkDelete'])->name('products.bulk-delete');
+    Route::get('/services',[ServiceController::class,'index'])->name('services.index');
+    Route::get('/services/create',[ServiceController::class,'create'])->name('services.create');
+    Route::post('/services',[ServiceController::class,'store'])->name('services.store');
+    Route::get('/services/{service}/edit',[ServiceController::class,'edit'])->name('services.edit');
+    Route::put('/services/{service}',[ServiceController::class,'update'])->name('services.update');
+    Route::post('/services/bulk-duplicate',[ServiceController::class,'bulkDuplicate'])->name('services.bulk-duplicate');
+    Route::post('/services/bulk-status',[ServiceController::class,'bulkStatus'])->name('services.bulk-status');
+    Route::delete('/services/bulk-delete',[ServiceController::class,'bulkDelete'])->name('services.bulk-delete');
     Route::get('/customers',[CustomerController::class,'index'])->name('customers.index');
     Route::get('/customers/cnpj/{cnpj}',[CustomerController::class,'lookupCnpj'])->where('cnpj','[0-9A-Za-z.\\/-]+')->name('customers.lookup-cnpj');
     Route::get('/customers/create',[CustomerController::class,'create'])->name('customers.create');
