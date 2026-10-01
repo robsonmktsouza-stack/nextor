@@ -1513,73 +1513,43 @@
   }
 }
 
-/* Painel grande de comandos do caixa */
+/* Barra compacta de atalhos do caixa */
 .pdv-catalog{
   grid-template-rows:auto auto minmax(120px,1fr) auto!important;
 }
 
 .pdv-command-center{
   min-width:0;
+  padding:8px;
   border:1px solid #d6e0e8;
   border-radius:6px;
   background:#fff;
-  overflow:hidden;
-}
-
-.pdv-command-head{
-  min-height:46px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:14px;
-  padding:8px 12px;
-  border-bottom:1px solid #e3e8ed;
-  background:#f8fafc;
-}
-
-.pdv-command-head>div{
-  min-width:0;
-  display:flex;
-  flex-direction:column;
-  gap:2px;
-}
-
-.pdv-command-head strong{
-  color:#33495f;
-  font-size:11.5px;
-}
-
-.pdv-command-head span{
-  color:#8a97a5;
-  font-size:9.5px;
-}
-
-.pdv-command-hint{
-  white-space:nowrap;
-  color:#5d7892!important;
-  font-weight:650;
+  overflow-x:auto;
+  overflow-y:hidden;
+  scrollbar-width:thin;
+  scrollbar-color:#c8d3de transparent;
 }
 
 .pdv-command-grid{
+  width:100%;
+  min-width:630px;
   display:grid;
-  grid-template-columns:repeat(5,minmax(0,1fr));
-  gap:8px;
-  padding:10px;
+  grid-template-columns:repeat(9,minmax(58px,1fr));
+  gap:7px;
 }
 
 .pdv-command-button{
+  position:relative;
   min-width:0;
-  min-height:78px;
-  display:grid;
-  grid-template-columns:42px minmax(0,1fr) auto;
+  height:64px;
+  display:flex;
   align-items:center;
-  gap:10px;
-  padding:10px;
+  justify-content:center;
+  padding:0;
   border:1px solid #d5dee7;
   border-radius:5px;
   background:#fff;
   color:#40556b;
-  text-align:left;
   transition:border-color .1s,background .1s,transform .05s;
 }
 
@@ -1595,7 +1565,7 @@
 }
 
 .pdv-command-button:disabled{
-  opacity:.48;
+  opacity:.42;
   cursor:not-allowed;
   background:#f6f8fa;
 }
@@ -1618,56 +1588,58 @@
 }
 
 .pdv-command-icon{
-  width:42px;
-  height:42px;
+  width:36px;
+  height:36px;
   display:grid;
   place-items:center;
-  border-radius:5px;
-  background:#edf5fc;
   color:#2877c7;
 }
 
 .pdv-command-button.danger .pdv-command-icon{
-  background:#fff0f1;
   color:#bd4d56;
 }
 
 .pdv-command-button.success .pdv-command-icon{
-  background:#eaf7ef;
   color:#2b9a5d;
 }
 
-.pdv-command-copy{
-  min-width:0;
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-}
-
-.pdv-command-copy strong{
-  overflow:hidden;
-  color:#2e455c;
-  font-size:11.5px;
-  font-weight:700;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-}
-
-.pdv-command-copy small{
-  overflow:hidden;
-  color:#8996a4;
-  font-size:9px;
-  line-height:1.35;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-}
-
 .pdv-command-button>kbd{
-  align-self:start;
-  min-width:30px;
-  height:25px;
+  position:absolute;
+  top:5px;
+  right:5px;
+  min-width:25px;
+  height:19px;
+  padding:0 4px;
+  border-color:#cdd7e0;
   background:#fff;
-  color:#4b657e;
+  color:#536a80;
+  font-size:7.5px;
+}
+
+@media(max-height:820px) and (min-width:1181px){
+  .pdv-command-button{
+    height:56px;
+  }
+
+  .pdv-command-icon{
+    width:32px;
+    height:32px;
+  }
+}
+
+@media(max-width:760px){
+  .pdv-command-center{
+    padding:6px;
+  }
+
+  .pdv-command-grid{
+    min-width:594px;
+    gap:5px;
+  }
+
+  .pdv-command-button{
+    height:58px;
+  }
 }
 
 /* Checkout simplificado: carrinho + total + finalizar */
