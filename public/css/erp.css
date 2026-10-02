@@ -1997,3 +1997,40 @@ body[data-show-tutorials="0"] [data-tutorial]{display:none!important}
   .settings-user-active{width:100%}
   .settings-user-edit-actions .btn{width:100%}
 }
+
+
+/* Permissões de usuários — switches grandes e clicáveis */
+.settings-permissions-toolbar{
+  display:flex;align-items:center;gap:6px;margin:0 0 10px
+}
+.settings-permission-grid{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px
+}
+.permission-switch{
+  min-height:44px;display:flex;align-items:center;gap:10px;padding:8px 10px;
+  border:1px solid #d4dce4;border-radius:4px;background:#fff;cursor:pointer;
+  transition:border-color .12s,background .12s
+}
+.permission-switch:hover{border-color:#9fb8cd;background:#f7fafc}
+.permission-switch input{position:absolute;opacity:0;pointer-events:none}
+.permission-switch-track{
+  position:relative;width:34px;height:18px;flex:0 0 34px;border-radius:999px;
+  background:#c3cbd3;transition:.15s
+}
+.permission-switch-track:after{
+  content:'';position:absolute;left:2px;top:2px;width:14px;height:14px;border-radius:50%;
+  background:#fff;box-shadow:0 1px 2px #0003;transition:.15s
+}
+.permission-switch input:checked + .permission-switch-track{background:#2877c7}
+.permission-switch input:checked + .permission-switch-track:after{transform:translateX(16px)}
+.permission-switch input:focus-visible + .permission-switch-track{outline:2px solid #8eb9dc;outline-offset:2px}
+.permission-switch-label{font-size:11.5px;font-weight:600;color:#526476}
+.permission-switch:has(input:checked){border-color:#a9c7df;background:#f0f7fc}
+.permission-switch:has(input:checked) .permission-switch-label{color:#285f89}
+
+@media(max-width:1100px){
+  .settings-permission-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:680px){
+  .settings-permission-grid{grid-template-columns:1fr}
+}
