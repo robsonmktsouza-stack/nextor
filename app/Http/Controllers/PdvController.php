@@ -43,7 +43,11 @@ class PdvController extends Controller
                 'allow_discount'=>true,
                 'show_stock'=>true,
             ]),
-            'allowNegativeStock'=>(bool)AppSetting::value('operations','allow_negative_stock',false),
+            'allowNegativeStock'=>(bool)AppSetting::value(
+                'inventory',
+                'allow_negative_stock',
+                AppSetting::value('operations','allow_negative_stock',false)
+            ),
         ]);
     }
 
