@@ -5,8 +5,28 @@
       $formatted = number_format((float) $value, 3, ',', '.');
       return rtrim(rtrim($formatted, '0'), ',');
   };
-  $paymentIsCash = $sale->payments->contains(fn($payment) => $payment->payment_method === 'cash');
-  $receiptHeightMm = max(120, min(500, 105 + ($sale->items->count() * 9) + ($sale->payments->count() * 6) + ($sale->notes ? 14 : 0)));
+
+  $receiptWidth = in_array((string)($pdvSettings['receipt_width'] ?? '80'), ['58','80'], true)
+      ? (string)$pdvSettings['receipt_width']
+      : '80';
+  $receiptCopies = max(1, min(5, (int)($pdvSettings['receipt_copies'] ?? 1)));
+  $paymentIsCash = $sale->payments->contains(
+      fn($payment) => ($paymentKinds[$payment->payment_method] ?? null) === 'cash'
+  );
+  $baseHeight = $receiptWidth === '58' ? 132 : 112;
+  $itemHeight = $receiptWidth === '58' ? 12 : 9;
+  $receiptHeightMm = max(
+      $receiptWidth === '58' ? 145 : 120,
+      min(700, $baseHeight + ($sale->items->count() * $itemHeight) + ($sale->payments->count() * 7) + ($sale->notes ? 16 : 0))
+  );
+  $companyName = $company->trade_name ?: $company->legal_name ?: config('app.name','NEXTOR');
+  $companyDocument = $company->document;
+  $companyAddress = collect([
+      $company->address,
+      $company->address_number,
+      $company->district,
+      $company->city ? $company->city.($company->state ? '/'.$company->state : '') : null,
+  ])->filter()->implode(' · ');
 @endphp
 <html lang="pt-BR">
 <head>
@@ -17,31 +37,36 @@
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;background:#eef1f4;color:#111;font-family:Arial,Helvetica,sans-serif}
 body{font-size:9px}
-.screen-actions{width:80mm;max-width:calc(100vw - 24px);margin:16px auto 10px;display:flex;gap:8px}
+.screen-actions{width:{{ $receiptWidth }}mm;max-width:calc(100vw - 24px);margin:16px auto 10px;display:flex;gap:8px}
 .screen-actions a,.screen-actions button{flex:1;min-height:38px;display:flex;align-items:center;justify-content:center;border:1px solid #cbd4dc;border-radius:5px;background:#fff;color:#29455e;font:600 11px Arial,sans-serif;text-decoration:none;cursor:pointer}
 .screen-actions button{background:#2877c7;border-color:#2877c7;color:#fff}
-.receipt{width:80mm;max-width:100%;margin:0 auto 24px;padding:4mm;background:#fff}
+.receipt{width:{{ $receiptWidth }}mm;max-width:100%;margin:0 auto 24px;padding:{{ $receiptWidth==='58'?'3':'4' }}mm;background:#fff}
+.receipt-copy+.receipt-copy{margin-top:12px}
 .center{text-align:center}
+.company-logo{display:block;max-width:70%;max-height:19mm;object-fit:contain;margin:0 auto 2mm}
 .section{padding:2.2mm 0;border-top:1px dashed #222}
-.brand{font-size:13px;font-weight:800;text-transform:uppercase}
-.subtitle{margin-top:1mm;font-size:10px;font-weight:700}
+.brand{font-size:{{ $receiptWidth==='58'?'11':'13' }}px;font-weight:800;text-transform:uppercase}
+.subtitle{margin-top:1mm;font-size:{{ $receiptWidth==='58'?'9':'10' }}px;font-weight:700}
 .warning{margin-top:1.5mm;padding:1.2mm;border:1px solid #222;font-size:8px;font-weight:700}
-.meta{margin-top:2mm;line-height:1.45;font-size:8px}
+.meta{margin-top:2mm;line-height:1.45;font-size:7.5px;overflow-wrap:anywhere}
+.custom-header{margin-top:1.5mm;font-size:7.2px;line-height:1.45}
 .items{width:100%;border-collapse:collapse;table-layout:fixed}
-.items th{padding:1mm .4mm;border-bottom:1px solid #222;font-size:6.8px;text-align:right}
+.items th{padding:1mm .3mm;border-bottom:1px solid #222;font-size:{{ $receiptWidth==='58'?'6':'6.8' }}px;text-align:right}
 .items th:nth-child(1),.items th:nth-child(2){text-align:left}
-.items td{padding:1mm .4mm;border-bottom:1px dotted #aaa;font-size:7.2px;text-align:right;vertical-align:top;overflow-wrap:anywhere}
+.items td{padding:1mm .3mm;border-bottom:1px dotted #aaa;font-size:{{ $receiptWidth==='58'?'6.4':'7.2' }}px;text-align:right;vertical-align:top;overflow-wrap:anywhere}
 .items td:nth-child(1),.items td:nth-child(2){text-align:left}
-.col-code{width:14%}.col-desc{width:36%}.col-qty{width:12%}.col-unit{width:18%}.col-total{width:20%}
-.row{display:grid;grid-template-columns:1fr auto;gap:5mm;margin:.8mm 0;align-items:baseline}
+.col-code{width:14%}.col-desc{width:{{ $receiptWidth==='58'?'34':'36' }}%}.col-qty{width:12%}.col-unit{width:19%}.col-total{width:21%}
+.row{display:grid;grid-template-columns:1fr auto;gap:3mm;margin:.8mm 0;align-items:baseline}
 .row strong{text-align:right;white-space:nowrap}
 .total{font-size:11px;font-weight:800;margin-top:1.5mm}
-.footer{font-size:7.2px;line-height:1.45;text-align:center}
-@page{size:80mm {{ $receiptHeightMm }}mm;margin:0}
+.footer{font-size:7.2px;line-height:1.45;text-align:center;overflow-wrap:anywhere}
+.copy-label{font-size:6.5px;color:#555;margin-top:1mm}
+@page{size:{{ $receiptWidth }}mm {{ $receiptHeightMm }}mm;margin:0}
 @media print{
-  html,body{width:80mm!important;min-width:80mm!important;max-width:80mm!important;min-height:{{ $receiptHeightMm }}mm!important;background:#fff!important}
+  html,body{width:{{ $receiptWidth }}mm!important;min-width:{{ $receiptWidth }}mm!important;max-width:{{ $receiptWidth }}mm!important;background:#fff!important}
   .screen-actions{display:none!important}
-  .receipt{width:80mm!important;min-width:80mm!important;max-width:80mm!important;margin:0!important;padding:4mm!important}
+  .receipt{width:{{ $receiptWidth }}mm!important;min-width:{{ $receiptWidth }}mm!important;max-width:{{ $receiptWidth }}mm!important;margin:0!important;padding:{{ $receiptWidth==='58'?'3':'4' }}mm!important;page-break-after:always}
+  .receipt:last-of-type{page-break-after:auto}
 }
 </style>
 </head>
@@ -51,9 +76,21 @@ body{font-size:9px}
   <button type="button">Imprimir novamente</button>
 </div>
 
-<main class="receipt">
+@for($copy=1;$copy<=$receiptCopies;$copy++)
+<main class="receipt receipt-copy">
   <header class="center">
-    <div class="brand">{{ config('app.name', 'NEXTOR') }}</div>
+    @if($company->logo_path)
+      <img class="company-logo" src="{{ asset('storage/'.$company->logo_path) }}" alt="">
+    @endif
+    <div class="brand">{{ $companyName }}</div>
+    @if($companyDocument)<div class="meta">{{ $companyDocument }}</div>@endif
+    @if($companyAddress)<div class="meta">{{ $companyAddress }}</div>@endif
+    @if($company->phone || $company->email)
+      <div class="meta">{{ collect([$company->phone,$company->email])->filter()->implode(' · ') }}</div>
+    @endif
+    @if($company->print_header)
+      <div class="custom-header">{!! nl2br(e($company->print_header)) !!}</div>
+    @endif
     <div class="subtitle">COMPROVANTE DE VENDA</div>
     <div class="warning">SEM VALOR FISCAL</div>
     <div class="meta">
@@ -61,6 +98,7 @@ body{font-size:9px}
       {{ optional($sale->completed_at)->format('d/m/Y H:i:s') ?? now()->format('d/m/Y H:i:s') }}
       @if($sale->user)<br>Operador: {{ $sale->user->name }}@endif
     </div>
+    @if($receiptCopies>1)<div class="copy-label">Via {{ $copy }}/{{ $receiptCopies }}</div>@endif
   </header>
 
   <section class="section">
@@ -103,9 +141,10 @@ body{font-size:9px}
 
   <section class="section">
     @foreach($sale->payments as $payment)
+      @php($isCash=($paymentKinds[$payment->payment_method] ?? null)==='cash')
       <div class="row">
         <span>{{ $paymentLabels[$payment->payment_method] ?? 'Outro' }}</span>
-        <strong>R$ {{ $formatMoney($payment->payment_method === 'cash' ? $cashReceived : $payment->amount) }}</strong>
+        <strong>R$ {{ $formatMoney($isCash ? $cashReceived : $payment->amount) }}</strong>
       </div>
     @endforeach
     @if($paymentIsCash)
@@ -125,9 +164,13 @@ body{font-size:9px}
   @endif
 
   <footer class="section footer">
+    @if($company->print_footer)
+      {!! nl2br(e($company->print_footer)) !!}<br>
+    @endif
     Comprovante interno de venda. Não substitui documento fiscal.
   </footer>
 </main>
+@endfor
 
 <script>
 (()=>{
