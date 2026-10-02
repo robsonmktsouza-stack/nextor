@@ -228,6 +228,10 @@ class SettingsController extends Controller
             'permissions.*'=>['string',Rule::in(array_keys(self::PERMISSIONS))],
         ]);
 
+        if($data['role']!=='admin' && empty($data['permissions'])) {
+            throw ValidationException::withMessages(['permissions'=>'Selecione pelo menos uma permissão para este usuário.']);
+        }
+
         $data['is_active']=true;
         $data['permissions']=$data['role']==='admin' ? array_keys(self::PERMISSIONS) : ($data['permissions'] ?? []);
         User::query()->create($data);
@@ -245,6 +249,10 @@ class SettingsController extends Controller
             'permissions'=>['nullable','array'],
             'permissions.*'=>['string',Rule::in(array_keys(self::PERMISSIONS))],
         ]);
+
+        if($data['role']!=='admin' && empty($data['permissions'])) {
+            throw ValidationException::withMessages(['permissions'=>'Selecione pelo menos uma permissão para este usuário.']);
+        }
 
         $active=$request->boolean('is_active');
         if($request->user()->is($user) && !$active) {
