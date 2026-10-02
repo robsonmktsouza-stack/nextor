@@ -4,37 +4,97 @@
 @section('content')
 
 @php
-$tabs=[
-  'general'=>['Geral','settings'],
-  'chart'=>['Plano de contas','layers'],
-  'accounts'=>['Contas financeiras','money'],
-  'operations'=>['Operações','sales'],
-  'payments'=>['Formas de pagamento','receipt'],
-  'pdv'=>['PDV','pdv'],
-  'billing'=>['Boletos / Cobranças','money'],
-  'fiscal'=>['Fiscal','shield'],
-  'tax'=>['Tributação','layers'],
-  'nfe'=>['NF-e','receipt'],
-  'nfce'=>['NFC-e','receipt'],
-  'nfse'=>['NFS-e','services'],
-  'cte'=>['CT-e / MDF-e','stock'],
-  'accounting'=>['Contábil','services'],
-  'users'=>['Usuários','customers'],
-  'integrations'=>['API / Integrações','layers'],
-  'system'=>['Sistema','settings'],
+$settingsGroups=[
+  'Empresa'=>[
+    'general'=>['Empresa','settings','Cadastro, endereço e dados tributários'],
+    'printing'=>['Impressão e identidade','receipt','Logomarca, cabeçalho e rodapé'],
+    'catalog'=>['Produtos e serviços','products','Padrões dos novos cadastros'],
+  ],
+  'Comercial'=>[
+    'operations'=>['Vendas e operações','sales','Orçamentos, vendas e devoluções'],
+    'inventory'=>['Estoque','stock','Saldo, alertas e movimentações'],
+    'pdv'=>['PDV','pdv','Comportamento do ponto de venda'],
+  ],
+  'Financeiro'=>[
+    'chart'=>['Plano de contas','layers','Receitas e despesas'],
+    'accounts'=>['Contas financeiras','money','Caixas, bancos e contas digitais'],
+    'payments'=>['Formas de pagamento','receipt','Taxas, prazos e disponibilidade'],
+    'billing'=>['Boletos e cobranças','money','PIX, juros, multa e provedor'],
+  ],
+  'Fiscal'=>[
+    'fiscal'=>['Fiscal geral','shield','Certificado e padrões compartilhados'],
+    'tax'=>['Dados tributários','layers','ICMS, PIS, COFINS, ISS, IBS e CBS'],
+    'nfe'=>['NF-e','receipt','Modelo 55'],
+    'nfce'=>['NFC-e','receipt','Modelo 65 e CSC'],
+    'nfse'=>['NFS-e','services','Serviços e integração municipal/nacional'],
+    'cte'=>['CT-e / MDF-e','stock','Transporte e manifesto'],
+  ],
+  'Administração'=>[
+    'accounting'=>['Contábil','services','Escritório e exportações'],
+    'users'=>['Usuários e permissões','customers','Acessos por módulo'],
+    'integrations'=>['API e integrações','layers','SMTP, webhook e integrações'],
+    'system'=>['Sistema','settings','Interface e comportamento geral'],
+  ],
 ];
+
+$activeItem=null;
+$activeGroup=null;
+foreach($settingsGroups as $groupName=>$items){
+  if(isset($items[$tab])){
+    $activeItem=$items[$tab];
+    $activeGroup=$groupName;
+    break;
+  }
+}
 @endphp
 
-<nav class="settings-tabs" aria-label="Configurações">
-  @foreach($tabs as $key=>$item)
-    <a href="{{ route('settings.index',['tab'=>$key]) }}" class="{{ $tab===$key?'active':'' }}">
-      @include('partials.icon',['name'=>$item[1],'size'=>15])
-      <span>{{ $item[0] }}</span>
-    </a>
-  @endforeach
-</nav>
+<div class="settings-layout">
+  <aside class="settings-navigation">
+    <div class="settings-navigation-head">
+      <div>
+        <strong>Configurações</strong>
+        <span>Central do Nextor</span>
+      </div>
+      @include('partials.icon',['name'=>'settings','size'=>19])
+    </div>
 
-<div class="settings-page">
+    <div class="settings-navigation-search">
+      @include('partials.icon',['name'=>'search','size'=>15])
+      <input type="search" placeholder="Buscar configuração..." autocomplete="off" data-settings-nav-search>
+    </div>
+
+    <nav aria-label="Configurações" data-settings-nav>
+      @foreach($settingsGroups as $groupName=>$items)
+        <section class="settings-nav-group" data-settings-nav-group>
+          <div class="settings-nav-group-title">{{ $groupName }}</div>
+          @foreach($items as $key=>$item)
+            <a href="{{ route('settings.index',['tab'=>$key]) }}"
+               class="settings-nav-link {{ $tab===$key?'active':'' }}"
+               data-settings-nav-item
+               data-settings-search="{{ strtolower($groupName.' '.$item[0].' '.$item[2]) }}">
+              <span class="settings-nav-icon">@include('partials.icon',['name'=>$item[1],'size'=>16])</span>
+              <span class="settings-nav-copy">
+                <strong>{{ $item[0] }}</strong>
+                <small>{{ $item[2] }}</small>
+              </span>
+              @if($tab===$key)<span class="settings-nav-active-dot"></span>@endif
+            </a>
+          @endforeach
+        </section>
+      @endforeach
+      <div class="settings-nav-empty" data-settings-nav-empty hidden>Nenhuma configuração encontrada.</div>
+    </nav>
+  </aside>
+
+  <main class="settings-page">
+    <header class="settings-content-head">
+      <div class="settings-content-icon">@include('partials.icon',['name'=>$activeItem[1] ?? 'settings','size'=>20])</div>
+      <div>
+        <span>{{ $activeGroup }}</span>
+        <h2>{{ $activeItem[0] ?? 'Configurações' }}</h2>
+        <p>{{ $activeItem[2] ?? 'Preferências do sistema' }}</p>
+      </div>
+    </header>
 @if($tab==='general')
   <form method="post" action="{{ route('settings.company.update') }}" enctype="multipart/form-data" class="settings-stack">
     @csrf
@@ -570,5 +630,6 @@ $tabs=[
     </section>
   </form>
 @endif
+  </main>
 </div>
 @endsection
