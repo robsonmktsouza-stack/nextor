@@ -18,7 +18,7 @@ final class IbsCbsClassificationCatalog
         if ($entry === null || $entry['cst'] !== $classification->cst || !$entry['nfce']) {
             throw new TaxConfigurationException(
                 "cClassTrib {$classification->code} / CST {$classification->cst} não está habilitado "
-                .'no subconjunto versionado e suportado pelo Nextor para NFC-e.'
+                .'no catálogo versionado do subconjunto suportado pelo Nextor para NFC-e.'
             );
         }
     }
