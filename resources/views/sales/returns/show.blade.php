@@ -46,7 +46,7 @@
     <div class="detail-meta">
       <div><span>Venda original</span><strong><a class="table-link" href="{{ route('sales.show',$saleReturn->sale_id) }}">#{{ str_pad((string)$saleReturn->sale_id,5,'0',STR_PAD_LEFT) }}</a></strong></div>
       <div><span>Cliente</span><strong>{{ $saleReturn->sale?->customer?->name ?? 'Consumidor não identificado' }}</strong></div>
-      <div><span>Data</span><strong>{{ $saleReturn->return_date->format('d/m/Y') }}</strong></div>
+      <div><span>Data</span><strong>{{ $saleReturn->return_date->format(\App\Models\AppSetting::dateFormat()) }}</strong></div>
       <div><span>Responsável</span><strong>{{ $saleReturn->user?->name ?? '—' }}</strong></div>
       <div><span>Situação</span><strong>{{ $saleReturn->status==='completed'?'Concluída':'Cancelada' }}</strong></div>
       @if($saleReturn->notes)<div><span>Observações</span><strong>{{ $saleReturn->notes }}</strong></div>@endif
