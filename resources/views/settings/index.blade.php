@@ -13,10 +13,12 @@ $tabs=[
   'pdv'=>['PDV','pdv'],
   'billing'=>['Cobranças','money'],
   'fiscal'=>['Fiscal','shield'],
+  'tax'=>['Tributação','layers'],
   'nfe'=>['NF-e','receipt'],
   'nfce'=>['NFC-e','receipt'],
   'nfse'=>['NFS-e','services'],
   'cte'=>['CT-e / MDF-e','stock'],
+  'accounting'=>['Contábil','services'],
   'users'=>['Usuários','customers'],
   'integrations'=>['Integrações','layers'],
   'system'=>['Sistema','settings'],
@@ -332,6 +334,35 @@ $tabs=[
     </section>
   </div>
 
+@elseif($tab==='tax')
+  <form method="post" action="{{ route('settings.group.update','tax') }}">
+    @csrf
+    <section class="settings-card">
+      <div class="settings-card-head">
+        <div><h2>Dados tributários</h2><p>Padrões de preenchimento para produtos, serviços e documentos. Estes valores não substituem a análise da operação.</p></div>
+        <button class="btn btn-primary">Salvar</button>
+      </div>
+      <div class="settings-form-grid">
+        <label class="field span-2"><span>Origem ICMS</span><input name="icms_origin_default" value="{{ $tax['icms_origin_default'] }}" maxlength="2" placeholder="0"></label>
+        <label class="field span-2"><span>CSOSN padrão</span><input name="icms_csosn_default" value="{{ $tax['icms_csosn_default'] }}" maxlength="4"></label>
+        <label class="field span-2"><span>CST ICMS padrão</span><input name="icms_cst_default" value="{{ $tax['icms_cst_default'] }}" maxlength="4"></label>
+        <label class="field span-2"><span>CST PIS padrão</span><input name="pis_cst_default" value="{{ $tax['pis_cst_default'] }}" maxlength="4"></label>
+        <label class="field span-2"><span>CST COFINS padrão</span><input name="cofins_cst_default" value="{{ $tax['cofins_cst_default'] }}" maxlength="4"></label>
+        <label class="field span-2"><span>CST IPI padrão</span><input name="ipi_cst_default" value="{{ $tax['ipi_cst_default'] }}" maxlength="4"></label>
+
+        <label class="field span-3"><span>ISS padrão (%)</span><input type="number" step="0.0001" min="0" max="100" name="iss_rate_default" value="{{ $tax['iss_rate_default'] }}"></label>
+        <label class="field span-3"><span>Crédito Simples (%)</span><input type="number" step="0.0001" min="0" max="100" name="simple_credit_rate" value="{{ $tax['simple_credit_rate'] }}"></label>
+        <label class="field span-3"><span>FCP padrão (%)</span><input type="number" step="0.0001" min="0" max="100" name="fcp_rate_default" value="{{ $tax['fcp_rate_default'] }}"></label>
+        <label class="field span-3"><span>Classificação tributária</span><input name="tax_classification_code" value="{{ $tax['tax_classification_code'] }}"></label>
+
+        <label class="field span-3"><span>CST IBS padrão</span><input name="ibs_cst_default" value="{{ $tax['ibs_cst_default'] }}"></label>
+        <label class="field span-3"><span>CST CBS padrão</span><input name="cbs_cst_default" value="{{ $tax['cbs_cst_default'] }}"></label>
+        <label class="field span-12"><span>Observações tributárias internas</span><textarea name="notes" rows="4">{{ $tax['notes'] }}</textarea></label>
+      </div>
+      <div class="settings-warning">Os campos desta aba são apenas padrões de cadastro. CFOP, CST/CSOSN, IBS/CBS, retenções e demais tratamentos devem ser definidos conforme cada operação e legislação aplicável.</div>
+    </section>
+  </form>
+
 @elseif($tab==='nfe')
   <form method="post" action="{{ route('settings.group.update','nfe') }}">
     @csrf
@@ -419,6 +450,32 @@ $tabs=[
           <label class="field span-3"><span>Próximo número</span><input type="number" min="1" name="mdfe_next_number" value="{{ $cte['mdfe_next_number'] }}"></label>
         </div>
         <label class="settings-switch settings-switch-single"><input type="checkbox" name="mdfe_enabled" value="1" @checked($cte['mdfe_enabled'])><span><strong>MDF-e habilitado</strong><small>Disponibiliza estes parâmetros ao módulo de manifesto.</small></span></label>
+      </div>
+    </section>
+  </form>
+
+@elseif($tab==='accounting')
+  <form method="post" action="{{ route('settings.group.update','accounting') }}">
+    @csrf
+    <section class="settings-card">
+      <div class="settings-card-head">
+        <div><h2>Contábil</h2><p>Dados do escritório e preferências para integração e exportação contábil.</p></div>
+        <button class="btn btn-primary">Salvar</button>
+      </div>
+      <div class="settings-form-grid">
+        <label class="field span-6"><span>Escritório contábil</span><input name="office_name" value="{{ $accounting['office_name'] }}"></label>
+        <label class="field span-6"><span>Contador responsável</span><input name="accountant_name" value="{{ $accounting['accountant_name'] }}"></label>
+        <label class="field span-3"><span>CPF / CNPJ</span><input name="accountant_document" value="{{ $accounting['accountant_document'] }}"></label>
+        <label class="field span-3"><span>CRC</span><input name="crc" value="{{ $accounting['crc'] }}"></label>
+        <label class="field span-3"><span>E-mail</span><input type="email" name="email" value="{{ $accounting['email'] }}"></label>
+        <label class="field span-3"><span>Telefone</span><input name="phone" value="{{ $accounting['phone'] }}"></label>
+        <label class="field span-6"><span>Sistema contábil</span><input name="accounting_system" value="{{ $accounting['accounting_system'] }}" placeholder="Ex.: Domínio, Alterdata, outro"></label>
+        <label class="field span-6"><span>Formato de exportação</span><input name="export_format" value="{{ $accounting['export_format'] }}" placeholder="Ex.: CSV, layout próprio"></label>
+        <label class="field span-12"><span>Observações</span><textarea name="notes" rows="4">{{ $accounting['notes'] }}</textarea></label>
+      </div>
+      <div class="settings-switch-grid">
+        <label class="settings-switch"><input type="checkbox" name="cost_center_enabled" value="1" @checked($accounting['cost_center_enabled'])><span><strong>Usar centros de custo</strong><small>Prepara classificações financeiras para detalhamento contábil.</small></span></label>
+        <label class="settings-switch"><input type="checkbox" name="automatic_monthly_export" value="1" @checked($accounting['automatic_monthly_export'])><span><strong>Exportação mensal automática</strong><small>Preferência para o fluxo quando o exportador contábil estiver conectado.</small></span></label>
       </div>
     </section>
   </form>
