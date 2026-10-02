@@ -142,7 +142,7 @@
     </div>
 
     <input type="hidden" name="customer_id" id="pdvCustomer" value="">
-    <input type="hidden" name="payment_method" id="pdvPaymentMethod" value="">
+    <input type="hidden" name="payment_method" id="pdvPaymentMethod" value="{{ $pdvSettings['default_payment_method'] }}">
     <input type="hidden" name="cash_received" id="pdvCashReceived" value="0.00">
     <input type="hidden" name="notes" id="pdvNotes" value="">
 
@@ -204,16 +204,19 @@
     <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
   </div>
   <div class="pdv-payment-options" id="pdvPaymentOptions">
-    <button type="button" data-payment-value="cash" data-payment-label="Dinheiro" data-payment-key="1"><kbd>1</kbd><span>Dinheiro</span></button>
-    <button type="button" data-payment-value="pix" data-payment-label="PIX" data-payment-key="2"><kbd>2</kbd><span>PIX</span></button>
-    <button type="button" data-payment-value="debit_card" data-payment-label="Cartão de débito" data-payment-key="3"><kbd>3</kbd><span>Cartão de débito</span></button>
-    <button type="button" data-payment-value="credit_card" data-payment-label="Cartão de crédito" data-payment-key="4"><kbd>4</kbd><span>Cartão de crédito</span></button>
-    <button type="button" data-payment-value="bank_slip" data-payment-label="Boleto" data-payment-key="5"><kbd>5</kbd><span>Boleto</span></button>
-    <button type="button" data-payment-value="bank_transfer" data-payment-label="Transferência" data-payment-key="6"><kbd>6</kbd><span>Transferência</span></button>
-    <button type="button" data-payment-value="other" data-payment-label="Outro" data-payment-key="7"><kbd>7</kbd><span>Outro</span></button>
+    @foreach($paymentMethods as $method)
+      <button type="button"
+              data-payment-value="{{ $method->code }}"
+              data-payment-label="{{ $method->name }}"
+              data-payment-kind="{{ $method->kind }}"
+              @if($loop->iteration<=9) data-payment-key="{{ $loop->iteration }}" @endif>
+        @if($loop->iteration<=9)<kbd>{{ $loop->iteration }}</kbd>@endif
+        <span>{{ $method->name }}</span>
+      </button>
+    @endforeach
   </div>
   <div class="pdv-modal-help">
-    <span><kbd>1–7</kbd> Selecionar</span>
+    <span><kbd>1–9</kbd> Selecionar</span>
     <span><kbd>↑</kbd><kbd>↓</kbd> Navegar</span>
     <span><kbd>Enter</kbd> Confirmar</span>
     <span><kbd>Esc</kbd> Fechar</span>
