@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Http\Request;
 
 class AppSetting extends Model
 {
@@ -54,6 +55,22 @@ class AppSetting extends Model
 
         Cache::forget('nextor.setting.'.$group.'.'.$key);
         Cache::forget('nextor.settings.group.'.$group);
+    }
+
+    public static function tablePerPage(Request $request): int
+    {
+        $allowed=[10,25,50,100];
+        $requested=$request->integer('per_page');
+
+        if(in_array($requested,$allowed,true)) {
+            $request->session()->put('table_per_page',$requested);
+        }
+
+        $default=(int)static::value('system','rows_per_page',25);
+        if(!in_array($default,$allowed,true)) $default=25;
+
+        $perPage=(int)$request->session()->get('table_per_page',$default);
+        return in_array($perPage,$allowed,true) ? $perPage : $default;
     }
 
     public static function groupValues(string $group,array $defaults=[]): array
