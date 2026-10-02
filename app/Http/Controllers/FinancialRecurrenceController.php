@@ -13,10 +13,29 @@ use Illuminate\Validation\ValidationException;
 
 class FinancialRecurrenceController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $term=trim((string)$request->query('search',''));
+        $type=in_array($request->query('type'),['receivable','payable'],true)?(string)$request->query('type'):'';
+        $status=in_array($request->query('status'),['active','paused'],true)?(string)$request->query('status'):'';
+
+        $query=FinancialRecurrence::query()
+            ->with(['customer','category','account'])
+            ->when($term,fn($q)=>$q->where(function($search) use($term){
+                $search->where('description','like',"%{$term}%")
+                    ->orWhere('keywords','like',"%{$term}%")
+                    ->orWhereHas('customer',fn($customer)=>$customer->where('name','like',"%{$term}%"));
+            }))
+            ->when($type,fn($q)=>$q->where('type',$type))
+            ->when($status==='active',fn($q)=>$q->where('is_active',true))
+            ->when($status==='paused',fn($q)=>$q->where('is_active',false));
+
+        $activeCount=(clone $query)->where('is_active',true)->count();
+        $monthlyBase=(float)(clone $query)->where('is_active',true)->where('frequency','monthly')->sum('amount');
+
         return view('finance.recurrences.index',[
-            'recurrences'=>FinancialRecurrence::query()->with(['customer','category','account'])->orderByDesc('is_active')->orderBy('next_date')->paginate(25),
+            'recurrences'=>$query->orderByDesc('is_active')->orderBy('next_date')->paginate(25)->withQueryString(),
+            'term'=>$term,'type'=>$type,'status'=>$status,'activeCount'=>$activeCount,'monthlyBase'=>$monthlyBase,
         ]);
     }
 
