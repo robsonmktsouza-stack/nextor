@@ -1,6 +1,60 @@
 @extends('layouts.pdv')
 
 @section('content')
+@if($pdvSettings['require_cash_opening'])
+<section class="pdv-cash-session-bar {{ $cashSession ? 'open' : 'closed' }}">
+  <div>
+    @include('partials.icon',['name'=>'money','size'=>17])
+    @if($cashSession)
+      <span>Caixa aberto às <strong>{{ $cashSession->opened_at->format('H:i') }}</strong> · Abertura <strong>R$ {{ number_format((float)$cashSession->opening_amount,2,',','.') }}</strong></span>
+      @if($cashExpected!==null)<small>Saldo esperado em dinheiro: R$ {{ number_format((float)$cashExpected,2,',','.') }}</small>@endif
+    @else
+      <span><strong>Caixa fechado.</strong> Abra o caixa para poder finalizar vendas.</span>
+    @endif
+  </div>
+  @if($cashSession)
+    <button type="button" class="pdv-cash-session-action" onclick="document.getElementById('pdvCashCloseDialog').showModal()">Fechar caixa</button>
+  @else
+    <button type="button" class="pdv-cash-session-action primary" onclick="document.getElementById('pdvCashOpenDialog').showModal()">Abrir caixa</button>
+  @endif
+</section>
+
+@if(!$cashSession)
+<dialog class="pdv-quick-modal" id="pdvCashOpenDialog">
+  <form method="post" action="{{ route('pdv.cash.open') }}">
+    @csrf
+    <div class="pdv-modal-head">
+      <div><h2>Abrir caixa</h2><p>Informe o fundo inicial disponível em dinheiro.</p></div>
+      <button type="button" class="pdv-modal-close" onclick="this.closest('dialog').close()" aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+    </div>
+    <div class="pdv-cash-modal-body">
+      <label><span>Valor de abertura</span><input type="number" step="0.01" min="0" name="opening_amount" value="{{ old('opening_amount','0.00') }}" required autofocus></label>
+      <label><span>Observação</span><textarea name="opening_notes" rows="3" maxlength="1000" placeholder="Opcional"></textarea></label>
+      <button class="pdv-modal-primary" type="submit">@include('partials.icon',['name'=>'check','size'=>18]) Abrir caixa</button>
+    </div>
+  </form>
+</dialog>
+@else
+<dialog class="pdv-quick-modal" id="pdvCashCloseDialog">
+  <form method="post" action="{{ route('pdv.cash.close') }}">
+    @csrf
+    <div class="pdv-modal-head">
+      <div><h2>Fechar caixa</h2><p>Conferência do saldo físico em dinheiro.</p></div>
+      <button type="button" class="pdv-modal-close" onclick="this.closest('dialog').close()" aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+    </div>
+    <div class="pdv-cash-modal-body">
+      @if($cashExpected!==null)
+        <div class="pdv-cash-total"><span>Saldo esperado</span><strong>R$ {{ number_format((float)$cashExpected,2,',','.') }}</strong></div>
+      @endif
+      <label><span>Saldo contado</span><input type="number" step="0.01" min="0" name="closing_amount" value="{{ old('closing_amount',$cashExpected ?? 0) }}" required autofocus></label>
+      <label><span>Observação</span><textarea name="closing_notes" rows="3" maxlength="1000" placeholder="Opcional"></textarea></label>
+      <button class="pdv-modal-primary" type="submit">@include('partials.icon',['name'=>'check','size'=>18]) Fechar caixa</button>
+    </div>
+  </form>
+</dialog>
+@endif
+@endif
+
 <form id="pdvForm" method="post" action="{{ route('pdv.store') }}">
 @csrf
 
@@ -22,7 +76,9 @@
      data-allow-negative-stock="{{ $allowNegativeStock ? '1' : '0' }}"
      data-require-customer="{{ $pdvSettings['require_customer'] ? '1' : '0' }}"
      data-allow-discount="{{ $pdvSettings['allow_discount'] ? '1' : '0' }}"
-     data-show-stock="{{ $pdvSettings['show_stock'] ? '1' : '0' }}">
+     data-show-stock="{{ $pdvSettings['show_stock'] ? '1' : '0' }}"
+     data-cash-required="{{ $pdvSettings['require_cash_opening'] ? '1' : '0' }}"
+     data-cash-open="{{ $cashSession ? '1' : '0' }}">
   <section class="pdv-catalog">
     <div class="pdv-search-panel">
       <div class="pdv-search-box">
