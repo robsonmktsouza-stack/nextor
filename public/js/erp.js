@@ -896,6 +896,7 @@
     const cepInput=scope?.querySelector('[data-cep-input]');
     const cep=(cepInput?.value||'').replace(/\D/g,'');
     if(cep.length!==8){cepInput?.focus();return;}
+    if(cepInput) cepInput.dataset.lastAutoLookup=cep;
     button.disabled=true;
     try{
       const response=await fetch('https://viacep.com.br/ws/'+cep+'/json/');
@@ -928,6 +929,7 @@
       nextorNotify('Informe um CNPJ válido com 14 caracteres.',{type:'warning',title:'Consulta de CNPJ'});
       return;
     }
+    if(documentInput) documentInput.dataset.lastAutoLookup=cnpj;
     const set=(name,value)=>{
       const field=form.querySelector('[name="'+name+'"]');
       if(field && value!==undefined && value!==null){
@@ -964,6 +966,37 @@
     }finally{
       button.disabled=false;
       if(button.querySelector('span')) button.querySelector('span').textContent=oldText||'Autopreencher';
+    }
+  });
+
+  const lookupTimers=new WeakMap();
+  document.addEventListener('input',event=>{
+    const input=event.target;
+    if(!(input instanceof HTMLInputElement)) return;
+
+    if(input.matches('[data-cep-input]')){
+      const value=(input.value||'').replace(/\D/g,'');
+      const previous=lookupTimers.get(input);
+      if(previous) clearTimeout(previous);
+      if(value.length!==8 || input.dataset.lastAutoLookup===value) return;
+      lookupTimers.set(input,setTimeout(()=>{
+        lookupTimers.delete(input);
+        const button=input.closest('[data-address-scope]')?.querySelector('[data-cep-search]');
+        if(button && !button.disabled) button.click();
+      },320));
+      return;
+    }
+
+    if(input.matches('[data-cnpj-document]')){
+      const value=(input.value||'').toUpperCase().replace(/[^0-9A-Z]/g,'');
+      const previous=lookupTimers.get(input);
+      if(previous) clearTimeout(previous);
+      if(value.length!==14 || input.dataset.lastAutoLookup===value) return;
+      lookupTimers.set(input,setTimeout(()=>{
+        lookupTimers.delete(input);
+        const button=input.closest('form')?.querySelector('[data-cnpj-autofill]');
+        if(button && !button.disabled) button.click();
+      },360));
     }
   });
 
