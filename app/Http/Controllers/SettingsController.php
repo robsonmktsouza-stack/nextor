@@ -330,14 +330,6 @@ class SettingsController extends Controller
                 'default_adjustment_reason'=>['nullable','string','max:255'],
             ],['allow_negative_stock','minimum_stock_alerts'],[]],
 
-            'catalog'=>[
-                'product_unit'=>'UN','product_usage_type'=>'resale','product_control_stock'=>true,
-                'product_minimum_stock'=>'0.000','new_products_active'=>true,'new_services_active'=>true,
-            ],
-            'inventory'=>[
-                'allow_negative_stock'=>false,'minimum_stock_alerts'=>true,
-                'stock_decimal_places'=>'3','default_adjustment_reason'=>null,
-            ],
             'operations'=>[[
                 'default_final_consumer'=>['nullable','boolean'],
                 'auto_finance_sale'=>['nullable','boolean'],
@@ -493,6 +485,14 @@ class SettingsController extends Controller
     private function defaults(string $group): array
     {
         return match($group) {
+            'catalog'=>[
+                'product_unit'=>'UN','product_usage_type'=>'resale','product_control_stock'=>true,
+                'product_minimum_stock'=>'0.000','new_products_active'=>true,'new_services_active'=>true,
+            ],
+            'inventory'=>[
+                'allow_negative_stock'=>false,'minimum_stock_alerts'=>true,
+                'stock_decimal_places'=>'3','default_adjustment_reason'=>null,
+            ],
             'operations'=>[
                 'default_final_consumer'=>true,'auto_finance_sale'=>true,
                 'allow_partial_return'=>true,'quote_valid_days'=>15,'default_due_days'=>0,
