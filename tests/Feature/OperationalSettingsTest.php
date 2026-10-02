@@ -6,7 +6,9 @@ use App\Models\AppSetting;
 use App\Models\FinancialEntry;
 use App\Models\FiscalDocumentJob;
 use App\Models\PaymentMethod;
+use App\Models\PdvCashMovement;
 use App\Models\Product;
+use App\Models\Sale;
 use App\Models\User;
 use App\Services\AccountingExportService;
 use App\Services\BillingService;
@@ -152,6 +154,87 @@ class OperationalSettingsTest extends TestCase
         ]);
 
         $response->assertSessionHasErrors('cash_session');
+    }
+
+    public function test_pdv_can_store_consumer_document_and_split_payment(): void
+    {
+        AppSetting::put('pdv','allow_split_payment',true);
+
+        $user=$this->user();
+        $product=$this->product();
+
+        $response=$this->actingAs($user)->post(route('pdv.store'),[
+            'consumer_document'=>'529.982.247-25',
+            'cash_received'=>'50.00',
+            'payments'=>[
+                ['payment_method'=>'cash','amount'=>'40.00'],
+                ['payment_method'=>'pix','amount'=>'60.00'],
+            ],
+            'items'=>[[
+                'item_type'=>'product',
+                'product_id'=>$product->id,
+                'quantity'=>'1.000',
+                'discount'=>'0.00',
+            ]],
+        ]);
+
+        $response->assertSessionHasNoErrors()->assertRedirect();
+
+        $sale=Sale::query()->firstOrFail();
+        $this->assertSame('52998224725',$sale->consumer_document);
+        $this->assertCount(2,$sale->payments);
+        $this->assertSame('40.00',$sale->payments->firstWhere('payment_method','cash')->amount);
+        $this->assertSame('60.00',$sale->payments->firstWhere('payment_method','pix')->amount);
+    }
+
+    public function test_pdv_rejects_invalid_consumer_document(): void
+    {
+        $user=$this->user();
+        $product=$this->product();
+
+        $this->actingAs($user)->post(route('pdv.store'),[
+            'consumer_document'=>'111.111.111-11',
+            'payment_method'=>'pix',
+            'items'=>[[
+                'item_type'=>'product',
+                'product_id'=>$product->id,
+                'quantity'=>'1.000',
+                'discount'=>'0.00',
+            ]],
+        ])->assertSessionHasErrors('consumer_document');
+
+        $this->assertSame(0,Sale::query()->count());
+    }
+
+    public function test_pdv_cash_session_records_supply_and_withdrawal(): void
+    {
+        AppSetting::put('pdv','allow_cash_movements',true);
+
+        $user=$this->user();
+
+        $this->actingAs($user)->post(route('pdv.cash.open'),[
+            'opening_amount'=>'100.00',
+        ])->assertSessionHasNoErrors();
+
+        $this->actingAs($user)->post(route('pdv.cash.movement'),[
+            'type'=>'supply',
+            'amount'=>'50.00',
+            'reason'=>'Reforço de troco',
+        ])->assertSessionHasNoErrors();
+
+        $this->actingAs($user)->post(route('pdv.cash.movement'),[
+            'type'=>'withdrawal',
+            'amount'=>'30.00',
+            'reason'=>'Depósito no cofre',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('pdv_cash_movements',[
+            'type'=>'supply','amount'=>'50.00','reason'=>'Reforço de troco',
+        ]);
+        $this->assertDatabaseHas('pdv_cash_movements',[
+            'type'=>'withdrawal','amount'=>'30.00','reason'=>'Depósito no cofre',
+        ]);
+        $this->assertSame(2,PdvCashMovement::query()->count());
     }
 
     public function test_billing_settings_generate_pix_copy_and_paste(): void
