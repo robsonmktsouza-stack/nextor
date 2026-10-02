@@ -791,20 +791,28 @@ class PdvController extends Controller
 
     private function normalizeCnpj(?string $document): ?string
     {
-        $digits=preg_replace('/\\D+/','',(string)$document) ?: '';
-        return $digits==='' ? null : mb_substr($digits,0,14);
+        $value=$this->normalizeTaxDocument($document);
+        return $value===null ? null : mb_substr($value,0,14);
     }
 
     private function normalizeConsumerDocument(?string $document): ?string
     {
-        $digits=preg_replace('/\D+/','',(string)$document) ?: '';
-        return $digits==='' ? null : $digits;
+        return $this->normalizeTaxDocument($document);
+    }
+
+    private function normalizeTaxDocument(?string $document): ?string
+    {
+        $value=strtoupper((string)$document);
+        $value=preg_replace('/[^A-Z0-9]/','',$value) ?: '';
+        return $value==='' ? null : $value;
     }
 
     private function validCpfCnpj(string $document): bool
     {
-        if(strlen($document)===11) {
-            if(preg_match('/^(\d)\1{10}$/',$document)) return false;
+        $document=$this->normalizeTaxDocument($document) ?? '';
+
+        if(strlen($document)===11 && ctype_digit($document)) {
+            if(preg_match('/^(\\d)\\1{10}$/',$document)) return false;
 
             for($t=9;$t<11;$t++) {
                 $sum=0;
@@ -819,28 +827,28 @@ class PdvController extends Controller
             return true;
         }
 
-        if(strlen($document)===14) {
-            if(preg_match('/^(\d)\1{13}$/',$document)) return false;
+        if(strlen($document)===14 && preg_match('/^[A-Z0-9]{12}[0-9]{2}$/',$document)) {
+            $base=substr($document,0,12);
+            $first=$this->cnpjCheckDigit($base,[5,4,3,2,9,8,7,6,5,4,3,2]);
+            $second=$this->cnpjCheckDigit($base.$first,[6,5,4,3,2,9,8,7,6,5,4,3,2]);
 
-            $weights=[
-                [5,4,3,2,9,8,7,6,5,4,3,2],
-                [6,5,4,3,2,9,8,7,6,5,4,3,2],
-            ];
-
-            foreach($weights as $offset=>$weight) {
-                $sum=0;
-                foreach($weight as $index=>$factor) {
-                    $sum+=(int)$document[$index]*$factor;
-                }
-                $remainder=$sum%11;
-                $digit=$remainder<2 ? 0 : 11-$remainder;
-                if((int)$document[12+$offset]!==$digit) return false;
-            }
-
-            return true;
+            return substr($document,-2)===(string)$first.(string)$second;
         }
 
         return false;
+    }
+
+    private function cnpjCheckDigit(string $base,array $weights): int
+    {
+        $sum=0;
+
+        foreach(str_split($base) as $index=>$character) {
+            $value=ord($character)-48;
+            $sum+=$value*$weights[$index];
+        }
+
+        $remainder=$sum%11;
+        return $remainder<2 ? 0 : 11-$remainder;
     }
 
 }
