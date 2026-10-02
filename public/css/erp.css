@@ -340,6 +340,13 @@ html,body{height:100%;overflow:hidden}
   pointer-events:all;
 }
 .nextor-loading.show{opacity:1}
+.nextor-loading.navigation-only{
+  background:transparent;
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+  pointer-events:none;
+  cursor:default;
+}
 .nextor-loading[hidden]{display:none!important}
 .nextor-loading-center{
   display:flex;
