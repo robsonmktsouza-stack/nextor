@@ -1368,6 +1368,20 @@
     const el=document.getElementById('stock-qty-label'); if(el) el.textContent=e.target.value==='adjustment'?'Novo saldo final *':'Quantidade *';
   });
 
+  document.addEventListener('click',event=>{
+    const button=event.target.closest?.('[data-permission-all],[data-permission-none]');
+    if(!button) return;
+
+    const block=button.closest('.settings-permissions-block');
+    if(!block) return;
+
+    const checked=button.hasAttribute('data-permission-all');
+    block.querySelectorAll('input[name="permissions[]"]').forEach(input=>{
+      input.checked=checked;
+      input.dispatchEvent(new Event('change',{bubbles:true}));
+    });
+  });
+
   const saleBody=document.getElementById('saleItems');
   if(!saleBody) return;
 
@@ -1908,19 +1922,5 @@
   saleHydrating=false;
   recalcSale();
 
-
-  document.addEventListener('click',event=>{
-    const button=event.target.closest?.('[data-permission-all],[data-permission-none]');
-    if(!button) return;
-
-    const block=button.closest('.settings-permissions-block');
-    if(!block) return;
-
-    const checked=button.hasAttribute('data-permission-all');
-    block.querySelectorAll('input[name="permissions[]"]').forEach(input=>{
-      input.checked=checked;
-      input.dispatchEvent(new Event('change',{bubbles:true}));
-    });
-  });
 
 })();
