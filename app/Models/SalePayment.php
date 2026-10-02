@@ -13,6 +13,14 @@ class SalePayment extends Model
         'amount',
         'due_date',
         'payment_method',
+        'integration_type',
+        'transaction_document',
+        'transaction_state',
+        'institution_document',
+        'card_brand',
+        'authorization_code',
+        'beneficiary_document',
+        'terminal_id',
         'receivable',
     ];
 
