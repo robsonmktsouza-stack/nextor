@@ -11,23 +11,25 @@
   </div>
 
   <div class="return-search-panel">
-    <form method="get" action="{{ route('sales.returns.create') }}" class="return-sale-search">
+    <form method="get" action="{{ route('sales.returns.create') }}" class="return-sale-search" data-live-search data-live-target="return-sale-live-results" data-live-delay="220">
       <label class="field">
         <span>Informe o código da venda para buscar os dados</span>
         <div class="return-search-row">
           <div class="input-icon-group">
             <span class="input-icon">@include('partials.icon',['name'=>'sales','size'=>17])</span>
-            <input name="sale" value="{{ $raw }}" inputmode="numeric" autocomplete="off" placeholder="Ex.: 00025" autofocus>
+            <input type="search" name="sale" value="{{ $raw }}" inputmode="numeric" autocomplete="off" placeholder="Ex.: 00025" data-live-search-input autofocus>
           </div>
           <button class="btn btn-secondary" type="submit">Buscar</button>
         </div>
       </label>
     </form>
 
+  </div>
+
+  <div id="return-sale-live-results" data-live-search-results>
     @if($searchError)
       <div class="return-search-error">@include('partials.icon',['name'=>'alert','size'=>17]) {{ $searchError }}</div>
     @endif
-  </div>
 
   @if($sale)
     <form method="post" action="{{ route('sales.returns.store') }}" class="return-form">
@@ -117,29 +119,6 @@
       <span>Depois você poderá selecionar os itens e quantidades que estão sendo devolvidos.</span>
     </div>
   @endif
+  </div>
 </section>
 @endsection
-
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded',()=>{
-  document.querySelectorAll('[data-return-item-toggle]').forEach(check=>{
-    const id=check.dataset.returnItemToggle;
-    const qty=document.querySelector('[data-return-qty="'+id+'"]');
-    const reason=document.querySelector('[data-return-reason="'+id+'"]');
-    const sync=()=>{
-      const enabled=check.checked && !check.disabled;
-      if(qty){
-        qty.disabled=!enabled;
-        if(enabled && Number(qty.value)<=0) qty.value=Math.min(1,Number(qty.max||1));
-        if(!enabled) qty.value='0';
-      }
-      if(reason) reason.disabled=!enabled;
-      check.closest('tr')?.classList.toggle('return-item-selected',enabled);
-    };
-    check.addEventListener('change',sync);
-    sync();
-  });
-});
-</script>
-@endpush
