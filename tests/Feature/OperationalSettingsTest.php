@@ -7,6 +7,7 @@ use App\Models\FinancialEntry;
 use App\Models\FiscalDocumentJob;
 use App\Models\PaymentMethod;
 use App\Models\PdvCashMovement;
+use App\Models\PdvSuspendedSale;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\User;
@@ -182,6 +183,8 @@ class OperationalSettingsTest extends TestCase
 
         $sale=Sale::query()->firstOrFail();
         $this->assertSame('52998224725',$sale->consumer_document);
+        $this->assertSame('50.00',$sale->cash_received);
+        $this->assertSame('10.00',$sale->change_amount);
         $this->assertCount(2,$sale->payments);
         $this->assertSame('40.00',$sale->payments->firstWhere('payment_method','cash')->amount);
         $this->assertSame('60.00',$sale->payments->firstWhere('payment_method','pix')->amount);
@@ -235,6 +238,170 @@ class OperationalSettingsTest extends TestCase
             'type'=>'withdrawal','amount'=>'30.00','reason'=>'Depósito no cofre',
         ]);
         $this->assertSame(2,PdvCashMovement::query()->count());
+    }
+
+    public function test_pdv_accepts_alphanumeric_cnpj(): void
+    {
+        $user=$this->user();
+        $product=$this->product();
+
+        $this->actingAs($user)->post(route('pdv.store'),[
+            'consumer_document'=>'00.000.000/E08G-12',
+            'payment_method'=>'pix',
+            'items'=>[[
+                'item_type'=>'product',
+                'product_id'=>$product->id,
+                'quantity'=>'1.000',
+                'discount'=>'0.00',
+            ]],
+        ])->assertSessionHasNoErrors();
+
+        $this->assertSame('00000000E08G12',Sale::query()->firstOrFail()->consumer_document);
+    }
+
+    public function test_pdv_can_suspend_and_resume_without_moving_stock(): void
+    {
+        $user=$this->user();
+        $product=$this->product(10);
+
+        $response=$this->actingAs($user)->postJson(route('pdv.suspended.store'),[
+            'label'=>'Balcão 2',
+            'items'=>[[
+                'type'=>'product',
+                'id'=>$product->id,
+                'quantity'=>2,
+                'discount'=>0,
+            ]],
+            'payment_method'=>'pix',
+        ])->assertCreated();
+
+        $suspended=PdvSuspendedSale::query()->firstOrFail();
+        $this->assertSame('10.000',$product->fresh()->stock_quantity);
+        $this->assertSame('200.00',$suspended->total);
+
+        $resume=$this->actingAs($user)
+            ->postJson(route('pdv.suspended.resume',$suspended))
+            ->assertOk()
+            ->json('snapshot');
+
+        $this->assertSame($product->id,$resume['items'][0]['id']);
+        $this->assertSame(2.0,(float)$resume['items'][0]['quantity']);
+        $this->assertNotNull($suspended->fresh()->resumed_at);
+        $this->assertSame('10.000',$product->fresh()->stock_quantity);
+    }
+
+    public function test_card_tef_data_is_persisted_and_reaches_nfce_snapshot(): void
+    {
+        AppSetting::put('fiscal','enabled',true);
+        AppSetting::put('nfce','enabled',true);
+        AppSetting::put('nfce','auto_from_pdv',true);
+
+        $user=$this->user();
+        $product=$this->product();
+
+        $this->actingAs($user)->post(route('pdv.store'),[
+            'payments'=>[[
+                'payment_method'=>'credit_card',
+                'amount'=>'100.00',
+                'integration_type'=>'1',
+                'institution_document'=>'59.434.778/0001-51',
+                'card_brand'=>'02',
+                'authorization_code'=>'AUTH12345',
+                'beneficiary_document'=>'59.434.778/0001-51',
+                'terminal_id'=>'POS-01',
+            ]],
+            'items'=>[[
+                'item_type'=>'product',
+                'product_id'=>$product->id,
+                'quantity'=>'1.000',
+                'discount'=>'0.00',
+            ]],
+        ])->assertSessionHasNoErrors();
+
+        $sale=Sale::query()->firstOrFail();
+        $payment=$sale->payments()->firstOrFail();
+
+        $this->assertSame('1',$payment->integration_type);
+        $this->assertSame('59434778000151',$payment->institution_document);
+        $this->assertSame('02',$payment->card_brand);
+        $this->assertSame('AUTH12345',$payment->authorization_code);
+        $this->assertSame('POS-01',$payment->terminal_id);
+
+        $job=FiscalDocumentJob::query()->where('sale_id',$sale->id)->where('document_type','nfce')->firstOrFail();
+        $snapshot=$job->source_snapshot;
+
+        $this->assertSame('59434778000151',$snapshot['payments'][0]['institution_document']);
+        $this->assertSame('02',$snapshot['payments'][0]['card_brand']);
+        $this->assertSame('AUTH12345',$snapshot['payments'][0]['authorization_code']);
+    }
+
+    public function test_nfce_contingency_marks_new_jobs_as_offline(): void
+    {
+        AppSetting::put('fiscal','enabled',true);
+        AppSetting::put('nfce','enabled',true);
+        AppSetting::put('nfce','auto_from_pdv',true);
+
+        $user=$this->user();
+
+        $this->actingAs($user)->post(route('pdv.nfce.contingency'),[
+            'action'=>'start',
+            'reason'=>'Indisponibilidade de comunicação com o autorizador da NFC-e.',
+        ])->assertSessionHasNoErrors();
+
+        $product=$this->product();
+
+        $this->actingAs($user)->post(route('pdv.store'),[
+            'payment_method'=>'pix',
+            'items'=>[[
+                'item_type'=>'product',
+                'product_id'=>$product->id,
+                'quantity'=>'1.000',
+                'discount'=>'0.00',
+            ]],
+        ])->assertSessionHasNoErrors();
+
+        $job=FiscalDocumentJob::query()->where('document_type','nfce')->firstOrFail();
+
+        $this->assertSame('offline',$job->emission_mode);
+        $this->assertNotNull($job->contingency_started_at);
+        $this->assertStringContainsString('Indisponibilidade',$job->contingency_reason);
+    }
+
+    public function test_authorized_nfce_can_enter_cancellation_queue(): void
+    {
+        AppSetting::put('fiscal','enabled',true);
+        AppSetting::put('nfce','enabled',true);
+        AppSetting::put('nfce','auto_from_pdv',true);
+
+        $user=$this->user();
+        $product=$this->product();
+
+        $this->actingAs($user)->post(route('pdv.store'),[
+            'payment_method'=>'pix',
+            'items'=>[[
+                'item_type'=>'product',
+                'product_id'=>$product->id,
+                'quantity'=>'1.000',
+                'discount'=>'0.00',
+            ]],
+        ])->assertSessionHasNoErrors();
+
+        $job=FiscalDocumentJob::query()->where('document_type','nfce')->firstOrFail();
+        $job->update([
+            'status'=>'authorized',
+            'access_key'=>str_repeat('1',44),
+            'protocol'=>'135260000000001',
+            'authorized_at'=>now(),
+        ]);
+
+        $this->actingAs($user)->post(route('pdv.nfce.cancel',$job),[
+            'reason'=>'Venda cancelada antes da saída da mercadoria do estabelecimento.',
+        ])->assertSessionHasNoErrors();
+
+        $job=$job->fresh();
+        $this->assertSame('pending',$job->cancellation_status);
+        $this->assertNotNull($job->cancellation_requested_at);
+        $this->assertStringContainsString('Venda cancelada',$job->cancellation_reason);
     }
 
     public function test_billing_settings_generate_pix_copy_and_paste(): void
