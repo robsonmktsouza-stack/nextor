@@ -154,6 +154,8 @@ class SalesService
                 'customer_id'=>$data['customer_id'] ?? null,
                 'consumer_document'=>$data['consumer_document'] ?? null,
                 'consumer_name'=>$data['consumer_name'] ?? null,
+                'cash_received'=>$data['cash_received'] ?? null,
+                'change_amount'=>$data['change_amount'] ?? 0,
                 'user_id'=>$userId,
                 'operation_type'=>$operationType,
                 'source'=>$data['source'] ?? 'manual',
