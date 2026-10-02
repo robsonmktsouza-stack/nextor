@@ -14,6 +14,7 @@ use App\Services\AccountingExportService;
 use App\Services\FinancialBalanceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -77,6 +78,7 @@ class SettingsController extends Controller
                 ->groupBy('status')
                 ->pluck('total','status')
                 ->all(),
+            'apiTokenConfigured'=>filled(AppSetting::value('integrations','api_token','')),
         ]);
     }
 
@@ -177,6 +179,17 @@ class SettingsController extends Controller
         };
 
         return redirect()->route('settings.index',['tab'=>$tab])->with('success','Configurações salvas.');
+    }
+
+    public function regenerateApiToken()
+    {
+        $token=Str::random(64);
+        AppSetting::put('integrations','api_token',$token,true);
+
+        return redirect()
+            ->route('settings.index',['tab'=>'integrations'])
+            ->with('success','Novo token da API gerado.')
+            ->with('api_token_plain',$token);
     }
 
     public function exportAccounting(Request $request, AccountingExportService $exports)
