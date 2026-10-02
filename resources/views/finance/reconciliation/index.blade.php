@@ -42,14 +42,14 @@
       @if($selected)
         <div class="finance-import-heading">
           <strong>{{ $selected->original_name }}</strong>
-          <span>{{ $selected->account->name }} · {{ $selected->period_start?->format('d/m/Y') }} a {{ $selected->period_end?->format('d/m/Y') }}</span>
+          <span>{{ $selected->account->name }} · {{ $selected->period_start?->format(\App\Models\AppSetting::dateFormat()) }} a {{ $selected->period_end?->format(\App\Models\AppSetting::dateFormat()) }}</span>
         </div>
         <table class="cms-table">
           <thead><tr><th>Data</th><th>Histórico</th><th>Valor</th><th>Situação</th><th>Conciliação</th></tr></thead>
           <tbody>
           @foreach($transactions as $tx)
             <tr>
-              <td class="nowrap">{{ $tx->transaction_date->format('d/m/Y') }}</td>
+              <td class="nowrap">{{ $tx->transaction_date->format(\App\Models\AppSetting::dateFormat()) }}</td>
               <td>{{ $tx->description }}@if($tx->external_id)<small class="table-subtitle">{{ $tx->external_id }}</small>@endif</td>
               <td class="{{ (float)$tx->amount>=0?'finance-positive':'finance-negative' }} nowrap">R$ {{ number_format((float)$tx->amount,2,',','.') }}</td>
               <td>@if($tx->reconciled_at)<span class="status status-ok">Conciliado</span>@else<span class="status status-blue">Pendente</span>@endif</td>
