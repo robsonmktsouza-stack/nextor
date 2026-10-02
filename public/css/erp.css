@@ -1710,15 +1710,6 @@ form[data-live-search].is-live-searching .table-search-submit svg{animation:next
 }
 .settings-subtabs a:hover{background:#f1f5f8;color:#315f7f}
 .settings-subtabs a.active{background:#e8f2fa;border-color:#9bbfd9;color:#2877c7}
-.settings-section-heading{
-  min-height:56px;display:flex;align-items:center;gap:9px;margin:0 0 10px;padding:10px 14px;
-  background:#fff;border:1px solid #d8e0e7;border-top:0
-}
-.settings-section-heading-icon{
-  width:30px;height:30px;display:grid;place-items:center;flex:0 0 30px;color:#62778a
-}
-.settings-section-heading h2{font-size:14px;color:#3b4e60;font-weight:650}
-.settings-section-heading p{margin-top:2px;font-size:10.5px;color:#8793a0}
 .settings-page{min-width:0}
 .settings-stack{display:flex;flex-direction:column;gap:12px}
 .settings-card{
@@ -1832,5 +1823,4 @@ body[data-show-tutorials="0"] [data-tutorial]{display:none!important}
 @media(max-width:760px){
   .settings-main-tabs a{flex:1 1 auto;justify-content:center}
   .settings-subtabs a{flex:1 1 auto;justify-content:center}
-  .settings-section-heading p{display:none}
 }
