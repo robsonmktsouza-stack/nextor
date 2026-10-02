@@ -65,6 +65,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/pdv/cash/open',[PdvController::class,'openCash'])->name('pdv.cash.open')->middleware('permission:pdv');
     Route::post('/pdv/cash/close',[PdvController::class,'closeCash'])->name('pdv.cash.close')->middleware('permission:pdv');
     Route::post('/pdv/cash/movement',[PdvController::class,'cashMovement'])->name('pdv.cash.movement')->middleware('permission:pdv');
+    Route::post('/pdv/suspended',[PdvController::class,'suspendSale'])->name('pdv.suspended.store')->middleware('permission:pdv');
+    Route::post('/pdv/suspended/{suspendedSale}/resume',[PdvController::class,'resumeSale'])->name('pdv.suspended.resume')->middleware('permission:pdv');
+    Route::delete('/pdv/suspended/{suspendedSale}',[PdvController::class,'discardSuspendedSale'])->name('pdv.suspended.destroy')->middleware('permission:pdv');
+    Route::post('/pdv/nfce/contingency',[PdvController::class,'setNfceContingency'])->name('pdv.nfce.contingency')->middleware('permission:pdv');
+    Route::post('/pdv/nfce/{fiscalJob}/cancel',[PdvController::class,'requestNfceCancellation'])->name('pdv.nfce.cancel')->middleware('permission:pdv');
     Route::get('/pdv/receipt/{sale}',[PdvController::class,'receipt'])->name('pdv.receipt')->middleware('permission:pdv');
     Route::post('/pdv',[PdvController::class,'store'])->name('pdv.store')->middleware('permission:pdv');
     Route::get('/sales',[SaleController::class,'index'])->name('sales.index')->middleware('permission:sales');
