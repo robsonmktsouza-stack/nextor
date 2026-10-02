@@ -6,7 +6,9 @@ use App\Models\AppSetting;
 use App\Models\CompanySetting;
 use App\Models\Customer;
 use App\Models\PaymentMethod;
+use App\Models\PdvCashMovement;
 use App\Models\PdvCashSession;
+use App\Models\SalePayment;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\Service;
@@ -26,6 +28,10 @@ class PdvController extends Controller
             'require_customer'=>false,
             'allow_discount'=>true,
             'require_cash_opening'=>false,
+            'allow_split_payment'=>true,
+            'ask_consumer_document'=>true,
+            'allow_split_payment'=>true,
+            'allow_cash_movements'=>true,
             'show_stock'=>true,
             'receipt_width'=>'80',
             'receipt_copies'=>1,
@@ -37,21 +43,14 @@ class PdvController extends Controller
             ->latest('opened_at')
             ->first();
 
-        $cashExpected=null;
-        if($cashSession) {
-            $cashSales=Sale::query()
-                ->where('source','pdv')
-                ->where('user_id',$request->user()->id)
-                ->where('status','completed')
-                ->where('completed_at','>=',$cashSession->opened_at)
-                ->whereHas('payments',fn($q)=>$q->whereIn(
-                    'payment_method',
-                    PaymentMethod::query()->where('kind','cash')->pluck('code')
-                ))
-                ->sum('total');
-
-            $cashExpected=round((float)$cashSession->opening_amount+(float)$cashSales,2);
-        }
+        $cashExpected=$cashSession ? $this->cashExpectedForSession($cashSession) : null;
+        $cashMovements=$cashSession
+            ? PdvCashMovement::query()
+                ->where('cash_session_id',$cashSession->id)
+                ->latest('id')
+                ->limit(8)
+                ->get()
+            : collect();
 
         return view('pdv.index',[
             'customers'=>Customer::query()
@@ -73,6 +72,7 @@ class PdvController extends Controller
             'pdvSettings'=>$pdvSettings,
             'cashSession'=>$cashSession,
             'cashExpected'=>$cashExpected,
+            'cashMovements'=>$cashMovements,
             'allowNegativeStock'=>(bool)AppSetting::value(
                 'inventory',
                 'allow_negative_stock',
@@ -161,7 +161,12 @@ class PdvController extends Controller
     {
         $data=$request->validate([
             'customer_id'=>['nullable','integer','exists:customers,id'],
-            'payment_method'=>['required',Rule::exists('payment_methods','code')->where(fn($q)=>$q->where('is_active',true)->where('pdv_enabled',true))],
+            'consumer_document'=>['nullable','string','max:20'],
+            'consumer_name'=>['nullable','string','max:190'],
+            'payment_method'=>['nullable',Rule::exists('payment_methods','code')->where(fn($q)=>$q->where('is_active',true)->where('pdv_enabled',true))],
+            'payments'=>['nullable','array','max:10'],
+            'payments.*.payment_method'=>['required_with:payments','string',Rule::exists('payment_methods','code')->where(fn($q)=>$q->where('is_active',true)->where('pdv_enabled',true))],
+            'payments.*.amount'=>['required_with:payments','numeric','gt:0','max:9999999999.99','decimal:0,2'],
             'cash_received'=>['nullable','numeric','min:0','max:9999999999.99','decimal:0,2'],
             'notes'=>['nullable','string','max:2000'],
             'items'=>['required','array','min:1','max:150'],
@@ -198,15 +203,6 @@ class PdvController extends Controller
         if(!(bool)$pdvSettings['allow_discount'] && collect($data['items'])->contains(fn($item)=>(float)($item['discount'] ?? 0)>0)) {
             throw ValidationException::withMessages(['items'=>'Descontos estão desativados nas configurações do PDV.']);
         }
-
-        $paymentMethod=PaymentMethod::query()
-            ->where('code',$data['payment_method'])
-            ->where('is_active',true)
-            ->where('pdv_enabled',true)
-            ->firstOrFail();
-
-        $isCash=$paymentMethod->kind==='cash';
-        $isReceivable=$paymentMethod->kind==='bank_slip' || $paymentMethod->settlement_days>0;
 
         $productIds=collect($data['items'])
             ->where('item_type','product')
@@ -280,16 +276,85 @@ class PdvController extends Controller
         }
 
         $total=$totalCents/100;
-        $cashReceived=(float)($data['cash_received'] ?? 0);
 
-        if($isCash && $cashReceived+0.0001<$total) {
+        $consumerDocument=$this->normalizeConsumerDocument($data['consumer_document'] ?? null);
+        if($consumerDocument!==null && !$this->validCpfCnpj($consumerDocument)) {
             throw ValidationException::withMessages([
-                'cash_received'=>'O valor recebido é menor que o total da venda.',
+                'consumer_document'=>'Informe um CPF ou CNPJ válido para identificar o consumidor.',
+            ]);
+        }
+
+        $submittedPayments=collect($data['payments'] ?? []);
+        if($submittedPayments->isNotEmpty() && !(bool)$pdvSettings['allow_split_payment']) {
+            throw ValidationException::withMessages([
+                'payments'=>'Pagamento dividido está desativado nas configurações do PDV.',
+            ]);
+        }
+
+        if($submittedPayments->isEmpty()) {
+            if(empty($data['payment_method'])) {
+                throw ValidationException::withMessages([
+                    'payment_method'=>'Selecione a forma de pagamento.',
+                ]);
+            }
+
+            $submittedPayments=collect([[
+                'payment_method'=>$data['payment_method'],
+                'amount'=>number_format($total,2,'.',''),
+            ]]);
+        }
+
+        $methodCodes=$submittedPayments->pluck('payment_method')->filter()->unique()->values()->all();
+        $methods=PaymentMethod::query()
+            ->whereIn('code',$methodCodes)
+            ->where('is_active',true)
+            ->where('pdv_enabled',true)
+            ->get()
+            ->keyBy('code');
+
+        if($methods->count()!==count($methodCodes)) {
+            throw ValidationException::withMessages([
+                'payments'=>'Há uma forma de pagamento inválida ou desabilitada no PDV.',
+            ]);
+        }
+
+        $paymentCents=$submittedPayments->sum(fn($payment)=>(int)round((float)$payment['amount']*100));
+        if(abs($paymentCents-$totalCents)>1) {
+            throw ValidationException::withMessages([
+                'payments'=>'A soma das formas de pagamento deve ser igual ao total da venda.',
+            ]);
+        }
+
+        $payments=[];
+        $cashPaymentTotal=0.0;
+
+        foreach($submittedPayments as $payment) {
+            $method=$methods->get($payment['payment_method']);
+            if(!$method) continue;
+
+            $amount=round((float)$payment['amount'],2);
+            $isCash=$method->kind==='cash';
+            if($isCash) $cashPaymentTotal+=$amount;
+
+            $payments[]=[
+                'amount'=>number_format($amount,2,'.',''),
+                'due_date'=>now()->copy()->addDays((int)$method->settlement_days)->toDateString(),
+                'payment_method'=>$method->code,
+                'receivable'=>$method->kind==='bank_slip' || $method->settlement_days>0,
+            ];
+        }
+
+        $cashReceived=(float)($data['cash_received'] ?? 0);
+        if($cashPaymentTotal>0 && $cashReceived+0.0001<$cashPaymentTotal) {
+            throw ValidationException::withMessages([
+                'cash_received'=>'O valor recebido em dinheiro é menor que a parcela em dinheiro.',
             ]);
         }
 
         $sale=$sales->create([
             'customer_id'=>$data['customer_id'] ?? null,
+            'consumer_document'=>$consumerDocument,
+            'consumer_name'=>$consumerDocument ? (trim((string)($data['consumer_name'] ?? '')) ?: null) : null,
             'operation_type'=>'sale',
             'source'=>'pdv',
             'operation_date'=>now()->toDateString(),
@@ -297,22 +362,17 @@ class PdvController extends Controller
             'keyword'=>'PDV',
             'notes'=>$data['notes'] ?? null,
             'items'=>$rows,
-            'payments'=>[[
-                'amount'=>number_format($total,2,'.',''),
-                'due_date'=>now()->copy()->addDays($paymentMethod->settlement_days)->toDateString(),
-                'payment_method'=>$data['payment_method'],
-                'receivable'=>$isReceivable,
-            ]],
+            'payments'=>$payments,
         ],(int)$request->user()->id);
 
-        $change=$isCash
-            ? max(0,$cashReceived-(float)$sale->total)
+        $change=$cashPaymentTotal>0
+            ? max(0,$cashReceived-$cashPaymentTotal)
             : 0;
 
         return redirect()
             ->route('pdv.receipt',$sale)
             ->with('pdv_last_sale',$sale->id)
-            ->with('pdv_cash_received',$isCash ? $cashReceived : $total)
+            ->with('pdv_cash_received',$cashPaymentTotal>0 ? $cashReceived : $total)
             ->with('pdv_change',$change);
     }
 
@@ -363,6 +423,52 @@ class PdvController extends Controller
         return redirect()->route('pdv.index')->with('success','Caixa fechado.');
     }
 
+    public function cashMovement(Request $request)
+    {
+        $data=$request->validate([
+            'type'=>['required',Rule::in(['supply','withdrawal'])],
+            'amount'=>['required','numeric','gt:0','max:9999999999.99','decimal:0,2'],
+            'reason'=>['required','string','max:255'],
+        ]);
+
+        if(!(bool)AppSetting::value('pdv','allow_cash_movements',true)) {
+            abort(403,'Movimentações de caixa estão desativadas.');
+        }
+
+        $session=PdvCashSession::query()
+            ->where('user_id',$request->user()->id)
+            ->open()
+            ->latest('opened_at')
+            ->first();
+
+        if(!$session) {
+            throw ValidationException::withMessages([
+                'amount'=>'Abra o caixa antes de registrar sangria ou suprimento.',
+            ]);
+        }
+
+        $amount=round((float)$data['amount'],2);
+
+        if($data['type']==='withdrawal' && $amount>$this->cashExpectedForSession($session)+0.0001) {
+            throw ValidationException::withMessages([
+                'amount'=>'A sangria não pode ser maior que o saldo esperado em dinheiro.',
+            ]);
+        }
+
+        PdvCashMovement::query()->create([
+            'cash_session_id'=>$session->id,
+            'user_id'=>$request->user()->id,
+            'type'=>$data['type'],
+            'amount'=>number_format($amount,2,'.',''),
+            'reason'=>trim($data['reason']),
+        ]);
+
+        return redirect()->route('pdv.index')->with(
+            'success',
+            $data['type']==='supply' ? 'Suprimento registrado.' : 'Sangria registrada.'
+        );
+    }
+
     public function receipt(Sale $sale)
     {
         abort_unless($sale->source==='pdv',404);
@@ -395,4 +501,79 @@ class PdvController extends Controller
             'change'=>$change,
         ]);
     }
+    private function cashExpectedForSession(PdvCashSession $session): float
+    {
+        $cashCodes=PaymentMethod::query()->where('kind','cash')->pluck('code');
+
+        $cashSales=(float)SalePayment::query()
+            ->whereIn('payment_method',$cashCodes)
+            ->whereHas('sale',fn($query)=>$query
+                ->where('source','pdv')
+                ->where('user_id',$session->user_id)
+                ->where('status','completed')
+                ->where('completed_at','>=',$session->opened_at)
+                ->when($session->closed_at,fn($q)=>$q->where('completed_at','<=',$session->closed_at)))
+            ->sum('amount');
+
+        $supply=(float)PdvCashMovement::query()
+            ->where('cash_session_id',$session->id)
+            ->where('type','supply')
+            ->sum('amount');
+
+        $withdrawal=(float)PdvCashMovement::query()
+            ->where('cash_session_id',$session->id)
+            ->where('type','withdrawal')
+            ->sum('amount');
+
+        return round((float)$session->opening_amount+$cashSales+$supply-$withdrawal,2);
+    }
+
+    private function normalizeConsumerDocument(?string $document): ?string
+    {
+        $digits=preg_replace('/\D+/','',(string)$document) ?: '';
+        return $digits==='' ? null : $digits;
+    }
+
+    private function validCpfCnpj(string $document): bool
+    {
+        if(strlen($document)===11) {
+            if(preg_match('/^(\d)\1{10}$/',$document)) return false;
+
+            for($t=9;$t<11;$t++) {
+                $sum=0;
+                for($i=0;$i<$t;$i++) {
+                    $sum+=(int)$document[$i]*(($t+1)-$i);
+                }
+                $digit=(10*($sum%11))%11;
+                if($digit===10) $digit=0;
+                if((int)$document[$t]!==$digit) return false;
+            }
+
+            return true;
+        }
+
+        if(strlen($document)===14) {
+            if(preg_match('/^(\d)\1{13}$/',$document)) return false;
+
+            $weights=[
+                [5,4,3,2,9,8,7,6,5,4,3,2],
+                [6,5,4,3,2,9,8,7,6,5,4,3,2],
+            ];
+
+            foreach($weights as $offset=>$weight) {
+                $sum=0;
+                foreach($weight as $index=>$factor) {
+                    $sum+=(int)$document[$index]*$factor;
+                }
+                $remainder=$sum%11;
+                $digit=$remainder<2 ? 0 : 11-$remainder;
+                if((int)$document[12+$offset]!==$digit) return false;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
 }
