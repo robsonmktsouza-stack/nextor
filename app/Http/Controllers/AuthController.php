@@ -15,7 +15,7 @@ class AuthController extends Controller {
             throw ValidationException::withMessages(['email'=>'Este usuário está desativado.']);
         }
         $request->session()->regenerate();
-        return redirect()->intended(route('dashboard'));
+        return redirect()->intended(route($request->user()->homeRouteName()));
     }
     public function logout(Request $request) {
         Auth::logout();$request->session()->invalidate();$request->session()->regenerateToken();
