@@ -19,6 +19,30 @@
     const payment=document.getElementById('pdvPaymentMethod');
     const paymentModal=document.getElementById('pdvPaymentModal');
     const paymentOptions=document.getElementById('pdvPaymentOptions');
+    const paymentPayload=document.getElementById('pdvPaymentsPayload');
+    const splitToggle=document.getElementById('pdvSplitToggle');
+    const splitPanel=document.getElementById('pdvSplitPanel');
+    const splitRows=document.getElementById('pdvSplitRows');
+    const splitApply=document.getElementById('pdvSplitApply');
+    const splitTotal=document.getElementById('pdvSplitTotal');
+    const splitPaid=document.getElementById('pdvSplitPaid');
+    const splitRemaining=document.getElementById('pdvSplitRemaining');
+
+    const consumerDocument=document.getElementById('pdvConsumerDocument');
+    const consumerName=document.getElementById('pdvConsumerName');
+    const consumerModal=document.getElementById('pdvConsumerDocumentModal');
+    const consumerDocumentInput=document.getElementById('pdvConsumerDocumentInput');
+    const consumerUseCustomer=document.getElementById('pdvConsumerUseCustomer');
+    const consumerSkip=document.getElementById('pdvConsumerSkip');
+    const consumerApply=document.getElementById('pdvConsumerApply');
+
+    const cashMovementModal=document.getElementById('pdvCashMovementDialog');
+    const cashMovementType=document.getElementById('pdvCashMovementType');
+    const cashMovementTitle=document.getElementById('pdvCashMovementTitle');
+    const cashMovementHelp=document.getElementById('pdvCashMovementHelp');
+    const cashMovementAmount=document.getElementById('pdvCashMovementAmount');
+    const cashMovementReason=document.getElementById('pdvCashMovementReason');
+    const cashMovementSubmit=document.getElementById('pdvCashMovementSubmit');
 
     const discountModal=document.getElementById('pdvDiscountModal');
     const discountModalInput=document.getElementById('pdvDiscountModalInput');
@@ -70,6 +94,8 @@
     const showStock=app.dataset.showStock!=='0';
     const cashOpeningRequired=app.dataset.cashRequired==='1';
     const cashSessionOpen=app.dataset.cashOpen==='1';
+    const askConsumerDocument=app.dataset.askConsumerDocument==='1';
+    const allowSplitPayment=app.dataset.allowSplitPayment==='1';
     const state=new Map();
     let currentKind='all';
     let lastResults=[];
@@ -78,6 +104,10 @@
     let searchController=null;
     let finishFlowPending=false;
     let bypassFinalizeValidation=false;
+    let splitMode=false;
+    let splitApplied=false;
+    let splitPayments=[];
+    let consumerAnswered=!askConsumerDocument;
 
     if(actionDiscount && !allowDiscount){
       actionDiscount.disabled=true;
@@ -222,6 +252,7 @@
           payload.appendChild(input);
         });
       });
+      syncPaymentPayload();
     };
 
     const renderSummary=()=>{
@@ -239,33 +270,82 @@
     const paymentOption=value=>paymentOptions?.querySelector('[data-payment-value="'+CSS.escape(String(value||''))+'"]');
     const paymentName=value=>paymentOption(value)?.dataset.paymentLabel||'Não selecionado';
     const paymentKind=value=>paymentOption(value)?.dataset.paymentKind||'other';
+    const paymentInfo=value=>{
+      const option=paymentOption(value);
+      return {
+        method:String(value||''),
+        label:option?.dataset.paymentLabel||String(value||''),
+        kind:option?.dataset.paymentKind||'other',
+      };
+    };
+
+    const splitPaymentTotal=()=>splitPayments.reduce((sum,row)=>sum+(Number(row.amount)||0),0);
+    const paymentReady=()=>{
+      if(splitApplied){
+        return splitPayments.length>0 && Math.abs(splitPaymentTotal()-totals().total)<0.01;
+      }
+      return !!payment.value;
+    };
+    const cashPaymentAmount=()=>{
+      if(splitApplied){
+        return splitPayments
+          .filter(row=>row.kind==='cash')
+          .reduce((sum,row)=>sum+(Number(row.amount)||0),0);
+      }
+      return paymentKind(payment.value)==='cash' ? totals().total : 0;
+    };
+
+    const syncPaymentPayload=()=>{
+      if(!paymentPayload) return;
+      paymentPayload.innerHTML='';
+
+      if(!splitApplied) return;
+
+      splitPayments.forEach((row,index)=>{
+        const method=document.createElement('input');
+        method.type='hidden';
+        method.name='payments['+index+'][payment_method]';
+        method.value=row.method;
+
+        const amount=document.createElement('input');
+        amount.type='hidden';
+        amount.name='payments['+index+'][amount]';
+        amount.value=(Number(row.amount)||0).toFixed(2);
+
+        paymentPayload.append(method,amount);
+      });
+    };
 
     const updatePaymentState=()=>{
-      const t=totals();
-      const cash=paymentKind(payment.value)==='cash';
-      const received=cash?moneyInputValue(cashInput):0;
-      const change=cash?Math.max(0,received-t.total):0;
+      const cashRequired=cashPaymentAmount();
+      const received=cashRequired>0?moneyInputValue(cashInput):0;
+      const change=cashRequired>0?Math.max(0,received-cashRequired):0;
 
-      if(actionPaymentValue) actionPaymentValue.textContent=paymentName(payment.value);
-      if(actionCashValue) actionCashValue.textContent=cash?money.format(received):'Não se aplica';
+      if(actionPaymentValue){
+        actionPaymentValue.textContent=splitApplied
+          ? splitPayments.length+' formas'
+          : paymentName(payment.value);
+      }
+      if(actionCashValue) actionCashValue.textContent=cashRequired>0?money.format(received):'Não se aplica';
       if(actionChangeValue) actionChangeValue.textContent=money.format(change);
 
       if(actionPayment){
-        const label=payment.value
-          ? 'Forma de pagamento: '+paymentName(payment.value)
-          : 'Forma de pagamento pendente';
+        const label=splitApplied
+          ? 'Pagamento dividido em '+splitPayments.length+' formas'
+          : (payment.value ? 'Forma de pagamento: '+paymentName(payment.value) : 'Forma de pagamento pendente');
         actionPayment.dataset.tooltip=label;
         actionPayment.setAttribute('aria-label',label);
       }
 
       if(actionCash){
-        const label=cash
-          ? 'Recebido '+money.format(received)+' · Troco '+money.format(change)
+        const label=cashRequired>0
+          ? 'Dinheiro '+money.format(cashRequired)+' · Recebido '+money.format(received)+' · Troco '+money.format(change)
           : 'Valor recebido e troco';
         actionCash.dataset.tooltip=label;
         actionCash.setAttribute('aria-label',label);
       }
 
+      syncPaymentPayload();
       updateFinishState();
     };
 
@@ -276,11 +356,10 @@
       finish.disabled=!hasItems || !customerReady || !cashSessionReady;
       if(actionFinish) actionFinish.disabled=!hasItems || !customerReady || !cashSessionReady;
 
-      const hasPayment=!!payment.value;
-      actionPayment?.classList.toggle('is-set',hasPayment);
+      actionPayment?.classList.toggle('is-set',paymentReady());
 
-      const cashReady=paymentKind(payment.value)==='cash' &&
-        moneyInputValue(cashInput)+0.0001>=totals().total;
+      const requiredCash=cashPaymentAmount();
+      const cashReady=requiredCash>0 && moneyInputValue(cashInput)+0.0001>=requiredCash;
       actionCash?.classList.toggle('is-set',cashReady);
     };
 
@@ -702,15 +781,94 @@
       options[paymentIndex]?.scrollIntoView({block:'nearest'});
     };
 
+    const renderSplitPayments=()=>{
+      if(!splitRows) return;
+
+      splitRows.innerHTML='';
+      const saleTotal=totals().total;
+      const informed=splitPaymentTotal();
+      const remaining=Math.max(0,saleTotal-informed);
+
+      if(splitTotal) splitTotal.textContent=money.format(saleTotal);
+      if(splitPaid) splitPaid.textContent=money.format(informed);
+      if(splitRemaining) splitRemaining.textContent=money.format(remaining);
+
+      splitPayments.forEach((row,index)=>{
+        const line=document.createElement('div');
+        line.className='pdv-split-row';
+
+        const label=document.createElement('strong');
+        label.textContent=row.label;
+
+        const input=document.createElement('input');
+        input.type='text';
+        input.inputMode='decimal';
+        input.value=(Number(row.amount)||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+        input.setAttribute('aria-label','Valor em '+row.label);
+
+        const remove=document.createElement('button');
+        remove.type='button';
+        remove.textContent='×';
+        remove.setAttribute('aria-label','Remover '+row.label);
+
+        input.addEventListener('input',()=>{
+          row.amount=parseDecimal(input.value);
+          splitApplied=false;
+          renderSplitPayments();
+        });
+        input.addEventListener('focus',()=>input.select());
+        remove.addEventListener('click',()=>{
+          splitPayments.splice(index,1);
+          splitApplied=false;
+          renderSplitPayments();
+        });
+
+        line.append(label,input,remove);
+        splitRows.appendChild(line);
+      });
+    };
+
+    const addSplitPayment=option=>{
+      if(!option) return;
+      const info=paymentInfo(option.dataset.paymentValue||'');
+      const remaining=Math.max(0,totals().total-splitPaymentTotal());
+
+      if(remaining<0.005){
+        notify('O total da venda já foi distribuído. Ajuste ou remova uma forma.','info');
+        return;
+      }
+
+      const existing=splitPayments.find(row=>row.method===info.method);
+      if(existing){
+        existing.amount=(Number(existing.amount)||0)+remaining;
+      }else{
+        splitPayments.push({...info,amount:remaining});
+      }
+
+      splitApplied=false;
+      renderSplitPayments();
+      requestAnimationFrame(()=>{
+        splitRows?.querySelector('.pdv-split-row:last-child input')?.focus();
+      });
+    };
+
     const selectPaymentOption=option=>{
       if(!option) return;
+
+      if(splitMode && allowSplitPayment){
+        addSplitPayment(option);
+        return;
+      }
+
+      splitApplied=false;
+      splitPayments=[];
       payment.value=option.dataset.paymentValue||'';
       if(actionPaymentValue) actionPaymentValue.textContent=option.dataset.paymentLabel||option.textContent.trim();
       payment.dispatchEvent(new Event('change',{bubbles:true}));
       paymentModal.close();
 
       if(finishFlowPending){
-        if(paymentKind(payment.value)==='cash'){
+        if(cashPaymentAmount()>0){
           setTimeout(()=>openCashModal(),0);
         }else{
           setTimeout(()=>requestFinalize(),0);
@@ -722,13 +880,68 @@
       if(customerModal?.open) customerModal.close();
       if(cashModal?.open) cashModal.close();
       if(notesModal?.open) notesModal.close();
+      if(consumerModal?.open) consumerModal.close();
       if(!paymentModal.open) paymentModal.showModal();
+
+      if(splitApplied && allowSplitPayment){
+        splitMode=true;
+        if(splitPanel) splitPanel.hidden=false;
+        if(splitToggle) splitToggle.textContent='Usar pagamento único';
+        renderSplitPayments();
+      }
+
       const options=paymentButtons();
       const selectedIndex=options.findIndex(option=>option.dataset.paymentValue===payment.value);
       paymentIndex=selectedIndex>=0?selectedIndex:0;
       updatePaymentHighlight();
       requestAnimationFrame(()=>options[paymentIndex]?.focus());
     };
+
+    splitToggle?.addEventListener('click',()=>{
+      splitMode=!splitMode;
+      if(splitPanel) splitPanel.hidden=!splitMode;
+      splitToggle.textContent=splitMode?'Usar pagamento único':'Dividir em mais de uma forma';
+
+      if(splitMode && !splitPayments.length && payment.value){
+        const info=paymentInfo(payment.value);
+        splitPayments=[{...info,amount:totals().total}];
+        splitApplied=false;
+      }
+
+      if(!splitMode && !splitApplied){
+        splitPayments=[];
+      }
+
+      renderSplitPayments();
+    });
+
+    splitApply?.addEventListener('click',()=>{
+      if(splitPayments.length<2){
+        notify('Adicione pelo menos duas formas de pagamento para dividir a venda.','warning');
+        return;
+      }
+
+      if(Math.abs(splitPaymentTotal()-totals().total)>=0.01){
+        notify('A soma dos pagamentos precisa ser igual ao total da venda.','warning');
+        return;
+      }
+
+      splitApplied=true;
+      splitMode=false;
+      payment.value='';
+      if(splitPanel) splitPanel.hidden=true;
+      if(splitToggle) splitToggle.textContent='Dividir em mais de uma forma';
+      updatePaymentState();
+      paymentModal.close();
+
+      if(finishFlowPending){
+        if(cashPaymentAmount()>0){
+          setTimeout(()=>openCashModal(),0);
+        }else{
+          setTimeout(()=>requestFinalize(),0);
+        }
+      }
+    });
 
     const updateDiscountPreview=()=>{
       const item=state.get(discountModalKey);
@@ -751,7 +964,7 @@
         return;
       }
 
-      [customerModal,paymentModal,discountModal,cashModal,notesModal].forEach(modal=>{
+      [customerModal,paymentModal,discountModal,cashModal,notesModal,consumerModal].forEach(modal=>{
         if(modal?.open) modal.close();
       });
 
@@ -796,22 +1009,22 @@
     };
 
     const updateCashModalPreview=()=>{
-      const total=totals().total;
+      const required=cashPaymentAmount();
       const received=parseDecimal(cashModalInput?.value);
-      if(cashModalTotal) cashModalTotal.textContent=money.format(total);
-      if(cashModalChange) cashModalChange.textContent=money.format(Math.max(0,received-total));
+      if(cashModalTotal) cashModalTotal.textContent=money.format(required);
+      if(cashModalChange) cashModalChange.textContent=money.format(Math.max(0,received-required));
     };
 
     const openCashModal=()=>{
-      if(paymentKind(payment.value)!=='cash'){
-        notify('Selecione Dinheiro como forma de pagamento para informar valor recebido.','info');
+      if(cashPaymentAmount()<=0){
+        notify('Não há parcela em dinheiro nesta venda.','info');
         finishFlowPending=true;
         openPaymentModal();
         return;
       }
       [customerModal,paymentModal,discountModal,notesModal].forEach(modal=>{if(modal?.open) modal.close();});
       const current=moneyInputValue(cashInput);
-      const suggested=current>0?current:totals().total;
+      const suggested=current>0?current:cashPaymentAmount();
       cashModalInput.value=suggested.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
       updateCashModalPreview();
       if(!cashModal.open) cashModal.showModal();
@@ -843,7 +1056,7 @@
     };
 
     cashExact?.addEventListener('click',()=>{
-      const total=totals().total;
+      const total=cashPaymentAmount();
       cashModalInput.value=total.toLocaleString('pt-BR',{
         minimumFractionDigits:2,
         maximumFractionDigits:2
@@ -892,6 +1105,100 @@
       }
     });
 
+    const selectedCustomerOption=()=>{
+      const id=String(customer.value||'');
+      return customerList?.querySelector('.pdv-client-option[data-customer-id="'+CSS.escape(id)+'"]')||null;
+    };
+
+    const openConsumerDocumentModal=()=>{
+      [customerModal,paymentModal,discountModal,cashModal,notesModal].forEach(modal=>{
+        if(modal?.open) modal.close();
+      });
+
+      const option=selectedCustomerOption();
+      const customerDoc=option?.dataset.customerDocument||'';
+      const current=consumerDocument?.value||'';
+      consumerDocumentInput.value=current||customerDoc||'';
+
+      if(consumerUseCustomer){
+        consumerUseCustomer.hidden=!customerDoc;
+        consumerUseCustomer.textContent=customerDoc
+          ? 'Usar documento de '+(option?.dataset.customerName||'cliente selecionado')
+          : 'Usar documento do cliente selecionado';
+      }
+
+      if(!consumerModal.open) consumerModal.showModal();
+      requestAnimationFrame(()=>{
+        consumerDocumentInput?.focus();
+        consumerDocumentInput?.select?.();
+      });
+    };
+
+    const finishConsumerStep=()=>{
+      consumerAnswered=true;
+      consumerModal?.close();
+      if(finishFlowPending) setTimeout(()=>requestFinalize(),0);
+    };
+
+    const applyConsumerDocument=()=>{
+      const digits=String(consumerDocumentInput?.value||'').replace(/\D+/g,'');
+      if(digits && ![11,14].includes(digits.length)){
+        notify('Digite um CPF com 11 dígitos ou CNPJ com 14 dígitos.','warning');
+        consumerDocumentInput?.focus();
+        return;
+      }
+
+      if(consumerDocument) consumerDocument.value=digits;
+      const option=selectedCustomerOption();
+      const customerDoc=option?.dataset.customerDocument||'';
+      if(consumerName){
+        consumerName.value=digits && digits===customerDoc
+          ? (option?.dataset.customerName||'')
+          : '';
+      }
+
+      finishConsumerStep();
+    };
+
+    consumerUseCustomer?.addEventListener('click',()=>{
+      const option=selectedCustomerOption();
+      const doc=option?.dataset.customerDocument||'';
+      if(!doc) return;
+      consumerDocumentInput.value=doc;
+      consumerDocumentInput.focus();
+      consumerDocumentInput.select();
+    });
+
+    consumerSkip?.addEventListener('click',()=>{
+      if(consumerDocument) consumerDocument.value='';
+      if(consumerName) consumerName.value='';
+      finishConsumerStep();
+    });
+    consumerApply?.addEventListener('click',applyConsumerDocument);
+    consumerDocumentInput?.addEventListener('keydown',event=>{
+      if(event.key==='Enter'){
+        event.preventDefault();
+        applyConsumerDocument();
+      }
+    });
+
+    document.querySelectorAll('[data-pdv-cash-movement]').forEach(button=>{
+      button.addEventListener('click',()=>{
+        if(!cashMovementModal) return;
+        const type=button.dataset.pdvCashMovement==='withdrawal'?'withdrawal':'supply';
+        if(cashMovementType) cashMovementType.value=type;
+        if(cashMovementTitle) cashMovementTitle.textContent=type==='withdrawal'?'Registrar sangria':'Registrar suprimento';
+        if(cashMovementHelp) cashMovementHelp.textContent=type==='withdrawal'
+          ? 'Retirada de dinheiro do caixa durante o turno.'
+          : 'Entrada manual de dinheiro para reforço de troco.';
+        if(cashMovementSubmit) cashMovementSubmit.textContent=type==='withdrawal'?'Registrar sangria':'Registrar suprimento';
+        if(cashMovementAmount) cashMovementAmount.value='';
+        if(cashMovementReason) cashMovementReason.value='';
+        cashMovementModal.showModal();
+        requestAnimationFrame(()=>cashMovementAmount?.focus());
+      });
+    });
+
     const requestFinalize=()=>{
       const t=totals();
 
@@ -902,24 +1209,32 @@
         return;
       }
 
-      if(!payment.value){
+      if(!paymentReady()){
         finishFlowPending=true;
         notify('Selecione a forma de pagamento para continuar.','info');
         openPaymentModal();
         return;
       }
 
-      if(paymentKind(payment.value)==='cash'){
+      const requiredCash=cashPaymentAmount();
+      if(requiredCash>0){
         const received=moneyInputValue(cashInput);
-        if(received+0.0001<t.total){
+        if(received+0.0001<requiredCash){
           finishFlowPending=true;
           openCashModal();
           return;
         }
       }
 
+      if(askConsumerDocument && !consumerAnswered){
+        finishFlowPending=true;
+        openConsumerDocumentModal();
+        return;
+      }
+
       finishFlowPending=false;
       syncPayload();
+      syncPaymentPayload();
       bypassFinalizeValidation=true;
       form.requestSubmit();
     };
@@ -1154,7 +1469,9 @@
         paymentModal?.open ||
         discountModal?.open ||
         cashModal?.open ||
-        notesModal?.open;
+        notesModal?.open ||
+        consumerModal?.open ||
+        cashMovementModal?.open;
 
       if(modalOpen) return;
 
@@ -1214,6 +1531,7 @@
       if(bypassFinalizeValidation){
         bypassFinalizeValidation=false;
         syncPayload();
+        syncPaymentPayload();
         return;
       }
 
