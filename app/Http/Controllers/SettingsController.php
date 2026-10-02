@@ -345,12 +345,6 @@ class SettingsController extends Controller
                 'notes'=>['nullable','string','max:3000'],
             ],[],[]],
 
-            'tax'=>[
-                'icms_origin_default'=>'0','icms_csosn_default'=>null,'icms_cst_default'=>null,
-                'pis_cst_default'=>null,'cofins_cst_default'=>null,'ipi_cst_default'=>null,
-                'iss_rate_default'=>null,'simple_credit_rate'=>null,'ibs_cst_default'=>null,
-                'cbs_cst_default'=>null,'tax_classification_code'=>null,'fcp_rate_default'=>null,'notes'=>null,
-            ],
             'nfe'=>[[
                 'enabled'=>['nullable','boolean'],
                 'environment'=>['required',Rule::in(['homologation','production'])],
@@ -415,11 +409,6 @@ class SettingsController extends Controller
                 'notes'=>['nullable','string','max:3000'],
             ],['cost_center_enabled','automatic_monthly_export'],[]],
 
-            'accounting'=>[
-                'office_name'=>null,'accountant_name'=>null,'accountant_document'=>null,'crc'=>null,
-                'email'=>null,'phone'=>null,'accounting_system'=>null,'export_format'=>null,
-                'cost_center_enabled'=>false,'automatic_monthly_export'=>false,'notes'=>null,
-            ],
             'integrations'=>[[
                 'smtp_enabled'=>['nullable','boolean'],
                 'smtp_host'=>['nullable','string','max:255'],
@@ -469,6 +458,12 @@ class SettingsController extends Controller
                 'enabled'=>false,'default_environment'=>'homologation','send_xml_email'=>true,
                 'keep_xml_copy'=>true,'accountant_email'=>null,'tax_profile'=>null,
             ],
+            'tax'=>[
+                'icms_origin_default'=>'0','icms_csosn_default'=>null,'icms_cst_default'=>null,
+                'pis_cst_default'=>null,'cofins_cst_default'=>null,'ipi_cst_default'=>null,
+                'iss_rate_default'=>null,'simple_credit_rate'=>null,'ibs_cst_default'=>null,
+                'cbs_cst_default'=>null,'tax_classification_code'=>null,'fcp_rate_default'=>null,'notes'=>null,
+            ],
             'nfe'=>[
                 'enabled'=>false,'environment'=>'homologation','series'=>1,'next_number'=>1,
                 'default_nature'=>null,'default_cfop'=>null,'auto_from_sale'=>false,'send_email'=>true,'print_danfe'=>true,
@@ -486,6 +481,11 @@ class SettingsController extends Controller
                 'cte_enabled'=>false,'cte_environment'=>'homologation','cte_series'=>1,'cte_next_number'=>1,
                 'rntrc'=>null,'default_cfop'=>null,'mdfe_enabled'=>false,'mdfe_environment'=>'homologation',
                 'mdfe_series'=>1,'mdfe_next_number'=>1,
+            ],
+            'accounting'=>[
+                'office_name'=>null,'accountant_name'=>null,'accountant_document'=>null,'crc'=>null,
+                'email'=>null,'phone'=>null,'accounting_system'=>null,'export_format'=>null,
+                'cost_center_enabled'=>false,'automatic_monthly_export'=>false,'notes'=>null,
             ],
             'integrations'=>[
                 'smtp_enabled'=>false,'smtp_host'=>null,'smtp_port'=>587,'smtp_encryption'=>'tls',
