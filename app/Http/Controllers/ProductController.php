@@ -29,13 +29,18 @@ class ProductController extends Controller {
             'product_minimum_stock'=>'0.000','new_products_active'=>true,
         ]);
 
+        $taxDefaults=AppSetting::groupValues('tax',[]);
+
         return view('products.form',[
             'product'=>new Product([
                 'unit'=>$catalog['product_unit'] ?: 'UN',
                 'usage_type'=>$catalog['product_usage_type'] ?: 'resale',
                 'control_stock'=>(bool)$catalog['product_control_stock'],
                 'is_active'=>(bool)$catalog['new_products_active'],
-                'origin'=>'0','ignore_taxes_mode'=>'none','different_tax_unit'=>false,
+                'origin'=>$taxDefaults['icms_origin_default'] ?? '0',
+                'tax_group'=>$taxDefaults['tax_classification_code'] ?? null,
+                'tax_defaults'=>$taxDefaults,
+                'ignore_taxes_mode'=>'none','different_tax_unit'=>false,
                 'cost_price'=>0,'sale_price'=>0,'stock_quantity'=>0,
                 'minimum_stock'=>$catalog['product_minimum_stock'] ?? 0,
             ]),
@@ -105,6 +110,9 @@ class ProductController extends Controller {
         if($data['sku']==='') $data['sku']=$product?->sku ?: $this->generateSku();
 
         $isNew=$product===null;
+        if($isNew) {
+            $data['tax_defaults']=AppSetting::groupValues('tax',[]);
+        }
 
         return DB::transaction(function() use ($request,$product,$data,$requestedStock,$isNew) {
             $oldImage=$product?->image_path;
