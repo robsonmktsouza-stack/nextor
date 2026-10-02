@@ -21,7 +21,8 @@ class ProductController extends Controller {
                 ->orWhere('ean_gtin','like',"%{$term}%")))
             ->orderBy('name')->paginate($perPage)->withQueryString();
         $stockDecimalPlaces=max(0,min(3,(int)AppSetting::value('inventory','stock_decimal_places',3)));
-        return view('products.index', compact('products','term','stockDecimalPlaces'));
+        $minimumStockAlerts=(bool)AppSetting::value('inventory','minimum_stock_alerts',true);
+        return view('products.index', compact('products','term','stockDecimalPlaces','minimumStockAlerts'));
     }
 
     public function create() {
