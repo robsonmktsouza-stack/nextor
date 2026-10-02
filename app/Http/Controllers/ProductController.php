@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Models\AppSetting;
 use App\Models\Product;
 use App\Models\StockMovement;
 use Illuminate\Http\Request;
@@ -11,12 +12,7 @@ use Illuminate\Validation\Rule;
 class ProductController extends Controller {
     public function index(Request $r) {
         $term=trim((string)$r->query('search',''));
-        $requestedPerPage=$r->integer('per_page');
-        if(in_array($requestedPerPage,[10,25,50,100],true)) {
-            $r->session()->put('table_per_page',$requestedPerPage);
-        }
-        $perPage=(int)$r->session()->get('table_per_page',25);
-        if(!in_array($perPage,[10,25,50,100],true)) $perPage=25;
+        $perPage=AppSetting::tablePerPage($r);
         $products=Product::query()
             ->when($term,fn($q)=>$q->where(fn($t)=>$t
                 ->where('name','like',"%{$term}%")
