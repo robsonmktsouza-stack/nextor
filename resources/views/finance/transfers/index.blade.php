@@ -47,7 +47,7 @@
       @forelse($transfers as $transfer)
         <tr>
           <td>#{{ $transfer->id }}</td>
-          <td class="nowrap">{{ $transfer->transfer_date->format('d/m/Y') }}</td>
+          <td class="nowrap">{{ $transfer->transfer_date->format(\App\Models\AppSetting::dateFormat()) }}</td>
           <td>{{ $transfer->fromAccount->name }}</td>
           <td>{{ $transfer->toAccount->name }}</td>
           <td>{{ $transfer->description ?: 'Transferência entre contas' }}</td>
