@@ -4,68 +4,137 @@
 @section('content')
 
 @php
-$settingsGroups=[
-  'Empresa'=>[
-    'general'=>['Empresa','settings','Cadastro, endereço e dados tributários'],
-    'printing'=>['Impressão e identidade','receipt','Logomarca, cabeçalho e rodapé'],
-    'catalog'=>['Produtos e serviços','products','Padrões dos novos cadastros'],
+$primaryTabs=[
+  'general'=>[
+    'label'=>'GERAL','icon'=>'settings',
+    'members'=>['general','printing','catalog'],
   ],
-  'Comercial'=>[
-    'operations'=>['Vendas e operações','sales','Orçamentos, vendas e devoluções'],
-    'inventory'=>['Estoque','stock','Saldo, alertas e movimentações'],
-    'pdv'=>['PDV','pdv','Comportamento do ponto de venda'],
+  'chart'=>[
+    'label'=>'PLANO DE CONTAS','icon'=>'layers',
+    'members'=>['chart'],
   ],
-  'Financeiro'=>[
-    'chart'=>['Plano de contas','layers','Receitas e despesas'],
-    'accounts'=>['Contas financeiras','money','Caixas, bancos e contas digitais'],
-    'payments'=>['Formas de pagamento','receipt','Taxas, prazos e disponibilidade'],
-    'billing'=>['Boletos e cobranças','money','PIX, juros, multa e provedor'],
+  'accounts'=>[
+    'label'=>'CONTAS CAIXA','icon'=>'money',
+    'members'=>['accounts'],
   ],
-  'Fiscal'=>[
-    'fiscal'=>['Fiscal geral','shield','Certificado e padrões compartilhados'],
-    'tax'=>['Dados tributários','layers','ICMS, PIS, COFINS, ISS, IBS e CBS'],
-    'nfe'=>['NF-e','receipt','Modelo 55'],
-    'nfce'=>['NFC-e','receipt','Modelo 65 e CSC'],
-    'nfse'=>['NFS-e','services','Serviços e integração municipal/nacional'],
-    'cte'=>['CT-e / MDF-e','stock','Transporte e manifesto'],
+  'operations'=>[
+    'label'=>'OPERAÇÕES','icon'=>'sales',
+    'members'=>['operations','inventory','pdv'],
   ],
-  'Administração'=>[
-    'accounting'=>['Contábil','services','Escritório e exportações'],
-    'users'=>['Usuários e permissões','customers','Acessos por módulo'],
-    'integrations'=>['API e integrações','layers','SMTP, webhook e integrações'],
-    'system'=>['Sistema','settings','Interface e comportamento geral'],
+  'payments'=>[
+    'label'=>'FORMAS PGTO','icon'=>'receipt',
+    'members'=>['payments'],
+  ],
+  'billing'=>[
+    'label'=>'BOLETOS / COBRANÇAS','icon'=>'money',
+    'members'=>['billing'],
+  ],
+  'fiscal'=>[
+    'label'=>'FISCAL','icon'=>'shield',
+    'members'=>['fiscal','nfe','nfce','nfse','cte'],
+  ],
+  'tax'=>[
+    'label'=>'DADOS TRIBUTÁRIOS','icon'=>'layers',
+    'members'=>['tax'],
+  ],
+  'accounting'=>[
+    'label'=>'CONTÁBIL','icon'=>'services',
+    'members'=>['accounting'],
+  ],
+  'users'=>[
+    'label'=>'USUÁRIOS','icon'=>'customers',
+    'members'=>['users'],
+  ],
+  'integrations'=>[
+    'label'=>'API / INTEGRAÇÕES','icon'=>'layers',
+    'members'=>['integrations'],
+  ],
+  'system'=>[
+    'label'=>'SISTEMA','icon'=>'settings',
+    'members'=>['system'],
   ],
 ];
 
-$settingsGroupIcons=[
-  'Empresa'=>'settings',
-  'Comercial'=>'sales',
-  'Financeiro'=>'money',
-  'Fiscal'=>'shield',
-  'Administração'=>'customers',
+$subTabs=[
+  'general'=>[
+    'general'=>['Dados da empresa','settings'],
+    'printing'=>['Impressão e identidade','receipt'],
+    'catalog'=>['Produtos e serviços','products'],
+  ],
+  'operations'=>[
+    'operations'=>['Vendas e operações','sales'],
+    'inventory'=>['Estoque','stock'],
+    'pdv'=>['PDV','pdv'],
+  ],
+  'fiscal'=>[
+    'fiscal'=>['Geral fiscal','shield'],
+    'nfe'=>['NF-e','receipt'],
+    'nfce'=>['NFC-e','receipt'],
+    'nfse'=>['NFS-e','services'],
+    'cte'=>['CT-e / MDF-e','stock'],
+  ],
 ];
+
+$tabTitles=[
+  'general'=>['Configuração geral','Dados cadastrais, endereço e informações tributárias da empresa.'],
+  'printing'=>['Impressão e identidade','Logomarca, cabeçalho e rodapé dos documentos do Nextor.'],
+  'catalog'=>['Produtos e serviços','Padrões aplicados aos novos produtos e serviços.'],
+  'chart'=>['Plano de contas','Categorias de receitas e despesas do financeiro.'],
+  'accounts'=>['Contas caixa','Caixas, bancos e contas digitais utilizadas pelo financeiro.'],
+  'operations'=>['Operações','Preferências de vendas, orçamentos e devoluções.'],
+  'inventory'=>['Estoque','Regras gerais de saldo e movimentações.'],
+  'pdv'=>['PDV','Preferências do ponto de venda.'],
+  'payments'=>['Formas de pagamento','Métodos disponíveis em vendas, financeiro e PDV.'],
+  'billing'=>['Boletos e cobranças','Parâmetros de cobrança, PIX, juros e integrações financeiras.'],
+  'fiscal'=>['Configuração fiscal','Certificado e parâmetros compartilhados pelos documentos fiscais.'],
+  'tax'=>['Dados tributários','Padrões de ICMS, PIS, COFINS, ISS, IBS e CBS.'],
+  'nfe'=>['NF-e','Configurações do documento fiscal eletrônico modelo 55.'],
+  'nfce'=>['NFC-e','Configurações do documento fiscal eletrônico modelo 65.'],
+  'nfse'=>['NFS-e','Configurações da nota fiscal de serviços.'],
+  'cte'=>['CT-e / MDF-e','Configurações de transporte e manifesto.'],
+  'accounting'=>['Contábil','Dados do contador e preferências de exportação.'],
+  'users'=>['Usuários','Usuários, funções e permissões do sistema.'],
+  'integrations'=>['API e integrações','SMTP, webhooks e integrações externas.'],
+  'system'=>['Sistema','Preferências gerais da interface e comportamento.'],
+];
+
+$activePrimary='general';
+foreach($primaryTabs as $key=>$item){
+  if(in_array($tab,$item['members'],true)){
+    $activePrimary=$key;
+    break;
+  }
+}
 @endphp
 
-<section class="settings-ribbon" aria-label="Configurações">
-  @foreach($settingsGroups as $groupName=>$items)
-    <div class="settings-ribbon-group">
-      <div class="settings-ribbon-group-label">
-        @include('partials.icon',['name'=>$settingsGroupIcons[$groupName] ?? 'settings','size'=>13])
-        <span>{{ $groupName }}</span>
-      </div>
-      <div class="settings-ribbon-tabs">
-        @foreach($items as $key=>$item)
-          <a href="{{ route('settings.index',['tab'=>$key]) }}"
-             class="{{ $tab===$key?'active':'' }}"
-             data-tooltip="{{ $item[2] }}">
-            @include('partials.icon',['name'=>$item[1],'size'=>14])
-            <span>{{ $item[0] }}</span>
-          </a>
-        @endforeach
-      </div>
-    </div>
+<nav class="settings-main-tabs" aria-label="Configurações">
+  @foreach($primaryTabs as $key=>$item)
+    <a href="{{ route('settings.index',['tab'=>$key]) }}"
+       class="{{ $activePrimary===$key?'active':'' }}">
+      @include('partials.icon',['name'=>$item['icon'],'size'=>13])
+      <span>{{ $item['label'] }}</span>
+    </a>
   @endforeach
-</section>
+</nav>
+
+@if(isset($subTabs[$activePrimary]))
+  <nav class="settings-subtabs" aria-label="Seção de configurações">
+    @foreach($subTabs[$activePrimary] as $key=>$item)
+      <a href="{{ route('settings.index',['tab'=>$key]) }}" class="{{ $tab===$key?'active':'' }}">
+        @include('partials.icon',['name'=>$item[1],'size'=>13])
+        <span>{{ $item[0] }}</span>
+      </a>
+    @endforeach
+  </nav>
+@endif
+
+<div class="settings-section-heading">
+  <div class="settings-section-heading-icon">@include('partials.icon',['name'=>$primaryTabs[$activePrimary]['icon'] ?? 'settings','size'=>17])</div>
+  <div>
+    <h2>{{ $tabTitles[$tab][0] ?? 'Configurações' }}</h2>
+    <p>{{ $tabTitles[$tab][1] ?? 'Preferências do Nextor.' }}</p>
+  </div>
+</div>
 
 <main class="settings-page">
 @if($tab==='general')
