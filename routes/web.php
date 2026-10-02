@@ -10,6 +10,7 @@ use App\Http\Controllers\FinancialTransferController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PdvController;
 use App\Http\Controllers\SaleController;
+use App\Http\Controllers\SaleReturnController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\StockController;
 use Illuminate\Support\Facades\Route;
@@ -55,6 +56,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/sales',[SaleController::class,'index'])->name('sales.index');
     Route::get('/sales/create',[SaleController::class,'create'])->name('sales.create');
     Route::post('/sales',[SaleController::class,'store'])->name('sales.store');
+
+    Route::get('/sales/returns',[SaleReturnController::class,'index'])->name('sales.returns.index');
+    Route::get('/sales/returns/create',[SaleReturnController::class,'create'])->name('sales.returns.create');
+    Route::post('/sales/returns',[SaleReturnController::class,'store'])->name('sales.returns.store');
+    Route::get('/sales/returns/{saleReturn}',[SaleReturnController::class,'show'])->name('sales.returns.show');
+    Route::post('/sales/returns/{saleReturn}/cancel',[SaleReturnController::class,'cancel'])->name('sales.returns.cancel');
+
     Route::get('/sales/{sale}',[SaleController::class,'show'])->name('sales.show');
     Route::post('/sales/{sale}/cancel',[SaleController::class,'cancel'])->name('sales.cancel');
 
