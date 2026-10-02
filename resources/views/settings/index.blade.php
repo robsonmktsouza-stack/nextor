@@ -488,7 +488,7 @@ foreach($primaryTabs as $key=>$item){
             <strong>Certificado configurado</strong>
             <span>
               @if($company->certificate_expires_at)
-                Válido até {{ $company->certificate_expires_at->format('d/m/Y') }}
+                Válido até {{ $company->certificate_expires_at->format(\App\Models\AppSetting::dateFormat()) }}
               @else
                 Validade não identificada
               @endif
@@ -523,7 +523,7 @@ foreach($primaryTabs as $key=>$item){
               <td>{{ $job->series ?? '—' }}</td>
               <td>{{ $job->document_number ?? '—' }}</td>
               <td><span class="status {{ $job->status==='prepared'?'status-blue':($job->status==='cancelled'?'status-muted':'status-ok') }}">{{ ucfirst($job->status) }}</span></td>
-              <td>{{ $job->prepared_at?->format('d/m/Y H:i') ?? '—' }}</td>
+              <td>{{ $job->prepared_at?->format(\App\Models\AppSetting::dateFormat().' H:i') ?? '—' }}</td>
             </tr>
           @empty
             <tr><td colspan="7" class="empty-cell">Nenhum documento fiscal preparado ainda.</td></tr>
