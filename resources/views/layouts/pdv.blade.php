@@ -20,9 +20,13 @@
       </div>
     </div>
 
-    <div class="pdv-topbar-status">
+    @php
+      $cashControlEnabled=isset($pdvSettings) && (bool)($pdvSettings['require_cash_opening'] ?? false);
+      $cashIsOpen=!$cashControlEnabled || !empty($cashSession);
+    @endphp
+    <div class="pdv-topbar-status {{ $cashIsOpen ? 'is-open' : 'is-closed' }}">
       <span class="pdv-online-dot"></span>
-      <span>Caixa aberto</span>
+      <span>{{ $cashIsOpen ? 'Caixa aberto' : 'Caixa fechado' }}</span>
       <span class="pdv-topbar-separator"></span>
       <span>{{ auth()->user()->name }}</span>
     </div>
