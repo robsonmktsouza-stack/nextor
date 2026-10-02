@@ -17,7 +17,11 @@
 </div>
 @endif
 
-<div class="pdv-workspace" id="pdvApp" data-search-url="{{ route('pdv.search') }}">
+<div class="pdv-workspace" id="pdvApp"
+     data-search-url="{{ route('pdv.search') }}"
+     data-allow-negative-stock="{{ $allowNegativeStock ? '1' : '0' }}"
+     data-require-customer="{{ $pdvSettings['require_customer'] ? '1' : '0' }}"
+     data-allow-discount="{{ $pdvSettings['allow_discount'] ? '1' : '0' }}">
   <section class="pdv-catalog">
     <div class="pdv-search-panel">
       <div class="pdv-search-box">
