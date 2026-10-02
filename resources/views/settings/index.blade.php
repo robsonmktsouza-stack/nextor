@@ -516,20 +516,22 @@ foreach($primaryTabs as $key=>$item){
       </div>
       <div class="table-scroll">
         <table class="cms-table">
-          <thead><tr><th>Tipo</th><th>Origem</th><th>Ambiente</th><th>Série</th><th>Número</th><th>Status</th><th>Preparado em</th></tr></thead>
+          <thead><tr><th>Tipo</th><th>Origem</th><th>Ambiente</th><th>Emissão</th><th>Série</th><th>Número</th><th>Status</th><th>Cancelamento</th><th>Preparado em</th></tr></thead>
           <tbody>
           @forelse($fiscalJobs as $job)
             <tr>
               <td><strong>{{ strtoupper($job->document_type) }}</strong></td>
               <td>@if($job->sale)<a class="table-link" href="{{ route('sales.show',$job->sale) }}">Venda #{{ str_pad((string)$job->sale_id,5,'0',STR_PAD_LEFT) }}</a>@else—@endif</td>
               <td>{{ $job->environment==='production'?'Produção':'Homologação' }}</td>
+              <td>{{ $job->emission_mode==='offline'?'Contingência offline':'Normal' }}</td>
               <td>{{ $job->series ?? '—' }}</td>
               <td>{{ $job->document_number ?? '—' }}</td>
               <td><span class="status {{ $job->status==='prepared'?'status-blue':($job->status==='cancelled'?'status-muted':'status-ok') }}">{{ ucfirst($job->status) }}</span></td>
+              <td>{{ $job->cancelled_at ? 'Cancelada' : ($job->cancellation_status==='pending' ? 'Pendente' : '—') }}</td>
               <td>{{ $job->prepared_at?->format(\App\Models\AppSetting::dateFormat().' H:i') ?? '—' }}</td>
             </tr>
           @empty
-            <tr><td colspan="7" class="empty-cell">Nenhum documento fiscal preparado ainda.</td></tr>
+            <tr><td colspan="9" class="empty-cell">Nenhum documento fiscal preparado ainda.</td></tr>
           @endforelse
           </tbody>
         </table>
