@@ -10,6 +10,10 @@ class AuthController extends Controller {
         if (!Auth::attempt($data, $request->boolean('remember'))) {
             throw ValidationException::withMessages(['email' => 'E-mail ou senha incorretos.']);
         }
+        if(!Auth::user()?->is_active) {
+            Auth::logout();
+            throw ValidationException::withMessages(['email'=>'Este usuário está desativado.']);
+        }
         $request->session()->regenerate();
         return redirect()->intended(route('dashboard'));
     }
