@@ -200,15 +200,18 @@
     loadingCount++;
     const text=loadingOverlay.querySelector('.nextor-loading-text');
     if(text) text.textContent=message;
-    setLoadingState(true);
-    if(!loadingTimer){
+
+    // Requisições rápidas não precisam piscar o overlay. A interface só é
+    // bloqueada quando o carregamento realmente ultrapassa este pequeno limiar.
+    if(!loadingTimer && loadingOverlay.hidden){
       loadingTimer=setTimeout(()=>{
         loadingTimer=null;
         if(loadingCount>0){
+          setLoadingState(true);
           loadingOverlay.hidden=false;
           requestAnimationFrame(()=>loadingOverlay.classList.add('show'));
         }
-      },80);
+      },140);
     }
   };
 
@@ -216,9 +219,14 @@
     loadingCount=Math.max(0,loadingCount-1);
     if(loadingCount>0) return;
     if(loadingTimer){clearTimeout(loadingTimer);loadingTimer=null;}
+
     loadingOverlay.classList.remove('show');
     setLoadingState(false);
-    setTimeout(()=>{if(loadingCount===0) loadingOverlay.hidden=true;},120);
+
+    // Esconde praticamente junto com o fim da resposta, sem segurar a tela.
+    setTimeout(()=>{
+      if(loadingCount===0) loadingOverlay.hidden=true;
+    },40);
   };
 
   const resetLoading=()=>{
