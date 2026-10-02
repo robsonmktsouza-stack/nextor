@@ -55,6 +55,9 @@
     </select></label>
 
     <label class="field col-6"><span>Palavras-chave</span><input name="keywords" maxlength="255" value="{{ old('keywords',$entry->keywords) }}" placeholder="Ex.: aluguel, fornecedor, mensalidade"></label>
+    @if($costCenterEnabled)
+      <label class="field col-6"><span>Centro de custo</span><input name="cost_center" maxlength="120" value="{{ old('cost_center',$entry->cost_center) }}" placeholder="Ex.: Administrativo, Loja, Oficina"></label>
+    @endif
 
     <label class="field col-4"><span>Data de competência</span><input type="date" name="competence_date" value="{{ old('competence_date',optional($entry->competence_date)->format('Y-m-d') ?? today()->format('Y-m-d')) }}"></label>
     @if($entry->type==='receivable')
