@@ -38,6 +38,7 @@
           <a href="{{ route('finance.recurrences.index') }}">Recorrências financeiras</a>
           <a href="{{ route('finance.receipts.index') }}">Recibos</a>
           <a href="{{ route('finance.reconciliation.index') }}">Conciliação bancária</a>
+          <a href="{{ route('settings.index') }}">Configurações</a>
         </div>
       </div>
       <a class="topbar-pdv-shortcut {{ request()->routeIs('pdv.*') ? 'active' : '' }}" href="{{ route('pdv.index') }}" data-tooltip="Abrir PDV">
@@ -79,6 +80,10 @@
       @include('partials.icon',['name'=>'pdv'])<span>PDV</span></a>
     <a href="{{ route('stock.index') }}" class="sidebar-link {{ request()->routeIs('stock.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'stock'])<span>Estoque</span></a>
+
+    <div class="sidebar-spacer"></div>
+    <a href="{{ route('settings.index') }}" class="sidebar-link sidebar-settings-link {{ request()->routeIs('settings.*') ? 'active' : '' }}">
+      @include('partials.icon',['name'=>'settings'])<span>Configurações</span></a>
   </aside>
   <main class="cms-page-shell" id="pageShell">
     <div class="main-content">
