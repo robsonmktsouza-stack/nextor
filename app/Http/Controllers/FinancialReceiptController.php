@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AppSetting;
 use App\Models\Customer;
 use App\Models\FinancialEntry;
 use App\Models\FinancialReceipt;
@@ -26,7 +27,8 @@ class FinancialReceiptController extends Controller
             }));
 
         $totalAmount=(float)(clone $query)->sum('amount');
-        $receipts=$query->orderByDesc('receipt_date')->orderByDesc('id')->paginate(25)->withQueryString();
+        $perPage=AppSetting::tablePerPage($request);
+        $receipts=$query->orderByDesc('receipt_date')->orderByDesc('id')->paginate($perPage)->withQueryString();
 
         return view('finance.receipts.index',[
             'receipts'=>$receipts,'term'=>$term,'totalAmount'=>$totalAmount,
