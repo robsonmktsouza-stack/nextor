@@ -1135,7 +1135,7 @@
       const selected=getRows().filter(x=>x.checked).map(x=>x.value);
       if(!selected.length) return;
       const msg=button.getAttribute('data-confirm');
-      if(msg){
+      if(msg && document.body?.dataset.confirmDestructive!=='0'){
         const confirmed=await nextorConfirm(msg,{
           title:'Confirmar ação',
           confirmLabel:'Confirmar',
@@ -1173,7 +1173,7 @@
       if(!selected.length || !menu?.value) return;
       const option=menu.selectedOptions[0];
       const msg=option?.dataset.confirm;
-      if(msg){
+      if(msg && document.body?.dataset.confirmDestructive!=='0'){
         const confirmed=await nextorConfirm(msg,{
           title:'Confirmar ação',
           confirmLabel:'Confirmar',
