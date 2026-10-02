@@ -1067,6 +1067,8 @@
       all.checked=selected.length===rows.length;
       all.indeterminate=selected.length>0 && selected.length<rows.length;
       card.querySelectorAll('[data-bulk-submit]').forEach(b=>b.disabled=selected.length===0);
+      card.querySelectorAll('[data-requires-selection]').forEach(b=>b.disabled=selected.length===0);
+      card.querySelectorAll('[data-requires-single]').forEach(b=>b.disabled=selected.length!==1);
       if(menu) menu.disabled=selected.length===0;
       if(apply) apply.disabled=selected.length===0 || !menu?.value;
       if(count){count.hidden=selected.length===0;count.textContent=selected.length+' selecionado'+(selected.length===1?'':'s');}
@@ -1083,11 +1085,32 @@
           title:'Confirmar ação',
           confirmLabel:'Confirmar',
           cancelLabel:'Cancelar',
-          type:button.classList.contains('grid-tool-danger')?'danger':'warning'
+          type:button.classList.contains('grid-tool-danger')||button.classList.contains('danger')?'danger':'warning'
         });
         if(!confirmed) return;
       }
       submitBulkForm(button.getAttribute('data-bulk-submit'),selected);
+    }));
+
+    card.querySelectorAll('[data-bulk-open-dialog]').forEach(button=>button.addEventListener('click',()=>{
+      const selected=rows.filter(x=>x.checked).map(x=>x.value);
+      if(!selected.length) return;
+      const dialog=document.getElementById(button.getAttribute('data-bulk-open-dialog'));
+      const form=dialog?.querySelector('form');
+      if(!prepareBulkForm(form,selected)) return;
+      const countLabel=dialog.querySelector('[data-bulk-dialog-count]');
+      if(countLabel) countLabel.textContent=selected.length+' lançamento'+(selected.length===1?'':'s')+' selecionado'+(selected.length===1?'':'s');
+      document.querySelectorAll('.finance-action-menu').forEach(actionMenu=>actionMenu.hidden=true);
+      document.querySelectorAll('[data-finance-action-toggle]').forEach(toggle=>toggle.setAttribute('aria-expanded','false'));
+      dialog.showModal();
+    }));
+
+    card.querySelectorAll('[data-selected-url-template]').forEach(button=>button.addEventListener('click',()=>{
+      const selected=rows.filter(x=>x.checked).map(x=>x.value);
+      if(selected.length!==1) return;
+      const template=button.getAttribute('data-selected-url-template')||'';
+      if(!template) return;
+      window.location.href=template.replace('__ID__',encodeURIComponent(selected[0]));
     }));
     apply?.addEventListener('click',async()=>{
       const selected=rows.filter(x=>x.checked);
@@ -1124,6 +1147,32 @@
       submitBulkForm(menu.value,selected.map(x=>x.value));
     });
     update();
+  });
+
+  const closeFinanceActionMenus=(except=null)=>{
+    document.querySelectorAll('.finance-action-menu').forEach(menu=>{
+      if(menu===except) return;
+      menu.hidden=true;
+    });
+    document.querySelectorAll('[data-finance-action-toggle]').forEach(toggle=>{
+      const target=document.getElementById(toggle.getAttribute('data-finance-action-toggle'));
+      if(target!==except) toggle.setAttribute('aria-expanded','false');
+    });
+  };
+
+  document.querySelectorAll('[data-finance-action-toggle]').forEach(toggle=>toggle.addEventListener('click',event=>{
+    event.stopPropagation();
+    if(toggle.disabled) return;
+    const menu=document.getElementById(toggle.getAttribute('data-finance-action-toggle'));
+    if(!menu) return;
+    const willOpen=menu.hidden;
+    closeFinanceActionMenus(menu);
+    menu.hidden=!willOpen;
+    toggle.setAttribute('aria-expanded',willOpen?'true':'false');
+  }));
+
+  document.addEventListener('click',event=>{
+    if(!event.target.closest('.finance-action-menu-wrap')) closeFinanceActionMenus();
   });
 
   document.querySelectorAll('[data-export-table]').forEach(button=>button.addEventListener('click',()=>{
