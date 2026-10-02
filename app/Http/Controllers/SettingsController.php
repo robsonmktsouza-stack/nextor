@@ -6,8 +6,11 @@ use App\Models\AppSetting;
 use App\Models\CompanySetting;
 use App\Models\FinancialAccount;
 use App\Models\FinancialCategory;
+use App\Models\FiscalDocumentJob;
 use App\Models\PaymentMethod;
 use App\Models\User;
+use App\Models\WebhookDelivery;
+use App\Services\AccountingExportService;
 use App\Services\FinancialBalanceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -37,7 +40,7 @@ class SettingsController extends Controller
         'fiscal'=>'Fiscal',
     ];
 
-    public function index(Request $request, FinancialBalanceService $balances)
+    public function index(Request $request, FinancialBalanceService $balances, AccountingExportService $accountingExports)
     {
         $tab=(string)$request->query('tab','general');
         if(!in_array($tab,self::TABS,true)) $tab='general';
@@ -67,6 +70,13 @@ class SettingsController extends Controller
             'accounting'=>AppSetting::groupValues('accounting',$this->defaults('accounting')),
             'integrations'=>AppSetting::groupValues('integrations',$this->defaults('integrations')),
             'system'=>AppSetting::groupValues('system',$this->defaults('system')),
+            'accountingExports'=>$accountingExports->listExports(),
+            'fiscalJobs'=>FiscalDocumentJob::query()->with('sale')->latest('id')->limit(12)->get(),
+            'webhookStats'=>WebhookDelivery::query()
+                ->selectRaw('status, COUNT(*) as total')
+                ->groupBy('status')
+                ->pluck('total','status')
+                ->all(),
         ]);
     }
 
@@ -167,6 +177,19 @@ class SettingsController extends Controller
         };
 
         return redirect()->route('settings.index',['tab'=>$tab])->with('success','Configurações salvas.');
+    }
+
+    public function exportAccounting(Request $request, AccountingExportService $exports)
+    {
+        $data=$request->validate([
+            'month'=>['required','regex:/^\\d{4}-(0[1-9]|1[0-2])$/'],
+        ]);
+
+        $path=$exports->generate($data['month']);
+
+        return Storage::disk('local')->download($path,basename($path),[
+            'Content-Type'=>'text/csv; charset=UTF-8',
+        ]);
     }
 
     public function uploadCertificate(Request $request)
