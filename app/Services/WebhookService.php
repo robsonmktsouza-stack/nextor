@@ -9,7 +9,7 @@ class WebhookService
 {
     public function queue(string $event,array $payload): void
     {
-        if(!(bool)AppSetting::value('integrations','api_enabled',false)) return;
+        if(!(bool)AppSetting::value('integrations','webhook_enabled',false)) return;
 
         $url=trim((string)AppSetting::value('integrations','webhook_url',''));
         if($url==='') return;
