@@ -179,6 +179,7 @@
   // Loading global do Nextor: bloqueia a interface enquanto qualquer operação está em andamento.
   let loadingCount=0;
   let loadingTimer=null;
+  let navigationLoadingTimer=null;
   const loadingOverlay=document.createElement('div');
   loadingOverlay.id='nextorLoading';
   loadingOverlay.className='nextor-loading';
@@ -232,9 +233,23 @@
   const resetLoading=()=>{
     loadingCount=0;
     if(loadingTimer){clearTimeout(loadingTimer);loadingTimer=null;}
-    loadingOverlay.classList.remove('show');
+    if(navigationLoadingTimer){clearTimeout(navigationLoadingTimer);navigationLoadingTimer=null;}
+    loadingOverlay.classList.remove('show','navigation-only');
     loadingOverlay.hidden=true;
     setLoadingState(false);
+  };
+
+  const beginNavigationLoading=()=>{
+    if(navigationLoadingTimer) clearTimeout(navigationLoadingTimer);
+    navigationLoadingTimer=setTimeout(()=>{
+      navigationLoadingTimer=null;
+      if(loadingCount>0) return;
+      const text=loadingOverlay.querySelector('.nextor-loading-text');
+      if(text) text.textContent='Carregando...';
+      loadingOverlay.classList.add('navigation-only');
+      loadingOverlay.hidden=false;
+      requestAnimationFrame(()=>loadingOverlay.classList.add('show'));
+    },90);
   };
 
   window.NextorLoading={show:beginLoading,hide:endLoading,reset:resetLoading};
@@ -272,8 +287,19 @@
     return nativeFormSubmit.call(this);
   };
 
-  // Navegações GET comuns ficam a cargo do navegador, sem overlay global.
-  // O loading permanece para submits, fetch e XHR que realmente processam dados.
+  // Navegação GET comum mantém apenas a bolinha visual, sem bloquear a interface.
+  document.addEventListener('click',event=>{
+    const link=event.target.closest?.('a[href]');
+    if(!link || link.hasAttribute('data-no-loading') || link.hasAttribute('download')) return;
+    if(link.target && link.target!=='_self') return;
+    if(event.ctrlKey||event.metaKey||event.shiftKey||event.altKey||event.button!==0) return;
+    const raw=link.getAttribute('href')||'';
+    if(!raw || raw.startsWith('#') || raw.startsWith('javascript:') || raw.startsWith('mailto:') || raw.startsWith('tel:')) return;
+    let url;
+    try{url=new URL(link.href,window.location.href);}catch(_){return;}
+    if(url.origin!==window.location.origin) return;
+    beginNavigationLoading();
+  });
 
   // Ao voltar pelo histórico/bfcache, nunca mantém a tela bloqueada.
   window.addEventListener('pageshow',event=>{if(event.persisted) resetLoading();});
