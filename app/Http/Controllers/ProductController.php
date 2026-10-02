@@ -20,7 +20,8 @@ class ProductController extends Controller {
                 ->orWhere('ncm','like',"%{$term}%")
                 ->orWhere('ean_gtin','like',"%{$term}%")))
             ->orderBy('name')->paginate($perPage)->withQueryString();
-        return view('products.index', compact('products','term'));
+        $stockDecimalPlaces=max(0,min(3,(int)AppSetting::value('inventory','stock_decimal_places',3)));
+        return view('products.index', compact('products','term','stockDecimalPlaces'));
     }
 
     public function create() {
@@ -45,14 +46,21 @@ class ProductController extends Controller {
                 'minimum_stock'=>$catalog['product_minimum_stock'] ?? 0,
             ]),
             'editing'=>false,
+            'stockDecimalPlaces'=>max(0,min(3,(int)AppSetting::value('inventory','stock_decimal_places',3))),
         ]);
     }
 
     public function edit(Product $product) {
-        return view('products.form',compact('product')+['editing'=>true]);
+        return view('products.form',compact('product')+[
+            'editing'=>true,
+            'stockDecimalPlaces'=>max(0,min(3,(int)AppSetting::value('inventory','stock_decimal_places',3))),
+        ]);
     }
 
     private function rules(?Product $product=null): array {
+        $stockPlaces=max(0,min(3,(int)AppSetting::value('inventory','stock_decimal_places',3)));
+        $stockRule=$stockPlaces===0 ? 'integer' : 'decimal:0,'.$stockPlaces;
+
         return [
             'sku'=>['nullable','string','max:80', Rule::unique('products','sku')->ignore($product?->id)],
             'name'=>['required','string','max:190'],
@@ -63,8 +71,8 @@ class ProductController extends Controller {
             'unit'=>['required','string','max:12'],
             'cost_price'=>['required','numeric','min:0','max:9999999999.99','decimal:0,2'],
             'sale_price'=>['required','numeric','min:0','max:9999999999.99','decimal:0,2'],
-            'stock_quantity'=>['nullable','numeric','min:-9999999999','max:9999999999','decimal:0,3'],
-            'minimum_stock'=>['required','numeric','min:0','max:9999999999','decimal:0,3'],
+            'stock_quantity'=>['nullable','numeric','min:-9999999999','max:9999999999',$stockRule],
+            'minimum_stock'=>['required','numeric','min:0','max:9999999999',$stockRule],
             'control_stock'=>['nullable','boolean'],
             'is_active'=>['nullable','boolean'],
 
