@@ -95,7 +95,7 @@ body{font-size:9px}
     <div class="warning">SEM VALOR FISCAL</div>
     <div class="meta">
       Venda nº {{ str_pad((string) $sale->id, 9, '0', STR_PAD_LEFT) }}<br>
-      {{ optional($sale->completed_at)->format('d/m/Y H:i:s') ?? now()->format('d/m/Y H:i:s') }}
+      {{ optional($sale->completed_at)->format(\App\Models\AppSetting::dateFormat().' H:i:s') ?? now()->format(\App\Models\AppSetting::dateFormat().' H:i:s') }}
       @if($sale->user)<br>Operador: {{ $sale->user->name }}@endif
     </div>
     @if($receiptCopies>1)<div class="copy-label">Via {{ $copy }}/{{ $receiptCopies }}</div>@endif
