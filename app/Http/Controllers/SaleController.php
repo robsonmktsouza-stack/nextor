@@ -74,6 +74,7 @@ class SaleController extends Controller
             'customers'=>Customer::orderBy('name')->get(['id','name','document','final_consumer']),
             'paymentMethods'=>PaymentMethod::options(),
             'defaultFinalConsumer'=>(bool)AppSetting::value('operations','default_final_consumer',true),
+            'defaultDueDays'=>max(0,(int)AppSetting::value('operations','default_due_days',0)),
         ]);
     }
 
