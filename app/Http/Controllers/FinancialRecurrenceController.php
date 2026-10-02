@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AppSetting;
 use App\Models\Customer;
 use App\Models\FinancialAccount;
 use App\Models\FinancialCategory;
@@ -33,8 +34,10 @@ class FinancialRecurrenceController extends Controller
         $activeCount=(clone $query)->where('is_active',true)->count();
         $monthlyBase=(float)(clone $query)->where('is_active',true)->where('frequency','monthly')->sum('amount');
 
+        $perPage=AppSetting::tablePerPage($request);
+
         return view('finance.recurrences.index',[
-            'recurrences'=>$query->orderByDesc('is_active')->orderBy('next_date')->paginate(25)->withQueryString(),
+            'recurrences'=>$query->orderByDesc('is_active')->orderBy('next_date')->paginate($perPage)->withQueryString(),
             'term'=>$term,'type'=>$type,'status'=>$status,'activeCount'=>$activeCount,'monthlyBase'=>$monthlyBase,
         ]);
     }
