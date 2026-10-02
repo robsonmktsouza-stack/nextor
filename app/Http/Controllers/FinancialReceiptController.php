@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\FinancialEntry;
 use App\Models\FinancialReceipt;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -36,10 +37,20 @@ class FinancialReceiptController extends Controller
         ]);
     }
 
-    public function create()
+    public function create(Request $request)
     {
+        $entry=null;
+        if($request->filled('entry')) {
+            $entry=FinancialEntry::query()
+                ->with('customer')
+                ->whereKey($request->integer('entry'))
+                ->where('type','receivable')
+                ->first();
+        }
+
         return view('finance.receipts.form',[
             'customers'=>Customer::query()->orderBy('name')->get(['id','name','document']),
+            'sourceEntry'=>$entry,
         ]);
     }
 
