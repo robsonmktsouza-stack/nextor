@@ -162,7 +162,7 @@
       return Number.isFinite(parsed)?Math.max(0,parsed):0;
     };
 
-    const onlyDigits=value=>String(value??'').replace(/\D+/g,'');
+    const normalizeTaxId=value=>String(value??'').toUpperCase().replace(/[^A-Z0-9]/g,'');
     const csrfToken=()=>document.querySelector('meta[name="csrf-token"]')?.content||'';
 
     const electronicFieldsFrom=row=>({
@@ -1225,18 +1225,30 @@
     };
 
     const applyConsumerDocument=()=>{
-      const digits=String(consumerDocumentInput?.value||'').replace(/\D+/g,'');
-      if(digits && ![11,14].includes(digits.length)){
-        notify('Digite um CPF com 11 dígitos ou CNPJ com 14 dígitos.','warning');
+      const document=normalizeTaxId(consumerDocumentInput?.value||'');
+      if(document && ![11,14].includes(document.length)){
+        notify('Digite um CPF com 11 caracteres ou CNPJ com 14 caracteres.','warning');
         consumerDocumentInput?.focus();
         return;
       }
 
-      if(consumerDocument) consumerDocument.value=digits;
+      if(document.length===11 && !/^\d{11}$/.test(document)){
+        notify('CPF deve conter somente números.','warning');
+        consumerDocumentInput?.focus();
+        return;
+      }
+
+      if(document.length===14 && !/^[A-Z0-9]{12}\d{2}$/.test(document)){
+        notify('Formato de CNPJ inválido.','warning');
+        consumerDocumentInput?.focus();
+        return;
+      }
+
+      if(consumerDocument) consumerDocument.value=document;
       const option=selectedCustomerOption();
       const customerDoc=option?.dataset.customerDocument||'';
       if(consumerName){
-        consumerName.value=digits && digits===customerDoc
+        consumerName.value=document && document===normalizeTaxId(customerDoc)
           ? (option?.dataset.customerName||'')
           : '';
       }
@@ -1320,11 +1332,11 @@
       const data={
         integration_type:electronicIntegration.value||'',
         card_brand:electronicBrand.value||'',
-        institution_document:onlyDigits(electronicInstitution.value),
+        institution_document:normalizeTaxId(electronicInstitution.value),
         authorization_code:electronicAuthorization.value.trim(),
-        beneficiary_document:onlyDigits(electronicBeneficiary.value),
+        beneficiary_document:normalizeTaxId(electronicBeneficiary.value),
         terminal_id:electronicTerminal.value.trim(),
-        transaction_document:onlyDigits(electronicTransactionDocument.value),
+        transaction_document:normalizeTaxId(electronicTransactionDocument.value),
         transaction_state:electronicTransactionState.value.trim().toUpperCase(),
       };
 
