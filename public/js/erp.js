@@ -1039,15 +1039,19 @@
     window.print();
     card.querySelectorAll('.print-excluded').forEach(tr=>tr.classList.remove('print-excluded'));
   };
-  const submitBulkForm=(formId,ids)=>{
-    const form=document.getElementById(formId);
-    if(!form) return;
+  const prepareBulkForm=(form,ids)=>{
+    if(!form) return false;
     form.querySelectorAll('[data-generated-bulk]').forEach(el=>el.remove());
     ids.forEach(id=>{
       const input=document.createElement('input');
       input.type='hidden';input.name='ids[]';input.value=id;input.dataset.generatedBulk='1';
       form.appendChild(input);
     });
+    return true;
+  };
+  const submitBulkForm=(formId,ids)=>{
+    const form=document.getElementById(formId);
+    if(!prepareBulkForm(form,ids)) return;
     form.submit();
   };
 
@@ -1105,6 +1109,16 @@
       }
       if(menu.value==='local:print'){
         printSelected(card);
+        return;
+      }
+      const dialogId=option?.dataset.bulkDialog;
+      if(dialogId){
+        const dialog=document.getElementById(dialogId);
+        const form=dialog?.querySelector('form');
+        if(!prepareBulkForm(form,selected.map(x=>x.value))) return;
+        const countLabel=dialog.querySelector('[data-bulk-dialog-count]');
+        if(countLabel) countLabel.textContent=selected.length+' lançamento'+(selected.length===1?'':'s')+' selecionado'+(selected.length===1?'':'s');
+        dialog.showModal();
         return;
       }
       submitBulkForm(menu.value,selected.map(x=>x.value));
