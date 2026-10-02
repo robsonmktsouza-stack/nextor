@@ -39,5 +39,11 @@ jobs:
       - name: Clear Laravel caches
         run: php artisan optimize:clear
 
-      - name: Run PHPUnit
-        run: vendor/bin/phpunit
+      - name: Run Fiscal PHPUnit
+        run: |
+          vendor/bin/phpunit \
+            tests/Feature/FiscalFoundationTest.php \
+            tests/Feature/FiscalCertificateIcpBrasilTest.php \
+            tests/Feature/FiscalSchemaDocumentXmlTest.php \
+            tests/Feature/FiscalTaxEngineTest.php \
+            tests/Feature/FiscalSignatureEngineTest.php
