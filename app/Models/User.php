@@ -37,6 +37,6 @@ class User extends Authenticatable {
             if($this->canAccess($permission)) return $route;
         }
 
-        return 'logout';
+        return 'dashboard';
     }
 }
