@@ -1452,7 +1452,8 @@
     padding:0;
   }
 
-  .pdv-topbar-button span{
+  .pdv-topbar-button span,
+  .pdv-topbar-button kbd{
     display:none;
   }
 
