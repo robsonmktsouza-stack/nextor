@@ -120,7 +120,8 @@ class SaleController extends Controller
     {
         $sale->load(['items.product','items.service','payments','customer','user']);
         $saleReturns=$sale->returns()->withCount('items')->orderByDesc('return_date')->orderByDesc('id')->get();
-        return view('sales.show',compact('sale','saleReturns'));
+        $paymentLabels=PaymentMethod::query()->orderBy('sort_order')->pluck('name','code')->all();
+        return view('sales.show',compact('sale','saleReturns','paymentLabels'));
     }
 
     public function cancel(Request $request, Sale $sale, SalesService $sales)
