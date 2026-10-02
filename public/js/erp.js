@@ -272,20 +272,8 @@
     return nativeFormSubmit.call(this);
   };
 
-  // Navegação interna também exibe o bloqueio.
-  document.addEventListener('click',event=>{
-    const link=event.target.closest?.('a[href]');
-    if(!link || link.hasAttribute('data-no-loading') || link.hasAttribute('download')) return;
-    if(link.target && link.target!=='_self') return;
-    if(event.ctrlKey||event.metaKey||event.shiftKey||event.altKey||event.button!==0) return;
-    const raw=link.getAttribute('href')||'';
-    if(!raw || raw.startsWith('#') || raw.startsWith('javascript:') || raw.startsWith('mailto:') || raw.startsWith('tel:')) return;
-    let url;
-    try{url=new URL(link.href,window.location.href);}catch(_){return;}
-    if(url.origin!==window.location.origin) return;
-    beginLoading('Carregando...');
-    setTimeout(()=>{if(event.defaultPrevented) endLoading();},0);
-  });
+  // Navegações GET comuns ficam a cargo do navegador, sem overlay global.
+  // O loading permanece para submits, fetch e XHR que realmente processam dados.
 
   // Ao voltar pelo histórico/bfcache, nunca mantém a tela bloqueada.
   window.addEventListener('pageshow',event=>{if(event.persisted) resetLoading();});
@@ -353,6 +341,7 @@
     wrapper.appendChild(trigger);
     wrapper.appendChild(menu);
 
+    let optionsBuilt=false;
     const buildOptions=()=>{
       menu.innerHTML='';
       [...select.options].forEach(option=>{
@@ -377,7 +366,9 @@
         });
         menu.appendChild(item);
       });
+      optionsBuilt=true;
     };
+    const ensureOptions=()=>{if(!optionsBuilt) buildOptions();};
     const sync=()=>{
       const option=select.options[select.selectedIndex];
       if(option) setUiSelectOptionContent(value,option);
@@ -398,6 +389,8 @@
       trigger.setAttribute('aria-expanded',willOpen?'true':'false');
       menu.hidden=!willOpen;
       if(willOpen){
+        ensureOptions();
+        sync();
         wrapper.classList.remove('drop-up');
         requestAnimationFrame(()=>{
           const rect=menu.getBoundingClientRect();
@@ -410,6 +403,7 @@
 
     trigger.addEventListener('click',open);
     trigger.addEventListener('keydown',e=>{
+      if(['Enter',' ','ArrowDown','ArrowUp'].includes(e.key)) ensureOptions();
       const items=[...menu.querySelectorAll('.ui-select-option:not(:disabled)')];
       if(!items.length) return;
       if(e.key==='Escape'){e.preventDefault();closeUiSelects();return;}
@@ -432,17 +426,20 @@
     });
     select.addEventListener('change',sync);
     select.addEventListener('invalid',()=>{
+      ensureOptions();
+      sync();
       trigger.focus();
       wrapper.classList.add('open');
       menu.hidden=false;
       trigger.setAttribute('aria-expanded','true');
     });
     new MutationObserver(mutations=>{
-      if(mutations.some(m=>m.type==='childList'||m.target.tagName==='OPTION')) buildOptions();
+      if(optionsBuilt && mutations.some(m=>m.type==='childList'||m.target.tagName==='OPTION')) buildOptions();
       sync();
     }).observe(select,{attributes:true,childList:true,subtree:true,attributeFilter:['disabled','selected','label']});
 
-    buildOptions();
+    // Renderiza apenas o valor selecionado no carregamento.
+    // A lista completa de opções só é construída quando o usuário abre o campo.
     sync();
   };
 
