@@ -65,7 +65,7 @@
           <td><a class="table-link" href="{{ route('sales.returns.show',$return) }}">#{{ str_pad((string)$return->id,5,'0',STR_PAD_LEFT) }}</a></td>
           <td><a class="table-link" href="{{ route('sales.show',$return->sale_id) }}">#{{ str_pad((string)$return->sale_id,5,'0',STR_PAD_LEFT) }}</a></td>
           <td>{{ $return->sale?->customer?->name ?? 'Consumidor não identificado' }}</td>
-          <td class="nowrap">{{ $return->return_date->format('d/m/Y') }}</td>
+          <td class="nowrap">{{ $return->return_date->format(\App\Models\AppSetting::dateFormat()) }}</td>
           <td>{{ $return->items_count }}</td>
           <td class="price-strong nowrap">R$ {{ number_format((float)$return->total,2,',','.') }}</td>
           <td>{{ $return->user?->name ?? '—' }}</td>
