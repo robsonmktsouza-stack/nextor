@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\AppSetting;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleReturn;
@@ -60,6 +61,7 @@ class SaleReturnService
 
             $prepared=[];
             $totalCents=0;
+            $allowPartialReturn=(bool)AppSetting::value('operations','allow_partial_return',true);
 
             foreach($requested as $index=>$row) {
                 $item=$saleItems->get($row['sale_item_id']);
@@ -73,6 +75,12 @@ class SaleReturnService
                 if($requestedMills>$availableMills) {
                     throw ValidationException::withMessages([
                         "items.$index.quantity"=>'Quantidade maior que o saldo disponível para devolução de '.$item->product_name.'.',
+                    ]);
+                }
+
+                if(!$allowPartialReturn && $requestedMills!==$availableMills) {
+                    throw ValidationException::withMessages([
+                        "items.$index.quantity"=>'A devolução parcial está desativada. Devolva todo o saldo disponível deste item.',
                     ]);
                 }
 
