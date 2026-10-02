@@ -20,7 +20,11 @@ class SalesService
         return DB::transaction(function () use ($data, $userId) {
             $rows=collect($data['items']);
             $operationType=$data['operation_type'] ?? 'sale';
-            $allowNegativeStock=(bool)AppSetting::value('operations','allow_negative_stock',false);
+            $allowNegativeStock=(bool)AppSetting::value(
+                'inventory',
+                'allow_negative_stock',
+                AppSetting::value('operations','allow_negative_stock',false)
+            );
 
             $productIds=$rows
                 ->where('item_type','product')
