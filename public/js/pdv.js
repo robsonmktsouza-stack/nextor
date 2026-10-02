@@ -1027,7 +1027,7 @@
 
     paymentModal?.addEventListener('keydown',event=>{
       const options=paymentButtons();
-      if(/^[1-7]$/.test(event.key)){
+      if(/^[1-9]$/.test(event.key)){
         event.preventDefault();
         const option=options.find(button=>button.dataset.paymentKey===event.key);
         selectPaymentOption(option);
