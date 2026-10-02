@@ -1,6 +1,7 @@
 <?php
 namespace App\Services;
 
+use App\Models\AppSetting;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\Service;
@@ -19,6 +20,7 @@ class SalesService
         return DB::transaction(function () use ($data, $userId) {
             $rows=collect($data['items']);
             $operationType=$data['operation_type'] ?? 'sale';
+            $allowNegativeStock=(bool)AppSetting::value('operations','allow_negative_stock',false);
 
             $productIds=$rows
                 ->where('item_type','product')
@@ -80,7 +82,7 @@ class SalesService
                         ]);
                     }
 
-                    if($operationType==='sale' && $product->control_stock &&
+                    if($operationType==='sale' && !$allowNegativeStock && $product->control_stock &&
                         InventoryService::toMills($product->stock_quantity)<$mills) {
                         throw ValidationException::withMessages([
                             "items.$index.quantity"=>'Estoque insuficiente para '.$product->name.'.'
@@ -192,9 +194,11 @@ class SalesService
                 ->values();
 
             if($payments->isEmpty() && $operationType==='sale' && $totalCents>0) {
+                $baseDate=\Carbon\Carbon::parse($data['operation_date'] ?? now()->toDateString());
+                $defaultDueDays=(int)AppSetting::value('operations','default_due_days',0);
                 $payments=collect([[
                     'amount'=>InventoryService::moneyFromCents($totalCents),
-                    'due_date'=>$data['operation_date'] ?? now()->toDateString(),
+                    'due_date'=>$baseDate->copy()->addDays(max(0,$defaultDueDays))->toDateString(),
                     'payment_method'=>null,
                     'receivable'=>true,
                 ]]);
@@ -220,7 +224,7 @@ class SalesService
                 });
             }
 
-            if($operationType==='sale') {
+            if($operationType==='sale' && (bool)AppSetting::value('operations','auto_finance_sale',true)) {
                 $this->financial->syncSale($sale,$userId);
             }
 
