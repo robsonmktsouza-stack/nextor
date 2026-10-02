@@ -319,7 +319,16 @@ $tabs=[
       @if($company->certificate_path)
         <div class="certificate-status ok">
           @include('partials.icon',['name'=>'shield','size'=>24])
-          <div><strong>Certificado configurado</strong><span>@if($company->certificate_expires_at)Válido até {{ $company->certificate_expires_at->format('d/m/Y') }}@elseValidade não identificada@endif</span></div>
+          <div>
+            <strong>Certificado configurado</strong>
+            <span>
+              @if($company->certificate_expires_at)
+                Válido até {{ $company->certificate_expires_at->format('d/m/Y') }}
+              @else
+                Validade não identificada
+              @endif
+            </span>
+          </div>
           <form method="post" action="{{ route('settings.certificate.remove') }}" data-confirm-submit="Remover o certificado fiscal armazenado?">@csrf @method('DELETE')<button class="btn btn-danger-outline">Remover</button></form>
         </div>
       @else
