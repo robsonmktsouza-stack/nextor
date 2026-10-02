@@ -19,4 +19,24 @@ class User extends Authenticatable {
         if($this->role==='admin') return true;
         return in_array($permission,$this->permissions ?? [],true);
     }
+
+    public function homeRouteName(): string
+    {
+        foreach([
+            'dashboard'=>'dashboard',
+            'finance'=>'finance.dashboard',
+            'sales'=>'sales.index',
+            'pdv'=>'pdv.index',
+            'products'=>'products.index',
+            'services'=>'services.index',
+            'customers'=>'customers.index',
+            'stock'=>'stock.index',
+            'returns'=>'sales.returns.index',
+            'settings'=>'settings.index',
+        ] as $permission=>$route) {
+            if($this->canAccess($permission)) return $route;
+        }
+
+        return 'logout';
+    }
 }
