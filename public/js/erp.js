@@ -996,7 +996,9 @@
   }));
   document.querySelectorAll('[data-print-page]').forEach(button=>button.addEventListener('click',()=>window.print()));
   document.querySelectorAll('[data-refresh-page]').forEach(button=>button.addEventListener('click',()=>window.location.reload()));
-  document.querySelectorAll('[data-confirm-submit]').forEach(form=>form.addEventListener('submit',async e=>{
+  document.addEventListener('submit',async e=>{
+    const form=e.target.closest?.('[data-confirm-submit]');
+    if(!form) return;
     if(form.dataset.confirmBypass==='1'){
       delete form.dataset.confirmBypass;
       return;
@@ -1013,7 +1015,7 @@
     if(!confirmed) return;
     form.dataset.confirmBypass='1';
     form.requestSubmit();
-  }));
+  });
 
   const selectedChecks=card=>[...card.querySelectorAll('[data-row-select]')].filter(x=>x.checked);
   const exportTable=(card,filename,selectedOnly=false)=>{
