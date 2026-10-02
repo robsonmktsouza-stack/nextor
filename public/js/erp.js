@@ -865,7 +865,8 @@
     citySelect.innerHTML='<option value="">'+(uf?'Carregando...':'Selecione o estado')+'</option>';
     if(!uf) return;
     try{
-      const response=await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados/'+encodeURIComponent(uf)+'/municipios?orderBy=nome');
+      const fetcher=window.NextorFetch || window.fetch.bind(window);
+      const response=await fetcher('https://servicodados.ibge.gov.br/api/v1/localidades/estados/'+encodeURIComponent(uf)+'/municipios?orderBy=nome');
       if(!response.ok) throw new Error('Falha ao carregar cidades');
       const cities=await response.json();
       citySelect.innerHTML='<option value="">Selecione a cidade</option>';
@@ -899,7 +900,8 @@
     if(cepInput) cepInput.dataset.lastAutoLookup=cep;
     button.disabled=true;
     try{
-      const response=await fetch('https://viacep.com.br/ws/'+cep+'/json/');
+      const fetcher=window.NextorFetch || window.fetch.bind(window);
+      const response=await fetcher('https://viacep.com.br/ws/'+cep+'/json/');
       const data=await response.json();
       if(data.erro) throw new Error('CEP não encontrado');
       const address=scope.querySelector('[data-address-input]');
@@ -941,7 +943,8 @@
     const oldText=button.querySelector('span')?.textContent;
     if(button.querySelector('span')) button.querySelector('span').textContent='Buscando...';
     try{
-      const response=await fetch('/customers/cnpj/'+encodeURIComponent(cnpj),{
+      const fetcher=window.NextorFetch || window.fetch.bind(window);
+      const response=await fetcher('/customers/cnpj/'+encodeURIComponent(cnpj),{
         headers:{'Accept':'application/json'}
       });
       const data=await response.json().catch(()=>({}));
