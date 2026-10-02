@@ -44,7 +44,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/services/bulk-status',[ServiceController::class,'bulkStatus'])->name('services.bulk-status')->middleware('permission:services');
     Route::delete('/services/bulk-delete',[ServiceController::class,'bulkDelete'])->name('services.bulk-delete')->middleware('permission:services');
     Route::get('/customers',[CustomerController::class,'index'])->name('customers.index')->middleware('permission:customers');
-    Route::get('/customers/cnpj/{cnpj}',[CustomerController::class,'lookupCnpj'])->where('cnpj','[0-9A-Za-z.\\/-]+')->name('customers.lookup-cnpj')->middleware('permission:customers');
+    Route::get('/customers/cnpj/{cnpj}',[CustomerController::class,'lookupCnpj'])->where('cnpj','[0-9A-Za-z.\\/-]+')->name('customers.lookup-cnpj')->middleware('permission:customers,settings');
     Route::get('/customers/create',[CustomerController::class,'create'])->name('customers.create')->middleware('permission:customers');
     Route::post('/customers',[CustomerController::class,'store'])->name('customers.store')->middleware('permission:customers');
     Route::get('/customers/{customer}/edit',[CustomerController::class,'edit'])->name('customers.edit')->middleware('permission:customers');
