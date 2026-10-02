@@ -2,6 +2,7 @@
 @section('title','Nova venda / orçamento')
 
 @section('content')
+@include('sales._nav')
 <form id="sale-form" class="sale-editor" action="{{ route('sales.store') }}" method="post">
 @csrf
 
