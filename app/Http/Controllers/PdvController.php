@@ -198,7 +198,10 @@ class PdvController extends Controller
             'payments.*.amount'=>['required_with:payments','numeric','gt:0','max:9999999999.99','decimal:0,2'],
             'payments.*.integration_type'=>['nullable',Rule::in(['1','2'])],
             'payments.*.transaction_document'=>['nullable','string','max:20'],
-            'payments.*.transaction_state'=>['nullable','string','size:2'],
+            'payments.*.transaction_state'=>['nullable','string',Rule::in([
+                'AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG',
+                'PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'
+            ])],
             'payments.*.institution_document'=>['nullable','string','max:20'],
             'payments.*.card_brand'=>['nullable',Rule::in(['01','02','03','04','05','06','07','08','09','99'])],
             'payments.*.authorization_code'=>['nullable','string','max:128'],
@@ -377,6 +380,19 @@ class PdvController extends Controller
             $transactionDocument=$this->normalizeCnpj($payment['transaction_document'] ?? null);
             $institutionDocument=$this->normalizeCnpj($payment['institution_document'] ?? null);
             $beneficiaryDocument=$this->normalizeCnpj($payment['beneficiary_document'] ?? null);
+            $transactionState=strtoupper(trim((string)($payment['transaction_state'] ?? '')));
+
+            if($method->kind==='card' && empty($payment['integration_type'])) {
+                throw ValidationException::withMessages([
+                    'payments'=>'Informe se o pagamento com cartão é integrado/TEF ou POS não integrado.',
+                ]);
+            }
+
+            if(($transactionDocument===null) xor ($transactionState==='')) {
+                throw ValidationException::withMessages([
+                    'payments'=>'CNPJ transacional e UF do pagamento devem ser informados juntos.',
+                ]);
+            }
 
             foreach([
                 'CNPJ transacional'=>$transactionDocument,
@@ -396,7 +412,7 @@ class PdvController extends Controller
                 'payment_method'=>$method->code,
                 'integration_type'=>$payment['integration_type'] ?? null,
                 'transaction_document'=>$transactionDocument,
-                'transaction_state'=>($state=strtoupper(trim((string)($payment['transaction_state'] ?? ''))))!=='' ? $state : null,
+                'transaction_state'=>$transactionState!=='' ? $transactionState : null,
                 'institution_document'=>$institutionDocument,
                 'card_brand'=>$payment['card_brand'] ?? null,
                 'authorization_code'=>trim((string)($payment['authorization_code'] ?? '')) ?: null,
@@ -843,6 +859,8 @@ class PdvController extends Controller
         }
 
         if(strlen($document)===14 && preg_match('/^[A-Z0-9]{12}[0-9]{2}$/',$document)) {
+            if(preg_match('/^(.)\\1{13}$/',$document)) return false;
+
             $base=substr($document,0,12);
             $first=$this->cnpjCheckDigit($base,[5,4,3,2,9,8,7,6,5,4,3,2]);
             $second=$this->cnpjCheckDigit($base.$first,[6,5,4,3,2,9,8,7,6,5,4,3,2]);
