@@ -23,7 +23,7 @@
     </div>
   </div>
 
-  <div class="grid-filter-panel" id="recurrence-filters" @if($term || $type || $status) hidden @endif>
+  <div class="grid-filter-panel" id="recurrence-filters" @if(!$term && !$type && !$status) hidden @endif>
     <form method="get" class="toolbar-filters">
       <input class="input-filter" name="search" value="{{ $term }}" placeholder="Descrição, contato ou palavra-chave">
       <select class="input-filter" name="type">
