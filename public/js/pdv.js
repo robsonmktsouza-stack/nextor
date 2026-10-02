@@ -64,6 +64,9 @@
 
     const money=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'});
     const number=new Intl.NumberFormat('pt-BR',{maximumFractionDigits:3});
+    const allowNegativeStock=app.dataset.allowNegativeStock==='1';
+    const requireCustomer=app.dataset.requireCustomer==='1';
+    const allowDiscount=app.dataset.allowDiscount!=='0';
     const state=new Map();
     let currentKind='all';
     let lastResults=[];
@@ -72,6 +75,11 @@
     let searchController=null;
     let finishFlowPending=false;
     let bypassFinalizeValidation=false;
+
+    if(actionDiscount && !allowDiscount){
+      actionDiscount.disabled=true;
+      actionDiscount.dataset.tooltip='Descontos desativados nas configurações do PDV';
+    }
 
     const notify=(message,type='info')=>{
       if(window.NextorNotify) window.NextorNotify(message,{type,title:type==='error'?'PDV':'PDV'});
@@ -110,6 +118,7 @@
     };
 
     const canIncrease=(item,nextQuantity)=>{
+      if(allowNegativeStock) return true;
       if(item.type!=='product' || !item.control_stock) return true;
       if(nextQuantity<=item.stock+0.000001) return true;
       notify('Estoque disponível: '+number.format(item.stock)+' '+(item.unit||'UN')+'.','warning');
@@ -259,8 +268,9 @@
 
     const updateFinishState=()=>{
       const hasItems=state.size>0;
-      finish.disabled=!hasItems;
-      if(actionFinish) actionFinish.disabled=!hasItems;
+      const customerReady=!requireCustomer || !!customer.value;
+      finish.disabled=!hasItems || !customerReady;
+      if(actionFinish) actionFinish.disabled=!hasItems || !customerReady;
 
       const hasPayment=!!payment.value;
       actionPayment?.classList.toggle('is-set',hasPayment);
@@ -725,6 +735,10 @@
     };
 
     const openDiscountModal=(key=activeCartKey())=>{
+      if(!allowDiscount){
+        notify('Descontos estão desativados nas configurações do PDV.','info');
+        return;
+      }
       const item=state.get(key);
       if(!item){
         notify('Adicione um item ao carrinho primeiro.','warning');
