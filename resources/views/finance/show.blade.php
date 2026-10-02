@@ -35,6 +35,43 @@
       <div><span>Vencimento</span><strong>{{ $entry->due_date->format('d/m/Y') }}</strong></div>
     </div>
 
+    @if($billingSummary)
+      <div class="finance-billing-box">
+        <div class="finance-billing-head">
+          <div>
+            <h3>Cobrança</h3>
+            <p>Valor atualizado conforme as configurações de cobrança.</p>
+          </div>
+          <strong>R$ {{ number_format((float)$billingSummary['charge'],2,',','.') }}</strong>
+        </div>
+
+        <div class="finance-billing-summary">
+          <span>Saldo: R$ {{ number_format((float)$billingSummary['balance'],2,',','.') }}</span>
+          @if((float)$billingSummary['fine']>0)<span>Multa: R$ {{ number_format((float)$billingSummary['fine'],2,',','.') }}</span>@endif
+          @if((float)$billingSummary['interest']>0)<span>Juros: R$ {{ number_format((float)$billingSummary['interest'],2,',','.') }}</span>@endif
+          @if((int)$billingSummary['days_late']>0)<span>{{ $billingSummary['days_late'] }} dia(s) em atraso</span>@endif
+        </div>
+
+        @if($billingSummary['pix_payload'])
+          <label class="field finance-pix-field">
+            <span>PIX Copia e Cola</span>
+            <textarea readonly rows="3" data-copy-source="finance-pix-{{ $entry->id }}">{{ $billingSummary['pix_payload'] }}</textarea>
+          </label>
+          <div class="finance-billing-actions">
+            <button type="button" class="btn btn-secondary" data-copy-target="finance-pix-{{ $entry->id }}">
+              @include('partials.icon',['name'=>'copy','size'=>15]) Copiar PIX
+            </button>
+          </div>
+        @elseif($billingSummary['pix_key'])
+          <div class="inline-note">A chave PIX foi configurada, mas não foi possível gerar a cobrança.</div>
+        @endif
+
+        @if($billingSummary['instructions'])
+          <div class="inline-note">{{ $billingSummary['instructions'] }}</div>
+        @endif
+      </div>
+    @endif
+
     <div class="card-header finance-history-header">
       <div><h2>Baixas e estornos</h2><p>Histórico financeiro do lançamento</p></div>
     </div>
