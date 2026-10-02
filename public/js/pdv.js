@@ -337,6 +337,17 @@
       }
       return !!payment.value;
     };
+
+    const incompleteCardTarget=()=>{
+      if(splitApplied){
+        const index=splitPayments.findIndex(row=>row.kind==='card' && !row.integration_type);
+        return index>=0 ? index : null;
+      }
+
+      if(paymentKind(payment.value)==='card' && !singleElectronicData.integration_type) return 'single';
+      return null;
+    };
+
     const cashPaymentAmount=()=>{
       if(splitApplied){
         return splitPayments
@@ -1706,6 +1717,14 @@
         finishFlowPending=true;
         notify('Selecione a forma de pagamento para continuar.','info');
         openPaymentModal();
+        return;
+      }
+
+      const incompleteCard=incompleteCardTarget();
+      if(incompleteCard!==null){
+        finishFlowPending=true;
+        notify('Informe se o cartão é TEF/POS integrado ou POS não integrado.','info');
+        openElectronicPaymentModal(incompleteCard,false);
         return;
       }
 
