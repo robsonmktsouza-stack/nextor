@@ -75,28 +75,7 @@ $subTabs=[
   ],
 ];
 
-$tabTitles=[
-  'general'=>['Configuração geral','Dados cadastrais, endereço e informações tributárias da empresa.'],
-  'printing'=>['Impressão e identidade','Logomarca, cabeçalho e rodapé dos documentos do Nextor.'],
-  'catalog'=>['Produtos e serviços','Padrões aplicados aos novos produtos e serviços.'],
-  'chart'=>['Plano de contas','Categorias de receitas e despesas do financeiro.'],
-  'accounts'=>['Contas caixa','Caixas, bancos e contas digitais utilizadas pelo financeiro.'],
-  'operations'=>['Operações','Preferências de vendas, orçamentos e devoluções.'],
-  'inventory'=>['Estoque','Regras gerais de saldo e movimentações.'],
-  'pdv'=>['PDV','Preferências do ponto de venda.'],
-  'payments'=>['Formas de pagamento','Métodos disponíveis em vendas, financeiro e PDV.'],
-  'billing'=>['Boletos e cobranças','Parâmetros de cobrança, PIX, juros e integrações financeiras.'],
-  'fiscal'=>['Configuração fiscal','Certificado e parâmetros compartilhados pelos documentos fiscais.'],
-  'tax'=>['Dados tributários','Padrões de ICMS, PIS, COFINS, ISS, IBS e CBS.'],
-  'nfe'=>['NF-e','Configurações do documento fiscal eletrônico modelo 55.'],
-  'nfce'=>['NFC-e','Configurações do documento fiscal eletrônico modelo 65.'],
-  'nfse'=>['NFS-e','Configurações da nota fiscal de serviços.'],
-  'cte'=>['CT-e / MDF-e','Configurações de transporte e manifesto.'],
-  'accounting'=>['Contábil','Dados do contador e preferências de exportação.'],
-  'users'=>['Usuários','Usuários, funções e permissões do sistema.'],
-  'integrations'=>['API e integrações','SMTP, webhooks e integrações externas.'],
-  'system'=>['Sistema','Preferências gerais da interface e comportamento.'],
-];
+
 
 $activePrimary='general';
 foreach($primaryTabs as $key=>$item){
@@ -127,14 +106,6 @@ foreach($primaryTabs as $key=>$item){
     @endforeach
   </nav>
 @endif
-
-<div class="settings-section-heading">
-  <div class="settings-section-heading-icon">@include('partials.icon',['name'=>$primaryTabs[$activePrimary]['icon'] ?? 'settings','size'=>17])</div>
-  <div>
-    <h2>{{ $tabTitles[$tab][0] ?? 'Configurações' }}</h2>
-    <p>{{ $tabTitles[$tab][1] ?? 'Preferências do Nextor.' }}</p>
-  </div>
-</div>
 
 <main class="settings-page">
 @if($tab==='general')
