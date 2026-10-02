@@ -109,7 +109,7 @@ class SaleReturnController extends Controller
             'return_date'=>['required','date'],
             'notes'=>['nullable','string','max:5000'],
             'items'=>['required','array','min:1','max:100'],
-            'items.*.sale_item_id'=>['required','integer','exists:sale_items,id'],
+            'items.*.sale_item_id'=>['required','integer','distinct','exists:sale_items,id'],
             'items.*.quantity'=>['nullable','numeric','min:0','max:9999999999','decimal:0,3'],
             'items.*.reason'=>['nullable','string','max:255'],
         ]);
