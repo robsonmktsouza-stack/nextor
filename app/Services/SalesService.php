@@ -234,6 +234,14 @@ class SalesService
                         'amount'=>$payment['amount'],
                         'due_date'=>$payment['due_date'] ?? null,
                         'payment_method'=>$payment['payment_method'] ?? null,
+                        'integration_type'=>$payment['integration_type'] ?? null,
+                        'transaction_document'=>$payment['transaction_document'] ?? null,
+                        'transaction_state'=>$payment['transaction_state'] ?? null,
+                        'institution_document'=>$payment['institution_document'] ?? null,
+                        'card_brand'=>$payment['card_brand'] ?? null,
+                        'authorization_code'=>$payment['authorization_code'] ?? null,
+                        'beneficiary_document'=>$payment['beneficiary_document'] ?? null,
+                        'terminal_id'=>$payment['terminal_id'] ?? null,
                         'receivable'=>(bool)($payment['receivable'] ?? true),
                     ]);
                 });
