@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 
 class AppSetting extends Model
 {
@@ -48,6 +49,39 @@ class AppSetting extends Model
         );
 
         Cache::forget('nextor.settings.raw.'.$group);
+    }
+
+    public static function reserveInteger(string $group,string $key,int $default=1): int
+    {
+        return DB::transaction(function() use($group,$key,$default) {
+            $row=static::query()
+                ->where('group',$group)
+                ->where('key',$key)
+                ->lockForUpdate()
+                ->first();
+
+            $current=$default;
+
+            if($row && $row->value!==null && $row->value!=='') {
+                try {
+                    $raw=$row->is_secret ? Crypt::decryptString($row->value) : $row->value;
+                    $decoded=static::decode($raw,$default);
+                    $current=max(1,(int)$decoded);
+                } catch (\Throwable) {
+                    $current=$default;
+                }
+            }
+
+            static::put($group,$key,$current+1,false);
+
+            return $current;
+        },3);
+    }
+
+    public static function dateFormat(): string
+    {
+        $format=(string)static::value('system','date_format','d/m/Y');
+        return in_array($format,['d/m/Y','Y-m-d'],true) ? $format : 'd/m/Y';
     }
 
     public static function tablePerPage(Request $request): int
