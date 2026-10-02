@@ -13,7 +13,7 @@
         <button class="grid-tool" type="button" data-export-table="recibos.csv" data-tooltip="Exportar CSV">@include('partials.icon',['name'=>'download','size'=>18])</button>
         <button class="grid-tool" type="button" data-refresh-page data-tooltip="Atualizar">@include('partials.icon',['name'=>'refresh','size'=>18])</button>
       </div>
-      <div class="finance-toolbar-summary">
+      <div class="finance-toolbar-summary" data-live-sync="receipt-summary">
         <span class="positive">Total emitido <strong>R$ {{ number_format((float)$totalAmount,2,',','.') }}</strong></span>
       </div>
     </div>
