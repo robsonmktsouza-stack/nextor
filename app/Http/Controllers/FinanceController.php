@@ -473,6 +473,7 @@ class FinanceController extends Controller
             'issue_date'=>['required','date'],'competence_date'=>['nullable','date'],'due_date'=>['required','date'],'credit_date'=>['nullable','date'],
             'amount'=>['required','numeric','gt:0','max:9999999999.99','decimal:0,2'],
             'payment_method'=>['nullable',Rule::in(array_keys($this->paymentMethods()))],'keywords'=>['nullable','string','max:255'],
+            'cost_center'=>['nullable','string','max:120'],
             'notes'=>['nullable','string','max:5000'],'attachment'=>['nullable','file','max:10240'],
         ]);
 
@@ -480,6 +481,9 @@ class FinanceController extends Controller
         $expected=$data['type']==='receivable'?'income':'expense';
         if($category->type!==$expected) throw ValidationException::withMessages(['category_id'=>$data['type']==='receivable'?'Selecione uma categoria de receita.':'Selecione uma categoria de despesa.']);
         $data['competence_date']=$data['competence_date'] ?: $data['issue_date'];
+        if(!(bool)AppSetting::value('accounting','cost_center_enabled',false)) {
+            $data['cost_center']=null;
+        }
         return $data;
     }
 
@@ -491,6 +495,7 @@ class FinanceController extends Controller
             'customers'=>Customer::query()->orderBy('name')->get(['id','name','document','is_customer','is_supplier']),
             'accounts'=>FinancialAccount::query()->where('is_active',true)->orderBy('name')->get(),
             'paymentMethods'=>$this->paymentMethods(),
+            'costCenterEnabled'=>(bool)AppSetting::value('accounting','cost_center_enabled',false),
         ];
     }
 
