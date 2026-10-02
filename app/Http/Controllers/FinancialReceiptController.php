@@ -13,11 +13,22 @@ class FinancialReceiptController extends Controller
     {
         $month=(string)$request->query('month',now()->format('Y-m'));
         try{$period=\Carbon\Carbon::createFromFormat('Y-m',$month)->startOfMonth();}catch(\Throwable){$period=now()->startOfMonth();}
+        $term=trim((string)$request->query('search',''));
+
+        $query=FinancialReceipt::query()->with('customer')
+            ->whereYear('receipt_date',$period->year)
+            ->whereMonth('receipt_date',$period->month)
+            ->when($term,fn($q)=>$q->where(function($search) use($term){
+                $search->where('recipient_name','like',"%{$term}%")
+                    ->orWhere('recipient_document','like',"%{$term}%")
+                    ->orWhere('reference','like',"%{$term}%");
+            }));
+
+        $totalAmount=(float)(clone $query)->sum('amount');
+        $receipts=$query->orderByDesc('receipt_date')->orderByDesc('id')->paginate(25)->withQueryString();
 
         return view('finance.receipts.index',[
-            'receipts'=>FinancialReceipt::query()->with('customer')
-                ->whereYear('receipt_date',$period->year)->whereMonth('receipt_date',$period->month)
-                ->orderByDesc('receipt_date')->orderByDesc('id')->paginate(25)->withQueryString(),
+            'receipts'=>$receipts,'term'=>$term,'totalAmount'=>$totalAmount,
             'month'=>$period->format('Y-m'),
             'prevMonth'=>$period->copy()->subMonth()->format('Y-m'),
             'nextMonth'=>$period->copy()->addMonth()->format('Y-m'),
