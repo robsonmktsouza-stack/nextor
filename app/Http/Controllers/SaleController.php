@@ -2,12 +2,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\AppSetting;
+use App\Models\PaymentMethod;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\Service;
 use App\Services\SalesService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class SaleController extends Controller
 {
@@ -74,6 +77,8 @@ class SaleController extends Controller
                 ->orderBy('name')
                 ->get(['id','name','sale_price','service_list_item','cnae']),
             'customers'=>Customer::orderBy('name')->get(['id','name','document','final_consumer']),
+            'paymentMethods'=>PaymentMethod::options(),
+            'defaultFinalConsumer'=>(bool)AppSetting::value('operations','default_final_consumer',true),
         ]);
     }
 
@@ -100,7 +105,7 @@ class SaleController extends Controller
             'payments'=>['nullable','array','max:60'],
             'payments.*.amount'=>['required_with:payments','numeric','min:0','max:9999999999.99','decimal:0,2'],
             'payments.*.due_date'=>['nullable','date'],
-            'payments.*.payment_method'=>['nullable','string','max:40'],
+            'payments.*.payment_method'=>['nullable',Rule::in(array_keys(PaymentMethod::options()))],
             'payments.*.receivable'=>['nullable','boolean'],
         ]);
 
