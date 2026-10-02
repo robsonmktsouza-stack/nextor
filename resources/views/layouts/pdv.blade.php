@@ -42,19 +42,22 @@
         <span>Operações</span>
         <kbd>Alt+O</kbd>
       </button>
-      <button type="button" class="pdv-topbar-button" id="pdvFullscreen" data-tooltip="Tela cheia">
+      <button type="button" class="pdv-topbar-button" id="pdvFullscreen" data-tooltip="Tela cheia — Alt+L">
         @include('partials.icon',['name'=>'expand','size'=>17])
         <span>Tela cheia</span>
+        <kbd>Alt+L</kbd>
       </button>
       @if(auth()->user()->canAccess('sales'))
-      <a class="pdv-topbar-button" href="{{ route('sales.index') }}">
+      <a class="pdv-topbar-button" id="pdvSalesLink" href="{{ route('sales.index') }}">
         @include('partials.icon',['name'=>'receipt','size'=>17])
         <span>Vendas</span>
+        <kbd>Alt+V</kbd>
       </a>
       @endif
-      <a class="pdv-topbar-button pdv-topbar-exit" href="{{ route(auth()->user()->canAccess('dashboard') ? 'dashboard' : auth()->user()->homeRouteName()) }}">
+      <a class="pdv-topbar-button pdv-topbar-exit" id="pdvAdminLink" href="{{ route(auth()->user()->canAccess('dashboard') ? 'dashboard' : auth()->user()->homeRouteName()) }}">
         @include('partials.icon',['name'=>'arrow-left','size'=>17])
         <span>Administração</span>
+        <kbd>Alt+M</kbd>
       </a>
     </div>
   </header>
