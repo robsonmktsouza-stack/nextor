@@ -14,7 +14,7 @@ class FiscalPreparationService
         if($sale->operation_type!=='sale' || $sale->status!=='completed') return;
         if(!(bool)AppSetting::value('fiscal','enabled',false)) return;
 
-        $sale->loadMissing(['items.product','items.service','customer']);
+        $sale->loadMissing(['items.product','items.service','customer','payments']);
 
         if($sale->source==='pdv') {
             $pdvAuto=(bool)AppSetting::value('pdv','auto_nfce',false);
@@ -80,6 +80,8 @@ class FiscalPreparationService
                     'source'=>$sale->source,
                     'operation_date'=>optional($sale->operation_date)->toDateString(),
                     'customer_id'=>$sale->customer_id,
+                    'consumer_document'=>$sale->consumer_document,
+                    'consumer_name'=>$sale->consumer_name,
                     'total'=>(string)$sale->total,
                     'items'=>$sale->items->map(fn($item)=>[
                         'item_type'=>$item->item_type,
@@ -100,6 +102,12 @@ class FiscalPreparationService
                         'municipal_tax_code'=>$item->service?->municipal_tax_code,
                         'national_tax_code'=>$item->service?->national_tax_code,
                         'nbs'=>$item->service?->nbs,
+                    ])->values()->all(),
+                    'payments'=>$sale->payments->map(fn($payment)=>[
+                        'payment_method'=>$payment->payment_method,
+                        'amount'=>(string)$payment->amount,
+                        'due_date'=>optional($payment->due_date)->toDateString(),
+                        'receivable'=>(bool)$payment->receivable,
                     ])->values()->all(),
                 ],
                 'prepared_at'=>now(),
