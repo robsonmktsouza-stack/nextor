@@ -44,6 +44,37 @@
     const cashMovementReason=document.getElementById('pdvCashMovementReason');
     const cashMovementSubmit=document.getElementById('pdvCashMovementSubmit');
 
+    const operationsButton=document.getElementById('pdvOperations');
+    const operationsModal=document.getElementById('pdvOperationsModal');
+    const suspendModal=document.getElementById('pdvSuspendModal');
+    const suspendLabel=document.getElementById('pdvSuspendLabel');
+    const suspendApply=document.getElementById('pdvSuspendApply');
+    const suspendItems=document.getElementById('pdvSuspendItems');
+    const suspendTotal=document.getElementById('pdvSuspendTotal');
+    const recoverModal=document.getElementById('pdvRecoverModal');
+    const suspendedList=document.getElementById('pdvSuspendedList');
+
+    const electronicModal=document.getElementById('pdvElectronicPaymentModal');
+    const electronicTargetLabel=document.getElementById('pdvElectronicTarget');
+    const electronicIntegration=document.getElementById('pdvElectronicIntegration');
+    const electronicBrand=document.getElementById('pdvElectronicBrand');
+    const electronicInstitution=document.getElementById('pdvElectronicInstitution');
+    const electronicAuthorization=document.getElementById('pdvElectronicAuthorization');
+    const electronicBeneficiary=document.getElementById('pdvElectronicBeneficiary');
+    const electronicTerminal=document.getElementById('pdvElectronicTerminal');
+    const electronicTransactionDocument=document.getElementById('pdvElectronicTransactionDocument');
+    const electronicTransactionState=document.getElementById('pdvElectronicTransactionState');
+    const electronicApply=document.getElementById('pdvElectronicApply');
+
+    const contingencyModal=document.getElementById('pdvContingencyModal');
+    const cancelNfceModal=document.getElementById('pdvCancelNfceModal');
+    const cancelNfceForm=document.getElementById('pdvCancelNfceForm');
+    const cancelNfceJob=document.getElementById('pdvCancelNfceJob');
+    const cancelNfceReason=document.getElementById('pdvCancelNfceReason');
+
+    const cashOpenDialog=document.getElementById('pdvCashOpenDialog');
+    const cashCloseDialog=document.getElementById('pdvCashCloseDialog');
+
     const discountModal=document.getElementById('pdvDiscountModal');
     const discountModalInput=document.getElementById('pdvDiscountModalInput');
     const discountItemName=document.getElementById('pdvDiscountItemName');
@@ -107,7 +138,11 @@
     let splitMode=false;
     let splitApplied=false;
     let splitPayments=[];
+    let singleElectronicData={};
+    let electronicTarget='single';
+    let electronicReturnToPayment=false;
     let consumerAnswered=!askConsumerDocument;
+    const defaultPaymentMethod=payment.value||'';
 
     if(actionDiscount && !allowDiscount){
       actionDiscount.disabled=true;
@@ -126,6 +161,20 @@
       const parsed=Number(text);
       return Number.isFinite(parsed)?Math.max(0,parsed):0;
     };
+
+    const onlyDigits=value=>String(value??'').replace(/\D+/g,'');
+    const csrfToken=()=>document.querySelector('meta[name="csrf-token"]')?.content||'';
+
+    const electronicFieldsFrom=row=>({
+      integration_type:row?.integration_type||'',
+      transaction_document:row?.transaction_document||'',
+      transaction_state:row?.transaction_state||'',
+      institution_document:row?.institution_document||'',
+      card_brand:row?.card_brand||'',
+      authorization_code:row?.authorization_code||'',
+      beneficiary_document:row?.beneficiary_document||'',
+      terminal_id:row?.terminal_id||'',
+    });
 
     const moneyInputValue=input=>{
       if(!input) return 0;
@@ -299,20 +348,38 @@
       if(!paymentPayload) return;
       paymentPayload.innerHTML='';
 
-      if(!splitApplied) return;
+      let rows=[];
+      if(splitApplied){
+        rows=splitPayments;
+      }else if(payment.value){
+        rows=[{
+          ...paymentInfo(payment.value),
+          amount:totals().total,
+          ...singleElectronicData,
+        }];
+      }
 
-      splitPayments.forEach((row,index)=>{
-        const method=document.createElement('input');
-        method.type='hidden';
-        method.name='payments['+index+'][payment_method]';
-        method.value=row.method;
+      rows.forEach((row,index)=>{
+        const values={
+          payment_method:row.method,
+          amount:(Number(row.amount)||0).toFixed(2),
+          integration_type:row.integration_type||'',
+          transaction_document:row.transaction_document||'',
+          transaction_state:row.transaction_state||'',
+          institution_document:row.institution_document||'',
+          card_brand:row.card_brand||'',
+          authorization_code:row.authorization_code||'',
+          beneficiary_document:row.beneficiary_document||'',
+          terminal_id:row.terminal_id||'',
+        };
 
-        const amount=document.createElement('input');
-        amount.type='hidden';
-        amount.name='payments['+index+'][amount]';
-        amount.value=(Number(row.amount)||0).toFixed(2);
-
-        paymentPayload.append(method,amount);
+        Object.entries(values).forEach(([field,value])=>{
+          const input=document.createElement('input');
+          input.type='hidden';
+          input.name='payments['+index+']['+field+']';
+          input.value=String(value??'');
+          paymentPayload.appendChild(input);
+        });
       });
     };
 
@@ -846,7 +913,7 @@
       if(existing){
         existing.amount=(Number(existing.amount)||0)+remaining;
       }else{
-        splitPayments.push({...info,amount:remaining});
+        splitPayments.push({...info,amount:remaining,...electronicFieldsFrom(null)});
       }
 
       splitApplied=false;
@@ -859,17 +926,30 @@
     const selectPaymentOption=option=>{
       if(!option) return;
 
+      const info=paymentInfo(option.dataset.paymentValue||'');
+
       if(splitMode && allowSplitPayment){
         addSplitPayment(option);
+        const index=splitPayments.findIndex(row=>row.method===info.method);
+        if(info.kind==='card' && index>=0){
+          paymentModal.close();
+          setTimeout(()=>openElectronicPaymentModal(index,true),0);
+        }
         return;
       }
 
       splitApplied=false;
       splitPayments=[];
+      singleElectronicData={};
       payment.value=option.dataset.paymentValue||'';
       if(actionPaymentValue) actionPaymentValue.textContent=option.dataset.paymentLabel||option.textContent.trim();
       payment.dispatchEvent(new Event('change',{bubbles:true}));
       paymentModal.close();
+
+      if(info.kind==='card'){
+        setTimeout(()=>openElectronicPaymentModal('single',false),0);
+        return;
+      }
 
       if(finishFlowPending){
         if(cashPaymentAmount()>0){
@@ -1039,7 +1119,7 @@
     };
 
     const applyCashModal=()=>{
-      const total=totals().total;
+      const total=cashPaymentAmount();
       const received=setCashReceived(cashModalInput.value);
 
       if(received+0.0001<total){
@@ -1115,7 +1195,7 @@
     };
 
     const openConsumerDocumentModal=()=>{
-      [customerModal,paymentModal,discountModal,cashModal,notesModal].forEach(modal=>{
+      [customerModal,paymentModal,discountModal,cashModal,notesModal,consumerModal,electronicModal,operationsModal,suspendModal,recoverModal,contingencyModal,cancelNfceModal].forEach(modal=>{
         if(modal?.open) modal.close();
       });
 
@@ -1183,7 +1263,402 @@
       if(event.key==='Enter'){
         event.preventDefault();
         applyConsumerDocument();
+      }else if(event.key==='Escape'){
+        event.preventDefault();
+        consumerSkip?.click();
       }
+    });
+
+    const electronicSource=()=>{
+      if(electronicTarget==='single'){
+        if(paymentKind(payment.value)!=='card') return null;
+        return {row:singleElectronicData,label:paymentName(payment.value)};
+      }
+
+      const index=Number(electronicTarget);
+      const row=splitPayments[index];
+      if(!row || row.kind!=='card') return null;
+      return {row,label:row.label};
+    };
+
+    const openElectronicPaymentModal=(target=null,returnToPayment=false)=>{
+      if(target===null){
+        if(splitApplied || splitMode){
+          const index=splitPayments.findIndex(row=>row.kind==='card');
+          target=index>=0 ? index : 'single';
+        }else{
+          target='single';
+        }
+      }
+
+      electronicTarget=target;
+      electronicReturnToPayment=returnToPayment;
+      const source=electronicSource();
+
+      if(!source){
+        notify('Selecione uma forma de pagamento com cartão primeiro.','info');
+        return;
+      }
+
+      const row=electronicFieldsFrom(source.row);
+      if(electronicTargetLabel) electronicTargetLabel.textContent=source.label;
+      electronicIntegration.value=row.integration_type;
+      electronicBrand.value=row.card_brand;
+      electronicInstitution.value=row.institution_document;
+      electronicAuthorization.value=row.authorization_code;
+      electronicBeneficiary.value=row.beneficiary_document;
+      electronicTerminal.value=row.terminal_id;
+      electronicTransactionDocument.value=row.transaction_document;
+      electronicTransactionState.value=row.transaction_state;
+
+      [operationsModal,paymentModal,consumerModal].forEach(modal=>{if(modal?.open) modal.close();});
+      if(!electronicModal.open) electronicModal.showModal();
+      requestAnimationFrame(()=>electronicIntegration?.focus());
+    };
+
+    const applyElectronicPayment=()=>{
+      const data={
+        integration_type:electronicIntegration.value||'',
+        card_brand:electronicBrand.value||'',
+        institution_document:onlyDigits(electronicInstitution.value),
+        authorization_code:electronicAuthorization.value.trim(),
+        beneficiary_document:onlyDigits(electronicBeneficiary.value),
+        terminal_id:electronicTerminal.value.trim(),
+        transaction_document:onlyDigits(electronicTransactionDocument.value),
+        transaction_state:electronicTransactionState.value.trim().toUpperCase(),
+      };
+
+      for(const key of ['institution_document','beneficiary_document','transaction_document']){
+        if(data[key] && data[key].length!==14){
+          notify('Os CNPJs do pagamento devem ter 14 dígitos.','warning');
+          return;
+        }
+      }
+
+      if(data.transaction_state && data.transaction_state.length!==2){
+        notify('Informe a UF do pagamento com 2 letras.','warning');
+        return;
+      }
+
+      if(electronicTarget==='single'){
+        singleElectronicData=data;
+      }else{
+        const index=Number(electronicTarget);
+        if(splitPayments[index]) Object.assign(splitPayments[index],data);
+      }
+
+      syncPaymentPayload();
+      electronicModal.close();
+
+      if(electronicReturnToPayment && splitMode){
+        setTimeout(()=>openPaymentModal(),0);
+      }else if(finishFlowPending){
+        setTimeout(()=>requestFinalize(),0);
+      }
+    };
+
+    electronicApply?.addEventListener('click',applyElectronicPayment);
+    electronicModal?.addEventListener('keydown',event=>{
+      if(event.ctrlKey && event.key==='Enter'){
+        event.preventDefault();
+        applyElectronicPayment();
+      }
+    });
+
+    const resetCurrentSale=()=>{
+      state.clear();
+      app.dataset.activeCartKey='';
+      customer.value='';
+      consumerDocument.value='';
+      consumerName.value='';
+      payment.value=defaultPaymentMethod;
+      cashInput.value='0.00';
+      notesInput.value='';
+      splitMode=false;
+      splitApplied=false;
+      splitPayments=[];
+      singleElectronicData={};
+      consumerAnswered=!askConsumerDocument;
+
+      if(actionCustomerValue) actionCustomerValue.textContent='Consumidor não identificado';
+      if(actionNotesValue) actionNotesValue.textContent='Sem observação';
+
+      renderCart();
+      updatePaymentState();
+      search.value='';
+      caption.textContent='Venda limpa. Busque um produto ou serviço.';
+      search.focus();
+    };
+
+    const serializePayments=()=>{
+      if(splitApplied) return splitPayments.map(row=>({...row}));
+      if(!payment.value) return [];
+      return [{
+        ...paymentInfo(payment.value),
+        amount:totals().total,
+        ...singleElectronicData,
+      }];
+    };
+
+    const openSuspendModal=()=>{
+      if(!state.size){
+        notify('Adicione pelo menos um item antes de suspender a venda.','warning');
+        return;
+      }
+
+      if(suspendItems) suspendItems.textContent=String(state.size);
+      if(suspendTotal) suspendTotal.textContent=money.format(totals().total);
+      if(suspendLabel) suspendLabel.value='';
+      [operationsModal,recoverModal].forEach(modal=>{if(modal?.open) modal.close();});
+      if(!suspendModal.open) suspendModal.showModal();
+      requestAnimationFrame(()=>suspendLabel?.focus());
+    };
+
+    const suspendCurrentSale=async()=>{
+      if(!state.size) return;
+
+      const body={
+        label:suspendLabel?.value.trim()||null,
+        customer_id:customer.value||null,
+        consumer_document:consumerDocument.value||null,
+        consumer_name:consumerName.value||null,
+        payment_method:splitApplied?null:(payment.value||null),
+        payments:serializePayments(),
+        cash_received:moneyInputValue(cashInput),
+        notes:notesInput.value||null,
+        items:[...state.values()].map(item=>({
+          type:item.type,
+          id:item.id,
+          quantity:item.quantity,
+          discount:item.discount,
+        })),
+      };
+
+      try{
+        const response=await fetch(app.dataset.suspendUrl,{
+          method:'POST',
+          headers:{
+            'Content-Type':'application/json',
+            'Accept':'application/json',
+            'X-CSRF-TOKEN':csrfToken(),
+          },
+          body:JSON.stringify(body),
+        });
+
+        const result=await response.json().catch(()=>({}));
+        if(!response.ok) throw new Error(result.message||Object.values(result.errors||{}).flat()[0]||'Não foi possível suspender a venda.');
+
+        suspendModal.close();
+        notify('Venda suspensa.','success');
+        resetCurrentSale();
+        window.setTimeout(()=>window.location.reload(),350);
+      }catch(error){
+        notify(error.message||'Não foi possível suspender a venda.','error');
+      }
+    };
+
+    suspendApply?.addEventListener('click',suspendCurrentSale);
+    suspendLabel?.addEventListener('keydown',event=>{
+      if(event.key==='Enter'){
+        event.preventDefault();
+        suspendCurrentSale();
+      }
+    });
+
+    const openRecoverModal=()=>{
+      [operationsModal,suspendModal].forEach(modal=>{if(modal?.open) modal.close();});
+      if(!recoverModal.open) recoverModal.showModal();
+      requestAnimationFrame(()=>suspendedList?.querySelector('.pdv-suspended-resume')?.focus());
+    };
+
+    const restoreSnapshot=snapshot=>{
+      resetCurrentSale();
+
+      (snapshot.items||[]).forEach(item=>{
+        const normalized={
+          ...item,
+          price:Number(item.price)||0,
+          stock:Number(item.stock)||0,
+          quantity:Number(item.quantity)||1,
+          discount:Number(item.discount)||0,
+        };
+        state.set(itemKey(normalized),normalized);
+      });
+
+      customer.value=snapshot.customer_id||'';
+      const option=selectedCustomerOption();
+      if(actionCustomerValue) actionCustomerValue.textContent=option?.querySelector('strong')?.textContent||'Consumidor não identificado';
+
+      consumerDocument.value=snapshot.consumer_document||'';
+      consumerName.value=snapshot.consumer_name||'';
+      cashInput.value=(Number(snapshot.cash_received)||0).toFixed(2);
+      notesInput.value=snapshot.notes||'';
+      if(actionNotesValue) actionNotesValue.textContent=notesInput.value||'Sem observação';
+
+      const restoredPayments=Array.isArray(snapshot.payments)?snapshot.payments:[];
+      if(restoredPayments.length>1){
+        splitPayments=restoredPayments.map(row=>({
+          ...row,
+          method:row.method||row.payment_method||'',
+          label:row.label||paymentName(row.method||row.payment_method),
+          kind:row.kind||paymentKind(row.method||row.payment_method),
+          amount:Number(row.amount)||0,
+        }));
+        splitApplied=true;
+        splitMode=false;
+        payment.value='';
+      }else if(restoredPayments.length===1){
+        const row=restoredPayments[0];
+        payment.value=row.method||row.payment_method||snapshot.payment_method||'';
+        singleElectronicData=electronicFieldsFrom(row);
+      }else{
+        payment.value=snapshot.payment_method||defaultPaymentMethod;
+      }
+
+      consumerAnswered=!!snapshot.consumer_document || !askConsumerDocument;
+      renderCart();
+      updatePaymentState();
+      caption.textContent='Venda suspensa recuperada.';
+      recoverModal?.close();
+      search.focus();
+    };
+
+    const resumeSuspendedSale=async id=>{
+      const url=(app.dataset.resumeUrlTemplate||'').replace('__ID__',String(id));
+      try{
+        const response=await fetch(url,{
+          method:'POST',
+          headers:{'Accept':'application/json','X-CSRF-TOKEN':csrfToken()},
+        });
+        const result=await response.json().catch(()=>({}));
+        if(!response.ok) throw new Error(result.message||'Não foi possível recuperar a venda.');
+        restoreSnapshot(result.snapshot||{});
+        notify('Venda recuperada.','success');
+      }catch(error){
+        notify(error.message||'Não foi possível recuperar a venda.','error');
+      }
+    };
+
+    const discardSuspendedSale=async id=>{
+      const url=(app.dataset.discardUrlTemplate||'').replace('__ID__',String(id));
+      try{
+        const response=await fetch(url,{
+          method:'DELETE',
+          headers:{'Accept':'application/json','X-CSRF-TOKEN':csrfToken()},
+        });
+        const result=await response.json().catch(()=>({}));
+        if(!response.ok) throw new Error(result.message||'Não foi possível descartar a venda.');
+        suspendedList?.querySelector('[data-suspended-row="'+CSS.escape(String(id))+'"]')?.remove();
+        notify('Venda suspensa descartada.','success');
+      }catch(error){
+        notify(error.message||'Não foi possível descartar a venda.','error');
+      }
+    };
+
+    suspendedList?.addEventListener('click',event=>{
+      const resume=event.target.closest('[data-suspended-id]');
+      if(resume){
+        resumeSuspendedSale(resume.dataset.suspendedId);
+        return;
+      }
+
+      const discard=event.target.closest('[data-suspended-discard]');
+      if(discard){
+        discardSuspendedSale(discard.dataset.suspendedDiscard);
+      }
+    });
+
+    recoverModal?.addEventListener('keydown',event=>{
+      const buttons=[...suspendedList.querySelectorAll('.pdv-suspended-resume')];
+      if(!buttons.length) return;
+      const current=Math.max(0,buttons.indexOf(document.activeElement));
+
+      if(event.key==='ArrowDown'){
+        event.preventDefault();
+        buttons[Math.min(buttons.length-1,current+1)]?.focus();
+      }else if(event.key==='ArrowUp'){
+        event.preventDefault();
+        buttons[Math.max(0,current-1)]?.focus();
+      }else if(event.key==='Delete'){
+        event.preventDefault();
+        const row=document.activeElement?.closest('[data-suspended-row]');
+        const discard=row?.querySelector('[data-suspended-discard]');
+        discard?.click();
+      }
+    });
+
+    const openOperationsModal=()=>{
+      if(!operationsModal) return;
+      if(!operationsModal.open) operationsModal.showModal();
+      requestAnimationFrame(()=>operationsModal.querySelector('[data-pdv-operation]')?.focus());
+    };
+
+    const openContingencyModal=()=>{
+      operationsModal?.close();
+      if(!contingencyModal.open) contingencyModal.showModal();
+      requestAnimationFrame(()=>contingencyModal.querySelector('textarea,button[type="submit"]')?.focus());
+    };
+
+    const openCancelNfceModal=()=>{
+      operationsModal?.close();
+      if(!cancelNfceModal.open) cancelNfceModal.showModal();
+      requestAnimationFrame(()=>cancelNfceJob?.focus()||cancelNfceReason?.focus());
+    };
+
+    const runAdvancedOperation=operation=>{
+      switch(operation){
+        case 'suspend': openSuspendModal(); break;
+        case 'resume': openRecoverModal(); break;
+        case 'electronic': operationsModal?.close(); openElectronicPaymentModal(); break;
+        case 'contingency': openContingencyModal(); break;
+        case 'cancel-nfce': openCancelNfceModal(); break;
+        case 'open-cash': operationsModal?.close(); cashOpenDialog?.showModal(); break;
+        case 'close-cash': operationsModal?.close(); cashCloseDialog?.showModal(); break;
+        case 'supply':
+          operationsModal?.close();
+          document.querySelector('[data-pdv-cash-movement="supply"]')?.click();
+          break;
+        case 'withdrawal':
+          operationsModal?.close();
+          document.querySelector('[data-pdv-cash-movement="withdrawal"]')?.click();
+          break;
+      }
+    };
+
+    operationsButton?.addEventListener('click',openOperationsModal);
+    operationsModal?.addEventListener('click',event=>{
+      const button=event.target.closest('[data-pdv-operation]');
+      if(button) runAdvancedOperation(button.dataset.pdvOperation);
+    });
+    operationsModal?.addEventListener('keydown',event=>{
+      const buttons=[...operationsModal.querySelectorAll('[data-pdv-operation]')];
+      if(!buttons.length) return;
+      const current=Math.max(0,buttons.indexOf(document.activeElement));
+
+      if(event.key==='ArrowDown'){
+        event.preventDefault();
+        buttons[Math.min(buttons.length-1,current+1)]?.focus();
+      }else if(event.key==='ArrowUp'){
+        event.preventDefault();
+        buttons[Math.max(0,current-1)]?.focus();
+      }
+    });
+
+    cancelNfceJob?.addEventListener('change',()=>{
+      const option=cancelNfceJob.selectedOptions[0];
+      if(cancelNfceForm && option?.dataset.cancelUrl) cancelNfceForm.action=option.dataset.cancelUrl;
+    });
+    if(cancelNfceJob?.selectedOptions[0]?.dataset.cancelUrl && cancelNfceForm){
+      cancelNfceForm.action=cancelNfceJob.selectedOptions[0].dataset.cancelUrl;
+    }
+
+    [contingencyModal,cancelNfceModal].forEach(modal=>{
+      modal?.addEventListener('keydown',event=>{
+        if(event.ctrlKey && event.key==='Enter'){
+          event.preventDefault();
+          modal.querySelector('form')?.requestSubmit();
+        }
+      });
     });
 
     document.querySelectorAll('[data-pdv-cash-movement]').forEach(button=>{
@@ -1349,6 +1824,18 @@
 
     paymentModal?.addEventListener('keydown',event=>{
       const options=paymentButtons();
+
+      if((event.key==='d'||event.key==='D') && allowSplitPayment && splitToggle){
+        event.preventDefault();
+        splitToggle.click();
+        return;
+      }
+
+      if(event.ctrlKey && event.key==='Enter' && splitMode && splitApply){
+        event.preventDefault();
+        splitApply.click();
+        return;
+      }
       if(/^[1-9]$/.test(event.key)){
         event.preventDefault();
         const option=options.find(button=>button.dataset.paymentKey===event.key);
@@ -1475,7 +1962,13 @@
         cashModal?.open ||
         notesModal?.open ||
         consumerModal?.open ||
-        cashMovementModal?.open;
+        cashMovementModal?.open ||
+        operationsModal?.open ||
+        suspendModal?.open ||
+        recoverModal?.open ||
+        electronicModal?.open ||
+        contingencyModal?.open ||
+        cancelNfceModal?.open;
 
       if(modalOpen) return;
 
@@ -1507,6 +2000,31 @@
         event.stopPropagation();
         removeActiveCartItem();
         return;
+      }
+
+      if(event.altKey && !event.ctrlKey && !event.metaKey){
+        const advanced={
+          KeyO:'operations',
+          Digit0:'suspend',
+          Numpad0:'suspend',
+          KeyR:'resume',
+          KeyT:'electronic',
+          KeyC:'contingency',
+          KeyX:'cancel-nfce',
+          KeyA:'open-cash',
+          KeyK:'close-cash',
+          KeyP:'supply',
+          KeyS:'withdrawal',
+        }[event.code];
+
+        if(advanced){
+          event.preventDefault();
+          event.stopPropagation();
+          event.stopImmediatePropagation?.();
+          if(advanced==='operations') openOperationsModal();
+          else runAdvancedOperation(advanced);
+          return;
+        }
       }
 
       if(event.ctrlKey || event.metaKey) return;
