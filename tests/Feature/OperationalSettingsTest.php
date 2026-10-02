@@ -25,6 +25,8 @@ class OperationalSettingsTest extends TestCase
             'name'=>'Administrador',
             'email'=>'settings@example.com',
             'password'=>'senhaSegura123',
+            'role'=>'admin',
+            'is_active'=>true,
         ]);
     }
 
