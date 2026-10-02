@@ -781,10 +781,7 @@
       options[paymentIndex]?.scrollIntoView({block:'nearest'});
     };
 
-    const renderSplitPayments=()=>{
-      if(!splitRows) return;
-
-      splitRows.innerHTML='';
+    const updateSplitSummary=()=>{
       const saleTotal=totals().total;
       const informed=splitPaymentTotal();
       const remaining=Math.max(0,saleTotal-informed);
@@ -792,6 +789,13 @@
       if(splitTotal) splitTotal.textContent=money.format(saleTotal);
       if(splitPaid) splitPaid.textContent=money.format(informed);
       if(splitRemaining) splitRemaining.textContent=money.format(remaining);
+    };
+
+    const renderSplitPayments=()=>{
+      if(!splitRows) return;
+
+      splitRows.innerHTML='';
+      updateSplitSummary();
 
       splitPayments.forEach((row,index)=>{
         const line=document.createElement('div');
@@ -814,7 +818,7 @@
         input.addEventListener('input',()=>{
           row.amount=parseDecimal(input.value);
           splitApplied=false;
-          renderSplitPayments();
+          updateSplitSummary();
         });
         input.addEventListener('focus',()=>input.select());
         remove.addEventListener('click',()=>{
