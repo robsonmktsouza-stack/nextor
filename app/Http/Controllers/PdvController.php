@@ -374,17 +374,33 @@ class PdvController extends Controller
             $isCash=$method->kind==='cash';
             if($isCash) $cashPaymentTotal+=$amount;
 
+            $transactionDocument=$this->normalizeCnpj($payment['transaction_document'] ?? null);
+            $institutionDocument=$this->normalizeCnpj($payment['institution_document'] ?? null);
+            $beneficiaryDocument=$this->normalizeCnpj($payment['beneficiary_document'] ?? null);
+
+            foreach([
+                'CNPJ transacional'=>$transactionDocument,
+                'CNPJ da instituição de pagamento'=>$institutionDocument,
+                'CNPJ do beneficiário'=>$beneficiaryDocument,
+            ] as $label=>$document) {
+                if($document!==null && (strlen($document)!==14 || !$this->validCpfCnpj($document))) {
+                    throw ValidationException::withMessages([
+                        'payments'=>$label.' inválido.',
+                    ]);
+                }
+            }
+
             $payments[]=[
                 'amount'=>number_format($amount,2,'.',''),
                 'due_date'=>now()->copy()->addDays((int)$method->settlement_days)->toDateString(),
                 'payment_method'=>$method->code,
                 'integration_type'=>$payment['integration_type'] ?? null,
-                'transaction_document'=>$this->normalizeCnpj($payment['transaction_document'] ?? null),
+                'transaction_document'=>$transactionDocument,
                 'transaction_state'=>isset($payment['transaction_state']) ? strtoupper(trim((string)$payment['transaction_state'])) : null,
-                'institution_document'=>$this->normalizeCnpj($payment['institution_document'] ?? null),
+                'institution_document'=>$institutionDocument,
                 'card_brand'=>$payment['card_brand'] ?? null,
                 'authorization_code'=>trim((string)($payment['authorization_code'] ?? '')) ?: null,
-                'beneficiary_document'=>$this->normalizeCnpj($payment['beneficiary_document'] ?? null),
+                'beneficiary_document'=>$beneficiaryDocument,
                 'terminal_id'=>trim((string)($payment['terminal_id'] ?? '')) ?: null,
                 'receivable'=>$method->kind==='bank_slip' || $method->settlement_days>0,
             ];
