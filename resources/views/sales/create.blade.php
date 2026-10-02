@@ -39,9 +39,9 @@
       <span>Consumidor final?</span>
       <label class="switch-field sale-final-consumer">
         <input type="hidden" name="final_consumer" value="0">
-        <input type="checkbox" name="final_consumer" id="saleFinalConsumer" value="1" @checked(old('final_consumer',true))>
+        <input type="checkbox" name="final_consumer" id="saleFinalConsumer" value="1" @checked(old('final_consumer',$defaultFinalConsumer))>
         <span class="switch-track"></span>
-        <strong data-switch-label>{{ old('final_consumer',true) ? 'Sim' : 'Não' }}</strong>
+        <strong data-switch-label>{{ old('final_consumer',$defaultFinalConsumer) ? 'Sim' : 'Não' }}</strong>
       </label>
     </div>
 
@@ -146,4 +146,5 @@
 <script type="application/json" id="sale-services">@json($services)</script>
 <script type="application/json" id="sale-old-items">@json(old('items',[]))</script>
 <script type="application/json" id="sale-old-payments">@json(old('payments',[]))</script>
+<script type="application/json" id="sale-payment-methods">@json($paymentMethods)</script>
 @endsection
