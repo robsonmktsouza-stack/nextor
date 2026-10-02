@@ -13,11 +13,13 @@ class SalesService
     public function __construct(
         private readonly InventoryService $inventory,
         private readonly FinancialService $financial,
+        private readonly FiscalPreparationService $fiscalPreparation,
+        private readonly WebhookService $webhooks,
     ) {}
 
     public function create(array $data, int $userId): Sale
     {
-        return DB::transaction(function () use ($data, $userId) {
+        $sale=DB::transaction(function () use ($data, $userId) {
             $rows=collect($data['items']);
             $operationType=$data['operation_type'] ?? 'sale';
             $allowNegativeStock=(bool)AppSetting::value(
@@ -154,6 +156,11 @@ class SalesService
                 'operation_type'=>$operationType,
                 'source'=>$data['source'] ?? 'manual',
                 'operation_date'=>$data['operation_date'] ?? now()->toDateString(),
+                'quote_expires_at'=>$operationType==='quote'
+                    ? \Carbon\Carbon::parse($data['operation_date'] ?? now()->toDateString())
+                        ->addDays(max(0,(int)AppSetting::value('operations','quote_valid_days',15)))
+                        ->toDateString()
+                    : null,
                 'final_consumer'=>(bool)($data['final_consumer'] ?? true),
                 'keyword'=>$data['keyword'] ?? null,
                 'status'=>'completed',
@@ -234,6 +241,24 @@ class SalesService
 
             return $sale->refresh();
         },3);
+
+        $this->fiscalPreparation->prepareForSale($sale);
+
+        $this->webhooks->queue(
+            $sale->operation_type==='quote' ? 'quote.created' : 'sale.completed',
+            [
+                'sale_id'=>$sale->id,
+                'operation_type'=>$sale->operation_type,
+                'source'=>$sale->source,
+                'customer_id'=>$sale->customer_id,
+                'total'=>(string)$sale->total,
+                'status'=>$sale->status,
+                'operation_date'=>optional($sale->operation_date)->toDateString(),
+                'quote_expires_at'=>optional($sale->quote_expires_at)->toDateString(),
+            ]
+        );
+
+        return $sale;
     }
 
     public function cancel(Sale $sale, int $userId): void
@@ -291,5 +316,24 @@ class SalesService
                 'cancelled_at'=>now(),
             ]);
         },3);
+
+        \App\Models\FiscalDocumentJob::query()
+            ->where('sale_id',$sale->id)
+            ->where('status','prepared')
+            ->update([
+                'status'=>'cancelled',
+                'error_message'=>'Documento cancelado antes da transmissão porque a venda/orçamento foi cancelado.',
+                'processed_at'=>now(),
+                'updated_at'=>now(),
+            ]);
+
+        $this->webhooks->queue(
+            $sale->operation_type==='quote' ? 'quote.cancelled' : 'sale.cancelled',
+            [
+                'sale_id'=>$sale->id,
+                'operation_type'=>$sale->operation_type,
+                'status'=>'cancelled',
+            ]
+        );
     }
 }
