@@ -369,7 +369,7 @@
     </div>
     <label>
       <span>CPF / CNPJ</span>
-      <input type="text" inputmode="numeric" maxlength="18" id="pdvConsumerDocumentInput" autocomplete="off" placeholder="Digite somente se solicitado">
+      <input type="text" maxlength="18" id="pdvConsumerDocumentInput" autocomplete="off" placeholder="Digite somente se solicitado">
     </label>
     <button type="button" class="pdv-consumer-customer" id="pdvConsumerUseCustomer" hidden>Usar documento do cliente selecionado</button>
     <div class="pdv-consumer-actions">
@@ -553,11 +553,11 @@
     <div class="pdv-electronic-grid">
       <label><span>Integração</span><select id="pdvElectronicIntegration"><option value="">Não informado</option><option value="1">1 — Integrado / TEF / POS integrado</option><option value="2">2 — POS não integrado</option></select></label>
       <label><span>Bandeira</span><select id="pdvElectronicBrand"><option value="">Não informada</option><option value="01">01 — Visa</option><option value="02">02 — Mastercard</option><option value="03">03 — American Express</option><option value="04">04 — Sorocred</option><option value="05">05 — Diners Club</option><option value="06">06 — Elo</option><option value="07">07 — Hipercard</option><option value="08">08 — Aura</option><option value="09">09 — Cabal</option><option value="99">99 — Outros</option></select></label>
-      <label><span>CNPJ instituição / adquirente</span><input id="pdvElectronicInstitution" inputmode="numeric" maxlength="18" placeholder="Somente números ou formatado"></label>
+      <label><span>CNPJ instituição / adquirente</span><input id="pdvElectronicInstitution" maxlength="18" placeholder="Somente números ou formatado"></label>
       <label><span>Autorização da transação</span><input id="pdvElectronicAuthorization" maxlength="128" placeholder="cAut"></label>
-      <label><span>CNPJ beneficiário</span><input id="pdvElectronicBeneficiary" inputmode="numeric" maxlength="18" placeholder="CNPJReceb"></label>
+      <label><span>CNPJ beneficiário</span><input id="pdvElectronicBeneficiary" maxlength="18" placeholder="CNPJReceb"></label>
       <label><span>Terminal</span><input id="pdvElectronicTerminal" maxlength="40" placeholder="idTermPag"></label>
-      <label><span>CNPJ transacional</span><input id="pdvElectronicTransactionDocument" inputmode="numeric" maxlength="18" placeholder="CNPJPag — opcional"></label>
+      <label><span>CNPJ transacional</span><input id="pdvElectronicTransactionDocument" maxlength="18" placeholder="CNPJPag — opcional"></label>
       <label><span>UF do pagamento</span><input id="pdvElectronicTransactionState" maxlength="2" placeholder="UFPag"></label>
     </div>
     <div class="pdv-operation-note">Esses campos são guardados na venda e seguem para o snapshot fiscal. A exigência final depende das regras da UF e do meio de pagamento.</div>
