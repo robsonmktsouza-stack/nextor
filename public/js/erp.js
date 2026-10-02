@@ -950,6 +950,7 @@
       const data=await response.json().catch(()=>({}));
       if(!response.ok) throw new Error(data.message||'Não foi possível consultar o CNPJ.');
       set('name',data.razao_social);
+      set('legal_name',data.razao_social);
       set('trade_name',data.nome_fantasia);
       set('email',data.email);
       set('phone',data.ddd_telefone_1);
@@ -1286,7 +1287,8 @@
     const state={timer:null,controller:null};
     liveSearchStates.set(form,state);
     const input=form.querySelector('[data-live-search-input],input[name="search"]');
-    const delay=Math.max(120,Number(form.dataset.liveDelay||240));
+    const globalDelay=Number(document.body?.dataset.liveSearchDelay||240);
+    const delay=Math.max(120,Number(form.dataset.liveDelay||globalDelay));
 
     const schedule=()=>{
       clearTimeout(state.timer);
