@@ -24,9 +24,18 @@ class FinancialReconciliationController extends Controller
 
         $transactions=collect();
         $candidateMap=[];
+        $summary=['count'=>0,'pending'=>0,'reconciled'=>0,'credits'=>0.0,'debits'=>0.0];
 
         if($selected) {
             $transactions=$selected->transactions()->with(['entry','settlement'])->orderBy('transaction_date')->orderBy('sequence')->get();
+
+            $summary=[
+                'count'=>$transactions->count(),
+                'pending'=>$transactions->whereNull('reconciled_at')->count(),
+                'reconciled'=>$transactions->whereNotNull('reconciled_at')->count(),
+                'credits'=>(float)$transactions->filter(fn($tx)=>(float)$tx->amount>0)->sum(fn($tx)=>(float)$tx->amount),
+                'debits'=>(float)$transactions->filter(fn($tx)=>(float)$tx->amount<0)->sum(fn($tx)=>abs((float)$tx->amount)),
+            ];
 
             foreach($transactions->whereNull('reconciled_at') as $transaction) {
                 $type=(float)$transaction->amount>=0?'receivable':'payable';
@@ -45,7 +54,7 @@ class FinancialReconciliationController extends Controller
             }
         }
 
-        return view('finance.reconciliation.index',compact('imports','selected','transactions','candidateMap'));
+        return view('finance.reconciliation.index',compact('imports','selected','transactions','candidateMap','summary'));
     }
 
     public function createImport()
