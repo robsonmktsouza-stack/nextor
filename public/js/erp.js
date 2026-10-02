@@ -1923,4 +1923,29 @@
   recalcSale();
 
 
+
+  document.addEventListener('click',async event=>{
+    const button=event.target.closest?.('[data-copy-target]');
+    if(!button) return;
+
+    const key=button.getAttribute('data-copy-target');
+    const source=document.querySelector('[data-copy-source="'+CSS.escape(key)+'"]');
+    if(!source) return;
+
+    const value='value' in source ? source.value : source.textContent;
+    if(!value) return;
+
+    try{
+      await navigator.clipboard.writeText(value);
+      nextorNotify('Conteúdo copiado.',{type:'success',title:'Copiar'});
+    }catch(error){
+      if(source.select){
+        source.focus();
+        source.select();
+        document.execCommand?.('copy');
+        nextorNotify('Conteúdo copiado.',{type:'success',title:'Copiar'});
+      }
+    }
+  });
+
 })();
