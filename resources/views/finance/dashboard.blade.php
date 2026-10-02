@@ -105,7 +105,7 @@
         <tbody>
         @forelse($upcoming as $entry)
           <tr>
-            <td class="nowrap">{{ $entry->due_date->format('d/m/Y') }}</td>
+            <td class="nowrap">{{ $entry->due_date->format(\App\Models\AppSetting::dateFormat()) }}</td>
             <td><span class="status {{ $entry->type==='receivable'?'status-ok':'status-blue' }}">{{ $entry->type_label }}</span></td>
             <td><a class="table-link" href="{{ route('finance.entries.show',$entry) }}">{{ $entry->description }}</a><small class="table-subtitle">{{ $entry->customer?->name ?? $entry->category?->name ?? '—' }}</small></td>
             <td class="price-strong">R$ {{ number_format($entry->balance,2,',','.') }}</td>
@@ -129,7 +129,7 @@
         @forelse($recentEntries as $entry)
           <tr>
             <td><a class="table-link" href="{{ route('finance.entries.show',$entry) }}">{{ $entry->description }}</a><small class="table-subtitle">{{ $entry->type_label }} · {{ $entry->status_label }}</small></td>
-            <td>{{ $entry->due_date->format('d/m/Y') }}</td>
+            <td>{{ $entry->due_date->format(\App\Models\AppSetting::dateFormat()) }}</td>
             <td class="price-strong">R$ {{ number_format((float)$entry->amount,2,',','.') }}</td>
           </tr>
         @empty
