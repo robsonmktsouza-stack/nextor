@@ -120,7 +120,7 @@
         <input type="hidden" name="action" value="settle_quick">
       </form>
 
-      <div class="finance-list-totals">
+      <div class="finance-list-totals" data-live-sync="finance-list-totals">
         <span>Total listado <strong>R$ {{ number_format((float)$totalAmount,2,',','.') }}</strong></span>
         <span>Em aberto <strong>R$ {{ number_format((float)$openAmount,2,',','.') }}</strong></span>
       </div>
@@ -136,10 +136,10 @@
   </div>
 
   <div class="grid-filter-panel" id="finance-filters" @if(!$term && !$status && !$categoryId) hidden @endif>
-    <form method="get" class="toolbar-filters">
+    <form method="get" action="{{ route('finance.entries') }}" class="toolbar-filters" data-live-search data-live-target="finance-live-results">
       <input type="hidden" name="month" value="{{ $month }}">
       @if($type)<input type="hidden" name="type" value="{{ $type }}">@endif
-      <input class="input-filter" name="search" value="{{ $term }}" placeholder="Descrição, contato, documento ou palavra-chave">
+      <input type="search" autocomplete="off" class="input-filter" name="search" value="{{ $term }}" placeholder="Descrição, contato, documento ou palavra-chave">
       <select class="input-filter" name="status">
         <option value="">Todas as situações</option>
         <option value="open" @selected($status==='open')>Em aberto</option>
@@ -157,6 +157,7 @@
     </form>
   </div>
 
+  <div id="finance-live-results" data-live-search-results>
   <div class="table-scroll">
     <table class="cms-table finance-main-table">
       <thead>
@@ -192,6 +193,7 @@
     </table>
   </div>
   @include('partials.table-footer',['paginator'=>$entries])
+  </div>
 </section>
 
 <dialog class="erp-dialog" id="financeBulkEditPrimary">
