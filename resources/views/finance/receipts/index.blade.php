@@ -28,14 +28,15 @@
   </div>
 
   <div class="grid-filter-panel" id="receipt-filters" @if(!$term) hidden @endif>
-    <form method="get" class="toolbar-filters">
+    <form method="get" action="{{ route('finance.receipts.index') }}" class="toolbar-filters" data-live-search data-live-target="receipts-live-results">
       <input type="hidden" name="month" value="{{ $month }}">
-      <input class="input-filter" name="search" value="{{ $term }}" placeholder="Contato, documento ou referência">
+      <input type="search" autocomplete="off" class="input-filter" name="search" value="{{ $term }}" placeholder="Contato, documento ou referência">
       <button class="btn btn-secondary">Filtrar</button>
       @if($term)<a class="btn btn-light" href="{{ route('finance.receipts.index',['month'=>$month]) }}">Limpar</a>@endif
     </form>
   </div>
 
+  <div id="receipts-live-results" data-live-search-results>
   <div class="table-scroll">
     <table class="cms-table">
       <thead><tr><th>Cód</th><th>Contato</th><th>Referência</th><th>Data</th><th>Valor</th><th></th></tr></thead>
@@ -57,5 +58,6 @@
     </table>
   </div>
   @include('partials.table-footer',['paginator'=>$receipts])
+  </div>
 </section>
 @endsection
