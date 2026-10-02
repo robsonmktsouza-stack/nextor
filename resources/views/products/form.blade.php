@@ -75,8 +75,8 @@ $origins=[
            <span class="switch-track"></span><strong data-switch-label>{{ old('control_stock',$product->control_stock ?? true) ? 'Sim' : 'Não' }}</strong>
          </label>
        </div>
-       <label class="field col-5"><span>Estoque atual</span><input type="number" step="{{ $stockDecimalPlaces===0 ? '1' : '0.'.str_repeat('0',$stockDecimalPlaces-1).'1' }}" name="stock_quantity" value="{{ old('stock_quantity',$product->stock_quantity ?? 0) }}" data-stock-field></label>
-       <label class="field col-5"><span>Estoque mínimo</span><input type="number" step="{{ $stockDecimalPlaces===0 ? '1' : '0.'.str_repeat('0',$stockDecimalPlaces-1).'1' }}" min="0" name="minimum_stock" value="{{ old('minimum_stock',$product->minimum_stock ?? 0) }}" required data-stock-field></label>
+       <label class="field col-5"><span>Estoque atual</span><input type="number" step="{{ $stockDecimalPlaces===0 ? '1' : '0.'.str_repeat('0',$stockDecimalPlaces-1).'1' }}" name="stock_quantity" value="{{ old('stock_quantity',number_format((float)($product->stock_quantity ?? 0),$stockDecimalPlaces,'.','')) }}" data-stock-field></label>
+       <label class="field col-5"><span>Estoque mínimo</span><input type="number" step="{{ $stockDecimalPlaces===0 ? '1' : '0.'.str_repeat('0',$stockDecimalPlaces-1).'1' }}" min="0" name="minimum_stock" value="{{ old('minimum_stock',number_format((float)($product->minimum_stock ?? 0),$stockDecimalPlaces,'.','')) }}" required data-stock-field></label>
      </div>
      <p class="editor-help">@include('partials.icon',['name'=>'clock','size'=>14]) Alterações no estoque atual geram uma movimentação de ajuste no histórico.</p>
    </div>
