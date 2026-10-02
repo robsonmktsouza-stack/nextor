@@ -1371,6 +1371,7 @@
   const services=JSON.parse(document.getElementById('sale-services')?.textContent||'[]');
   const oldRows=JSON.parse(document.getElementById('sale-old-items')?.textContent||'[]');
   const oldPayments=JSON.parse(document.getElementById('sale-old-payments')?.textContent||'[]');
+  const salePaymentMethods=JSON.parse(document.getElementById('sale-payment-methods')?.textContent||'{}');
   const paymentBody=document.getElementById('salePayments');
   const operationType=document.getElementById('saleOperationType');
   const operationDate=document.querySelector('[name="operation_date"]');
@@ -1653,22 +1654,19 @@
       '<td class="payment-position"></td>'+
       '<td><input class="payment-amount" type="number" min="0" step="0.01" data-number-kind="money" value="0"></td>'+
       '<td><input class="payment-date" type="date"></td>'+
-      '<td><select class="payment-method">'+
-        '<option value="">Selecione</option>'+
-        '<option value="cash">Dinheiro</option>'+
-        '<option value="pix">PIX</option>'+
-        '<option value="debit_card">Cartão de débito</option>'+
-        '<option value="credit_card">Cartão de crédito</option>'+
-        '<option value="bank_slip">Boleto</option>'+
-        '<option value="bank_transfer">Transferência</option>'+
-        '<option value="other">Outro</option>'+
-      '</select></td>'+
+      '<td><select class="payment-method"><option value="">Selecione</option></select></td>'+
       '<td><label class="payment-receivable"><input type="hidden" value="0"><input type="checkbox" value="1" checked><span>A receber</span></label></td>'+
       '<td><button type="button" class="btn-icon row-action-danger" data-tooltip="Remover parcela" aria-label="Remover parcela"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M5 6l1 15h12l1-15M10 10v7M14 10v7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></td>';
 
     const amount=tr.querySelector('.payment-amount');
     const date=tr.querySelector('.payment-date');
     const method=tr.querySelector('.payment-method');
+    Object.entries(salePaymentMethods).forEach(([code,label])=>{
+      const option=document.createElement('option');
+      option.value=code;
+      option.textContent=label;
+      method.appendChild(option);
+    });
     const hiddenReceive=tr.querySelector('.payment-receivable input[type="hidden"]');
     const receive=tr.querySelector('.payment-receivable input[type="checkbox"]');
 
