@@ -24,11 +24,20 @@ class ProductController extends Controller {
     }
 
     public function create() {
+        $catalog=AppSetting::groupValues('catalog',[
+            'product_unit'=>'UN','product_usage_type'=>'resale','product_control_stock'=>true,
+            'product_minimum_stock'=>'0.000','new_products_active'=>true,
+        ]);
+
         return view('products.form',[
             'product'=>new Product([
-                'unit'=>'UN','usage_type'=>'resale','control_stock'=>true,'is_active'=>true,
+                'unit'=>$catalog['product_unit'] ?: 'UN',
+                'usage_type'=>$catalog['product_usage_type'] ?: 'resale',
+                'control_stock'=>(bool)$catalog['product_control_stock'],
+                'is_active'=>(bool)$catalog['new_products_active'],
                 'origin'=>'0','ignore_taxes_mode'=>'none','different_tax_unit'=>false,
-                'cost_price'=>0,'sale_price'=>0,'stock_quantity'=>0,'minimum_stock'=>0,
+                'cost_price'=>0,'sale_price'=>0,'stock_quantity'=>0,
+                'minimum_stock'=>$catalog['product_minimum_stock'] ?? 0,
             ]),
             'editing'=>false,
         ]);
