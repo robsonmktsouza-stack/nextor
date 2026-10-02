@@ -506,6 +506,33 @@ foreach($primaryTabs as $key=>$item){
         <button class="btn btn-success" type="submit">Salvar certificado</button>
       </form>
     </section>
+
+    <section class="editor-panel settings-panel">
+      <div class="settings-panel-head">
+        <div><h2>Fila fiscal preparada</h2><p>Documentos que o Nextor já preparou a partir das operações do sistema.</p></div>
+      </div>
+      <div class="table-scroll">
+        <table class="cms-table">
+          <thead><tr><th>Tipo</th><th>Origem</th><th>Ambiente</th><th>Série</th><th>Número</th><th>Status</th><th>Preparado em</th></tr></thead>
+          <tbody>
+          @forelse($fiscalJobs as $job)
+            <tr>
+              <td><strong>{{ strtoupper($job->document_type) }}</strong></td>
+              <td>@if($job->sale)<a class="table-link" href="{{ route('sales.show',$job->sale) }}">Venda #{{ str_pad((string)$job->sale_id,5,'0',STR_PAD_LEFT) }}</a>@else—@endif</td>
+              <td>{{ $job->environment==='production'?'Produção':'Homologação' }}</td>
+              <td>{{ $job->series ?? '—' }}</td>
+              <td>{{ $job->document_number ?? '—' }}</td>
+              <td><span class="status {{ $job->status==='prepared'?'status-blue':($job->status==='cancelled'?'status-muted':'status-ok') }}">{{ ucfirst($job->status) }}</span></td>
+              <td>{{ $job->prepared_at?->format('d/m/Y H:i') ?? '—' }}</td>
+            </tr>
+          @empty
+            <tr><td colspan="7" class="empty-cell">Nenhum documento fiscal preparado ainda.</td></tr>
+          @endforelse
+          </tbody>
+        </table>
+      </div>
+      <div class="inline-note">Preparado significa que o Nextor reservou numeração e reuniu os dados da operação. A transmissão à SEFAZ/prefeitura continua dependendo do emissor fiscal conectado.</div>
+    </section>
   </div>
 
 @elseif($tab==='tax')
@@ -678,6 +705,26 @@ foreach($primaryTabs as $key=>$item){
   </div>
 </form>
 
+<section class="editor-panel settings-panel settings-accounting-export">
+  <div class="settings-panel-head">
+    <div><h2>Exportação contábil</h2><p>Gere agora o arquivo da competência ou deixe a geração mensal automática habilitada.</p></div>
+  </div>
+  <form method="post" action="{{ route('settings.accounting.export') }}" class="settings-inline-form">
+    @csrf
+    <label class="field"><span>Competência</span><input type="month" name="month" value="{{ now()->subMonthNoOverflow()->format('Y-m') }}" required></label>
+    <div></div>
+    <button class="btn btn-success" type="submit">@include('partials.icon',['name'=>'download','size'=>15]) Gerar CSV</button>
+  </form>
+  @if(count($accountingExports))
+    <div class="settings-export-history">
+      <strong>Arquivos gerados recentemente</strong>
+      @foreach(array_slice($accountingExports,0,6) as $export)
+        <span>{{ $export['name'] }} · {{ number_format($export['size']/1024,1,',','.') }} KB</span>
+      @endforeach
+    </div>
+  @endif
+</section>
+
 @elseif($tab==='users')
   <div class="settings-users-page">
     <section class="editor-panel settings-panel">
@@ -830,6 +877,45 @@ foreach($primaryTabs as $key=>$item){
   <div class="editor-savebar settings-savebar">
     <button class="btn btn-success" type="submit">Salvar</button>
   </div>
+</form>
+
+<section class="editor-panel settings-panel">
+  <div class="settings-panel-head">
+    <div><h2>API do Nextor</h2><p>Endpoints de leitura protegidos por Bearer Token.</p></div>
+  </div>
+  <div class="settings-api-grid">
+    <div>
+      <strong>Status</strong>
+      <span class="status {{ $integrations['api_enabled']?'status-ok':'status-muted' }}">{{ $integrations['api_enabled']?'Ativa':'Desativada' }}</span>
+    </div>
+    <div><strong>Produtos</strong><code>/api/nextor/products</code></div>
+    <div><strong>Clientes</strong><code>/api/nextor/customers</code></div>
+    <div><strong>Vendas</strong><code>/api/nextor/sales</code></div>
+  </div>
+
+  @if(session('api_token_plain'))
+    <label class="field settings-api-token">
+      <span>Novo token — copie agora</span>
+      <textarea readonly rows="2" data-copy-source="nextor-api-token">{{ session('api_token_plain') }}</textarea>
+    </label>
+    <button type="button" class="btn btn-secondary" data-copy-target="nextor-api-token">@include('partials.icon',['name'=>'copy','size'=>15]) Copiar token</button>
+  @else
+    <div class="inline-note">{{ $apiTokenConfigured ? 'Há um token configurado. Por segurança ele não é exibido novamente.' : 'Nenhum token foi gerado ainda.' }}</div>
+  @endif
+
+  <div class="settings-api-actions">
+    <button class="btn btn-secondary" type="submit" form="nextor-api-token-form">{{ $apiTokenConfigured ? 'Regenerar token' : 'Gerar token' }}</button>
+  </div>
+
+  <div class="settings-webhook-stats">
+    <span>Pendentes: <strong>{{ (int)($webhookStats['pending'] ?? 0)+(int)($webhookStats['retry'] ?? 0) }}</strong></span>
+    <span>Entregues: <strong>{{ (int)($webhookStats['delivered'] ?? 0) }}</strong></span>
+    <span>Falhas: <strong>{{ (int)($webhookStats['failed'] ?? 0) }}</strong></span>
+  </div>
+</section>
+
+<form id="nextor-api-token-form" method="post" action="{{ route('settings.api-token.regenerate') }}" hidden>
+  @csrf
 </form>
 
 @elseif($tab==='system')
