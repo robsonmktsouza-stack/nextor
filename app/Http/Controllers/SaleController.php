@@ -14,6 +14,7 @@ class SaleController extends Controller
     public function index(Request $request)
     {
         $status=$request->query('status','');
+        $term=trim((string)$request->query('search',''));
         $requestedPerPage=$request->integer('per_page');
         if(in_array($requestedPerPage,[10,25,50,100],true)) {
             $request->session()->put('table_per_page',$requestedPerPage);
@@ -45,12 +46,22 @@ class SaleController extends Controller
                         ->whereMonth('created_at',$period->month);
                 });
             })
+            ->when($term,fn($q)=>$q->where(function($search) use($term){
+                $numeric=(int)preg_replace('/\D+/','',$term);
+                if($numeric>0) $search->orWhere('id',$numeric);
+                $search->orWhere('keyword','like',"%{$term}%")
+                    ->orWhere('notes','like',"%{$term}%")
+                    ->orWhereHas('customer',fn($customer)=>$customer
+                        ->where('name','like',"%{$term}%")
+                        ->orWhere('document','like',"%{$term}%"))
+                    ->orWhereHas('user',fn($user)=>$user->where('name','like',"%{$term}%"));
+            }))
             ->when(in_array($status,['completed','cancelled'],true),fn($q)=>$q->where('status',$status))
             ->latest()
             ->paginate($perPage)
             ->withQueryString();
 
-        return view('sales.index',compact('sales','status','month','prevMonth','nextMonth','monthLabel'));
+        return view('sales.index',compact('sales','status','term','month','prevMonth','nextMonth','monthLabel'));
     }
 
     public function create()
