@@ -51,8 +51,9 @@ class SaleReturnService
                 ->whereIn('sale_return_items.sale_item_id',$ids)
                 ->where('sale_returns.status','completed')
                 ->groupBy('sale_return_items.sale_item_id')
-                ->selectRaw('sale_return_items.sale_item_id, COALESCE(SUM(sale_return_items.quantity),0) returned_quantity')
-                ->pluck('returned_quantity','sale_item_id');
+                ->selectRaw('sale_return_items.sale_item_id, COALESCE(SUM(sale_return_items.quantity),0) returned_quantity, COALESCE(SUM(sale_return_items.line_total),0) returned_total')
+                ->get()
+                ->keyBy('sale_item_id');
 
             $productIds=$saleItems->pluck('product_id')->filter()->unique()->values()->all();
             $products=Product::query()->whereIn('id',$productIds)->orderBy('id')->lockForUpdate()->get()->keyBy('id');
@@ -64,7 +65,9 @@ class SaleReturnService
                 $item=$saleItems->get($row['sale_item_id']);
                 $requestedMills=InventoryService::toMills($row['quantity']);
                 $soldMills=InventoryService::toMills($item->quantity);
-                $returnedMills=InventoryService::toMills($alreadyReturned->get($item->id,'0'));
+                $previous=$alreadyReturned->get($item->id);
+                $returnedMills=InventoryService::toMills($previous?->returned_quantity ?? '0');
+                $returnedLineCents=(int)round((float)($previous?->returned_total ?? 0)*100);
                 $availableMills=max(0,$soldMills-$returnedMills);
 
                 if($requestedMills>$availableMills) {
@@ -74,7 +77,9 @@ class SaleReturnService
                 }
 
                 $originalLineCents=(int)round((float)$item->line_total*100);
-                $lineCents=$soldMills>0 ? (int)round($originalLineCents*$requestedMills/$soldMills) : 0;
+                $lineCents=$requestedMills===$availableMills
+                    ? max(0,$originalLineCents-$returnedLineCents)
+                    : ($soldMills>0 ? (int)round($originalLineCents*$requestedMills/$soldMills) : 0);
                 $totalCents+=$lineCents;
 
                 $prepared[]=[
