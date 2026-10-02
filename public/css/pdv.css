@@ -2378,3 +2378,94 @@
   .pdv-grand-total strong{font-size:28px!important}
   .pdv-finish{min-height:54px;margin:8px 14px 10px}
 }
+
+
+/* PDV varejo: consumidor, pagamento dividido e movimentos de caixa */
+.pdv-cash-session-actions{
+  display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end
+}
+.pdv-cash-session-action.danger{
+  border-color:#e2b7bb;background:#fff7f7;color:#a64d55
+}
+.pdv-cash-session-action.danger:hover{
+  background:#fff0f1;border-color:#d79ca2
+}
+
+.pdv-cash-history{
+  display:grid;gap:5px;padding:10px 12px;border:1px solid #d9e2ea;border-radius:5px;background:#f8fafc
+}
+.pdv-cash-history>strong{font-size:10.5px;color:#53697e}
+.pdv-cash-history>span{font-size:9.5px;color:#748394;line-height:1.35}
+
+.pdv-split-payment{
+  padding:0 16px 14px
+}
+.pdv-split-toggle{
+  width:100%;min-height:38px;border:1px dashed #9bb9d7;border-radius:5px;
+  background:#f7fbff;color:#2b6ea9;font-size:10.5px;font-weight:700;cursor:pointer
+}
+.pdv-split-toggle:hover{background:#eef7ff}
+.pdv-split-panel{
+  display:grid;gap:10px;margin-top:10px;padding:12px;border:1px solid #d7e2eb;border-radius:5px;background:#f8fafc
+}
+.pdv-split-summary{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px
+}
+.pdv-split-summary span{
+  display:flex;flex-direction:column;gap:3px;padding:7px 8px;border:1px solid #dce5ec;border-radius:4px;background:#fff;
+  color:#7a8998;font-size:9px
+}
+.pdv-split-summary strong{color:#344b61;font-size:12px}
+.pdv-split-rows{display:grid;gap:6px}
+.pdv-split-row{
+  display:grid;grid-template-columns:minmax(0,1fr) 130px 34px;align-items:center;gap:8px;
+  min-height:42px;padding:5px 7px;border:1px solid #dce4eb;border-radius:4px;background:#fff
+}
+.pdv-split-row strong{
+  min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#40556b;font-size:10.5px
+}
+.pdv-split-row input{
+  width:100%;height:32px;border:1px solid #cbd6df;border-radius:4px;padding:0 8px;text-align:right;
+  color:#2e455c;font-size:11px
+}
+.pdv-split-row button{
+  width:30px;height:30px;border:1px solid #ead1d4;border-radius:4px;background:#fff;color:#b65159;font-size:17px
+}
+.pdv-split-help{margin:0;color:#7f8c99;font-size:9.5px;line-height:1.4}
+
+.pdv-consumer-modal-body{
+  display:grid;gap:14px;padding:18px
+}
+.pdv-consumer-question{
+  min-height:70px;display:flex;align-items:center;gap:12px;padding:12px;
+  border:1px solid #d7e2eb;border-radius:5px;background:#f7fafc;color:#668097
+}
+.pdv-consumer-question>div{display:flex;flex-direction:column;gap:3px}
+.pdv-consumer-question strong{font-size:12px;color:#344b61}
+.pdv-consumer-question span{font-size:10px;color:#82909e}
+.pdv-consumer-modal-body label{display:grid;gap:7px}
+.pdv-consumer-modal-body label>span{font-size:10.5px;font-weight:700;color:#53697e}
+#pdvConsumerDocumentInput{
+  width:100%;height:52px;border:2px solid #91b9df;border-radius:5px;padding:0 13px;
+  outline:0;color:#203c56;font-size:18px;font-weight:700;letter-spacing:.04em
+}
+#pdvConsumerDocumentInput:focus{border-color:#2877c7}
+.pdv-consumer-customer{
+  min-height:36px;border:1px solid #cbd7e1;border-radius:4px;background:#fff;color:#4d657c;
+  font-size:10.5px;font-weight:650
+}
+.pdv-consumer-actions{
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px
+}
+.pdv-consumer-skip{
+  min-height:46px;border:1px solid #ccd6df;border-radius:5px;background:#fff;color:#566b80;
+  font-size:11px;font-weight:700
+}
+
+@media(max-width:760px){
+  .pdv-cash-session-actions{width:100%;justify-content:stretch}
+  .pdv-cash-session-actions .pdv-cash-session-action{flex:1}
+  .pdv-split-summary{grid-template-columns:1fr}
+  .pdv-split-row{grid-template-columns:minmax(0,1fr) 105px 32px}
+  .pdv-consumer-actions{grid-template-columns:1fr}
+}
