@@ -1374,6 +1374,7 @@
   const oldRows=JSON.parse(document.getElementById('sale-old-items')?.textContent||'[]');
   const oldPayments=JSON.parse(document.getElementById('sale-old-payments')?.textContent||'[]');
   const salePaymentMethods=JSON.parse(document.getElementById('sale-payment-methods')?.textContent||'{}');
+  const saleDefaultDueDays=Number(JSON.parse(document.getElementById('sale-default-due-days')?.textContent||'0'))||0;
   const paymentBody=document.getElementById('salePayments');
   const operationType=document.getElementById('saleOperationType');
   const operationDate=document.querySelector('[name="operation_date"]');
@@ -1646,6 +1647,19 @@
     });
   }
 
+  const saleDefaultPaymentDate=()=>{
+    const raw=operationDate?.value||'';
+    if(!raw) return '';
+    const parts=raw.split('-').map(Number);
+    if(parts.length!==3) return raw;
+    const date=new Date(parts[0],parts[1]-1,parts[2]);
+    date.setDate(date.getDate()+Math.max(0,saleDefaultDueDays));
+    const y=date.getFullYear();
+    const m=String(date.getMonth()+1).padStart(2,'0');
+    const d=String(date.getDate()).padStart(2,'0');
+    return y+'-'+m+'-'+d;
+  };
+
   function addPayment(initial={},auto=false){
     if(!paymentBody) return;
     const idx=paymentSeq++;
@@ -1679,7 +1693,7 @@
     receive.name=`payments[${idx}][receivable]`;
 
     amount.value=String(initial.amount??currentSaleTotal??0);
-    date.value=initial.due_date || operationDate?.value || '';
+    date.value=initial.due_date || saleDefaultPaymentDate();
     method.value=initial.payment_method||'';
     receive.checked=String(initial.receivable??'1')!=='0';
 
