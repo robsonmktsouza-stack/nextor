@@ -47,7 +47,7 @@
  <td>{{ $product->unit }}</td>
  <td class="nowrap">R$ {{ number_format((float)$product->cost_price,2,',','.') }}</td>
  <td class="nowrap price-strong">R$ {{ number_format((float)$product->sale_price,2,',','.') }}</td>
- <td><span class="{{ (float)$product->stock_quantity <= (float)$product->minimum_stock ? 'stock-low':'stock-normal' }}">{{ number_format((float)$product->stock_quantity,$stockDecimalPlaces,',','.') }}</span></td>
+ <td><span class="{{ $minimumStockAlerts && (float)$product->minimum_stock>0 && (float)$product->stock_quantity <= (float)$product->minimum_stock ? 'stock-low':'stock-normal' }}">{{ number_format((float)$product->stock_quantity,$stockDecimalPlaces,',','.') }}</span></td>
  <td><span class="status {{ $product->is_active?'status-ok':'status-muted' }}">{{ $product->is_active?'Ativo':'Inativo' }}</span></td>
  <td class="action-cell">
    <div class="row-actions">
