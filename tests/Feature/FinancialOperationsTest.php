@@ -111,6 +111,54 @@ class FinancialOperationsTest extends TestCase
         $this->assertNull($entry->fresh()->cancelled_at);
     }
 
+    public function test_bulk_primary_edit_updates_only_informed_fields(): void
+    {
+        $user=$this->user();
+        $category=FinancialCategory::query()->where('type','income')->firstOrFail();
+
+        $entry=FinancialEntry::query()->create([
+            'type'=>'receivable','status'=>'open','category_id'=>$category->id,'created_by'=>$user->id,
+            'description'=>'Descrição original','keywords'=>'manter','issue_date'=>'2026-10-02','competence_date'=>'2026-10-02',
+            'due_date'=>'2026-10-10','amount'=>'100.00','paid_amount'=>'0.00',
+        ]);
+
+        $this->actingAs($user)->post(route('finance.entries.bulk-action'),[
+            'ids'=>[$entry->id],
+            'action'=>'edit_primary',
+            'description'=>'Descrição alterada',
+            'due_date'=>'2026-10-20',
+        ])->assertSessionHasNoErrors();
+
+        $entry->refresh();
+        $this->assertSame('Descrição alterada',$entry->description);
+        $this->assertSame('2026-10-20',$entry->due_date->toDateString());
+        $this->assertSame('100.00',$entry->amount);
+        $this->assertSame('manter',$entry->keywords);
+    }
+
+    public function test_quick_bulk_settlement_uses_entry_account_and_payment_method(): void
+    {
+        $user=$this->user();
+        $account=FinancialAccount::query()->firstOrFail();
+        $category=FinancialCategory::query()->where('type','income')->firstOrFail();
+
+        $entry=FinancialEntry::query()->create([
+            'type'=>'receivable','status'=>'open','category_id'=>$category->id,'financial_account_id'=>$account->id,'created_by'=>$user->id,
+            'description'=>'Recebimento rápido','issue_date'=>'2026-10-02','competence_date'=>'2026-10-02',
+            'due_date'=>'2026-10-10','amount'=>'90.00','paid_amount'=>'0.00','payment_method'=>'pix',
+        ]);
+
+        $this->actingAs($user)->post(route('finance.entries.bulk-action'),[
+            'ids'=>[$entry->id],
+            'action'=>'settle_quick',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('financial_entries',['id'=>$entry->id,'status'=>'paid','paid_amount'=>'90.00']);
+        $this->assertDatabaseHas('financial_settlements',[
+            'financial_entry_id'=>$entry->id,'financial_account_id'=>$account->id,'payment_method'=>'pix','amount'=>'90.00',
+        ]);
+    }
+
     public function test_ofx_parser_extracts_bank_transactions(): void
     {
         $ofx="OFXHEADER:100\nDATA:OFXSGML\n<OFX><BANKMSGSRSV1><STMTTRNRS><STMTRS><BANKTRANLIST>
