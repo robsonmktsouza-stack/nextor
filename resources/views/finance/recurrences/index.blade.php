@@ -52,9 +52,9 @@
           <td>{{ $r->customer?->name ?? '—' }}</td>
           <td>{{ $r->description }}@if($r->keywords)<small class="table-subtitle">{{ $r->keywords }}</small>@endif</td>
           <td>{{ $r->frequency_label }}</td>
-          <td class="nowrap">{{ $r->start_date->format('d/m/Y') }}</td>
-          <td class="nowrap">{{ $r->last_generated_at?->format('d/m/Y') ?? '—' }}</td>
-          <td class="nowrap">{{ $r->next_date?->format('d/m/Y') ?? '—' }}</td>
+          <td class="nowrap">{{ $r->start_date->format(\App\Models\AppSetting::dateFormat()) }}</td>
+          <td class="nowrap">{{ $r->last_generated_at?->format(\App\Models\AppSetting::dateFormat()) ?? '—' }}</td>
+          <td class="nowrap">{{ $r->next_date?->format(\App\Models\AppSetting::dateFormat()) ?? '—' }}</td>
           <td><span class="status {{ $r->is_active?'status-ok':'status-muted' }}">{{ $r->is_active?'Ativa':'Pausada' }}</span></td>
           <td class="price-strong nowrap">R$ {{ number_format((float)$r->amount,2,',','.') }}</td>
           <td class="action-cell">
