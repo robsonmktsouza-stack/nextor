@@ -871,7 +871,10 @@ foreach($primaryTabs as $key=>$item){
         <label class="field col-6"><span>Segredo do webhook</span><input type="password" name="webhook_secret" placeholder="{{ $integrations['webhook_secret'] ? 'Segredo já configurado' : '' }}"></label>
         <label class="field col-6"><span>Integração contábil</span><input name="accounting_integration" value="{{ $integrations['accounting_integration'] }}" placeholder="Ex.: Domínio, Alterdata, arquivo..."></label>
       </div>
-      <label class="settings-switch settings-switch-single"><input type="checkbox" name="api_enabled" value="1" @checked($integrations['api_enabled'])><span><strong>API habilitada</strong><small>Preferência de acesso; os endpoints e permissões continuam controlados pela aplicação.</small></span></label>
+      <div class="settings-switch-grid">
+        <label class="settings-switch"><input type="checkbox" name="api_enabled" value="1" @checked($integrations['api_enabled'])><span><strong>API habilitada</strong><small>Libera os endpoints protegidos por Bearer Token.</small></span></label>
+        <label class="settings-switch"><input type="checkbox" name="webhook_enabled" value="1" @checked($integrations['webhook_enabled'])><span><strong>Webhook habilitado</strong><small>Enfileira eventos de vendas, devoluções e baixas financeiras para a URL configurada.</small></span></label>
+      </div>
     </section>
   
   <div class="editor-savebar settings-savebar">
