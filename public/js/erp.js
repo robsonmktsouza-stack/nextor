@@ -952,6 +952,8 @@
       set('name',data.razao_social);
       set('legal_name',data.razao_social);
       set('trade_name',data.nome_fantasia);
+      set('cnae_main',data.cnae_fiscal);
+      set('city_ibge_code',data.codigo_municipio);
       set('email',data.email);
       set('phone',data.ddd_telefone_1);
       set('zip_code',data.cep);
