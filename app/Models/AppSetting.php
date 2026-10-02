@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Crypt;
 
 class AppSetting extends Model
 {
@@ -18,22 +18,16 @@ class AppSetting extends Model
 
     public static function value(string $group,string $key,mixed $default=null): mixed
     {
-        return Cache::remember('nextor.setting.'.$group.'.'.$key,3600,function() use($group,$key,$default) {
-            $row=static::query()->where('group',$group)->where('key',$key)->first();
-            if(!$row || $row->value===null || $row->value==='') return $default;
+        $row=static::rawGroup($group)[$key] ?? null;
+        if(!$row || $row['value']===null || $row['value']==='') return $default;
 
-            try {
-                $raw=$row->is_secret ? Crypt::decryptString($row->value) : $row->value;
-            } catch (\Throwable) {
-                return $default;
-            }
+        try {
+            $raw=$row['is_secret'] ? Crypt::decryptString($row['value']) : $row['value'];
+        } catch (\Throwable) {
+            return $default;
+        }
 
-            if(str_starts_with($raw,'json:')) {
-                return json_decode(substr($raw,5),true) ?? $default;
-            }
-
-            return $raw;
-        });
+        return static::decode($raw,$default);
     }
 
     public static function put(string $group,string $key,mixed $value,bool $secret=false): void
@@ -53,8 +47,7 @@ class AppSetting extends Model
             ['value'=>$value,'is_secret'=>$secret]
         );
 
-        Cache::forget('nextor.setting.'.$group.'.'.$key);
-        Cache::forget('nextor.settings.group.'.$group);
+        Cache::forget('nextor.settings.raw.'.$group);
     }
 
     public static function tablePerPage(Request $request): int
@@ -75,21 +68,48 @@ class AppSetting extends Model
 
     public static function groupValues(string $group,array $defaults=[]): array
     {
-        $stored=Cache::remember('nextor.settings.group.'.$group,3600,function() use($group) {
-            $values=[];
-            foreach(static::query()->where('group',$group)->get() as $row) {
-                try {
-                    $raw=$row->is_secret && $row->value ? Crypt::decryptString($row->value) : $row->value;
-                    $values[$row->key]=is_string($raw) && str_starts_with($raw,'json:')
-                        ? (json_decode(substr($raw,5),true) ?? null)
-                        : $raw;
-                } catch (\Throwable) {
-                    $values[$row->key]=null;
-                }
-            }
-            return $values;
-        });
+        $values=$defaults;
 
-        return array_replace($defaults,$stored);
+        foreach(static::rawGroup($group) as $key=>$row) {
+            try {
+                $raw=$row['is_secret'] && $row['value'] ? Crypt::decryptString($row['value']) : $row['value'];
+                $values[$key]=static::decode($raw,null);
+            } catch (\Throwable) {
+                $values[$key]=null;
+            }
+        }
+
+        return $values;
+    }
+
+    private static function rawGroup(string $group): array
+    {
+        try {
+            return Cache::remember('nextor.settings.raw.'.$group,3600,function() use($group) {
+                return static::query()
+                    ->where('group',$group)
+                    ->get(['key','value','is_secret'])
+                    ->mapWithKeys(fn(self $row)=>[
+                        $row->key=>[
+                            'value'=>$row->value,
+                            'is_secret'=>(bool)$row->is_secret,
+                        ],
+                    ])
+                    ->all();
+            });
+        } catch (\Throwable) {
+            return [];
+        }
+    }
+
+    private static function decode(mixed $raw,mixed $default=null): mixed
+    {
+        if(!is_string($raw)) return $raw ?? $default;
+
+        if(str_starts_with($raw,'json:')) {
+            return json_decode(substr($raw,5),true) ?? $default;
+        }
+
+        return $raw;
     }
 }
