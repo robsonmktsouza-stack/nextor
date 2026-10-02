@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class FinancialEntry extends Model
 {
     protected $fillable=[
-        'type','status','category_id','financial_account_id','customer_id','sale_id','sale_payment_id','recurrence_id','recurrence_occurrence_date','created_by',
+        'type','status','category_id','financial_account_id','customer_id','sale_id','sale_payment_id','recurrence_id','recurrence_occurrence_date','created_by','source_key',
         'description','document_number','issue_date','competence_date','due_date','credit_date','amount','paid_amount',
         'payment_method','keywords','notes','attachment_path','attachment_name','cancelled_at',
     ];
