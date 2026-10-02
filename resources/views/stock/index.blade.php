@@ -30,15 +30,24 @@
     <button class="grid-filter-button" type="button" data-filter-toggle="stock-filters" data-tooltip="Filtro avançado" aria-label="Filtro avançado">@include('partials.icon',['name'=>'search','size'=>18])</button>
   </div>
 </div>
-<div class="grid-filter-panel" id="stock-filters" @if(!$productId) hidden @endif>
-<form method="get" class="toolbar-filters"><input type="hidden" name="month" value="{{ $month }}"><select class="input-filter" name="product_id"><option value="">Todos os produtos</option>@foreach($products as $product)<option value="{{ $product->id }}" @selected($productId===$product->id)>{{ $product->name }} ({{ $product->sku }})</option>@endforeach</select><button class="btn btn-secondary">Filtrar</button>@if($productId)<a class="btn btn-light" href="{{ route('stock.index',['month'=>$month]) }}">Limpar</a>@endif</form>
+<div class="grid-filter-panel" id="stock-filters" @if(!$productId && !$term) hidden @endif>
+<form method="get" action="{{ route('stock.index') }}" class="toolbar-filters" data-live-search data-live-target="stock-live-results">
+  <input type="hidden" name="month" value="{{ $month }}">
+  <div class="table-search-group">
+    <input type="search" autocomplete="off" name="search" value="{{ $term }}" placeholder="Produto, SKU, motivo ou responsável..." aria-label="Buscar movimentações">
+    <button type="submit" class="table-search-submit" data-tooltip="Pesquisar">@include('partials.icon',['name'=>'search','size'=>17])</button>
+  </div>
+  <select class="input-filter" name="product_id"><option value="">Todos os produtos</option>@foreach($products as $product)<option value="{{ $product->id }}" @selected($productId===$product->id)>{{ $product->name }} ({{ $product->sku }})</option>@endforeach</select>
+  <button class="btn btn-secondary">Filtrar</button>
+  @if($productId || $term)<a class="btn btn-light" href="{{ route('stock.index',['month'=>$month]) }}">Limpar</a>@endif
+</form>
 </div>
-<div class="table-scroll"><table class="cms-table"><thead><tr><th class="select-cell"><input type="checkbox" data-check-all aria-label="Selecionar todos"></th><th>Data</th><th>Produto</th><th>Operação</th><th>Alteração</th><th>Saldo anterior</th><th>Saldo novo</th><th>Motivo</th><th>Responsável</th></tr></thead><tbody>
+<div id="stock-live-results" data-live-search-results><div class="table-scroll"><table class="cms-table"><thead><tr><th class="select-cell"><input type="checkbox" data-check-all aria-label="Selecionar todos"></th><th>Data</th><th>Produto</th><th>Operação</th><th>Alteração</th><th>Saldo anterior</th><th>Saldo novo</th><th>Motivo</th><th>Responsável</th></tr></thead><tbody>
 @forelse($movements as $movement)<tr><td class="select-cell"><input type="checkbox" data-row-select value="{{ $movement->id }}" aria-label="Selecionar movimentação {{ $movement->id }}"></td><td class="nowrap">{{ $movement->created_at?->format('d/m/Y H:i') }}</td><td><strong class="table-title">{{ $movement->product?->name }}</strong><small class="table-subtitle">{{ $movement->product?->sku }}</small></td><td>
 @php($labels=['entry'=>'Entrada','exit'=>'Saída','adjustment'=>'Ajuste','sale'=>'Venda','sale_cancel'=>'Estorno','sale_return'=>'Devolução de venda','sale_return_cancel'=>'Cancelamento de devolução'])
 <span class="status {{ in_array($movement->type,['entry','sale_cancel','sale_return'])?'status-ok':(in_array($movement->type,['sale','sale_return_cancel'])?'status-blue':'status-muted') }}">{{ $labels[$movement->type] ?? $movement->type }}</span></td><td class="nowrap {{ (float)$movement->quantity_delta>0?'positive':'negative' }}">{{ (float)$movement->quantity_delta>0?'+':'' }}{{ number_format((float)$movement->quantity_delta,3,',','.') }}</td><td>{{ number_format((float)$movement->previous_quantity,3,',','.') }}</td><td class="price-strong">{{ number_format((float)$movement->new_quantity,3,',','.') }}</td><td>{{ $movement->reason }}</td><td>{{ $movement->user?->name ?? 'Sistema' }}</td></tr>
 @empty<tr><td class="empty-cell" colspan="9">Nenhuma movimentação registrada.</td></tr>@endforelse
-</tbody></table></div>@include('partials.table-footer',['paginator'=>$movements])
+</tbody></table></div>@include('partials.table-footer',['paginator'=>$movements])</div>
 </section>
 <dialog class="erp-dialog" id="stock-add"><form action="{{ route('stock.store') }}" method="post">@csrf
 <div class="dialog-header"><div><h2>Nova movimentação</h2><p>Atualize as quantidades disponíveis</p></div><button type="button" data-dialog-close class="close-dialog">@include('partials.icon',['name'=>'x'])</button></div>
