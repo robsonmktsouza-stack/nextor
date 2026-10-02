@@ -224,19 +224,13 @@
       updatePaymentState();
     };
 
-    const paymentName=value=>({
-      cash:'Dinheiro',
-      pix:'PIX',
-      debit_card:'Cartão de débito',
-      credit_card:'Cartão de crédito',
-      bank_slip:'Boleto',
-      bank_transfer:'Transferência',
-      other:'Outro',
-    }[value]||'Não selecionado');
+    const paymentOption=value=>paymentOptions?.querySelector('[data-payment-value="'+CSS.escape(String(value||''))+'"]');
+    const paymentName=value=>paymentOption(value)?.dataset.paymentLabel||'Não selecionado';
+    const paymentKind=value=>paymentOption(value)?.dataset.paymentKind||'other';
 
     const updatePaymentState=()=>{
       const t=totals();
-      const cash=payment.value==='cash';
+      const cash=paymentKind(payment.value)==='cash';
       const received=cash?moneyInputValue(cashInput):0;
       const change=cash?Math.max(0,received-t.total):0;
 
@@ -271,7 +265,7 @@
       const hasPayment=!!payment.value;
       actionPayment?.classList.toggle('is-set',hasPayment);
 
-      const cashReady=payment.value==='cash' &&
+      const cashReady=paymentKind(payment.value)==='cash' &&
         moneyInputValue(cashInput)+0.0001>=totals().total;
       actionCash?.classList.toggle('is-set',cashReady);
     };
@@ -701,7 +695,7 @@
       paymentModal.close();
 
       if(finishFlowPending){
-        if(payment.value==='cash'){
+        if(paymentKind(payment.value)==='cash'){
           setTimeout(()=>openCashModal(),0);
         }else{
           setTimeout(()=>requestFinalize(),0);
@@ -790,7 +784,7 @@
     };
 
     const openCashModal=()=>{
-      if(payment.value!=='cash'){
+      if(paymentKind(payment.value)!=='cash'){
         notify('Selecione Dinheiro como forma de pagamento para informar valor recebido.','info');
         finishFlowPending=true;
         openPaymentModal();
@@ -896,7 +890,7 @@
         return;
       }
 
-      if(payment.value==='cash'){
+      if(paymentKind(payment.value)==='cash'){
         const received=moneyInputValue(cashInput);
         if(received+0.0001<t.total){
           finishFlowPending=true;
