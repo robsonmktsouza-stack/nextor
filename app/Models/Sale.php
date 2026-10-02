@@ -6,13 +6,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Sale extends Model {
     protected $fillable=[
-        'customer_id','user_id','operation_type','source','operation_date','final_consumer','keyword',
+        'customer_id','user_id','operation_type','source','operation_date','quote_expires_at','final_consumer','keyword',
         'status','subtotal','discount_total','total','notes','completed_at','cancelled_at'
     ];
 
     protected function casts(): array {
         return [
             'operation_date'=>'date',
+            'quote_expires_at'=>'date',
             'final_consumer'=>'boolean',
             'subtotal'=>'decimal:2',
             'discount_total'=>'decimal:2',
