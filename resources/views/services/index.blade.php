@@ -59,9 +59,9 @@
   </div>
 
   <div class="grid-filter-panel" id="service-filters" @if(!$term) hidden @endif>
-    <form method="get" class="toolbar-filters">
+    <form method="get" action="{{ route('services.index') }}" class="toolbar-filters" data-live-search data-live-target="services-live-results">
       <div class="table-search-group">
-        <input name="search" value="{{ $term }}" placeholder="Buscar por nome, CNAE ou código..." aria-label="Buscar serviços">
+        <input type="search" autocomplete="off" name="search" value="{{ $term }}" placeholder="Buscar por nome, CNAE ou código..." aria-label="Buscar serviços">
         <button type="submit" class="table-search-submit" data-tooltip="Pesquisar" aria-label="Pesquisar">
           @include('partials.icon',['name'=>'search','size'=>17])
         </button>
@@ -70,6 +70,7 @@
     </form>
   </div>
 
+  <div id="services-live-results" data-live-search-results>
   <div class="table-scroll">
     <table class="cms-table">
       <thead>
@@ -130,5 +131,6 @@
   </div>
 
   @include('partials.table-footer',['paginator'=>$services])
+  </div>
 </section>
 @endsection
