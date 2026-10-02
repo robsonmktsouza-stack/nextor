@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AppSetting;
+use App\Models\CompanySetting;
 use App\Models\Customer;
 use App\Models\FinancialEntry;
 use App\Models\FinancialReceipt;
@@ -85,7 +86,8 @@ class FinancialReceiptController extends Controller
     public function printReceipt(FinancialReceipt $receipt)
     {
         $receipt->load(['customer','creator']);
-        return view('finance.receipts.print',compact('receipt'));
+        $company=CompanySetting::current();
+        return view('finance.receipts.print',compact('receipt','company'));
     }
 
     public function attachment(FinancialReceipt $receipt)
