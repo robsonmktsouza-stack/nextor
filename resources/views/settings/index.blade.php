@@ -6,51 +6,51 @@
 @php
 $primaryTabs=[
   'general'=>[
-    'label'=>'GERAL','icon'=>'settings',
+    'label'=>'Geral','icon'=>'settings',
     'members'=>['general','printing','catalog'],
   ],
   'chart'=>[
-    'label'=>'PLANO DE CONTAS','icon'=>'layers',
+    'label'=>'Plano de contas','icon'=>'layers',
     'members'=>['chart'],
   ],
   'accounts'=>[
-    'label'=>'CONTAS CAIXA','icon'=>'money',
+    'label'=>'Contas caixa','icon'=>'money',
     'members'=>['accounts'],
   ],
   'operations'=>[
-    'label'=>'OPERAÇÕES','icon'=>'sales',
+    'label'=>'Operações','icon'=>'sales',
     'members'=>['operations','inventory','pdv'],
   ],
   'payments'=>[
-    'label'=>'FORMAS PGTO','icon'=>'receipt',
+    'label'=>'Formas pgto','icon'=>'receipt',
     'members'=>['payments'],
   ],
   'billing'=>[
-    'label'=>'BOLETOS / COBRANÇAS','icon'=>'money',
+    'label'=>'Boletos / cobranças','icon'=>'money',
     'members'=>['billing'],
   ],
   'fiscal'=>[
-    'label'=>'FISCAL','icon'=>'shield',
+    'label'=>'Fiscal','icon'=>'shield',
     'members'=>['fiscal','nfe','nfce','nfse','cte'],
   ],
   'tax'=>[
-    'label'=>'DADOS TRIBUTÁRIOS','icon'=>'layers',
+    'label'=>'Tributação','icon'=>'layers',
     'members'=>['tax'],
   ],
   'accounting'=>[
-    'label'=>'CONTÁBIL','icon'=>'services',
+    'label'=>'Contábil','icon'=>'services',
     'members'=>['accounting'],
   ],
   'users'=>[
-    'label'=>'USUÁRIOS','icon'=>'customers',
+    'label'=>'Usuários','icon'=>'customers',
     'members'=>['users'],
   ],
   'integrations'=>[
-    'label'=>'API / INTEGRAÇÕES','icon'=>'layers',
+    'label'=>'API / Integrações','icon'=>'layers',
     'members'=>['integrations'],
   ],
   'system'=>[
-    'label'=>'SISTEMA','icon'=>'settings',
+    'label'=>'Sistema','icon'=>'settings',
     'members'=>['system'],
   ],
 ];
