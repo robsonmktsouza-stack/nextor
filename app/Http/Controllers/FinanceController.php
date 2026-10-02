@@ -214,10 +214,17 @@ class FinanceController extends Controller
         $data=$request->validate([
             'ids'=>['required','array','min:1','max:200'],
             'ids.*'=>['required','integer','distinct','exists:financial_entries,id'],
-            'action'=>['required',Rule::in(['settle','cancel','reopen'])],
+            'action'=>['required',Rule::in(['settle','settle_quick','cancel','reopen','edit_primary','edit_aux'])],
             'financial_account_id'=>['nullable','integer','exists:financial_accounts,id'],
             'settled_at'=>['nullable','date'],
             'payment_method'=>['nullable',Rule::in(array_keys(self::PAYMENT_METHODS))],
+            'description'=>['nullable','string','max:190'],
+            'due_date'=>['nullable','date'],
+            'amount'=>['nullable','numeric','gt:0','max:9999999999.99','decimal:0,2'],
+            'category_id'=>['nullable','integer','exists:financial_categories,id'],
+            'keywords'=>['nullable','string','max:255'],
+            'clear_keywords'=>['nullable','boolean'],
+            'clear_payment_method'=>['nullable','boolean'],
         ]);
 
         $ids=array_values(array_unique(array_map('intval',$data['ids'])));
@@ -267,6 +274,109 @@ class FinanceController extends Controller
             }
 
             $message=$applied.' lançamento(s) baixado(s) integralmente.';
+        } elseif($data['action']==='settle_quick') {
+            foreach($entries as $entry) {
+                if(
+                    !in_array($entry->status,['open','partial'],true)
+                    || $entry->balance<=0
+                    || !$entry->financial_account_id
+                    || !$entry->payment_method
+                ) {
+                    $skipped++;
+                    continue;
+                }
+
+                $financial->settle($entry,[
+                    'amount'=>number_format($entry->balance,2,'.',''),
+                    'settled_at'=>today()->toDateString(),
+                    'financial_account_id'=>$entry->financial_account_id,
+                    'payment_method'=>$entry->payment_method,
+                    'notes'=>'Baixa integral rápida registrada por ação em massa.',
+                ],(int)$request->user()->id);
+                $applied++;
+            }
+
+            $message=$applied.' lançamento(s) baixado(s) usando conta e forma já cadastradas.';
+        } elseif($data['action']==='edit_primary') {
+            $hasChange=
+                filled($data['description'] ?? null)
+                || filled($data['due_date'] ?? null)
+                || filled($data['amount'] ?? null)
+                || filled($data['category_id'] ?? null)
+                || filled($data['financial_account_id'] ?? null);
+
+            if(!$hasChange) {
+                throw ValidationException::withMessages(['action'=>'Informe pelo menos um campo para alterar.']);
+            }
+
+            $category=!empty($data['category_id'])
+                ? FinancialCategory::query()->findOrFail((int)$data['category_id'])
+                : null;
+
+            foreach($entries as $entry) {
+                if($entry->sale_id!==null || $entry->status==='cancelled') {
+                    $skipped++;
+                    continue;
+                }
+
+                if(isset($data['amount']) && (float)$data['amount']+0.0001<(float)$entry->paid_amount) {
+                    $skipped++;
+                    continue;
+                }
+
+                if($category) {
+                    $expected=$entry->type==='receivable'?'income':'expense';
+                    if($category->type!==$expected) {
+                        $skipped++;
+                        continue;
+                    }
+                }
+
+                $updates=[];
+                if(filled($data['description'] ?? null)) $updates['description']=trim((string)$data['description']);
+                if(filled($data['due_date'] ?? null)) $updates['due_date']=$data['due_date'];
+                if(filled($data['amount'] ?? null)) $updates['amount']=$data['amount'];
+                if($category) $updates['category_id']=$category->id;
+                if(filled($data['financial_account_id'] ?? null)) $updates['financial_account_id']=(int)$data['financial_account_id'];
+
+                if($updates) {
+                    $entry->update($updates);
+                    $entry->refresh();
+                    if((float)$entry->paid_amount>0) {
+                        $entry->update([
+                            'status'=>(float)$entry->paid_amount+0.0001>=(float)$entry->amount?'paid':'partial',
+                        ]);
+                    }
+                    $applied++;
+                }
+            }
+
+            $message=$applied.' lançamento(s) atualizado(s).';
+        } elseif($data['action']==='edit_aux') {
+            $changeKeywords=filled($data['keywords'] ?? null) || $request->boolean('clear_keywords');
+            $changePayment=filled($data['payment_method'] ?? null) || $request->boolean('clear_payment_method');
+
+            if(!$changeKeywords && !$changePayment) {
+                throw ValidationException::withMessages(['action'=>'Informe palavras-chave ou forma de pagamento para alterar.']);
+            }
+
+            foreach($entries as $entry) {
+                if($entry->sale_id!==null || $entry->status==='cancelled') {
+                    $skipped++;
+                    continue;
+                }
+
+                $updates=[];
+                if($changeKeywords) $updates['keywords']=$request->boolean('clear_keywords') ? null : trim((string)($data['keywords'] ?? ''));
+                if($changePayment) $updates['payment_method']=$request->boolean('clear_payment_method') ? null : ($data['payment_method'] ?? null);
+
+                if($updates) {
+                    $entry->update($updates);
+                    $applied++;
+                }
+            }
+
+            $message=$applied.' lançamento(s) atualizado(s).';
         } elseif($data['action']==='cancel') {
             foreach($entries as $entry) {
                 if($entry->sale_id!==null || $entry->status==='cancelled' || $entry->active_settlements_count>0) {
