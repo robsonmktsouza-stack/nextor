@@ -33,6 +33,10 @@
           <a href="{{ route('finance.dashboard') }}">Financeiro</a>
           <a href="{{ route('finance.entries',['type'=>'receivable']) }}">Contas a receber</a>
           <a href="{{ route('finance.entries',['type'=>'payable']) }}">Contas a pagar</a>
+          <a href="{{ route('finance.transfers.index') }}">Transferências financeiras</a>
+          <a href="{{ route('finance.recurrences.index') }}">Recorrências financeiras</a>
+          <a href="{{ route('finance.receipts.index') }}">Recibos</a>
+          <a href="{{ route('finance.reconciliation.index') }}">Conciliação bancária</a>
         </div>
       </div>
       <div class="topbar-spacer"></div>

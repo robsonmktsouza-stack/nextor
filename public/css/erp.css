@@ -1497,3 +1497,33 @@ input[type="number"]::-webkit-outer-spin-button{
   .finance-summary-strip{grid-template-columns:1fr 1fr}
   .finance-settings-form,.finance-account-form{grid-template-columns:1fr}
 }
+
+
+/* Financeiro operacional */
+.finance-module-tabs{display:flex;align-items:stretch;gap:6px;margin-bottom:10px;overflow-x:auto;white-space:nowrap;border-bottom:1px solid #d9e1e8}
+.finance-module-tabs a{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 17px;border-radius:5px 5px 0 0;background:#526e7d;color:#fff;text-decoration:none;font-size:12px;font-weight:700}
+.finance-module-tabs a:hover{background:#456371}
+.finance-module-tabs a.active{background:#2877c7}
+.finance-module-tabs .finance-settings-tab{margin-left:auto;padding:0 13px}
+.finance-operational-card{border-radius:0 0 6px 6px!important}
+.finance-main-table tfoot td{background:#fbfcfd;border-top:1px solid #dde4ea}
+.finance-entry-banner{min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 16px;border-radius:5px 5px 0 0;background:#2877c7;color:#fff}
+.finance-entry-banner strong{font-size:14px}.finance-entry-banner span{max-width:40%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
+.finance-entry-banner.receivable{background:#28a965}.finance-entry-banner.payable{background:#d95a5f}.finance-entry-banner.transfer{background:#d7a500}.finance-entry-banner.recurrence{background:#2877c7}.finance-entry-banner.receipt{background:#7c36c9}.finance-entry-banner.reconciliation{background:#3e82b6}
+.finance-entry-panel{border-radius:0!important;padding:28px 30px!important;background:#f1f2f3!important}
+.finance-now-switch{min-height:38px;padding:0 10px;border:1px solid #ccd3da;border-radius:4px;background:#e5e7e9}
+.finance-reference-form{padding-bottom:74px}
+.finance-reference-form .field small{color:#7b8792;font-size:10.5px;line-height:1.4}
+.finance-reference-form input[type=file]{background:#fff}
+.finance-reconcile-layout{display:grid;grid-template-columns:260px minmax(0,1fr);min-height:360px}
+.finance-import-list{border-right:1px solid #e1e6eb;padding:12px}
+.finance-import-list h3{margin:0 0 9px;font-size:12px;color:#586a79}
+.finance-import-list>a{display:flex;flex-direction:column;gap:3px;padding:10px;border-radius:4px;color:#405466;text-decoration:none}
+.finance-import-list>a:hover,.finance-import-list>a.active{background:#edf5fc;color:#215d91}
+.finance-import-list>a strong{font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.finance-import-list>a span{font-size:10px;color:#7d8a96}
+.finance-reconcile-table{min-width:0}
+.finance-import-heading{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid #e5e9ed;background:#fafbfc}
+.finance-import-heading strong{font-size:12px}.finance-import-heading span{font-size:10.5px;color:#7b8894}
+.finance-match{display:flex;align-items:center;gap:6px}.finance-match .ui-select,.finance-match select{min-width:220px}.finance-match .btn{white-space:nowrap}
+@media(max-width:900px){.finance-reconcile-layout{grid-template-columns:1fr}.finance-import-list{border-right:0;border-bottom:1px solid #e1e6eb}.finance-module-tabs .finance-settings-tab{margin-left:0}}

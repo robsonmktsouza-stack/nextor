@@ -6,13 +6,7 @@
 @endsection
 
 @section('content')
-<nav class="finance-nav">
-  <a class="active" href="{{ route('finance.dashboard') }}">Visão geral</a>
-  <a href="{{ route('finance.entries',['type'=>'receivable']) }}">Contas a receber</a>
-  <a href="{{ route('finance.entries',['type'=>'payable']) }}">Contas a pagar</a>
-  <a href="{{ route('finance.entries') }}">Todos os lançamentos</a>
-  <a href="{{ route('finance.settings') }}">Configurações</a>
-</nav>
+@include('finance._nav')
 
 <div class="finance-periodbar">
   <a class="period-current" href="{{ route('finance.dashboard',['month'=>now()->format('Y-m')]) }}">Mês atual</a>

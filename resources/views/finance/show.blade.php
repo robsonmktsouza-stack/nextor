@@ -19,12 +19,7 @@
   };
 @endphp
 
-<nav class="finance-nav">
-  <a href="{{ route('finance.dashboard') }}">Visão geral</a>
-  <a href="{{ route('finance.entries',['type'=>'receivable']) }}">Contas a receber</a>
-  <a href="{{ route('finance.entries',['type'=>'payable']) }}">Contas a pagar</a>
-  <a href="{{ route('finance.entries') }}">Todos os lançamentos</a>
-</nav>
+@include('finance._nav')
 
 <div class="detail-grid finance-detail-grid">
   <section class="cms-card">
@@ -86,6 +81,11 @@
       <div><span>Categoria</span><strong>{{ $entry->category?->name ?? '—' }}</strong></div>
       <div><span>Pessoa</span><strong>{{ $entry->customer?->name ?? '—' }}</strong></div>
       <div><span>Emissão</span><strong>{{ $entry->issue_date->format('d/m/Y') }}</strong></div>
+      <div><span>Competência</span><strong>{{ $entry->competence_date?->format('d/m/Y') ?? '—' }}</strong></div>
+      <div><span>Conta</span><strong>{{ $entry->account?->name ?? '—' }}</strong></div>
+      @if($entry->credit_date)<div><span>Previsão de crédito</span><strong>{{ $entry->credit_date->format('d/m/Y') }}</strong></div>@endif
+      @if($entry->keywords)<div><span>Palavras-chave</span><strong>{{ $entry->keywords }}</strong></div>@endif
+      @if($entry->attachment_path)<div><span>Anexo</span><strong><a class="table-link" href="{{ route('finance.entries.attachment',$entry) }}">{{ $entry->attachment_name }}</a></strong></div>@endif
       <div><span>Forma prevista</span><strong>{{ $paymentMethods[$entry->payment_method] ?? 'Não informada' }}</strong></div>
       @if($entry->sale)
         <div><span>Origem</span><strong><a class="table-link" href="{{ route('sales.show',$entry->sale) }}">Venda #{{ str_pad($entry->sale_id,5,'0',STR_PAD_LEFT) }}</a></strong></div>
