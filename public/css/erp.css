@@ -1785,3 +1785,13 @@ form[data-live-search].is-live-searching .table-search-submit svg{animation:next
   .settings-switch-grid,.settings-split-tables,.settings-brand-grid{grid-template-columns:1fr}
   .settings-card-head{align-items:flex-start;flex-direction:column}
 }
+
+
+/* Preferências globais do sistema */
+.system-comfortable .cms-table th{padding-top:12px;padding-bottom:12px}
+.system-comfortable .cms-table td{padding-top:12px;padding-bottom:12px}
+.system-comfortable .grid-actionbar{min-height:66px}
+.system-comfortable .field input,
+.system-comfortable .field select{min-height:40px}
+.system-comfortable .sidebar-link{min-height:47px}
+body[data-show-tutorials="0"] [data-tutorial]{display:none!important}
