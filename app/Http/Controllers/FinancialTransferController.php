@@ -15,14 +15,24 @@ class FinancialTransferController extends Controller
         $month=(string)$request->query('month',now()->format('Y-m'));
         try{$period=Carbon::createFromFormat('Y-m',$month)->startOfMonth();}catch(\Throwable){$period=now()->startOfMonth();}
         $month=$period->format('Y-m');
+        $term=trim((string)$request->query('search',''));
 
-        $transfers=FinancialTransfer::query()
+        $query=FinancialTransfer::query()
             ->with(['fromAccount','toAccount','user'])
-            ->whereYear('transfer_date',$period->year)->whereMonth('transfer_date',$period->month)
-            ->orderByDesc('transfer_date')->orderByDesc('id')->paginate(25)->withQueryString();
+            ->whereYear('transfer_date',$period->year)
+            ->whereMonth('transfer_date',$period->month)
+            ->when($term,fn($q)=>$q->where(function($search) use($term){
+                $search->where('description','like',"%{$term}%")
+                    ->orWhereHas('fromAccount',fn($account)=>$account->where('name','like',"%{$term}%"))
+                    ->orWhereHas('toAccount',fn($account)=>$account->where('name','like',"%{$term}%"));
+            }));
+
+        $activeTotal=(float)(clone $query)->whereNull('cancelled_at')->sum('amount');
+        $cancelledCount=(clone $query)->whereNotNull('cancelled_at')->count();
+        $transfers=$query->orderByDesc('transfer_date')->orderByDesc('id')->paginate(25)->withQueryString();
 
         return view('finance.transfers.index',[
-            'transfers'=>$transfers,'month'=>$month,
+            'transfers'=>$transfers,'month'=>$month,'term'=>$term,'activeTotal'=>$activeTotal,'cancelledCount'=>$cancelledCount,
             'prevMonth'=>$period->copy()->subMonth()->format('Y-m'),
             'nextMonth'=>$period->copy()->addMonth()->format('Y-m'),
             'monthLabel'=>ucfirst($period->locale('pt_BR')->translatedFormat('F Y')),
