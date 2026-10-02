@@ -12,11 +12,17 @@
       <span><strong>Caixa fechado.</strong> Abra o caixa para poder finalizar vendas.</span>
     @endif
   </div>
-  @if($cashSession)
-    <button type="button" class="pdv-cash-session-action" onclick="document.getElementById('pdvCashCloseDialog').showModal()">Fechar caixa</button>
-  @else
-    <button type="button" class="pdv-cash-session-action primary" onclick="document.getElementById('pdvCashOpenDialog').showModal()">Abrir caixa</button>
-  @endif
+  <div class="pdv-cash-session-actions">
+    @if($cashSession && $pdvSettings['allow_cash_movements'])
+      <button type="button" class="pdv-cash-session-action" data-pdv-cash-movement="supply">Suprimento</button>
+      <button type="button" class="pdv-cash-session-action danger" data-pdv-cash-movement="withdrawal">Sangria</button>
+    @endif
+    @if($cashSession)
+      <button type="button" class="pdv-cash-session-action" onclick="document.getElementById('pdvCashCloseDialog').showModal()">Fechar caixa</button>
+    @else
+      <button type="button" class="pdv-cash-session-action primary" onclick="document.getElementById('pdvCashOpenDialog').showModal()">Abrir caixa</button>
+    @endif
+  </div>
 </section>
 
 @if(!$cashSession)
@@ -53,6 +59,43 @@
   </form>
 </dialog>
 @endif
+
+@if($cashSession && $pdvSettings['allow_cash_movements'])
+<dialog class="pdv-quick-modal pdv-cash-movement-modal" id="pdvCashMovementDialog">
+  <form method="post" action="{{ route('pdv.cash.movement') }}">
+    @csrf
+    <input type="hidden" name="type" id="pdvCashMovementType" value="supply">
+    <div class="pdv-modal-head">
+      <div>
+        <h2 id="pdvCashMovementTitle">Movimentar caixa</h2>
+        <p id="pdvCashMovementHelp">Registre uma entrada ou retirada manual.</p>
+      </div>
+      <button type="button" class="pdv-modal-close" onclick="this.closest('dialog').close()" aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+    </div>
+    <div class="pdv-cash-modal-body">
+      <div class="pdv-cash-total">
+        <span>Saldo esperado agora</span>
+        <strong>R$ {{ number_format((float)($cashExpected ?? 0),2,',','.') }}</strong>
+      </div>
+      <label><span>Valor</span><input type="number" step="0.01" min="0.01" name="amount" id="pdvCashMovementAmount" required></label>
+      <label><span>Motivo</span><input type="text" name="reason" maxlength="255" id="pdvCashMovementReason" placeholder="Ex.: troco adicional, depósito no cofre..." required></label>
+      @if($cashMovements->isNotEmpty())
+        <div class="pdv-cash-history">
+          <strong>Últimas movimentações</strong>
+          @foreach($cashMovements as $movement)
+            <span>
+              {{ $movement->type==='supply'?'Suprimento':'Sangria' }}
+              · R$ {{ number_format((float)$movement->amount,2,',','.') }}
+              · {{ $movement->reason }}
+            </span>
+          @endforeach
+        </div>
+      @endif
+      <button class="pdv-modal-primary" type="submit" id="pdvCashMovementSubmit">Registrar</button>
+    </div>
+  </form>
+</dialog>
+@endif
 @endif
 
 <form id="pdvForm" method="post" action="{{ route('pdv.store') }}">
@@ -78,7 +121,9 @@
      data-allow-discount="{{ $pdvSettings['allow_discount'] ? '1' : '0' }}"
      data-show-stock="{{ $pdvSettings['show_stock'] ? '1' : '0' }}"
      data-cash-required="{{ $pdvSettings['require_cash_opening'] ? '1' : '0' }}"
-     data-cash-open="{{ $cashSession ? '1' : '0' }}">
+     data-cash-open="{{ $cashSession ? '1' : '0' }}"
+     data-ask-consumer-document="{{ $pdvSettings['ask_consumer_document'] ? '1' : '0' }}"
+     data-allow-split-payment="{{ $pdvSettings['allow_split_payment'] ? '1' : '0' }}">
   <section class="pdv-catalog">
     <div class="pdv-search-panel">
       <div class="pdv-search-box">
@@ -203,11 +248,14 @@
     </div>
 
     <input type="hidden" name="customer_id" id="pdvCustomer" value="">
+    <input type="hidden" name="consumer_document" id="pdvConsumerDocument" value="">
+    <input type="hidden" name="consumer_name" id="pdvConsumerName" value="">
     <input type="hidden" name="payment_method" id="pdvPaymentMethod" value="{{ $pdvSettings['default_payment_method'] }}">
     <input type="hidden" name="cash_received" id="pdvCashReceived" value="0.00">
     <input type="hidden" name="notes" id="pdvNotes" value="">
 
     <div id="pdvItemsPayload"></div>
+    <div id="pdvPaymentsPayload"></div>
 
     <button type="submit" class="pdv-finish" id="pdvFinish" disabled>
       <span>@include('partials.icon',['name'=>'check','size'=>19]) Finalizar venda</span>
@@ -232,13 +280,15 @@
     <input type="search" id="pdvCustomerSearch" autocomplete="off" placeholder="Digite o nome ou CPF/CNPJ...">
   </div>
   <div class="pdv-client-list" id="pdvCustomerList">
-    <button type="button" class="pdv-client-option" data-customer-id="" data-customer-search="consumidor não identificado">
+    <button type="button" class="pdv-client-option" data-customer-id="" data-customer-name="" data-customer-document="" data-customer-search="consumidor não identificado">
       <span class="pdv-client-avatar">CF</span>
       <span><strong>Consumidor não identificado</strong><small>Venda sem cliente vinculado</small></span>
     </button>
     @foreach($customers as $customer)
       <button type="button" class="pdv-client-option"
               data-customer-id="{{ $customer->id }}"
+              data-customer-name="{{ $customer->name }}"
+              data-customer-document="{{ preg_replace('/\D+/','',$customer->document ?? '') }}"
               data-customer-search="{{ mb_strtolower($customer->name.' '.$customer->document) }}">
         <span class="pdv-client-avatar">{{ strtoupper(substr($customer->name,0,2)) }}</span>
         <span>
@@ -276,11 +326,51 @@
       </button>
     @endforeach
   </div>
+  @if($pdvSettings['allow_split_payment'])
+    <div class="pdv-split-payment">
+      <button type="button" class="pdv-split-toggle" id="pdvSplitToggle">Dividir em mais de uma forma</button>
+      <div class="pdv-split-panel" id="pdvSplitPanel" hidden>
+        <div class="pdv-split-summary">
+          <span>Total <strong id="pdvSplitTotal">R$ 0,00</strong></span>
+          <span>Informado <strong id="pdvSplitPaid">R$ 0,00</strong></span>
+          <span>Falta <strong id="pdvSplitRemaining">R$ 0,00</strong></span>
+        </div>
+        <div class="pdv-split-rows" id="pdvSplitRows"></div>
+        <p class="pdv-split-help">Com a divisão ativa, clique nas formas de pagamento acima para adicioná-las.</p>
+        <button type="button" class="pdv-modal-primary" id="pdvSplitApply">Aplicar pagamento dividido</button>
+      </div>
+    </div>
+  @endif
   <div class="pdv-modal-help">
     <span><kbd>1–9</kbd> Selecionar</span>
     <span><kbd>↑</kbd><kbd>↓</kbd> Navegar</span>
     <span><kbd>Enter</kbd> Confirmar</span>
     <span><kbd>Esc</kbd> Fechar</span>
+  </div>
+</dialog>
+
+<dialog class="pdv-quick-modal pdv-consumer-modal" id="pdvConsumerDocumentModal">
+  <div class="pdv-modal-head">
+    <div>
+      <h2>CPF/CNPJ na nota?</h2>
+      <p>Identifique o consumidor somente quando ele solicitar ou quando a operação exigir.</p>
+    </div>
+    <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+  </div>
+  <div class="pdv-consumer-modal-body">
+    <div class="pdv-consumer-question">
+      @include('partials.icon',['name'=>'customers','size'=>28])
+      <div><strong>O consumidor quer identificação na nota?</strong><span>Informe CPF ou CNPJ, ou continue sem identificação.</span></div>
+    </div>
+    <label>
+      <span>CPF / CNPJ</span>
+      <input type="text" inputmode="numeric" maxlength="18" id="pdvConsumerDocumentInput" autocomplete="off" placeholder="Digite somente se solicitado">
+    </label>
+    <button type="button" class="pdv-consumer-customer" id="pdvConsumerUseCustomer" hidden>Usar documento do cliente selecionado</button>
+    <div class="pdv-consumer-actions">
+      <button type="button" class="pdv-consumer-skip" id="pdvConsumerSkip">Sem CPF/CNPJ</button>
+      <button type="button" class="pdv-modal-primary" id="pdvConsumerApply">@include('partials.icon',['name'=>'check','size'=>18]) Confirmar identificação</button>
+    </div>
   </div>
 </dialog>
 
