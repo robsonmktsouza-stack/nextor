@@ -88,7 +88,12 @@ class FinanceController extends Controller
             ->when($type==='receivable',fn($q)=>$q->where('type','income'))
             ->when($type==='payable',fn($q)=>$q->where('type','expense'))->orderBy('name')->get();
 
-        return view('finance.index',compact('entries','type','status','term','categoryId','categories','month','prevMonth','nextMonth','monthLabel','totalAmount','openAmount'));
+        $accounts=FinancialAccount::query()->where('is_active',true)->orderBy('name')->get();
+
+        return view('finance.index',compact(
+            'entries','type','status','term','categoryId','categories','accounts','month','prevMonth','nextMonth',
+            'monthLabel','totalAmount','openAmount'
+        ))->with('paymentMethods',self::PAYMENT_METHODS);
     }
 
     public function create(Request $request)
@@ -202,6 +207,98 @@ class FinanceController extends Controller
     {
         $financial->cancelManual($entry);
         return redirect()->route('finance.entries.show',$entry)->with('success','Lançamento cancelado.');
+    }
+
+    public function bulkAction(Request $request, FinancialService $financial)
+    {
+        $data=$request->validate([
+            'ids'=>['required','array','min:1','max:200'],
+            'ids.*'=>['required','integer','distinct','exists:financial_entries,id'],
+            'action'=>['required',Rule::in(['settle','cancel','reopen'])],
+            'financial_account_id'=>['nullable','integer','exists:financial_accounts,id'],
+            'settled_at'=>['nullable','date'],
+            'payment_method'=>['nullable',Rule::in(array_keys(self::PAYMENT_METHODS))],
+        ]);
+
+        $ids=array_values(array_unique(array_map('intval',$data['ids'])));
+        $entries=FinancialEntry::query()
+            ->withCount('activeSettlements')
+            ->whereIn('id',$ids)
+            ->orderBy('id')
+            ->get();
+
+        $applied=0;
+        $skipped=0;
+
+        if($data['action']==='settle') {
+            if(empty($data['financial_account_id'])) {
+                throw ValidationException::withMessages(['financial_account_id'=>'Selecione a conta financeira para a baixa em massa.']);
+            }
+            if(empty($data['settled_at'])) {
+                throw ValidationException::withMessages(['settled_at'=>'Informe a data da baixa em massa.']);
+            }
+            if(empty($data['payment_method'])) {
+                throw ValidationException::withMessages(['payment_method'=>'Selecione a forma de pagamento da baixa em massa.']);
+            }
+
+            $account=FinancialAccount::query()
+                ->whereKey((int)$data['financial_account_id'])
+                ->where('is_active',true)
+                ->first();
+
+            if(!$account) {
+                throw ValidationException::withMessages(['financial_account_id'=>'Conta financeira inválida ou inativa.']);
+            }
+
+            foreach($entries as $entry) {
+                if(!in_array($entry->status,['open','partial'],true) || $entry->balance<=0) {
+                    $skipped++;
+                    continue;
+                }
+
+                $financial->settle($entry,[
+                    'amount'=>number_format($entry->balance,2,'.',''),
+                    'settled_at'=>$data['settled_at'],
+                    'financial_account_id'=>$account->id,
+                    'payment_method'=>$data['payment_method'],
+                    'notes'=>'Baixa integral registrada por ação em massa.',
+                ],(int)$request->user()->id);
+                $applied++;
+            }
+
+            $message=$applied.' lançamento(s) baixado(s) integralmente.';
+        } elseif($data['action']==='cancel') {
+            foreach($entries as $entry) {
+                if($entry->sale_id!==null || $entry->status==='cancelled' || $entry->active_settlements_count>0) {
+                    $skipped++;
+                    continue;
+                }
+
+                $financial->cancelManual($entry);
+                $applied++;
+            }
+
+            $message=$applied.' lançamento(s) cancelado(s).';
+        } else {
+            foreach($entries as $entry) {
+                if($entry->sale_id!==null || $entry->status!=='cancelled') {
+                    $skipped++;
+                    continue;
+                }
+
+                $financial->reopenManual($entry);
+                $applied++;
+            }
+
+            $message=$applied.' lançamento(s) reaberto(s).';
+        }
+
+        $redirect=back()->with('success',$message);
+        if($skipped>0) {
+            $redirect->with('warning',$skipped.' item(ns) foram ignorados porque não permitem esta ação.');
+        }
+
+        return $redirect;
     }
 
     public function settings(FinancialBalanceService $balances)
