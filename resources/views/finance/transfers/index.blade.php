@@ -15,7 +15,7 @@
         <button class="grid-tool" type="button" data-export-table="transferencias.csv" data-tooltip="Exportar CSV">@include('partials.icon',['name'=>'download','size'=>18])</button>
         <button class="grid-tool" type="button" data-refresh-page data-tooltip="Atualizar">@include('partials.icon',['name'=>'refresh','size'=>18])</button>
       </div>
-      <div class="finance-toolbar-summary">
+      <div class="finance-toolbar-summary" data-live-sync="transfer-summary">
         <span class="neutral">Movimentado <strong>R$ {{ number_format((float)$activeTotal,2,',','.') }}</strong></span>
         @if($cancelledCount)<span>Canceladas <strong>{{ $cancelledCount }}</strong></span>@endif
       </div>
