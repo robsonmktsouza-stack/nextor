@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AppSetting;
 use App\Models\FinancialAccount;
 use App\Models\FinancialTransfer;
 use Carbon\Carbon;
@@ -29,7 +30,8 @@ class FinancialTransferController extends Controller
 
         $activeTotal=(float)(clone $query)->whereNull('cancelled_at')->sum('amount');
         $cancelledCount=(clone $query)->whereNotNull('cancelled_at')->count();
-        $transfers=$query->orderByDesc('transfer_date')->orderByDesc('id')->paginate(25)->withQueryString();
+        $perPage=AppSetting::tablePerPage($request);
+        $transfers=$query->orderByDesc('transfer_date')->orderByDesc('id')->paginate($perPage)->withQueryString();
 
         return view('finance.transfers.index',[
             'transfers'=>$transfers,'month'=>$month,'term'=>$term,'activeTotal'=>$activeTotal,'cancelledCount'=>$cancelledCount,
