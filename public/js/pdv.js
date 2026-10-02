@@ -1893,7 +1893,11 @@
       button.addEventListener('click',()=>button.closest('dialog')?.close());
     });
 
-    [customerModal,paymentModal,discountModal,cashModal,notesModal].forEach(modal=>{
+    [
+      customerModal,paymentModal,discountModal,cashModal,notesModal,consumerModal,
+      electronicModal,operationsModal,suspendModal,recoverModal,contingencyModal,
+      cancelNfceModal,cashMovementModal,cashOpenDialog,cashCloseDialog
+    ].forEach(modal=>{
       modal?.addEventListener('close',()=>{
         setTimeout(()=>search.focus(),0);
       });
@@ -2001,7 +2005,9 @@
         recoverModal?.open ||
         electronicModal?.open ||
         contingencyModal?.open ||
-        cancelNfceModal?.open;
+        cancelNfceModal?.open ||
+        cashOpenDialog?.open ||
+        cashCloseDialog?.open;
 
       if(modalOpen) return;
 
