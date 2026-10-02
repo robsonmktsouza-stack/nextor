@@ -49,7 +49,7 @@ body{font-family:Arial,sans-serif;background:#f2f4f6;margin:0;color:#202b34}
 
   <p class="text">Recebi de <strong>{{ $receipt->recipient_name }}</strong>@if($receipt->recipient_document), inscrito(a) sob o documento <strong>{{ $receipt->recipient_document }}</strong>@endif, a importância de <strong>R$ {{ number_format((float)$receipt->amount,2,',','.') }}</strong>, referente a <strong>{{ $receipt->reference }}</strong>.</p>
 
-  <p class="text">Data: {{ $receipt->receipt_date->format('d/m/Y') }}.</p>
+  <p class="text">Data: {{ $receipt->receipt_date->format(\App\Models\AppSetting::dateFormat()) }}.</p>
 
   <div class="signature">
     <div class="line"></div>
