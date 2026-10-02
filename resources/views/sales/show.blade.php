@@ -2,12 +2,16 @@
 @section('title',($sale->operation_type==='quote'?'Orçamento ':'Venda ').'#'.str_pad($sale->id,5,'0',STR_PAD_LEFT))
 @section('actions')
 <a class="btn btn-secondary" href="{{ route('sales.index') }}">@include('partials.icon',['name'=>'arrow-left','size'=>16]) Voltar</a>
+@if($sale->operation_type==='sale' && $sale->status==='completed')
+<a class="btn btn-primary" href="{{ route('sales.returns.create',['sale'=>$sale->id]) }}">@include('partials.icon',['name'=>'return','size'=>16]) Nova devolução</a>
+@endif
 @if($sale->status==='completed')
 <button class="btn btn-danger-outline" data-dialog-open="sale-cancel" type="button">@include('partials.icon',['name'=>'x','size'=>16]) Cancelar</button>
 @endif
 @endsection
 
 @section('content')
+@include('sales._nav')
 <div class="detail-grid">
   <section class="cms-card">
     <div class="card-header">
@@ -61,6 +65,30 @@
             <td>{{ $payment->due_date?->format('d/m/Y') ?? '—' }}</td>
             <td>{{ match($payment->payment_method){'cash'=>'Dinheiro','pix'=>'PIX','debit_card'=>'Cartão de débito','credit_card'=>'Cartão de crédito','bank_slip'=>'Boleto','bank_transfer'=>'Transferência','other'=>'Outro',default=>'Não informado'} }}</td>
             <td>{{ $payment->receivable?'A receber':'Recebido' }}</td>
+          </tr>
+        @endforeach
+        </tbody>
+      </table>
+    </div>
+    @endif
+
+    @if($saleReturns->isNotEmpty())
+    <div class="card-header">
+      <div><h2>Devoluções</h2><p>{{ $saleReturns->count() }} registro(s) vinculados a esta venda</p></div>
+      <a class="minor-link" href="{{ route('sales.returns.index',['search'=>$sale->id]) }}">Ver todas</a>
+    </div>
+    <div class="table-scroll">
+      <table class="cms-table">
+        <thead><tr><th>Cód.</th><th>Data</th><th>Itens</th><th>Valor</th><th>Situação</th><th class="action-cell"></th></tr></thead>
+        <tbody>
+        @foreach($saleReturns as $return)
+          <tr>
+            <td><a class="table-link" href="{{ route('sales.returns.show',$return) }}">#{{ str_pad((string)$return->id,5,'0',STR_PAD_LEFT) }}</a></td>
+            <td>{{ $return->return_date->format('d/m/Y') }}</td>
+            <td>{{ $return->items_count }}</td>
+            <td class="price-strong">R$ {{ number_format((float)$return->total,2,',','.') }}</td>
+            <td><span class="status {{ $return->status==='completed'?'status-ok':'status-muted' }}">{{ $return->status==='completed'?'Concluída':'Cancelada' }}</span></td>
+            <td class="action-cell"><a class="btn-icon" href="{{ route('sales.returns.show',$return) }}" data-tooltip="Abrir devolução">@include('partials.icon',['name'=>'chevron','size'=>16])</a></td>
           </tr>
         @endforeach
         </tbody>
