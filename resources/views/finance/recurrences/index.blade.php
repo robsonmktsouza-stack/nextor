@@ -13,7 +13,7 @@
         <button class="grid-tool" type="button" data-print-page data-tooltip="Imprimir">@include('partials.icon',['name'=>'print','size'=>18])</button>
         <button class="grid-tool" type="button" data-export-table="recorrencias.csv" data-tooltip="Exportar CSV">@include('partials.icon',['name'=>'download','size'=>18])</button>
       </div>
-      <div class="finance-toolbar-summary">
+      <div class="finance-toolbar-summary" data-live-sync="recurrence-summary">
         <span class="neutral">Ativas <strong>{{ $activeCount }}</strong></span>
         <span class="positive">Base mensal <strong>R$ {{ number_format((float)$monthlyBase,2,',','.') }}</strong></span>
       </div>
