@@ -9,7 +9,10 @@ use Illuminate\Validation\ValidationException;
 
 class SalesService
 {
-    public function __construct(private readonly InventoryService $inventory) {}
+    public function __construct(
+        private readonly InventoryService $inventory,
+        private readonly FinancialService $financial,
+    ) {}
 
     public function create(array $data, int $userId): Sale
     {
@@ -217,6 +220,10 @@ class SalesService
                 });
             }
 
+            if($operationType==='sale') {
+                $this->financial->syncSale($sale,$userId);
+            }
+
             return $sale->refresh();
         },3);
     }
@@ -259,6 +266,10 @@ class SalesService
                         $locked->id
                     );
                 }
+            }
+
+            if($locked->operation_type==='sale') {
+                $this->financial->cancelSale($locked);
             }
 
             $locked->update([

@@ -23,12 +23,28 @@ class InventorySalesTest extends TestCase
             'sale_price'=>'19.90','minimum_stock'=>'2.000','stock_quantity'=>'0.000','is_active'=>true,
         ]);
     }
+    private function salePayload(Product $product, string $quantity): array
+    {
+        return [
+            'operation_type'=>'sale',
+            'operation_date'=>now()->toDateString(),
+            'final_consumer'=>1,
+            'items'=>[[
+                'item_type'=>'product',
+                'product_id'=>$product->id,
+                'quantity'=>$quantity,
+                'unit_price'=>(string)$product->sale_price,
+                'discount'=>'0.00',
+            ]],
+        ];
+    }
+
     public function test_entry_and_sale_create_auditable_movements(): void
     {
         $p=$this->product();$u=$this->user();
         $this->actingAs($u)->post('/stock',['product_id'=>$p->id,'type'=>'entry','quantity'=>'5.000','reason'=>'Compra'])->assertRedirect('/stock');
         $this->assertEquals('5.000',$p->fresh()->stock_quantity);
-        $response=$this->actingAs($u)->post('/sales',['items'=>[['product_id'=>$p->id,'quantity'=>'2.000']]]);
+        $response=$this->actingAs($u)->post('/sales',$this->salePayload($p,'2.000'));
         $response->assertRedirect();
         $this->assertEquals('3.000',$p->fresh()->stock_quantity);
         $this->assertEquals('39.80',Sale::firstOrFail()->total);
@@ -37,7 +53,7 @@ class InventorySalesTest extends TestCase
     public function test_sale_fails_atomically_when_stock_is_insufficient(): void
     {
         $p=$this->product();$u=$this->user();
-        $this->actingAs($u)->post('/sales',['items'=>[['product_id'=>$p->id,'quantity'=>'1.000']]])->assertSessionHasErrors('items');
+        $this->actingAs($u)->post('/sales',$this->salePayload($p,'1.000'))->assertSessionHasErrors('items');
         $this->assertEquals('0.000',$p->fresh()->stock_quantity);
         $this->assertSame(0,Sale::count());
         $this->assertSame(0,StockMovement::count());
@@ -46,7 +62,7 @@ class InventorySalesTest extends TestCase
     {
         $p=$this->product();$u=$this->user();
         $this->actingAs($u)->post('/stock',['product_id'=>$p->id,'type'=>'entry','quantity'=>'3.000','reason'=>'Abertura']);
-        $this->actingAs($u)->post('/sales',['items'=>[['product_id'=>$p->id,'quantity'=>'2.000']]]);
+        $this->actingAs($u)->post('/sales',$this->salePayload($p,'2.000'));
         $sale=Sale::firstOrFail();
         $this->actingAs($u)->post("/sales/{$sale->id}/cancel")->assertRedirect();
         $this->assertEquals('3.000',$p->fresh()->stock_quantity);

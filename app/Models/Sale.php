@@ -26,4 +26,5 @@ class Sale extends Model {
     public function user(): BelongsTo { return $this->belongsTo(User::class); }
     public function items(): HasMany { return $this->hasMany(SaleItem::class); }
     public function payments(): HasMany { return $this->hasMany(SalePayment::class)->orderBy('installment'); }
+    public function financialEntries(): HasMany { return $this->hasMany(FinancialEntry::class); }
 }

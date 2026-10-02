@@ -30,6 +30,9 @@
           <a href="{{ route('pdv.index') }}">PDV</a>
           <a href="{{ route('sales.index') }}">Vendas</a>
           <a href="{{ route('sales.create') }}">Nova venda</a>
+          <a href="{{ route('finance.dashboard') }}">Financeiro</a>
+          <a href="{{ route('finance.entries',['type'=>'receivable']) }}">Contas a receber</a>
+          <a href="{{ route('finance.entries',['type'=>'payable']) }}">Contas a pagar</a>
         </div>
       </div>
       <div class="topbar-spacer"></div>
@@ -65,6 +68,9 @@
       @include('partials.icon',['name'=>'pdv'])<span>PDV</span></a>
     <a href="{{ route('sales.index') }}" class="sidebar-link {{ request()->routeIs('sales.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'sales'])<span>Vendas</span></a>
+    <div class="sidebar-section-label">FINANCEIRO</div>
+    <a href="{{ route('finance.dashboard') }}" class="sidebar-link {{ request()->routeIs('finance.*') ? 'active' : '' }}">
+      @include('partials.icon',['name'=>'money'])<span>Financeiro</span></a>
       </aside>
   <main class="cms-page-shell" id="pageShell">
     <div class="main-content">

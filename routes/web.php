@@ -2,6 +2,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PdvController;
 use App\Http\Controllers\SaleController;
@@ -52,4 +53,21 @@ Route::middleware('auth')->group(function () {
     Route::post('/sales',[SaleController::class,'store'])->name('sales.store');
     Route::get('/sales/{sale}',[SaleController::class,'show'])->name('sales.show');
     Route::post('/sales/{sale}/cancel',[SaleController::class,'cancel'])->name('sales.cancel');
+
+    Route::get('/finance',[FinanceController::class,'dashboard'])->name('finance.dashboard');
+    Route::get('/finance/entries',[FinanceController::class,'entries'])->name('finance.entries');
+    Route::get('/finance/entries/create',[FinanceController::class,'create'])->name('finance.entries.create');
+    Route::post('/finance/entries',[FinanceController::class,'store'])->name('finance.entries.store');
+    Route::get('/finance/entries/{entry}',[FinanceController::class,'show'])->name('finance.entries.show');
+    Route::get('/finance/entries/{entry}/edit',[FinanceController::class,'edit'])->name('finance.entries.edit');
+    Route::put('/finance/entries/{entry}',[FinanceController::class,'update'])->name('finance.entries.update');
+    Route::post('/finance/entries/{entry}/settle',[FinanceController::class,'settle'])->name('finance.entries.settle');
+    Route::post('/finance/entries/{entry}/cancel',[FinanceController::class,'cancel'])->name('finance.entries.cancel');
+    Route::post('/finance/settlements/{settlement}/reverse',[FinanceController::class,'reverseSettlement'])->name('finance.settlements.reverse');
+
+    Route::get('/finance/settings',[FinanceController::class,'settings'])->name('finance.settings');
+    Route::post('/finance/categories',[FinanceController::class,'storeCategory'])->name('finance.categories.store');
+    Route::post('/finance/categories/{category}/toggle',[FinanceController::class,'toggleCategory'])->name('finance.categories.toggle');
+    Route::post('/finance/accounts',[FinanceController::class,'storeAccount'])->name('finance.accounts.store');
+    Route::post('/finance/accounts/{account}/toggle',[FinanceController::class,'toggleAccount'])->name('finance.accounts.toggle');
 });
