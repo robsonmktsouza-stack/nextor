@@ -27,6 +27,8 @@
           <a href="{{ route('pdv.index') }}">PDV</a>
           <a href="{{ route('sales.index') }}">Vendas</a>
           <a href="{{ route('sales.create') }}">Nova venda</a>
+          <a href="{{ route('sales.returns.index') }}">Devoluções</a>
+          <a href="{{ route('sales.returns.create') }}">Nova devolução</a>
           <a href="{{ route('finance.dashboard') }}">Financeiro</a>
           <a href="{{ route('finance.entries',['type'=>'receivable']) }}">Contas a receber</a>
           <a href="{{ route('finance.entries',['type'=>'payable']) }}">Contas a pagar</a>
