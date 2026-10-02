@@ -38,6 +38,14 @@ final readonly class NfceSnapshot
         'tax_unit_price',
         'include_total',
         'tax',
+        'total_item',
+    ];
+
+    private const ITEM_TAX_REQUIRED = [
+        'ICMS',
+        'PIS',
+        'COFINS',
+        'IBSCBS',
     ];
 
     private const ICMS_TOTAL_REQUIRED = [
@@ -222,9 +230,18 @@ final readonly class NfceSnapshot
 
             foreach (self::ITEM_REQUIRED as $field) {
                 if ($field === 'tax') {
-                    if (!isset($item[$field]) || !is_array($item[$field])) {
-                        throw new InvalidFiscalDataException("Campo tax ausente/inválido no item {$index}.");
+                    if (!isset($item[$field]) || !is_array($item[$field]) || $item[$field] === []) {
+                        throw new InvalidFiscalDataException("Campo tax ausente/vazio no item {$index}.");
                     }
+
+                    foreach (self::ITEM_TAX_REQUIRED as $taxGroup) {
+                        if (!isset($item[$field][$taxGroup]) || !is_array($item[$field][$taxGroup])) {
+                            throw new InvalidFiscalDataException(
+                                "Grupo tributário {$taxGroup} ausente no item {$index}."
+                            );
+                        }
+                    }
+
                     continue;
                 }
 
@@ -242,6 +259,15 @@ final readonly class NfceSnapshot
 
         foreach (self::ICMS_TOTAL_REQUIRED as $field) {
             $this->requireScalar($this->payload['totals']['ICMSTot'], $field, 'totals.ICMSTot');
+        }
+
+        if (
+            !isset($this->payload['totals']['IBSCBSTot'])
+            || !is_array($this->payload['totals']['IBSCBSTot'])
+            || !array_key_exists('vNFTot', $this->payload['totals'])
+            || !is_scalar($this->payload['totals']['vNFTot'])
+        ) {
+            throw new InvalidFiscalDataException('Totais RTC devem conter IBSCBSTot e vNFTot.');
         }
 
         if (!is_array($this->payload['payments']) || !array_is_list($this->payload['payments'])) {

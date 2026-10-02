@@ -303,6 +303,8 @@ final class NfceXmlGenerator
             $groupNode = $this->element($dom, $tax, $group);
             $this->appendResolvedTree($dom, $groupNode, $item['tax'][$group]);
         }
+
+        $this->element($dom, $det, 'vItem', $item['total_item']);
     }
 
     private function appendTotals(DOMDocument $dom, DOMElement $parent, array $totals): void

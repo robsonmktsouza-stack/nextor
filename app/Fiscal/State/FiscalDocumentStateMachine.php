@@ -14,14 +14,14 @@ final class FiscalDocumentStateMachine
             FiscalDocumentState::ERROR,
         ],
         'generated' => [
-            FiscalDocumentState::VALIDATED,
-            FiscalDocumentState::ERROR,
-        ],
-        'validated' => [
             FiscalDocumentState::SIGNED,
             FiscalDocumentState::ERROR,
         ],
         'signed' => [
+            FiscalDocumentState::VALIDATED,
+            FiscalDocumentState::ERROR,
+        ],
+        'validated' => [
             FiscalDocumentState::PENDING,
             FiscalDocumentState::CONTINGENCY,
             FiscalDocumentState::ERROR,

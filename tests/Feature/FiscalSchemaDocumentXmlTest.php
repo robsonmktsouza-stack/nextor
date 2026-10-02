@@ -216,7 +216,51 @@ class FiscalSchemaDocumentXmlTest extends TestCase
                 'tax_quantity' => '1.0000',
                 'tax_unit_price' => '10.0000000000',
                 'include_total' => '1',
-                'tax' => [],
+                'tax' => [
+                    'ICMS' => [
+                        'ICMSSN102' => [
+                            'orig' => '0',
+                            'CSOSN' => '102',
+                        ],
+                    ],
+                    'PIS' => [
+                        'PISOutr' => [
+                            'CST' => '49',
+                            'vBC' => '10.00',
+                            'pPIS' => '0.0000',
+                            'vPIS' => '0.00',
+                        ],
+                    ],
+                    'COFINS' => [
+                        'COFINSOutr' => [
+                            'CST' => '49',
+                            'vBC' => '10.00',
+                            'pCOFINS' => '0.0000',
+                            'vCOFINS' => '0.00',
+                        ],
+                    ],
+                    'IBSCBS' => [
+                        'CST' => '000',
+                        'cClassTrib' => '000001',
+                        'gIBSCBS' => [
+                            'vBC' => '10.00',
+                            'gIBSUF' => [
+                                'pIBSUF' => '0.1000',
+                                'vIBSUF' => '0.01',
+                            ],
+                            'gIBSMun' => [
+                                'pIBSMun' => '0.0000',
+                                'vIBSMun' => '0.00',
+                            ],
+                            'vIBS' => '0.01',
+                            'gCBS' => [
+                                'pCBS' => '0.9000',
+                                'vCBS' => '0.09',
+                            ],
+                        ],
+                    ],
+                ],
+                'total_item' => '10.00',
             ]],
             'totals' => [
                 'ICMSTot' => [
@@ -240,6 +284,32 @@ class FiscalSchemaDocumentXmlTest extends TestCase
                     'vOutro' => '0.00',
                     'vNF' => '10.00',
                 ],
+                'IBSCBSTot' => [
+                    'vBCIBSCBS' => '10.00',
+                    'gIBS' => [
+                        'gIBSUF' => [
+                            'vDif' => '0.00',
+                            'vDevTrib' => '0.00',
+                            'vIBSUF' => '0.01',
+                        ],
+                        'gIBSMun' => [
+                            'vDif' => '0.00',
+                            'vDevTrib' => '0.00',
+                            'vIBSMun' => '0.00',
+                        ],
+                        'vIBS' => '0.01',
+                        'vCredPres' => '0.00',
+                        'vCredPresCondSus' => '0.00',
+                    ],
+                    'gCBS' => [
+                        'vDif' => '0.00',
+                        'vDevTrib' => '0.00',
+                        'vCBS' => '0.09',
+                        'vCredPres' => '0.00',
+                        'vCredPresCondSus' => '0.00',
+                    ],
+                ],
+                'vNFTot' => '10.00',
             ],
             'freight_mode' => '9',
             'payments' => [[

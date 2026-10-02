@@ -28,6 +28,11 @@ class FiscalDocument extends Model
         'snapshot_sha256',
     ];
 
+    private const WRITE_ONCE_FIELDS = [
+        'xml_generated',
+        'xml_signed',
+    ];
+
     protected $fillable = [
         'fiscal_company_id', 'sale_id', 'model', 'series', 'number', 'access_key',
         'environment', 'emission_type', 'numeric_code', 'state', 'layout_version',
@@ -59,6 +64,17 @@ class FiscalDocument extends Model
                 if ($document->isDirty($field)) {
                     throw new ImmutableFiscalDocumentException(
                         "O campo fiscal imutável '{$field}' não pode ser alterado após a criação do documento."
+                    );
+                }
+            }
+
+            foreach (self::WRITE_ONCE_FIELDS as $field) {
+                if (
+                    $document->isDirty($field)
+                    && $document->getOriginal($field) !== null
+                ) {
+                    throw new ImmutableFiscalDocumentException(
+                        "O campo fiscal '{$field}' é gravado uma única vez e não pode ser sobrescrito."
                     );
                 }
             }

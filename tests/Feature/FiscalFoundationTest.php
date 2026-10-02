@@ -96,6 +96,27 @@ class FiscalFoundationTest extends TestCase
         );
     }
 
+    public function test_state_machine_follows_generated_signed_validated_order(): void
+    {
+        $machine = new FiscalDocumentStateMachine();
+
+        $this->assertTrue(
+            $machine->canTransition(FiscalDocumentState::DRAFT, FiscalDocumentState::GENERATED)
+        );
+        $this->assertTrue(
+            $machine->canTransition(FiscalDocumentState::GENERATED, FiscalDocumentState::SIGNED)
+        );
+        $this->assertTrue(
+            $machine->canTransition(FiscalDocumentState::SIGNED, FiscalDocumentState::VALIDATED)
+        );
+        $this->assertFalse(
+            $machine->canTransition(FiscalDocumentState::GENERATED, FiscalDocumentState::VALIDATED)
+        );
+        $this->assertFalse(
+            $machine->canTransition(FiscalDocumentState::VALIDATED, FiscalDocumentState::SIGNED)
+        );
+    }
+
     public function test_sequence_reservation_is_monotonic(): void
     {
         $company = FiscalCompany::query()->create([
