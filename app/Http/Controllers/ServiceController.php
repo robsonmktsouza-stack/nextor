@@ -35,9 +35,13 @@ class ServiceController extends Controller
             'new_services_active'=>true,
         ]);
 
+        $taxDefaults=AppSetting::groupValues('tax',[]);
+
         return view('services.form',[
             'service'=>new Service([
                 'sale_price'=>0,
+                'tax_group'=>$taxDefaults['tax_classification_code'] ?? null,
+                'tax_defaults'=>$taxDefaults,
                 'is_active'=>(bool)$catalog['new_services_active'],
             ]),
             'editing'=>false,
@@ -76,6 +80,7 @@ class ServiceController extends Controller
             return $service->refresh();
         }
 
+        $data['tax_defaults']=AppSetting::groupValues('tax',[]);
         return Service::create($data);
     }
 
