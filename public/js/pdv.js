@@ -1166,8 +1166,14 @@
     });
 
     cashModalInput?.addEventListener('input',updateCashModalPreview);
-    cashModalInput?.addEventListener('keydown',event=>{
-      if(event.key==='Enter'){
+    cashModal?.addEventListener('keydown',event=>{
+      if((event.key==='e'||event.key==='E') && !event.ctrlKey && !event.metaKey){
+        event.preventDefault();
+        cashExact?.click();
+        return;
+      }
+
+      if(event.key==='Enter' && document.activeElement===cashModalInput){
         event.preventDefault();
         applyCashModal();
       }
@@ -1284,6 +1290,14 @@
       finishConsumerStep();
     });
     consumerApply?.addEventListener('click',applyConsumerDocument);
+    consumerModal?.addEventListener('keydown',event=>{
+      if((event.key==='c'||event.key==='C') && !consumerUseCustomer?.hidden && document.activeElement!==consumerDocumentInput){
+        event.preventDefault();
+        consumerUseCustomer?.click();
+        return;
+      }
+    });
+
     consumerDocumentInput?.addEventListener('keydown',event=>{
       if(event.key==='Enter'){
         event.preventDefault();
@@ -1684,6 +1698,13 @@
           modal.querySelector('form')?.requestSubmit();
         }
       });
+    });
+
+    cashMovementModal?.addEventListener('keydown',event=>{
+      if(event.ctrlKey && event.key==='Enter'){
+        event.preventDefault();
+        cashMovementModal.querySelector('form')?.requestSubmit();
+      }
     });
 
     document.querySelectorAll('[data-pdv-cash-movement]').forEach(button=>{
