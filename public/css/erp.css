@@ -2034,3 +2034,27 @@ body[data-show-tutorials="0"] [data-tutorial]{display:none!important}
 @media(max-width:680px){
   .settings-permission-grid{grid-template-columns:1fr}
 }
+
+
+.stock-alert-chip{
+  min-height:30px;display:inline-flex;align-items:center;gap:6px;padding:0 9px;
+  border:1px solid #e1c483;border-radius:4px;background:#fff8e6;color:#8a681b;
+  font-size:10.5px;font-weight:700
+}
+
+.finance-billing-box{
+  margin:16px;border:1px solid #d7e2eb;border-radius:5px;background:#f8fbfd;padding:14px
+}
+.finance-billing-head{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:14px
+}
+.finance-billing-head h3{font-size:13px;color:#3e5266}
+.finance-billing-head p{margin-top:3px;font-size:10.5px;color:#8592a0}
+.finance-billing-head>strong{font-size:16px;color:#2877c7;white-space:nowrap}
+.finance-billing-summary{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}
+.finance-billing-summary span{
+  padding:5px 7px;border:1px solid #dce5ec;border-radius:3px;background:#fff;
+  color:#647487;font-size:10px
+}
+.finance-pix-field textarea{font-family:Consolas,monospace;font-size:10px;line-height:1.45;resize:vertical}
+.finance-billing-actions{display:flex;justify-content:flex-end;margin-top:8px}
