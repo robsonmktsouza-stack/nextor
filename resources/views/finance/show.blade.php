@@ -122,6 +122,7 @@
       <div><span>Conta</span><strong>{{ $entry->account?->name ?? '—' }}</strong></div>
       @if($entry->credit_date)<div><span>Previsão de crédito</span><strong>{{ $entry->credit_date->format('d/m/Y') }}</strong></div>@endif
       @if($entry->keywords)<div><span>Palavras-chave</span><strong>{{ $entry->keywords }}</strong></div>@endif
+      @if($entry->cost_center)<div><span>Centro de custo</span><strong>{{ $entry->cost_center }}</strong></div>@endif
       @if($entry->attachment_path)<div><span>Anexo</span><strong><a class="table-link" href="{{ route('finance.entries.attachment',$entry) }}">{{ $entry->attachment_name }}</a></strong></div>@endif
       <div><span>Forma prevista</span><strong>{{ $paymentMethods[$entry->payment_method] ?? 'Não informada' }}</strong></div>
       @if($entry->sale)
