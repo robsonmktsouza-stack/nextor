@@ -62,6 +62,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/finance/entries',[FinanceController::class,'entries'])->name('finance.entries');
     Route::get('/finance/entries/create',[FinanceController::class,'create'])->name('finance.entries.create');
     Route::post('/finance/entries',[FinanceController::class,'store'])->name('finance.entries.store');
+    Route::post('/finance/entries/bulk-action',[FinanceController::class,'bulkAction'])->name('finance.entries.bulk-action');
     Route::get('/finance/entries/{entry}',[FinanceController::class,'show'])->name('finance.entries.show');
     Route::get('/finance/entries/{entry}/edit',[FinanceController::class,'edit'])->name('finance.entries.edit');
     Route::put('/finance/entries/{entry}',[FinanceController::class,'update'])->name('finance.entries.update');
