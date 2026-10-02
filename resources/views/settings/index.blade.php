@@ -679,39 +679,116 @@ foreach($primaryTabs as $key=>$item){
 </form>
 
 @elseif($tab==='users')
-  <section class="editor-panel settings-panel">
-    <div class="settings-panel-head"><div><h2>Usuários e acesso</h2><p>Cadastro, função, status e permissões por área.</p></div></div>
-    <form method="post" action="{{ route('settings.users.store') }}" class="settings-user-create">
-      @csrf
-      <div class="editor-grid cols-12 settings-grid">
-        <label class="field col-3"><span>Nome</span><input name="name" required></label>
-        <label class="field col-3"><span>E-mail</span><input type="email" name="email" required></label>
-        <label class="field col-3"><span>Senha inicial</span><input type="password" name="password" minlength="8" required></label>
-        <label class="field col-3"><span>Função</span><select name="role"><option value="admin">Administrador</option><option value="manager">Gerente</option><option value="finance">Financeiro</option><option value="sales">Vendas</option><option value="operator">Operador</option></select></label>
+  <div class="settings-users-page">
+    <section class="editor-panel settings-panel">
+      <div class="settings-panel-head">
+        <div><h2>Novo usuário</h2><p>Cadastre o acesso e defina quais áreas do Nextor estarão disponíveis.</p></div>
       </div>
-      <div class="permission-grid">@foreach($permissions as $key=>$label)<label><input type="checkbox" name="permissions[]" value="{{ $key }}"><span>{{ $label }}</span></label>@endforeach</div>
-      <button class="btn btn-success" type="submit">@include('partials.icon',['name'=>'plus','size'=>15]) Criar usuário</button>
-    </form>
 
-    <div class="settings-user-list">
-      @foreach($users as $user)
-        <details class="settings-edit-row">
-          <summary><div><strong>{{ $user->name }}</strong><span>{{ $user->email }} · {{ ucfirst($user->role ?? 'admin') }}</span></div><div><span class="status {{ $user->is_active?'status-ok':'status-muted' }}">{{ $user->is_active?'Ativo':'Inativo' }}</span>@include('partials.icon',['name'=>'down','size'=>15])</div></summary>
-          <form method="post" action="{{ route('settings.users.update',$user) }}">
-            @csrf @method('PUT')
-            <div class="editor-grid cols-12 settings-grid">
-              <label class="field col-3"><span>Nome</span><input name="name" value="{{ $user->name }}" required></label>
-              <label class="field col-3"><span>E-mail</span><input type="email" name="email" value="{{ $user->email }}" required></label>
-              <label class="field col-3"><span>Nova senha</span><input type="password" name="password" minlength="8" placeholder="Manter atual"></label>
-              <label class="field col-3"><span>Função</span><select name="role">@foreach(['admin'=>'Administrador','manager'=>'Gerente','finance'=>'Financeiro','sales'=>'Vendas','operator'=>'Operador'] as $k=>$v)<option value="{{ $k }}" @selected(($user->role ?? 'admin')===$k)>{{ $v }}</option>@endforeach</select></label>
-            </div>
-            <div class="permission-grid">@foreach($permissions as $key=>$label)<label><input type="checkbox" name="permissions[]" value="{{ $key }}" @checked(($user->role ?? 'admin')==='admin' || in_array($key,$user->permissions ?? [],true))><span>{{ $label }}</span></label>@endforeach</div>
-            <div class="settings-row-actions"><label class="check-line"><input type="checkbox" name="is_active" value="1" @checked($user->is_active)><span>Usuário ativo</span></label><button class="btn btn-primary">Salvar usuário</button></div>
-          </form>
-        </details>
-      @endforeach
-    </div>
-  </section>
+      <form method="post" action="{{ route('settings.users.store') }}" class="settings-user-form" autocomplete="off">
+        @csrf
+        <div class="editor-grid cols-12 settings-grid">
+          <label class="field col-3"><span>Nome *</span><input name="name" value="{{ old('name') }}" required autocomplete="off"></label>
+          <label class="field col-3"><span>E-mail *</span><input type="email" name="email" value="{{ old('email') }}" required autocomplete="off"></label>
+          <label class="field col-3"><span>Senha inicial *</span><input type="password" name="password" minlength="8" required autocomplete="new-password"></label>
+          <label class="field col-3"><span>Função</span>
+            <select name="role">
+              <option value="admin" @selected(old('role')==='admin')>Administrador</option>
+              <option value="manager" @selected(old('role')==='manager')>Gerente</option>
+              <option value="finance" @selected(old('role')==='finance')>Financeiro</option>
+              <option value="sales" @selected(old('role')==='sales')>Vendas</option>
+              <option value="operator" @selected(old('role')==='operator')>Operador</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="settings-permissions-block">
+          <h3>Permissões</h3>
+          <p>Administrador possui acesso completo. Para os demais perfis, marque as áreas liberadas.</p>
+          <div class="settings-permission-grid">
+            @foreach($permissions as $key=>$label)
+              <label class="check-option">
+                <input type="checkbox" name="permissions[]" value="{{ $key }}" @checked(in_array($key,old('permissions',[]),true))>
+                <span>{{ $label }}</span>
+              </label>
+            @endforeach
+          </div>
+        </div>
+
+        <div class="settings-user-form-actions">
+          <button class="btn btn-success" type="submit">@include('partials.icon',['name'=>'plus','size'=>15]) Criar usuário</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="editor-panel settings-panel">
+      <div class="settings-panel-head settings-users-heading">
+        <div><h2>Usuários cadastrados</h2><p>{{ $users->count() }} {{ $users->count()===1?'usuário cadastrado':'usuários cadastrados' }}.</p></div>
+      </div>
+
+      <div class="settings-user-list">
+        @forelse($users as $user)
+          <details class="settings-user-row" @if(session('edited_user_id')==$user->id) open @endif>
+            <summary>
+              <div class="settings-user-summary-main">
+                <span class="settings-user-avatar">{{ strtoupper(mb_substr($user->name,0,1)) }}</span>
+                <span class="settings-user-summary-text">
+                  <strong>{{ $user->name }}</strong>
+                  <small>{{ $user->email }} · {{ match($user->role ?? 'admin'){ 'manager'=>'Gerente','finance'=>'Financeiro','sales'=>'Vendas','operator'=>'Operador',default=>'Administrador' } }}</small>
+                </span>
+              </div>
+              <div class="settings-user-summary-status">
+                <span class="status {{ $user->is_active?'status-ok':'status-muted' }}">{{ $user->is_active?'Ativo':'Inativo' }}</span>
+                @include('partials.icon',['name'=>'down','size'=>15])
+              </div>
+            </summary>
+
+            <form method="post" action="{{ route('settings.users.update',$user) }}" class="settings-user-edit-form" autocomplete="off">
+              @csrf
+              @method('PUT')
+
+              <div class="editor-grid cols-12 settings-grid">
+                <label class="field col-3"><span>Nome *</span><input name="name" value="{{ $user->name }}" required autocomplete="off"></label>
+                <label class="field col-3"><span>E-mail *</span><input type="email" name="email" value="{{ $user->email }}" required autocomplete="off"></label>
+                <label class="field col-3"><span>Nova senha</span><input type="password" name="password" minlength="8" placeholder="Deixe vazio para manter" autocomplete="new-password"></label>
+                <label class="field col-3"><span>Função</span>
+                  <select name="role">
+                    @foreach(['admin'=>'Administrador','manager'=>'Gerente','finance'=>'Financeiro','sales'=>'Vendas','operator'=>'Operador'] as $k=>$v)
+                      <option value="{{ $k }}" @selected(($user->role ?? 'admin')===$k)>{{ $v }}</option>
+                    @endforeach
+                  </select>
+                </label>
+              </div>
+
+              <div class="settings-permissions-block compact">
+                <h3>Permissões</h3>
+                <div class="settings-permission-grid">
+                  @foreach($permissions as $key=>$label)
+                    <label class="check-option">
+                      <input type="checkbox" name="permissions[]" value="{{ $key }}" @checked(($user->role ?? 'admin')==='admin' || in_array($key,$user->permissions ?? [],true))>
+                      <span>{{ $label }}</span>
+                    </label>
+                  @endforeach
+                </div>
+              </div>
+
+              <div class="settings-user-edit-actions">
+                <label class="switch-field settings-user-active">
+                  <input type="hidden" name="is_active" value="0">
+                  <input type="checkbox" name="is_active" value="1" @checked($user->is_active)>
+                  <span class="switch-track"></span>
+                  <strong>Usuário ativo</strong>
+                </label>
+                <button class="btn btn-success" type="submit">@include('partials.icon',['name'=>'check','size'=>15]) Salvar usuário</button>
+              </div>
+            </form>
+          </details>
+        @empty
+          <div class="empty-state compact">Nenhum usuário cadastrado.</div>
+        @endforelse
+      </div>
+    </section>
+  </div>
 
 @elseif($tab==='integrations')
   <form method="post" action="{{ route('settings.group.update','integrations') }}" class="settings-editor">
