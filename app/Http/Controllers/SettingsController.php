@@ -500,10 +500,11 @@ class SettingsController extends Controller
                 'smtp_from_address'=>['nullable','email','max:255'],
                 'smtp_from_name'=>['nullable','string','max:190'],
                 'api_enabled'=>['nullable','boolean'],
+                'webhook_enabled'=>['nullable','boolean'],
                 'webhook_url'=>['nullable','url','max:2000'],
                 'webhook_secret'=>['nullable','string','max:2000'],
                 'accounting_integration'=>['nullable','string','max:120'],
-            ],['smtp_enabled','api_enabled'],['smtp_password','webhook_secret']],
+            ],['smtp_enabled','api_enabled','webhook_enabled'],['smtp_password','webhook_secret']],
 
             'system'=>[[
                 'rows_per_page'=>['required',Rule::in(['10','25','50','100'])],
@@ -579,7 +580,7 @@ class SettingsController extends Controller
             'integrations'=>[
                 'smtp_enabled'=>false,'smtp_host'=>null,'smtp_port'=>587,'smtp_encryption'=>'tls',
                 'smtp_username'=>null,'smtp_password'=>null,'smtp_from_address'=>null,'smtp_from_name'=>null,
-                'api_enabled'=>false,'webhook_url'=>null,'webhook_secret'=>null,'accounting_integration'=>null,
+                'api_enabled'=>false,'webhook_enabled'=>false,'webhook_url'=>null,'webhook_secret'=>null,'accounting_integration'=>null,
             ],
             'system'=>[
                 'rows_per_page'=>'25','search_delay'=>240,'date_format'=>'d/m/Y',
