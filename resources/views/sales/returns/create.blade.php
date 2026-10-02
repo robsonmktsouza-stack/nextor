@@ -39,7 +39,7 @@
       <div class="return-sale-summary">
         <div><span>Venda</span><strong>#{{ str_pad((string)$sale->id,5,'0',STR_PAD_LEFT) }}</strong></div>
         <div><span>Cliente</span><strong>{{ $sale->customer?->name ?? 'Consumidor não identificado' }}</strong></div>
-        <div><span>Data da venda</span><strong>{{ ($sale->operation_date ?? $sale->created_at)->format('d/m/Y') }}</strong></div>
+        <div><span>Data da venda</span><strong>{{ ($sale->operation_date ?? $sale->created_at)->format(\App\Models\AppSetting::dateFormat()) }}</strong></div>
         <div><span>Valor da venda</span><strong>R$ {{ number_format((float)$sale->total,2,',','.') }}</strong></div>
       </div>
 
