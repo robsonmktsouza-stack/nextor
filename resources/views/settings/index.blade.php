@@ -11,7 +11,7 @@ $tabs=[
   'operations'=>['Operações','sales'],
   'payments'=>['Formas de pagamento','receipt'],
   'pdv'=>['PDV','pdv'],
-  'billing'=>['Cobranças','money'],
+  'billing'=>['Boletos / Cobranças','money'],
   'fiscal'=>['Fiscal','shield'],
   'tax'=>['Tributação','layers'],
   'nfe'=>['NF-e','receipt'],
@@ -20,7 +20,7 @@ $tabs=[
   'cte'=>['CT-e / MDF-e','stock'],
   'accounting'=>['Contábil','services'],
   'users'=>['Usuários','customers'],
-  'integrations'=>['Integrações','layers'],
+  'integrations'=>['API / Integrações','layers'],
   'system'=>['Sistema','settings'],
 ];
 @endphp
