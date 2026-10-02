@@ -31,14 +31,15 @@
   </div>
 
   <div class="grid-filter-panel" id="transfer-filters" @if(!$term) hidden @endif>
-    <form method="get" class="toolbar-filters">
+    <form method="get" action="{{ route('finance.transfers.index') }}" class="toolbar-filters" data-live-search data-live-target="transfers-live-results">
       <input type="hidden" name="month" value="{{ $month }}">
-      <input class="input-filter" name="search" value="{{ $term }}" placeholder="Descrição, conta de origem ou destino">
+      <input type="search" autocomplete="off" class="input-filter" name="search" value="{{ $term }}" placeholder="Descrição, conta de origem ou destino">
       <button class="btn btn-secondary">Filtrar</button>
       @if($term)<a class="btn btn-light" href="{{ route('finance.transfers.index',['month'=>$month]) }}">Limpar</a>@endif
     </form>
   </div>
 
+  <div id="transfers-live-results" data-live-search-results>
   <div class="table-scroll">
     <table class="cms-table">
       <thead><tr><th>Cód</th><th>Data</th><th>Origem</th><th>Destino</th><th>Descrição</th><th>Situação</th><th>Valor</th><th></th></tr></thead>
@@ -69,5 +70,6 @@
     </table>
   </div>
   @include('partials.table-footer',['paginator'=>$transfers])
+  </div>
 </section>
 @endsection
