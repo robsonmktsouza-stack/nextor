@@ -10,8 +10,10 @@
   <header class="cms-topbar">
     <div class="cms-topbar-brand">
       <button class="cms-topbar-icon" type="button" data-sidebar-toggle aria-label="Alternar menu">@include('partials.icon',['name'=>'menu','size'=>20])</button>
-      <div class="cms-logo-mark">@include('partials.icon',['name'=>'shield','size'=>17])</div>
-      <strong class="brand-name">ERP</strong>
+      <a class="brand-home-link" href="{{ route('dashboard') }}" data-tooltip="Abrir dashboard" aria-label="Abrir dashboard">
+        <span class="cms-logo-mark">@include('partials.icon',['name'=>'shield','size'=>17])</span>
+        <strong class="brand-name">ERP</strong>
+      </a>
     </div>
     <div class="topbar-content">
       <div class="command-box">
@@ -38,6 +40,10 @@
           <a href="{{ route('finance.reconciliation.index') }}">Conciliação bancária</a>
         </div>
       </div>
+      <a class="topbar-pdv-shortcut {{ request()->routeIs('pdv.*') ? 'active' : '' }}" href="{{ route('pdv.index') }}" data-tooltip="Abrir PDV">
+        @include('partials.icon',['name'=>'pdv','size'=>18])
+        <span>PDV</span>
+      </a>
       <div class="topbar-spacer"></div>
       <span class="topbar-environment">ADMINISTRAÇÃO</span>
       <details class="user-menu"><summary>
@@ -55,8 +61,9 @@
   <div class="mobile-overlay" id="mobileOverlay" hidden></div>
   <aside class="cms-sidebar" id="sidebar">
     <div class="sidebar-section-label">PRINCIPAL</div>
-    <a href="{{ route('dashboard') }}" class="sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-      @include('partials.icon',['name'=>'panel'])<span>Painel</span></a>
+    <a href="{{ route('finance.dashboard') }}" class="sidebar-link {{ request()->routeIs('finance.*') ? 'active' : '' }}">
+      @include('partials.icon',['name'=>'money'])<span>Financeiro</span></a>
+
     <div class="sidebar-section-label">CADASTROS</div>
     <a href="{{ route('products.index') }}" class="sidebar-link {{ request()->routeIs('products.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'products'])<span>Produtos</span></a>
@@ -64,17 +71,15 @@
       @include('partials.icon',['name'=>'services'])<span>Serviços</span></a>
     <a href="{{ route('customers.index') }}" class="sidebar-link {{ request()->routeIs('customers.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'customers'])<span>Clientes</span></a>
+
     <div class="sidebar-section-label">OPERAÇÕES</div>
-    <a href="{{ route('stock.index') }}" class="sidebar-link {{ request()->routeIs('stock.*') ? 'active' : '' }}">
-      @include('partials.icon',['name'=>'stock'])<span>Estoque</span></a>
-    <a href="{{ route('pdv.index') }}" class="sidebar-link {{ request()->routeIs('pdv.*') ? 'active' : '' }}">
-      @include('partials.icon',['name'=>'pdv'])<span>PDV</span></a>
     <a href="{{ route('sales.index') }}" class="sidebar-link {{ request()->routeIs('sales.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'sales'])<span>Vendas</span></a>
-    <div class="sidebar-section-label">FINANCEIRO</div>
-    <a href="{{ route('finance.dashboard') }}" class="sidebar-link {{ request()->routeIs('finance.*') ? 'active' : '' }}">
-      @include('partials.icon',['name'=>'money'])<span>Financeiro</span></a>
-      </aside>
+    <a href="{{ route('pdv.index') }}" class="sidebar-link {{ request()->routeIs('pdv.*') ? 'active' : '' }}">
+      @include('partials.icon',['name'=>'pdv'])<span>PDV</span></a>
+    <a href="{{ route('stock.index') }}" class="sidebar-link {{ request()->routeIs('stock.*') ? 'active' : '' }}">
+      @include('partials.icon',['name'=>'stock'])<span>Estoque</span></a>
+  </aside>
   <main class="cms-page-shell" id="pageShell">
     <div class="main-content">
       <div class="page-heading">
