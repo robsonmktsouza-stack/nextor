@@ -9,6 +9,7 @@ use Carbon\Carbon;
 class StockController extends Controller {
     public function index(Request $request) {
         $productId=$request->integer('product_id');
+        $term=trim((string)$request->query('search',''));
         $requestedPerPage=$request->integer('per_page');
         if(in_array($requestedPerPage,[10,25,50,100],true)) {
             $request->session()->put('table_per_page',$requestedPerPage);
@@ -29,9 +30,17 @@ class StockController extends Controller {
             ->whereYear('created_at',$period->year)
             ->whereMonth('created_at',$period->month)
             ->when($productId,fn($q)=>$q->where('product_id',$productId))
+            ->when($term,fn($q)=>$q->where(function($search) use($term){
+                $search->where('reason','like',"%{$term}%")
+                    ->orWhere('type','like',"%{$term}%")
+                    ->orWhereHas('product',fn($product)=>$product
+                        ->where('name','like',"%{$term}%")
+                        ->orWhere('sku','like',"%{$term}%"))
+                    ->orWhereHas('user',fn($user)=>$user->where('name','like',"%{$term}%"));
+            }))
             ->orderByDesc('id')->paginate($perPage)->withQueryString();
         $products=Product::orderBy('name')->get(['id','name','sku','stock_quantity','unit']);
-        return view('stock.index',compact('movements','products','productId','month','prevMonth','nextMonth','monthLabel'));
+        return view('stock.index',compact('movements','products','productId','term','month','prevMonth','nextMonth','monthLabel'));
     }
     public function store(Request $request, InventoryService $inventory) {
         $data=$request->validate([
