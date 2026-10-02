@@ -37,8 +37,16 @@ $settingsGroups=[
   ],
 ];
 
+$settingsGroupIcons=[
+  'Empresa'=>'settings',
+  'Comercial'=>'sales',
+  'Financeiro'=>'money',
+  'Fiscal'=>'shield',
+  'Administração'=>'customers',
+];
+
 $activeItem=null;
-$activeGroup=null;
+$activeGroup='Empresa';
 foreach($settingsGroups as $groupName=>$items){
   if(isset($items[$tab])){
     $activeItem=$items[$tab];
@@ -48,53 +56,72 @@ foreach($settingsGroups as $groupName=>$items){
 }
 @endphp
 
-<div class="settings-layout">
-  <aside class="settings-navigation">
-    <div class="settings-navigation-head">
+<section class="settings-menu" data-settings-center>
+  <div class="settings-menu-head">
+    <div class="settings-menu-title">
+      <span class="settings-menu-title-icon">@include('partials.icon',['name'=>'settings','size'=>18])</span>
       <div>
-        <strong>Configurações</strong>
-        <span>Central do Nextor</span>
+        <strong>Central de configurações</strong>
+        <span>Empresa, comercial, financeiro, fiscal e administração</span>
       </div>
-      @include('partials.icon',['name'=>'settings','size'=>19])
     </div>
-
-    <div class="settings-navigation-search">
+    <label class="settings-menu-search">
       @include('partials.icon',['name'=>'search','size'=>15])
-      <input type="search" placeholder="Buscar configuração..." autocomplete="off" data-settings-nav-search>
-    </div>
+      <input type="search" placeholder="Buscar configuração..." autocomplete="off" data-settings-menu-search>
+    </label>
+  </div>
 
-    <nav aria-label="Configurações" data-settings-nav>
-      @foreach($settingsGroups as $groupName=>$items)
-        <section class="settings-nav-group" data-settings-nav-group>
-          <div class="settings-nav-group-title">{{ $groupName }}</div>
-          @foreach($items as $key=>$item)
-            <a href="{{ route('settings.index',['tab'=>$key]) }}"
-               class="settings-nav-link {{ $tab===$key?'active':'' }}"
-               data-settings-nav-item
-               data-settings-search="{{ strtolower($groupName.' '.$item[0].' '.$item[2]) }}">
-              <span class="settings-nav-icon">@include('partials.icon',['name'=>$item[1],'size'=>16])</span>
-              <span class="settings-nav-copy">
-                <strong>{{ $item[0] }}</strong>
-                <small>{{ $item[2] }}</small>
-              </span>
-              @if($tab===$key)<span class="settings-nav-active-dot"></span>@endif
-            </a>
-          @endforeach
-        </section>
-      @endforeach
-      <div class="settings-nav-empty" data-settings-nav-empty hidden>Nenhuma configuração encontrada.</div>
-    </nav>
-  </aside>
+  <nav class="settings-group-menu" aria-label="Grupos de configuração">
+    @foreach($settingsGroups as $groupName=>$items)
+      @php($groupId='settings-group-'.\Illuminate\Support\Str::slug($groupName))
+      <button type="button"
+              class="settings-group-button {{ $activeGroup===$groupName?'active':'' }}"
+              data-settings-group-button="{{ $groupId }}"
+              aria-controls="{{ $groupId }}"
+              aria-expanded="{{ $activeGroup===$groupName?'true':'false' }}">
+        @include('partials.icon',['name'=>$settingsGroupIcons[$groupName] ?? 'settings','size'=>16])
+        <span>{{ $groupName }}</span>
+        <small>{{ count($items) }}</small>
+      </button>
+    @endforeach
+  </nav>
 
-  <main class="settings-page">
-    <header class="settings-content-head">
-      <div class="settings-content-icon">@include('partials.icon',['name'=>$activeItem[1] ?? 'settings','size'=>20])</div>
-      <div>
-        <span>{{ $activeGroup }}</span>
-        <h2>{{ $activeItem[0] ?? 'Configurações' }}</h2>
-        <p>{{ $activeItem[2] ?? 'Preferências do sistema' }}</p>
+  <div class="settings-submenu">
+    @foreach($settingsGroups as $groupName=>$items)
+      @php($groupId='settings-group-'.\Illuminate\Support\Str::slug($groupName))
+      <div class="settings-submenu-panel"
+           id="{{ $groupId }}"
+           data-settings-submenu-panel
+           data-settings-group-name="{{ strtolower($groupName) }}"
+           @if($activeGroup!==$groupName) hidden @endif>
+        @foreach($items as $key=>$item)
+          <a href="{{ route('settings.index',['tab'=>$key]) }}"
+             class="settings-submenu-link {{ $tab===$key?'active':'' }}"
+             data-settings-menu-item
+             data-settings-search="{{ strtolower($groupName.' '.$item[0].' '.$item[2]) }}">
+            <span class="settings-submenu-icon">@include('partials.icon',['name'=>$item[1],'size'=>17])</span>
+            <span>
+              <strong>{{ $item[0] }}</strong>
+              <small>{{ $item[2] }}</small>
+            </span>
+            @if($tab===$key)<span class="settings-submenu-current">@include('partials.icon',['name'=>'check','size'=>13])</span>@endif
+          </a>
+        @endforeach
       </div>
-    </header>
+    @endforeach
+    <div class="settings-menu-empty" data-settings-menu-empty hidden>Nenhuma configuração encontrada.</div>
+  </div>
+</section>
+
+<main class="settings-page">
+  <header class="settings-content-head">
+    <div class="settings-content-icon">@include('partials.icon',['name'=>$activeItem[1] ?? 'settings','size'=>20])</div>
+    <div>
+      <span>{{ $activeGroup }}</span>
+      <h2>{{ $activeItem[0] ?? 'Configurações' }}</h2>
+      <p>{{ $activeItem[2] ?? 'Preferências do sistema' }}</p>
+    </div>
+  </header>
 @if($tab==='general')
   <form method="post" action="{{ route('settings.company.update') }}" enctype="multipart/form-data" class="settings-stack">
     @csrf
@@ -630,6 +657,5 @@ foreach($settingsGroups as $groupName=>$items){
     </section>
   </form>
 @endif
-  </main>
-</div>
+</main>
 @endsection
