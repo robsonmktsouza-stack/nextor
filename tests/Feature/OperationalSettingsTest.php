@@ -1,0 +1,216 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\AppSetting;
+use App\Models\FinancialEntry;
+use App\Models\FiscalDocumentJob;
+use App\Models\PaymentMethod;
+use App\Models\Product;
+use App\Models\User;
+use App\Services\AccountingExportService;
+use App\Services\BillingService;
+use App\Services\SalesService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
+use Tests\TestCase;
+
+class OperationalSettingsTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private function user(): User
+    {
+        return User::create([
+            'name'=>'Administrador',
+            'email'=>'settings@example.com',
+            'password'=>'senhaSegura123',
+        ]);
+    }
+
+    private function product(float $stock=10): Product
+    {
+        return Product::create([
+            'sku'=>'SET001',
+            'name'=>'Produto Configuração',
+            'unit'=>'UN',
+            'usage_type'=>'resale',
+            'cost_price'=>'5.00',
+            'sale_price'=>'100.00',
+            'stock_quantity'=>number_format($stock,3,'.',''),
+            'minimum_stock'=>'1.000',
+            'control_stock'=>true,
+            'is_active'=>true,
+            'origin'=>'0',
+            'ignore_taxes_mode'=>'none',
+        ]);
+    }
+
+    private function saleData(Product $product,string $operation='sale',string $payment='cash',bool $receivable=false): array
+    {
+        return [
+            'operation_type'=>$operation,
+            'operation_date'=>'2026-10-02',
+            'items'=>[[
+                'item_type'=>'product',
+                'product_id'=>$product->id,
+                'quantity'=>'1.000',
+                'unit_price'=>'100.00',
+                'discount'=>'0.00',
+            ]],
+            'payments'=>$operation==='sale' ? [[
+                'amount'=>'100.00',
+                'due_date'=>'2026-10-02',
+                'payment_method'=>$payment,
+                'receivable'=>$receivable,
+            ]] : [],
+        ];
+    }
+
+    public function test_quote_validity_setting_is_applied(): void
+    {
+        AppSetting::put('operations','quote_valid_days',20);
+        $sale=app(SalesService::class)->create(
+            $this->saleData($this->product(),'quote'),
+            $this->user()->id
+        );
+
+        $this->assertSame('2026-10-22',$sale->quote_expires_at->toDateString());
+    }
+
+    public function test_negative_stock_setting_is_enforced_by_inventory_engine(): void
+    {
+        AppSetting::put('inventory','allow_negative_stock',true);
+        $user=$this->user();
+        $product=$this->product(1);
+
+        $data=$this->saleData($product);
+        $data['items'][0]['quantity']='2.000';
+        $data['items'][0]['unit_price']='100.00';
+        $data['payments'][0]['amount']='200.00';
+
+        app(SalesService::class)->create($data,$user->id);
+
+        $this->assertSame('-1.000',$product->fresh()->stock_quantity);
+    }
+
+    public function test_payment_method_fee_generates_financial_expense(): void
+    {
+        $method=PaymentMethod::query()->where('code','cash')->firstOrFail();
+        $method->update(['fee_percent'=>'2.5000','fee_fixed'=>'1.00']);
+
+        app(SalesService::class)->create(
+            $this->saleData($this->product()),
+            $this->user()->id
+        );
+
+        $fee=FinancialEntry::query()->where('source_key','like','payment-fee:%')->firstOrFail();
+
+        $this->assertSame('payable',$fee->type);
+        $this->assertSame('3.50',$fee->amount);
+        $this->assertSame('paid',$fee->status);
+    }
+
+    public function test_enabled_nfe_prepares_fiscal_job_and_reserves_number(): void
+    {
+        AppSetting::put('fiscal','enabled',true);
+        AppSetting::put('nfe','enabled',true);
+        AppSetting::put('nfe','auto_from_sale',true);
+        AppSetting::put('nfe','environment','homologation');
+        AppSetting::put('nfe','series',1);
+        AppSetting::put('nfe','next_number',25);
+
+        $sale=app(SalesService::class)->create(
+            $this->saleData($this->product()),
+            $this->user()->id
+        );
+
+        $job=FiscalDocumentJob::query()->where('sale_id',$sale->id)->where('document_type','nfe')->firstOrFail();
+
+        $this->assertSame('prepared',$job->status);
+        $this->assertSame(25,$job->document_number);
+        $this->assertSame(26,(int)AppSetting::value('nfe','next_number'));
+    }
+
+    public function test_pdv_cash_opening_setting_blocks_sale_without_open_session(): void
+    {
+        AppSetting::put('pdv','require_cash_opening',true);
+        $user=$this->user();
+        $product=$this->product();
+
+        $response=$this->actingAs($user)->post(route('pdv.store'),[
+            'payment_method'=>'cash',
+            'cash_received'=>'100.00',
+            'items'=>[[
+                'item_type'=>'product',
+                'product_id'=>$product->id,
+                'quantity'=>'1.000',
+                'discount'=>'0.00',
+            ]],
+        ]);
+
+        $response->assertSessionHasErrors('cash_session');
+    }
+
+    public function test_billing_settings_generate_pix_copy_and_paste(): void
+    {
+        AppSetting::put('billing','enabled',true);
+        AppSetting::put('billing','pix_key','financeiro@example.com');
+        AppSetting::put('billing','fine_percent','2.0000');
+        AppSetting::put('billing','interest_monthly_percent','1.0000');
+
+        $entry=FinancialEntry::query()->create([
+            'type'=>'receivable',
+            'status'=>'open',
+            'description'=>'Mensalidade',
+            'issue_date'=>'2026-09-01',
+            'competence_date'=>'2026-09-01',
+            'due_date'=>today()->subDays(10)->toDateString(),
+            'amount'=>'100.00',
+            'paid_amount'=>'0.00',
+        ]);
+
+        $summary=app(BillingService::class)->summary($entry);
+
+        $this->assertNotNull($summary);
+        $this->assertNotEmpty($summary['pix_payload']);
+        $this->assertStringStartsWith('00020126',$summary['pix_payload']);
+        $this->assertGreaterThan(100,$summary['charge']);
+    }
+
+    public function test_accounting_export_writes_csv(): void
+    {
+        Storage::fake('local');
+
+        FinancialEntry::query()->create([
+            'type'=>'payable',
+            'status'=>'open',
+            'description'=>'Aluguel',
+            'issue_date'=>'2026-10-02',
+            'competence_date'=>'2026-10-02',
+            'due_date'=>'2026-10-10',
+            'amount'=>'500.00',
+            'paid_amount'=>'0.00',
+            'cost_center'=>'Administrativo',
+        ]);
+
+        $path=app(AccountingExportService::class)->generate('2026-10');
+
+        Storage::disk('local')->assertExists($path);
+        $this->assertStringContainsString('nextor-contabil-2026-10.csv',$path);
+    }
+
+    public function test_api_switch_and_token_protect_endpoints(): void
+    {
+        AppSetting::put('integrations','api_enabled',true);
+        AppSetting::put('integrations','api_token','token-teste-seguro',true);
+        $this->product();
+
+        $this->get('/api/nextor/products')->assertStatus(401);
+
+        $this->withToken('token-teste-seguro')
+            ->get('/api/nextor/products')
+            ->assertOk()
+            ->assertJsonPath('data.0.sku','SET001');
+    }
+}
