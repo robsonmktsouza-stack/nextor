@@ -68,6 +68,8 @@
     const requireCustomer=app.dataset.requireCustomer==='1';
     const allowDiscount=app.dataset.allowDiscount!=='0';
     const showStock=app.dataset.showStock!=='0';
+    const cashOpeningRequired=app.dataset.cashRequired==='1';
+    const cashSessionOpen=app.dataset.cashOpen==='1';
     const state=new Map();
     let currentKind='all';
     let lastResults=[];
@@ -270,8 +272,9 @@
     const updateFinishState=()=>{
       const hasItems=state.size>0;
       const customerReady=!requireCustomer || !!customer.value;
-      finish.disabled=!hasItems || !customerReady;
-      if(actionFinish) actionFinish.disabled=!hasItems || !customerReady;
+      const cashSessionReady=!cashOpeningRequired || cashSessionOpen;
+      finish.disabled=!hasItems || !customerReady || !cashSessionReady;
+      if(actionFinish) actionFinish.disabled=!hasItems || !customerReady || !cashSessionReady;
 
       const hasPayment=!!payment.value;
       actionPayment?.classList.toggle('is-set',hasPayment);
