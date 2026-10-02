@@ -382,11 +382,14 @@ class SettingsController extends Controller
                 'require_customer'=>['nullable','boolean'],
                 'allow_discount'=>['nullable','boolean'],
                 'require_cash_opening'=>['nullable','boolean'],
+                'ask_consumer_document'=>['nullable','boolean'],
+                'allow_split_payment'=>['nullable','boolean'],
+                'allow_cash_movements'=>['nullable','boolean'],
                 'auto_nfce'=>['nullable','boolean'],
                 'show_stock'=>['nullable','boolean'],
                 'receipt_width'=>['required',Rule::in(['58','80'])],
                 'receipt_copies'=>['required','integer','min:1','max:5'],
-            ],['require_customer','allow_discount','require_cash_opening','auto_nfce','show_stock'],[]],
+            ],['require_customer','allow_discount','require_cash_opening','ask_consumer_document','allow_split_payment','allow_cash_movements','auto_nfce','show_stock'],[]],
 
             'billing'=>[[
                 'enabled'=>['nullable','boolean'],
@@ -537,7 +540,8 @@ class SettingsController extends Controller
             ],
             'pdv'=>[
                 'default_payment_method'=>null,'require_customer'=>false,'allow_discount'=>true,
-                'require_cash_opening'=>false,'auto_nfce'=>false,'show_stock'=>true,'receipt_width'=>'80','receipt_copies'=>1,
+                'require_cash_opening'=>false,'ask_consumer_document'=>true,'allow_split_payment'=>true,'allow_cash_movements'=>true,
+                'auto_nfce'=>false,'show_stock'=>true,'receipt_width'=>'80','receipt_copies'=>1,
             ],
             'billing'=>[
                 'enabled'=>false,'provider'=>null,'default_financial_account_id'=>null,'pix_key'=>null,
