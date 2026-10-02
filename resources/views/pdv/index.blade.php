@@ -14,13 +14,13 @@
   </div>
   <div class="pdv-cash-session-actions">
     @if($cashSession && $pdvSettings['allow_cash_movements'])
-      <button type="button" class="pdv-cash-session-action" data-pdv-cash-movement="supply">Suprimento</button>
-      <button type="button" class="pdv-cash-session-action danger" data-pdv-cash-movement="withdrawal">Sangria</button>
+      <button type="button" class="pdv-cash-session-action" data-pdv-cash-movement="supply">Suprimento <kbd>Alt+P</kbd></button>
+      <button type="button" class="pdv-cash-session-action danger" data-pdv-cash-movement="withdrawal">Sangria <kbd>Alt+S</kbd></button>
     @endif
     @if($cashSession)
-      <button type="button" class="pdv-cash-session-action" onclick="document.getElementById('pdvCashCloseDialog').showModal()">Fechar caixa</button>
+      <button type="button" class="pdv-cash-session-action" id="pdvCashCloseButton" onclick="document.getElementById('pdvCashCloseDialog').showModal()">Fechar caixa <kbd>Alt+K</kbd></button>
     @else
-      <button type="button" class="pdv-cash-session-action primary" onclick="document.getElementById('pdvCashOpenDialog').showModal()">Abrir caixa</button>
+      <button type="button" class="pdv-cash-session-action primary" id="pdvCashOpenButton" onclick="document.getElementById('pdvCashOpenDialog').showModal()">Abrir caixa <kbd>Alt+A</kbd></button>
     @endif
   </div>
 </section>
@@ -123,7 +123,11 @@
      data-cash-required="{{ $pdvSettings['require_cash_opening'] ? '1' : '0' }}"
      data-cash-open="{{ $cashSession ? '1' : '0' }}"
      data-ask-consumer-document="{{ $pdvSettings['ask_consumer_document'] ? '1' : '0' }}"
-     data-allow-split-payment="{{ $pdvSettings['allow_split_payment'] ? '1' : '0' }}">
+     data-allow-split-payment="{{ $pdvSettings['allow_split_payment'] ? '1' : '0' }}"
+     data-suspend-url="{{ route('pdv.suspended.store') }}"
+     data-resume-url-template="{{ route('pdv.suspended.resume',['suspendedSale'=>'__ID__']) }}"
+     data-discard-url-template="{{ route('pdv.suspended.destroy',['suspendedSale'=>'__ID__']) }}"
+     data-contingency-active="{{ $nfceContingencyActive ? '1' : '0' }}">
   <section class="pdv-catalog">
     <div class="pdv-search-panel">
       <div class="pdv-search-box">
@@ -343,6 +347,7 @@
   @endif
   <div class="pdv-modal-help">
     <span><kbd>1–9</kbd> Selecionar</span>
+    @if($pdvSettings['allow_split_payment'])<span><kbd>D</kbd> Dividir</span>@endif
     <span><kbd>↑</kbd><kbd>↓</kbd> Navegar</span>
     <span><kbd>Enter</kbd> Confirmar</span>
     <span><kbd>Esc</kbd> Fechar</span>
@@ -368,8 +373,8 @@
     </label>
     <button type="button" class="pdv-consumer-customer" id="pdvConsumerUseCustomer" hidden>Usar documento do cliente selecionado</button>
     <div class="pdv-consumer-actions">
-      <button type="button" class="pdv-consumer-skip" id="pdvConsumerSkip">Sem CPF/CNPJ</button>
-      <button type="button" class="pdv-modal-primary" id="pdvConsumerApply">@include('partials.icon',['name'=>'check','size'=>18]) Confirmar identificação</button>
+      <button type="button" class="pdv-consumer-skip" id="pdvConsumerSkip">Sem CPF/CNPJ <kbd>Esc</kbd></button>
+      <button type="button" class="pdv-modal-primary" id="pdvConsumerApply">@include('partials.icon',['name'=>'check','size'=>18]) Confirmar identificação <kbd>Enter</kbd></button>
     </div>
   </div>
 </dialog>
@@ -470,6 +475,150 @@
   </div>
 </dialog>
 </form>
+
+<dialog class="pdv-quick-modal pdv-operations-modal" id="pdvOperationsModal">
+  <div class="pdv-modal-head">
+    <div>
+      <span>Alt+O</span>
+      <h2>Operações do caixa</h2>
+      <p>Todas as rotinas operacionais também possuem atalho direto.</p>
+    </div>
+    <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+  </div>
+  <div class="pdv-operations-list">
+    <button type="button" data-pdv-operation="suspend"><span><strong>Suspender venda</strong><small>Guarda o carrinho para atender depois.</small></span><kbd>Alt+0</kbd></button>
+    <button type="button" data-pdv-operation="resume"><span><strong>Recuperar venda</strong><small>Retoma uma venda suspensa sem movimentar estoque antes da conclusão.</small></span><kbd>Alt+R</kbd></button>
+    <button type="button" data-pdv-operation="electronic"><span><strong>Cartão / TEF / POS</strong><small>Dados da integração, adquirente, bandeira, autorização e terminal.</small></span><kbd>Alt+T</kbd></button>
+    <button type="button" data-pdv-operation="contingency"><span><strong>Contingência NFC-e</strong><small>Ativa ou encerra a preparação offline de novas NFC-e.</small></span><kbd>Alt+C</kbd></button>
+    <button type="button" data-pdv-operation="cancel-nfce"><span><strong>Cancelamento NFC-e</strong><small>Coloca uma NFC-e autorizada na fila de cancelamento fiscal.</small></span><kbd>Alt+X</kbd></button>
+    @if($pdvSettings['require_cash_opening'])
+      @if($cashSession)
+        <button type="button" data-pdv-operation="close-cash"><span><strong>Fechar caixa</strong><small>Encerra o turno atual.</small></span><kbd>Alt+K</kbd></button>
+        @if($pdvSettings['allow_cash_movements'])
+          <button type="button" data-pdv-operation="supply"><span><strong>Suprimento</strong><small>Entrada manual de dinheiro para reforço de troco.</small></span><kbd>Alt+P</kbd></button>
+          <button type="button" data-pdv-operation="withdrawal"><span><strong>Sangria</strong><small>Retirada manual de dinheiro do caixa.</small></span><kbd>Alt+S</kbd></button>
+        @endif
+      @else
+        <button type="button" data-pdv-operation="open-cash"><span><strong>Abrir caixa</strong><small>Inicia o turno do operador.</small></span><kbd>Alt+A</kbd></button>
+      @endif
+    @endif
+  </div>
+  <div class="pdv-modal-help"><span><kbd>↑</kbd><kbd>↓</kbd> Navegar</span><span><kbd>Enter</kbd> Abrir</span><span><kbd>Esc</kbd> Fechar</span></div>
+</dialog>
+
+<dialog class="pdv-quick-modal pdv-suspend-modal" id="pdvSuspendModal">
+  <div class="pdv-modal-head">
+    <div><span>Alt+0</span><h2>Suspender venda</h2><p>O estoque só será movimentado quando a venda for finalizada.</p></div>
+    <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+  </div>
+  <div class="pdv-operation-body">
+    <div class="pdv-operation-summary"><span>Itens</span><strong id="pdvSuspendItems">0</strong><span>Total</span><strong id="pdvSuspendTotal">R$ 0,00</strong></div>
+    <label><span>Identificação opcional</span><input type="text" id="pdvSuspendLabel" maxlength="190" placeholder="Ex.: Mesa 3, João, orçamento balcão..."></label>
+    <button type="button" class="pdv-modal-primary" id="pdvSuspendApply">Suspender venda <kbd>Enter</kbd></button>
+  </div>
+</dialog>
+
+<dialog class="pdv-quick-modal pdv-recover-modal" id="pdvRecoverModal">
+  <div class="pdv-modal-head">
+    <div><span>Alt+R</span><h2>Recuperar venda suspensa</h2><p>Selecione a venda que deseja devolver ao carrinho.</p></div>
+    <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+  </div>
+  <div class="pdv-suspended-list" id="pdvSuspendedList">
+    @forelse($suspendedSales as $suspended)
+      <div class="pdv-suspended-row" data-suspended-row="{{ $suspended->id }}">
+        <button type="button" class="pdv-suspended-resume"
+                data-suspended-id="{{ $suspended->id }}">
+          <span>
+            <strong>{{ $suspended->label ?: 'Venda suspensa #'.$suspended->id }}</strong>
+            <small>{{ $suspended->item_count }} item(ns) · R$ {{ number_format((float)$suspended->total,2,',','.') }} · {{ $suspended->user?->name }}</small>
+          </span>
+          <time>{{ $suspended->suspended_at?->format('d/m H:i') }}</time>
+        </button>
+        <button type="button" class="pdv-suspended-discard" data-suspended-discard="{{ $suspended->id }}" aria-label="Descartar venda suspensa">@include('partials.icon',['name'=>'trash','size'=>15])</button>
+      </div>
+    @empty
+      <div class="pdv-operation-empty">Nenhuma venda suspensa.</div>
+    @endforelse
+  </div>
+  <div class="pdv-modal-help"><span><kbd>↑</kbd><kbd>↓</kbd> Navegar</span><span><kbd>Enter</kbd> Recuperar</span><span><kbd>Delete</kbd> Descartar</span></div>
+</dialog>
+
+<dialog class="pdv-quick-modal pdv-electronic-modal" id="pdvElectronicPaymentModal">
+  <div class="pdv-modal-head">
+    <div><span>Alt+T</span><h2>Cartão / TEF / POS</h2><p>Dados que acompanham o grupo de pagamento eletrônico da NFC-e.</p></div>
+    <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+  </div>
+  <div class="pdv-electronic-body">
+    <div class="pdv-electronic-target" id="pdvElectronicTarget">Selecione uma forma de pagamento com cartão.</div>
+    <div class="pdv-electronic-grid">
+      <label><span>Integração</span><select id="pdvElectronicIntegration"><option value="">Não informado</option><option value="1">1 — Integrado / TEF / POS integrado</option><option value="2">2 — POS não integrado</option></select></label>
+      <label><span>Bandeira</span><select id="pdvElectronicBrand"><option value="">Não informada</option><option value="01">01 — Visa</option><option value="02">02 — Mastercard</option><option value="03">03 — American Express</option><option value="04">04 — Sorocred</option><option value="05">05 — Diners Club</option><option value="06">06 — Elo</option><option value="07">07 — Hipercard</option><option value="08">08 — Aura</option><option value="09">09 — Cabal</option><option value="99">99 — Outros</option></select></label>
+      <label><span>CNPJ instituição / adquirente</span><input id="pdvElectronicInstitution" inputmode="numeric" maxlength="18" placeholder="Somente números ou formatado"></label>
+      <label><span>Autorização da transação</span><input id="pdvElectronicAuthorization" maxlength="128" placeholder="cAut"></label>
+      <label><span>CNPJ beneficiário</span><input id="pdvElectronicBeneficiary" inputmode="numeric" maxlength="18" placeholder="CNPJReceb"></label>
+      <label><span>Terminal</span><input id="pdvElectronicTerminal" maxlength="40" placeholder="idTermPag"></label>
+      <label><span>CNPJ transacional</span><input id="pdvElectronicTransactionDocument" inputmode="numeric" maxlength="18" placeholder="CNPJPag — opcional"></label>
+      <label><span>UF do pagamento</span><input id="pdvElectronicTransactionState" maxlength="2" placeholder="UFPag"></label>
+    </div>
+    <div class="pdv-operation-note">Esses campos são guardados na venda e seguem para o snapshot fiscal. A exigência final depende das regras da UF e do meio de pagamento.</div>
+    <button type="button" class="pdv-modal-primary" id="pdvElectronicApply">Salvar dados do pagamento <kbd>Ctrl+Enter</kbd></button>
+  </div>
+</dialog>
+
+<dialog class="pdv-quick-modal pdv-contingency-modal" id="pdvContingencyModal">
+  <form method="post" action="{{ route('pdv.nfce.contingency') }}">
+    @csrf
+    <input type="hidden" name="action" value="{{ $nfceContingencyActive ? 'stop' : 'start' }}">
+    <div class="pdv-modal-head">
+      <div><span>Alt+C</span><h2>Contingência NFC-e</h2><p>Controle operacional da emissão offline.</p></div>
+      <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+    </div>
+    <div class="pdv-operation-body">
+      @if($nfceContingencyActive)
+        <div class="pdv-contingency-active">
+          <strong>Contingência offline ativa</strong>
+          <span>{{ $nfceContingencyReason ?: 'Sem motivo registrado' }}</span>
+          @if($nfceContingencyStartedAt)<small>Iniciada em {{ CarbonCarbon::parse($nfceContingencyStartedAt)->format('d/m/Y H:i') }}</small>@endif
+        </div>
+        <div class="pdv-operation-note">Encerrar a contingência afeta apenas novas vendas. As NFC-e já preparadas offline permanecem identificadas para transmissão posterior.</div>
+        <button class="pdv-modal-primary" type="submit">Encerrar contingência <kbd>Ctrl+Enter</kbd></button>
+      @else
+        <label><span>Motivo técnico *</span><textarea name="reason" id="pdvContingencyReason" rows="4" minlength="15" maxlength="255" required placeholder="Ex.: indisponibilidade de comunicação com o autorizador..."></textarea></label>
+        <div class="pdv-operation-note">Use contingência somente quando houver problema técnico que impeça a autorização normal.</div>
+        <button class="pdv-modal-primary" type="submit">Ativar contingência offline <kbd>Ctrl+Enter</kbd></button>
+      @endif
+    </div>
+  </form>
+</dialog>
+
+<dialog class="pdv-quick-modal pdv-cancel-nfce-modal" id="pdvCancelNfceModal">
+  <form method="post" id="pdvCancelNfceForm" action="">
+    @csrf
+    <div class="pdv-modal-head">
+      <div><span>Alt+X</span><h2>Cancelar NFC-e</h2><p>Somente documentos já autorizados podem entrar na fila de cancelamento.</p></div>
+      <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+    </div>
+    <div class="pdv-operation-body">
+      @if($cancelableNfceJobs->isNotEmpty())
+        <label><span>NFC-e autorizada</span>
+          <select id="pdvCancelNfceJob" required>
+            @foreach($cancelableNfceJobs as $job)
+              <option value="{{ $job->id }}" data-cancel-url="{{ route('pdv.nfce.cancel',$job) }}">
+                NFC-e {{ $job->series }}/{{ $job->document_number }} · venda #{{ $job->sale_id }} · R$ {{ number_format((float)($job->sale?->total ?? 0),2,',','.') }}
+              </option>
+            @endforeach
+          </select>
+        </label>
+        <label><span>Justificativa *</span><textarea name="reason" id="pdvCancelNfceReason" rows="4" minlength="15" maxlength="255" required></textarea></label>
+        <div class="pdv-operation-note">O Nextor registra a solicitação na fila fiscal. A efetivação depende do motor fiscal transmitir o evento à SEFAZ.</div>
+        <button class="pdv-modal-primary" type="submit">Colocar cancelamento na fila <kbd>Ctrl+Enter</kbd></button>
+      @else
+        <div class="pdv-operation-empty">Nenhuma NFC-e autorizada disponível para cancelamento.</div>
+      @endif
+    </div>
+  </form>
+</dialog>
+
 @endsection
 
 @push('scripts')
