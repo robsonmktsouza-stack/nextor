@@ -5,12 +5,16 @@
 <title>@yield('title','Painel') — {{ config('app.name') }}</title>
 <link rel="stylesheet" href="{{ asset('css/erp.css') }}">
 <script defer src="{{ asset('js/erp.js') }}"></script>
-</head><body data-live-search-delay="{{ \App\Models\AppSetting::value('system','search_delay',240) }}">
+</head><body
+  class="{{ \App\Models\AppSetting::value('system','compact_mode',true) ? 'system-compact' : 'system-comfortable' }}"
+  data-live-search-delay="{{ \App\Models\AppSetting::value('system','search_delay',240) }}"
+  data-confirm-destructive="{{ \App\Models\AppSetting::value('system','confirm_destructive_actions',true) ? '1' : '0' }}"
+  data-show-tutorials="{{ \App\Models\AppSetting::value('system','show_tutorials',true) ? '1' : '0' }}">
 <div class="app-root" id="appRoot">
   <header class="cms-topbar">
     <div class="cms-topbar-brand">
       <button class="cms-topbar-icon" type="button" data-sidebar-toggle aria-label="Alternar menu">@include('partials.icon',['name'=>'menu','size'=>20])</button>
-      <a class="brand-home-link" href="{{ route('dashboard') }}" data-tooltip="Abrir dashboard" aria-label="Abrir dashboard">
+      <a class="brand-home-link" href="{{ route(auth()->user()->canAccess('dashboard') ? 'dashboard' : auth()->user()->homeRouteName()) }}" data-tooltip="Abrir dashboard" aria-label="Abrir dashboard">
         <span class="cms-logo-mark">@include('partials.icon',['name'=>'shield','size'=>17])</span>
         <strong class="brand-name">ERP</strong>
       </a>
@@ -21,24 +25,30 @@
         <input id="commandSearch" autocomplete="off" placeholder="Buscar no sistema..." aria-label="Buscar páginas">
         <kbd>Ctrl K</kbd>
         <div class="command-results" id="commandResults" hidden>
-          <a href="{{ route('dashboard') }}">Painel geral</a>
-          <a href="{{ route('products.index') }}">Produtos</a>
-          <a href="{{ route('services.index') }}">Serviços</a>
-          <a href="{{ route('stock.index') }}">Movimentações de estoque</a>
-          <a href="{{ route('customers.index') }}">Clientes</a>
-          <a href="{{ route('pdv.index') }}">PDV</a>
-          <a href="{{ route('sales.index') }}">Vendas</a>
-          <a href="{{ route('sales.create') }}">Nova venda</a>
-          <a href="{{ route('sales.returns.index') }}">Devoluções</a>
-          <a href="{{ route('sales.returns.create') }}">Nova devolução</a>
-          <a href="{{ route('finance.dashboard') }}">Financeiro</a>
-          <a href="{{ route('finance.entries',['type'=>'receivable']) }}">Contas a receber</a>
-          <a href="{{ route('finance.entries',['type'=>'payable']) }}">Contas a pagar</a>
-          <a href="{{ route('finance.transfers.index') }}">Transferências financeiras</a>
-          <a href="{{ route('finance.recurrences.index') }}">Recorrências financeiras</a>
-          <a href="{{ route('finance.receipts.index') }}">Recibos</a>
-          <a href="{{ route('finance.reconciliation.index') }}">Conciliação bancária</a>
-          <a href="{{ route('settings.index') }}">Configurações</a>
+          @if(auth()->user()->canAccess('dashboard'))<a href="{{ route('dashboard') }}">Painel geral</a>@endif
+          @if(auth()->user()->canAccess('products'))<a href="{{ route('products.index') }}">Produtos</a>@endif
+          @if(auth()->user()->canAccess('services'))<a href="{{ route('services.index') }}">Serviços</a>@endif
+          @if(auth()->user()->canAccess('stock'))<a href="{{ route('stock.index') }}">Movimentações de estoque</a>@endif
+          @if(auth()->user()->canAccess('customers'))<a href="{{ route('customers.index') }}">Clientes</a>@endif
+          @if(auth()->user()->canAccess('pdv'))<a href="{{ route('pdv.index') }}">PDV</a>@endif
+          @if(auth()->user()->canAccess('sales'))
+            <a href="{{ route('sales.index') }}">Vendas</a>
+            <a href="{{ route('sales.create') }}">Nova venda</a>
+          @endif
+          @if(auth()->user()->canAccess('returns'))
+            <a href="{{ route('sales.returns.index') }}">Devoluções</a>
+            <a href="{{ route('sales.returns.create') }}">Nova devolução</a>
+          @endif
+          @if(auth()->user()->canAccess('finance'))
+            <a href="{{ route('finance.dashboard') }}">Financeiro</a>
+            <a href="{{ route('finance.entries',['type'=>'receivable']) }}">Contas a receber</a>
+            <a href="{{ route('finance.entries',['type'=>'payable']) }}">Contas a pagar</a>
+            <a href="{{ route('finance.transfers.index') }}">Transferências financeiras</a>
+            <a href="{{ route('finance.recurrences.index') }}">Recorrências financeiras</a>
+            <a href="{{ route('finance.receipts.index') }}">Recibos</a>
+            <a href="{{ route('finance.reconciliation.index') }}">Conciliação bancária</a>
+          @endif
+          @if(auth()->user()->canAccess('settings'))<a href="{{ route('settings.index') }}">Configurações</a>@endif
         </div>
       </div>
       @if(auth()->user()->canAccess('pdv'))
@@ -51,7 +61,7 @@
       <span class="topbar-environment">ADMINISTRAÇÃO</span>
       <details class="user-menu"><summary>
         <span class="user-avatar">{{ collect(explode(' ', auth()->user()->name))->filter()->take(2)->map(fn($w) => strtoupper(substr($w,0,1)))->implode('') }}</span>
-        <span class="user-label"><strong>{{ auth()->user()->name }}</strong><small>Administrador</small></span>
+        <span class="user-label"><strong>{{ auth()->user()->name }}</strong><small>{{ match(auth()->user()->role ?? 'admin'){ 'manager'=>'Gerente','finance'=>'Financeiro','sales'=>'Vendas','operator'=>'Operador',default=>'Administrador' } }}</small></span>
         @include('partials.icon',['name'=>'down','size'=>15])
       </summary><div class="user-dropdown">
          <span class="user-dropdown-name">{{ auth()->user()->email }}</span>
