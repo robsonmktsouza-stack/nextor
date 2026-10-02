@@ -10,8 +10,6 @@ return new class extends Migration {
         Schema::table('sales', function (Blueprint $table) {
             $table->string('consumer_document',20)->nullable()->after('customer_id')->index();
             $table->string('consumer_name',190)->nullable()->after('consumer_document');
-            $table->decimal('cash_received',14,2)->nullable()->after('consumer_name');
-            $table->decimal('change_amount',14,2)->default(0)->after('cash_received');
         });
 
         Schema::create('pdv_cash_movements', function (Blueprint $table) {
@@ -32,7 +30,7 @@ return new class extends Migration {
         Schema::dropIfExists('pdv_cash_movements');
 
         Schema::table('sales', function (Blueprint $table) {
-            $table->dropColumn(['consumer_document','consumer_name','cash_received','change_amount']);
+            $table->dropColumn(['consumer_document','consumer_name']);
         });
     }
 };
