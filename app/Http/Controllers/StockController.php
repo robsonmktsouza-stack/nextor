@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
-use App\Models\Product;
+
+use App\Models\AppSetting;use App\Models\Product;
 use App\Models\StockMovement;
 use App\Services\InventoryService;
 use Illuminate\Http\Request;
@@ -10,12 +11,7 @@ class StockController extends Controller {
     public function index(Request $request) {
         $productId=$request->integer('product_id');
         $term=trim((string)$request->query('search',''));
-        $requestedPerPage=$request->integer('per_page');
-        if(in_array($requestedPerPage,[10,25,50,100],true)) {
-            $request->session()->put('table_per_page',$requestedPerPage);
-        }
-        $perPage=(int)$request->session()->get('table_per_page',25);
-        if(!in_array($perPage,[10,25,50,100],true)) $perPage=25;
+        $perPage=AppSetting::tablePerPage($request);
         $month=(string)$request->query('month',now()->format('Y-m'));
         try {
             $period=Carbon::createFromFormat('Y-m',$month)->startOfMonth();
