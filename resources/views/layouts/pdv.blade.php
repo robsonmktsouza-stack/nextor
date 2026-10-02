@@ -32,6 +32,16 @@
     </div>
 
     <div class="pdv-topbar-actions">
+      @if(!empty($nfceContingencyActive))
+        <span class="pdv-topbar-contingency" data-tooltip="Novas NFC-e serão preparadas em contingência offline">
+          NFC-e contingência
+        </span>
+      @endif
+      <button type="button" class="pdv-topbar-button" id="pdvOperations" data-tooltip="Operações do caixa — Alt+O">
+        @include('partials.icon',['name'=>'menu','size'=>17])
+        <span>Operações</span>
+        <kbd>Alt+O</kbd>
+      </button>
       <button type="button" class="pdv-topbar-button" id="pdvFullscreen" data-tooltip="Tela cheia">
         @include('partials.icon',['name'=>'expand','size'=>17])
         <span>Tela cheia</span>
