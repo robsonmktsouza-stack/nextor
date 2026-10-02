@@ -1669,3 +1669,14 @@ input[type="number"]::-webkit-outer-spin-button{
   .return-sale-summary{grid-template-columns:1fr}
   .return-section-title,.return-savebar{align-items:flex-start;flex-direction:column}
 }
+
+
+/* Busca dinâmica global */
+form[data-live-search]{position:relative}
+[data-live-search-results]{transition:opacity .12s ease}
+[data-live-search-results].is-live-loading{opacity:.5;pointer-events:none}
+form[data-live-search].is-live-searching .table-search-group,
+form[data-live-search].is-live-searching .input-filter[name="search"]{position:relative}
+form[data-live-search].is-live-searching .table-search-submit{color:#2877c7}
+form[data-live-search].is-live-searching .table-search-submit svg{animation:nextorLiveSearchPulse .8s ease-in-out infinite alternate}
+@keyframes nextorLiveSearchPulse{from{opacity:.35;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
