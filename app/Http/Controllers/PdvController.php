@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AppSetting;
+use App\Models\CompanySetting;
 use App\Models\Customer;
 use App\Models\PaymentMethod;
 use App\Models\Product;
@@ -42,6 +43,7 @@ class PdvController extends Controller
                 'allow_discount'=>true,
                 'show_stock'=>true,
             ]),
+            'allowNegativeStock'=>(bool)AppSetting::value('operations','allow_negative_stock',false),
         ]);
     }
 
@@ -135,6 +137,19 @@ class PdvController extends Controller
             'items.*.quantity'=>['required','numeric','gt:0','max:9999999999','decimal:0,3'],
             'items.*.discount'=>['nullable','numeric','min:0','max:9999999999.99','decimal:0,2'],
         ]);
+
+        $pdvSettings=AppSetting::groupValues('pdv',[
+            'require_customer'=>false,
+            'allow_discount'=>true,
+        ]);
+
+        if((bool)$pdvSettings['require_customer'] && empty($data['customer_id'])) {
+            throw ValidationException::withMessages(['customer_id'=>'Selecione um cliente para concluir a venda no PDV.']);
+        }
+
+        if(!(bool)$pdvSettings['allow_discount'] && collect($data['items'])->contains(fn($item)=>(float)($item['discount'] ?? 0)>0)) {
+            throw ValidationException::withMessages(['items'=>'Descontos estão desativados nas configurações do PDV.']);
+        }
 
         $paymentMethod=PaymentMethod::query()
             ->where('code',$data['payment_method'])
@@ -264,7 +279,11 @@ class PdvController extends Controller
             'payments',
         ]);
 
-        $paymentLabels=PaymentMethod::query()->orderBy('sort_order')->pluck('name','code')->all();
+        $allPaymentMethods=PaymentMethod::query()->orderBy('sort_order')->get(['code','name','kind']);
+        $paymentLabels=$allPaymentMethods->pluck('name','code')->all();
+        $paymentKinds=$allPaymentMethods->pluck('kind','code')->all();
+        $pdvSettings=AppSetting::groupValues('pdv',['receipt_width'=>'80','receipt_copies'=>1]);
+        $company=CompanySetting::current();
 
         $cashReceived=(float)session('pdv_cash_received',(float)$sale->total);
         $change=(float)session('pdv_change',0);
@@ -274,6 +293,9 @@ class PdvController extends Controller
         return view('pdv.receipt',[
             'sale'=>$sale,
             'paymentLabels'=>$paymentLabels,
+            'paymentKinds'=>$paymentKinds,
+            'pdvSettings'=>$pdvSettings,
+            'company'=>$company,
             'cashReceived'=>$cashReceived,
             'change'=>$change,
         ]);
