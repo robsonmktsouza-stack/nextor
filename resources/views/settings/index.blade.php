@@ -705,11 +705,16 @@ foreach($primaryTabs as $key=>$item){
         <div class="settings-permissions-block">
           <h3>Permissões</h3>
           <p>Administrador possui acesso completo. Para os demais perfis, marque as áreas liberadas.</p>
+          <div class="settings-permissions-toolbar">
+            <button type="button" class="btn btn-light btn-sm" data-permission-all>Marcar todas</button>
+            <button type="button" class="btn btn-light btn-sm" data-permission-none>Limpar</button>
+          </div>
           <div class="settings-permission-grid">
             @foreach($permissions as $key=>$label)
-              <label class="check-option">
+              <label class="permission-switch">
                 <input type="checkbox" name="permissions[]" value="{{ $key }}" @checked(in_array($key,old('permissions',[]),true))>
-                <span>{{ $label }}</span>
+                <span class="permission-switch-track"></span>
+                <span class="permission-switch-label">{{ $label }}</span>
               </label>
             @endforeach
           </div>
@@ -762,11 +767,16 @@ foreach($primaryTabs as $key=>$item){
 
               <div class="settings-permissions-block compact">
                 <h3>Permissões</h3>
+                <div class="settings-permissions-toolbar">
+                  <button type="button" class="btn btn-light btn-sm" data-permission-all>Marcar todas</button>
+                  <button type="button" class="btn btn-light btn-sm" data-permission-none>Limpar</button>
+                </div>
                 <div class="settings-permission-grid">
                   @foreach($permissions as $key=>$label)
-                    <label class="check-option">
+                    <label class="permission-switch">
                       <input type="checkbox" name="permissions[]" value="{{ $key }}" @checked(($user->role ?? 'admin')==='admin' || in_array($key,$user->permissions ?? [],true))>
-                      <span>{{ $label }}</span>
+                      <span class="permission-switch-track"></span>
+                      <span class="permission-switch-label">{{ $label }}</span>
                     </label>
                   @endforeach
                 </div>
