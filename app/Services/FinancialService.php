@@ -152,6 +152,29 @@ class FinancialService
         },3);
     }
 
+    public function reopenManual(FinancialEntry $entry): void
+    {
+        DB::transaction(function () use ($entry) {
+            $locked=FinancialEntry::query()->lockForUpdate()->findOrFail($entry->id);
+
+            if($locked->sale_id!==null) {
+                throw ValidationException::withMessages([
+                    'entry'=>'Lançamentos originados de venda não podem ser reabertos diretamente.'
+                ]);
+            }
+
+            if($locked->status!=='cancelled') {
+                throw ValidationException::withMessages(['entry'=>'Apenas lançamentos cancelados podem ser reabertos.']);
+            }
+
+            $locked->update([
+                'status'=>'open',
+                'paid_amount'=>'0.00',
+                'cancelled_at'=>null,
+            ]);
+        },3);
+    }
+
     public function cancelSale(Sale $sale): void
     {
         $entries=FinancialEntry::query()
