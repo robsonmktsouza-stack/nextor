@@ -144,18 +144,24 @@ body{font-size:9px}
       @php($isCash=($paymentKinds[$payment->payment_method] ?? null)==='cash')
       <div class="row">
         <span>{{ $paymentLabels[$payment->payment_method] ?? 'Outro' }}</span>
-        <strong>R$ {{ $formatMoney($isCash ? $cashReceived : $payment->amount) }}</strong>
+        <strong>R$ {{ $formatMoney($payment->amount) }}</strong>
       </div>
     @endforeach
     @if($paymentIsCash)
+      <div class="row"><span>Recebido em dinheiro</span><strong>R$ {{ $formatMoney($cashReceived) }}</strong></div>
       <div class="row"><span>Troco</span><strong>R$ {{ $formatMoney($change) }}</strong></div>
     @endif
   </section>
 
   <section class="section">
     <div class="row"><span>Cliente</span><strong>{{ $sale->customer?->name ?? 'Consumidor não identificado' }}</strong></div>
-    @if($sale->customer?->document)
-      <div class="row"><span>Documento</span><strong>{{ $sale->customer->document }}</strong></div>
+    @if($sale->consumer_document)
+      <div class="row"><span>CPF/CNPJ na nota</span><strong>{{ $sale->consumer_document }}</strong></div>
+      @if($sale->consumer_name)
+        <div class="row"><span>Consumidor identificado</span><strong>{{ $sale->consumer_name }}</strong></div>
+      @endif
+    @else
+      <div class="row"><span>CPF/CNPJ na nota</span><strong>Não informado</strong></div>
     @endif
   </section>
 
