@@ -24,8 +24,8 @@
   </div>
 
   <div class="grid-filter-panel" id="recurrence-filters" @if(!$term && !$type && !$status) hidden @endif>
-    <form method="get" class="toolbar-filters">
-      <input class="input-filter" name="search" value="{{ $term }}" placeholder="Descrição, contato ou palavra-chave">
+    <form method="get" action="{{ route('finance.recurrences.index') }}" class="toolbar-filters" data-live-search data-live-target="recurrences-live-results">
+      <input type="search" autocomplete="off" class="input-filter" name="search" value="{{ $term }}" placeholder="Descrição, contato ou palavra-chave">
       <select class="input-filter" name="type">
         <option value="">Todos os tipos</option>
         <option value="receivable" @selected($type==='receivable')>Recebimentos</option>
@@ -41,6 +41,7 @@
     </form>
   </div>
 
+  <div id="recurrences-live-results" data-live-search-results>
   <div class="table-scroll">
     <table class="cms-table">
       <thead><tr><th>Cód</th><th>Contato</th><th>Descrição</th><th>A cada</th><th>Início</th><th>Último gerado</th><th>Próximo</th><th>Situação</th><th>Valor</th><th></th></tr></thead>
@@ -67,5 +68,6 @@
     </table>
   </div>
   @include('partials.table-footer',['paginator'=>$recurrences])
+  </div>
 </section>
 @endsection
