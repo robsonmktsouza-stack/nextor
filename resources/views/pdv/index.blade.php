@@ -91,7 +91,7 @@
           @endforeach
         </div>
       @endif
-      <button class="pdv-modal-primary" type="submit" id="pdvCashMovementSubmit">Registrar</button>
+      <button class="pdv-modal-primary" type="submit" id="pdvCashMovementSubmit">Registrar <kbd>Ctrl+Enter</kbd></button>
     </div>
   </form>
 </dialog>
@@ -332,7 +332,7 @@
   </div>
   @if($pdvSettings['allow_split_payment'])
     <div class="pdv-split-payment">
-      <button type="button" class="pdv-split-toggle" id="pdvSplitToggle">Dividir em mais de uma forma</button>
+      <button type="button" class="pdv-split-toggle" id="pdvSplitToggle">Dividir em mais de uma forma <kbd>D</kbd></button>
       <div class="pdv-split-panel" id="pdvSplitPanel" hidden>
         <div class="pdv-split-summary">
           <span>Total <strong id="pdvSplitTotal">R$ 0,00</strong></span>
@@ -341,7 +341,7 @@
         </div>
         <div class="pdv-split-rows" id="pdvSplitRows"></div>
         <p class="pdv-split-help">Com a divisão ativa, clique nas formas de pagamento acima para adicioná-las.</p>
-        <button type="button" class="pdv-modal-primary" id="pdvSplitApply">Aplicar pagamento dividido</button>
+        <button type="button" class="pdv-modal-primary" id="pdvSplitApply">Aplicar pagamento dividido <kbd>Ctrl+Enter</kbd></button>
       </div>
     </div>
   @endif
@@ -371,7 +371,7 @@
       <span>CPF / CNPJ</span>
       <input type="text" maxlength="18" id="pdvConsumerDocumentInput" autocomplete="off" placeholder="Digite somente se solicitado">
     </label>
-    <button type="button" class="pdv-consumer-customer" id="pdvConsumerUseCustomer" hidden>Usar documento do cliente selecionado</button>
+    <button type="button" class="pdv-consumer-customer" id="pdvConsumerUseCustomer" hidden>Usar documento do cliente selecionado <kbd>C</kbd></button>
     <div class="pdv-consumer-actions">
       <button type="button" class="pdv-consumer-skip" id="pdvConsumerSkip">Sem CPF/CNPJ <kbd>Esc</kbd></button>
       <button type="button" class="pdv-modal-primary" id="pdvConsumerApply">@include('partials.icon',['name'=>'check','size'=>18]) Confirmar identificação <kbd>Enter</kbd></button>
@@ -433,7 +433,7 @@
     </label>
 
     <button type="button" class="pdv-cash-exact" id="pdvCashExact">
-      Usar valor exato da venda
+      Usar valor exato da venda <kbd>E</kbd>
     </button>
 
     <div class="pdv-cash-change">
