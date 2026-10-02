@@ -5,7 +5,7 @@
 <title>@yield('title','Painel') — {{ config('app.name') }}</title>
 <link rel="stylesheet" href="{{ asset('css/erp.css') }}">
 <script defer src="{{ asset('js/erp.js') }}"></script>
-</head><body>
+</head><body data-live-search-delay="{{ \App\Models\AppSetting::value('system','search_delay',240) }}">
 <div class="app-root" id="appRoot">
   <header class="cms-topbar">
     <div class="cms-topbar-brand">
@@ -41,10 +41,12 @@
           <a href="{{ route('settings.index') }}">Configurações</a>
         </div>
       </div>
+      @if(auth()->user()->canAccess('pdv'))
       <a class="topbar-pdv-shortcut {{ request()->routeIs('pdv.*') ? 'active' : '' }}" href="{{ route('pdv.index') }}" data-tooltip="Abrir PDV">
         @include('partials.icon',['name'=>'pdv','size'=>18])
         <span>PDV</span>
       </a>
+      @endif
       <div class="topbar-spacer"></div>
       <span class="topbar-environment">ADMINISTRAÇÃO</span>
       <details class="user-menu"><summary>
@@ -62,28 +64,44 @@
   <div class="mobile-overlay" id="mobileOverlay" hidden></div>
   <aside class="cms-sidebar" id="sidebar">
     <div class="sidebar-section-label">PRINCIPAL</div>
+    @if(auth()->user()->canAccess('finance'))
     <a href="{{ route('finance.dashboard') }}" class="sidebar-link {{ request()->routeIs('finance.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'money'])<span>Financeiro</span></a>
+    @endif
 
     <div class="sidebar-section-label">CADASTROS</div>
+    @if(auth()->user()->canAccess('products'))
     <a href="{{ route('products.index') }}" class="sidebar-link {{ request()->routeIs('products.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'products'])<span>Produtos</span></a>
+    @endif
+    @if(auth()->user()->canAccess('services'))
     <a href="{{ route('services.index') }}" class="sidebar-link {{ request()->routeIs('services.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'services'])<span>Serviços</span></a>
+    @endif
+    @if(auth()->user()->canAccess('customers'))
     <a href="{{ route('customers.index') }}" class="sidebar-link {{ request()->routeIs('customers.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'customers'])<span>Clientes</span></a>
+    @endif
 
     <div class="sidebar-section-label">OPERAÇÕES</div>
+    @if(auth()->user()->canAccess('sales'))
     <a href="{{ route('sales.index') }}" class="sidebar-link {{ request()->routeIs('sales.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'sales'])<span>Vendas</span></a>
+    @endif
+    @if(auth()->user()->canAccess('pdv'))
     <a href="{{ route('pdv.index') }}" class="sidebar-link {{ request()->routeIs('pdv.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'pdv'])<span>PDV</span></a>
+    @endif
+    @if(auth()->user()->canAccess('stock'))
     <a href="{{ route('stock.index') }}" class="sidebar-link {{ request()->routeIs('stock.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'stock'])<span>Estoque</span></a>
+    @endif
 
     <div class="sidebar-spacer"></div>
+    @if(auth()->user()->canAccess('settings'))
     <a href="{{ route('settings.index') }}" class="sidebar-link sidebar-settings-link {{ request()->routeIs('settings.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'settings'])<span>Configurações</span></a>
+    @endif
   </aside>
   <main class="cms-page-shell" id="pageShell">
     <div class="main-content">
