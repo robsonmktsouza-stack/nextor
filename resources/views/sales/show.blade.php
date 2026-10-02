@@ -62,7 +62,7 @@
           <tr>
             <td>{{ $payment->installment }}/{{ $sale->payments->count() }}</td>
             <td class="price-strong">R$ {{ number_format((float)$payment->amount,2,',','.') }}</td>
-            <td>{{ $payment->due_date?->format('d/m/Y') ?? '—' }}</td>
+            <td>{{ $payment->due_date?->format(\App\Models\AppSetting::dateFormat()) ?? '—' }}</td>
             <td>{{ $paymentLabels[$payment->payment_method] ?? ($payment->payment_method ?: 'Não informado') }}</td>
             <td>{{ $payment->receivable?'A receber':'Recebido' }}</td>
           </tr>
@@ -84,7 +84,7 @@
         @foreach($saleReturns as $return)
           <tr>
             <td><a class="table-link" href="{{ route('sales.returns.show',$return) }}">#{{ str_pad((string)$return->id,5,'0',STR_PAD_LEFT) }}</a></td>
-            <td>{{ $return->return_date->format('d/m/Y') }}</td>
+            <td>{{ $return->return_date->format(\App\Models\AppSetting::dateFormat()) }}</td>
             <td>{{ $return->items_count }}</td>
             <td class="price-strong">R$ {{ number_format((float)$return->total,2,',','.') }}</td>
             <td><span class="status {{ $return->status==='completed'?'status-ok':'status-muted' }}">{{ $return->status==='completed'?'Concluída':'Cancelada' }}</span></td>
@@ -102,12 +102,12 @@
     <div class="detail-meta">
       <div><span>Tipo</span><strong>{{ $sale->operation_type==='quote'?'Orçamento':'Venda' }}</strong></div>
       <div><span>Cliente</span><strong>{{ $sale->customer?->name ?? 'Consumidor não identificado' }}</strong></div>
-      <div><span>Data</span><strong>{{ ($sale->operation_date ?? $sale->created_at)->format('d/m/Y') }}</strong></div>
+      <div><span>Data</span><strong>{{ ($sale->operation_date ?? $sale->created_at)->format(\App\Models\AppSetting::dateFormat()) }}</strong></div>
       <div><span>Consumidor final</span><strong>{{ $sale->final_consumer?'Sim':'Não' }}</strong></div>
       @if($sale->keyword)<div><span>Palavra-chave</span><strong>{{ $sale->keyword }}</strong></div>@endif
       <div><span>Responsável</span><strong>{{ $sale->user?->name ?? '—' }}</strong></div>
       <div><span>Status</span><strong>{{ $sale->status==='completed'?'Concluída':'Cancelada' }}</strong></div>
-      @if($sale->cancelled_at)<div><span>Cancelada em</span><strong>{{ $sale->cancelled_at->format('d/m/Y H:i') }}</strong></div>@endif
+      @if($sale->cancelled_at)<div><span>Cancelada em</span><strong>{{ $sale->cancelled_at->format(\App\Models\AppSetting::dateFormat().' H:i') }}</strong></div>@endif
       @if($sale->notes)<div><span>Observações</span><strong>{{ $sale->notes }}</strong></div>@endif
     </div>
   </aside>
