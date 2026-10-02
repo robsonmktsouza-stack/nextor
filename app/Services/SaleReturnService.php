@@ -12,11 +12,14 @@ use Illuminate\Validation\ValidationException;
 
 class SaleReturnService
 {
-    public function __construct(private readonly InventoryService $inventory) {}
+    public function __construct(
+        private readonly InventoryService $inventory,
+        private readonly WebhookService $webhooks,
+    ) {}
 
     public function create(array $data, int $userId): SaleReturn
     {
-        return DB::transaction(function () use ($data,$userId) {
+        $return=DB::transaction(function () use ($data,$userId) {
             $sale=Sale::query()->lockForUpdate()->findOrFail((int)$data['sale_id']);
 
             if($sale->operation_type!=='sale') {
@@ -140,6 +143,16 @@ class SaleReturnService
 
             return $return->refresh();
         },3);
+
+        $this->webhooks->queue('sale_return.completed',[
+            'sale_return_id'=>$return->id,
+            'sale_id'=>$return->sale_id,
+            'total'=>(string)$return->total,
+            'return_date'=>optional($return->return_date)->toDateString(),
+            'status'=>$return->status,
+        ]);
+
+        return $return;
     }
 
     public function cancel(SaleReturn $saleReturn, int $userId): void
@@ -170,5 +183,11 @@ class SaleReturnService
 
             $locked->update(['status'=>'cancelled','cancelled_at'=>now()]);
         },3);
+
+        $this->webhooks->queue('sale_return.cancelled',[
+            'sale_return_id'=>$saleReturn->id,
+            'sale_id'=>$saleReturn->sale_id,
+            'status'=>'cancelled',
+        ]);
     }
 }
