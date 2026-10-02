@@ -33,9 +33,9 @@
   </div>
 </div>
 <div class="grid-filter-panel" id="customer-filters" @if(!$term) hidden @endif>
-<form class="toolbar-filters" method="get"><div class="table-search-group"><input name="search" value="{{ $term }}" placeholder="Buscar cliente ou CPF/CNPJ..." aria-label="Buscar clientes"><button type="submit" class="table-search-submit" data-tooltip="Pesquisar" aria-label="Pesquisar">@include('partials.icon',['name'=>'search','size'=>17])</button></div>@if($term)<a class="btn btn-light" href="{{ route('customers.index') }}">Limpar</a>@endif</form>
+<form class="toolbar-filters" method="get" action="{{ route('customers.index') }}" data-live-search data-live-target="customers-live-results"><div class="table-search-group"><input type="search" autocomplete="off" name="search" value="{{ $term }}" placeholder="Buscar cliente ou CPF/CNPJ..." aria-label="Buscar clientes"><button type="submit" class="table-search-submit" data-tooltip="Pesquisar" aria-label="Pesquisar">@include('partials.icon',['name'=>'search','size'=>17])</button></div>@if($term)<a class="btn btn-light" href="{{ route('customers.index') }}">Limpar</a>@endif</form>
 </div>
-<div class="table-scroll"><table class="cms-table"><thead><tr><th class="select-cell"><input type="checkbox" data-check-all aria-label="Selecionar todos"></th><th>Cód.</th><th>Nome</th><th>Documento</th><th>Fone</th><th>Palavras-chave</th><th>Cidade/UF</th><th class="action-cell">Ações</th></tr></thead><tbody>
+<div id="customers-live-results" data-live-search-results><div class="table-scroll"><table class="cms-table"><thead><tr><th class="select-cell"><input type="checkbox" data-check-all aria-label="Selecionar todos"></th><th>Cód.</th><th>Nome</th><th>Documento</th><th>Fone</th><th>Palavras-chave</th><th>Cidade/UF</th><th class="action-cell">Ações</th></tr></thead><tbody>
 @forelse($customers as $customer)<tr>
 <td class="select-cell"><input type="checkbox" data-row-select value="{{ $customer->id }}" aria-label="Selecionar {{ $customer->name }}"></td>
 <td class="nowrap">{{ $customer->id }}</td>
@@ -47,6 +47,6 @@
 <td class="action-cell"><div class="row-actions"><a class="btn-icon" href="{{ route('customers.edit',$customer) }}" data-tooltip="Editar cliente" aria-label="Editar cliente {{ $customer->name }}">@include('partials.icon',['name'=>'edit','size'=>16])</a></div></td>
 </tr>
 @empty<tr><td class="empty-cell" colspan="8">Nenhum cliente encontrado.</td></tr>@endforelse
-</tbody></table></div>@include('partials.table-footer',['paginator'=>$customers])
+</tbody></table></div>@include('partials.table-footer',['paginator'=>$customers])</div>
 </section>
 @endsection
