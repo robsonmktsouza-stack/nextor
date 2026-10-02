@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Models\FinancialAccount;
 use App\Models\FinancialCategory;
 use App\Models\FinancialRecurrence;
+use App\Models\PaymentMethod;
 use App\Services\FinancialRecurrenceService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -48,6 +49,7 @@ class FinancialRecurrenceController extends Controller
             'categories'=>FinancialCategory::query()->where('is_active',true)->orderBy('type')->orderBy('name')->get(),
             'customers'=>Customer::query()->orderBy('name')->get(['id','name','document']),
             'accounts'=>FinancialAccount::query()->where('is_active',true)->orderBy('name')->get(),
+            'paymentMethods'=>PaymentMethod::options(),
         ]);
     }
 
@@ -64,7 +66,7 @@ class FinancialRecurrenceController extends Controller
             'interval_count'=>['required','integer','min:1','max:24'],
             'start_date'=>['required','date'],
             'end_date'=>['nullable','date','after_or_equal:start_date'],
-            'payment_method'=>['nullable',Rule::in(['cash','pix','debit_card','credit_card','bank_slip','bank_transfer','other'])],
+            'payment_method'=>['nullable',Rule::in(array_keys(PaymentMethod::options()))],
             'keywords'=>['nullable','string','max:255'],
             'notes'=>['nullable','string','max:2000'],
         ]);
