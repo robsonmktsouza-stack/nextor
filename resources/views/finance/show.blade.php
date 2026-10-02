@@ -32,7 +32,7 @@
       <div><span>Valor</span><strong>R$ {{ number_format((float)$entry->amount,2,',','.') }}</strong></div>
       <div><span>Baixado</span><strong>R$ {{ number_format((float)$entry->paid_amount,2,',','.') }}</strong></div>
       <div><span>Saldo</span><strong>R$ {{ number_format($entry->balance,2,',','.') }}</strong></div>
-      <div><span>Vencimento</span><strong>{{ $entry->due_date->format('d/m/Y') }}</strong></div>
+      <div><span>Vencimento</span><strong>{{ $entry->due_date->format(\App\Models\AppSetting::dateFormat()) }}</strong></div>
     </div>
 
     @if($billingSummary)
@@ -82,7 +82,7 @@
         <tbody>
         @forelse($entry->settlements as $settlement)
           <tr>
-            <td>{{ $settlement->settled_at->format('d/m/Y') }}</td>
+            <td>{{ $settlement->settled_at->format(\App\Models\AppSetting::dateFormat()) }}</td>
             <td>{{ $settlement->account?->name ?? '—' }}</td>
             <td>{{ $paymentMethods[$settlement->payment_method] ?? 'Não informado' }}</td>
             <td class="price-strong">R$ {{ number_format((float)$settlement->amount,2,',','.') }}</td>
@@ -117,10 +117,10 @@
       <div><span>Tipo</span><strong>{{ $entry->type_label }}</strong></div>
       <div><span>Categoria</span><strong>{{ $entry->category?->name ?? '—' }}</strong></div>
       <div><span>Pessoa</span><strong>{{ $entry->customer?->name ?? '—' }}</strong></div>
-      <div><span>Emissão</span><strong>{{ $entry->issue_date->format('d/m/Y') }}</strong></div>
-      <div><span>Competência</span><strong>{{ $entry->competence_date?->format('d/m/Y') ?? '—' }}</strong></div>
+      <div><span>Emissão</span><strong>{{ $entry->issue_date->format(\App\Models\AppSetting::dateFormat()) }}</strong></div>
+      <div><span>Competência</span><strong>{{ $entry->competence_date?->format(\App\Models\AppSetting::dateFormat()) ?? '—' }}</strong></div>
       <div><span>Conta</span><strong>{{ $entry->account?->name ?? '—' }}</strong></div>
-      @if($entry->credit_date)<div><span>Previsão de crédito</span><strong>{{ $entry->credit_date->format('d/m/Y') }}</strong></div>@endif
+      @if($entry->credit_date)<div><span>Previsão de crédito</span><strong>{{ $entry->credit_date->format(\App\Models\AppSetting::dateFormat()) }}</strong></div>@endif
       @if($entry->keywords)<div><span>Palavras-chave</span><strong>{{ $entry->keywords }}</strong></div>@endif
       @if($entry->cost_center)<div><span>Centro de custo</span><strong>{{ $entry->cost_center }}</strong></div>@endif
       @if($entry->attachment_path)<div><span>Anexo</span><strong><a class="table-link" href="{{ route('finance.entries.attachment',$entry) }}">{{ $entry->attachment_name }}</a></strong></div>@endif
