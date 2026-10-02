@@ -1504,7 +1504,24 @@ input[type="number"]::-webkit-outer-spin-button{
 .finance-module-tabs a{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 17px;border-radius:5px 5px 0 0;background:#526e7d;color:#fff;text-decoration:none;font-size:12px;font-weight:700}
 .finance-module-tabs a:hover{background:#456371}
 .finance-module-tabs a.active{background:#2877c7}
+.finance-module-tabs a.finance-tab-receivable.active{background:#28a965}
+.finance-module-tabs a.finance-tab-payable.active{background:#d95a5f}
+.finance-module-tabs a.finance-tab-transfer.active{background:#c89a00}
+.finance-module-tabs a.finance-tab-recurrence.active{background:#2877c7}
+.finance-module-tabs a.finance-tab-receipt.active{background:#7c36c9}
+.finance-module-tabs a.finance-tab-reconciliation.active{background:#3e82b6}
 .finance-module-tabs .finance-settings-tab{margin-left:auto;padding:0 13px}
+.finance-toolbar-summary{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-left:8px}
+.finance-toolbar-summary span{display:inline-flex;align-items:center;gap:5px;min-height:29px;padding:0 9px;border:1px solid #dce3e8;border-radius:4px;background:#fff;color:#667784;font-size:10.5px}
+.finance-toolbar-summary strong{color:#2f4554;font-size:11px}
+.finance-toolbar-summary .positive strong{color:#218455}
+.finance-toolbar-summary .negative strong{color:#ba4d54}
+.finance-toolbar-summary .neutral strong{color:#326f9d}
+.finance-reconcile-summary{display:flex;gap:8px;flex-wrap:wrap;padding:10px 12px;border-bottom:1px solid #e3e8ec;background:#f8fafb}
+.finance-reconcile-summary span{display:flex;flex-direction:column;gap:2px;min-width:105px;padding:7px 10px;border:1px solid #dde5ea;border-radius:4px;background:#fff;color:#768590;font-size:9.5px;text-transform:uppercase;letter-spacing:.03em}
+.finance-reconcile-summary strong{color:#314957;font-size:12px;text-transform:none;letter-spacing:0}
+.finance-reconcile-summary .positive strong{color:#218455}
+.finance-reconcile-summary .negative strong{color:#ba4d54}
 .finance-operational-card{border-radius:0 0 6px 6px!important}
 .finance-main-table tfoot td{background:#fbfcfd;border-top:1px solid #dde4ea}
 .finance-entry-banner{min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 16px;border-radius:5px 5px 0 0;background:#2877c7;color:#fff}
