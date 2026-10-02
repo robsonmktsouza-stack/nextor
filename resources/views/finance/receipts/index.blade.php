@@ -46,7 +46,7 @@
           <td>#{{ $r->id }}</td>
           <td>{{ $r->recipient_name }}@if($r->recipient_document)<small class="table-subtitle">{{ $r->recipient_document }}</small>@endif</td>
           <td>{{ $r->reference }}</td>
-          <td class="nowrap">{{ $r->receipt_date->format('d/m/Y') }}</td>
+          <td class="nowrap">{{ $r->receipt_date->format(\App\Models\AppSetting::dateFormat()) }}</td>
           <td class="price-strong nowrap">R$ {{ number_format((float)$r->amount,2,',','.') }}</td>
           <td class="action-cell"><a class="btn-icon" href="{{ route('finance.receipts.print',$r) }}" data-tooltip="Abrir / imprimir">@include('partials.icon',['name'=>'print','size'=>16])</a></td>
         </tr>
