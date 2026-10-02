@@ -67,6 +67,7 @@
     const allowNegativeStock=app.dataset.allowNegativeStock==='1';
     const requireCustomer=app.dataset.requireCustomer==='1';
     const allowDiscount=app.dataset.allowDiscount!=='0';
+    const showStock=app.dataset.showStock!=='0';
     const state=new Map();
     let currentKind='all';
     let lastResults=[];
@@ -134,7 +135,7 @@
         if(!canIncrease(existing,next)) return;
         existing.quantity=next;
       }else{
-        if(item.type==='product' && item.control_stock && item.stock<1){
+        if(!allowNegativeStock && item.type==='product' && item.control_stock && item.stock<1){
           notify('Este produto está sem estoque disponível.','warning');
           return;
         }
@@ -492,7 +493,7 @@
       const code=document.createElement('small');
       const parts=[item.code];
       if(item.ean) parts.push(item.ean);
-      if(item.type==='product' && item.control_stock) parts.push('Estoque '+number.format(item.stock)+' '+(item.unit||'UN'));
+      if(showStock && item.type==='product' && item.control_stock) parts.push('Estoque '+number.format(item.stock)+' '+(item.unit||'UN'));
       if(item.type==='service') parts.push('Serviço');
       code.textContent=parts.filter(Boolean).join(' · ');
       info.append(name,code);
