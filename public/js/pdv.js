@@ -637,6 +637,7 @@
     });
 
     payment.addEventListener('change',updatePaymentState);
+    customer.addEventListener('change',updateFinishState);
     const normalizeText=value=>String(value||'')
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g,'')
