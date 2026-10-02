@@ -1,6 +1,7 @@
 <?php
 namespace App\Services;
 
+use App\Models\AppSetting;
 use App\Models\Product;
 use App\Models\StockMovement;
 use Illuminate\Support\Facades\DB;
@@ -44,7 +45,12 @@ class InventoryService
     {
         $old = self::toMills($product->stock_quantity);
         $new = $old + $deltaMills;
-        if ($new < 0) {
+        $allowNegative=(bool)AppSetting::value(
+            'inventory',
+            'allow_negative_stock',
+            AppSetting::value('operations','allow_negative_stock',false)
+        );
+        if ($new < 0 && !$allowNegative) {
             throw ValidationException::withMessages(['items' => 'Estoque insuficiente: '.$product->name.' (disponível: '.self::formatMills($old).' '.$product->unit.').']);
         }
         $product->stock_quantity = self::formatMills($new);
