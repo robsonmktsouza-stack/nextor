@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\AppSetting;
 use App\Models\FinancialAccount;
 use App\Models\FinancialCategory;
 use App\Models\FinancialEntry;
 use App\Models\FinancialSettlement;
+use App\Models\PaymentMethod;
 use App\Models\Sale;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -20,10 +22,10 @@ class FinancialService
 
         $sale->loadMissing(['payments','customer']);
         $category=$this->salesCategory();
-        $defaultAccount=$this->defaultAccount();
         $installments=max(1,$sale->payments->count());
 
         foreach($sale->payments as $payment) {
+            $defaultAccount=$this->defaultAccount($payment->payment_method);
             $entry=FinancialEntry::query()->firstOrCreate(
                 ['sale_payment_id'=>$payment->id],
                 [
@@ -254,14 +256,41 @@ class FinancialService
 
     private function salesCategory(): FinancialCategory
     {
+        $configuredId=(int)AppSetting::value('operations','default_income_category_id',0);
+        if($configuredId>0) {
+            $configured=FinancialCategory::query()
+                ->whereKey($configuredId)
+                ->where('type','income')
+                ->where('is_active',true)
+                ->first();
+            if($configured) return $configured;
+        }
+
         return FinancialCategory::query()->firstOrCreate(
             ['name'=>'Vendas','type'=>'income'],
             ['is_active'=>true],
         );
     }
 
-    private function defaultAccount(): FinancialAccount
+    private function defaultAccount(?string $paymentMethodCode=null): FinancialAccount
     {
+        if($paymentMethodCode) {
+            $method=PaymentMethod::query()
+                ->where('code',$paymentMethodCode)
+                ->with('financialAccount')
+                ->first();
+
+            if($method?->financialAccount?->is_active) {
+                return $method->financialAccount;
+            }
+        }
+
+        $configuredId=(int)AppSetting::value('operations','default_financial_account_id',0);
+        if($configuredId>0) {
+            $configured=FinancialAccount::query()->whereKey($configuredId)->where('is_active',true)->first();
+            if($configured) return $configured;
+        }
+
         return FinancialAccount::query()->where('is_active',true)->orderBy('id')->first()
             ?? FinancialAccount::query()->create([
                 'name'=>'Caixa principal',
