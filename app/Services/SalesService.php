@@ -152,6 +152,8 @@ class SalesService
 
             $sale=Sale::create([
                 'customer_id'=>$data['customer_id'] ?? null,
+                'consumer_document'=>$data['consumer_document'] ?? null,
+                'consumer_name'=>$data['consumer_name'] ?? null,
                 'user_id'=>$userId,
                 'operation_type'=>$operationType,
                 'source'=>$data['source'] ?? 'manual',
