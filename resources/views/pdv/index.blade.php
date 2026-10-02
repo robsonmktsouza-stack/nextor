@@ -418,7 +418,7 @@
 
   <div class="pdv-cash-modal-body">
     <div class="pdv-cash-total">
-      <span>Total da venda</span>
+      <span>Parcela em dinheiro</span>
       <strong id="pdvCashModalTotal">R$ 0,00</strong>
     </div>
 
