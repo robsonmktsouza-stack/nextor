@@ -2,7 +2,7 @@
 @section('title',($sale->operation_type==='quote'?'Orçamento ':'Venda ').'#'.str_pad($sale->id,5,'0',STR_PAD_LEFT))
 @section('actions')
 <a class="btn btn-secondary" href="{{ route('sales.index') }}">@include('partials.icon',['name'=>'arrow-left','size'=>16]) Voltar</a>
-@if($sale->operation_type==='sale' && $sale->status==='completed')
+@if(auth()->user()->canAccess('returns') && $sale->operation_type==='sale' && $sale->status==='completed')
 <a class="btn btn-primary" href="{{ route('sales.returns.create',['sale'=>$sale->id]) }}">@include('partials.icon',['name'=>'return','size'=>16]) Nova devolução</a>
 @endif
 @if($sale->status==='completed')
@@ -63,7 +63,7 @@
             <td>{{ $payment->installment }}/{{ $sale->payments->count() }}</td>
             <td class="price-strong">R$ {{ number_format((float)$payment->amount,2,',','.') }}</td>
             <td>{{ $payment->due_date?->format('d/m/Y') ?? '—' }}</td>
-            <td>{{ match($payment->payment_method){'cash'=>'Dinheiro','pix'=>'PIX','debit_card'=>'Cartão de débito','credit_card'=>'Cartão de crédito','bank_slip'=>'Boleto','bank_transfer'=>'Transferência','other'=>'Outro',default=>'Não informado'} }}</td>
+            <td>{{ $paymentLabels[$payment->payment_method] ?? ($payment->payment_method ?: 'Não informado') }}</td>
             <td>{{ $payment->receivable?'A receber':'Recebido' }}</td>
           </tr>
         @endforeach
@@ -72,7 +72,7 @@
     </div>
     @endif
 
-    @if($saleReturns->isNotEmpty())
+    @if(auth()->user()->canAccess('returns') && $saleReturns->isNotEmpty())
     <div class="card-header">
       <div><h2>Devoluções</h2><p>{{ $saleReturns->count() }} registro(s) vinculados a esta venda</p></div>
       <a class="minor-link" href="{{ route('sales.returns.index',['search'=>$sale->id]) }}">Ver todas</a>
