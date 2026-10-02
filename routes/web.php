@@ -13,6 +13,7 @@ use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SaleReturnController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\StockController;
+use App\Http\Controllers\SettingsController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard');
@@ -102,6 +103,16 @@ Route::middleware('auth')->group(function () {
     Route::post('/finance/reconciliation/transactions/{transaction}/unmatch',[FinancialReconciliationController::class,'unmatch'])->name('finance.reconciliation.unmatch');
 
     Route::get('/finance/entries/{entry}/attachment',[FinanceController::class,'attachment'])->name('finance.entries.attachment');
+
+    Route::get('/settings',[SettingsController::class,'index'])->name('settings.index');
+    Route::post('/settings/company',[SettingsController::class,'updateCompany'])->name('settings.company.update');
+    Route::post('/settings/group/{group}',[SettingsController::class,'updateGroup'])->name('settings.group.update');
+    Route::post('/settings/certificate',[SettingsController::class,'uploadCertificate'])->name('settings.certificate.upload');
+    Route::delete('/settings/certificate',[SettingsController::class,'removeCertificate'])->name('settings.certificate.remove');
+    Route::post('/settings/payment-methods',[SettingsController::class,'storePaymentMethod'])->name('settings.payment-methods.store');
+    Route::put('/settings/payment-methods/{paymentMethod}',[SettingsController::class,'updatePaymentMethod'])->name('settings.payment-methods.update');
+    Route::post('/settings/users',[SettingsController::class,'storeUser'])->name('settings.users.store');
+    Route::put('/settings/users/{user}',[SettingsController::class,'updateUser'])->name('settings.users.update');
 
     Route::get('/finance/settings',[FinanceController::class,'settings'])->name('finance.settings');
     Route::post('/finance/categories',[FinanceController::class,'storeCategory'])->name('finance.categories.store');
