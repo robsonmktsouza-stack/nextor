@@ -31,16 +31,23 @@ class SettingsModuleTest extends TestCase
 
     public function test_admin_can_open_complete_settings_center(): void
     {
-        $this->actingAs($this->admin())
+        $admin=$this->admin();
+
+        $this->actingAs($admin)
             ->get(route('settings.index'))
             ->assertOk()
             ->assertSee('Plano de contas')
+            ->assertSee('Fiscal')
+            ->assertSee('Tributação')
+            ->assertSee('Contábil');
+
+        $this->actingAs($admin)
+            ->get(route('settings.index',['tab'=>'fiscal']))
+            ->assertOk()
             ->assertSee('NF-e')
             ->assertSee('NFC-e')
             ->assertSee('NFS-e')
-            ->assertSee('CT-e / MDF-e')
-            ->assertSee('Tributação')
-            ->assertSee('Contábil');
+            ->assertSee('CT-e / MDF-e');
     }
 
     public function test_company_settings_are_persisted(): void
