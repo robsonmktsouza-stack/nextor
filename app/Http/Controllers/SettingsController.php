@@ -17,8 +17,10 @@ use Illuminate\Validation\ValidationException;
 class SettingsController extends Controller
 {
     public const TABS=[
-        'general','chart','accounts','operations','payments','pdv','billing',
-        'fiscal','tax','nfe','nfce','nfse','cte','accounting','users','integrations','system',
+        'general','printing','catalog','operations','inventory','pdv',
+        'chart','accounts','payments','billing',
+        'fiscal','tax','nfe','nfce','nfse','cte',
+        'accounting','users','integrations','system',
     ];
 
     public const PERMISSIONS=[
@@ -48,7 +50,12 @@ class SettingsController extends Controller
             'paymentMethods'=>PaymentMethod::query()->with('financialAccount')->orderBy('sort_order')->orderBy('name')->get(),
             'users'=>User::query()->orderBy('name')->get(),
             'permissions'=>self::PERMISSIONS,
+            'catalog'=>AppSetting::groupValues('catalog',$this->defaults('catalog')),
             'operations'=>AppSetting::groupValues('operations',$this->defaults('operations')),
+            'inventory'=>AppSetting::groupValues('inventory',array_replace(
+                $this->defaults('inventory'),
+                ['allow_negative_stock'=>(bool)AppSetting::value('operations','allow_negative_stock',false)]
+            )),
             'pdv'=>AppSetting::groupValues('pdv',$this->defaults('pdv')),
             'billing'=>AppSetting::groupValues('billing',$this->defaults('billing')),
             'fiscal'=>AppSetting::groupValues('fiscal',$this->defaults('fiscal')),
@@ -106,6 +113,28 @@ class SettingsController extends Controller
         return redirect()->route('settings.index',['tab'=>'general'])->with('success','Configurações gerais salvas.');
     }
 
+    public function updatePrinting(Request $request)
+    {
+        $data=$request->validate([
+            'print_header'=>['nullable','string','max:5000'],
+            'print_footer'=>['nullable','string','max:5000'],
+            'logo'=>['nullable','image','mimes:jpg,jpeg,png,webp','max:4096'],
+        ]);
+
+        $company=CompanySetting::current();
+        $data['show_currency_prefix']=$request->boolean('show_currency_prefix');
+
+        if($request->hasFile('logo')) {
+            if($company->logo_path) Storage::disk('public')->delete($company->logo_path);
+            $data['logo_path']=$request->file('logo')->store('company','public');
+        }
+
+        unset($data['logo']);
+        $company->update($data);
+
+        return redirect()->route('settings.index',['tab'=>'printing'])->with('success','Configurações de impressão salvas.');
+    }
+
     public function updateGroup(Request $request,string $group)
     {
         [$rules,$booleanKeys,$secretKeys]=$this->groupRules($group);
@@ -130,9 +159,10 @@ class SettingsController extends Controller
         }
 
         $tab=match($group){
-            'operations'=>'operations','pdv'=>'pdv','billing'=>'billing','fiscal'=>'fiscal',
-            'tax'=>'tax','nfe'=>'nfe','nfce'=>'nfce','nfse'=>'nfse','cte'=>'cte',
-            'accounting'=>'accounting','integrations'=>'integrations','system'=>'system',
+            'catalog'=>'catalog','operations'=>'operations','inventory'=>'inventory','pdv'=>'pdv',
+            'billing'=>'billing','fiscal'=>'fiscal','tax'=>'tax','nfe'=>'nfe','nfce'=>'nfce',
+            'nfse'=>'nfse','cte'=>'cte','accounting'=>'accounting','integrations'=>'integrations',
+            'system'=>'system',
             default=>'general',
         };
 
@@ -284,9 +314,32 @@ class SettingsController extends Controller
     private function groupRules(string $group): array
     {
         return match($group) {
+            'catalog'=>[[
+                'product_unit'=>['required','string','max:12'],
+                'product_usage_type'=>['required',Rule::in(['resale','consumption','raw_material','fixed_asset','packaging','other'])],
+                'product_control_stock'=>['nullable','boolean'],
+                'product_minimum_stock'=>['required','numeric','min:0','max:9999999999','decimal:0,3'],
+                'new_products_active'=>['nullable','boolean'],
+                'new_services_active'=>['nullable','boolean'],
+            ],['product_control_stock','new_products_active','new_services_active'],[]],
+
+            'inventory'=>[[
+                'allow_negative_stock'=>['nullable','boolean'],
+                'minimum_stock_alerts'=>['nullable','boolean'],
+                'stock_decimal_places'=>['required',Rule::in(['0','1','2','3'])],
+                'default_adjustment_reason'=>['nullable','string','max:255'],
+            ],['allow_negative_stock','minimum_stock_alerts'],[]],
+
+            'catalog'=>[
+                'product_unit'=>'UN','product_usage_type'=>'resale','product_control_stock'=>true,
+                'product_minimum_stock'=>'0.000','new_products_active'=>true,'new_services_active'=>true,
+            ],
+            'inventory'=>[
+                'allow_negative_stock'=>false,'minimum_stock_alerts'=>true,
+                'stock_decimal_places'=>'3','default_adjustment_reason'=>null,
+            ],
             'operations'=>[[
                 'default_final_consumer'=>['nullable','boolean'],
-                'allow_negative_stock'=>['nullable','boolean'],
                 'auto_finance_sale'=>['nullable','boolean'],
                 'allow_partial_return'=>['nullable','boolean'],
                 'quote_valid_days'=>['required','integer','min:0','max:3650'],
@@ -294,7 +347,7 @@ class SettingsController extends Controller
                 'default_financial_account_id'=>['nullable','integer','exists:financial_accounts,id'],
                 'default_income_category_id'=>['nullable','integer','exists:financial_categories,id'],
                 'default_expense_category_id'=>['nullable','integer','exists:financial_categories,id'],
-            ],['default_final_consumer','allow_negative_stock','auto_finance_sale','allow_partial_return'],[]],
+            ],['default_final_consumer','auto_finance_sale','allow_partial_return'],[]],
 
             'pdv'=>[[
                 'default_payment_method'=>['nullable','string','exists:payment_methods,code'],
@@ -441,7 +494,7 @@ class SettingsController extends Controller
     {
         return match($group) {
             'operations'=>[
-                'default_final_consumer'=>true,'allow_negative_stock'=>false,'auto_finance_sale'=>true,
+                'default_final_consumer'=>true,'auto_finance_sale'=>true,
                 'allow_partial_return'=>true,'quote_valid_days'=>15,'default_due_days'=>0,
                 'default_financial_account_id'=>null,'default_income_category_id'=>null,'default_expense_category_id'=>null,
             ],
