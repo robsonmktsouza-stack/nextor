@@ -6,6 +6,12 @@ class User extends Authenticatable {
     use Notifiable;
     protected $fillable = ['name','email','password','role','is_active','permissions'];
     protected $hidden = ['password','remember_token'];
+
+    protected $attributes = [
+        'role'=>'admin',
+        'is_active'=>true,
+        'permissions'=>null,
+    ];
     protected function casts(): array {
         return [
             'password'=>'hashed',
