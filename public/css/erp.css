@@ -1916,3 +1916,84 @@ body[data-show-tutorials="0"] [data-tutorial]{display:none!important}
   .settings-savebar,.app-root.sidebar-collapsed .settings-savebar{left:0}
   .settings-switch-grid{grid-template-columns:1fr}
 }
+
+
+/* Usuários em Configurações — mesmo padrão dos editores */
+.settings-users-page{display:grid;gap:14px}
+.settings-user-form{display:grid;gap:18px}
+.settings-user-form-actions{display:flex;justify-content:flex-end;padding-top:2px}
+.settings-users-heading{margin-bottom:10px}
+
+.settings-permissions-block{
+  padding-top:16px;border-top:1px solid #d9dee4
+}
+.settings-permissions-block.compact{margin-top:18px;padding-top:16px}
+.settings-permissions-block h3{
+  margin:0 0 4px;font-size:13px;font-weight:600;color:#596676
+}
+.settings-permissions-block>p{
+  margin:0 0 10px;color:#7f8b98;font-size:10.5px;line-height:1.45
+}
+.settings-permission-grid{
+  display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px 12px
+}
+.settings-permission-grid .check-option{
+  min-height:32px;padding:0;background:transparent
+}
+.settings-permission-grid .check-option span{
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap
+}
+
+.settings-user-list{
+  margin:0;border:1px solid #d6dde4;border-radius:4px;overflow:hidden;background:#fff
+}
+.settings-user-row{border-bottom:1px solid #dfe4e9;background:#fff}
+.settings-user-row:last-child{border-bottom:0}
+.settings-user-row>summary{
+  min-height:56px;display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:8px 12px;list-style:none;cursor:pointer;background:#f8f9fa
+}
+.settings-user-row>summary::-webkit-details-marker{display:none}
+.settings-user-row>summary:hover{background:#f2f4f6}
+.settings-user-row[open]>summary{background:#e9edf1;border-bottom:1px solid #d7dde4}
+.settings-user-summary-main{display:flex;align-items:center;gap:10px;min-width:0}
+.settings-user-avatar{
+  width:32px;height:32px;display:grid;place-items:center;flex:0 0 32px;border-radius:50%;
+  background:#dfe8f0;color:#4f6b82;font-size:12px;font-weight:700
+}
+.settings-user-summary-text{display:flex;flex-direction:column;gap:2px;min-width:0}
+.settings-user-summary-text strong{font-size:12px;color:#34485b}
+.settings-user-summary-text small{font-size:10px;color:#8491a0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.settings-user-summary-status{display:flex;align-items:center;gap:10px;color:#7f8c99}
+.settings-user-row[open] .settings-user-summary-status svg{transform:rotate(180deg)}
+.settings-user-summary-status svg{transition:transform .15s}
+
+.settings-user-edit-form{
+  padding:18px;background:#f1f2f4
+}
+.settings-user-edit-actions{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin-top:18px;padding-top:16px;border-top:1px solid #d7dde4
+}
+.settings-user-active{width:220px;background:#e8eaec}
+
+.settings-users-page input:-webkit-autofill,
+.settings-users-page input:-webkit-autofill:hover,
+.settings-users-page input:-webkit-autofill:focus{
+  -webkit-text-fill-color:#4b5969;
+  -webkit-box-shadow:0 0 0 1000px #fff inset;
+  transition:background-color 9999s ease-out 0s
+}
+
+@media(max-width:1250px){
+  .settings-permission-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media(max-width:900px){
+  .settings-permission-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:760px){
+  .settings-permission-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .settings-user-edit-actions{align-items:stretch;flex-direction:column}
+  .settings-user-active{width:100%}
+  .settings-user-edit-actions .btn{width:100%}
+}
