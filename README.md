@@ -75,3 +75,10 @@ vendor/                 Laravel e dependências PHP
 - Por motivos de segurança, nenhuma conta de usuário ou senha padrão acompanha o pacote.
 - Para produtos em quilo, metro e similares, a quantidade é mantida com três casas decimais.
 - Ao publicar o software, verifique a licença das dependências e de quaisquer arquivos derivados da referência visual.
+
+
+## Motor fiscal nativo arquivado
+
+O motor NFC-e próprio desenvolvido experimentalmente foi retirado do runtime antes de uso em produção. O snapshot foi preservado em `archive/nextor-native-nfce-2026-10-02.zip`.
+
+O PDV permanece com comprovante interno sem valor fiscal. A futura integração fiscal será feita por uma camada/adaptador separado.
