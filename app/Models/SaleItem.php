@@ -3,6 +3,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SaleItem extends Model {
     public $timestamps=false;
@@ -23,4 +24,5 @@ class SaleItem extends Model {
 
     public function product(): BelongsTo { return $this->belongsTo(Product::class); }
     public function service(): BelongsTo { return $this->belongsTo(Service::class); }
+    public function returnItems(): HasMany { return $this->hasMany(SaleReturnItem::class); }
 }
