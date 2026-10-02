@@ -8,11 +8,13 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RequirePermission
 {
-    public function handle(Request $request, Closure $next, string $permission): Response
+    public function handle(Request $request, Closure $next, string $permission, string ...$alternatives): Response
     {
         $user=$request->user();
+        $permissions=array_merge([$permission],$alternatives);
+        $allowed=$user && $user->is_active && collect($permissions)->contains(fn($item)=>$user->canAccess($item));
 
-        abort_unless($user && $user->is_active && $user->canAccess($permission),403,'Você não possui permissão para acessar esta área.');
+        abort_unless($allowed,403,'Você não possui permissão para acessar esta área.');
 
         return $next($request);
     }
