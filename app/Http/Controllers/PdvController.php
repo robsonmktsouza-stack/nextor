@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AppSetting;
 use App\Models\Customer;
+use App\Models\PaymentMethod;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\Service;
@@ -10,6 +12,7 @@ use App\Services\InventoryService;
 use App\Services\SalesService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class PdvController extends Controller
@@ -27,6 +30,18 @@ class PdvController extends Controller
                 ->latest('id')
                 ->limit(6)
                 ->get(['id','customer_id','total','status','completed_at','created_at']),
+            'paymentMethods'=>PaymentMethod::query()
+                ->where('is_active',true)
+                ->where('pdv_enabled',true)
+                ->orderBy('sort_order')
+                ->orderBy('name')
+                ->get(),
+            'pdvSettings'=>AppSetting::groupValues('pdv',[
+                'default_payment_method'=>null,
+                'require_customer'=>false,
+                'allow_discount'=>true,
+                'show_stock'=>true,
+            ]),
         ]);
     }
 
@@ -110,7 +125,7 @@ class PdvController extends Controller
     {
         $data=$request->validate([
             'customer_id'=>['nullable','integer','exists:customers,id'],
-            'payment_method'=>['required','in:cash,pix,debit_card,credit_card,bank_slip,bank_transfer,other'],
+            'payment_method'=>['required',Rule::exists('payment_methods','code')->where(fn($q)=>$q->where('is_active',true)->where('pdv_enabled',true))],
             'cash_received'=>['nullable','numeric','min:0','max:9999999999.99','decimal:0,2'],
             'notes'=>['nullable','string','max:2000'],
             'items'=>['required','array','min:1','max:150'],
@@ -120,6 +135,15 @@ class PdvController extends Controller
             'items.*.quantity'=>['required','numeric','gt:0','max:9999999999','decimal:0,3'],
             'items.*.discount'=>['nullable','numeric','min:0','max:9999999999.99','decimal:0,2'],
         ]);
+
+        $paymentMethod=PaymentMethod::query()
+            ->where('code',$data['payment_method'])
+            ->where('is_active',true)
+            ->where('pdv_enabled',true)
+            ->firstOrFail();
+
+        $isCash=$paymentMethod->kind==='cash';
+        $isReceivable=$paymentMethod->kind==='bank_slip' || $paymentMethod->settlement_days>0;
 
         $productIds=collect($data['items'])
             ->where('item_type','product')
@@ -195,7 +219,7 @@ class PdvController extends Controller
         $total=$totalCents/100;
         $cashReceived=(float)($data['cash_received'] ?? 0);
 
-        if($data['payment_method']==='cash' && $cashReceived+0.0001<$total) {
+        if($isCash && $cashReceived+0.0001<$total) {
             throw ValidationException::withMessages([
                 'cash_received'=>'O valor recebido é menor que o total da venda.',
             ]);
@@ -212,20 +236,20 @@ class PdvController extends Controller
             'items'=>$rows,
             'payments'=>[[
                 'amount'=>number_format($total,2,'.',''),
-                'due_date'=>now()->toDateString(),
+                'due_date'=>now()->copy()->addDays($paymentMethod->settlement_days)->toDateString(),
                 'payment_method'=>$data['payment_method'],
-                'receivable'=>$data['payment_method']==='bank_slip',
+                'receivable'=>$isReceivable,
             ]],
         ],(int)$request->user()->id);
 
-        $change=$data['payment_method']==='cash'
+        $change=$isCash
             ? max(0,$cashReceived-(float)$sale->total)
             : 0;
 
         return redirect()
             ->route('pdv.receipt',$sale)
             ->with('pdv_last_sale',$sale->id)
-            ->with('pdv_cash_received',$data['payment_method']==='cash' ? $cashReceived : $total)
+            ->with('pdv_cash_received',$isCash ? $cashReceived : $total)
             ->with('pdv_change',$change);
     }
 
@@ -240,15 +264,7 @@ class PdvController extends Controller
             'payments',
         ]);
 
-        $paymentLabels=[
-            'cash'=>'Dinheiro',
-            'pix'=>'PIX',
-            'debit_card'=>'Cartão de débito',
-            'credit_card'=>'Cartão de crédito',
-            'bank_slip'=>'Boleto',
-            'bank_transfer'=>'Transferência',
-            'other'=>'Outro',
-        ];
+        $paymentLabels=PaymentMethod::query()->orderBy('sort_order')->pluck('name','code')->all();
 
         $cashReceived=(float)session('pdv_cash_received',(float)$sale->total);
         $change=(float)session('pdv_change',0);
