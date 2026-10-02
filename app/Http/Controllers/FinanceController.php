@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AppSetting;
 use App\Models\Customer;
 use App\Models\FinancialAccount;
 use App\Models\FinancialCategory;
 use App\Models\FinancialEntry;
 use App\Models\FinancialSettlement;
+use App\Models\PaymentMethod;
 use App\Services\FinancialBalanceService;
 use App\Services\FinancialService;
 use Carbon\Carbon;
@@ -64,8 +66,10 @@ class FinanceController extends Controller
         $categoryId=$request->integer('category_id');
         $requestedPerPage=$request->integer('per_page');
         if(in_array($requestedPerPage,[10,25,50,100],true)) $request->session()->put('table_per_page',$requestedPerPage);
-        $perPage=(int)$request->session()->get('table_per_page',25);
-        if(!in_array($perPage,[10,25,50,100],true)) $perPage=25;
+        $defaultPerPage=(int)AppSetting::value('system','rows_per_page',25);
+        if(!in_array($defaultPerPage,[10,25,50,100],true)) $defaultPerPage=25;
+        $perPage=(int)$request->session()->get('table_per_page',$defaultPerPage);
+        if(!in_array($perPage,[10,25,50,100],true)) $perPage=$defaultPerPage;
 
         $query=FinancialEntry::query()->with(['category','account','customer','sale'])
             ->whereYear('due_date',$period->year)->whereMonth('due_date',$period->month)
@@ -93,7 +97,7 @@ class FinanceController extends Controller
         return view('finance.index',compact(
             'entries','type','status','term','categoryId','categories','accounts','month','prevMonth','nextMonth',
             'monthLabel','totalAmount','openAmount'
-        ))->with('paymentMethods',self::PAYMENT_METHODS);
+        ))->with('paymentMethods',$this->paymentMethods());
     }
 
     public function create(Request $request)
@@ -132,7 +136,7 @@ class FinanceController extends Controller
         if($settleNow) {
             $financial->settle($entry,[
                 'amount'=>$entry->amount,'settled_at'=>$settledAt,'financial_account_id'=>$entry->financial_account_id,
-                'payment_method'=>$entry->payment_method ?: 'other','notes'=>'Baixa registrada junto com o lançamento.',
+                'payment_method'=>$entry->payment_method ?: $this->defaultPaymentMethod(),'notes'=>'Baixa registrada junto com o lançamento.',
             ],(int)$request->user()->id);
         }
 
@@ -144,7 +148,7 @@ class FinanceController extends Controller
         $entry->load(['category','account','customer','sale','salePayment','recurrence','creator','settlements.account','settlements.user']);
         return view('finance.show',[
             'entry'=>$entry,'accounts'=>FinancialAccount::query()->where('is_active',true)->orderBy('name')->get(),
-            'paymentMethods'=>self::PAYMENT_METHODS,
+            'paymentMethods'=>$this->paymentMethods(),
         ]);
     }
 
@@ -189,7 +193,7 @@ class FinanceController extends Controller
         $data=$request->validate([
             'amount'=>['required','numeric','gt:0','max:9999999999.99','decimal:0,2'],'settled_at'=>['required','date'],
             'financial_account_id'=>['required','integer','exists:financial_accounts,id'],
-            'payment_method'=>['required',Rule::in(array_keys(self::PAYMENT_METHODS))],'notes'=>['nullable','string','max:1000'],
+            'payment_method'=>['required',Rule::in(array_keys($this->paymentMethods()))],'notes'=>['nullable','string','max:1000'],
         ]);
         $financial->settle($entry,$data,(int)$request->user()->id);
         return redirect()->route('finance.entries.show',$entry)->with('success','Baixa registrada.');
@@ -217,7 +221,7 @@ class FinanceController extends Controller
             'action'=>['required',Rule::in(['settle','settle_quick','cancel','reopen','edit_primary','edit_aux'])],
             'financial_account_id'=>['nullable','integer','exists:financial_accounts,id'],
             'settled_at'=>['nullable','date'],
-            'payment_method'=>['nullable',Rule::in(array_keys(self::PAYMENT_METHODS))],
+            'payment_method'=>['nullable',Rule::in(array_keys($this->paymentMethods()))],
             'description'=>['nullable','string','max:190'],
             'due_date'=>['nullable','date'],
             'amount'=>['nullable','numeric','gt:0','max:9999999999.99','decimal:0,2'],
@@ -453,7 +457,7 @@ class FinanceController extends Controller
             'description'=>['required','string','max:190'],'document_number'=>['nullable','string','max:80'],
             'issue_date'=>['required','date'],'competence_date'=>['nullable','date'],'due_date'=>['required','date'],'credit_date'=>['nullable','date'],
             'amount'=>['required','numeric','gt:0','max:9999999999.99','decimal:0,2'],
-            'payment_method'=>['nullable',Rule::in(array_keys(self::PAYMENT_METHODS))],'keywords'=>['nullable','string','max:255'],
+            'payment_method'=>['nullable',Rule::in(array_keys($this->paymentMethods()))],'keywords'=>['nullable','string','max:255'],
             'notes'=>['nullable','string','max:5000'],'attachment'=>['nullable','file','max:10240'],
         ]);
 
@@ -471,8 +475,21 @@ class FinanceController extends Controller
             'categories'=>FinancialCategory::query()->where('is_active',true)->orderBy('type')->orderBy('name')->get(),
             'customers'=>Customer::query()->orderBy('name')->get(['id','name','document','is_customer','is_supplier']),
             'accounts'=>FinancialAccount::query()->where('is_active',true)->orderBy('name')->get(),
-            'paymentMethods'=>self::PAYMENT_METHODS,
+            'paymentMethods'=>$this->paymentMethods(),
         ];
+    }
+
+    private function paymentMethods(): array
+    {
+        $methods=PaymentMethod::options();
+        return $methods ?: self::PAYMENT_METHODS;
+    }
+
+    private function defaultPaymentMethod(): string
+    {
+        $methods=$this->paymentMethods();
+        if(isset($methods['other'])) return 'other';
+        return (string)(array_key_first($methods) ?: 'other');
     }
 
     private function period(Request $request): array
