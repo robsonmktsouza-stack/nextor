@@ -3,7 +3,8 @@
 @section('title','Vendas')
 @section('description','Histórico de pedidos e operações comerciais com baixa automática de estoque.')
 @section('content')
-<section class="cms-card">
+@include('sales._nav')
+<section class="cms-card sales-module-card">
 <div class="grid-actionbar">
   <div class="grid-actions-left">
     <a class="grid-primary-action" href="{{ route('sales.create') }}">@include('partials.icon',['name'=>'plus','size'=>17]) <span>Nova</span></a>
