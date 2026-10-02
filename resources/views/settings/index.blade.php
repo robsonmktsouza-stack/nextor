@@ -44,84 +44,30 @@ $settingsGroupIcons=[
   'Fiscal'=>'shield',
   'Administração'=>'customers',
 ];
-
-$activeItem=null;
-$activeGroup='Empresa';
-foreach($settingsGroups as $groupName=>$items){
-  if(isset($items[$tab])){
-    $activeItem=$items[$tab];
-    $activeGroup=$groupName;
-    break;
-  }
-}
 @endphp
 
-<section class="settings-menu" data-settings-center>
-  <div class="settings-menu-head">
-    <div class="settings-menu-title">
-      <span class="settings-menu-title-icon">@include('partials.icon',['name'=>'settings','size'=>18])</span>
-      <div>
-        <strong>Central de configurações</strong>
-        <span>Empresa, comercial, financeiro, fiscal e administração</span>
-      </div>
-    </div>
-    <label class="settings-menu-search">
-      @include('partials.icon',['name'=>'search','size'=>15])
-      <input type="search" placeholder="Buscar configuração..." autocomplete="off" data-settings-menu-search>
-    </label>
-  </div>
-
-  <nav class="settings-group-menu" aria-label="Grupos de configuração">
-    @foreach($settingsGroups as $groupName=>$items)
-      @php($groupId='settings-group-'.\Illuminate\Support\Str::slug($groupName))
-      <button type="button"
-              class="settings-group-button {{ $activeGroup===$groupName?'active':'' }}"
-              data-settings-group-button="{{ $groupId }}"
-              aria-controls="{{ $groupId }}"
-              aria-expanded="{{ $activeGroup===$groupName?'true':'false' }}">
-        @include('partials.icon',['name'=>$settingsGroupIcons[$groupName] ?? 'settings','size'=>16])
+<section class="settings-ribbon" aria-label="Configurações">
+  @foreach($settingsGroups as $groupName=>$items)
+    <div class="settings-ribbon-group">
+      <div class="settings-ribbon-group-label">
+        @include('partials.icon',['name'=>$settingsGroupIcons[$groupName] ?? 'settings','size'=>13])
         <span>{{ $groupName }}</span>
-        <small>{{ count($items) }}</small>
-      </button>
-    @endforeach
-  </nav>
-
-  <div class="settings-submenu">
-    @foreach($settingsGroups as $groupName=>$items)
-      @php($groupId='settings-group-'.\Illuminate\Support\Str::slug($groupName))
-      <div class="settings-submenu-panel"
-           id="{{ $groupId }}"
-           data-settings-submenu-panel
-           data-settings-group-name="{{ strtolower($groupName) }}"
-           @if($activeGroup!==$groupName) hidden @endif>
+      </div>
+      <div class="settings-ribbon-tabs">
         @foreach($items as $key=>$item)
           <a href="{{ route('settings.index',['tab'=>$key]) }}"
-             class="settings-submenu-link {{ $tab===$key?'active':'' }}"
-             data-settings-menu-item
-             data-settings-search="{{ strtolower($groupName.' '.$item[0].' '.$item[2]) }}">
-            <span class="settings-submenu-icon">@include('partials.icon',['name'=>$item[1],'size'=>17])</span>
-            <span>
-              <strong>{{ $item[0] }}</strong>
-              <small>{{ $item[2] }}</small>
-            </span>
-            @if($tab===$key)<span class="settings-submenu-current">@include('partials.icon',['name'=>'check','size'=>13])</span>@endif
+             class="{{ $tab===$key?'active':'' }}"
+             data-tooltip="{{ $item[2] }}">
+            @include('partials.icon',['name'=>$item[1],'size'=>14])
+            <span>{{ $item[0] }}</span>
           </a>
         @endforeach
       </div>
-    @endforeach
-    <div class="settings-menu-empty" data-settings-menu-empty hidden>Nenhuma configuração encontrada.</div>
-  </div>
+    </div>
+  @endforeach
 </section>
 
 <main class="settings-page">
-  <header class="settings-content-head">
-    <div class="settings-content-icon">@include('partials.icon',['name'=>$activeItem[1] ?? 'settings','size'=>20])</div>
-    <div>
-      <span>{{ $activeGroup }}</span>
-      <h2>{{ $activeItem[0] ?? 'Configurações' }}</h2>
-      <p>{{ $activeItem[2] ?? 'Preferências do sistema' }}</p>
-    </div>
-  </header>
 @if($tab==='general')
   <form method="post" action="{{ route('settings.company.update') }}" enctype="multipart/form-data" class="settings-stack">
     @csrf
