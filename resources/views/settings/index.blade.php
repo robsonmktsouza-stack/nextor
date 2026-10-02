@@ -251,7 +251,7 @@ foreach($primaryTabs as $key=>$item){
     </section>
   
   <div class="editor-savebar settings-savebar">
-    <button class="btn btn-success">@include('partials.icon',['name'=>'check','size'=>15]) Salvar</button>
+    <button class="btn btn-success" type="submit">@include('partials.icon',['name'=>'check','size'=>15]) Salvar</button>
   </div>
 </form>
 
@@ -262,7 +262,7 @@ foreach($primaryTabs as $key=>$item){
       @csrf
       <label class="field"><span>Nome</span><input name="name" maxlength="120" required placeholder="Ex.: Receita de vendas"></label>
       <label class="field"><span>Tipo</span><select name="type"><option value="income">Receita</option><option value="expense">Despesa</option></select></label>
-      <button class="btn btn-success">@include('partials.icon',['name'=>'plus','size'=>15]) Adicionar</button>
+      <button class="btn btn-success" type="submit">@include('partials.icon',['name'=>'plus','size'=>15]) Adicionar</button>
     </form>
     <div class="settings-split-tables">
       @foreach(['income'=>'Receitas','expense'=>'Despesas'] as $kind=>$label)
@@ -317,7 +317,7 @@ foreach($primaryTabs as $key=>$item){
   <form method="post" action="{{ route('settings.group.update','operations') }}" class="settings-editor">
     @csrf
     <section class="editor-panel settings-panel">
-      <div class="settings-panel-head"><div><h2>Operações de vendas e estoque</h2><p>Padrões usados no fluxo comercial do Nextor.</p></div><button class="btn btn-primary">@include('partials.icon',['name'=>'check','size'=>15]) Salvar</button></div>
+      <div class="settings-panel-head"><div><h2>Operações de vendas e estoque</h2><p>Padrões usados no fluxo comercial do Nextor.</p></div></div>
       <div class="editor-grid cols-12 settings-grid">
         <label class="field col-3"><span>Validade padrão do orçamento</span><input type="number" name="quote_valid_days" value="{{ $operations['quote_valid_days'] }}" min="0"><small>Dias</small></label>
         <label class="field col-3"><span>Vencimento padrão</span><input type="number" name="default_due_days" value="{{ $operations['default_due_days'] }}" min="0"><small>Dias após a venda</small></label>
@@ -331,6 +331,10 @@ foreach($primaryTabs as $key=>$item){
         <label class="settings-switch"><input type="checkbox" name="allow_partial_return" value="1" @checked($operations['allow_partial_return'])><span><strong>Permitir devolução parcial</strong><small>Permite devolver parte da quantidade vendida.</small></span></label>
       </div>
     </section>
+
+    <div class="editor-savebar settings-savebar">
+      <button class="btn btn-success" type="submit">@include('partials.icon',['name'=>'check','size'=>15]) Salvar</button>
+    </div>
   </form>
 
 @elseif($tab==='inventory')
@@ -347,7 +351,7 @@ foreach($primaryTabs as $key=>$item){
             @foreach(['0','1','2','3'] as $places)<option value="{{ $places }}" @selected((string)$inventory['stock_decimal_places']===$places)>{{ $places }}</option>@endforeach
           </select>
         </label>
-        <label class="field span-9"><span>Motivo padrão para ajuste</span><input name="default_adjustment_reason" value="{{ $inventory['default_adjustment_reason'] }}" maxlength="255" placeholder="Ex.: Ajuste manual de estoque"></label>
+        <label class="field col-9"><span>Motivo padrão para ajuste</span><input name="default_adjustment_reason" value="{{ $inventory['default_adjustment_reason'] }}" maxlength="255" placeholder="Ex.: Ajuste manual de estoque"></label>
       </div>
       <div class="settings-switch-grid">
         <label class="settings-switch"><input type="checkbox" name="allow_negative_stock" value="1" @checked($inventory['allow_negative_stock'])><span><strong>Permitir estoque negativo</strong><small>Autoriza venda mesmo quando o saldo controlado for insuficiente.</small></span></label>
@@ -356,7 +360,7 @@ foreach($primaryTabs as $key=>$item){
     </section>
   
   <div class="editor-savebar settings-savebar">
-    <button class="btn btn-success">@include('partials.icon',['name'=>'check','size'=>15]) Salvar</button>
+    <button class="btn btn-success" type="submit">@include('partials.icon',['name'=>'check','size'=>15]) Salvar</button>
   </div>
 </form>
 
@@ -375,7 +379,7 @@ foreach($primaryTabs as $key=>$item){
       <label class="field"><span>Ordem</span><input type="number" min="0" name="sort_order" value="100"></label>
       <label class="check-line"><input type="checkbox" name="is_active" value="1" checked><span>Ativa</span></label>
       <label class="check-line"><input type="checkbox" name="pdv_enabled" value="1" checked><span>Disponível no PDV</span></label>
-      <button class="btn btn-success">@include('partials.icon',['name'=>'plus','size'=>15]) Criar</button>
+      <button class="btn btn-success" type="submit">@include('partials.icon',['name'=>'plus','size'=>15]) Criar</button>
     </form>
 
     <div class="settings-payment-list">
@@ -424,7 +428,7 @@ foreach($primaryTabs as $key=>$item){
     </section>
   
   <div class="editor-savebar settings-savebar">
-    <button class="btn btn-success">@include('partials.icon',['name'=>'check','size'=>15]) Salvar</button>
+    <button class="btn btn-success" type="submit">@include('partials.icon',['name'=>'check','size'=>15]) Salvar</button>
   </div>
 </form>
 
@@ -448,7 +452,7 @@ foreach($primaryTabs as $key=>$item){
     </section>
   
   <div class="editor-savebar settings-savebar">
-    <button class="btn btn-success">Salvar</button>
+    <button class="btn btn-success" type="submit">Salvar</button>
   </div>
 </form>
 
@@ -471,7 +475,7 @@ foreach($primaryTabs as $key=>$item){
       </section>
     
   <div class="editor-savebar settings-savebar">
-    <button class="btn btn-success">Salvar</button>
+    <button class="btn btn-success" type="submit">Salvar</button>
   </div>
 </form>
 
@@ -499,7 +503,7 @@ foreach($primaryTabs as $key=>$item){
         @csrf
         <label class="field"><span>Certificado A1</span><input type="file" name="certificate" accept=".pfx,.p12" required></label>
         <label class="field"><span>Senha</span><input type="password" name="certificate_password" required></label>
-        <button class="btn btn-success">Salvar certificado</button>
+        <button class="btn btn-success" type="submit">Salvar certificado</button>
       </form>
     </section>
   </div>
@@ -533,7 +537,7 @@ foreach($primaryTabs as $key=>$item){
     </section>
   
   <div class="editor-savebar settings-savebar">
-    <button class="btn btn-success">Salvar</button>
+    <button class="btn btn-success" type="submit">Salvar</button>
   </div>
 </form>
 
@@ -558,7 +562,7 @@ foreach($primaryTabs as $key=>$item){
     </section>
   
   <div class="editor-savebar settings-savebar">
-    <button class="btn btn-success">Salvar</button>
+    <button class="btn btn-success" type="submit">Salvar</button>
   </div>
 </form>
 
@@ -583,7 +587,7 @@ foreach($primaryTabs as $key=>$item){
     </section>
   
   <div class="editor-savebar settings-savebar">
-    <button class="btn btn-success">Salvar</button>
+    <button class="btn btn-success" type="submit">Salvar</button>
   </div>
 </form>
 
@@ -610,7 +614,7 @@ foreach($primaryTabs as $key=>$item){
     </section>
   
   <div class="editor-savebar settings-savebar">
-    <button class="btn btn-success">Salvar</button>
+    <button class="btn btn-success" type="submit">Salvar</button>
   </div>
 </form>
 
@@ -640,7 +644,7 @@ foreach($primaryTabs as $key=>$item){
     </section>
   
   <div class="editor-savebar settings-savebar">
-    <button class="btn btn-success">Salvar</button>
+    <button class="btn btn-success" type="submit">Salvar</button>
   </div>
 </form>
 
@@ -670,7 +674,7 @@ foreach($primaryTabs as $key=>$item){
     </section>
   
   <div class="editor-savebar settings-savebar">
-    <button class="btn btn-success">Salvar</button>
+    <button class="btn btn-success" type="submit">Salvar</button>
   </div>
 </form>
 
@@ -686,7 +690,7 @@ foreach($primaryTabs as $key=>$item){
         <label class="field col-3"><span>Função</span><select name="role"><option value="admin">Administrador</option><option value="manager">Gerente</option><option value="finance">Financeiro</option><option value="sales">Vendas</option><option value="operator">Operador</option></select></label>
       </div>
       <div class="permission-grid">@foreach($permissions as $key=>$label)<label><input type="checkbox" name="permissions[]" value="{{ $key }}"><span>{{ $label }}</span></label>@endforeach</div>
-      <button class="btn btn-success">@include('partials.icon',['name'=>'plus','size'=>15]) Criar usuário</button>
+      <button class="btn btn-success" type="submit">@include('partials.icon',['name'=>'plus','size'=>15]) Criar usuário</button>
     </form>
 
     <div class="settings-user-list">
@@ -737,7 +741,7 @@ foreach($primaryTabs as $key=>$item){
     </section>
   
   <div class="editor-savebar settings-savebar">
-    <button class="btn btn-success">Salvar</button>
+    <button class="btn btn-success" type="submit">Salvar</button>
   </div>
 </form>
 
@@ -759,7 +763,7 @@ foreach($primaryTabs as $key=>$item){
     </section>
   
   <div class="editor-savebar settings-savebar">
-    <button class="btn btn-success">Salvar</button>
+    <button class="btn btn-success" type="submit">Salvar</button>
   </div>
 </form>
 @endif
