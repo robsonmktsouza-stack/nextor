@@ -6,6 +6,7 @@ use App\Models\AppSetting;
 use App\Models\CompanySetting;
 use App\Models\Customer;
 use App\Models\PaymentMethod;
+use App\Models\PdvCashSession;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\Service;
@@ -18,8 +19,40 @@ use Illuminate\Validation\ValidationException;
 
 class PdvController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $pdvSettings=AppSetting::groupValues('pdv',[
+            'default_payment_method'=>null,
+            'require_customer'=>false,
+            'allow_discount'=>true,
+            'require_cash_opening'=>false,
+            'show_stock'=>true,
+            'receipt_width'=>'80',
+            'receipt_copies'=>1,
+        ]);
+
+        $cashSession=PdvCashSession::query()
+            ->where('user_id',$request->user()->id)
+            ->open()
+            ->latest('opened_at')
+            ->first();
+
+        $cashExpected=null;
+        if($cashSession) {
+            $cashSales=Sale::query()
+                ->where('source','pdv')
+                ->where('user_id',$request->user()->id)
+                ->where('status','completed')
+                ->where('completed_at','>=',$cashSession->opened_at)
+                ->whereHas('payments',fn($q)=>$q->whereIn(
+                    'payment_method',
+                    PaymentMethod::query()->where('kind','cash')->pluck('code')
+                ))
+                ->sum('total');
+
+            $cashExpected=round((float)$cashSession->opening_amount+(float)$cashSales,2);
+        }
+
         return view('pdv.index',[
             'customers'=>Customer::query()
                 ->where('is_customer',true)
@@ -37,12 +70,9 @@ class PdvController extends Controller
                 ->orderBy('sort_order')
                 ->orderBy('name')
                 ->get(),
-            'pdvSettings'=>AppSetting::groupValues('pdv',[
-                'default_payment_method'=>null,
-                'require_customer'=>false,
-                'allow_discount'=>true,
-                'show_stock'=>true,
-            ]),
+            'pdvSettings'=>$pdvSettings,
+            'cashSession'=>$cashSession,
+            'cashExpected'=>$cashExpected,
             'allowNegativeStock'=>(bool)AppSetting::value(
                 'inventory',
                 'allow_negative_stock',
@@ -145,7 +175,21 @@ class PdvController extends Controller
         $pdvSettings=AppSetting::groupValues('pdv',[
             'require_customer'=>false,
             'allow_discount'=>true,
+            'require_cash_opening'=>false,
         ]);
+
+        if((bool)$pdvSettings['require_cash_opening']) {
+            $hasOpenCash=PdvCashSession::query()
+                ->where('user_id',$request->user()->id)
+                ->open()
+                ->exists();
+
+            if(!$hasOpenCash) {
+                throw ValidationException::withMessages([
+                    'cash_session'=>'Abra o caixa antes de finalizar uma venda no PDV.',
+                ]);
+            }
+        }
 
         if((bool)$pdvSettings['require_customer'] && empty($data['customer_id'])) {
             throw ValidationException::withMessages(['customer_id'=>'Selecione um cliente para concluir a venda no PDV.']);
@@ -270,6 +314,53 @@ class PdvController extends Controller
             ->with('pdv_last_sale',$sale->id)
             ->with('pdv_cash_received',$isCash ? $cashReceived : $total)
             ->with('pdv_change',$change);
+    }
+
+    public function openCash(Request $request)
+    {
+        $data=$request->validate([
+            'opening_amount'=>['required','numeric','min:0','max:9999999999.99','decimal:0,2'],
+            'opening_notes'=>['nullable','string','max:1000'],
+        ]);
+
+        if(PdvCashSession::query()->where('user_id',$request->user()->id)->open()->exists()) {
+            throw ValidationException::withMessages(['opening_amount'=>'Já existe um caixa aberto para este usuário.']);
+        }
+
+        PdvCashSession::query()->create([
+            'user_id'=>$request->user()->id,
+            'opening_amount'=>$data['opening_amount'],
+            'opening_notes'=>$data['opening_notes'] ?? null,
+            'opened_at'=>now(),
+        ]);
+
+        return redirect()->route('pdv.index')->with('success','Caixa aberto.');
+    }
+
+    public function closeCash(Request $request)
+    {
+        $data=$request->validate([
+            'closing_amount'=>['required','numeric','min:0','max:9999999999.99','decimal:0,2'],
+            'closing_notes'=>['nullable','string','max:1000'],
+        ]);
+
+        $session=PdvCashSession::query()
+            ->where('user_id',$request->user()->id)
+            ->open()
+            ->latest('opened_at')
+            ->first();
+
+        if(!$session) {
+            throw ValidationException::withMessages(['closing_amount'=>'Não há caixa aberto para fechar.']);
+        }
+
+        $session->update([
+            'closing_amount'=>$data['closing_amount'],
+            'closing_notes'=>$data['closing_notes'] ?? null,
+            'closed_at'=>now(),
+        ]);
+
+        return redirect()->route('pdv.index')->with('success','Caixa fechado.');
     }
 
     public function receipt(Sale $sale)
