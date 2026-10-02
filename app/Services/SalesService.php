@@ -91,7 +91,7 @@ class SalesService
                     if($operationType==='sale' && !$allowNegativeStock && $product->control_stock &&
                         InventoryService::toMills($product->stock_quantity)<$mills) {
                         throw ValidationException::withMessages([
-                            "items.$index.quantity"=>'Estoque insuficiente para '.$product->name.'.'
+                            'items'=>'Estoque insuficiente para '.$product->name.'.'
                         ]);
                     }
 
