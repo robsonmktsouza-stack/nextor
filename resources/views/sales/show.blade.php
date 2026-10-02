@@ -103,6 +103,9 @@
       <div><span>Tipo</span><strong>{{ $sale->operation_type==='quote'?'Orçamento':'Venda' }}</strong></div>
       <div><span>Cliente</span><strong>{{ $sale->customer?->name ?? 'Consumidor não identificado' }}</strong></div>
       <div><span>Data</span><strong>{{ ($sale->operation_date ?? $sale->created_at)->format(\App\Models\AppSetting::dateFormat()) }}</strong></div>
+      @if($sale->operation_type==='quote' && $sale->quote_expires_at)
+        <div><span>Validade</span><strong>{{ $sale->quote_expires_at->format(\App\Models\AppSetting::dateFormat()) }}</strong></div>
+      @endif
       <div><span>Consumidor final</span><strong>{{ $sale->final_consumer?'Sim':'Não' }}</strong></div>
       @if($sale->keyword)<div><span>Palavra-chave</span><strong>{{ $sale->keyword }}</strong></div>@endif
       <div><span>Responsável</span><strong>{{ $sale->user?->name ?? '—' }}</strong></div>
