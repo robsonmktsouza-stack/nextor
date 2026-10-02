@@ -18,7 +18,7 @@ class SettingsController extends Controller
 {
     public const TABS=[
         'general','chart','accounts','operations','payments','pdv','billing',
-        'fiscal','nfe','nfce','nfse','cte','users','integrations','system',
+        'fiscal','tax','nfe','nfce','nfse','cte','accounting','users','integrations','system',
     ];
 
     public const PERMISSIONS=[
@@ -52,10 +52,12 @@ class SettingsController extends Controller
             'pdv'=>AppSetting::groupValues('pdv',$this->defaults('pdv')),
             'billing'=>AppSetting::groupValues('billing',$this->defaults('billing')),
             'fiscal'=>AppSetting::groupValues('fiscal',$this->defaults('fiscal')),
+            'tax'=>AppSetting::groupValues('tax',$this->defaults('tax')),
             'nfe'=>AppSetting::groupValues('nfe',$this->defaults('nfe')),
             'nfce'=>AppSetting::groupValues('nfce',$this->defaults('nfce')),
             'nfse'=>AppSetting::groupValues('nfse',$this->defaults('nfse')),
             'cte'=>AppSetting::groupValues('cte',$this->defaults('cte')),
+            'accounting'=>AppSetting::groupValues('accounting',$this->defaults('accounting')),
             'integrations'=>AppSetting::groupValues('integrations',$this->defaults('integrations')),
             'system'=>AppSetting::groupValues('system',$this->defaults('system')),
         ]);
@@ -129,8 +131,8 @@ class SettingsController extends Controller
 
         $tab=match($group){
             'operations'=>'operations','pdv'=>'pdv','billing'=>'billing','fiscal'=>'fiscal',
-            'nfe'=>'nfe','nfce'=>'nfce','nfse'=>'nfse','cte'=>'cte',
-            'integrations'=>'integrations','system'=>'system',
+            'tax'=>'tax','nfe'=>'nfe','nfce'=>'nfce','nfse'=>'nfse','cte'=>'cte',
+            'accounting'=>'accounting','integrations'=>'integrations','system'=>'system',
             default=>'general',
         };
 
@@ -319,6 +321,28 @@ class SettingsController extends Controller
                 'tax_profile'=>['nullable','string','max:120'],
             ],['enabled','send_xml_email','keep_xml_copy'],[]],
 
+            'tax'=>[[
+                'icms_origin_default'=>['nullable','string','max:2'],
+                'icms_csosn_default'=>['nullable','string','max:4'],
+                'icms_cst_default'=>['nullable','string','max:4'],
+                'pis_cst_default'=>['nullable','string','max:4'],
+                'cofins_cst_default'=>['nullable','string','max:4'],
+                'ipi_cst_default'=>['nullable','string','max:4'],
+                'iss_rate_default'=>['nullable','numeric','min:0','max:100','decimal:0,4'],
+                'simple_credit_rate'=>['nullable','numeric','min:0','max:100','decimal:0,4'],
+                'ibs_cst_default'=>['nullable','string','max:10'],
+                'cbs_cst_default'=>['nullable','string','max:10'],
+                'tax_classification_code'=>['nullable','string','max:40'],
+                'fcp_rate_default'=>['nullable','numeric','min:0','max:100','decimal:0,4'],
+                'notes'=>['nullable','string','max:3000'],
+            ],[],[]],
+
+            'tax'=>[
+                'icms_origin_default'=>'0','icms_csosn_default'=>null,'icms_cst_default'=>null,
+                'pis_cst_default'=>null,'cofins_cst_default'=>null,'ipi_cst_default'=>null,
+                'iss_rate_default'=>null,'simple_credit_rate'=>null,'ibs_cst_default'=>null,
+                'cbs_cst_default'=>null,'tax_classification_code'=>null,'fcp_rate_default'=>null,'notes'=>null,
+            ],
             'nfe'=>[[
                 'enabled'=>['nullable','boolean'],
                 'environment'=>['required',Rule::in(['homologation','production'])],
@@ -369,6 +393,25 @@ class SettingsController extends Controller
                 'mdfe_next_number'=>['required','integer','min:1','max:999999999'],
             ],['cte_enabled','mdfe_enabled'],[]],
 
+            'accounting'=>[[
+                'office_name'=>['nullable','string','max:190'],
+                'accountant_name'=>['nullable','string','max:190'],
+                'accountant_document'=>['nullable','string','max:20'],
+                'crc'=>['nullable','string','max:40'],
+                'email'=>['nullable','email','max:255'],
+                'phone'=>['nullable','string','max:30'],
+                'accounting_system'=>['nullable','string','max:120'],
+                'export_format'=>['nullable','string','max:80'],
+                'cost_center_enabled'=>['nullable','boolean'],
+                'automatic_monthly_export'=>['nullable','boolean'],
+                'notes'=>['nullable','string','max:3000'],
+            ],['cost_center_enabled','automatic_monthly_export'],[]],
+
+            'accounting'=>[
+                'office_name'=>null,'accountant_name'=>null,'accountant_document'=>null,'crc'=>null,
+                'email'=>null,'phone'=>null,'accounting_system'=>null,'export_format'=>null,
+                'cost_center_enabled'=>false,'automatic_monthly_export'=>false,'notes'=>null,
+            ],
             'integrations'=>[[
                 'smtp_enabled'=>['nullable','boolean'],
                 'smtp_host'=>['nullable','string','max:255'],
