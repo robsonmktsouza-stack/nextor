@@ -239,6 +239,12 @@ class SalesService
                 ]);
             }
 
+            if($locked->operation_type==='sale' && $locked->returns()->where('status','completed')->exists()) {
+                throw ValidationException::withMessages([
+                    'sale'=>'Esta venda possui devolução ativa. Cancele primeiro as devoluções vinculadas antes de cancelar a venda.'
+                ]);
+            }
+
             if($locked->operation_type==='sale') {
                 $items=$locked->items()
                     ->where('item_type','product')
