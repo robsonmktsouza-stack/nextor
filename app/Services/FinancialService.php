@@ -25,6 +25,9 @@ class FinancialService
         $installments=max(1,$sale->payments->count());
 
         foreach($sale->payments as $payment) {
+            $paymentMethod=$payment->payment_method
+                ? PaymentMethod::query()->where('code',$payment->payment_method)->first()
+                : null;
             $defaultAccount=$this->defaultAccount($payment->payment_method);
             $entry=FinancialEntry::query()->firstOrCreate(
                 ['sale_payment_id'=>$payment->id],
@@ -63,6 +66,10 @@ class FinancialService
                         'Recebimento registrado automaticamente na venda.'
                     );
                 }
+            }
+
+            if($paymentMethod) {
+                $this->syncPaymentFee($sale,$payment,$paymentMethod,$defaultAccount,$userId);
             }
         }
     }
@@ -252,6 +259,68 @@ class FinancialService
             'paid_amount'=>$this->money($paidCents),
             'status'=>$paidCents<=0 ? 'open' : ($paidCents>=$totalCents ? 'paid' : 'partial'),
         ]);
+    }
+
+    private function syncPaymentFee(
+        Sale $sale,
+        \App\Models\SalePayment $payment,
+        PaymentMethod $method,
+        FinancialAccount $account,
+        int $userId,
+    ): void {
+        $paymentCents=$this->cents($payment->amount);
+        $percent=(float)$method->fee_percent;
+        $fixedCents=$this->cents($method->fee_fixed);
+        $feeCents=(int)round($paymentCents*$percent/100)+$fixedCents;
+
+        if($feeCents<=0) return;
+
+        $issueDate=($sale->operation_date ?? $sale->created_at ?? now())->toDateString();
+        $dueDate=($payment->due_date ?? $sale->operation_date ?? $sale->created_at ?? now())->toDateString();
+        $sourceKey='payment-fee:'.$payment->id;
+
+        $feeEntry=FinancialEntry::query()->firstOrCreate(
+            ['source_key'=>$sourceKey],
+            [
+                'type'=>'payable',
+                'status'=>'open',
+                'category_id'=>$this->paymentFeeCategory()->id,
+                'financial_account_id'=>$account->id,
+                'customer_id'=>$sale->customer_id,
+                'sale_id'=>$sale->id,
+                'created_by'=>$userId,
+                'description'=>'Taxa de '.$method->name.' - venda #'.str_pad((string)$sale->id,5,'0',STR_PAD_LEFT),
+                'document_number'=>'TAXA-VENDA-'.$sale->id.'-'.$payment->installment,
+                'issue_date'=>$issueDate,
+                'competence_date'=>$issueDate,
+                'due_date'=>$dueDate,
+                'credit_date'=>$dueDate,
+                'amount'=>$this->money($feeCents),
+                'paid_amount'=>'0.00',
+                'payment_method'=>$method->code,
+                'notes'=>'Custo gerado automaticamente pela forma de pagamento ('.$method->name.').',
+            ]
+        );
+
+        if(!$payment->receivable && $feeEntry->status!=='paid' && !$feeEntry->activeSettlements()->exists()) {
+            $this->recordSettlement(
+                $feeEntry,
+                (string)$feeEntry->amount,
+                $issueDate,
+                $method->code,
+                $account,
+                $userId,
+                'Taxa da forma de pagamento baixada automaticamente junto com a venda.'
+            );
+        }
+    }
+
+    private function paymentFeeCategory(): FinancialCategory
+    {
+        return FinancialCategory::query()->firstOrCreate(
+            ['name'=>'Taxas de pagamento','type'=>'expense'],
+            ['is_active'=>true],
+        );
     }
 
     private function salesCategory(): FinancialCategory
