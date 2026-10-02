@@ -100,6 +100,15 @@
   box-shadow:0 0 0 4px #62c47c18;
 }
 
+.pdv-topbar-status.is-closed .pdv-online-dot{
+  background:#e9a23b;
+  box-shadow:0 0 0 4px #e9a23b1f;
+}
+
+.pdv-topbar-status.is-closed{
+  color:#e8c58d;
+}
+
 .pdv-topbar-separator{
   width:1px;
   height:22px;
