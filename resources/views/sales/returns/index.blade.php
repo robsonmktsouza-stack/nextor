@@ -27,10 +27,10 @@
   </div>
 
   <div class="grid-filter-panel" id="return-filters" @if(!$term && !$status) hidden @endif>
-    <form method="get" class="toolbar-filters">
+    <form method="get" action="{{ route('sales.returns.index') }}" class="toolbar-filters" data-live-search data-live-target="returns-live-results">
       <input type="hidden" name="month" value="{{ $month }}">
       <div class="table-search-group">
-        <input name="search" value="{{ $term }}" placeholder="Código da devolução, venda ou cliente...">
+        <input type="search" autocomplete="off" name="search" value="{{ $term }}" placeholder="Código da devolução, venda ou cliente...">
         <button type="submit" class="table-search-submit" data-tooltip="Pesquisar">@include('partials.icon',['name'=>'search','size'=>17])</button>
       </div>
       <select class="input-filter" name="status">
@@ -43,6 +43,7 @@
     </form>
   </div>
 
+  <div id="returns-live-results" data-live-search-results>
   <div class="table-scroll">
     <table class="cms-table">
       <thead>
@@ -79,5 +80,6 @@
   </div>
 
   @include('partials.table-footer',['paginator'=>$returns])
+  </div>
 </section>
 @endsection
