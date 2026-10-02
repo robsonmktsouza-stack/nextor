@@ -62,6 +62,22 @@ class FiscalPreparationService
                 ?? AppSetting::value('fiscal','default_environment','homologation'));
             $series=isset($settings['series']) ? (int)$settings['series'] : null;
 
+            $offline=$documentType==='nfce'
+                && (bool)AppSetting::value('nfce','offline_contingency_active',false);
+            $contingencyReason=$offline
+                ? trim((string)AppSetting::value('nfce','offline_contingency_reason',''))
+                : null;
+            $contingencyStartedAt=null;
+
+            if($offline) {
+                $started=(string)AppSetting::value('nfce','offline_contingency_started_at','');
+                try {
+                    $contingencyStartedAt=$started!=='' ? \Carbon\Carbon::parse($started) : now();
+                } catch (\Throwable) {
+                    $contingencyStartedAt=now();
+                }
+            }
+
             $safeSettings=$settings;
             foreach(['csc_token','municipal_password','api_key','api_secret'] as $secretKey) {
                 unset($safeSettings[$secretKey]);
@@ -71,6 +87,9 @@ class FiscalPreparationService
                 'document_type'=>$documentType,
                 'sale_id'=>$sale->id,
                 'status'=>'prepared',
+                'emission_mode'=>$offline ? 'offline' : 'normal',
+                'contingency_reason'=>$contingencyReason ?: null,
+                'contingency_started_at'=>$contingencyStartedAt,
                 'environment'=>$environment,
                 'series'=>$series,
                 'document_number'=>$number,
@@ -109,6 +128,14 @@ class FiscalPreparationService
                         'payment_method'=>$payment->payment_method,
                         'amount'=>(string)$payment->amount,
                         'due_date'=>optional($payment->due_date)->toDateString(),
+                        'integration_type'=>$payment->integration_type,
+                        'transaction_document'=>$payment->transaction_document,
+                        'transaction_state'=>$payment->transaction_state,
+                        'institution_document'=>$payment->institution_document,
+                        'card_brand'=>$payment->card_brand,
+                        'authorization_code'=>$payment->authorization_code,
+                        'beneficiary_document'=>$payment->beneficiary_document,
+                        'terminal_id'=>$payment->terminal_id,
                         'receivable'=>(bool)$payment->receivable,
                     ])->values()->all(),
                 ],
