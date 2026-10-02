@@ -103,9 +103,15 @@ class FinanceController extends Controller
     public function create(Request $request)
     {
         $type=in_array($request->query('type'),['receivable','payable'],true)?(string)$request->query('type'):'receivable';
+        $categorySetting=$type==='receivable'?'default_income_category_id':'default_expense_category_id';
+        $categoryId=(int)AppSetting::value('operations',$categorySetting,0);
+        $accountId=(int)AppSetting::value('operations','default_financial_account_id',0);
+        $dueDays=max(0,(int)AppSetting::value('operations','default_due_days',0));
+
         $entry=new FinancialEntry([
             'type'=>$type,'status'=>'open','issue_date'=>today(),'competence_date'=>today(),
-            'due_date'=>today(),'amount'=>'0.00','paid_amount'=>'0.00',
+            'due_date'=>today()->copy()->addDays($dueDays),'amount'=>'0.00','paid_amount'=>'0.00',
+            'category_id'=>$categoryId ?: null,'financial_account_id'=>$accountId ?: null,
         ]);
         return view('finance.form',$this->formData($entry,false));
     }
