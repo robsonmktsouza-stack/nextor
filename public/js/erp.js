@@ -1041,7 +1041,7 @@
       return;
     }
     const message=form.getAttribute('data-confirm-submit');
-    if(!message) return;
+    if(!message || document.body?.dataset.confirmDestructive==='0') return;
     e.preventDefault();
     const confirmed=await nextorConfirm(message,{
       title:'Confirmar exclusão',
