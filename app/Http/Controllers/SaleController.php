@@ -18,12 +18,7 @@ class SaleController extends Controller
     {
         $status=$request->query('status','');
         $term=trim((string)$request->query('search',''));
-        $requestedPerPage=$request->integer('per_page');
-        if(in_array($requestedPerPage,[10,25,50,100],true)) {
-            $request->session()->put('table_per_page',$requestedPerPage);
-        }
-        $perPage=(int)$request->session()->get('table_per_page',25);
-        if(!in_array($perPage,[10,25,50,100],true)) $perPage=25;
+        $perPage=AppSetting::tablePerPage($request);
         $month=(string)$request->query('month',now()->format('Y-m'));
 
         try {
