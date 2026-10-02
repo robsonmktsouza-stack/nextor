@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Models\AppSetting;
 use App\Models\Customer;
 use App\Models\Sale;
 use Illuminate\Http\Request;
@@ -10,12 +11,7 @@ use Illuminate\Support\Facades\Http;
 class CustomerController extends Controller {
     public function index(Request $request) {
         $term=trim((string)$request->query('search',''));
-        $requestedPerPage=$request->integer('per_page');
-        if(in_array($requestedPerPage,[10,25,50,100],true)) {
-            $request->session()->put('table_per_page',$requestedPerPage);
-        }
-        $perPage=(int)$request->session()->get('table_per_page',25);
-        if(!in_array($perPage,[10,25,50,100],true)) $perPage=25;
+        $perPage=AppSetting::tablePerPage($request);
         $customers=Customer::query()
             ->when($term,fn($q)=>$q->where(fn($t)=>$t
                 ->where('name','like',"%{$term}%")
