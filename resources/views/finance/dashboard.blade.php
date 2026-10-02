@@ -63,7 +63,7 @@
         @forelse($cashFlow as $row)
           @php($net=(float)$row->income-(float)$row->expense)
           <tr>
-            <td>{{ CarbonCarbon::parse($row->day)->format('d/m/Y') }}</td>
+            <td>{{ date('d/m/Y', strtotime((string)$row->day)) }}</td>
             <td class="finance-positive">R$ {{ number_format((float)$row->income,2,',','.') }}</td>
             <td class="finance-negative">R$ {{ number_format((float)$row->expense,2,',','.') }}</td>
             <td class="{{ $net<0?'finance-negative':'price-strong' }}">R$ {{ number_format($net,2,',','.') }}</td>
