@@ -5,14 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>PDV — {{ config('app.name') }}</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('css/erp.css') }}">
 <link rel="stylesheet" href="{{ asset('css/pdv.css') }}">
 <script defer src="{{ asset('js/erp.js') }}"></script>
 </head>
-<body class="pdv-body">
+<body class="pdv-body" data-confirm-destructive="{{ \App\Models\AppSetting::value('system','confirm_destructive_actions',true) ? '1' : '0' }}">
 <div class="pdv-root" id="appRoot">
   <header class="pdv-topbar">
     <div class="pdv-topbar-brand">
@@ -35,11 +32,13 @@
         @include('partials.icon',['name'=>'expand','size'=>17])
         <span>Tela cheia</span>
       </button>
+      @if(auth()->user()->canAccess('sales'))
       <a class="pdv-topbar-button" href="{{ route('sales.index') }}">
         @include('partials.icon',['name'=>'receipt','size'=>17])
         <span>Vendas</span>
       </a>
-      <a class="pdv-topbar-button pdv-topbar-exit" href="{{ route('dashboard') }}">
+      @endif
+      <a class="pdv-topbar-button pdv-topbar-exit" href="{{ route(auth()->user()->canAccess('dashboard') ? 'dashboard' : auth()->user()->homeRouteName()) }}">
         @include('partials.icon',['name'=>'arrow-left','size'=>17])
         <span>Administração</span>
       </a>
