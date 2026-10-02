@@ -38,4 +38,9 @@ class FiscalCompany extends Model
     {
         return $this->hasMany(FiscalDocument::class);
     }
+
+    public function transmissions(): HasMany
+    {
+        return $this->hasMany(FiscalTransmission::class);
+    }
 }

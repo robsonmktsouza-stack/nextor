@@ -16,7 +16,12 @@ final class A1CertificateReader
     }
 
     /**
-     * @return array{info: CertificateInfo, certificate: OpenSSLCertificate|string, private_key: OpenSSLAsymmetricKey|string}
+     * @return array{
+     *   info: CertificateInfo,
+     *   certificate: OpenSSLCertificate|string,
+     *   private_key: OpenSSLAsymmetricKey|string,
+     *   extra_certificates: list<OpenSSLCertificate|string>
+     * }
      */
     public function read(string $pfxBytes, string $password): array
     {
@@ -53,10 +58,18 @@ final class A1CertificateReader
                 : null,
         );
 
+        $extraCertificates = [];
+        foreach (($store['extracerts'] ?? []) as $certificate) {
+            if (is_string($certificate) || $certificate instanceof OpenSSLCertificate) {
+                $extraCertificates[] = $certificate;
+            }
+        }
+
         return [
             'info' => $info,
             'certificate' => $store['cert'],
             'private_key' => $store['pkey'],
+            'extra_certificates' => $extraCertificates,
         ];
     }
 

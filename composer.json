@@ -6,6 +6,10 @@
   "license": "proprietary",
   "require": {
     "php": "^8.3",
+    "ext-curl": "*",
+    "ext-dom": "*",
+    "ext-libxml": "*",
+    "ext-openssl": "*",
     "laravel/framework": "^13.8",
     "laravel/tinker": "^3.0"
   },

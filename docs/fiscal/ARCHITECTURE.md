@@ -337,3 +337,95 @@ QR Code/CSC, DANFE final, cancelamento, inutilização e contingência permanece
 ## Documentação detalhada
 
 Ver `docs/fiscal/PHASE_3_TAX_SIGNATURE.md`.
+
+
+## Fase 4 — infraestrutura SEFAZ de homologação
+
+A camada de comunicação externa permanece isolada do PDV e, nesta fase, implementa somente `NfeStatusServico` para NFC-e modelo 65 em homologação.
+
+```text
+FiscalCompany
+  -> UF
+  -> SefazEndpointRegistry
+  -> catálogo NFC-e versionado
+  -> StatusServiceRequestXmlBuilder
+  -> SOAP 1.2
+  -> mTLS A1 / cURL
+  -> autorizador oficial
+  -> SOAP parser
+  -> retConsStatServ
+  -> FiscalTransmission
+  -> SefazStatusResult
+```
+
+### Catálogo de endpoints
+
+O catálogo fica em `resources/fiscal/sefaz/endpoints/` e é a única origem aceita para URLs SEFAZ. Não existe entrada de URL pelo operador.
+
+O catálogo de 01/10/2026 é deliberadamente **homologação-only** e contém somente topologias auditadas nesta fase. UFs sem topologia auditada falham fechadas; o motor não presume SVRS.
+
+A NFC-e da Bahia é resolvida para SVRS conforme página oficial da SEFAZ Bahia. AM, GO, MS, MT, PR, RS e SP possuem autorizadores próprios conforme a relação oficial de serviços do Portal NFC-e/SVRS.
+
+### Padrão de comunicação
+
+- Web Service: `NFeStatusServico4`;
+- método: `nfeStatusServicoNF`;
+- leiaute: 4.00;
+- SOAP: 1.2, Document/Literal;
+- entrada SOAP: `nfeDadosMsg`;
+- saída SOAP: `nfeResultMsg`;
+- TLS: 1.2 ou superior com autenticação mútua;
+- certificado cliente: A1 armazenado pelo Nextor;
+- verificação do certificado do servidor e hostname: obrigatórias;
+- redirects: desabilitados;
+- retry automático: inexistente.
+
+O trust store utilizado é o confiável do sistema/PHP/cURL. O Nextor não inclui bundle de CA aleatório e não desliga validação SSL.
+
+### Material A1 para mTLS
+
+Quando cURL necessita PEM, o PFX é aberto em memória e o certificado/chave são exportados para arquivos temporários dentro de `storage/app/private/fiscal/tls`, com nomes aleatórios e permissão 0600. O diretório recebe 0700. Os arquivos são excluídos em `finally`, inclusive em exceções.
+
+PFX, senha, chave privada e PEM completo nunca entram em logs.
+
+### FiscalTransmission
+
+Cada chamada externa é uma tentativa técnica independente do documento fiscal. A tabela `fiscal_transmissions` registra:
+
+- empresa e documento opcional;
+- serviço/UF/ambiente/autorizador/endpoint;
+- `attempt_uuid`;
+- timestamps e duração;
+- HTTP e status de transporte;
+- `cStat/xMotivo`;
+- hashes SHA-256;
+- request/response criptografados em repouso;
+- classe/mensagem técnica de erro.
+
+Para `STATUS_SERVICE`, request/response não contêm chave privada nem credenciais, mas os payloads são mesmo assim armazenados com cast `encrypted`. Logs de aplicação não recebem XML bruto.
+
+### HTTP não é status fiscal
+
+`HTTP 200` significa somente sucesso de transporte HTTP. O estado fiscal vem de `retConsStatServ/cStat`.
+
+A classificação técnica atual reconhece 107, 108 e 109, mas o resultado preserva sempre `cStat` e `xMotivo` originais e não exige 107 para considerar o transporte bem-sucedido.
+
+### Bloqueio de produção
+
+`statusService()` rejeita qualquer empresa fora de homologação antes de resolver endpoint ou iniciar uma transmissão.
+
+### Política após falha de validação local
+
+```text
+generated -> signed -> validate()
+                     |
+                     +-- válido   -> validated
+                     |
+                     +-- inválido -> error
+```
+
+Quando a validação local falha depois da assinatura, `xml_signed` permanece write-once e o documento passa para `error`. Regeneração silenciosa é bloqueada; uma nova tentativa lógica deverá criar novo documento fiscal.
+
+A fronteira `SignedFiscalXml` aceita somente documento `validated` e entrega os bytes exatos de `xml_signed`, sem DOM, formatação ou reserialização.
+
+Ver `docs/fiscal/PHASE_4_SEFAZ_STATUS.md`.

@@ -42,11 +42,11 @@ final class FiscalDocumentValidationService
 
         $valid = $signature->valid && $schema->valid;
 
-        if ($valid) {
-            $document->forceFill([
-                'state' => FiscalDocumentState::VALIDATED,
-            ])->save();
-        }
+        $document->forceFill([
+            'state' => $valid
+                ? FiscalDocumentState::VALIDATED
+                : FiscalDocumentState::ERROR,
+        ])->save();
 
         return new FiscalValidationResult(
             valid: $valid,

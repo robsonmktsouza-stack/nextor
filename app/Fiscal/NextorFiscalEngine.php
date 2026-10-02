@@ -6,6 +6,8 @@ use App\Fiscal\Contracts\FiscalEngineInterface;
 use App\Fiscal\Models\FiscalCompany;
 use App\Fiscal\Models\FiscalDocument;
 use App\Fiscal\Nfce\FiscalDocumentCreator;
+use App\Fiscal\Sefaz\DTO\SefazStatusResult;
+use App\Fiscal\Sefaz\Services\StatusServiceClient;
 use App\Fiscal\Signature\FiscalDocumentSignatureService;
 use App\Fiscal\Tax\Contracts\TaxEngineInterface;
 use App\Fiscal\Tax\DTO\NfceTaxDocumentInput;
@@ -24,6 +26,7 @@ final class NextorFiscalEngine implements FiscalEngineInterface
         private readonly NfceXmlService $xml,
         private readonly FiscalDocumentSignatureService $signatures,
         private readonly FiscalDocumentValidationService $validation,
+        private readonly StatusServiceClient $statusServiceClient,
     ) {
     }
 
@@ -63,6 +66,11 @@ final class NextorFiscalEngine implements FiscalEngineInterface
     public function validate(FiscalDocument $document): FiscalValidationResult
     {
         return $this->validation->validate($document);
+    }
+
+    public function statusService(FiscalCompany $company): SefazStatusResult
+    {
+        return $this->statusServiceClient->query($company);
     }
 
     public function getGeneratedXml(FiscalDocument $document): ?string

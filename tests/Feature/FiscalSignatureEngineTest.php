@@ -186,6 +186,40 @@ class FiscalSignatureEngineTest extends TestCase
         $this->assertStringContainsString('DigestValue', implode(' | ', $result->errors));
     }
 
+    public function test_failed_local_validation_moves_signed_document_to_error_and_blocks_regeneration(): void
+    {
+        [$company, $product] = $this->configuredScenario();
+        $fixture = TestA1CertificateFactory::make();
+
+        app(A1CertificateVault::class)->store($company, $fixture['pfx'], $fixture['password']);
+        app(FiscalSequenceService::class)->ensure($company, 1, FiscalEnvironment::HOMOLOGATION);
+
+        /** @var FiscalEngineInterface $engine */
+        $engine = app(FiscalEngineInterface::class);
+        $document = $engine->generate($engine->createDocument(
+            $company,
+            $this->input($product),
+            issueAt: new DateTimeImmutable('2026-10-01T12:00:00-03:00'),
+        ));
+        $document = $engine->sign($document);
+
+        $tampered = str_replace('FITA TESTE', 'FITA ALTERADA', (string) $document->xml_signed);
+
+        \Illuminate\Support\Facades\DB::table('fiscal_documents')
+            ->where('id', $document->id)
+            ->update(['xml_signed' => $tampered]);
+
+        $document->refresh();
+        $result = $engine->validate($document);
+
+        $this->assertFalse($result->valid);
+        $this->assertSame(FiscalDocumentState::ERROR, $document->refresh()->state);
+        $this->assertSame($tampered, $document->xml_signed);
+
+        $this->expectException(ImmutableFiscalDocumentException::class);
+        $engine->generate($document);
+    }
+
     public function test_signed_xml_is_write_once(): void
     {
         [$company, $product] = $this->configuredScenario();
