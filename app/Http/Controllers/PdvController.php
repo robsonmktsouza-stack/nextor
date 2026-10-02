@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\AppSetting;
 use App\Models\CompanySetting;
 use App\Models\Customer;
+use App\Models\FiscalDocumentJob;
 use App\Models\PaymentMethod;
 use App\Models\PdvCashMovement;
 use App\Models\PdvCashSession;
+use App\Models\PdvSuspendedSale;
 use App\Models\SalePayment;
 use App\Models\Product;
 use App\Models\Sale;
@@ -28,7 +30,6 @@ class PdvController extends Controller
             'require_customer'=>false,
             'allow_discount'=>true,
             'require_cash_opening'=>false,
-            'allow_split_payment'=>true,
             'ask_consumer_document'=>true,
             'allow_split_payment'=>true,
             'allow_cash_movements'=>true,
@@ -52,6 +53,29 @@ class PdvController extends Controller
                 ->get()
             : collect();
 
+        $suspendedSales=PdvSuspendedSale::query()
+            ->with('user:id,name')
+            ->whereNull('resumed_at')
+            ->latest('suspended_at')
+            ->limit(20)
+            ->get();
+
+        $nfceContingencyActive=(bool)AppSetting::value('nfce','offline_contingency_active',false);
+        $nfceContingencyReason=(string)AppSetting::value('nfce','offline_contingency_reason','');
+        $nfceContingencyStartedAt=AppSetting::value('nfce','offline_contingency_started_at',null);
+
+        $cancelableNfceJobs=FiscalDocumentJob::query()
+            ->with('sale:id,total,completed_at')
+            ->where('document_type','nfce')
+            ->where('status','authorized')
+            ->whereNull('cancelled_at')
+            ->where(function($q){
+                $q->whereNull('cancellation_status')->orWhere('cancellation_status','failed');
+            })
+            ->latest('authorized_at')
+            ->limit(12)
+            ->get();
+
         return view('pdv.index',[
             'customers'=>Customer::query()
                 ->where('is_customer',true)
@@ -73,6 +97,11 @@ class PdvController extends Controller
             'cashSession'=>$cashSession,
             'cashExpected'=>$cashExpected,
             'cashMovements'=>$cashMovements,
+            'suspendedSales'=>$suspendedSales,
+            'nfceContingencyActive'=>$nfceContingencyActive,
+            'nfceContingencyReason'=>$nfceContingencyReason,
+            'nfceContingencyStartedAt'=>$nfceContingencyStartedAt,
+            'cancelableNfceJobs'=>$cancelableNfceJobs,
             'allowNegativeStock'=>(bool)AppSetting::value(
                 'inventory',
                 'allow_negative_stock',
@@ -167,6 +196,14 @@ class PdvController extends Controller
             'payments'=>['nullable','array','max:10'],
             'payments.*.payment_method'=>['required_with:payments','string',Rule::exists('payment_methods','code')->where(fn($q)=>$q->where('is_active',true)->where('pdv_enabled',true))],
             'payments.*.amount'=>['required_with:payments','numeric','gt:0','max:9999999999.99','decimal:0,2'],
+            'payments.*.integration_type'=>['nullable',Rule::in(['1','2'])],
+            'payments.*.transaction_document'=>['nullable','string','max:20'],
+            'payments.*.transaction_state'=>['nullable','string','size:2'],
+            'payments.*.institution_document'=>['nullable','string','max:20'],
+            'payments.*.card_brand'=>['nullable',Rule::in(['01','02','03','04','05','06','07','08','09','99'])],
+            'payments.*.authorization_code'=>['nullable','string','max:128'],
+            'payments.*.beneficiary_document'=>['nullable','string','max:20'],
+            'payments.*.terminal_id'=>['nullable','string','max:40'],
             'cash_received'=>['nullable','numeric','min:0','max:9999999999.99','decimal:0,2'],
             'notes'=>['nullable','string','max:2000'],
             'items'=>['required','array','min:1','max:150'],
@@ -181,6 +218,7 @@ class PdvController extends Controller
             'require_customer'=>false,
             'allow_discount'=>true,
             'require_cash_opening'=>false,
+            'allow_split_payment'=>true,
         ]);
 
         if((bool)$pdvSettings['require_cash_opening']) {
@@ -340,6 +378,14 @@ class PdvController extends Controller
                 'amount'=>number_format($amount,2,'.',''),
                 'due_date'=>now()->copy()->addDays((int)$method->settlement_days)->toDateString(),
                 'payment_method'=>$method->code,
+                'integration_type'=>$payment['integration_type'] ?? null,
+                'transaction_document'=>$this->normalizeCnpj($payment['transaction_document'] ?? null),
+                'transaction_state'=>isset($payment['transaction_state']) ? strtoupper(trim((string)$payment['transaction_state'])) : null,
+                'institution_document'=>$this->normalizeCnpj($payment['institution_document'] ?? null),
+                'card_brand'=>$payment['card_brand'] ?? null,
+                'authorization_code'=>trim((string)($payment['authorization_code'] ?? '')) ?: null,
+                'beneficiary_document'=>$this->normalizeCnpj($payment['beneficiary_document'] ?? null),
+                'terminal_id'=>trim((string)($payment['terminal_id'] ?? '')) ?: null,
                 'receivable'=>$method->kind==='bank_slip' || $method->settlement_days>0,
             ];
         }
@@ -376,6 +422,143 @@ class PdvController extends Controller
             ->with('pdv_last_sale',$sale->id)
             ->with('pdv_cash_received',$cashPaymentTotal>0 ? $cashReceived : $total)
             ->with('pdv_change',$change);
+    }
+
+    public function suspendSale(Request $request)
+    {
+        $data=$request->validate([
+            'label'=>['nullable','string','max:190'],
+            'customer_id'=>['nullable','integer','exists:customers,id'],
+            'consumer_document'=>['nullable','string','max:20'],
+            'consumer_name'=>['nullable','string','max:190'],
+            'payment_method'=>['nullable','string','max:40'],
+            'cash_received'=>['nullable','numeric','min:0','max:9999999999.99'],
+            'notes'=>['nullable','string','max:2000'],
+            'items'=>['required','array','min:1','max:150'],
+            'items.*.type'=>['required',Rule::in(['product','service'])],
+            'items.*.id'=>['required','integer'],
+            'items.*.quantity'=>['required','numeric','gt:0','max:9999999999'],
+            'items.*.discount'=>['nullable','numeric','min:0','max:9999999999.99'],
+            'payments'=>['nullable','array','max:10'],
+        ]);
+
+        $snapshot=$this->buildSuspendedSnapshot($data);
+
+        if(empty($snapshot['items'])) {
+            throw ValidationException::withMessages(['items'=>'Não há itens válidos para suspender.']);
+        }
+
+        $suspended=PdvSuspendedSale::query()->create([
+            'user_id'=>$request->user()->id,
+            'label'=>trim((string)($data['label'] ?? '')) ?: null,
+            'payload'=>$snapshot,
+            'total'=>number_format((float)$snapshot['total'],2,'.',''),
+            'item_count'=>count($snapshot['items']),
+            'suspended_at'=>now(),
+        ]);
+
+        return response()->json([
+            'message'=>'Venda suspensa.',
+            'id'=>$suspended->id,
+        ],201);
+    }
+
+    public function resumeSale(Request $request, PdvSuspendedSale $suspendedSale)
+    {
+        if($suspendedSale->resumed_at) {
+            return response()->json(['message'=>'Esta venda suspensa já foi recuperada.'],409);
+        }
+
+        $snapshot=$this->refreshSuspendedSnapshot($suspendedSale->payload ?? []);
+
+        if(empty($snapshot['items'])) {
+            return response()->json(['message'=>'Nenhum item da venda suspensa está disponível atualmente.'],422);
+        }
+
+        $suspendedSale->update(['resumed_at'=>now()]);
+
+        return response()->json([
+            'message'=>'Venda recuperada.',
+            'snapshot'=>$snapshot,
+        ]);
+    }
+
+    public function discardSuspendedSale(PdvSuspendedSale $suspendedSale)
+    {
+        if($suspendedSale->resumed_at) {
+            return response()->json(['message'=>'A venda já foi recuperada.'],409);
+        }
+
+        $suspendedSale->delete();
+
+        return response()->json(['message'=>'Venda suspensa descartada.']);
+    }
+
+    public function setNfceContingency(Request $request)
+    {
+        $data=$request->validate([
+            'action'=>['required',Rule::in(['start','stop'])],
+            'reason'=>['nullable','string','max:255'],
+        ]);
+
+        if(!(bool)AppSetting::value('fiscal','enabled',false) || !(bool)AppSetting::value('nfce','enabled',false)) {
+            throw ValidationException::withMessages([
+                'action'=>'Habilite os recursos fiscais e a NFC-e antes de usar contingência.',
+            ]);
+        }
+
+        if($data['action']==='start') {
+            $reason=trim((string)($data['reason'] ?? ''));
+            if(mb_strlen($reason)<15) {
+                throw ValidationException::withMessages([
+                    'reason'=>'Informe um motivo de contingência com pelo menos 15 caracteres.',
+                ]);
+            }
+
+            AppSetting::put('nfce','offline_contingency_active',true);
+            AppSetting::put('nfce','offline_contingency_reason',$reason);
+            AppSetting::put('nfce','offline_contingency_started_at',now()->toIso8601String());
+
+            return redirect()->route('pdv.index')->with('warning','Contingência offline NFC-e ativada para novas vendas.');
+        }
+
+        AppSetting::put('nfce','offline_contingency_active',false);
+        AppSetting::put('nfce','offline_contingency_reason',null);
+        AppSetting::put('nfce','offline_contingency_started_at',null);
+
+        return redirect()->route('pdv.index')->with('success','Contingência NFC-e encerrada para novas vendas.');
+    }
+
+    public function requestNfceCancellation(Request $request, FiscalDocumentJob $fiscalJob)
+    {
+        $data=$request->validate([
+            'reason'=>['required','string','min:15','max:255'],
+        ]);
+
+        if($fiscalJob->document_type!=='nfce') abort(404);
+
+        if($fiscalJob->status!=='authorized' || !$fiscalJob->access_key) {
+            throw ValidationException::withMessages([
+                'reason'=>'Somente uma NFC-e autorizada e com chave de acesso pode entrar na fila de cancelamento.',
+            ]);
+        }
+
+        if($fiscalJob->cancelled_at || $fiscalJob->cancellation_status==='pending') {
+            throw ValidationException::withMessages([
+                'reason'=>'Esta NFC-e já foi cancelada ou já possui cancelamento pendente.',
+            ]);
+        }
+
+        $fiscalJob->update([
+            'cancellation_status'=>'pending',
+            'cancellation_reason'=>trim($data['reason']),
+            'cancellation_requested_at'=>now(),
+        ]);
+
+        return redirect()->route('pdv.index')->with(
+            'warning',
+            'Cancelamento fiscal colocado na fila. A transmissão será executada pelo motor fiscal conectado.'
+        );
     }
 
     public function openCash(Request $request)
@@ -528,6 +711,88 @@ class PdvController extends Controller
             ->sum('amount');
 
         return round((float)$session->opening_amount+$cashSales+$supply-$withdrawal,2);
+    }
+
+    private function buildSuspendedSnapshot(array $data): array
+    {
+        $items=$this->refreshSuspendedItems($data['items'] ?? []);
+
+        $total=collect($items)->sum(
+            fn($item)=>max(0,((float)$item['price']*(float)$item['quantity'])-(float)$item['discount'])
+        );
+
+        return [
+            'customer_id'=>$data['customer_id'] ?? null,
+            'consumer_document'=>$this->normalizeConsumerDocument($data['consumer_document'] ?? null),
+            'consumer_name'=>trim((string)($data['consumer_name'] ?? '')) ?: null,
+            'payment_method'=>$data['payment_method'] ?? null,
+            'payments'=>array_values($data['payments'] ?? []),
+            'cash_received'=>(float)($data['cash_received'] ?? 0),
+            'notes'=>trim((string)($data['notes'] ?? '')) ?: null,
+            'items'=>$items,
+            'total'=>round($total,2),
+        ];
+    }
+
+    private function refreshSuspendedSnapshot(array $payload): array
+    {
+        $items=$this->refreshSuspendedItems($payload['items'] ?? []);
+        $total=collect($items)->sum(
+            fn($item)=>max(0,((float)$item['price']*(float)$item['quantity'])-(float)$item['discount'])
+        );
+
+        $payload['items']=$items;
+        $payload['total']=round($total,2);
+
+        if(!empty($payload['customer_id'])) {
+            $customer=Customer::query()
+                ->where('id',$payload['customer_id'])
+                ->where('is_customer',true)
+                ->first();
+
+            if(!$customer) $payload['customer_id']=null;
+        }
+
+        return $payload;
+    }
+
+    private function refreshSuspendedItems(array $rows): array
+    {
+        $productIds=collect($rows)->where('type','product')->pluck('id')->map(fn($id)=>(int)$id)->unique()->all();
+        $serviceIds=collect($rows)->where('type','service')->pluck('id')->map(fn($id)=>(int)$id)->unique()->all();
+
+        $products=Product::query()->whereIn('id',$productIds)->where('is_active',true)->get()->keyBy('id');
+        $services=Service::query()->whereIn('id',$serviceIds)->where('is_active',true)->get()->keyBy('id');
+
+        return collect($rows)->map(function($row) use($products,$services) {
+            $type=$row['type'] ?? null;
+            $id=(int)($row['id'] ?? 0);
+            $item=$type==='product' ? $products->get($id) : ($type==='service' ? $services->get($id) : null);
+            if(!$item) return null;
+
+            return [
+                'type'=>$type,
+                'id'=>$item->id,
+                'name'=>$item->name,
+                'code'=>$type==='product' ? $item->sku : ($item->service_list_item ?: 'SERV-'.$item->id),
+                'ean'=>$type==='product' ? $item->ean_gtin : null,
+                'price'=>(float)$item->sale_price,
+                'stock'=>$type==='product' ? (float)$item->stock_quantity : null,
+                'unit'=>$type==='product' ? $item->unit : 'UN',
+                'control_stock'=>$type==='product' ? (bool)$item->control_stock : false,
+                'quantity'=>max(0.001,(float)($row['quantity'] ?? 1)),
+                'discount'=>max(0,(float)($row['discount'] ?? 0)),
+                'image'=>$type==='product' && $item->image_path
+                    ? Storage::disk('public')->url($item->image_path)
+                    : null,
+            ];
+        })->filter()->values()->all();
+    }
+
+    private function normalizeCnpj(?string $document): ?string
+    {
+        $digits=preg_replace('/\\D+/','',(string)$document) ?: '';
+        return $digits==='' ? null : mb_substr($digits,0,14);
     }
 
     private function normalizeConsumerDocument(?string $document): ?string
