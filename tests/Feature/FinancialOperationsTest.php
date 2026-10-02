@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\FinancialAccount;
 use App\Models\FinancialCategory;
+use App\Models\FinancialEntry;
 use App\Models\FinancialRecurrence;
 use App\Models\FinancialTransfer;
 use App\Models\User;
@@ -55,6 +56,59 @@ class FinancialOperationsTest extends TestCase
         $this->assertSame(1,$service->generateDue($recurrence,\Carbon\Carbon::parse('2026-10-02')));
         $this->assertSame(0,$service->generateDue($recurrence->fresh(),\Carbon\Carbon::parse('2026-10-02')));
         $this->assertDatabaseHas('financial_entries',['description'=>'Aluguel','amount'=>'500.00','recurrence_id'=>$recurrence->id]);
+    }
+
+    public function test_bulk_settlement_closes_selected_open_entries(): void
+    {
+        $user=$this->user();
+        $account=FinancialAccount::query()->firstOrFail();
+        $category=FinancialCategory::query()->where('type','income')->firstOrFail();
+
+        $entry=FinancialEntry::query()->create([
+            'type'=>'receivable','status'=>'open','category_id'=>$category->id,'created_by'=>$user->id,
+            'description'=>'Mensalidade teste','issue_date'=>'2026-10-02','competence_date'=>'2026-10-02',
+            'due_date'=>'2026-10-10','amount'=>'180.00','paid_amount'=>'0.00',
+        ]);
+
+        $this->actingAs($user)->post(route('finance.entries.bulk-action'),[
+            'ids'=>[$entry->id],
+            'action'=>'settle',
+            'financial_account_id'=>$account->id,
+            'settled_at'=>'2026-10-02',
+            'payment_method'=>'pix',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('financial_entries',[
+            'id'=>$entry->id,'status'=>'paid','paid_amount'=>'180.00',
+        ]);
+        $this->assertDatabaseHas('financial_settlements',[
+            'financial_entry_id'=>$entry->id,'financial_account_id'=>$account->id,'amount'=>'180.00',
+        ]);
+    }
+
+    public function test_bulk_cancel_and_reopen_manual_entries(): void
+    {
+        $user=$this->user();
+        $category=FinancialCategory::query()->where('type','expense')->firstOrFail();
+
+        $entry=FinancialEntry::query()->create([
+            'type'=>'payable','status'=>'open','category_id'=>$category->id,'created_by'=>$user->id,
+            'description'=>'Despesa teste','issue_date'=>'2026-10-02','competence_date'=>'2026-10-02',
+            'due_date'=>'2026-10-10','amount'=>'75.00','paid_amount'=>'0.00',
+        ]);
+
+        $this->actingAs($user)->post(route('finance.entries.bulk-action'),[
+            'ids'=>[$entry->id],'action'=>'cancel',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('financial_entries',['id'=>$entry->id,'status'=>'cancelled']);
+
+        $this->actingAs($user)->post(route('finance.entries.bulk-action'),[
+            'ids'=>[$entry->id],'action'=>'reopen',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('financial_entries',['id'=>$entry->id,'status'=>'open']);
+        $this->assertNull($entry->fresh()->cancelled_at);
     }
 
     public function test_ofx_parser_extracts_bank_transactions(): void
