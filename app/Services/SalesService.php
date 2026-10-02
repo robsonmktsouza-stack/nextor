@@ -284,6 +284,18 @@ class SalesService
                 ]);
             }
 
+            $authorizedFiscal=\App\Models\FiscalDocumentJob::query()
+                ->where('sale_id',$locked->id)
+                ->where('status','authorized')
+                ->whereNull('cancelled_at')
+                ->first();
+
+            if($authorizedFiscal) {
+                throw ValidationException::withMessages([
+                    'sale'=>'A venda possui documento fiscal autorizado. Solicite e conclua o cancelamento fiscal antes de cancelar a venda.'
+                ]);
+            }
+
             if($locked->operation_type==='sale' && $locked->returns()->where('status','completed')->exists()) {
                 throw ValidationException::withMessages([
                     'sale'=>'Esta venda possui devolução ativa. Cancele primeiro as devoluções vinculadas antes de cancelar a venda.'
