@@ -16,7 +16,10 @@ use App\Http\Controllers\StockController;
 use App\Http\Controllers\SettingsController;
 use Illuminate\Support\Facades\Route;
 
-Route::redirect('/', '/dashboard')->middleware('permission:dashboard');
+Route::get('/', function () {
+    if(!auth()->check()) return redirect()->route('login');
+    return redirect()->route(auth()->user()->homeRouteName());
+});
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class,'loginForm'])->name('login');
     Route::post('/login', [AuthController::class,'login'])->middleware('throttle:5,1');
@@ -114,9 +117,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/settings/users',[SettingsController::class,'storeUser'])->name('settings.users.store')->middleware('permission:settings');
     Route::put('/settings/users/{user}',[SettingsController::class,'updateUser'])->name('settings.users.update')->middleware('permission:settings');
 
-    Route::get('/finance/settings',[FinanceController::class,'settings'])->name('finance.settings')->middleware('permission:finance');
-    Route::post('/finance/categories',[FinanceController::class,'storeCategory'])->name('finance.categories.store')->middleware('permission:finance');
-    Route::post('/finance/categories/{category}/toggle',[FinanceController::class,'toggleCategory'])->name('finance.categories.toggle')->middleware('permission:finance');
-    Route::post('/finance/accounts',[FinanceController::class,'storeAccount'])->name('finance.accounts.store')->middleware('permission:finance');
-    Route::post('/finance/accounts/{account}/toggle',[FinanceController::class,'toggleAccount'])->name('finance.accounts.toggle')->middleware('permission:finance');
+    Route::get('/finance/settings',[FinanceController::class,'settings'])->name('finance.settings')->middleware('permission:settings');
+    Route::post('/finance/categories',[FinanceController::class,'storeCategory'])->name('finance.categories.store')->middleware('permission:settings');
+    Route::post('/finance/categories/{category}/toggle',[FinanceController::class,'toggleCategory'])->name('finance.categories.toggle')->middleware('permission:settings');
+    Route::post('/finance/accounts',[FinanceController::class,'storeAccount'])->name('finance.accounts.store')->middleware('permission:settings');
+    Route::post('/finance/accounts/{account}/toggle',[FinanceController::class,'toggleAccount'])->name('finance.accounts.toggle')->middleware('permission:settings');
 });
