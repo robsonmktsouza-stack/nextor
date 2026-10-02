@@ -21,3 +21,13 @@
 @push('scripts')
 <script>document.addEventListener('DOMContentLoaded',()=>{const c=document.getElementById('receiptCustomer'),n=document.getElementById('receiptName'),d=document.getElementById('receiptDocument');c?.addEventListener('change',()=>{const o=c.options[c.selectedIndex];if(o?.value){n.value=o.dataset.name||'';d.value=o.dataset.document||'';d.dispatchEvent(new Event('input',{bubbles:true}));}});});</script>
 @endpush
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+ const file=document.querySelector('[data-finance-attachment]');
+ const label=document.querySelector('[data-finance-attachment-label]');
+ file?.addEventListener('change',()=>{if(label) label.textContent=file.files?.[0]?.name||'Nenhum arquivo anexado';});
+});
+</script>
+@endpush

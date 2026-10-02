@@ -58,7 +58,7 @@ class FinancialReceiptController extends Controller
         return redirect()->route('finance.receipts.print',$receipt);
     }
 
-    public function print(FinancialReceipt $receipt)
+    public function printReceipt(FinancialReceipt $receipt)
     {
         $receipt->load(['customer','creator']);
         return view('finance.receipts.print',compact('receipt'));

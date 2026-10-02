@@ -106,6 +106,13 @@ class FinanceController extends Controller
         $data=$this->validatedEntry($request);
         $settleNow=$request->boolean('settle_now');
         $settledAt=$request->input('settled_at') ?: $data['issue_date'];
+
+        if($settleNow && empty($data['financial_account_id'])) {
+            throw ValidationException::withMessages([
+                'financial_account_id'=>'Selecione a conta para registrar a baixa agora.'
+            ]);
+        }
+
         $data['status']='open';$data['paid_amount']='0.00';$data['created_by']=$request->user()->id;
 
         if($request->hasFile('attachment')) {
@@ -118,7 +125,6 @@ class FinanceController extends Controller
         $entry=FinancialEntry::query()->create($data);
 
         if($settleNow) {
-            if(!$entry->financial_account_id) throw ValidationException::withMessages(['financial_account_id'=>'Selecione a conta para registrar a baixa agora.']);
             $financial->settle($entry,[
                 'amount'=>$entry->amount,'settled_at'=>$settledAt,'financial_account_id'=>$entry->financial_account_id,
                 'payment_method'=>$entry->payment_method ?: 'other','notes'=>'Baixa registrada junto com o lançamento.',

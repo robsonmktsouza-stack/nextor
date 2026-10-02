@@ -30,7 +30,20 @@ class FinancialRecurrence extends Model
 
     public function getFrequencyLabelAttribute(): string
     {
-        $base=match($this->frequency){'weekly'=>'semana','yearly'=>'ano',default=>'mês'};
-        return $this->interval_count===1 ? 'Todo '.$base : 'A cada '.$this->interval_count.' '.$base.'s';
+        if($this->interval_count===1) {
+            return match($this->frequency){
+                'weekly'=>'Toda semana',
+                'yearly'=>'Todo ano',
+                default=>'Todo mês',
+            };
+        }
+
+        $unit=match($this->frequency){
+            'weekly'=>'semanas',
+            'yearly'=>'anos',
+            default=>'meses',
+        };
+
+        return 'A cada '.$this->interval_count.' '.$unit;
     }
 }

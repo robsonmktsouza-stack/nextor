@@ -83,7 +83,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/finance/receipts',[FinancialReceiptController::class,'index'])->name('finance.receipts.index');
     Route::get('/finance/receipts/create',[FinancialReceiptController::class,'create'])->name('finance.receipts.create');
     Route::post('/finance/receipts',[FinancialReceiptController::class,'store'])->name('finance.receipts.store');
-    Route::get('/finance/receipts/{receipt}/print',[FinancialReceiptController::class,'print'])->name('finance.receipts.print');
+    Route::get('/finance/receipts/{receipt}/print',[FinancialReceiptController::class,'printReceipt'])->name('finance.receipts.print');
     Route::get('/finance/receipts/{receipt}/attachment',[FinancialReceiptController::class,'attachment'])->name('finance.receipts.attachment');
 
     Route::get('/finance/reconciliation',[FinancialReconciliationController::class,'index'])->name('finance.reconciliation.index');

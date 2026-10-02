@@ -59,7 +59,7 @@ class FinancialReconciliationController extends Controller
     {
         $data=$request->validate([
             'financial_account_id'=>['required','integer','exists:financial_accounts,id'],
-            'file'=>['required','file','max:10240','mimes:ofx,csv,xlsx'],
+            'file'=>['required','file','max:10240'],
         ]);
 
         $file=$request->file('file');

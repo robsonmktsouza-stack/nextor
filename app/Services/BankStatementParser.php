@@ -105,30 +105,59 @@ class BankStatementParser
         $shared=[];
         $sharedXml=$zip->getFromName('xl/sharedStrings.xml');
         if($sharedXml!==false) {
-            $xml=@simplexml_load_string($sharedXml);
-            if($xml) foreach($xml->si as $si) $shared[]=trim((string)$si->t ?: implode('',array_map('strval',iterator_to_array($si->r->t ?? []))));
+            $dom=new \DOMDocument();
+            if(@$dom->loadXML($sharedXml)) {
+                $xp=new \DOMXPath($dom);
+                $xp->registerNamespace('x','http://schemas.openxmlformats.org/spreadsheetml/2006/main');
+                foreach($xp->query('//x:si') as $si) {
+                    $parts=[];
+                    foreach($xp->query('.//x:t',$si) as $node) $parts[]=$node->textContent;
+                    $shared[]=trim(implode('',$parts));
+                }
+            }
         }
 
         $sheet=$zip->getFromName('xl/worksheets/sheet1.xml');
         $zip->close();
-        if($sheet===false) throw ValidationException::withMessages(['file'=>'Planilha XLSX sem primeira aba legível.']);
 
-        $xml=@simplexml_load_string($sheet);
-        if(!$xml) throw ValidationException::withMessages(['file'=>'XLSX inválido.']);
+        if($sheet===false) {
+            throw ValidationException::withMessages(['file'=>'Planilha XLSX sem primeira aba legível.']);
+        }
+
+        $dom=new \DOMDocument();
+        if(!@$dom->loadXML($sheet)) {
+            throw ValidationException::withMessages(['file'=>'XLSX inválido.']);
+        }
+
+        $xp=new \DOMXPath($dom);
+        $xp->registerNamespace('x','http://schemas.openxmlformats.org/spreadsheetml/2006/main');
 
         $matrix=[];
-        foreach($xml->sheetData->row as $row) {
+        foreach($xp->query('//x:sheetData/x:row') as $row) {
             $values=[];
-            foreach($row->c as $cell) {
-                $ref=(string)$cell['r'];
+            foreach($xp->query('./x:c',$row) as $cell) {
+                $ref=$cell->attributes?->getNamedItem('r')?->nodeValue ?: 'A1';
                 preg_match('/^[A-Z]+/',$ref,$m);
                 $col=$this->columnIndex($m[0] ?? 'A');
-                $value=(string)$cell->v;
-                if((string)$cell['t']==='s') $value=$shared[(int)$value] ?? '';
+                $type=$cell->attributes?->getNamedItem('t')?->nodeValue;
+                $valueNode=$xp->query('./x:v',$cell)->item(0);
+                $value=$valueNode?->textContent ?? '';
+
+                if($type==='s') $value=$shared[(int)$value] ?? '';
+                elseif($type==='inlineStr') {
+                    $parts=[];
+                    foreach($xp->query('.//x:t',$cell) as $node) $parts[]=$node->textContent;
+                    $value=implode('',$parts);
+                }
+
                 $values[$col]=$value;
             }
-            ksort($values);
-            $matrix[]=array_values($values);
+
+            if($values) {
+                ksort($values);
+                $max=max(array_keys($values));
+                $matrix[]=array_map(fn($i)=>$values[$i] ?? '',range(0,$max));
+            }
         }
 
         if(!$matrix) return $this->finish([]);
@@ -148,9 +177,13 @@ class BankStatementParser
             if(is_numeric($rawDate)) $rawDate=date('Y-m-d',((int)$rawDate-25569)*86400);
             $date=$this->dateValue($rawDate);
             if(!$date) continue;
+
             $value=$this->decimal($cols[$amountIdx] ?? '0');
             $rows[]=[
-                'sequence'=>$i+1,'external_id'=>null,'transaction_date'=>$date,'amount'=>$value,
+                'sequence'=>$i+1,
+                'external_id'=>null,
+                'transaction_date'=>$date,
+                'amount'=>$value,
                 'description'=>trim((string)($descIdx!==null ? ($cols[$descIdx] ?? '') : '')) ?: 'Movimentação bancária',
                 'transaction_type'=>$value>=0 ? 'credit' : 'debit',
             ];
