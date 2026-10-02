@@ -112,6 +112,8 @@
     const actionNotesValue=document.getElementById('pdvActionNotesValue');
     const finish=document.getElementById('pdvFinish');
     const fullscreenButton=document.getElementById('pdvFullscreen');
+    const salesLink=document.getElementById('pdvSalesLink');
+    const adminLink=document.getElementById('pdvAdminLink');
     const itemCount=document.getElementById('pdvItemCount');
     const subtotalOutput=document.getElementById('pdvSubtotal');
     const discountOutput=document.getElementById('pdvDiscountTotal');
@@ -2027,6 +2029,9 @@
           KeyK:'close-cash',
           KeyP:'supply',
           KeyS:'withdrawal',
+          KeyL:'fullscreen',
+          KeyV:'sales',
+          KeyM:'admin',
         }[event.code];
 
         if(advanced){
@@ -2034,6 +2039,9 @@
           event.stopPropagation();
           event.stopImmediatePropagation?.();
           if(advanced==='operations') openOperationsModal();
+          else if(advanced==='fullscreen') fullscreenButton?.click();
+          else if(advanced==='sales' && salesLink?.href) window.location.href=salesLink.href;
+          else if(advanced==='admin' && adminLink?.href) window.location.href=adminLink.href;
           else runAdvancedOperation(advanced);
           return;
         }
