@@ -396,7 +396,7 @@ class PdvController extends Controller
                 'payment_method'=>$method->code,
                 'integration_type'=>$payment['integration_type'] ?? null,
                 'transaction_document'=>$transactionDocument,
-                'transaction_state'=>isset($payment['transaction_state']) ? strtoupper(trim((string)$payment['transaction_state'])) : null,
+                'transaction_state'=>($state=strtoupper(trim((string)($payment['transaction_state'] ?? ''))))!=='' ? $state : null,
                 'institution_document'=>$institutionDocument,
                 'card_brand'=>$payment['card_brand'] ?? null,
                 'authorization_code'=>trim((string)($payment['authorization_code'] ?? '')) ?: null,
@@ -807,8 +807,7 @@ class PdvController extends Controller
 
     private function normalizeCnpj(?string $document): ?string
     {
-        $value=$this->normalizeTaxDocument($document);
-        return $value===null ? null : mb_substr($value,0,14);
+        return $this->normalizeTaxDocument($document);
     }
 
     private function normalizeConsumerDocument(?string $document): ?string
