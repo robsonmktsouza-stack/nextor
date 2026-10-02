@@ -180,7 +180,7 @@
           </td>
           <td>{{ $entry->customer?->name ?? '—' }}</td>
           <td>{{ $entry->account?->name ?? '—' }}</td>
-          <td class="nowrap">{{ $entry->due_date->format('d/m/Y') }}</td>
+          <td class="nowrap">{{ $entry->due_date->format(\App\Models\AppSetting::dateFormat()) }}</td>
           <td><span class="status {{ $statusClass }}">{{ $entry->status_label }}</span></td>
           <td class="price-strong nowrap">R$ {{ number_format((float)$entry->amount,2,',','.') }}</td>
           <td class="action-cell"><a class="btn-icon" href="{{ route('finance.entries.show',$entry) }}" data-tooltip="Abrir">@include('partials.icon',['name'=>'chevron','size'=>16])</a></td>
