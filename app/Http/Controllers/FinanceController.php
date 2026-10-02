@@ -413,23 +413,20 @@ class FinanceController extends Controller
 
     public function settings(FinancialBalanceService $balances)
     {
-        return view('finance.settings',[
-            'categories'=>FinancialCategory::query()->orderBy('type')->orderBy('name')->get(),
-            'accounts'=>$balances->accounts(false),
-        ]);
+        return redirect()->route('settings.index',['tab'=>'chart']);
     }
 
     public function storeCategory(Request $request)
     {
         $data=$request->validate(['name'=>['required','string','max:120'],'type'=>['required','in:income,expense']]);
         FinancialCategory::query()->firstOrCreate(['name'=>trim($data['name']),'type'=>$data['type']],['is_active'=>true]);
-        return redirect()->route('finance.settings')->with('success','Categoria salva.');
+        return redirect()->route('settings.index',['tab'=>'chart'])->with('success','Categoria salva.');
     }
 
     public function toggleCategory(FinancialCategory $category)
     {
         $category->update(['is_active'=>!$category->is_active]);
-        return redirect()->route('finance.settings')->with('success','Categoria atualizada.');
+        return redirect()->route('settings.index',['tab'=>'chart'])->with('success','Categoria atualizada.');
     }
 
     public function storeAccount(Request $request)
@@ -439,13 +436,13 @@ class FinanceController extends Controller
             'opening_balance'=>['required','numeric','min:0','max:9999999999.99','decimal:0,2'],
         ]);
         $data['is_active']=true;FinancialAccount::query()->create($data);
-        return redirect()->route('finance.settings')->with('success','Conta financeira criada.');
+        return redirect()->route('settings.index',['tab'=>'accounts'])->with('success','Conta financeira criada.');
     }
 
     public function toggleAccount(FinancialAccount $account)
     {
         $account->update(['is_active'=>!$account->is_active]);
-        return redirect()->route('finance.settings')->with('success','Conta financeira atualizada.');
+        return redirect()->route('settings.index',['tab'=>'accounts'])->with('success','Conta financeira atualizada.');
     }
 
     private function validatedEntry(Request $request): array
