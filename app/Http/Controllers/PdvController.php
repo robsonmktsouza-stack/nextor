@@ -351,10 +351,16 @@ class PdvController extends Controller
             ]);
         }
 
+        $change=$cashPaymentTotal>0
+            ? max(0,$cashReceived-$cashPaymentTotal)
+            : 0;
+
         $sale=$sales->create([
             'customer_id'=>$data['customer_id'] ?? null,
             'consumer_document'=>$consumerDocument,
             'consumer_name'=>$consumerDocument ? (trim((string)($data['consumer_name'] ?? '')) ?: null) : null,
+            'cash_received'=>$cashPaymentTotal>0 ? number_format($cashReceived,2,'.','') : null,
+            'change_amount'=>number_format($change,2,'.',''),
             'operation_type'=>'sale',
             'source'=>'pdv',
             'operation_date'=>now()->toDateString(),
@@ -364,10 +370,6 @@ class PdvController extends Controller
             'items'=>$rows,
             'payments'=>$payments,
         ],(int)$request->user()->id);
-
-        $change=$cashPaymentTotal>0
-            ? max(0,$cashReceived-$cashPaymentTotal)
-            : 0;
 
         return redirect()
             ->route('pdv.receipt',$sale)
@@ -486,8 +488,8 @@ class PdvController extends Controller
         $pdvSettings=AppSetting::groupValues('pdv',['receipt_width'=>'80','receipt_copies'=>1]);
         $company=CompanySetting::current();
 
-        $cashReceived=(float)session('pdv_cash_received',(float)$sale->total);
-        $change=(float)session('pdv_change',0);
+        $cashReceived=(float)session('pdv_cash_received',(float)($sale->cash_received ?? $sale->total));
+        $change=(float)session('pdv_change',(float)($sale->change_amount ?? 0));
 
         session()->keep(['pdv_last_sale','pdv_change']);
 
