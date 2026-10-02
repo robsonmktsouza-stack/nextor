@@ -107,7 +107,8 @@ class SaleController extends Controller
     public function show(Sale $sale)
     {
         $sale->load(['items.product','items.service','payments','customer','user']);
-        return view('sales.show',compact('sale'));
+        $saleReturns=$sale->returns()->withCount('items')->orderByDesc('return_date')->orderByDesc('id')->get();
+        return view('sales.show',compact('sale','saleReturns'));
     }
 
     public function cancel(Request $request, Sale $sale, SalesService $sales)
