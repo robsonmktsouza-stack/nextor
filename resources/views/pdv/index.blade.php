@@ -292,7 +292,7 @@
       <button type="button" class="pdv-client-option"
               data-customer-id="{{ $customer->id }}"
               data-customer-name="{{ $customer->name }}"
-              data-customer-document="{{ preg_replace('/\D+/','',$customer->document ?? '') }}"
+              data-customer-document="{{ strtoupper(preg_replace('/[^A-Z0-9]/i','',$customer->document ?? '')) }}"
               data-customer-search="{{ mb_strtolower($customer->name.' '.$customer->document) }}">
         <span class="pdv-client-avatar">{{ strtoupper(substr($customer->name,0,2)) }}</span>
         <span>
