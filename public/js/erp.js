@@ -1056,8 +1056,8 @@
   };
 
   document.querySelectorAll('.cms-card').forEach(card=>{
-    const all=card.querySelector('[data-check-all]');
-    if(!all) return;
+    const getAll=()=>card.querySelector('[data-check-all]');
+    if(!getAll()) return;
 
     const getRows=()=>[...card.querySelectorAll('[data-row-select]')];
     const count=card.querySelector('[data-selection-count]');
@@ -1065,10 +1065,13 @@
     const apply=card.querySelector('[data-bulk-apply]');
 
     const update=()=>{
+      const all=getAll();
       const rows=getRows();
       const selected=rows.filter(x=>x.checked);
-      all.checked=rows.length>0 && selected.length===rows.length;
-      all.indeterminate=selected.length>0 && selected.length<rows.length;
+      if(all){
+        all.checked=rows.length>0 && selected.length===rows.length;
+        all.indeterminate=selected.length>0 && selected.length<rows.length;
+      }
       card.querySelectorAll('[data-bulk-submit]').forEach(b=>b.disabled=selected.length===0);
       card.querySelectorAll('[data-requires-selection]').forEach(b=>b.disabled=selected.length===0);
       card.querySelectorAll('[data-requires-single]').forEach(b=>b.disabled=selected.length!==1);
@@ -1080,11 +1083,12 @@
       }
     };
 
-    all.addEventListener('change',()=>{
-      getRows().forEach(x=>x.checked=all.checked);
-      update();
-    });
     card.addEventListener('change',event=>{
+      if(event.target.matches?.('[data-check-all]')){
+        getRows().forEach(x=>x.checked=event.target.checked);
+        update();
+        return;
+      }
       if(event.target.matches?.('[data-row-select]') || event.target===menu) update();
     });
 
