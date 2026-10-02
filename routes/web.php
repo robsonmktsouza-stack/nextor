@@ -3,6 +3,10 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FinanceController;
+use App\Http\Controllers\FinancialReconciliationController;
+use App\Http\Controllers\FinancialReceiptController;
+use App\Http\Controllers\FinancialRecurrenceController;
+use App\Http\Controllers\FinancialTransferController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PdvController;
 use App\Http\Controllers\SaleController;
@@ -64,6 +68,31 @@ Route::middleware('auth')->group(function () {
     Route::post('/finance/entries/{entry}/settle',[FinanceController::class,'settle'])->name('finance.entries.settle');
     Route::post('/finance/entries/{entry}/cancel',[FinanceController::class,'cancel'])->name('finance.entries.cancel');
     Route::post('/finance/settlements/{settlement}/reverse',[FinanceController::class,'reverseSettlement'])->name('finance.settlements.reverse');
+
+    Route::get('/finance/transfers',[FinancialTransferController::class,'index'])->name('finance.transfers.index');
+    Route::get('/finance/transfers/create',[FinancialTransferController::class,'create'])->name('finance.transfers.create');
+    Route::post('/finance/transfers',[FinancialTransferController::class,'store'])->name('finance.transfers.store');
+    Route::post('/finance/transfers/{transfer}/cancel',[FinancialTransferController::class,'cancel'])->name('finance.transfers.cancel');
+
+    Route::get('/finance/recurrences',[FinancialRecurrenceController::class,'index'])->name('finance.recurrences.index');
+    Route::get('/finance/recurrences/create',[FinancialRecurrenceController::class,'create'])->name('finance.recurrences.create');
+    Route::post('/finance/recurrences',[FinancialRecurrenceController::class,'store'])->name('finance.recurrences.store');
+    Route::post('/finance/recurrences/generate',[FinancialRecurrenceController::class,'generate'])->name('finance.recurrences.generate');
+    Route::post('/finance/recurrences/{recurrence}/toggle',[FinancialRecurrenceController::class,'toggle'])->name('finance.recurrences.toggle');
+
+    Route::get('/finance/receipts',[FinancialReceiptController::class,'index'])->name('finance.receipts.index');
+    Route::get('/finance/receipts/create',[FinancialReceiptController::class,'create'])->name('finance.receipts.create');
+    Route::post('/finance/receipts',[FinancialReceiptController::class,'store'])->name('finance.receipts.store');
+    Route::get('/finance/receipts/{receipt}/print',[FinancialReceiptController::class,'print'])->name('finance.receipts.print');
+    Route::get('/finance/receipts/{receipt}/attachment',[FinancialReceiptController::class,'attachment'])->name('finance.receipts.attachment');
+
+    Route::get('/finance/reconciliation',[FinancialReconciliationController::class,'index'])->name('finance.reconciliation.index');
+    Route::get('/finance/reconciliation/import',[FinancialReconciliationController::class,'createImport'])->name('finance.reconciliation.import');
+    Route::post('/finance/reconciliation/import',[FinancialReconciliationController::class,'storeImport'])->name('finance.reconciliation.store-import');
+    Route::post('/finance/reconciliation/transactions/{transaction}/match',[FinancialReconciliationController::class,'match'])->name('finance.reconciliation.match');
+    Route::post('/finance/reconciliation/transactions/{transaction}/unmatch',[FinancialReconciliationController::class,'unmatch'])->name('finance.reconciliation.unmatch');
+
+    Route::get('/finance/entries/{entry}/attachment',[FinanceController::class,'attachment'])->name('finance.entries.attachment');
 
     Route::get('/finance/settings',[FinanceController::class,'settings'])->name('finance.settings');
     Route::post('/finance/categories',[FinanceController::class,'storeCategory'])->name('finance.categories.store');

@@ -30,6 +30,7 @@ class FinancialService
                     'type'=>'receivable',
                     'status'=>'open',
                     'category_id'=>$category->id,
+                    'financial_account_id'=>$payment->receivable ? null : $defaultAccount->id,
                     'customer_id'=>$sale->customer_id,
                     'sale_id'=>$sale->id,
                     'created_by'=>$userId,
@@ -37,6 +38,7 @@ class FinancialService
                         .' - parcela '.$payment->installment.'/'.$installments,
                     'document_number'=>'VENDA-'.$sale->id,
                     'issue_date'=>($sale->operation_date ?? $sale->created_at)->toDateString(),
+                    'competence_date'=>($sale->operation_date ?? $sale->created_at)->toDateString(),
                     'due_date'=>($payment->due_date ?? $sale->operation_date ?? $sale->created_at)->toDateString(),
                     'amount'=>$payment->amount,
                     'paid_amount'=>'0.00',
@@ -221,6 +223,7 @@ class FinancialService
         $totalCents=$this->cents($entry->amount);
 
         $entry->update([
+            'financial_account_id'=>$entry->financial_account_id ?: $entry->activeSettlements()->value('financial_account_id'),
             'paid_amount'=>$this->money($paidCents),
             'status'=>$paidCents<=0 ? 'open' : ($paidCents>=$totalCents ? 'paid' : 'partial'),
         ]);

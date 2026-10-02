@@ -9,16 +9,19 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class FinancialEntry extends Model
 {
     protected $fillable=[
-        'type','status','category_id','customer_id','sale_id','sale_payment_id','created_by',
-        'description','document_number','issue_date','due_date','amount','paid_amount',
-        'payment_method','notes','cancelled_at',
+        'type','status','category_id','financial_account_id','customer_id','sale_id','sale_payment_id','recurrence_id','recurrence_occurrence_date','created_by',
+        'description','document_number','issue_date','competence_date','due_date','credit_date','amount','paid_amount',
+        'payment_method','keywords','notes','attachment_path','attachment_name','cancelled_at',
     ];
 
     protected function casts(): array
     {
         return [
             'issue_date'=>'date',
+            'competence_date'=>'date',
             'due_date'=>'date',
+            'credit_date'=>'date',
+            'recurrence_occurrence_date'=>'date',
             'amount'=>'decimal:2',
             'paid_amount'=>'decimal:2',
             'cancelled_at'=>'datetime',
@@ -28,6 +31,16 @@ class FinancialEntry extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(FinancialCategory::class,'category_id');
+    }
+
+    public function account(): BelongsTo
+    {
+        return $this->belongsTo(FinancialAccount::class,'financial_account_id');
+    }
+
+    public function recurrence(): BelongsTo
+    {
+        return $this->belongsTo(FinancialRecurrence::class,'recurrence_id');
     }
 
     public function customer(): BelongsTo
