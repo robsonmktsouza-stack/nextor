@@ -2469,3 +2469,110 @@
   .pdv-split-row{grid-template-columns:minmax(0,1fr) 105px 32px}
   .pdv-consumer-actions{grid-template-columns:1fr}
 }
+
+
+/* Operações avançadas do PDV */
+.pdv-topbar-button kbd,
+.pdv-cash-session-action kbd,
+.pdv-modal-primary kbd,
+.pdv-consumer-skip kbd{
+  margin-left:6px;padding:1px 4px;border:1px solid currentColor;border-radius:3px;
+  background:transparent;font:700 8.5px/1.2 Arial,sans-serif;opacity:.8
+}
+.pdv-topbar-contingency{
+  min-height:30px;display:inline-flex;align-items:center;padding:0 9px;border:1px solid #d7a654;
+  border-radius:4px;background:#fff4df;color:#8d641d;font-size:9.5px;font-weight:800;white-space:nowrap
+}
+
+.pdv-operations-modal{width:min(620px,calc(100vw - 28px))}
+.pdv-operations-list{display:grid;gap:6px;padding:14px}
+.pdv-operations-list>button{
+  min-height:52px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;
+  padding:8px 10px;border:1px solid #d8e1e9;border-radius:5px;background:#fff;text-align:left;cursor:pointer
+}
+.pdv-operations-list>button:hover,.pdv-operations-list>button:focus{
+  outline:0;border-color:#8eb7dd;background:#f5faff
+}
+.pdv-operations-list>button>span{display:flex;min-width:0;flex-direction:column;gap:2px}
+.pdv-operations-list>button strong{font-size:11px;color:#334a61}
+.pdv-operations-list>button small{font-size:9.5px;color:#83919f;line-height:1.35}
+.pdv-operations-list>button kbd{
+  padding:4px 6px;border:1px solid #ccd7e1;border-radius:4px;background:#f7f9fb;color:#526a81;
+  font-size:9px;font-weight:800;white-space:nowrap
+}
+
+.pdv-operation-body{display:grid;gap:12px;padding:16px}
+.pdv-operation-body label{display:grid;gap:6px}
+.pdv-operation-body label>span{font-size:10.5px;font-weight:700;color:#51687d}
+.pdv-operation-body input,
+.pdv-operation-body textarea,
+.pdv-operation-body select{
+  width:100%;border:1px solid #cad6e0;border-radius:4px;background:#fff;color:#2e455b;
+  font:inherit;outline:0
+}
+.pdv-operation-body input,.pdv-operation-body select{height:38px;padding:0 9px}
+.pdv-operation-body textarea{padding:9px;resize:vertical}
+.pdv-operation-body input:focus,
+.pdv-operation-body textarea:focus,
+.pdv-operation-body select:focus{border-color:#2877c7;box-shadow:0 0 0 2px #2877c712}
+.pdv-operation-summary{
+  display:grid;grid-template-columns:auto 1fr auto 1fr;align-items:center;gap:8px;
+  padding:10px 12px;border:1px solid #d8e3eb;border-radius:5px;background:#f7fafc
+}
+.pdv-operation-summary span{font-size:9.5px;color:#82909e}
+.pdv-operation-summary strong{font-size:12px;color:#334b61}
+.pdv-operation-note{
+  padding:9px 10px;border:1px solid #dce5ec;border-radius:4px;background:#f8fafc;
+  color:#788897;font-size:9.5px;line-height:1.45
+}
+.pdv-operation-empty{
+  margin:14px;padding:24px;border:1px dashed #d2dce5;border-radius:5px;background:#fafcfd;
+  color:#8492a0;text-align:center;font-size:10.5px
+}
+
+.pdv-suspended-list{display:grid;gap:6px;max-height:420px;padding:14px;overflow:auto}
+.pdv-suspended-row{
+  display:grid;grid-template-columns:minmax(0,1fr) 36px;gap:6px;align-items:stretch
+}
+.pdv-suspended-resume{
+  min-height:54px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;
+  padding:8px 10px;border:1px solid #d9e2ea;border-radius:5px;background:#fff;text-align:left;cursor:pointer
+}
+.pdv-suspended-resume:hover,.pdv-suspended-resume:focus{
+  outline:0;border-color:#8db6dd;background:#f5faff
+}
+.pdv-suspended-resume>span{display:flex;min-width:0;flex-direction:column;gap:3px}
+.pdv-suspended-resume strong{font-size:10.5px;color:#354c62}
+.pdv-suspended-resume small{font-size:9.2px;color:#82909e}
+.pdv-suspended-resume time{font-size:9px;color:#7e8d9b;white-space:nowrap}
+.pdv-suspended-discard{
+  border:1px solid #ead2d4;border-radius:5px;background:#fff;color:#b7535b;cursor:pointer
+}
+
+.pdv-electronic-modal{width:min(720px,calc(100vw - 28px))}
+.pdv-electronic-body{display:grid;gap:12px;padding:16px}
+.pdv-electronic-target{
+  padding:9px 10px;border:1px solid #bed5ea;border-radius:4px;background:#f2f8fd;
+  color:#356d9f;font-size:10.5px;font-weight:800
+}
+.pdv-electronic-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.pdv-electronic-grid label{display:grid;gap:5px}
+.pdv-electronic-grid label>span{font-size:9.5px;font-weight:700;color:#586d81}
+.pdv-electronic-grid input,.pdv-electronic-grid select{
+  width:100%;height:36px;border:1px solid #cad6df;border-radius:4px;padding:0 8px;background:#fff;color:#32495f;
+  font-size:10.5px;outline:0
+}
+.pdv-electronic-grid input:focus,.pdv-electronic-grid select:focus{border-color:#2877c7}
+
+.pdv-contingency-active{
+  display:grid;gap:4px;padding:12px;border:1px solid #e2c17c;border-radius:5px;background:#fff7e8;color:#70531d
+}
+.pdv-contingency-active strong{font-size:11px}
+.pdv-contingency-active span{font-size:10px}
+.pdv-contingency-active small{font-size:9px;color:#8d7341}
+
+@media(max-width:760px){
+  .pdv-electronic-grid{grid-template-columns:1fr}
+  .pdv-operation-summary{grid-template-columns:auto 1fr}
+  .pdv-topbar-contingency{display:none}
+}
