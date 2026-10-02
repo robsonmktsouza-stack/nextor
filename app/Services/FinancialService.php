@@ -14,6 +14,8 @@ use Illuminate\Validation\ValidationException;
 
 class FinancialService
 {
+    public function __construct(private readonly WebhookService $webhooks) {}
+
     public function syncSale(Sale $sale, int $userId): void
     {
         if($sale->operation_type!=='sale' || $sale->status!=='completed') {
@@ -76,7 +78,7 @@ class FinancialService
 
     public function settle(FinancialEntry $entry, array $data, int $userId): FinancialSettlement
     {
-        return DB::transaction(function () use ($entry,$data,$userId) {
+        $settlement=DB::transaction(function () use ($entry,$data,$userId) {
             $locked=FinancialEntry::query()->lockForUpdate()->findOrFail($entry->id);
 
             if($locked->status==='cancelled') {
@@ -106,6 +108,16 @@ class FinancialService
                 $data['notes'] ?? null,
             );
         },3);
+
+        $this->webhooks->queue('financial.settled',[
+            'financial_entry_id'=>$settlement->financial_entry_id,
+            'settlement_id'=>$settlement->id,
+            'amount'=>(string)$settlement->amount,
+            'settled_at'=>optional($settlement->settled_at)->toDateString(),
+            'payment_method'=>$settlement->payment_method,
+        ]);
+
+        return $settlement;
     }
 
     public function reverse(FinancialSettlement $settlement, ?string $reason=null): void
@@ -130,6 +142,12 @@ class FinancialService
 
             $this->recalculate($entry);
         },3);
+
+        $this->webhooks->queue('financial.settlement_reversed',[
+            'settlement_id'=>$settlement->id,
+            'financial_entry_id'=>$settlement->financial_entry_id,
+            'reason'=>$reason,
+        ]);
     }
 
     public function cancelManual(FinancialEntry $entry): void
