@@ -109,6 +109,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/settings',[SettingsController::class,'index'])->name('settings.index')->middleware('permission:settings');
     Route::post('/settings/company',[SettingsController::class,'updateCompany'])->name('settings.company.update')->middleware('permission:settings');
+    Route::post('/settings/printing',[SettingsController::class,'updatePrinting'])->name('settings.printing.update')->middleware('permission:settings');
     Route::post('/settings/group/{group}',[SettingsController::class,'updateGroup'])->name('settings.group.update')->middleware('permission:settings');
     Route::post('/settings/certificate',[SettingsController::class,'uploadCertificate'])->name('settings.certificate.upload')->middleware('permission:settings');
     Route::delete('/settings/certificate',[SettingsController::class,'removeCertificate'])->name('settings.certificate.remove')->middleware('permission:settings');
