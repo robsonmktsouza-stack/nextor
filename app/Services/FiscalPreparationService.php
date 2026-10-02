@@ -14,7 +14,7 @@ class FiscalPreparationService
         if($sale->operation_type!=='sale' || $sale->status!=='completed') return;
         if(!(bool)AppSetting::value('fiscal','enabled',false)) return;
 
-        $sale->loadMissing(['items','customer']);
+        $sale->loadMissing(['items.product','items.service','customer']);
 
         if($sale->source==='pdv') {
             $pdvAuto=(bool)AppSetting::value('pdv','auto_nfce',false);
@@ -89,6 +89,17 @@ class FiscalPreparationService
                         'quantity'=>(string)$item->quantity,
                         'unit_price'=>(string)$item->unit_price,
                         'line_total'=>(string)$item->line_total,
+                        'tax_defaults'=>$item->product?->tax_defaults
+                            ?? $item->service?->tax_defaults
+                            ?? AppSetting::groupValues('tax',[]),
+                        'origin'=>$item->product?->origin,
+                        'ncm'=>$item->product?->ncm,
+                        'cest'=>$item->product?->cest,
+                        'service_list_item'=>$item->service?->service_list_item,
+                        'cnae'=>$item->service?->cnae,
+                        'municipal_tax_code'=>$item->service?->municipal_tax_code,
+                        'national_tax_code'=>$item->service?->national_tax_code,
+                        'nbs'=>$item->service?->nbs,
                     ])->values()->all(),
                 ],
                 'prepared_at'=>now(),
