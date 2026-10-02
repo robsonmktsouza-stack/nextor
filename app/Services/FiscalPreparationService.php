@@ -82,6 +82,8 @@ class FiscalPreparationService
                     'customer_id'=>$sale->customer_id,
                     'consumer_document'=>$sale->consumer_document,
                     'consumer_name'=>$sale->consumer_name,
+                    'cash_received'=>$sale->cash_received!==null ? (string)$sale->cash_received : null,
+                    'change_amount'=>(string)($sale->change_amount ?? 0),
                     'total'=>(string)$sale->total,
                     'items'=>$sale->items->map(fn($item)=>[
                         'item_type'=>$item->item_type,
