@@ -1,4 +1,5 @@
 <?php
+use App\Http\Controllers\ApiController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
@@ -20,6 +21,12 @@ Route::get('/', function () {
     if(!auth()->check()) return redirect()->route('login');
     return redirect()->route(auth()->user()->homeRouteName());
 });
+Route::prefix('api/nextor')->middleware(['nextor.api','throttle:120,1'])->group(function () {
+    Route::get('/products',[ApiController::class,'products']);
+    Route::get('/customers',[ApiController::class,'customers']);
+    Route::get('/sales',[ApiController::class,'sales']);
+});
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class,'loginForm'])->name('login');
     Route::post('/login', [AuthController::class,'login'])->middleware('throttle:5,1');
@@ -114,6 +121,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/settings/printing',[SettingsController::class,'updatePrinting'])->name('settings.printing.update')->middleware('permission:settings');
     Route::post('/settings/group/{group}',[SettingsController::class,'updateGroup'])->name('settings.group.update')->middleware('permission:settings');
     Route::post('/settings/accounting/export',[SettingsController::class,'exportAccounting'])->name('settings.accounting.export')->middleware('permission:settings');
+    Route::post('/settings/api-token/regenerate',[SettingsController::class,'regenerateApiToken'])->name('settings.api-token.regenerate')->middleware('permission:settings');
     Route::post('/settings/certificate',[SettingsController::class,'uploadCertificate'])->name('settings.certificate.upload')->middleware('permission:settings');
     Route::delete('/settings/certificate',[SettingsController::class,'removeCertificate'])->name('settings.certificate.remove')->middleware('permission:settings');
     Route::post('/settings/payment-methods',[SettingsController::class,'storePaymentMethod'])->name('settings.payment-methods.store')->middleware('permission:settings');
