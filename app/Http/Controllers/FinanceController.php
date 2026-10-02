@@ -9,6 +9,7 @@ use App\Models\FinancialCategory;
 use App\Models\FinancialEntry;
 use App\Models\FinancialSettlement;
 use App\Models\PaymentMethod;
+use App\Services\BillingService;
 use App\Services\FinancialBalanceService;
 use App\Services\FinancialService;
 use Carbon\Carbon;
@@ -108,6 +109,12 @@ class FinanceController extends Controller
         $accountId=(int)AppSetting::value('operations','default_financial_account_id',0);
         $dueDays=max(0,(int)AppSetting::value('operations','default_due_days',0));
 
+        if($type==='receivable' && (bool)AppSetting::value('billing','enabled',false)) {
+            $dueDays=max(0,(int)AppSetting::value('billing','default_due_days',$dueDays));
+            $billingAccount=(int)AppSetting::value('billing','default_financial_account_id',0);
+            if($billingAccount>0) $accountId=$billingAccount;
+        }
+
         $entry=new FinancialEntry([
             'type'=>$type,'status'=>'open','issue_date'=>today(),'competence_date'=>today(),
             'due_date'=>today()->copy()->addDays($dueDays),'amount'=>'0.00','paid_amount'=>'0.00',
@@ -149,12 +156,14 @@ class FinanceController extends Controller
         return redirect()->route('finance.entries.show',$entry)->with('success','Lançamento financeiro criado.');
     }
 
-    public function show(FinancialEntry $entry)
+    public function show(FinancialEntry $entry, BillingService $billing)
     {
         $entry->load(['category','account','customer','sale','salePayment','recurrence','creator','settlements.account','settlements.user']);
         return view('finance.show',[
-            'entry'=>$entry,'accounts'=>FinancialAccount::query()->where('is_active',true)->orderBy('name')->get(),
+            'entry'=>$entry,
+            'accounts'=>FinancialAccount::query()->where('is_active',true)->orderBy('name')->get(),
             'paymentMethods'=>$this->paymentMethods(),
+            'billingSummary'=>$billing->summary($entry),
         ]);
     }
 
