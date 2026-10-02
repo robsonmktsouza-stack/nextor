@@ -199,8 +199,16 @@ foreach($settingsGroups as $groupName=>$items){
       </div>
     </section>
 
+  </form>
+
+@elseif($tab==='printing')
+  <form method="post" action="{{ route('settings.printing.update') }}" enctype="multipart/form-data" class="settings-stack">
+    @csrf
     <section class="settings-card">
-      <div class="settings-card-head"><div><h2>Impressão e identidade</h2><p>Logo e textos padrão para recibos, pedidos e relatórios.</p></div></div>
+      <div class="settings-card-head">
+        <div><h2>Impressão e identidade</h2><p>Identidade usada em recibos, comprovantes, pedidos e relatórios.</p></div>
+        <button class="btn btn-primary" type="submit">@include('partials.icon',['name'=>'check','size'=>15]) Salvar</button>
+      </div>
       <div class="settings-brand-grid">
         <div class="settings-logo-box">
           @if($company->logo_path)
@@ -208,13 +216,43 @@ foreach($settingsGroups as $groupName=>$items){
           @else
             <div class="settings-logo-empty">@include('partials.icon',['name'=>'products','size'=>30])<span>Sem logomarca</span></div>
           @endif
-          <input type="file" name="logo" accept=".jpg,.jpeg,.png,.webp">
+          <label class="field"><span>Nova logomarca</span><input type="file" name="logo" accept=".jpg,.jpeg,.png,.webp"></label>
         </div>
         <div class="settings-print-fields">
-          <label class="field"><span>Cabeçalho de impressão</span><textarea name="print_header" rows="4">{{ old('print_header',$company->print_header) }}</textarea></label>
-          <label class="field"><span>Rodapé de impressão</span><textarea name="print_footer" rows="4">{{ old('print_footer',$company->print_footer) }}</textarea></label>
-          <label class="check-line"><input type="checkbox" name="show_currency_prefix" value="1" @checked(old('show_currency_prefix',$company->show_currency_prefix))><span>Mostrar prefixo R$ em relatórios e impressões</span></label>
+          <label class="field"><span>Cabeçalho de impressão</span><textarea name="print_header" rows="5">{{ old('print_header',$company->print_header) }}</textarea></label>
+          <label class="field"><span>Rodapé de impressão</span><textarea name="print_footer" rows="5">{{ old('print_footer',$company->print_footer) }}</textarea></label>
+          <label class="settings-switch settings-switch-inline">
+            <input type="checkbox" name="show_currency_prefix" value="1" @checked(old('show_currency_prefix',$company->show_currency_prefix))>
+            <span><strong>Mostrar R$ nas impressões</strong><small>Exibe o prefixo monetário em relatórios e comprovantes.</small></span>
+          </label>
         </div>
+      </div>
+    </section>
+  </form>
+
+@elseif($tab==='catalog')
+  <form method="post" action="{{ route('settings.group.update','catalog') }}" class="settings-stack">
+    @csrf
+    <section class="settings-card">
+      <div class="settings-card-head">
+        <div><h2>Produtos e serviços</h2><p>Padrões aplicados aos novos cadastros do catálogo.</p></div>
+        <button class="btn btn-primary">@include('partials.icon',['name'=>'check','size'=>15]) Salvar</button>
+      </div>
+      <div class="settings-form-grid">
+        <label class="field span-3"><span>Unidade padrão</span><input name="product_unit" value="{{ $catalog['product_unit'] }}" maxlength="12" placeholder="UN"></label>
+        <label class="field span-5"><span>Uso padrão do produto</span>
+          <select name="product_usage_type">
+            @foreach(['resale'=>'Revenda','consumption'=>'Uso e consumo','raw_material'=>'Matéria-prima','fixed_asset'=>'Ativo imobilizado','packaging'=>'Embalagem','other'=>'Outro'] as $key=>$label)
+              <option value="{{ $key }}" @selected($catalog['product_usage_type']===$key)>{{ $label }}</option>
+            @endforeach
+          </select>
+        </label>
+        <label class="field span-4"><span>Estoque mínimo padrão</span><input type="number" step="0.001" min="0" name="product_minimum_stock" value="{{ $catalog['product_minimum_stock'] }}"></label>
+      </div>
+      <div class="settings-switch-grid">
+        <label class="settings-switch"><input type="checkbox" name="product_control_stock" value="1" @checked($catalog['product_control_stock'])><span><strong>Controlar estoque por padrão</strong><small>Novos produtos já iniciam com controle de saldo habilitado.</small></span></label>
+        <label class="settings-switch"><input type="checkbox" name="new_products_active" value="1" @checked($catalog['new_products_active'])><span><strong>Novos produtos ativos</strong><small>Define o status inicial de novos produtos.</small></span></label>
+        <label class="settings-switch"><input type="checkbox" name="new_services_active" value="1" @checked($catalog['new_services_active'])><span><strong>Novos serviços ativos</strong><small>Define o status inicial de novos serviços.</small></span></label>
       </div>
     </section>
   </form>
@@ -292,8 +330,30 @@ foreach($settingsGroups as $groupName=>$items){
       <div class="settings-switch-grid">
         <label class="settings-switch"><input type="checkbox" name="default_final_consumer" value="1" @checked($operations['default_final_consumer'])><span><strong>Consumidor final por padrão</strong><small>Novas vendas iniciam marcadas como consumidor final.</small></span></label>
         <label class="settings-switch"><input type="checkbox" name="auto_finance_sale" value="1" @checked($operations['auto_finance_sale'])><span><strong>Gerar financeiro da venda</strong><small>Integra vendas e parcelas ao financeiro.</small></span></label>
-        <label class="settings-switch"><input type="checkbox" name="allow_negative_stock" value="1" @checked($operations['allow_negative_stock'])><span><strong>Permitir estoque negativo</strong><small>Autoriza concluir venda acima do saldo disponível.</small></span></label>
         <label class="settings-switch"><input type="checkbox" name="allow_partial_return" value="1" @checked($operations['allow_partial_return'])><span><strong>Permitir devolução parcial</strong><small>Permite devolver parte da quantidade vendida.</small></span></label>
+      </div>
+    </section>
+  </form>
+
+@elseif($tab==='inventory')
+  <form method="post" action="{{ route('settings.group.update','inventory') }}" class="settings-stack">
+    @csrf
+    <section class="settings-card">
+      <div class="settings-card-head">
+        <div><h2>Estoque</h2><p>Regras gerais de saldo, alertas e movimentações.</p></div>
+        <button class="btn btn-primary">@include('partials.icon',['name'=>'check','size'=>15]) Salvar</button>
+      </div>
+      <div class="settings-form-grid">
+        <label class="field span-3"><span>Casas decimais da quantidade</span>
+          <select name="stock_decimal_places">
+            @foreach(['0','1','2','3'] as $places)<option value="{{ $places }}" @selected((string)$inventory['stock_decimal_places']===$places)>{{ $places }}</option>@endforeach
+          </select>
+        </label>
+        <label class="field span-9"><span>Motivo padrão para ajuste</span><input name="default_adjustment_reason" value="{{ $inventory['default_adjustment_reason'] }}" maxlength="255" placeholder="Ex.: Ajuste manual de estoque"></label>
+      </div>
+      <div class="settings-switch-grid">
+        <label class="settings-switch"><input type="checkbox" name="allow_negative_stock" value="1" @checked($inventory['allow_negative_stock'])><span><strong>Permitir estoque negativo</strong><small>Autoriza venda mesmo quando o saldo controlado for insuficiente.</small></span></label>
+        <label class="settings-switch"><input type="checkbox" name="minimum_stock_alerts" value="1" @checked($inventory['minimum_stock_alerts'])><span><strong>Alertar estoque mínimo</strong><small>Habilita avisos quando o produto atingir o limite configurado.</small></span></label>
       </div>
     </section>
   </form>
