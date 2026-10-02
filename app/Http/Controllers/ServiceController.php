@@ -31,10 +31,14 @@ class ServiceController extends Controller
 
     public function create()
     {
+        $catalog=AppSetting::groupValues('catalog',[
+            'new_services_active'=>true,
+        ]);
+
         return view('services.form',[
             'service'=>new Service([
                 'sale_price'=>0,
-                'is_active'=>true,
+                'is_active'=>(bool)$catalog['new_services_active'],
             ]),
             'editing'=>false,
         ]);
