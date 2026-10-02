@@ -17,6 +17,7 @@ class Service extends Model
         'national_tax_code',
         'nbs',
         'tax_group',
+        'tax_defaults',
         'is_active',
     ];
 
@@ -24,6 +25,7 @@ class Service extends Model
     {
         return [
             'sale_price' => 'decimal:2',
+            'tax_defaults' => 'array',
             'is_active' => 'boolean',
         ];
     }
