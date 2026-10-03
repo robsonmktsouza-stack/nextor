@@ -90,6 +90,44 @@ class ProductController extends Controller {
             'ignore_taxes_mode'=>['required','in:none,purchase,sale,both'],
             'nfe_notes'=>['nullable','string','max:5000'],
             'tax_group'=>['nullable','string','max:120'],
+            'tax_defaults'=>['nullable','array'],
+            'tax_defaults.cfop_outbound_internal'=>['nullable','string','max:10'],
+            'tax_defaults.cfop_outbound_interstate'=>['nullable','string','max:10'],
+            'tax_defaults.cfop_inbound_internal'=>['nullable','string','max:10'],
+            'tax_defaults.cfop_inbound_interstate'=>['nullable','string','max:10'],
+            'tax_defaults.icms_csosn'=>['nullable','string','max:4'],
+            'tax_defaults.icms_cst'=>['nullable','string','max:4'],
+            'tax_defaults.icms_csosn_export'=>['nullable','string','max:4'],
+            'tax_defaults.icms_rate'=>['nullable','numeric','min:0','max:100'],
+            'tax_defaults.base_reduction_rate'=>['nullable','numeric','min:0','max:100'],
+            'tax_defaults.simple_credit_rate'=>['nullable','numeric','min:0','max:100'],
+            'tax_defaults.mod_bc'=>['nullable','string','max:4'],
+            'tax_defaults.mod_bc_st'=>['nullable','string','max:4'],
+            'tax_defaults.icms_st_rate'=>['nullable','numeric','min:0','max:100'],
+            'tax_defaults.mva_rate'=>['nullable','numeric','min:0','max:1000'],
+            'tax_defaults.pis_cst'=>['nullable','string','max:4'],
+            'tax_defaults.pis_rate'=>['nullable','numeric','min:0','max:100'],
+            'tax_defaults.cofins_cst'=>['nullable','string','max:4'],
+            'tax_defaults.cofins_rate'=>['nullable','numeric','min:0','max:100'],
+            'tax_defaults.ipi_cst'=>['nullable','string','max:4'],
+            'tax_defaults.ipi_rate'=>['nullable','numeric','min:0','max:100'],
+            'tax_defaults.ipi_enq'=>['nullable','string','max:10'],
+            'tax_defaults.iss_rate'=>['nullable','numeric','min:0','max:100'],
+            'tax_defaults.service_list_code'=>['nullable','string','max:20'],
+            'tax_defaults.interstate_icms_rate'=>['nullable','numeric','min:0','max:100'],
+            'tax_defaults.internal_icms_rate'=>['nullable','numeric','min:0','max:100'],
+            'tax_defaults.fcp_interstate_rate'=>['nullable','numeric','min:0','max:100'],
+            'tax_defaults.tax_quantity_factor'=>['nullable','numeric','min:0'],
+            'tax_defaults.petroleum_derived'=>['nullable','boolean'],
+            'tax_defaults.anp_code'=>['nullable','string','max:20'],
+            'tax_defaults.anp_description'=>['nullable','string','max:190'],
+            'tax_defaults.glp_rate'=>['nullable','numeric','min:0','max:100'],
+            'tax_defaults.gnn_rate'=>['nullable','numeric','min:0','max:100'],
+            'tax_defaults.gni_rate'=>['nullable','numeric','min:0','max:100'],
+            'tax_defaults.starting_value'=>['nullable','numeric','min:0'],
+            'tax_defaults.ibs_cst'=>['nullable','string','max:10'],
+            'tax_defaults.cbs_cst'=>['nullable','string','max:10'],
+            'tax_defaults.tax_classification_code'=>['nullable','string','max:40'],
 
             'image'=>['nullable','image','mimes:jpg,jpeg,png,webp','max:4096'],
             'integration_reference'=>['nullable','string','max:120'],
@@ -109,7 +147,8 @@ class ProductController extends Controller {
     private function persist(Request $request, ?Product $product=null): Product {
         $data=$request->validate($this->rules($product));
         $requestedStock=(float)($data['stock_quantity'] ?? ($product?->stock_quantity ?? 0));
-        unset($data['stock_quantity'],$data['image']);
+        $submittedTaxDefaults=$data['tax_defaults'] ?? [];
+        unset($data['stock_quantity'],$data['image'],$data['tax_defaults']);
 
         $data['control_stock']=$request->boolean('control_stock');
         $data['different_tax_unit']=$request->boolean('different_tax_unit');
@@ -119,9 +158,11 @@ class ProductController extends Controller {
         if($data['sku']==='') $data['sku']=$product?->sku ?: $this->generateSku();
 
         $isNew=$product===null;
-        if($isNew) {
-            $data['tax_defaults']=AppSetting::groupValues('tax',[]);
-        }
+        $baseTaxDefaults=$isNew
+            ? AppSetting::groupValues('tax',[])
+            : ($product?->tax_defaults ?? []);
+        $data['tax_defaults']=array_replace($baseTaxDefaults,$submittedTaxDefaults);
+        $data['tax_defaults']['petroleum_derived']=$request->boolean('tax_defaults.petroleum_derived');
 
         return DB::transaction(function() use ($request,$product,$data,$requestedStock,$isNew) {
             $oldImage=$product?->image_path;
