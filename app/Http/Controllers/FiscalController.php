@@ -91,6 +91,7 @@ class FiscalController extends Controller
             'environment'=>$environment,
             'configuration'=>$this->configurationFor($tab),
             'fiscalEnabled'=>(bool)AppSetting::value('fiscal','enabled',false),
+            'dateFormat'=>AppSetting::dateFormat(),
         ]);
     }
 
@@ -116,6 +117,7 @@ class FiscalController extends Controller
                 ->all(),
             'configuration'=>$this->configurationFor($tab),
             'fiscalEnabled'=>(bool)AppSetting::value('fiscal','enabled',false),
+            'dateFormat'=>AppSetting::dateFormat(),
         ]);
     }
 
