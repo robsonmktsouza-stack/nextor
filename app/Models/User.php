@@ -38,6 +38,7 @@ class User extends Authenticatable {
             'customers'=>'customers.index',
             'stock'=>'stock.index',
             'returns'=>'sales.returns.index',
+            'fiscal'=>'fiscal.index',
             'settings'=>'settings.index',
         ] as $permission=>$route) {
             if($this->canAccess($permission)) return $route;
