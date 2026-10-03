@@ -157,6 +157,23 @@ class OperationalSettingsTest extends TestCase
         $response->assertSessionHasErrors('cash_session');
     }
 
+    public function test_pdv_rejects_services_even_if_posted_manually(): void
+    {
+        $user=$this->user();
+
+        $this->actingAs($user)->post(route('pdv.store'),[
+            'payment_method'=>'pix',
+            'items'=>[[
+                'item_type'=>'service',
+                'service_id'=>1,
+                'quantity'=>'1.000',
+                'discount'=>'0.00',
+            ]],
+        ])->assertSessionHasErrors('items.0.item_type');
+
+        $this->assertSame(0,Sale::query()->count());
+    }
+
     public function test_pdv_can_store_consumer_document_and_split_payment(): void
     {
         AppSetting::put('pdv','allow_split_payment',true);
