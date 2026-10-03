@@ -5,6 +5,8 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\FiscalController;
+use App\Http\Controllers\NfeDraftController;
+use App\Http\Controllers\OperationNatureController;
 use App\Http\Controllers\FinancialReconciliationController;
 use App\Http\Controllers\FinancialReceiptController;
 use App\Http\Controllers\FinancialRecurrenceController;
@@ -87,6 +89,18 @@ Route::middleware('auth')->group(function () {
     Route::post('/sales/{sale}/cancel',[SaleController::class,'cancel'])->name('sales.cancel')->middleware('permission:sales');
 
     Route::get('/fiscal',[FiscalController::class,'index'])->name('fiscal.index')->middleware('permission:fiscal');
+
+    Route::get('/fiscal/nfe/create',[NfeDraftController::class,'create'])->name('fiscal.nfe.create')->middleware('permission:fiscal');
+    Route::post('/fiscal/nfe/drafts',[NfeDraftController::class,'store'])->name('fiscal.nfe.store')->middleware('permission:fiscal');
+    Route::get('/fiscal/nfe/drafts/{nfeDraft}/edit',[NfeDraftController::class,'edit'])->name('fiscal.nfe.edit')->middleware('permission:fiscal');
+    Route::put('/fiscal/nfe/drafts/{nfeDraft}',[NfeDraftController::class,'update'])->name('fiscal.nfe.update')->middleware('permission:fiscal');
+    Route::post('/fiscal/nfe/drafts/{nfeDraft}/validate',[NfeDraftController::class,'validateDraft'])->name('fiscal.nfe.validate')->middleware('permission:fiscal');
+    Route::delete('/fiscal/nfe/drafts/{nfeDraft}',[NfeDraftController::class,'destroy'])->name('fiscal.nfe.destroy')->middleware('permission:fiscal');
+
+    Route::get('/fiscal/nfe/natures',[OperationNatureController::class,'index'])->name('fiscal.nfe.natures.index')->middleware('permission:fiscal');
+    Route::post('/fiscal/nfe/natures',[OperationNatureController::class,'store'])->name('fiscal.nfe.natures.store')->middleware('permission:fiscal');
+    Route::put('/fiscal/nfe/natures/{operationNature}',[OperationNatureController::class,'update'])->name('fiscal.nfe.natures.update')->middleware('permission:fiscal');
+
     Route::get('/fiscal/{fiscalDocumentJob}',[FiscalController::class,'show'])->name('fiscal.show')->middleware('permission:fiscal');
 
     Route::get('/finance',[FinanceController::class,'dashboard'])->name('finance.dashboard')->middleware('permission:finance');
