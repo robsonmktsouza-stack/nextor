@@ -240,7 +240,7 @@
       <div class="pdv-cart-empty" id="pdvCartEmpty">
         @include('partials.icon',['name'=>'sales','size'=>26])
         <strong>Carrinho vazio</strong>
-        <span>Adicione um produto ou serviço.</span>
+        <span>Adicione um produto.</span>
       </div>
     </div>
 
