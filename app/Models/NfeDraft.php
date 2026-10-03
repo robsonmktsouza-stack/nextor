@@ -10,8 +10,10 @@ class NfeDraft extends Model
 {
     protected $fillable=[
         'operation_nature_id','customer_id','user_id','status','operation_type','destination',
-        'presence','purpose','final_consumer','issue_date','issue_time','exit_date','exit_time',
-        'expected_delivery_date','government_purchase','advance_payment','different_delivery',
+        'presence','purpose','final_consumer','substitute_state_registration','has_referenced_document',
+        'inform_issue_datetime','inform_exit_datetime','inform_expected_delivery_date',
+        'issue_date','issue_time','exit_date','exit_time','expected_delivery_date',
+        'government_purchase','advance_payment','different_delivery',
         'discount','surcharge','payment_type','payment_condition','payment_other_description',
         'card_brand','card_acquirer_document','card_authorization_code',
         'series','document_number','environment','emitter_snapshot','recipient_snapshot',
@@ -23,6 +25,10 @@ class NfeDraft extends Model
     {
         return [
             'final_consumer'=>'boolean',
+            'has_referenced_document'=>'boolean',
+            'inform_issue_datetime'=>'boolean',
+            'inform_exit_datetime'=>'boolean',
+            'inform_expected_delivery_date'=>'boolean',
             'government_purchase'=>'boolean',
             'advance_payment'=>'boolean',
             'different_delivery'=>'boolean',
