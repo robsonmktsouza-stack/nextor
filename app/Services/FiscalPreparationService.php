@@ -17,6 +17,13 @@ class FiscalPreparationService
         $sale->loadMissing(['items.product','items.service','customer','payments']);
 
         if($sale->source==='pdv') {
+            $productOnly=$sale->items->isNotEmpty()
+                && $sale->items->every(fn($item)=>$item->item_type==='product' && $item->product_id);
+
+            if(!$productOnly) {
+                return;
+            }
+
             $pdvAuto=(bool)AppSetting::value('pdv','auto_nfce',false);
             $nfceAuto=(bool)AppSetting::value('nfce','auto_from_pdv',false);
 
