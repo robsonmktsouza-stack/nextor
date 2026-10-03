@@ -192,7 +192,7 @@ $origins=[
         <div class="grid-actionbar">
           <div class="grid-actions-left">
             <button type="button" class="grid-primary-action" id="nfeAddProduct">
-              @include('partials.icon',['name'=>'plus','size'=>17]) <span>Adicionar</span>
+              @include('partials.icon',['name'=>'plus','size'=>17]) <span>Adicionar</span> <kbd data-tutorial>F6</kbd>
             </button>
           </div>
         </div>
@@ -403,7 +403,7 @@ $origins=[
           </div>
 
           <label class="field col-8"><span>Descrição do item *</span><input id="nfeItemName" maxlength="190" placeholder="Descrição que será enviada na NF-e"></label>
-          <label class="field col-4"><span>Código próprio</span><input id="nfeItemSku" maxlength="80" placeholder="Opcional para item avulso"></label>
+          <label class="field col-4"><span>Código próprio</span><input id="nfeItemSku" maxlength="80" placeholder="Opcional"></label>
 
           <label class="field col-2"><span>Quantidade *</span><input id="nfeItemQuantity" type="number" step="0.0001" min="0.0001" value="1"></label>
           <label class="field col-2"><span>Fator / dimensão</span><input id="nfeItemDimensionQuantity" type="number" step="0.0001" min="0.0001" value="1"></label>
