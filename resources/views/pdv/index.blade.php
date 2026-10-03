@@ -531,7 +531,7 @@
             <strong>{{ $suspended->label ?: 'Venda suspensa #'.$suspended->id }}</strong>
             <small>{{ $suspended->item_count }} item(ns) · R$ {{ number_format((float)$suspended->total,2,',','.') }} · {{ $suspended->user?->name }}</small>
           </span>
-          <time>{{ $suspended->suspended_at?->format('d/m H:i') }}</time>
+          <time>{{ $suspended->suspended_at?->format(\App\Models\AppSetting::dateFormat().' H:i') }}</time>
         </button>
         <button type="button" class="pdv-suspended-discard" data-suspended-discard="{{ $suspended->id }}" aria-label="Descartar venda suspensa">@include('partials.icon',['name'=>'trash','size'=>15])</button>
       </div>
