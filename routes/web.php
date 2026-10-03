@@ -91,6 +91,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/fiscal',[FiscalController::class,'index'])->name('fiscal.index')->middleware('permission:fiscal');
 
     Route::get('/fiscal/nfe/create',[NfeDraftController::class,'create'])->name('fiscal.nfe.create')->middleware('permission:fiscal');
+    Route::get('/fiscal/nfe/drafts',[NfeDraftController::class,'index'])->name('fiscal.nfe.drafts.index')->middleware('permission:fiscal');
     Route::post('/fiscal/nfe/drafts',[NfeDraftController::class,'store'])->name('fiscal.nfe.store')->middleware('permission:fiscal');
     Route::get('/fiscal/nfe/drafts/{nfeDraft}/edit',[NfeDraftController::class,'edit'])->name('fiscal.nfe.edit')->middleware('permission:fiscal');
     Route::put('/fiscal/nfe/drafts/{nfeDraft}',[NfeDraftController::class,'update'])->name('fiscal.nfe.update')->middleware('permission:fiscal');
