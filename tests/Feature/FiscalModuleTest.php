@@ -36,9 +36,17 @@ class FiscalModuleTest extends TestCase
             ->assertDontSee('Em processamento')
             ->assertDontSee('Fiscal geral')
             ->assertDontSee('Próximo número')
-            ->assertSee('fiscal-actionbar',false)
+            ->assertSee('sales-module-tabs',false)
+            ->assertSee('grid-actionbar',false)
+            ->assertSee('grid-actions-left',false)
+            ->assertSee('grid-actions-right',false)
+            ->assertSee('period-current',false)
+            ->assertSee('grid-filter-button',false)
+            ->assertSee('cms-table',false)
             ->assertSee('Mês atual')
-            ->assertSee('TOTAL LISTADO')
+            ->assertDontSee('fiscal-actionbar',false)
+            ->assertDontSee('fiscal-new-action',false)
+            ->assertDontSee('TOTAL LISTADO')
             ->assertDontSee('conector fiscal externo');
     }
 
@@ -97,7 +105,8 @@ class FiscalModuleTest extends TestCase
             ->assertSee('Outubro 2026')
             ->assertSee('101')
             ->assertDontSee('88')
-            ->assertSee('fiscal-row-authorized',false);
+            ->assertSee('Autorizada')
+            ->assertSee('status-ok',false);
 
         $this->actingAs($admin)
             ->get(route('fiscal.index',['tab'=>'nfe','month'=>'2026-09']))
