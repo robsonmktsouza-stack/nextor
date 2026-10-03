@@ -26,7 +26,7 @@ $primaryTabs=[
     'members'=>['payments'],
   ],
   'billing'=>[
-    'label'=>'Boletos / cobranças','icon'=>'money',
+    'label'=>'Cobranças / PIX','icon'=>'money',
     'members'=>['billing'],
   ],
   'fiscal'=>[
