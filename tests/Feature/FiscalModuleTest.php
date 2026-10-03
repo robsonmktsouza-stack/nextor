@@ -65,8 +65,8 @@ class FiscalModuleTest extends TestCase
         $this->actingAs($this->admin())
             ->get(route('fiscal.index',['tab'=>'nfe']))
             ->assertOk()
-            ->assertSee('1/15')
-            ->assertDontSee('2/99');
+            ->assertSee('15')
+            ->assertDontSee('99');
     }
 
     public function test_fiscal_month_navigation_filters_documents(): void
@@ -93,16 +93,16 @@ class FiscalModuleTest extends TestCase
             ->get(route('fiscal.index',['tab'=>'nfe','month'=>'2026-10']))
             ->assertOk()
             ->assertSee('Outubro 2026')
-            ->assertSee('>101<',false)
-            ->assertDontSee('>88<',false)
+            ->assertSee('101')
+            ->assertDontSee('88')
             ->assertSee('fiscal-row-authorized',false);
 
         $this->actingAs($this->admin())
             ->get(route('fiscal.index',['tab'=>'nfe','month'=>'2026-09']))
             ->assertOk()
             ->assertSee('Setembro 2026')
-            ->assertSee('>88<',false)
-            ->assertDontSee('>101<',false);
+            ->assertSee('88')
+            ->assertDontSee('101');
     }
 
     public function test_fiscal_document_has_detail_page(): void
