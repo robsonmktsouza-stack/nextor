@@ -12,52 +12,6 @@
 @section('content')
 @include('fiscal._nav')
 
-@php
-  $total=array_sum($statusCounts);
-  $prepared=(int)($statusCounts['prepared'] ?? 0)+(int)($statusCounts['pending'] ?? 0)+(int)($statusCounts['processing'] ?? 0);
-  $authorized=(int)($statusCounts['authorized'] ?? 0);
-  $problems=(int)($statusCounts['error'] ?? 0)+(int)($statusCounts['rejected'] ?? 0)+(int)($statusCounts['failed'] ?? 0);
-  $environmentLabel=($configuration['environment'] ?? 'homologation')==='production' ? 'Produção' : 'Homologação';
-@endphp
-
-<div class="fiscal-summary-grid">
-  <div class="fiscal-summary-card">
-    <span>Documentos</span>
-    <strong>{{ $total }}</strong>
-    <small>{{ $tabMeta['label'] }} registrados no Nextor</small>
-  </div>
-  <div class="fiscal-summary-card">
-    <span>Em processamento</span>
-    <strong>{{ $prepared }}</strong>
-    <small>Preparados, pendentes ou processando</small>
-  </div>
-  <div class="fiscal-summary-card">
-    <span>Autorizados</span>
-    <strong>{{ $authorized }}</strong>
-    <small>Documentos com autorização registrada</small>
-  </div>
-  <div class="fiscal-summary-card {{ $problems>0?'has-alert':'' }}">
-    <span>Com problema</span>
-    <strong>{{ $problems }}</strong>
-    <small>Erros, rejeições ou falhas</small>
-  </div>
-</div>
-
-<section class="fiscal-config-strip">
-  <div>
-    <span>Fiscal geral</span>
-    <strong class="status {{ $fiscalEnabled?'status-ok':'status-muted' }}">{{ $fiscalEnabled?'Habilitado':'Desabilitado' }}</strong>
-  </div>
-  <div>
-    <span>{{ $tabMeta['label'] }}</span>
-    <strong class="status {{ $configuration['enabled']?'status-ok':'status-muted' }}">{{ $configuration['enabled']?'Habilitada':'Desabilitada' }}</strong>
-  </div>
-  <div><span>Ambiente</span><strong>{{ $environmentLabel }}</strong></div>
-  <div><span>Série</span><strong>{{ $configuration['series'] ?? '—' }}</strong></div>
-  <div><span>Próximo número</span><strong>{{ $configuration['next_number'] ?? '—' }}</strong></div>
-  <div><span>Transmissão</span><strong class="status status-muted">Conector externo</strong></div>
-</section>
-
 <section class="cms-card fiscal-module-card">
   <div class="grid-actionbar">
     <div class="grid-actions-left">
