@@ -20,6 +20,7 @@ $existingItems=old('items_json')
       'product_name'=>$item->product_name,
       'product_sku'=>$item->product_sku,
       'quantity'=>(float)$item->quantity,
+      'dimension_quantity'=>(float)($item->dimension_quantity ?? 1),
       'unit_price'=>(float)$item->unit_price,
       'cfop'=>$item->cfop,
       'origin'=>$item->origin,
@@ -309,7 +310,7 @@ $origins=[
       </div>
 
       <div class="editor-panel" id="nfeCardPanel">
-        <h3>Cartão / PIX</h3>
+        <h3>Dados de cartão / pagamento eletrônico</h3>
         <div class="editor-grid cols-12">
           <label class="field col-4"><span>Bandeira</span>
             <select name="card_brand">
@@ -412,10 +413,11 @@ $origins=[
           </label>
           <label class="field col-2"><span>Código próprio</span><input id="nfeItemSku" readonly></label>
           <label class="field col-2"><span>Quantidade *</span><input id="nfeItemQuantity" type="number" step="0.0001" min="0.0001" value="1"></label>
+          <label class="field col-2"><span>Fator / dimensão</span><input id="nfeItemDimensionQuantity" type="number" step="0.0001" min="0.0001" value="1"></label>
           <label class="field col-2"><span>Valor unitário *</span><input id="nfeItemUnitPrice" type="number" step="0.0001" min="0"></label>
 
-          <div class="field col-3"><span>Subtotal</span><div class="readonly-field" id="nfeItemSubtotal">R$ 0,00</div></div>
-          <label class="field col-5"><span>Descrição do pedido (xPed)</span><input id="nfeItemPurchaseOrder"></label>
+          <div class="field col-2"><span>Subtotal</span><div class="readonly-field" id="nfeItemSubtotal">R$ 0,00</div></div>
+          <label class="field col-4"><span>Descrição do pedido (xPed)</span><input id="nfeItemPurchaseOrder"></label>
           <label class="field col-2"><span>Item do pedido</span><input id="nfeItemPurchaseOrderItem"></label>
           <label class="field col-12"><span>Observação do item</span><input id="nfeItemNotes"></label>
         </div>
