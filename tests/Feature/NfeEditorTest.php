@@ -162,6 +162,10 @@ class NfeEditorTest extends TestCase
             ->assertSee('Transporte')
             ->assertSee('Pagamento')
             ->assertSee('Referências / observações')
+            ->assertSee('Buscar produto ou informar descrição')
+            ->assertSee('Item avulso')
+            ->assertSee('Cadastrar novo produto')
+            ->assertSee('Descrição do item')
             ->assertSee('Natureza da operação')
             ->assertSee('Tipo de operação')
             ->assertSee('Presença do comprador')
@@ -359,6 +363,73 @@ class NfeEditorTest extends TestCase
         $this->assertSame('300',data_get($item->tax_data,'icms_csosn_export'));
         $this->assertSame('400',data_get($item->tax_data,'icms_csosn_inbound'));
         $this->assertSame('210203001',data_get($item->special_data,'anp_code'));
+    }
+
+    public function test_nfe_accepts_unregistered_item_without_creating_product(): void
+    {
+        $this->company('BA');
+        $nature=$this->nature();
+        $customer=$this->customer();
+        $productsBefore=Product::query()->count();
+
+        $items=[[
+            'product_id'=>null,
+            'product_name'=>'Peça avulsa informada na NF-e',
+            'product_sku'=>'AVULSO-01',
+            'quantity'=>2,
+            'dimension_quantity'=>1,
+            'unit_price'=>75,
+            'cfop'=>'',
+            'origin'=>'0',
+            'ean_gtin'=>'SEM GTIN',
+            'unit'=>'UN',
+            'tax_unit'=>'UN',
+            'ncm'=>'84839000',
+            'cest'=>'',
+            'fiscal_benefit_code'=>'',
+            'purchase_order'=>'',
+            'purchase_order_item'=>'',
+            'notes'=>'Item não cadastrado no catálogo',
+            'tax_data'=>[
+                'icms_csosn'=>'102',
+                'pis_cst'=>'49',
+                'cofins_cst'=>'49',
+                'ipi_cst'=>'99',
+            ],
+            'special_data'=>[],
+        ]];
+
+        $response=$this->actingAs($this->admin())
+            ->post(route('fiscal.nfe.store'),[
+                'operation_nature_id'=>$nature->id,
+                'customer_id'=>$customer->id,
+                'operation_type'=>'outbound',
+                'presence'=>'presential',
+                'issue_date'=>'2026-10-03',
+                'discount'=>'0',
+                'surcharge'=>'0',
+                'freight_mode'=>'9',
+                'freight_value'=>'0',
+                'payment_type'=>'01',
+                'payment_condition'=>'a_vista',
+                'items_json'=>json_encode($items),
+                'duplicates_json'=>'[]',
+                'references_json'=>'[]',
+            ]);
+
+        $draft=NfeDraft::query()->firstOrFail();
+        $response->assertRedirect(route('fiscal.nfe.edit',$draft));
+
+        $this->assertSame($productsBefore,Product::query()->count());
+
+        $item=$draft->items()->firstOrFail();
+        $this->assertNull($item->product_id);
+        $this->assertSame('Peça avulsa informada na NF-e',$item->product_name);
+        $this->assertSame('AVULSO-01',$item->product_sku);
+        $this->assertSame('5102',$item->cfop);
+        $this->assertSame('84839000',$item->ncm);
+        $this->assertEquals(150.0,(float)$item->line_total);
+        $this->assertEquals(150.0,(float)data_get($draft->totals,'products'));
     }
 
     public function test_destination_and_cfop_are_derived_for_interstate_operation(): void

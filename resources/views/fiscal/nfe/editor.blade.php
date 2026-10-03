@@ -189,21 +189,28 @@ $origins=[
 
     <section class="editor-tab-panel" data-tab-panel="nfe-items" hidden>
       <div class="editor-panel">
-        <h3>Adicionar produto</h3>
+        <h3>Adicionar item</h3>
         <div class="editor-grid cols-12 nfe-quick-item">
-          <label class="field col-6"><span>Produto</span>
-            <select id="nfeQuickProduct">
-              <option value="">Selecione</option>
-              @foreach($products as $product)
-                <option value="{{ $product->id }}">{{ $product->name }} — {{ $product->sku }}</option>
-              @endforeach
-            </select>
-          </label>
+          <div class="field col-6">
+            <span>Buscar produto ou informar descrição</span>
+            <div class="nfe-product-search-actions">
+              <div class="sale-item-search-wrap nfe-product-search">
+                <input type="text" class="sale-item-search" id="nfeQuickProductSearch" autocomplete="off" placeholder="Buscar por nome, código, GTIN ou NCM">
+                <input type="hidden" id="nfeQuickProductId">
+                <div class="sale-item-suggestions" id="nfeQuickProductSuggestions" hidden></div>
+              </div>
+              <button type="button" class="btn btn-secondary" id="nfeQuickManual">Item avulso</button>
+            </div>
+          </div>
           <label class="field col-2"><span>Quantidade</span><input type="number" id="nfeQuickQuantity" step="0.0001" min="0.0001" value="1"></label>
           <label class="field col-2"><span>Valor unitário</span><input type="number" id="nfeQuickUnitPrice" step="0.0001" min="0"></label>
           <div class="field col-2"><span>&nbsp;</span><button type="button" class="btn btn-primary" id="nfeQuickAdd">@include('partials.icon',['name'=>'plus','size'=>16]) Adicionar</button></div>
         </div>
-        <p class="inline-note">O produto traz NCM, CEST, origem e tributação do cadastro. A Natureza de Operação decide se o CFOP do produto será mantido ou sobrescrito.</p>
+        <div class="nfe-item-source-actions">
+          <span>Produto cadastrado traz automaticamente NCM, CEST e tributação.</span>
+          <a class="btn btn-light" href="{{ route('products.create') }}" target="_blank" rel="noopener">Cadastrar novo produto</a>
+        </div>
+        <p class="inline-note">Se o item não existir no cadastro, digite a descrição e use <strong>Item avulso</strong>. Ele ficará somente nesta NF-e e não será criado no cadastro de produtos.</p>
       </div>
 
       <div class="cms-card">
@@ -405,22 +412,36 @@ $origins=[
       <div class="editor-panel">
         <h3>Dados comerciais</h3>
         <div class="editor-grid cols-12">
-          <label class="field col-6"><span>Produto *</span>
-            <select id="nfeItemProduct">
-              <option value="">Selecione</option>
-              @foreach($products as $product)<option value="{{ $product->id }}">{{ $product->name }} — {{ $product->sku }}</option>@endforeach
-            </select>
-          </label>
-          <label class="field col-2"><span>Código próprio</span><input id="nfeItemSku" readonly></label>
+          <div class="field col-8">
+            <span>Buscar produto cadastrado</span>
+            <div class="nfe-product-search-actions">
+              <div class="sale-item-search-wrap nfe-product-search">
+                <input type="text" class="sale-item-search" id="nfeItemProductSearch" autocomplete="off" placeholder="Buscar por nome, código, GTIN ou NCM">
+                <input type="hidden" id="nfeItemProduct">
+                <div class="sale-item-suggestions" id="nfeItemProductSuggestions" hidden></div>
+              </div>
+              <button type="button" class="btn btn-secondary" id="nfeItemUseManual">Item avulso</button>
+            </div>
+          </div>
+          <div class="field col-4">
+            <span>Cadastro de produtos</span>
+            <a class="btn btn-light nfe-product-register" href="{{ route('products.create') }}" target="_blank" rel="noopener">
+              @include('partials.icon',['name'=>'plus','size'=>15]) Cadastrar produto
+            </a>
+          </div>
+
+          <label class="field col-8"><span>Descrição do item *</span><input id="nfeItemName" maxlength="190" placeholder="Descrição que será enviada na NF-e"></label>
+          <label class="field col-4"><span>Código próprio</span><input id="nfeItemSku" maxlength="80" placeholder="Opcional para item avulso"></label>
+
           <label class="field col-2"><span>Quantidade *</span><input id="nfeItemQuantity" type="number" step="0.0001" min="0.0001" value="1"></label>
           <label class="field col-2"><span>Fator / dimensão</span><input id="nfeItemDimensionQuantity" type="number" step="0.0001" min="0.0001" value="1"></label>
           <label class="field col-2"><span>Valor unitário *</span><input id="nfeItemUnitPrice" type="number" step="0.0001" min="0"></label>
-
           <div class="field col-2"><span>Subtotal</span><div class="readonly-field" id="nfeItemSubtotal">R$ 0,00</div></div>
-          <label class="field col-4"><span>Descrição do pedido (xPed)</span><input id="nfeItemPurchaseOrder"></label>
-          <label class="field col-2"><span>Item do pedido</span><input id="nfeItemPurchaseOrderItem"></label>
+          <label class="field col-3"><span>Descrição do pedido (xPed)</span><input id="nfeItemPurchaseOrder"></label>
+          <label class="field col-1"><span>Item</span><input id="nfeItemPurchaseOrderItem"></label>
           <label class="field col-12"><span>Observação do item</span><input id="nfeItemNotes"></label>
         </div>
+        <p class="inline-note" id="nfeItemSourceNote">Selecione um produto do cadastro ou use um item avulso somente nesta NF-e.</p>
       </div>
     </section>
 
@@ -601,6 +622,7 @@ $origins=[
 <script type="application/json" id="nfe-products-data">@json($productData)</script>
 <script type="application/json" id="nfe-customers-data">@json($customerData)</script>
 <script type="application/json" id="nfe-natures-data">@json($natureData)</script>
+<script type="application/json" id="nfe-tax-defaults-data">@json($taxDefaults)</script>
 <script type="application/json" id="nfe-emitter-state">@json($company->state)</script>
 @endsection
 

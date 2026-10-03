@@ -12,6 +12,7 @@
   const products=parseJson('nfe-products-data');
   const customers=parseJson('nfe-customers-data');
   const natures=parseJson('nfe-natures-data');
+  const taxDefaults=parseJson('nfe-tax-defaults-data');
   const emitterState=(()=>{
     try{return JSON.parse(byId('nfe-emitter-state')?.textContent||'null')||'';}catch(_){return '';}
   })();
@@ -263,7 +264,7 @@
         <tr>
           <td>
             <strong class="table-title">${esc(item.product_name||'')}</strong>
-            <small class="table-subtitle">${esc(item.product_sku||'')}</small>
+            <small class="table-subtitle">${esc(item.product_sku || (item.product_id ? 'Produto cadastrado' : 'Item avulso · não cadastrado'))}</small>
           </td>
           <td>${item.cfop?'<span class="code-tag">'+esc(item.cfop)+'</span>':'—'}</td>
           <td>${esc(item.ncm||'—')}</td>
@@ -329,6 +330,7 @@
   const itemFields={
     index:'nfeItemIndex',
     product_id:'nfeItemProduct',
+    product_name:'nfeItemName',
     product_sku:'nfeItemSku',
     quantity:'nfeItemQuantity',
     dimension_quantity:'nfeItemDimensionQuantity',
@@ -406,6 +408,127 @@
     vehicle_color:'nfeSpecialVehicleColor',
   };
 
+  const productSearchMeta=product=>{
+    const stock=Number(product.stock_quantity||0).toLocaleString('pt-BR',{maximumFractionDigits:3});
+    return [
+      product.sku ? 'Cód. '+product.sku : null,
+      product.ean_gtin ? 'GTIN '+product.ean_gtin : null,
+      product.ncm ? 'NCM '+product.ncm : null,
+      money(product.sale_price),
+      product.control_stock ? 'Estoque '+stock+' '+(product.unit||'UN') : null,
+    ].filter(Boolean).join(' · ');
+  };
+
+  const closeProductSuggestions=(except=null)=>{
+    document.querySelectorAll('.nfe-product-search .sale-item-suggestions').forEach(menu=>{
+      if(menu!==except) menu.hidden=true;
+    });
+  };
+
+  const bindProductSearch=(inputId,hiddenId,menuId,onChoose,onManual)=>{
+    const input=byId(inputId);
+    const hidden=byId(hiddenId);
+    const menu=byId(menuId);
+    if(!input||!hidden||!menu) return null;
+
+    const selectProduct=product=>{
+      hidden.value=String(product.id);
+      input.value=product.name;
+      input.dataset.selectedLabel=product.name;
+      menu.hidden=true;
+      onChoose?.(product);
+    };
+
+    const useManual=label=>{
+      hidden.value='';
+      delete input.dataset.selectedLabel;
+      input.value=label||input.value.trim();
+      menu.hidden=true;
+      onManual?.(input.value.trim());
+    };
+
+    const render=()=>{
+      const raw=input.value.trim();
+      const term=raw.toLocaleLowerCase('pt-BR');
+      const matches=products.filter(product=>{
+        const hay=[product.name,product.sku,product.ean_gtin,product.ncm]
+          .filter(Boolean).join(' ').toLocaleLowerCase('pt-BR');
+        return !term || hay.includes(term);
+      }).slice(0,10);
+
+      menu.innerHTML='';
+
+      matches.forEach(product=>{
+        const option=document.createElement('button');
+        option.type='button';
+        option.className='sale-suggestion';
+        option.innerHTML='<strong></strong><small></small>';
+        option.querySelector('strong').textContent=product.name;
+        option.querySelector('small').textContent=productSearchMeta(product);
+        option.addEventListener('mousedown',event=>{
+          event.preventDefault();
+          selectProduct(product);
+        });
+        menu.appendChild(option);
+      });
+
+      if(raw){
+        const manual=document.createElement('button');
+        manual.type='button';
+        manual.className='sale-suggestion nfe-manual-suggestion';
+        manual.innerHTML='<strong></strong><small></small>';
+        manual.querySelector('strong').textContent='Usar "'+raw+'" como item avulso';
+        manual.querySelector('small').textContent='Somente nesta NF-e · não cadastra no catálogo';
+        manual.addEventListener('mousedown',event=>{
+          event.preventDefault();
+          useManual(raw);
+        });
+        menu.appendChild(manual);
+      }else if(!matches.length){
+        const empty=document.createElement('div');
+        empty.className='sale-suggestion-empty';
+        empty.textContent='Nenhum produto cadastrado.';
+        menu.appendChild(empty);
+      }
+
+      closeProductSuggestions(menu);
+      menu.hidden=false;
+    };
+
+    input.addEventListener('focus',render);
+    input.addEventListener('input',()=>{
+      if(input.dataset.selectedLabel && input.value!==input.dataset.selectedLabel){
+        hidden.value='';
+        delete input.dataset.selectedLabel;
+      }
+      render();
+    });
+
+    return {
+      clear(){
+        hidden.value='';
+        input.value='';
+        delete input.dataset.selectedLabel;
+        menu.hidden=true;
+      },
+      setProduct(product){
+        if(!product){this.clear();return;}
+        hidden.value=String(product.id);
+        input.value=product.name;
+        input.dataset.selectedLabel=product.name;
+        menu.hidden=true;
+      },
+      setManual(label){
+        hidden.value='';
+        input.value=label||'';
+        delete input.dataset.selectedLabel;
+        menu.hidden=true;
+      },
+      render,
+      useManual,
+    };
+  };
+
   const updateItemSubtotal=()=>{
     const subtotal=byId('nfeItemSubtotal');
     const quantity=number(getField('nfeItemQuantity'));
@@ -429,6 +552,14 @@
   document.querySelectorAll('[data-nfe-item-tab]').forEach(button=>{
     button.addEventListener('click',()=>switchItemTab(button.dataset.nfeItemTab));
   });
+
+  const setItemSourceNote=product=>{
+    const note=byId('nfeItemSourceNote');
+    if(!note) return;
+    note.textContent=product
+      ? 'Vinculado ao produto cadastrado "'+product.name+'". Os dados fiscais vieram do cadastro e podem ser ajustados somente para esta NF-e.'
+      : 'Item avulso: será salvo somente nesta NF-e e não criará produto no cadastro.';
+  };
 
   const clearItemDialog=()=>{
     Object.values(itemFields).forEach(id=>setField(id,''));
@@ -478,67 +609,160 @@
     };
   };
 
-  const populateItemDialog=item=>{
+  const manualDefaults=(name='')=>{
+    const tax=normalizeTax(taxDefaults||{});
+    return {
+      product_id:'',
+      product_name:name,
+      product_sku:'',
+      quantity:1,
+      dimension_quantity:1,
+      unit_price:0,
+      cfop:resolveCfop(tax),
+      origin:taxDefaults?.icms_origin_default||'0',
+      ean_gtin:'',
+      unit:'UN',
+      tax_unit:'UN',
+      ncm:'',
+      cest:'',
+      ipi_exception:'',
+      fiscal_benefit_code:'',
+      purchase_order:'',
+      purchase_order_item:'',
+      notes:'',
+      tax_data:tax,
+      special_data:{},
+    };
+  };
+
+  let itemSearchControl=null;
+  let quickSearchControl=null;
+
+  const populateItemDialog=(item,indexValue='')=>{
     clearItemDialog();
     Object.entries(itemFields).forEach(([key,id])=>{
       if(key==='index') return;
-      if(key==='product_id') setSelect(id,item.product_id);
-      else if(key==='origin') setSelect(id,item.origin??'0');
+      if(key==='origin') setSelect(id,item.origin??'0');
       else setField(id,item[key]);
     });
+
     const tax=normalizeTax(item.tax_data||{});
     Object.entries(taxFields).forEach(([key,id])=>setField(id,tax[key]));
+
     const special=item.special_data||{};
     Object.entries(specialFields).forEach(([key,id])=>setField(id,special[key]));
     const petroleum=byId('nfeSpecialPetroleum');
     if(petroleum) petroleum.checked=!!special.petroleum_derived;
+
+    const product=productById(item.product_id);
+    if(product) itemSearchControl?.setProduct(product);
+    else itemSearchControl?.setManual(item.product_name||'');
+
+    setField('nfeItemIndex',indexValue);
+    setItemSourceNote(product||null);
     updateItemSubtotal();
   };
 
   const openNewItem=()=>{
-    clearItemDialog();
-    setField('nfeItemIndex','');
+    populateItemDialog(manualDefaults(''),'');
     itemDialog?.showModal();
+    setTimeout(()=>byId('nfeItemProductSearch')?.focus(),0);
+  };
+
+  const openManualItem=(name='',quantity=1,unitPrice=0)=>{
+    const item=manualDefaults(name);
+    item.quantity=quantity>0?quantity:1;
+    item.unit_price=Math.max(0,unitPrice||0);
+    populateItemDialog(item,'');
+    itemDialog?.showModal();
+    setTimeout(()=>byId(name?'nfeItemNcm':'nfeItemName')?.focus(),0);
   };
 
   const openEditItem=index=>{
     const item=items[index];
     if(!item) return;
-    populateItemDialog(item);
-    setField('nfeItemIndex',index);
+    populateItemDialog(item,index);
     itemDialog?.showModal();
   };
 
-  const fillItemFromProduct=product=>{
+  const applyProductToItemDialog=product=>{
     if(!product) return;
+    const currentIndex=getField('nfeItemIndex');
+    const currentQty=Math.max(number(getField('nfeItemQuantity'))||1,0.0001);
+    const currentDimension=Math.max(number(getField('nfeItemDimensionQuantity'))||1,0.0001);
     const defaults=productDefaults(product);
-    populateItemDialog(defaults);
-    setField('nfeItemIndex','');
+    defaults.quantity=currentQty;
+    defaults.dimension_quantity=currentDimension;
+    populateItemDialog(defaults,currentIndex);
   };
 
-  byId('nfeItemProduct')?.addEventListener('change',()=>{
-    const product=productById(getField('nfeItemProduct'));
-    if(product) fillItemFromProduct(product);
+  const detachCurrentItem=(label='')=>{
+    const currentName=(label||getField('nfeItemName')||getField('nfeItemProductSearch')).trim();
+    setField('nfeItemProduct','');
+    if(currentName) setField('nfeItemName',currentName);
+    itemSearchControl?.setManual(currentName);
+    setItemSourceNote(null);
+  };
+
+  itemSearchControl=bindProductSearch(
+    'nfeItemProductSearch',
+    'nfeItemProduct',
+    'nfeItemProductSuggestions',
+    product=>applyProductToItemDialog(product),
+    label=>detachCurrentItem(label)
+  );
+
+  quickSearchControl=bindProductSearch(
+    'nfeQuickProductSearch',
+    'nfeQuickProductId',
+    'nfeQuickProductSuggestions',
+    product=>setField('nfeQuickUnitPrice',product.sale_price??''),
+    label=>openManualItem(label,number(getField('nfeQuickQuantity'))||1,number(getField('nfeQuickUnitPrice')))
+  );
+
+  byId('nfeItemUseManual')?.addEventListener('click',()=>{
+    detachCurrentItem(getField('nfeItemProductSearch'));
+    byId('nfeItemName')?.focus();
+  });
+
+  byId('nfeQuickManual')?.addEventListener('click',()=>{
+    openManualItem(
+      getField('nfeQuickProductSearch'),
+      number(getField('nfeQuickQuantity'))||1,
+      number(getField('nfeQuickUnitPrice'))
+    );
+  });
+
+  document.addEventListener('click',event=>{
+    if(!event.target.closest('.nfe-product-search')) closeProductSuggestions();
   });
 
   byId('nfeAddProduct')?.addEventListener('click',openNewItem);
 
-  byId('nfeQuickProduct')?.addEventListener('change',()=>{
-    const product=productById(getField('nfeQuickProduct'));
-    setField('nfeQuickUnitPrice',product?.sale_price??'');
-  });
-
   byId('nfeQuickAdd')?.addEventListener('click',()=>{
-    const product=productById(getField('nfeQuickProduct'));
+    const product=productById(getField('nfeQuickProductId'));
     const quantity=number(getField('nfeQuickQuantity'));
-    if(!product){byId('nfeQuickProduct')?.focus();return;}
-    if(quantity<=0){byId('nfeQuickQuantity')?.focus();return;}
+    const typedName=getField('nfeQuickProductSearch').trim();
+
+    if(quantity<=0){
+      byId('nfeQuickQuantity')?.focus();
+      return;
+    }
+
+    if(!product){
+      if(!typedName){
+        byId('nfeQuickProductSearch')?.focus();
+        return;
+      }
+      openManualItem(typedName,quantity,number(getField('nfeQuickUnitPrice')));
+      return;
+    }
 
     const item=productDefaults(product);
     item.quantity=quantity;
     item.unit_price=number(getField('nfeQuickUnitPrice')||product.sale_price);
     items.push(item);
-    setSelect('nfeQuickProduct','');
+    quickSearchControl?.clear();
     setField('nfeQuickQuantity','1');
     setField('nfeQuickUnitPrice','');
     renderItems();
@@ -546,9 +770,17 @@
 
   byId('nfeSaveItem')?.addEventListener('click',()=>{
     const product=productById(getField('nfeItemProduct'));
+    const productName=getField('nfeItemName').trim();
     const quantity=number(getField('nfeItemQuantity'));
-    if(!product){byId('nfeItemProduct')?.focus();return;}
-    if(quantity<=0){byId('nfeItemQuantity')?.focus();return;}
+
+    if(!productName){
+      byId('nfeItemName')?.focus();
+      return;
+    }
+    if(quantity<=0){
+      byId('nfeItemQuantity')?.focus();
+      return;
+    }
 
     const tax={};
     Object.entries(taxFields).forEach(([key,id])=>tax[key]=getField(id));
@@ -558,9 +790,9 @@
     special.petroleum_derived=!!byId('nfeSpecialPetroleum')?.checked;
 
     const item={
-      product_id:product.id,
-      product_name:product.name,
-      product_sku:getField('nfeItemSku')||product.sku,
+      product_id:product?.id||null,
+      product_name:productName,
+      product_sku:getField('nfeItemSku')||product?.sku||'',
       quantity,
       dimension_quantity:Math.max(number(getField('nfeItemDimensionQuantity'))||1,0),
       unit_price:number(getField('nfeItemUnitPrice')),

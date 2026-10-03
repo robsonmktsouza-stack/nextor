@@ -217,6 +217,8 @@ class NfeDraftController extends Controller
             'name'=>$product->name,
             'sku'=>$product->sku,
             'sale_price'=>(float)$product->sale_price,
+            'stock_quantity'=>(float)$product->stock_quantity,
+            'control_stock'=>(bool)$product->control_stock,
             'origin'=>$product->origin,
             'ean_gtin'=>$product->ean_gtin,
             'unit'=>$product->unit,
@@ -274,6 +276,7 @@ class NfeDraftController extends Controller
             'productData'=>$productData,
             'customerData'=>$customerData,
             'natureData'=>$natureData,
+            'taxDefaults'=>AppSetting::groupValues('tax',[]),
             'paymentTypes'=>self::PAYMENT_TYPES,
             'cardBrands'=>self::CARD_BRANDS,
             'isEditing'=>$draft->exists,
@@ -428,9 +431,19 @@ class NfeDraftController extends Controller
 
         foreach(array_values($items) as $index=>$item) {
             $productId=(int)($item['product_id'] ?? 0);
-            $product=Product::query()->find($productId);
-            if(!$product) {
-                throw ValidationException::withMessages(['items_json'=>'Um dos produtos selecionados não existe mais.']);
+            $product=$productId>0 ? Product::query()->find($productId) : null;
+
+            if($productId>0 && !$product) {
+                throw ValidationException::withMessages([
+                    'items_json'=>'Um dos produtos vinculados à NF-e não existe mais. Remova o vínculo ou selecione outro produto.',
+                ]);
+            }
+
+            $productName=trim((string)($item['product_name'] ?? $product?->name ?? ''));
+            if($productName==='') {
+                throw ValidationException::withMessages([
+                    'items_json'=>'Todo item da NF-e precisa ter uma descrição.',
+                ]);
             }
 
             $quantity=max(0,(float)($item['quantity'] ?? 0));
@@ -440,7 +453,7 @@ class NfeDraftController extends Controller
             $lineTotal=max(0,$quantity*$dimensionQuantity*$unitPrice);
 
             $taxData=array_replace(
-                is_array($product->tax_defaults) ? $product->tax_defaults : [],
+                is_array($product?->tax_defaults) ? $product->tax_defaults : [],
                 is_array($item['tax_data'] ?? null) ? $item['tax_data'] : []
             );
 
@@ -456,10 +469,10 @@ class NfeDraftController extends Controller
             }
 
             $draft->items()->create([
-                'product_id'=>$product->id,
+                'product_id'=>$product?->id,
                 'item_number'=>$index+1,
-                'product_name'=>$item['product_name'] ?? $product->name,
-                'product_sku'=>$item['product_sku'] ?? $product->sku,
+                'product_name'=>$productName,
+                'product_sku'=>$item['product_sku'] ?? $product?->sku,
                 'quantity'=>$quantity,
                 'dimension_quantity'=>$dimensionQuantity,
                 'unit_price'=>$unitPrice,
@@ -469,17 +482,17 @@ class NfeDraftController extends Controller
                 'discount'=>0,
                 'line_total'=>$lineTotal,
                 'cfop'=>$cfop ?: null,
-                'origin'=>$item['origin'] ?? $taxData['origin'] ?? $product->origin,
-                'ean_gtin'=>$item['ean_gtin'] ?? $product->ean_gtin,
-                'unit'=>$item['unit'] ?? $product->unit,
-                'tax_unit'=>$item['tax_unit'] ?? $product->tax_unit ?? $product->unit,
-                'ncm'=>$item['ncm'] ?? $product->ncm,
-                'cest'=>$item['cest'] ?? $product->cest,
-                'ipi_exception'=>$item['ipi_exception'] ?? $product->ipi_exception,
-                'fiscal_benefit_code'=>$item['fiscal_benefit_code'] ?? $product->fiscal_benefit_code,
+                'origin'=>$item['origin'] ?? $taxData['origin'] ?? $product?->origin,
+                'ean_gtin'=>$item['ean_gtin'] ?? $product?->ean_gtin,
+                'unit'=>$item['unit'] ?? $product?->unit,
+                'tax_unit'=>$item['tax_unit'] ?? $product?->tax_unit ?? $product?->unit,
+                'ncm'=>$item['ncm'] ?? $product?->ncm,
+                'cest'=>$item['cest'] ?? $product?->cest,
+                'ipi_exception'=>$item['ipi_exception'] ?? $product?->ipi_exception,
+                'fiscal_benefit_code'=>$item['fiscal_benefit_code'] ?? $product?->fiscal_benefit_code,
                 'purchase_order'=>$item['purchase_order'] ?? null,
                 'purchase_order_item'=>$item['purchase_order_item'] ?? null,
-                'notes'=>$item['notes'] ?? $product->nfe_notes,
+                'notes'=>$item['notes'] ?? $product?->nfe_notes,
                 'tax_data'=>$taxData,
                 'special_data'=>is_array($item['special_data'] ?? null) ? $item['special_data'] : [],
             ]);
