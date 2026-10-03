@@ -31,11 +31,11 @@ class FiscalModuleTest extends TestCase
             ->assertSee('NFC-e')
             ->assertSee('NFS-e')
             ->assertSee('CT-e')
-            ->assertDontSee('Documentos')
+            ->assertDontSee('fiscal-summary-grid',false)
+            ->assertDontSee('fiscal-config-strip',false)
             ->assertDontSee('Em processamento')
             ->assertDontSee('Fiscal geral')
-            ->assertDontSee('Próximo número')
-            ->assertDontSee('Conector externo');
+            ->assertDontSee('Próximo número');
     }
 
     public function test_fiscal_tab_only_lists_selected_document_type(): void
