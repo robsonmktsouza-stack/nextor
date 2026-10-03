@@ -72,12 +72,6 @@ $origins=[
   <div class="dialog-header">
     <div>
       <h2>{{ $isEditing ? 'Editar NF-e em rascunho' : 'Criar nova NF-e' }}</h2>
-      <p>
-        {{ $company->legal_name ?: 'Emitente não configurado' }}
-        · Série {{ $draft->series ?? 1 }}
-        · {{ ($draft->environment ?? 'homologation')==='production' ? 'Produção' : 'Homologação' }}
-        · Número {{ $draft->document_number ?: 'automático na emissão' }}
-      </p>
     </div>
     <a class="close-dialog" href="{{ route('fiscal.index',['tab'=>'nfe']) }}" aria-label="Fechar">
       @include('partials.icon',['name'=>'x','size'=>18])
@@ -147,7 +141,7 @@ $origins=[
                     <option value="">Selecione</option>
                     @foreach($natures as $nature)
                       <option value="{{ $nature->id }}" @selected(old('operation_nature_id',$draft->operation_nature_id)===$nature->id)>
-                        {{ $nature->name }}
+                        {{ $nature->cfop_internal ? $nature->cfop_internal.' - ' : '' }}{{ $nature->name }}
                       </option>
                     @endforeach
                   </select>
