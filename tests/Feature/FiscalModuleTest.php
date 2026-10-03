@@ -35,7 +35,11 @@ class FiscalModuleTest extends TestCase
             ->assertDontSee('fiscal-config-strip',false)
             ->assertDontSee('Em processamento')
             ->assertDontSee('Fiscal geral')
-            ->assertDontSee('Próximo número');
+            ->assertDontSee('Próximo número')
+            ->assertSee('fiscal-actionbar',false)
+            ->assertSee('Mês atual')
+            ->assertSee('TOTAL LISTADO')
+            ->assertDontSee('conector fiscal externo');
     }
 
     public function test_fiscal_tab_only_lists_selected_document_type(): void
@@ -63,6 +67,42 @@ class FiscalModuleTest extends TestCase
             ->assertOk()
             ->assertSee('1/15')
             ->assertDontSee('2/99');
+    }
+
+    public function test_fiscal_month_navigation_filters_documents(): void
+    {
+        FiscalDocumentJob::query()->create([
+            'document_type'=>'nfe',
+            'status'=>'authorized',
+            'environment'=>'production',
+            'series'=>1,
+            'document_number'=>101,
+            'prepared_at'=>'2026-10-03 10:00:00',
+        ]);
+
+        FiscalDocumentJob::query()->create([
+            'document_type'=>'nfe',
+            'status'=>'authorized',
+            'environment'=>'production',
+            'series'=>1,
+            'document_number'=>88,
+            'prepared_at'=>'2026-09-15 10:00:00',
+        ]);
+
+        $this->actingAs($this->admin())
+            ->get(route('fiscal.index',['tab'=>'nfe','month'=>'2026-10']))
+            ->assertOk()
+            ->assertSee('Outubro 2026')
+            ->assertSee('>101<',false)
+            ->assertDontSee('>88<',false)
+            ->assertSee('fiscal-row-authorized',false);
+
+        $this->actingAs($this->admin())
+            ->get(route('fiscal.index',['tab'=>'nfe','month'=>'2026-09']))
+            ->assertOk()
+            ->assertSee('Setembro 2026')
+            ->assertSee('>88<',false)
+            ->assertDontSee('>101<',false);
     }
 
     public function test_fiscal_document_has_detail_page(): void
