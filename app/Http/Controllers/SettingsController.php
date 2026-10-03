@@ -393,16 +393,13 @@ class SettingsController extends Controller
 
             'billing'=>[[
                 'enabled'=>['nullable','boolean'],
-                'provider'=>['nullable','string','max:80'],
                 'default_financial_account_id'=>['nullable','integer','exists:financial_accounts,id'],
                 'pix_key'=>['nullable','string','max:255'],
                 'default_due_days'=>['required','integer','min:0','max:3650'],
                 'fine_percent'=>['required','numeric','min:0','max:100','decimal:0,4'],
                 'interest_monthly_percent'=>['required','numeric','min:0','max:100','decimal:0,4'],
                 'instructions'=>['nullable','string','max:2000'],
-                'api_key'=>['nullable','string','max:2000'],
-                'api_secret'=>['nullable','string','max:2000'],
-            ],['enabled'],['api_key','api_secret']],
+            ],['enabled'],[]],
 
             'fiscal'=>[[
                 'enabled'=>['nullable','boolean'],
@@ -487,7 +484,7 @@ class SettingsController extends Controller
                 'email'=>['nullable','email','max:255'],
                 'phone'=>['nullable','string','max:30'],
                 'accounting_system'=>['nullable','string','max:120'],
-                'export_format'=>['nullable','string','max:80'],
+                'export_format'=>['required',Rule::in(['csv'])],
                 'cost_center_enabled'=>['nullable','boolean'],
                 'automatic_monthly_export'=>['nullable','boolean'],
                 'notes'=>['nullable','string','max:3000'],
@@ -506,7 +503,6 @@ class SettingsController extends Controller
                 'webhook_enabled'=>['nullable','boolean'],
                 'webhook_url'=>['nullable','url','max:2000'],
                 'webhook_secret'=>['nullable','string','max:2000'],
-                'accounting_integration'=>['nullable','string','max:120'],
             ],['smtp_enabled','api_enabled','webhook_enabled'],['smtp_password','webhook_secret']],
 
             'system'=>[[
@@ -544,9 +540,8 @@ class SettingsController extends Controller
                 'auto_nfce'=>false,'show_stock'=>true,'receipt_width'=>'80','receipt_copies'=>1,
             ],
             'billing'=>[
-                'enabled'=>false,'provider'=>null,'default_financial_account_id'=>null,'pix_key'=>null,
+                'enabled'=>false,'default_financial_account_id'=>null,'pix_key'=>null,
                 'default_due_days'=>3,'fine_percent'=>'0.0000','interest_monthly_percent'=>'0.0000','instructions'=>null,
-                'api_key'=>null,'api_secret'=>null,
             ],
             'fiscal'=>[
                 'enabled'=>false,'default_environment'=>'homologation','send_xml_email'=>true,
@@ -578,13 +573,13 @@ class SettingsController extends Controller
             ],
             'accounting'=>[
                 'office_name'=>null,'accountant_name'=>null,'accountant_document'=>null,'crc'=>null,
-                'email'=>null,'phone'=>null,'accounting_system'=>null,'export_format'=>null,
+                'email'=>null,'phone'=>null,'accounting_system'=>null,'export_format'=>'csv',
                 'cost_center_enabled'=>false,'automatic_monthly_export'=>false,'notes'=>null,
             ],
             'integrations'=>[
                 'smtp_enabled'=>false,'smtp_host'=>null,'smtp_port'=>587,'smtp_encryption'=>'tls',
                 'smtp_username'=>null,'smtp_password'=>null,'smtp_from_address'=>null,'smtp_from_name'=>null,
-                'api_enabled'=>false,'webhook_enabled'=>false,'webhook_url'=>null,'webhook_secret'=>null,'accounting_integration'=>null,
+                'api_enabled'=>false,'webhook_enabled'=>false,'webhook_url'=>null,'webhook_secret'=>null,
             ],
             'system'=>[
                 'rows_per_page'=>'25','search_delay'=>240,'date_format'=>'d/m/Y',
