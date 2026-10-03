@@ -46,6 +46,9 @@
           @include('partials.icon',['name'=>'refresh','size'=>18])
         </button>
         @if($tab==='nfe')
+          <a class="grid-tool grid-tool-wide" href="{{ route('fiscal.nfe.drafts.index') }}" data-tooltip="Rascunhos de NF-e">
+            @include('partials.icon',['name'=>'edit','size'=>17]) <span>Rascunhos</span>
+          </a>
           <a class="grid-tool" href="{{ route('fiscal.nfe.natures.index') }}" data-tooltip="Naturezas de Operação">
             @include('partials.icon',['name'=>'tag','size'=>18])
           </a>
