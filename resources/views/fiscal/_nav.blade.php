@@ -1,8 +1,9 @@
 <nav class="fiscal-tabs" aria-label="Documentos fiscais">
   @foreach($tabs as $key=>$item)
-    <a href="{{ route('fiscal.index',['tab'=>$key]) }}" class="{{ $tab===$key?'active':'' }}">
+    <a href="{{ route('fiscal.index',['tab'=>$key,'month'=>request('month',now()->format('Y-m'))]) }}"
+       class="{{ $tab===$key?'active':'' }}">
+      @include('partials.icon',['name'=>'receipt','size'=>16])
       <span>{{ $item['label'] }}</span>
-      @if(($tabCounts[$key] ?? 0)>0)<small>{{ $tabCounts[$key] }}</small>@endif
     </a>
   @endforeach
 </nav>
