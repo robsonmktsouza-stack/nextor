@@ -693,7 +693,7 @@ foreach($primaryTabs as $key=>$item){
         <label class="field col-3"><span>E-mail</span><input type="email" name="email" value="{{ $accounting['email'] }}"></label>
         <label class="field col-3"><span>Telefone</span><input name="phone" value="{{ $accounting['phone'] }}"></label>
         <label class="field col-6"><span>Sistema contábil de destino</span><input name="accounting_system" value="{{ $accounting['accounting_system'] }}" placeholder="Ex.: Domínio, Alterdata, outro"><small>Identificação incluída nos metadados da exportação.</small></label>
-        <label class="field col-6"><span>Formato de exportação</span><select name="export_format"><option value="csv" @selected(($accounting['export_format'] ?? 'csv')==='csv')>CSV</option></select><small>Formato atualmente suportado pelo exportador do Nextor.</small></label>
+        <div class="field col-6"><span>Formato disponível</span><div class="inline-note"><strong>CSV</strong> · formato atualmente gerado pelo Nextor.</div></div>
         <label class="field col-12"><span>Observações</span><textarea name="notes" rows="4">{{ $accounting['notes'] }}</textarea></label>
       </div>
       <div class="settings-switch-grid">
