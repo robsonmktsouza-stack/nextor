@@ -40,6 +40,10 @@ class NfeDraftController extends Controller
             return $draft;
         });
 
+        if($request->input('after_save')==='validate') {
+            return $this->validateAndRedirect($draft);
+        }
+
         return redirect()->route('fiscal.nfe.edit',$draft)->with('success','Rascunho da NF-e salvo.');
     }
 
@@ -56,10 +60,19 @@ class NfeDraftController extends Controller
             $this->replaceItems($nfeDraft,$request);
         });
 
+        if($request->input('after_save')==='validate') {
+            return $this->validateAndRedirect($nfeDraft);
+        }
+
         return redirect()->route('fiscal.nfe.edit',$nfeDraft)->with('success','Rascunho da NF-e atualizado.');
     }
 
     public function validateDraft(NfeDraft $nfeDraft)
+    {
+        return $this->validateAndRedirect($nfeDraft);
+    }
+
+    private function validateAndRedirect(NfeDraft $nfeDraft)
     {
         $nfeDraft->load(['items','customer','operationNature']);
         $errors=[];
