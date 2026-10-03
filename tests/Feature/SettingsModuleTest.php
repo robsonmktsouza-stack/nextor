@@ -99,6 +99,30 @@ class SettingsModuleTest extends TestCase
         $this->assertSame($secret,AppSetting::value('nfce','csc_token'));
     }
 
+    public function test_settings_do_not_expose_unimplemented_operational_fields(): void
+    {
+        $admin=$this->admin();
+
+        $this->actingAs($admin)
+            ->get(route('settings.index',['tab'=>'billing']))
+            ->assertOk()
+            ->assertSee('Cobranças e PIX')
+            ->assertDontSee('API key')
+            ->assertDontSee('API secret')
+            ->assertDontSee('name="provider"',false);
+
+        $this->actingAs($admin)
+            ->get(route('settings.index',['tab'=>'accounting']))
+            ->assertOk()
+            ->assertSee('Formato disponível')
+            ->assertDontSee('name="export_format"',false);
+
+        $this->actingAs($admin)
+            ->get(route('settings.index',['tab'=>'integrations']))
+            ->assertOk()
+            ->assertDontSee('Integração contábil');
+    }
+
     public function test_payment_methods_can_be_configured(): void
     {
         $this->actingAs($this->admin())

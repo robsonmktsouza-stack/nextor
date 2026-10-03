@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\AppSetting;
+use App\Models\CompanySetting;
 use App\Models\FinancialEntry;
 use App\Models\FiscalDocumentJob;
 use App\Models\PaymentMethod;
@@ -463,10 +464,71 @@ class OperationalSettingsTest extends TestCase
             'cost_center'=>'Administrativo',
         ]);
 
+        AppSetting::put('accounting','office_name','Martins Contabilidade');
+        AppSetting::put('accounting','accountant_name','Responsável Contábil');
+        AppSetting::put('accounting','accounting_system','Domínio');
+
         $path=app(AccountingExportService::class)->generate('2026-10');
 
         Storage::disk('local')->assertExists($path);
+        Storage::disk('local')->assertExists('accounting/exports/2026/nextor-contabil-2026-10.meta.json');
         $this->assertStringContainsString('nextor-contabil-2026-10.csv',$path);
+
+        $metadata=json_decode(
+            Storage::disk('local')->get('accounting/exports/2026/nextor-contabil-2026-10.meta.json'),
+            true
+        );
+        $this->assertSame('Martins Contabilidade',$metadata['accounting']['office_name']);
+        $this->assertSame('Responsável Contábil',$metadata['accounting']['accountant_name']);
+        $this->assertSame('Domínio',$metadata['accounting']['accounting_system']);
+        $this->assertSame('csv',$metadata['format']);
+    }
+
+    public function test_print_currency_prefix_setting_is_honored(): void
+    {
+        $user=$this->user();
+        $data=$this->saleData($this->product());
+        $data['source']='pdv';
+
+        $sale=app(SalesService::class)->create($data,$user->id);
+
+        CompanySetting::current()->update(['show_currency_prefix'=>false]);
+
+        $this->actingAs($user)
+            ->get(route('pdv.receipt',$sale))
+            ->assertOk()
+            ->assertDontSee('R$');
+
+        CompanySetting::current()->update(['show_currency_prefix'=>true]);
+
+        $this->actingAs($user)
+            ->get(route('pdv.receipt',$sale))
+            ->assertOk()
+            ->assertSee('R$');
+    }
+
+    public function test_system_preferences_are_exposed_to_admin_and_pdv_layouts(): void
+    {
+        AppSetting::put('system','compact_mode',false);
+        AppSetting::put('system','show_tutorials',false);
+        AppSetting::put('system','confirm_destructive_actions',false);
+        AppSetting::put('system','search_delay',480);
+
+        $user=$this->user();
+
+        $this->actingAs($user)
+            ->get(route('settings.index',['tab'=>'system']))
+            ->assertOk()
+            ->assertSee('system-comfortable',false)
+            ->assertSee('data-show-tutorials="0"',false)
+            ->assertSee('data-confirm-destructive="0"',false)
+            ->assertSee('data-live-search-delay="480"',false);
+
+        $this->actingAs($user)
+            ->get(route('pdv.index'))
+            ->assertOk()
+            ->assertSee('data-show-tutorials="0"',false)
+            ->assertSee('data-confirm-destructive="0"',false);
     }
 
     public function test_api_switch_and_token_protect_endpoints(): void

@@ -26,7 +26,7 @@ $primaryTabs=[
     'members'=>['payments'],
   ],
   'billing'=>[
-    'label'=>'Boletos / cobranças','icon'=>'money',
+    'label'=>'Cobranças / PIX','icon'=>'money',
     'members'=>['billing'],
   ],
   'fiscal'=>[
@@ -439,19 +439,16 @@ foreach($primaryTabs as $key=>$item){
   <form method="post" action="{{ route('settings.group.update','billing') }}" class="settings-editor">
     @csrf
     <section class="editor-panel settings-panel">
-      <div class="settings-panel-head"><div><h2>Cobranças, boleto e PIX</h2><p>Parâmetros para provedores financeiros e geração futura de cobranças.</p></div></div>
+      <div class="settings-panel-head"><div><h2>Cobranças e PIX</h2><p>Regras internas usadas pelo financeiro para vencimento, encargos e PIX copia e cola.</p></div></div>
       <div class="editor-grid cols-12 settings-grid">
-        <label class="field col-4"><span>Provedor</span><input name="provider" value="{{ $billing['provider'] }}" placeholder="Ex.: banco / gateway"></label>
         <label class="field col-4"><span>Conta financeira padrão</span><select name="default_financial_account_id"><option value="">Nenhuma</option>@foreach($accounts as $a)<option value="{{ $a->id }}" @selected((string)$billing['default_financial_account_id']===(string)$a->id)>{{ $a->name }}</option>@endforeach</select></label>
         <label class="field col-4"><span>Chave PIX</span><input name="pix_key" value="{{ $billing['pix_key'] }}"></label>
-        <label class="field col-3"><span>Vencimento padrão</span><input type="number" min="0" name="default_due_days" value="{{ $billing['default_due_days'] }}"><small>Dias</small></label>
+        <label class="field col-4"><span>Vencimento padrão</span><input type="number" min="0" name="default_due_days" value="{{ $billing['default_due_days'] }}"><small>Dias</small></label>
         <label class="field col-3"><span>Multa (%)</span><input type="number" step="0.0001" min="0" name="fine_percent" value="{{ $billing['fine_percent'] }}"></label>
         <label class="field col-3"><span>Juros mensal (%)</span><input type="number" step="0.0001" min="0" name="interest_monthly_percent" value="{{ $billing['interest_monthly_percent'] }}"></label>
-        <label class="field col-6"><span>API key</span><input type="password" name="api_key" placeholder="{{ $billing['api_key'] ? 'Credencial já configurada' : 'Informe a credencial' }}"></label>
-        <label class="field col-6"><span>API secret</span><input type="password" name="api_secret" placeholder="{{ $billing['api_secret'] ? 'Credencial já configurada' : 'Informe a credencial' }}"></label>
         <label class="field col-12"><span>Instruções padrão</span><textarea name="instructions" rows="4">{{ $billing['instructions'] }}</textarea></label>
       </div>
-      <label class="settings-switch settings-switch-single"><input type="checkbox" name="enabled" value="1" @checked($billing['enabled'])><span><strong>Habilitar integração de cobranças</strong><small>Ativa o cadastro do provedor; a emissão depende do conector implementado.</small></span></label>
+      <label class="settings-switch settings-switch-single"><input type="checkbox" name="enabled" value="1" @checked($billing['enabled'])><span><strong>Habilitar cobranças internas</strong><small>Ativa cálculo de multa e juros e geração de PIX copia e cola nas contas a receber.</small></span></label>
     </section>
   
   <div class="editor-savebar settings-savebar">
@@ -695,13 +692,13 @@ foreach($primaryTabs as $key=>$item){
         <label class="field col-3"><span>CRC</span><input name="crc" value="{{ $accounting['crc'] }}"></label>
         <label class="field col-3"><span>E-mail</span><input type="email" name="email" value="{{ $accounting['email'] }}"></label>
         <label class="field col-3"><span>Telefone</span><input name="phone" value="{{ $accounting['phone'] }}"></label>
-        <label class="field col-6"><span>Sistema contábil</span><input name="accounting_system" value="{{ $accounting['accounting_system'] }}" placeholder="Ex.: Domínio, Alterdata, outro"></label>
-        <label class="field col-6"><span>Formato de exportação</span><input name="export_format" value="{{ $accounting['export_format'] }}" placeholder="Ex.: CSV, layout próprio"></label>
+        <label class="field col-6"><span>Sistema contábil de destino</span><input name="accounting_system" value="{{ $accounting['accounting_system'] }}" placeholder="Ex.: Domínio, Alterdata, outro"><small>Identificação incluída nos metadados da exportação.</small></label>
+        <div class="field col-6"><span>Formato disponível</span><div class="inline-note"><strong>CSV</strong> · formato atualmente gerado pelo Nextor.</div></div>
         <label class="field col-12"><span>Observações</span><textarea name="notes" rows="4">{{ $accounting['notes'] }}</textarea></label>
       </div>
       <div class="settings-switch-grid">
         <label class="settings-switch"><input type="checkbox" name="cost_center_enabled" value="1" @checked($accounting['cost_center_enabled'])><span><strong>Usar centros de custo</strong><small>Prepara classificações financeiras para detalhamento contábil.</small></span></label>
-        <label class="settings-switch"><input type="checkbox" name="automatic_monthly_export" value="1" @checked($accounting['automatic_monthly_export'])><span><strong>Exportação mensal automática</strong><small>Preferência para o fluxo quando o exportador contábil estiver conectado.</small></span></label>
+        <label class="settings-switch"><input type="checkbox" name="automatic_monthly_export" value="1" @checked($accounting['automatic_monthly_export'])><span><strong>Exportação mensal automática</strong><small>Gera automaticamente o CSV do mês anterior no primeiro dia de cada mês.</small></span></label>
       </div>
     </section>
   
@@ -870,11 +867,10 @@ foreach($primaryTabs as $key=>$item){
     </section>
 
     <section class="editor-panel settings-panel">
-      <div class="settings-panel-head"><div><h2>API, webhook e contabilidade</h2><p>Pontos de integração externa do Nextor.</p></div></div>
+      <div class="settings-panel-head"><div><h2>API e webhook</h2><p>Integrações externas que já possuem execução no Nextor.</p></div></div>
       <div class="editor-grid cols-12 settings-grid">
         <label class="field col-6"><span>Webhook</span><input type="url" name="webhook_url" value="{{ $integrations['webhook_url'] }}" placeholder="https://..."></label>
         <label class="field col-6"><span>Segredo do webhook</span><input type="password" name="webhook_secret" placeholder="{{ $integrations['webhook_secret'] ? 'Segredo já configurado' : '' }}"></label>
-        <label class="field col-6"><span>Integração contábil</span><input name="accounting_integration" value="{{ $integrations['accounting_integration'] }}" placeholder="Ex.: Domínio, Alterdata, arquivo..."></label>
       </div>
       <div class="settings-switch-grid">
         <label class="settings-switch"><input type="checkbox" name="api_enabled" value="1" @checked($integrations['api_enabled'])><span><strong>API habilitada</strong><small>Libera os endpoints protegidos por Bearer Token.</small></span></label>

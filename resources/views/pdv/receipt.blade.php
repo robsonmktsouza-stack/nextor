@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 @php
   $formatMoney = fn($value) => number_format((float) $value, 2, ',', '.');
+  $currencyPrefix = $company->show_currency_prefix ? 'R$ ' : '';
   $formatQty = function ($value) {
       $formatted = number_format((float) $value, 3, ',', '.');
       return rtrim(rtrim($formatted, '0'), ',');
@@ -132,11 +133,11 @@ body{font-size:9px}
   </section>
 
   <section class="section">
-    <div class="row"><span>Subtotal</span><strong>R$ {{ $formatMoney($sale->subtotal) }}</strong></div>
+    <div class="row"><span>Subtotal</span><strong>{{ $currencyPrefix }}{{ $formatMoney($sale->subtotal) }}</strong></div>
     @if((float) $sale->discount_total > 0)
-      <div class="row"><span>Desconto</span><strong>- R$ {{ $formatMoney($sale->discount_total) }}</strong></div>
+      <div class="row"><span>Desconto</span><strong>- {{ $currencyPrefix }}{{ $formatMoney($sale->discount_total) }}</strong></div>
     @endif
-    <div class="row total"><span>Total</span><strong>R$ {{ $formatMoney($sale->total) }}</strong></div>
+    <div class="row total"><span>Total</span><strong>{{ $currencyPrefix }}{{ $formatMoney($sale->total) }}</strong></div>
   </section>
 
   <section class="section">
@@ -144,12 +145,12 @@ body{font-size:9px}
       @php($isCash=($paymentKinds[$payment->payment_method] ?? null)==='cash')
       <div class="row">
         <span>{{ $paymentLabels[$payment->payment_method] ?? 'Outro' }}</span>
-        <strong>R$ {{ $formatMoney($payment->amount) }}</strong>
+        <strong>{{ $currencyPrefix }}{{ $formatMoney($payment->amount) }}</strong>
       </div>
     @endforeach
     @if($paymentIsCash)
-      <div class="row"><span>Recebido em dinheiro</span><strong>R$ {{ $formatMoney($cashReceived) }}</strong></div>
-      <div class="row"><span>Troco</span><strong>R$ {{ $formatMoney($change) }}</strong></div>
+      <div class="row"><span>Recebido em dinheiro</span><strong>{{ $currencyPrefix }}{{ $formatMoney($cashReceived) }}</strong></div>
+      <div class="row"><span>Troco</span><strong>{{ $currencyPrefix }}{{ $formatMoney($change) }}</strong></div>
     @endif
   </section>
 

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\AppSetting;
+use App\Models\CompanySetting;
 use App\Models\FinancialEntry;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -56,8 +57,38 @@ class AccountingExportService
         $csv=stream_get_contents($handle);
         fclose($handle);
 
-        $path='accounting/exports/'.$period->format('Y').'/nextor-contabil-'.$period->format('Y-m').'.csv';
+        $directory='accounting/exports/'.$period->format('Y');
+        $baseName='nextor-contabil-'.$period->format('Y-m');
+        $path=$directory.'/'.$baseName.'.csv';
         Storage::disk('local')->put($path,"\xEF\xBB\xBF".$csv);
+
+        $company=CompanySetting::current();
+        $accounting=AppSetting::groupValues('accounting',[]);
+        $metadata=[
+            'version'=>1,
+            'competence'=>$period->format('Y-m'),
+            'generated_at'=>now()->toIso8601String(),
+            'format'=>'csv',
+            'company'=>[
+                'document'=>$company->document,
+                'legal_name'=>$company->legal_name,
+                'trade_name'=>$company->trade_name,
+            ],
+            'accounting'=>[
+                'office_name'=>$accounting['office_name'] ?? null,
+                'accountant_name'=>$accounting['accountant_name'] ?? null,
+                'accountant_document'=>$accounting['accountant_document'] ?? null,
+                'crc'=>$accounting['crc'] ?? null,
+                'email'=>$accounting['email'] ?? null,
+                'phone'=>$accounting['phone'] ?? null,
+                'accounting_system'=>$accounting['accounting_system'] ?? null,
+                'notes'=>$accounting['notes'] ?? null,
+            ],
+        ];
+        Storage::disk('local')->put(
+            $directory.'/'.$baseName.'.meta.json',
+            json_encode($metadata,JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)
+        );
 
         return $path;
     }

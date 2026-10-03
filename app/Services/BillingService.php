@@ -47,7 +47,6 @@ class BillingService
             'pix_key'=>$pixKey,
             'pix_payload'=>$pix,
             'instructions'=>$settings['instructions'] ?? null,
-            'provider'=>$settings['provider'] ?? null,
             'default_financial_account_id'=>(int)($settings['default_financial_account_id'] ?? 0),
         ];
     }

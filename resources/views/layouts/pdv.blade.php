@@ -9,7 +9,10 @@
 <link rel="stylesheet" href="{{ asset('css/pdv.css') }}">
 <script defer src="{{ asset('js/erp.js') }}"></script>
 </head>
-<body class="pdv-body" data-confirm-destructive="{{ \App\Models\AppSetting::value('system','confirm_destructive_actions',true) ? '1' : '0' }}">
+<body
+  class="pdv-body"
+  data-confirm-destructive="{{ \App\Models\AppSetting::value('system','confirm_destructive_actions',true) ? '1' : '0' }}"
+  data-show-tutorials="{{ \App\Models\AppSetting::value('system','show_tutorials',true) ? '1' : '0' }}">
 <div class="pdv-root" id="appRoot">
   <header class="pdv-topbar">
     <div class="pdv-topbar-brand">

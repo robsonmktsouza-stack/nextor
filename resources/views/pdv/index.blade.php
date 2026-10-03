@@ -68,7 +68,7 @@
     <div class="pdv-modal-head">
       <div>
         <h2 id="pdvCashMovementTitle">Movimentar caixa</h2>
-        <p id="pdvCashMovementHelp">Registre uma entrada ou retirada manual.</p>
+        <p id="pdvCashMovementHelp" data-tutorial>Registre uma entrada ou retirada manual.</p>
       </div>
       <button type="button" class="pdv-modal-close" onclick="this.closest('dialog').close()" aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
     </div>
@@ -480,7 +480,7 @@
     <div>
       <span>Alt+O</span>
       <h2>Operações do caixa</h2>
-      <p>Todas as rotinas operacionais também possuem atalho direto.</p>
+      <p data-tutorial>Todas as rotinas operacionais também possuem atalho direto.</p>
     </div>
     <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
   </div>
@@ -531,7 +531,7 @@
             <strong>{{ $suspended->label ?: 'Venda suspensa #'.$suspended->id }}</strong>
             <small>{{ $suspended->item_count }} item(ns) · R$ {{ number_format((float)$suspended->total,2,',','.') }} · {{ $suspended->user?->name }}</small>
           </span>
-          <time>{{ $suspended->suspended_at?->format('d/m H:i') }}</time>
+          <time>{{ $suspended->suspended_at?->format(\App\Models\AppSetting::dateFormat().' H:i') }}</time>
         </button>
         <button type="button" class="pdv-suspended-discard" data-suspended-discard="{{ $suspended->id }}" aria-label="Descartar venda suspensa">@include('partials.icon',['name'=>'trash','size'=>15])</button>
       </div>
@@ -577,7 +577,7 @@
         <div class="pdv-contingency-active">
           <strong>Contingência offline ativa</strong>
           <span>{{ $nfceContingencyReason ?: 'Sem motivo registrado' }}</span>
-          @if($nfceContingencyStartedAt)<small>Iniciada em {{ CarbonCarbon::parse($nfceContingencyStartedAt)->format('d/m/Y H:i') }}</small>@endif
+          @if($nfceContingencyStartedAt)<small>Iniciada em {{ \Carbon\Carbon::parse($nfceContingencyStartedAt)->format(\App\Models\AppSetting::dateFormat().' H:i') }}</small>@endif
         </div>
         <div class="pdv-operation-note">Encerrar a contingência afeta apenas novas vendas. As NFC-e já preparadas offline permanecem identificadas para transmissão posterior.</div>
         <button class="pdv-modal-primary" type="submit">Encerrar contingência <kbd>Ctrl+Enter</kbd></button>
