@@ -130,7 +130,6 @@
     const askConsumerDocument=app.dataset.askConsumerDocument==='1';
     const allowSplitPayment=app.dataset.allowSplitPayment==='1';
     const state=new Map();
-    let currentKind='all';
     let lastResults=[];
     let resultIndex=-1;
     let searchTimer=null;
@@ -186,7 +185,7 @@
       return parseDecimal(input.value);
     };
 
-    const itemKey=item=>item.type+':'+item.id;
+    const itemKey=item=>'product:'+item.id;
 
     const lineTotal=item=>Math.max(0,(item.price*item.quantity)-item.discount);
 
@@ -203,13 +202,18 @@
 
     const canIncrease=(item,nextQuantity)=>{
       if(allowNegativeStock) return true;
-      if(item.type!=='product' || !item.control_stock) return true;
+      if(!item.control_stock) return true;
       if(nextQuantity<=item.stock+0.000001) return true;
       notify('Estoque disponível: '+number.format(item.stock)+' '+(item.unit||'UN')+'.','warning');
       return false;
     };
 
     const addItem=item=>{
+      if(!item || item.type!=='product'){
+        notify('O PDV aceita somente produtos. Use Vendas/Orçamentos para serviços.','warning');
+        return;
+      }
+
       const key=itemKey(item);
       const existing=state.get(key);
 
@@ -218,7 +222,7 @@
         if(!canIncrease(existing,next)) return;
         existing.quantity=next;
       }else{
-        if(!allowNegativeStock && item.type==='product' && item.control_stock && item.stock<1){
+        if(!allowNegativeStock && item.control_stock && item.stock<1){
           notify('Este produto está sem estoque disponível.','warning');
           return;
         }
@@ -234,7 +238,7 @@
       app.dataset.activeCartKey=key;
       renderCart();
       search.value='';
-      caption.textContent='Item adicionado. Busque o próximo produto ou serviço.';
+      caption.textContent='Produto adicionado. Busque o próximo produto.';
       search.focus();
     };
 
@@ -288,9 +292,8 @@
       payload.innerHTML='';
       [...state.values()].forEach((item,index)=>{
         const values={
-          item_type:item.type,
-          product_id:item.type==='product'?item.id:'',
-          service_id:item.type==='service'?item.id:'',
+          item_type:'product',
+          product_id:item.id,
           quantity:item.quantity.toFixed(3),
           discount:item.discount.toFixed(2),
         };
@@ -493,8 +496,8 @@
       title.className='pdv-cart-item';
 
       const marker=document.createElement('span');
-      marker.className='pdv-cart-marker '+(item.type==='service'?'service':'product');
-      marker.textContent=item.type==='service'?'S':'P';
+      marker.className='pdv-cart-marker product';
+      marker.textContent='P';
 
       const details=document.createElement('div');
       const strong=document.createElement('strong');
@@ -620,7 +623,7 @@
       if(!state.size){
         const empty=document.createElement('div');
         empty.className='pdv-cart-empty';
-        empty.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="20" r="1" fill="none" stroke="currentColor"/><circle cx="19" cy="20" r="1" fill="none" stroke="currentColor"/><path d="M2 3h2l2.4 12.1a2 2 0 0 0 2 1.6h9.9a2 2 0 0 0 2-1.6L22 7H5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><strong>Carrinho vazio</strong><span>Adicione um produto ou serviço.</span>';
+        empty.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="20" r="1" fill="none" stroke="currentColor"/><circle cx="19" cy="20" r="1" fill="none" stroke="currentColor"/><path d="M2 3h2l2.4 12.1a2 2 0 0 0 2 1.6h9.9a2 2 0 0 0 2-1.6L22 7H5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><strong>Carrinho vazio</strong><span>Adicione um produto.</span>';
         cart.appendChild(empty);
       }else{
         state.forEach(item=>cart.appendChild(createCartRow(item)));
@@ -644,8 +647,8 @@
         img.alt='';
         thumb.appendChild(img);
       }else{
-        thumb.classList.add(item.type==='service'?'service':'product');
-        thumb.textContent=item.type==='service'?'S':'P';
+        thumb.classList.add('product');
+        thumb.textContent='P';
       }
 
       const info=document.createElement('span');
@@ -655,8 +658,7 @@
       const code=document.createElement('small');
       const parts=[item.code];
       if(item.ean) parts.push(item.ean);
-      if(showStock && item.type==='product' && item.control_stock) parts.push('Estoque '+number.format(item.stock)+' '+(item.unit||'UN'));
-      if(item.type==='service') parts.push('Serviço');
+      if(showStock && item.control_stock) parts.push('Estoque '+number.format(item.stock)+' '+(item.unit||'UN'));
       code.textContent=parts.filter(Boolean).join(' · ');
       info.append(name,code);
 
@@ -718,8 +720,8 @@
       if(!term){
         lastResults=[];
         resultIndex=-1;
-        results.innerHTML='<div class="pdv-empty-state"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m20 20-4-4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><strong>Localize um item para começar</strong><span>Use nome, SKU, EAN/GTIN ou item de serviço.</span></div>';
-        caption.textContent='Digite para localizar um produto ou serviço.';
+        results.innerHTML='<div class="pdv-empty-state"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m20 20-4-4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><strong>Localize um produto para começar</strong><span>Use nome, SKU ou EAN/GTIN.</span></div>';
+        caption.textContent='Digite para localizar um produto.';
         return;
       }
 
@@ -730,7 +732,6 @@
         caption.textContent='Buscando...';
         const url=new URL(app.dataset.searchUrl,window.location.origin);
         url.searchParams.set('q',term);
-        url.searchParams.set('kind',currentKind);
 
         const fetcher=window.NextorFetch||window.fetch.bind(window);
         const response=await fetcher(url.toString(),{
@@ -787,16 +788,6 @@
           performSearch(true);
         }
       }
-    });
-
-    document.querySelectorAll('[data-pdv-kind]').forEach(button=>{
-      button.addEventListener('click',()=>{
-        document.querySelectorAll('[data-pdv-kind]').forEach(x=>x.classList.remove('active'));
-        button.classList.add('active');
-        currentKind=button.dataset.pdvKind||'all';
-        search.focus();
-        if(search.value.trim()) performSearch(false);
-      });
     });
 
     payment.addEventListener('change',updatePaymentState);
@@ -1513,7 +1504,7 @@
     const restoreSnapshot=snapshot=>{
       resetCurrentSale();
 
-      (snapshot.items||[]).forEach(item=>{
+      (snapshot.items||[]).filter(item=>item?.type==='product').forEach(item=>{
         const normalized={
           ...item,
           price:Number(item.price)||0,
