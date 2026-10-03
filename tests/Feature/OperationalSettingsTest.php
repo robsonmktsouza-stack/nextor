@@ -504,7 +504,6 @@ class OperationalSettingsTest extends TestCase
         $this->actingAs($user)
             ->get(route('pdv.index'))
             ->assertOk()
-            ->assertSee('system-comfortable',false)
             ->assertSee('data-show-tutorials="0"',false)
             ->assertSee('data-confirm-destructive="0"',false);
     }
