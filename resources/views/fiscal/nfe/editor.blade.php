@@ -72,12 +72,6 @@ $origins=[
   <div class="dialog-header">
     <div>
       <h2>{{ $isEditing ? 'Editar NF-e em rascunho' : 'Criar nova NF-e' }}</h2>
-      <p>
-        {{ $company->legal_name ?: 'Emitente não configurado' }}
-        · Série {{ $draft->series ?? 1 }}
-        · {{ ($draft->environment ?? 'homologation')==='production' ? 'Produção' : 'Homologação' }}
-        · Número {{ $draft->document_number ?: 'automático na emissão' }}
-      </p>
     </div>
     <a class="close-dialog" href="{{ route('fiscal.index',['tab'=>'nfe']) }}" aria-label="Fechar">
       @include('partials.icon',['name'=>'x','size'=>18])
@@ -94,67 +88,117 @@ $origins=[
     </div>
 
     <section class="editor-tab-panel active" data-tab-panel="nfe-general">
-      <div class="editor-panel">
-        <h3>Emitente</h3>
-        <div class="editor-grid cols-12">
-          <div class="field col-8">
-            <span>Empresa</span>
-            <div class="readonly-field">
-              <strong>{{ $company->legal_name ?: 'Dados da empresa incompletos' }}</strong>
-              <small>
-                CNPJ {{ $company->document ?: '—' }} · IE {{ $company->state_registration ?: '—' }}
-                · {{ collect([$company->address,$company->address_number,$company->city,$company->state])->filter()->implode(', ') ?: 'Endereço não informado' }}
-              </small>
-            </div>
+      <div class="nfe-emitter-summary">
+        <div class="nfe-emitter-logo">
+          @if($company->logo_path)
+            <img src="{{ asset('storage/'.$company->logo_path) }}" alt="Logomarca da empresa">
+          @endif
+        </div>
+
+        <div class="nfe-emitter-identity">
+          <div class="nfe-emitter-name">
+            <strong>{{ $company->legal_name ?: 'Dados da empresa incompletos' }}</strong>
+            @if($company->trade_name)<span>{{ $company->trade_name }}</span>@endif
           </div>
-          <div class="field col-2"><span>Série</span><div class="readonly-field">{{ $draft->series ?? 1 }}</div></div>
-          <div class="field col-2"><span>Número</span><div class="readonly-field">{{ $draft->document_number ?: 'Automático' }}</div></div>
+          <div class="nfe-emitter-address">
+            <span>{{ collect([$company->address,$company->address_number,$company->address_complement,$company->district])->filter()->implode(', ') ?: 'Endereço não informado' }}</span>
+            <span>{{ collect([$company->city,$company->state,$company->zip_code])->filter()->implode(' - ') }}</span>
+          </div>
+          <div class="nfe-emitter-docs">
+            <span><b>CNPJ:</b> {{ $company->document ?: '—' }}</span>
+            <span><b>IE:</b> {{ $company->state_registration ?: '—' }}</span>
+            <span><b>CRT:</b> {{ $company->crt ?: '—' }}</span>
+          </div>
+          @if(auth()->user()->canAccess('settings'))
+            <a href="{{ route('settings.index',['tab'=>'general']) }}" class="nfe-emitter-edit">
+              @include('partials.icon',['name'=>'edit','size'=>14]) Editar dados do emitente
+            </a>
+          @endif
+        </div>
+
+        <div class="nfe-document-summary">
+          <span>Número da NF-e</span>
+          <strong>{{ $draft->document_number ?: 'Automático' }}</strong>
+          <div>
+            <span>Série<b>{{ str_pad((string)($draft->series ?? 1),3,'0',STR_PAD_LEFT) }}</b></span>
+            <span>Ambiente<b>{{ ($draft->environment ?? 'homologation')==='production' ? 'Produção' : 'Homologação' }}</b></span>
+          </div>
         </div>
       </div>
 
-      <div class="editor-panel">
-        <h3>Operação</h3>
-        <div class="editor-grid cols-12">
-          <label class="field col-6">
-            <span>Natureza da operação *</span>
-            <div class="input-action-group">
-              <select name="operation_nature_id" id="nfeNature" required>
-                <option value="">Selecione</option>
-                @foreach($natures as $nature)
-                  <option value="{{ $nature->id }}" @selected(old('operation_nature_id',$draft->operation_nature_id)===$nature->id)>
-                    {{ $nature->name }}
-                  </option>
-                @endforeach
-              </select>
-              <a class="input-action-button" href="{{ route('fiscal.nfe.natures.index') }}" data-tooltip="Naturezas de Operação">
-                @include('partials.icon',['name'=>'settings','size'=>15])
-              </a>
+      <div class="nfe-general-card">
+        <div class="nfe-section-title">
+          <h3>Dados gerais</h3>
+        </div>
+
+        <div class="nfe-general-layout">
+          <div class="nfe-general-fields">
+            <div class="editor-grid cols-12">
+              <label class="field col-12">
+                <span>Natureza da operação *</span>
+                <div class="input-action-group">
+                  <select name="operation_nature_id" id="nfeNature" required>
+                    <option value="">Selecione</option>
+                    @foreach($natures as $nature)
+                      <option value="{{ $nature->id }}" @selected(old('operation_nature_id',$draft->operation_nature_id)===$nature->id)>
+                        {{ $nature->cfop_internal ? $nature->cfop_internal.' - ' : '' }}{{ $nature->name }}
+                      </option>
+                    @endforeach
+                  </select>
+                  <a class="input-action-button" href="{{ route('fiscal.nfe.natures.index') }}" data-tooltip="Naturezas de Operação">
+                    @include('partials.icon',['name'=>'settings','size'=>15])
+                  </a>
+                </div>
+              </label>
+
+              <label class="field col-4">
+                <span>Tipo de operação *</span>
+                <select name="operation_type" id="nfeOperationType">
+                  <option value="outbound" @selected(old('operation_type',$draft->operation_type)==='outbound')>Saída</option>
+                  <option value="inbound" @selected(old('operation_type',$draft->operation_type)==='inbound')>Entrada</option>
+                </select>
+              </label>
+
+              <div class="field col-4">
+                <span>Destino da operação</span>
+                <div class="readonly-field" id="nfeDestinationPreview">Automático</div>
+              </div>
+
+              <label class="field col-4">
+                <span>Presença do comprador</span>
+                <select name="presence" id="nfePresence">
+                  <option value="presential" @selected(old('presence',$draft->presence)==='presential')>Presencial</option>
+                  <option value="not_applicable" @selected(old('presence',$draft->presence)==='not_applicable')>Não se aplica</option>
+                  <option value="internet" @selected(old('presence',$draft->presence)==='internet')>Internet</option>
+                  <option value="phone" @selected(old('presence',$draft->presence)==='phone')>Teleatendimento</option>
+                  <option value="outside_establishment" @selected(old('presence',$draft->presence)==='outside_establishment')>Fora do estabelecimento</option>
+                  <option value="other" @selected(old('presence',$draft->presence)==='other')>Outros</option>
+                </select>
+              </label>
+
+              <div class="field col-4">
+                <span>Finalidade da emissão</span>
+                <div class="readonly-field" id="nfePurposePreview">—</div>
+              </div>
+
+              <div class="field col-4">
+                <span>Consumidor final</span>
+                <div class="readonly-field" id="nfeFinalConsumerPreview">Automático pelo cliente</div>
+              </div>
             </div>
-          </label>
+          </div>
 
-          <label class="field col-2">
-            <span>Tipo de operação *</span>
-            <select name="operation_type" id="nfeOperationType">
-              <option value="outbound" @selected(old('operation_type',$draft->operation_type)==='outbound')>Saída</option>
-              <option value="inbound" @selected(old('operation_type',$draft->operation_type)==='inbound')>Entrada</option>
-            </select>
-          </label>
+          <div class="nfe-general-dates">
+            <label class="field"><span>Data de emissão</span><input type="date" name="issue_date" value="{{ old('issue_date',$draft->issue_date?->format('Y-m-d') ?? now()->format('Y-m-d')) }}" required></label>
+            <label class="field"><span>Hora de emissão</span><input type="time" name="issue_time" value="{{ old('issue_time',$draft->issue_time ?? now()->format('H:i')) }}"></label>
+            <label class="field"><span>Previsão de entrega</span><input type="date" name="expected_delivery_date" value="{{ old('expected_delivery_date',$draft->expected_delivery_date?->format('Y-m-d')) }}"></label>
+          </div>
+        </div>
+      </div>
 
-          <label class="field col-2">
-            <span>Presença do comprador</span>
-            <select name="presence" id="nfePresence">
-              <option value="presential" @selected(old('presence',$draft->presence)==='presential')>Presencial</option>
-              <option value="not_applicable" @selected(old('presence',$draft->presence)==='not_applicable')>Não se aplica</option>
-              <option value="internet" @selected(old('presence',$draft->presence)==='internet')>Internet</option>
-              <option value="phone" @selected(old('presence',$draft->presence)==='phone')>Teleatendimento</option>
-              <option value="outside_establishment" @selected(old('presence',$draft->presence)==='outside_establishment')>Fora do estabelecimento</option>
-              <option value="other" @selected(old('presence',$draft->presence)==='other')>Outros</option>
-            </select>
-          </label>
-
-          <label class="field col-2"><span>Data da emissão *</span><input type="date" name="issue_date" value="{{ old('issue_date',$draft->issue_date?->format('Y-m-d') ?? now()->format('Y-m-d')) }}" required></label>
-          <label class="field col-2"><span>Hora</span><input type="time" name="issue_time" value="{{ old('issue_time',$draft->issue_time ?? now()->format('H:i')) }}"></label>
-
+      <div class="editor-panel nfe-recipient-panel">
+        <h3>Dados do destinatário</h3>
+        <div class="editor-grid cols-12">
           <label class="field col-8">
             <span>Destinatário *</span>
             <select name="customer_id" id="nfeCustomer" required>
@@ -167,17 +211,8 @@ $origins=[
             </select>
           </label>
 
-          <label class="field col-2"><span>Previsão de entrega</span><input type="date" name="expected_delivery_date" value="{{ old('expected_delivery_date',$draft->expected_delivery_date?->format('Y-m-d')) }}"></label>
-
-          <div class="field col-2">
-            <span>Finalidade</span>
-            <div class="readonly-field" id="nfePurposePreview">—</div>
-          </div>
-
-          <div class="field col-3"><span>Destino</span><div class="readonly-field" id="nfeDestinationPreview">Automático</div></div>
-          <div class="field col-3"><span>Consumidor final</span><div class="readonly-field" id="nfeFinalConsumerPreview">Automático pelo cliente</div></div>
-          <div class="field col-6">
-            <span>Dados do destinatário</span>
+          <div class="field col-4">
+            <span>Identificação</span>
             <div class="readonly-field" id="nfeRecipientSummary">Selecione um destinatário.</div>
           </div>
 

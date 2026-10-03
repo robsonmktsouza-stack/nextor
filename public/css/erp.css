@@ -2124,6 +2124,65 @@ body[data-show-tutorials="0"] .pdv-split-help{display:none!important}
 .nfe-workspace-body .cms-card{margin:0}
 .nfe-workspace-body .readonly-field strong{color:#334458}
 .nfe-workspace-body .readonly-field small{display:block;margin-top:4px;line-height:1.45}
+
+.nfe-emitter-summary{
+  display:grid;grid-template-columns:150px minmax(0,1fr) 280px;gap:20px;
+  align-items:center;margin:0 0 14px;padding:18px 20px;border:1px solid #dce3ea;
+  border-radius:5px;background:#fff
+}
+.nfe-emitter-logo{
+  min-height:100px;display:flex;align-items:center;justify-content:center;
+  padding:8px;border-right:1px solid #edf0f3
+}
+.nfe-emitter-logo img{
+  display:block;max-width:120px;max-height:84px;width:auto;height:auto;object-fit:contain
+}
+.nfe-emitter-identity{min-width:0;display:flex;flex-direction:column;gap:3px}
+.nfe-emitter-name{display:flex;align-items:baseline;flex-wrap:wrap;gap:5px;color:#566675}
+.nfe-emitter-name strong{font-size:15px;color:#33485a}
+.nfe-emitter-name span{font-size:12px}
+.nfe-emitter-address{display:flex;flex-direction:column;gap:2px;font-size:11px;color:#6f7d89}
+.nfe-emitter-docs{display:flex;flex-wrap:wrap;gap:10px;margin-top:2px;font-size:11px;color:#657482}
+.nfe-emitter-docs b{color:#415568}
+.nfe-emitter-edit{
+  width:max-content;display:inline-flex;align-items:center;gap:5px;margin-top:4px;
+  color:#2877c7;font-size:11px;font-weight:650
+}
+.nfe-document-summary{
+  align-self:stretch;min-height:105px;display:flex;flex-direction:column;justify-content:center;
+  padding:12px 14px;border:1px solid #dce3ea;border-radius:4px;background:#fbfcfd;text-align:center
+}
+.nfe-document-summary>span{
+  font-size:10px;color:#788692;text-transform:uppercase;font-weight:700;letter-spacing:.02em
+}
+.nfe-document-summary>strong{
+  margin:3px 0 10px;color:#394e60;font-size:14px;font-weight:700
+}
+.nfe-document-summary>div{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-top:9px;border-top:1px solid #e4e9ed
+}
+.nfe-document-summary>div span{font-size:10px;color:#7b8894;font-weight:650}
+.nfe-document-summary>div b{display:block;margin-top:2px;color:#415568;font-size:11px}
+
+.nfe-general-card{
+  overflow:hidden;margin-bottom:14px;border:1px solid #dce3ea;border-radius:5px;background:#fff
+}
+.nfe-section-title{
+  display:flex;align-items:center;min-height:48px;padding:0 16px;border-bottom:1px solid #dce3ea
+}
+.nfe-section-title h3{margin:0;color:#344b5e;font-size:15px;font-weight:700}
+.nfe-general-layout{display:grid;grid-template-columns:minmax(0,1fr) 270px}
+.nfe-general-fields{padding:16px}
+.nfe-general-fields .editor-grid{margin:0}
+.nfe-general-dates{
+  display:flex;flex-direction:column;gap:10px;padding:16px;border-left:1px solid #e3e8ed;background:#fafbfc
+}
+.nfe-general-dates .field{margin:0}
+.nfe-recipient-panel{margin-bottom:0}
+.nfe-recipient-panel #nfeRecipientSummary{
+  min-height:39px;height:auto;align-items:flex-start;justify-content:center;flex-direction:column
+}
+
 .nfe-quick-item .btn{min-height:39px}
 .nfe-product-search-actions{display:flex;align-items:stretch;gap:7px;min-width:0}
 .nfe-product-search-actions .nfe-product-search{flex:1}
@@ -2152,10 +2211,17 @@ body[data-show-tutorials="0"] .pdv-split-help{display:none!important}
   .nfe-workspace-dialog{width:calc(100vw - 18px);height:calc(100vh - 18px)}
   .nfe-editor-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}
   .nfe-item-tabs{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .nfe-emitter-summary{grid-template-columns:120px minmax(0,1fr) 240px}
+  .nfe-general-layout{grid-template-columns:1fr}
+  .nfe-general-dates{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-left:0;border-top:1px solid #e3e8ed}
 }
 @media(max-width:760px){
   .nfe-workspace-dialog,.nfe-item-dialog{width:100vw;height:100vh;border:0;border-radius:0}
   .nfe-editor-tabs,.nfe-item-tabs{grid-template-columns:1fr 1fr}
+  .nfe-emitter-summary{grid-template-columns:1fr;gap:10px;padding:14px}
+  .nfe-emitter-logo{min-height:70px;border-right:0;border-bottom:1px solid #edf0f3}
+  .nfe-document-summary{min-height:0}
+  .nfe-general-dates{grid-template-columns:1fr}
   .nfe-product-search-actions,.nfe-item-source-actions{align-items:stretch;flex-direction:column}
   .nfe-dialog-footer{align-items:flex-start;flex-direction:column}
   .nfe-dialog-footer>div:last-child{width:100%;overflow-x:auto}
