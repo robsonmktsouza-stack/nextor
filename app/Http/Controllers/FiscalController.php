@@ -4,15 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\AppSetting;
 use App\Models\FiscalDocumentJob;
+use App\Models\Sale;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class FiscalController extends Controller
 {
     private const TABS=[
-        'nfe'=>['label'=>'NF-e','description'=>'Nota Fiscal Eletrônica — modelo 55'],
-        'nfse'=>['label'=>'NFS-e','description'=>'Nota Fiscal de Serviço Eletrônica'],
-        'cte'=>['label'=>'CT-e','description'=>'Conhecimento de Transporte Eletrônico — modelo 57'],
-        'nfce'=>['label'=>'NFC-e','description'=>'Nota Fiscal de Consumidor Eletrônica — modelo 65'],
+        'nfe'=>['label'=>'NF-e','description'=>'Nota Fiscal Eletrônica — modelo 55','party'=>'Destinatário'],
+        'nfse'=>['label'=>'NFS-e','description'=>'Nota Fiscal de Serviço Eletrônica','party'=>'Tomador'],
+        'cte'=>['label'=>'CT-e','description'=>'Conhecimento de Transporte Eletrônico — modelo 57','party'=>'Tomador'],
+        'nfce'=>['label'=>'NFC-e','description'=>'Nota Fiscal de Consumidor Eletrônica — modelo 65','party'=>'Consumidor'],
     ];
 
     public function index(Request $request)
@@ -23,6 +25,13 @@ class FiscalController extends Controller
         $term=trim((string)$request->query('search',''));
         $status=trim((string)$request->query('status',''));
         $environment=trim((string)$request->query('environment',''));
+        $month=(string)$request->query('month',now()->format('Y-m'));
+        if(!preg_match('/^\d{4}-(0[1-9]|1[0-2])$/',$month)) {
+            $month=now()->format('Y-m');
+        }
+
+        $period=Carbon::createFromFormat('Y-m-d',$month.'-01')->startOfMonth();
+        $periodEnd=$period->copy()->endOfMonth();
 
         $query=FiscalDocumentJob::query()
             ->with(['sale.customer'])
@@ -51,6 +60,14 @@ class FiscalController extends Controller
             });
         }
 
+        $query->where(function($dateQuery) use($period,$periodEnd) {
+            $dateQuery->whereBetween('prepared_at',[$period,$periodEnd])
+                ->orWhere(function($fallback) use($period,$periodEnd) {
+                    $fallback->whereNull('prepared_at')
+                        ->whereBetween('created_at',[$period,$periodEnd]);
+                });
+        });
+
         if($status!=='') $query->where('status',$status);
         if(in_array($environment,['homologation','production'],true)) {
             $query->where('environment',$environment);
@@ -58,28 +75,41 @@ class FiscalController extends Controller
             $environment='';
         }
 
+        $listedSaleIds=(clone $query)
+            ->whereNotNull('sale_id')
+            ->pluck('sale_id')
+            ->filter()
+            ->unique()
+            ->values();
+
+        $listedAmount=$listedSaleIds->isEmpty()
+            ? 0.0
+            : (float)Sale::query()->whereIn('id',$listedSaleIds)->sum('total');
+
         $documents=$query
+            ->latest('prepared_at')
             ->latest('id')
             ->paginate(AppSetting::tablePerPage($request))
             ->withQueryString();
 
-        $tabCounts=FiscalDocumentJob::query()
-            ->selectRaw('document_type, COUNT(*) as total')
-            ->whereIn('document_type',array_keys(self::TABS))
-            ->groupBy('document_type')
-            ->pluck('total','document_type')
-            ->map(fn($value)=>(int)$value)
-            ->all();
+        $monthNames=[
+            1=>'Janeiro',2=>'Fevereiro',3=>'Março',4=>'Abril',5=>'Maio',6=>'Junho',
+            7=>'Julho',8=>'Agosto',9=>'Setembro',10=>'Outubro',11=>'Novembro',12=>'Dezembro',
+        ];
 
         return view('fiscal.index',[
             'tab'=>$tab,
             'tabs'=>self::TABS,
             'tabMeta'=>self::TABS[$tab],
-            'tabCounts'=>$tabCounts,
             'documents'=>$documents,
             'term'=>$term,
             'status'=>$status,
             'environment'=>$environment,
+            'month'=>$month,
+            'prevMonth'=>$period->copy()->subMonth()->format('Y-m'),
+            'nextMonth'=>$period->copy()->addMonth()->format('Y-m'),
+            'monthLabel'=>$monthNames[(int)$period->format('n')].' '.$period->format('Y'),
+            'listedAmount'=>$listedAmount,
             'configuration'=>$this->configurationFor($tab),
             'dateFormat'=>AppSetting::dateFormat(),
         ]);
@@ -98,13 +128,6 @@ class FiscalController extends Controller
             'tab'=>$tab,
             'tabs'=>self::TABS,
             'tabMeta'=>self::TABS[$tab],
-            'tabCounts'=>FiscalDocumentJob::query()
-                ->selectRaw('document_type, COUNT(*) as total')
-                ->whereIn('document_type',array_keys(self::TABS))
-                ->groupBy('document_type')
-                ->pluck('total','document_type')
-                ->map(fn($value)=>(int)$value)
-                ->all(),
             'configuration'=>$this->configurationFor($tab),
             'fiscalEnabled'=>(bool)AppSetting::value('fiscal','enabled',false),
             'dateFormat'=>AppSetting::dateFormat(),
