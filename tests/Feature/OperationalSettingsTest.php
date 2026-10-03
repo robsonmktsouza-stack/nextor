@@ -466,7 +466,6 @@ class OperationalSettingsTest extends TestCase
         AppSetting::put('accounting','office_name','Martins Contabilidade');
         AppSetting::put('accounting','accountant_name','Responsável Contábil');
         AppSetting::put('accounting','accounting_system','Domínio');
-        AppSetting::put('accounting','export_format','csv');
 
         $path=app(AccountingExportService::class)->generate('2026-10');
 
