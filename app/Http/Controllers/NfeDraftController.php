@@ -104,10 +104,10 @@ class NfeDraftController extends Controller
 
         foreach($nfeDraft->items as $item) {
             $prefix='Item '.$item->item_number.' — '.$item->product_name.': ';
-            if(!$item->ncm) $errors[]=$prefix.'NCM não informado.';
-            if(!$item->cfop) $errors[]=$prefix.'CFOP não informado.';
-            if(!$item->origin) $errors[]=$prefix.'origem da mercadoria não informada.';
-            if(!$item->unit) $errors[]=$prefix.'unidade comercial não informada.';
+            if($item->ncm===null || trim((string)$item->ncm)==='') $errors[]=$prefix.'NCM não informado.';
+            if($item->cfop===null || trim((string)$item->cfop)==='') $errors[]=$prefix.'CFOP não informado.';
+            if($item->origin===null || trim((string)$item->origin)==='') $errors[]=$prefix.'origem da mercadoria não informada.';
+            if($item->unit===null || trim((string)$item->unit)==='') $errors[]=$prefix.'unidade comercial não informada.';
 
             $tax=$item->tax_data ?? [];
             if(empty($tax['icms_cst']) && empty($tax['icms_csosn'])) {
@@ -160,6 +160,62 @@ class NfeDraftController extends Controller
             ->orderBy('name')
             ->get();
 
+        $productData=$products->map(fn($product)=>[
+            'id'=>$product->id,
+            'name'=>$product->name,
+            'sku'=>$product->sku,
+            'sale_price'=>(float)$product->sale_price,
+            'origin'=>$product->origin,
+            'ean_gtin'=>$product->ean_gtin,
+            'unit'=>$product->unit,
+            'tax_unit'=>$product->tax_unit,
+            'ncm'=>$product->ncm,
+            'cest'=>$product->cest,
+            'ipi_exception'=>$product->ipi_exception,
+            'fiscal_benefit_code'=>$product->fiscal_benefit_code,
+            'nfe_notes'=>$product->nfe_notes,
+            'tax_defaults'=>$product->tax_defaults ?? [],
+        ])->values()->all();
+
+        $customerData=$customers->map(fn($customer)=>[
+            'id'=>$customer->id,
+            'name'=>$customer->name,
+            'document'=>$customer->document,
+            'state_registration'=>$customer->state_registration,
+            'ie_indicator'=>$customer->ie_indicator,
+            'final_consumer'=>(bool)$customer->final_consumer,
+            'zip_code'=>$customer->zip_code,
+            'state'=>$customer->state,
+            'city'=>$customer->city,
+            'address'=>$customer->address,
+            'address_number'=>$customer->address_number,
+            'district'=>$customer->district,
+            'delivery_addresses'=>$customer->deliveryAddresses->map(fn($address)=>[
+                'id'=>$address->id,
+                'name'=>$address->name,
+                'document'=>$address->document,
+                'state'=>$address->state,
+                'city'=>$address->city,
+                'address'=>$address->address,
+                'address_number'=>$address->address_number,
+                'district'=>$address->district,
+            ])->values()->all(),
+        ])->values()->all();
+
+        $natureData=$natures->map(fn($nature)=>[
+            'id'=>$nature->id,
+            'operation_type'=>$nature->operation_type,
+            'purpose'=>$nature->purpose,
+            'cfop_internal'=>$nature->cfop_internal,
+            'cfop_interstate'=>$nature->cfop_interstate,
+            'cfop_foreign'=>$nature->cfop_foreign,
+            'override_product_cfop'=>(bool)$nature->override_product_cfop,
+            'final_consumer_default'=>(bool)$nature->final_consumer_default,
+            'presence_default'=>$nature->presence_default,
+            'additional_info'=>$nature->additional_info,
+            'tax_authority_info'=>$nature->tax_authority_info,
+        ])->values()->all();
+
         return view('fiscal.nfe.editor',[
             'draft'=>$draft,
             'company'=>$company,
@@ -167,6 +223,9 @@ class NfeDraftController extends Controller
             'products'=>$products,
             'natures'=>$natures,
             'paymentMethods'=>$paymentMethods,
+            'productData'=>$productData,
+            'customerData'=>$customerData,
+            'natureData'=>$natureData,
             'isEditing'=>$draft->exists,
             'nextNumber'=>(int)AppSetting::value('nfe','next_number',1),
         ]);
