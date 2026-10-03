@@ -89,7 +89,9 @@ class FiscalModuleTest extends TestCase
             'prepared_at'=>'2026-09-15 10:00:00',
         ]);
 
-        $this->actingAs($this->admin())
+        $admin=$this->admin();
+
+        $this->actingAs($admin)
             ->get(route('fiscal.index',['tab'=>'nfe','month'=>'2026-10']))
             ->assertOk()
             ->assertSee('Outubro 2026')
@@ -97,7 +99,7 @@ class FiscalModuleTest extends TestCase
             ->assertDontSee('88')
             ->assertSee('fiscal-row-authorized',false);
 
-        $this->actingAs($this->admin())
+        $this->actingAs($admin)
             ->get(route('fiscal.index',['tab'=>'nfe','month'=>'2026-09']))
             ->assertOk()
             ->assertSee('Setembro 2026')
