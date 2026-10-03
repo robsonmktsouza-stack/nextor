@@ -96,6 +96,8 @@ class CustomerController extends Controller {
             'customer'=>new Customer([
                 'is_customer'=>true,
                 'ie_indicator'=>'non_contributor',
+                'country_code'=>'1058',
+                'country_name'=>'BRASIL',
                 'lgpd_legal_basis'=>'default',
             ]),
             'editing'=>false,
