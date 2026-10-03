@@ -188,36 +188,11 @@ $origins=[
     </section>
 
     <section class="editor-tab-panel" data-tab-panel="nfe-items" hidden>
-      <div class="editor-panel">
-        <h3>Adicionar item</h3>
-        <div class="editor-grid cols-12 nfe-quick-item">
-          <div class="field col-6">
-            <span>Buscar produto ou informar descrição</span>
-            <div class="nfe-product-search-actions">
-              <div class="sale-item-search-wrap nfe-product-search">
-                <input type="text" class="sale-item-search" id="nfeQuickProductSearch" autocomplete="off" placeholder="Buscar por nome, código, GTIN ou NCM">
-                <input type="hidden" id="nfeQuickProductId">
-                <div class="sale-item-suggestions" id="nfeQuickProductSuggestions" hidden></div>
-              </div>
-              <button type="button" class="btn btn-secondary" id="nfeQuickManual">Item avulso</button>
-            </div>
-          </div>
-          <label class="field col-2"><span>Quantidade</span><input type="number" id="nfeQuickQuantity" step="0.0001" min="0.0001" value="1"></label>
-          <label class="field col-2"><span>Valor unitário</span><input type="number" id="nfeQuickUnitPrice" step="0.0001" min="0"></label>
-          <div class="field col-2"><span>&nbsp;</span><button type="button" class="btn btn-primary" id="nfeQuickAdd">@include('partials.icon',['name'=>'plus','size'=>16]) Adicionar</button></div>
-        </div>
-        <div class="nfe-item-source-actions">
-          <span>Produto cadastrado traz automaticamente NCM, CEST e tributação.</span>
-          <a class="btn btn-light" href="{{ route('products.create') }}" target="_blank" rel="noopener">Cadastrar novo produto</a>
-        </div>
-        <p class="inline-note">Se o item não existir no cadastro, digite a descrição e use <strong>Item avulso</strong>. Ele ficará somente nesta NF-e e não será criado no cadastro de produtos.</p>
-      </div>
-
       <div class="cms-card">
         <div class="grid-actionbar">
           <div class="grid-actions-left">
             <button type="button" class="grid-primary-action" id="nfeAddProduct">
-              @include('partials.icon',['name'=>'plus','size'=>17]) <span>Adicionar item detalhado</span>
+              @include('partials.icon',['name'=>'plus','size'=>17]) <span>Adicionar</span>
             </button>
           </div>
         </div>
@@ -414,13 +389,10 @@ $origins=[
         <div class="editor-grid cols-12">
           <div class="field col-8">
             <span>Buscar produto cadastrado</span>
-            <div class="nfe-product-search-actions">
-              <div class="sale-item-search-wrap nfe-product-search">
-                <input type="text" class="sale-item-search" id="nfeItemProductSearch" autocomplete="off" placeholder="Buscar por nome, código, GTIN ou NCM">
-                <input type="hidden" id="nfeItemProduct">
-                <div class="sale-item-suggestions" id="nfeItemProductSuggestions" hidden></div>
-              </div>
-              <button type="button" class="btn btn-secondary" id="nfeItemUseManual">Item avulso</button>
+            <div class="sale-item-search-wrap nfe-product-search">
+              <input type="text" class="sale-item-search" id="nfeItemProductSearch" autocomplete="off" placeholder="Buscar por nome, código, GTIN ou NCM">
+              <input type="hidden" id="nfeItemProduct">
+              <div class="sale-item-suggestions" id="nfeItemProductSuggestions" hidden></div>
             </div>
           </div>
           <div class="field col-4">
@@ -441,7 +413,7 @@ $origins=[
           <label class="field col-1"><span>Item</span><input id="nfeItemPurchaseOrderItem"></label>
           <label class="field col-12"><span>Observação do item</span><input id="nfeItemNotes"></label>
         </div>
-        <p class="inline-note" id="nfeItemSourceNote">Selecione um produto do cadastro ou use um item avulso somente nesta NF-e.</p>
+        <p class="inline-note">A busca é opcional. Se o produto não estiver cadastrado, informe a descrição e os dados do item normalmente.</p>
       </div>
     </section>
 
