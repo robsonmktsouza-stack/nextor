@@ -369,20 +369,12 @@
       <div class="nfe-editor-actions">
         <a class="btn btn-secondary" href="{{ route('fiscal.index',['tab'=>'nfe']) }}">Cancelar <kbd data-tutorial>Esc</kbd></a>
         <button class="btn btn-primary" type="submit">Apenas salvar <kbd data-tutorial>Ctrl+S</kbd></button>
-        @if($isEditing)
-          <button class="btn btn-secondary" type="submit" form="nfeValidateForm">Validar NF-e <kbd data-tutorial>F8</kbd></button>
-        @else
-          <button class="btn btn-secondary" type="button" disabled data-tooltip="Salve o rascunho antes de validar">Validar NF-e</button>
-        @endif
+        <button class="btn btn-secondary" type="submit" name="after_save" value="validate" id="nfeValidateCurrent">Validar NF-e <kbd data-tutorial>F8</kbd></button>
         <button class="btn btn-success" type="button" disabled data-tooltip="Disponível após a integração ACBr">Emitir NF-e</button>
       </div>
     </footer>
   </form>
 </dialog>
-
-@if($isEditing)
-<form id="nfeValidateForm" method="post" action="{{ route('fiscal.nfe.validate',$draft) }}">@csrf</form>
-@endif
 
 <dialog class="erp-dialog nfe-item-dialog" id="nfeItemDialog">
   <div class="dialog-header"><div><h2>Produto da NF-e</h2><p>Dados comerciais e tributários do item.</p></div><button type="button" data-dialog-close class="close-dialog">@include('partials.icon',['name'=>'x'])</button></div>
