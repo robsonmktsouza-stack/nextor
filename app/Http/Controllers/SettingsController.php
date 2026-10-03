@@ -484,7 +484,6 @@ class SettingsController extends Controller
                 'email'=>['nullable','email','max:255'],
                 'phone'=>['nullable','string','max:30'],
                 'accounting_system'=>['nullable','string','max:120'],
-                'export_format'=>['required',Rule::in(['csv'])],
                 'cost_center_enabled'=>['nullable','boolean'],
                 'automatic_monthly_export'=>['nullable','boolean'],
                 'notes'=>['nullable','string','max:3000'],
@@ -573,7 +572,7 @@ class SettingsController extends Controller
             ],
             'accounting'=>[
                 'office_name'=>null,'accountant_name'=>null,'accountant_document'=>null,'crc'=>null,
-                'email'=>null,'phone'=>null,'accounting_system'=>null,'export_format'=>'csv',
+                'email'=>null,'phone'=>null,'accounting_system'=>null,
                 'cost_center_enabled'=>false,'automatic_monthly_export'=>false,'notes'=>null,
             ],
             'integrations'=>[
