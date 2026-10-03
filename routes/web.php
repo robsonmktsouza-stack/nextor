@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FinanceController;
+use App\Http\Controllers\FiscalController;
 use App\Http\Controllers\FinancialReconciliationController;
 use App\Http\Controllers\FinancialReceiptController;
 use App\Http\Controllers\FinancialRecurrenceController;
@@ -84,6 +85,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/sales/{sale}',[SaleController::class,'show'])->name('sales.show')->middleware('permission:sales');
     Route::post('/sales/{sale}/cancel',[SaleController::class,'cancel'])->name('sales.cancel')->middleware('permission:sales');
+
+    Route::get('/fiscal',[FiscalController::class,'index'])->name('fiscal.index')->middleware('permission:fiscal');
+    Route::get('/fiscal/{fiscalDocumentJob}',[FiscalController::class,'show'])->name('fiscal.show')->middleware('permission:fiscal');
 
     Route::get('/finance',[FinanceController::class,'dashboard'])->name('finance.dashboard')->middleware('permission:finance');
     Route::get('/finance/entries',[FinanceController::class,'entries'])->name('finance.entries')->middleware('permission:finance');
