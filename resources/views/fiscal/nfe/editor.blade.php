@@ -461,6 +461,8 @@ $origins=[
           <label class="field col-3"><span>CSOSN</span><input id="nfeTaxCsosn" maxlength="4"></label>
           <label class="field col-3"><span>CST ICMS</span><input id="nfeTaxIcmsCst" maxlength="4"></label>
           <label class="field col-3"><span>CSOSN exportação</span><input id="nfeTaxCsosnExport" maxlength="4"></label>
+          <label class="field col-3"><span>CSOSN entrada</span><input id="nfeTaxCsosnInbound" maxlength="4"></label>
+          <label class="field col-3"><span>CST ICMS entrada</span><input id="nfeTaxIcmsCstInbound" maxlength="4"></label>
           <label class="field col-3"><span>Alíquota ICMS %</span><input id="nfeTaxIcmsRate" type="number" step="0.0001"></label>
 
           <label class="field col-3"><span>Redução da BC %</span><input id="nfeTaxBaseReduction" type="number" step="0.0001"></label>
@@ -480,10 +482,13 @@ $origins=[
         <div class="editor-grid cols-12">
           <label class="field col-2"><span>CST PIS *</span><input id="nfeTaxPisCst" maxlength="4"></label>
           <label class="field col-2"><span>PIS %</span><input id="nfeTaxPisRate" type="number" step="0.0001"></label>
+          <label class="field col-2"><span>CST PIS entrada</span><input id="nfeTaxPisCstInbound" maxlength="4"></label>
           <label class="field col-2"><span>CST COFINS *</span><input id="nfeTaxCofinsCst" maxlength="4"></label>
           <label class="field col-2"><span>COFINS %</span><input id="nfeTaxCofinsRate" type="number" step="0.0001"></label>
+          <label class="field col-2"><span>CST COFINS entrada</span><input id="nfeTaxCofinsCstInbound" maxlength="4"></label>
           <label class="field col-2"><span>CST IPI *</span><input id="nfeTaxIpiCst" maxlength="4"></label>
           <label class="field col-2"><span>IPI %</span><input id="nfeTaxIpiRate" type="number" step="0.0001"></label>
+          <label class="field col-2"><span>CST IPI entrada</span><input id="nfeTaxIpiCstInbound" maxlength="4"></label>
 
           <label class="field col-3"><span>Enquadramento IPI (cEnq)</span><input id="nfeTaxIpiEnq" maxlength="10" value="999"></label>
           <label class="field col-3"><span>ISS %</span><input id="nfeTaxIssRate" type="number" step="0.0001"></label>
