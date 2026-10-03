@@ -1416,7 +1416,7 @@
       renderCart();
       updatePaymentState();
       search.value='';
-      caption.textContent='Venda limpa. Busque um produto ou serviço.';
+      caption.textContent='Venda limpa. Busque um produto.';
       search.focus();
     };
 
