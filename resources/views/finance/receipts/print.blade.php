@@ -2,6 +2,7 @@
 @php
   $companyName=$company->trade_name ?: $company->legal_name ?: config('app.name');
   $issuerName=$receipt->issuer_mode==='company' ? $companyName : ($receipt->creator?->name ?? $companyName);
+  $currencyPrefix=$company->show_currency_prefix ? 'R$ ' : '';
 @endphp
 <html lang="pt-BR">
 <head>
@@ -44,10 +45,10 @@ body{font-family:Arial,sans-serif;background:#f2f4f6;margin:0;color:#202b34}
     @if($company->print_header)<div class="custom-print">{!! nl2br(e($company->print_header)) !!}</div>@endif
   @endif
 
-  <div class="amount">R$ {{ number_format((float)$receipt->amount,2,',','.') }}</div>
+  <div class="amount">{{ $currencyPrefix }}{{ number_format((float)$receipt->amount,2,',','.') }}</div>
   <h1>RECIBO</h1>
 
-  <p class="text">Recebi de <strong>{{ $receipt->recipient_name }}</strong>@if($receipt->recipient_document), inscrito(a) sob o documento <strong>{{ $receipt->recipient_document }}</strong>@endif, a importância de <strong>R$ {{ number_format((float)$receipt->amount,2,',','.') }}</strong>, referente a <strong>{{ $receipt->reference }}</strong>.</p>
+  <p class="text">Recebi de <strong>{{ $receipt->recipient_name }}</strong>@if($receipt->recipient_document), inscrito(a) sob o documento <strong>{{ $receipt->recipient_document }}</strong>@endif, a importância de <strong>{{ $currencyPrefix }}{{ number_format((float)$receipt->amount,2,',','.') }}</strong>, referente a <strong>{{ $receipt->reference }}</strong>.</p>
 
   <p class="text">Data: {{ $receipt->receipt_date->format(\App\Models\AppSetting::dateFormat()) }}.</p>
 
