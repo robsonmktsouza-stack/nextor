@@ -2168,9 +2168,20 @@ body[data-show-tutorials="0"] .pdv-split-help{display:none!important}
   overflow:hidden;margin-bottom:14px;border:1px solid #dce3ea;border-radius:5px;background:#fff
 }
 .nfe-section-title{
-  display:flex;align-items:center;min-height:48px;padding:0 16px;border-bottom:1px solid #dce3ea
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  min-height:48px;padding:0 16px;border-bottom:1px solid #dce3ea
 }
 .nfe-section-title h3{margin:0;color:#344b5e;font-size:15px;font-weight:700}
+.nfe-section-toggle,.nfe-clear-field{
+  appearance:none;border:0;background:transparent;color:#2877c7;cursor:pointer;
+  font:inherit;font-size:10.5px;font-weight:650;padding:2px 0
+}
+.nfe-section-toggle:hover,.nfe-clear-field:hover{text-decoration:underline}
+.nfe-field-title{display:flex;align-items:center;gap:7px}
+.nfe-field-title>span{color:inherit;font:inherit}
+.nfe-general-dates input:disabled{
+  background:#f0f2f4;color:#9aa5af;cursor:not-allowed
+}
 .nfe-general-layout{display:grid;grid-template-columns:minmax(0,1fr) 270px}
 .nfe-general-fields{padding:16px}
 .nfe-general-fields .editor-grid{margin:0}

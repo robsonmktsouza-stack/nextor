@@ -31,6 +31,8 @@
         <option value="complementary" @selected(old('purpose',$nature->purpose)==='complementary')>2 - NF-e complementar</option>
         <option value="adjustment" @selected(old('purpose',$nature->purpose)==='adjustment')>3 - NF-e de ajuste</option>
         <option value="return" @selected(old('purpose',$nature->purpose)==='return')>4 - Devolução de mercadoria</option>
+        <option value="credit_note" @selected(old('purpose',$nature->purpose)==='credit_note')>5 - Nota de crédito</option>
+        <option value="debit_note" @selected(old('purpose',$nature->purpose)==='debit_note')>6 - Nota de débito</option>
       </select>
     </label>
   </div>

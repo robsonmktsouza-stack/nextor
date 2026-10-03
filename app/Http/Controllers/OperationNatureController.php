@@ -32,7 +32,7 @@ class OperationNatureController extends Controller
         $data=$request->validate([
             'name'=>['required','string','max:160'],
             'operation_type'=>['required',Rule::in(['outbound','inbound'])],
-            'purpose'=>['required',Rule::in(['normal','complementary','adjustment','return'])],
+            'purpose'=>['required',Rule::in(['normal','complementary','adjustment','return','credit_note','debit_note'])],
             'cfop_internal'=>['nullable','string','max:10'],
             'cfop_interstate'=>['nullable','string','max:10'],
             'cfop_inbound_internal'=>['nullable','string','max:10'],

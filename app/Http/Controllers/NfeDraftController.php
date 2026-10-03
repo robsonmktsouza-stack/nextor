@@ -71,10 +71,14 @@ class NfeDraftController extends Controller
         return $this->editor(new NfeDraft([
             'status'=>'draft',
             'operation_type'=>'outbound',
-            'destination'=>'auto',
-            'presence'=>'presential',
+            'destination'=>'internal',
+            'presence'=>'not_applicable',
             'purpose'=>'normal',
             'final_consumer'=>false,
+            'has_referenced_document'=>false,
+            'inform_issue_datetime'=>true,
+            'inform_exit_datetime'=>false,
+            'inform_expected_delivery_date'=>false,
             'issue_date'=>now()->toDateString(),
             'issue_time'=>now()->format('H:i'),
             'discount'=>0,
@@ -151,6 +155,10 @@ class NfeDraftController extends Controller
             if(!$draft->customer?->state) $errors[]='O destinatário está sem UF.';
             if(!$draft->customer?->city) $errors[]='O destinatário está sem município.';
             if(!$draft->customer?->city_ibge_code) $errors[]='O destinatário está sem código IBGE do município.';
+        }
+
+        if($draft->has_referenced_document && empty($draft->references)) {
+            $errors[]='Informe ao menos um documento referenciado.';
         }
 
         if($draft->items->isEmpty()) $errors[]='Adicione pelo menos um produto.';
@@ -257,6 +265,7 @@ class NfeDraftController extends Controller
             'id'=>$nature->id,
             'operation_type'=>$nature->operation_type,
             'purpose'=>$nature->purpose,
+            'presence_default'=>$nature->presence_default,
             'cfop_outbound_internal'=>$nature->cfop_internal,
             'cfop_outbound_interstate'=>$nature->cfop_interstate,
             'cfop_inbound_internal'=>$nature->cfop_inbound_internal,
@@ -290,10 +299,21 @@ class NfeDraftController extends Controller
             'operation_nature_id'=>['required','integer','exists:operation_natures,id'],
             'customer_id'=>['required','integer','exists:customers,id'],
             'operation_type'=>['required',Rule::in(['outbound','inbound'])],
-            'presence'=>['required',Rule::in(['not_applicable','presential','internet','phone','outside_establishment','other'])],
-            'issue_date'=>['required','date'],
+            'destination'=>['nullable',Rule::in(['internal','interstate','foreign'])],
+            'presence'=>['required',Rule::in(['not_applicable','presential','internet','phone','delivery_home','outside_establishment','other'])],
+            'purpose'=>['nullable',Rule::in(['normal','complementary','adjustment','return','credit_note','debit_note'])],
+            'substitute_state_registration'=>['nullable','string','max:30'],
+            'has_referenced_document'=>['nullable','boolean'],
+            'inform_issue_datetime'=>['nullable','boolean'],
+            'inform_exit_datetime'=>['nullable','boolean'],
+            'inform_expected_delivery_date'=>['nullable','boolean'],
+            'issue_date'=>['nullable','date'],
             'issue_time'=>['nullable','date_format:H:i'],
+            'exit_date'=>['nullable','date'],
+            'exit_time'=>['nullable','date_format:H:i'],
             'expected_delivery_date'=>['nullable','date'],
+            'government_purchase'=>['nullable','boolean'],
+            'advance_payment'=>['nullable','boolean'],
             'discount'=>['nullable','numeric','min:0'],
             'surcharge'=>['nullable','numeric','min:0'],
 
@@ -333,8 +353,26 @@ class NfeDraftController extends Controller
         $surcharge=max(0,(float)($data['surcharge'] ?? 0));
         $freight=max(0,(float)($data['freight_value'] ?? 0));
         $totals=$this->calculateTotals($items,$discount,$surcharge,$freight);
-        $destination=$this->resolveDestination($customer,$company);
-        $purpose=$nature->purpose ?: 'normal';
+        $destination=$data['destination'] ?? $this->resolveDestination($customer,$company);
+        $purpose=$data['purpose'] ?? ($nature->purpose ?: 'normal');
+        $hasReferencedDocument=$request->boolean('has_referenced_document');
+        $informIssueDatetime=$request->boolean('inform_issue_datetime',true);
+        $informExitDatetime=$request->boolean('inform_exit_datetime');
+        $informExpectedDeliveryDate=$request->boolean('inform_expected_delivery_date');
+
+        if($informIssueDatetime && empty($data['issue_date'])) {
+            throw ValidationException::withMessages(['issue_date'=>'Informe a data de emissão.']);
+        }
+        if($informExitDatetime && empty($data['exit_date'])) {
+            throw ValidationException::withMessages(['exit_date'=>'Informe a data de saída/entrada.']);
+        }
+        if($informExpectedDeliveryDate && empty($data['expected_delivery_date'])) {
+            throw ValidationException::withMessages(['expected_delivery_date'=>'Informe a previsão de entrega.']);
+        }
+
+        $references=$hasReferencedDocument
+            ? $this->validatedReferences($data['references_json'] ?? null)
+            : [];
 
         return [
             'operation_nature_id'=>$nature->id,
@@ -346,13 +384,18 @@ class NfeDraftController extends Controller
             'presence'=>$data['presence'],
             'purpose'=>$purpose,
             'final_consumer'=>(bool)$customer->final_consumer,
-            'issue_date'=>$data['issue_date'],
-            'issue_time'=>$data['issue_time'] ?? null,
-            'exit_date'=>null,
-            'exit_time'=>null,
-            'expected_delivery_date'=>$data['expected_delivery_date'] ?? null,
-            'government_purchase'=>false,
-            'advance_payment'=>false,
+            'substitute_state_registration'=>$data['substitute_state_registration'] ?? null,
+            'has_referenced_document'=>$hasReferencedDocument,
+            'inform_issue_datetime'=>$informIssueDatetime,
+            'inform_exit_datetime'=>$informExitDatetime,
+            'inform_expected_delivery_date'=>$informExpectedDeliveryDate,
+            'issue_date'=>$informIssueDatetime ? $data['issue_date'] : now()->toDateString(),
+            'issue_time'=>$informIssueDatetime ? ($data['issue_time'] ?? null) : now()->format('H:i'),
+            'exit_date'=>$informExitDatetime ? ($data['exit_date'] ?? null) : null,
+            'exit_time'=>$informExitDatetime ? ($data['exit_time'] ?? null) : null,
+            'expected_delivery_date'=>$informExpectedDeliveryDate ? ($data['expected_delivery_date'] ?? null) : null,
+            'government_purchase'=>$request->boolean('government_purchase'),
+            'advance_payment'=>$request->boolean('advance_payment'),
             'different_delivery'=>false,
             'discount'=>$discount,
             'surcharge'=>$surcharge,
@@ -409,7 +452,7 @@ class NfeDraftController extends Controller
                 'acquirer_document'=>$data['card_acquirer_document'] ?? null,
                 'authorization_code'=>$data['card_authorization_code'] ?? null,
             ]],
-            'references'=>$this->validatedReferences($data['references_json'] ?? null),
+            'references'=>$references,
             'custom_fields'=>[],
             'additional_info'=>$data['additional_info'] ?? $nature->additional_info,
             'tax_authority_info'=>null,
@@ -461,8 +504,7 @@ class NfeDraftController extends Controller
             if($cfop==='') {
                 $cfop=$this->resolveItemCfop(
                     $nature,
-                    $customer,
-                    $company,
+                    $draft->destination,
                     $draft->operation_type,
                     $taxData
                 );
@@ -530,13 +572,12 @@ class NfeDraftController extends Controller
 
     private function resolveItemCfop(
         ?OperationNature $nature,
-        ?Customer $customer,
-        CompanySetting $company,
+        ?string $destination,
         string $operationType,
         array $taxData
     ): ?string {
-        $interstate=$customer?->state && $company->state && $customer->state!==$company->state;
-        $foreign=$this->isForeignCustomer($customer);
+        $interstate=$destination==='interstate';
+        $foreign=$destination==='foreign';
 
         $natureCfop=null;
         if($nature) {

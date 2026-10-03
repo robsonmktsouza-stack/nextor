@@ -166,7 +166,25 @@ class NfeEditorTest extends TestCase
             ->assertSee('Série')
             ->assertSee('Ambiente')
             ->assertSee('Destino da operação')
+            ->assertSee('Operação interna')
+            ->assertSee('Operação interestadual')
+            ->assertSee('Operação com exterior')
             ->assertSee('Finalidade da emissão')
+            ->assertSee('Nota de crédito')
+            ->assertSee('Nota de débito')
+            ->assertSee('Ins. Est. Subst. Trib.')
+            ->assertSee('Possui documento referenciado?')
+            ->assertSee('Informar data de emissão')
+            ->assertSee('Informar data de saída')
+            ->assertSee('Informar previsão de entrega')
+            ->assertSee('Compra governamental')
+            ->assertSee('Pagamento antecipado')
+            ->assertSee('Data emissão NF (atual)')
+            ->assertSee('Hora emissão NF (atual)')
+            ->assertSee('Data saída/entrada (atual)')
+            ->assertSee('Hora saída/entrada (atual)')
+            ->assertSee('Limpar campo')
+            ->assertSee('ocultar')
             ->assertSee('Dados do destinatário')
             ->assertSee('Itens')
             ->assertSee('Transporte')
@@ -442,6 +460,84 @@ class NfeEditorTest extends TestCase
         $this->assertSame('84839000',$item->ncm);
         $this->assertEquals(150.0,(float)$item->line_total);
         $this->assertEquals(150.0,(float)data_get($draft->totals,'products'));
+    }
+
+    public function test_general_fields_can_override_operation_defaults(): void
+    {
+        $this->company('BA');
+        $nature=$this->nature([
+            'operation_type'=>'outbound',
+            'purpose'=>'normal',
+            'presence_default'=>'not_applicable',
+        ]);
+        $customer=$this->customer(['state'=>'BA']);
+        $product=$this->product();
+
+        $items=[[
+            'product_id'=>$product->id,
+            'product_name'=>$product->name,
+            'product_sku'=>$product->sku,
+            'quantity'=>1,
+            'dimension_quantity'=>1,
+            'unit_price'=>100,
+            'origin'=>'0',
+            'unit'=>'UN',
+            'ncm'=>'12345678',
+            'tax_data'=>$product->tax_defaults,
+        ]];
+
+        $key=str_repeat('2',44);
+
+        $this->actingAs($this->admin())
+            ->post(route('fiscal.nfe.store'),[
+                'operation_nature_id'=>$nature->id,
+                'customer_id'=>$customer->id,
+                'operation_type'=>'inbound',
+                'destination'=>'interstate',
+                'presence'=>'delivery_home',
+                'purpose'=>'credit_note',
+                'substitute_state_registration'=>'IE-ST-998877',
+                'has_referenced_document'=>'1',
+                'inform_issue_datetime'=>'1',
+                'issue_date'=>'2026-10-01',
+                'issue_time'=>'09:15',
+                'inform_exit_datetime'=>'1',
+                'exit_date'=>'2026-10-02',
+                'exit_time'=>'11:45',
+                'inform_expected_delivery_date'=>'1',
+                'expected_delivery_date'=>'2026-10-05',
+                'government_purchase'=>'1',
+                'advance_payment'=>'1',
+                'discount'=>'0',
+                'surcharge'=>'0',
+                'freight_mode'=>'9',
+                'freight_value'=>'0',
+                'payment_type'=>'01',
+                'payment_condition'=>'a_vista',
+                'items_json'=>json_encode($items),
+                'duplicates_json'=>'[]',
+                'references_json'=>json_encode([['key'=>$key]]),
+            ])
+            ->assertRedirect();
+
+        $draft=NfeDraft::query()->firstOrFail();
+
+        $this->assertSame('inbound',$draft->operation_type);
+        $this->assertSame('interstate',$draft->destination);
+        $this->assertSame('delivery_home',$draft->presence);
+        $this->assertSame('credit_note',$draft->purpose);
+        $this->assertSame('IE-ST-998877',$draft->substitute_state_registration);
+        $this->assertTrue($draft->has_referenced_document);
+        $this->assertTrue($draft->inform_issue_datetime);
+        $this->assertTrue($draft->inform_exit_datetime);
+        $this->assertTrue($draft->inform_expected_delivery_date);
+        $this->assertTrue($draft->government_purchase);
+        $this->assertTrue($draft->advance_payment);
+        $this->assertSame('2026-10-01',$draft->issue_date->format('Y-m-d'));
+        $this->assertSame('2026-10-02',$draft->exit_date->format('Y-m-d'));
+        $this->assertSame('2026-10-05',$draft->expected_delivery_date->format('Y-m-d'));
+        $this->assertSame($key,data_get($draft->references,'0.key'));
+        $this->assertSame('2102',$draft->items()->firstOrFail()->cfop);
     }
 
     public function test_destination_and_cfop_are_derived_for_interstate_operation(): void

@@ -129,13 +129,17 @@ $origins=[
       <div class="nfe-general-card">
         <div class="nfe-section-title">
           <h3>Dados gerais</h3>
+          <button type="button" class="nfe-section-toggle" data-nfe-general-toggle>ocultar</button>
         </div>
 
-        <div class="nfe-general-layout">
+        <div class="nfe-general-layout" id="nfeGeneralFields">
           <div class="nfe-general-fields">
             <div class="editor-grid cols-12">
               <label class="field col-12">
-                <span>Natureza da operação *</span>
+                <span class="nfe-field-title">
+                  <span>Natureza da operação *</span>
+                  <button type="button" class="nfe-clear-field" id="nfeClearNature">Limpar campo</button>
+                </span>
                 <div class="input-action-group">
                   <select name="operation_nature_id" id="nfeNature" required>
                     <option value="">Selecione</option>
@@ -152,46 +156,135 @@ $origins=[
               </label>
 
               <label class="field col-4">
-                <span>Tipo de operação *</span>
+                <span>Tipo de operação</span>
                 <select name="operation_type" id="nfeOperationType">
-                  <option value="outbound" @selected(old('operation_type',$draft->operation_type)==='outbound')>Saída</option>
                   <option value="inbound" @selected(old('operation_type',$draft->operation_type)==='inbound')>Entrada</option>
+                  <option value="outbound" @selected(old('operation_type',$draft->operation_type)==='outbound')>Saída</option>
                 </select>
               </label>
 
-              <div class="field col-4">
+              <label class="field col-4">
                 <span>Destino da operação</span>
-                <div class="readonly-field" id="nfeDestinationPreview">Automático</div>
-              </div>
+                <select name="destination" id="nfeDestination">
+                  <option value="internal" @selected(old('destination',$draft->destination)==='internal' || old('destination',$draft->destination)==='auto')>Operação interna</option>
+                  <option value="interstate" @selected(old('destination',$draft->destination)==='interstate')>Operação interestadual</option>
+                  <option value="foreign" @selected(old('destination',$draft->destination)==='foreign')>Operação com exterior</option>
+                </select>
+              </label>
 
               <label class="field col-4">
                 <span>Presença do comprador</span>
                 <select name="presence" id="nfePresence">
-                  <option value="presential" @selected(old('presence',$draft->presence)==='presential')>Presencial</option>
                   <option value="not_applicable" @selected(old('presence',$draft->presence)==='not_applicable')>Não se aplica</option>
-                  <option value="internet" @selected(old('presence',$draft->presence)==='internet')>Internet</option>
-                  <option value="phone" @selected(old('presence',$draft->presence)==='phone')>Teleatendimento</option>
-                  <option value="outside_establishment" @selected(old('presence',$draft->presence)==='outside_establishment')>Fora do estabelecimento</option>
-                  <option value="other" @selected(old('presence',$draft->presence)==='other')>Outros</option>
+                  <option value="presential" @selected(old('presence',$draft->presence)==='presential')>Operação presencial</option>
+                  <option value="internet" @selected(old('presence',$draft->presence)==='internet')>Operação não presencial, pela Internet</option>
+                  <option value="phone" @selected(old('presence',$draft->presence)==='phone')>Operação não presencial, teleatendimento</option>
+                  <option value="delivery_home" @selected(old('presence',$draft->presence)==='delivery_home')>NFC-e em operação com entrega a domicílio</option>
+                  <option value="outside_establishment" @selected(old('presence',$draft->presence)==='outside_establishment')>Operação presencial, fora do estabelecimento</option>
+                  <option value="other" @selected(old('presence',$draft->presence)==='other')>Operação não presencial, outros</option>
                 </select>
               </label>
 
-              <div class="field col-4">
+              <label class="field col-4">
                 <span>Finalidade da emissão</span>
-                <div class="readonly-field" id="nfePurposePreview">—</div>
+                <select name="purpose" id="nfePurpose">
+                  <option value="normal" @selected(old('purpose',$draft->purpose)==='normal')>NF-e Normal</option>
+                  <option value="complementary" @selected(old('purpose',$draft->purpose)==='complementary')>NF-e Complementar</option>
+                  <option value="adjustment" @selected(old('purpose',$draft->purpose)==='adjustment')>NF-e de ajuste</option>
+                  <option value="return" @selected(old('purpose',$draft->purpose)==='return')>Devolução de mercadoria</option>
+                  <option value="credit_note" @selected(old('purpose',$draft->purpose)==='credit_note')>Nota de crédito</option>
+                  <option value="debit_note" @selected(old('purpose',$draft->purpose)==='debit_note')>Nota de débito</option>
+                </select>
+              </label>
+
+              <label class="field col-4">
+                <span>Ins. Est. Subst. Trib.</span>
+                <input name="substitute_state_registration" maxlength="30" value="{{ old('substitute_state_registration',$draft->substitute_state_registration) }}">
+              </label>
+
+              <div class="field col-4"></div>
+
+              <div class="field col-4">
+                <span>Possui documento referenciado?</span>
+                <label class="switch-field">
+                  <input type="hidden" name="has_referenced_document" value="0">
+                  <input type="checkbox" name="has_referenced_document" id="nfeHasReferencedDocument" value="1"
+                    @checked(old('has_referenced_document',$draft->has_referenced_document || !empty($draft->references)))>
+                  <span class="switch-track"></span><strong data-switch-label>Sim</strong>
+                </label>
               </div>
 
               <div class="field col-4">
-                <span>Consumidor final</span>
-                <div class="readonly-field" id="nfeFinalConsumerPreview">Automático pelo cliente</div>
+                <span>Informar data de emissão</span>
+                <label class="switch-field">
+                  <input type="hidden" name="inform_issue_datetime" value="0">
+                  <input type="checkbox" name="inform_issue_datetime" id="nfeInformIssueDatetime" value="1"
+                    @checked(old('inform_issue_datetime',$draft->inform_issue_datetime ?? true))>
+                  <span class="switch-track"></span><strong data-switch-label>Sim</strong>
+                </label>
+              </div>
+
+              <div class="field col-4">
+                <span>Informar data de saída</span>
+                <label class="switch-field">
+                  <input type="hidden" name="inform_exit_datetime" value="0">
+                  <input type="checkbox" name="inform_exit_datetime" id="nfeInformExitDatetime" value="1"
+                    @checked(old('inform_exit_datetime',$draft->inform_exit_datetime ?? false))>
+                  <span class="switch-track"></span><strong data-switch-label>Sim</strong>
+                </label>
+              </div>
+
+              <div class="field col-4">
+                <span>Informar previsão de entrega</span>
+                <label class="switch-field">
+                  <input type="hidden" name="inform_expected_delivery_date" value="0">
+                  <input type="checkbox" name="inform_expected_delivery_date" id="nfeInformExpectedDeliveryDate" value="1"
+                    @checked(old('inform_expected_delivery_date',$draft->inform_expected_delivery_date ?? false))>
+                  <span class="switch-track"></span><strong data-switch-label>Sim</strong>
+                </label>
+              </div>
+
+              <div class="field col-4">
+                <span>Compra governamental</span>
+                <label class="switch-field">
+                  <input type="hidden" name="government_purchase" value="0">
+                  <input type="checkbox" name="government_purchase" value="1" @checked(old('government_purchase',$draft->government_purchase))>
+                  <span class="switch-track"></span><strong data-switch-label>Sim</strong>
+                </label>
+              </div>
+
+              <div class="field col-4">
+                <span>Pagamento antecipado</span>
+                <label class="switch-field">
+                  <input type="hidden" name="advance_payment" value="0">
+                  <input type="checkbox" name="advance_payment" value="1" @checked(old('advance_payment',$draft->advance_payment))>
+                  <span class="switch-track"></span><strong data-switch-label>Sim</strong>
+                </label>
               </div>
             </div>
           </div>
 
           <div class="nfe-general-dates">
-            <label class="field"><span>Data de emissão</span><input type="date" name="issue_date" value="{{ old('issue_date',$draft->issue_date?->format('Y-m-d') ?? now()->format('Y-m-d')) }}" required></label>
-            <label class="field"><span>Hora de emissão</span><input type="time" name="issue_time" value="{{ old('issue_time',$draft->issue_time ?? now()->format('H:i')) }}"></label>
-            <label class="field"><span>Previsão de entrega</span><input type="date" name="expected_delivery_date" value="{{ old('expected_delivery_date',$draft->expected_delivery_date?->format('Y-m-d')) }}"></label>
+            <label class="field" data-nfe-date-group="issue">
+              <span>Data emissão NF (atual)</span>
+              <input type="date" name="issue_date" id="nfeIssueDate" value="{{ old('issue_date',$draft->issue_date?->format('Y-m-d') ?? now()->format('Y-m-d')) }}">
+            </label>
+            <label class="field" data-nfe-date-group="issue">
+              <span>Hora emissão NF (atual)</span>
+              <input type="time" name="issue_time" id="nfeIssueTime" value="{{ old('issue_time',$draft->issue_time ?? now()->format('H:i')) }}">
+            </label>
+            <label class="field" data-nfe-date-group="exit">
+              <span>Data saída/entrada (atual)</span>
+              <input type="date" name="exit_date" id="nfeExitDate" value="{{ old('exit_date',$draft->exit_date?->format('Y-m-d')) }}">
+            </label>
+            <label class="field" data-nfe-date-group="exit">
+              <span>Hora saída/entrada (atual)</span>
+              <input type="time" name="exit_time" id="nfeExitTime" value="{{ old('exit_time',$draft->exit_time) }}">
+            </label>
+            <label class="field" data-nfe-date-group="delivery">
+              <span>Previsão de entrega</span>
+              <input type="date" name="expected_delivery_date" id="nfeExpectedDeliveryDate" value="{{ old('expected_delivery_date',$draft->expected_delivery_date?->format('Y-m-d')) }}">
+            </label>
           </div>
         </div>
       </div>

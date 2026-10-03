@@ -46,26 +46,7 @@
   const selectedNature=()=>natureById(getField('nfeNature'));
   const selectedCustomer=()=>customerById(getField('nfeCustomer'));
   const operationType=()=>getField('nfeOperationType')||'outbound';
-
-  const isForeign=customer=>{
-    if(!customer) return false;
-    const country=String(customer.country_code||'').replace(/\D/g,'');
-    return customer.state==='EX' || (country!=='' && country!=='1058');
-  };
-
-  const destinationFor=customer=>{
-    if(!customer) return 'Automático';
-    if(isForeign(customer)) return 'Exterior';
-    if(customer.state && emitterState && customer.state!==emitterState) return 'Interestadual';
-    return 'Interna';
-  };
-
-  const purposeLabel=value=>({
-    normal:'1 - NF-e normal',
-    complementary:'2 - NF-e complementar',
-    adjustment:'3 - NF-e de ajuste',
-    return:'4 - Devolução de mercadoria'
-  }[value]||'—');
+  const destinationType=()=>getField('nfeDestination')||'internal';
 
   const normalizeTax=raw=>{
     raw=raw&&typeof raw==='object'?raw:{};
@@ -114,10 +95,10 @@
 
   const resolveCfop=(taxData={})=>{
     const nature=selectedNature();
-    const customer=selectedCustomer();
     const type=operationType();
-    const foreign=isForeign(customer);
-    const interstate=!!(customer?.state && emitterState && customer.state!==emitterState && !foreign);
+    const destination=destinationType();
+    const foreign=destination==='foreign';
+    const interstate=destination==='interstate';
 
     let natureCfop='';
     if(nature){
@@ -143,35 +124,25 @@
     return productCfop||natureCfop;
   };
 
-  const updateGeneralPreview=()=>{
-    const nature=selectedNature();
+  const updateRecipientPreview=()=>{
     const customer=selectedCustomer();
-
-    const purpose=byId('nfePurposePreview');
-    if(purpose) purpose.textContent=purposeLabel(nature?.purpose);
-
-    const destination=byId('nfeDestinationPreview');
-    if(destination) destination.textContent=destinationFor(customer);
-
-    const finalConsumer=byId('nfeFinalConsumerPreview');
-    if(finalConsumer) finalConsumer.textContent=customer ? (customer.final_consumer?'Sim':'Não') : 'Automático pelo cliente';
-
     const summary=byId('nfeRecipientSummary');
-    if(summary){
-      if(!customer){
-        summary.textContent='Selecione um destinatário.';
-      }else{
-        const address=[customer.address,customer.address_number,customer.district,customer.city,customer.state].filter(Boolean).join(', ');
-        const document=customer.document||customer.foreign_id||'—';
-        summary.innerHTML=
-          '<strong>'+esc(customer.name)+'</strong><small>'+
-          'CPF/CNPJ/ID: '+esc(document)+
-          ' · IE: '+esc(customer.state_registration||'—')+
-          ' · Município IBGE: '+esc(customer.city_ibge_code||'—')+
-          ' · '+esc(address||'Endereço não informado')+
-          '</small>';
-      }
+
+    if(!summary) return;
+    if(!customer){
+      summary.textContent='Selecione um destinatário.';
+      return;
     }
+
+    const address=[customer.address,customer.address_number,customer.district,customer.city,customer.state].filter(Boolean).join(', ');
+    const document=customer.document||customer.foreign_id||'—';
+    summary.innerHTML=
+      '<strong>'+esc(customer.name)+'</strong><small>'+
+      'CPF/CNPJ/ID: '+esc(document)+
+      ' · IE: '+esc(customer.state_registration||'—')+
+      ' · Município IBGE: '+esc(customer.city_ibge_code||'—')+
+      ' · '+esc(address||'Endereço não informado')+
+      '</small>';
   };
 
   const recalcItemCfops=()=>{
@@ -190,21 +161,49 @@
     const nature=selectedNature();
     if(nature){
       setSelect('nfeOperationType',nature.operation_type||'outbound');
+      if(nature.purpose) setSelect('nfePurpose',nature.purpose);
+      if(nature.presence_default) setSelect('nfePresence',nature.presence_default);
+
       const additional=document.querySelector('[name="additional_info"]');
       if(additional && !additional.value && nature.additional_info) additional.value=nature.additional_info;
     }
-    updateGeneralPreview();
     recalcItemCfops();
   });
 
-  byId('nfeCustomer')?.addEventListener('change',()=>{
-    updateGeneralPreview();
-    recalcItemCfops();
+  byId('nfeClearNature')?.addEventListener('click',()=>{
+    setSelect('nfeNature','');
   });
 
-  byId('nfeOperationType')?.addEventListener('change',()=>{
-    recalcItemCfops();
+  byId('nfeCustomer')?.addEventListener('change',updateRecipientPreview);
+  byId('nfeOperationType')?.addEventListener('change',recalcItemCfops);
+  byId('nfeDestination')?.addEventListener('change',recalcItemCfops);
+
+  const generalToggle=byId('nfeGeneralFields');
+  document.querySelector('[data-nfe-general-toggle]')?.addEventListener('click',event=>{
+    if(!generalToggle) return;
+    const hidden=generalToggle.hidden;
+    generalToggle.hidden=!hidden;
+    event.currentTarget.textContent=hidden?'ocultar':'mostrar';
   });
+
+  const syncDateControl=(checkboxId,inputIds)=>{
+    const checkbox=byId(checkboxId);
+    if(!checkbox) return;
+
+    const apply=()=>{
+      inputIds.forEach(id=>{
+        const input=byId(id);
+        if(input) input.disabled=!checkbox.checked;
+      });
+    };
+
+    checkbox.addEventListener('change',apply);
+    apply();
+  };
+
+  syncDateControl('nfeInformIssueDatetime',['nfeIssueDate','nfeIssueTime']);
+  syncDateControl('nfeInformExitDatetime',['nfeExitDate','nfeExitTime']);
+  syncDateControl('nfeInformExpectedDeliveryDate',['nfeExpectedDeliveryDate']);
 
   const itemTotal=item=>number(item.quantity)*Math.max(number(item.dimension_quantity)||1,0)*number(item.unit_price);
 
@@ -727,6 +726,11 @@
       return;
     }
     references.push({key});
+    const referenceToggle=byId('nfeHasReferencedDocument');
+    if(referenceToggle){
+      referenceToggle.checked=true;
+      referenceToggle.dispatchEvent(new Event('change',{bubbles:true}));
+    }
     setField('nfeReferenceKey','');
     byId('nfeReferenceDialog')?.close();
     renderReferences();
@@ -803,7 +807,7 @@
     }
   });
 
-  updateGeneralPreview();
+  updateRecipientPreview();
   updatePaymentVisibility();
   renderItems();
   renderReferences();

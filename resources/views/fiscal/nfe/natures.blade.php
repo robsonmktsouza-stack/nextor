@@ -40,7 +40,7 @@
             <strong class="table-title">{{ $nature->name }}</strong>
             <small class="table-subtitle">Padrão: {{ $nature->operation_type==='outbound'?'Saída':'Entrada' }}</small>
           </td>
-          <td>{{ ['normal'=>'1 - Normal','complementary'=>'2 - Complementar','adjustment'=>'3 - Ajuste','return'=>'4 - Devolução'][$nature->purpose] ?? $nature->purpose }}</td>
+          <td>{{ ['normal'=>'1 - Normal','complementary'=>'2 - Complementar','adjustment'=>'3 - Ajuste','return'=>'4 - Devolução','credit_note'=>'5 - Nota de crédito','debit_note'=>'6 - Nota de débito'][$nature->purpose] ?? $nature->purpose }}</td>
           <td>
             <span class="code-tag">{{ $nature->cfop_internal ?: '—' }}</span>
             <small class="table-subtitle">Interestadual: {{ $nature->cfop_interstate ?: '—' }}</small>
