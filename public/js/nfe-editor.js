@@ -205,7 +205,7 @@
     recalcItemCfops();
   });
 
-  const itemTotal=item=>number(item.quantity)*number(item.unit_price);
+  const itemTotal=item=>number(item.quantity)*Math.max(number(item.dimension_quantity)||1,0)*number(item.unit_price);
 
   const totals=()=>{
     let productsTotal=0;
@@ -319,7 +319,7 @@
     const type=getField('nfePaymentType');
     const cardPanel=byId('nfeCardPanel');
     const otherField=byId('nfeOtherPaymentField');
-    if(cardPanel) cardPanel.hidden=!['03','04'].includes(type);
+    if(cardPanel) cardPanel.hidden=!['03','04','17'].includes(type);
     if(otherField) otherField.hidden=type!=='99';
   };
   byId('nfePaymentType')?.addEventListener('change',updatePaymentVisibility);
@@ -331,6 +331,7 @@
     product_id:'nfeItemProduct',
     product_sku:'nfeItemSku',
     quantity:'nfeItemQuantity',
+    dimension_quantity:'nfeItemDimensionQuantity',
     unit_price:'nfeItemUnitPrice',
     purchase_order:'nfeItemPurchaseOrder',
     purchase_order_item:'nfeItemPurchaseOrderItem',
@@ -407,9 +408,12 @@
 
   const updateItemSubtotal=()=>{
     const subtotal=byId('nfeItemSubtotal');
-    if(subtotal) subtotal.textContent=money(number(getField('nfeItemQuantity'))*number(getField('nfeItemUnitPrice')));
+    const quantity=number(getField('nfeItemQuantity'));
+    const dimension=Math.max(number(getField('nfeItemDimensionQuantity'))||1,0);
+    if(subtotal) subtotal.textContent=money(quantity*dimension*number(getField('nfeItemUnitPrice')));
   };
   byId('nfeItemQuantity')?.addEventListener('input',updateItemSubtotal);
+  byId('nfeItemDimensionQuantity')?.addEventListener('input',updateItemSubtotal);
   byId('nfeItemUnitPrice')?.addEventListener('input',updateItemSubtotal);
 
   const switchItemTab=target=>{
@@ -431,6 +435,7 @@
     Object.values(taxFields).forEach(id=>setField(id,''));
     Object.values(specialFields).forEach(id=>setField(id,''));
     setField('nfeItemQuantity','1');
+    setField('nfeItemDimensionQuantity','1');
     setField('nfeTaxQuantityFactor','1');
     setField('nfeTaxIpiEnq','999');
     const petroleum=byId('nfeSpecialPetroleum');
@@ -446,6 +451,7 @@
       product_name:product?.name||'',
       product_sku:product?.sku||'',
       quantity:1,
+      dimension_quantity:1,
       unit_price:number(product?.sale_price),
       cfop:resolveCfop(tax),
       origin:product?.origin??'0',
@@ -556,6 +562,7 @@
       product_name:product.name,
       product_sku:getField('nfeItemSku')||product.sku,
       quantity,
+      dimension_quantity:Math.max(number(getField('nfeItemDimensionQuantity'))||1,0),
       unit_price:number(getField('nfeItemUnitPrice')),
       cfop:getField('nfeItemCfop')||resolveCfop(tax),
       origin:getField('nfeItemOrigin'),
