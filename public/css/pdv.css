@@ -2577,3 +2577,10 @@
   .pdv-operation-summary{grid-template-columns:auto 1fr}
   .pdv-topbar-contingency{display:none}
 }
+
+.pdv-product-search-label{
+  min-height:34px;display:inline-flex;align-items:center;gap:7px;padding:0 10px;
+  border:1px solid #d4dee7;border-radius:4px;background:#f7f9fb;color:#52677c;
+  font-size:10.5px;font-weight:700
+}
+.pdv-product-search-label svg{color:#2877c7}
