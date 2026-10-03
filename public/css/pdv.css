@@ -1310,7 +1310,40 @@
     height:54px;
   }
 
-  @media(max-width:1180px){
+  .pdv-recent{
+    display:none;
+  }
+
+  .pdv-checkout-head{
+    min-height:62px;
+    padding-top:9px;
+    padding-bottom:9px;
+  }
+
+  .pdv-summary{
+    padding-top:9px;
+    padding-bottom:9px;
+  }
+
+  .pdv-grand-total strong{
+    font-size:28px!important;
+  }
+
+  .pdv-checkout-fields{
+    padding-top:9px;
+    padding-bottom:9px;
+  }
+
+  .pdv-finish{
+    min-height:48px;
+  }
+
+  .pdv-shortcuts{
+    min-height:52px;
+  }
+}
+
+@media(max-width:1180px){
   .pdv-body{
     height:auto;
     min-height:100vh;
@@ -1388,7 +1421,60 @@
     align-items:flex-start;
   }
 
-  /* Barra compacta de atalhos do caixa */
+  .pdv-results{
+    grid-template-columns:1fr;
+  }
+
+  .pdv-cart-row{
+    grid-template-columns:minmax(0,1fr) 112px 40px;
+    align-items:center;
+  }
+
+  .pdv-cart-item{
+    grid-column:1/2;
+  }
+
+  .pdv-cart-qty-cell{
+    grid-column:2/3;
+  }
+
+  .pdv-cart-remove{
+    grid-column:3/4;
+  }
+
+  .pdv-cart-discount{
+    grid-column:1/2;
+    grid-row:2;
+  }
+
+  .pdv-cart-line-total{
+    grid-column:2/3;
+    grid-row:2;
+  }
+
+  .pdv-checkout-fields{
+    grid-template-columns:1fr;
+  }
+
+  .pdv-notes-field{
+    grid-column:auto;
+  }
+
+  .pdv-shortcuts{
+    display:none;
+  }
+
+  .pdv-payment-options{
+    grid-template-columns:1fr;
+  }
+
+  .pdv-modal-help{
+    flex-wrap:wrap;
+    gap:8px 12px;
+  }
+}
+
+/* Barra compacta de atalhos do caixa */
 .pdv-catalog{
   grid-template-rows:auto auto minmax(120px,1fr) auto!important;
 }
