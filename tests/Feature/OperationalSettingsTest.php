@@ -497,88 +497,14 @@ class OperationalSettingsTest extends TestCase
         $this->actingAs($user)
             ->get(route('pdv.receipt',$sale))
             ->assertOk()
-            ->assertDontSee('R    {
-        AppSetting::put('system','compact_mode',false);
-        AppSetting::put('system','show_tutorials',false);
-        AppSetting::put('system','confirm_destructive_actions',false);
-        AppSetting::put('system','search_delay',480);
-
-        $user=$this->user();
-
-        $this->actingAs($user)
-            ->get(route('settings.index',['tab'=>'system']))
-            ->assertOk()
-            ->assertSee('system-comfortable',false)
-            ->assertSee('data-show-tutorials="0"',false)
-            ->assertSee('data-confirm-destructive="0"',false)
-            ->assertSee('data-live-search-delay="480"',false);
-
-        $this->actingAs($user)
-            ->get(route('pdv.index'))
-            ->assertOk()
-            ->assertSee('data-show-tutorials="0"',false)
-            ->assertSee('data-confirm-destructive="0"',false);
-    }
-
-    public function test_api_switch_and_token_protect_endpoints(): void
-    {
-        AppSetting::put('integrations','api_enabled',true);
-        AppSetting::put('integrations','api_token','token-teste-seguro',true);
-        $this->product();
-
-        $this->get('/api/nextor/products')->assertStatus(401);
-
-        $this->withToken('token-teste-seguro')
-            ->get('/api/nextor/products')
-            ->assertOk()
-            ->assertJsonPath('data.0.sku','SET001');
-    }
-}
-);
+            ->assertDontSee('R$');
 
         CompanySetting::current()->update(['show_currency_prefix'=>true]);
 
         $this->actingAs($user)
             ->get(route('pdv.receipt',$sale))
             ->assertOk()
-            ->assertSee('R    {
-        AppSetting::put('system','compact_mode',false);
-        AppSetting::put('system','show_tutorials',false);
-        AppSetting::put('system','confirm_destructive_actions',false);
-        AppSetting::put('system','search_delay',480);
-
-        $user=$this->user();
-
-        $this->actingAs($user)
-            ->get(route('settings.index',['tab'=>'system']))
-            ->assertOk()
-            ->assertSee('system-comfortable',false)
-            ->assertSee('data-show-tutorials="0"',false)
-            ->assertSee('data-confirm-destructive="0"',false)
-            ->assertSee('data-live-search-delay="480"',false);
-
-        $this->actingAs($user)
-            ->get(route('pdv.index'))
-            ->assertOk()
-            ->assertSee('data-show-tutorials="0"',false)
-            ->assertSee('data-confirm-destructive="0"',false);
-    }
-
-    public function test_api_switch_and_token_protect_endpoints(): void
-    {
-        AppSetting::put('integrations','api_enabled',true);
-        AppSetting::put('integrations','api_token','token-teste-seguro',true);
-        $this->product();
-
-        $this->get('/api/nextor/products')->assertStatus(401);
-
-        $this->withToken('token-teste-seguro')
-            ->get('/api/nextor/products')
-            ->assertOk()
-            ->assertJsonPath('data.0.sku','SET001');
-    }
-}
-);
+            ->assertSee('R$');
     }
 
     public function test_system_preferences_are_exposed_to_admin_and_pdv_layouts(): void
