@@ -10,9 +10,9 @@ class FiscalController extends Controller
 {
     private const TABS=[
         'nfe'=>['label'=>'NF-e','description'=>'Nota Fiscal Eletrônica — modelo 55'],
-        'nfce'=>['label'=>'NFC-e','description'=>'Nota Fiscal de Consumidor Eletrônica — modelo 65'],
         'nfse'=>['label'=>'NFS-e','description'=>'Nota Fiscal de Serviço Eletrônica'],
         'cte'=>['label'=>'CT-e','description'=>'Conhecimento de Transporte Eletrônico — modelo 57'],
+        'nfce'=>['label'=>'NFC-e','description'=>'Nota Fiscal de Consumidor Eletrônica — modelo 65'],
     ];
 
     public function index(Request $request)
