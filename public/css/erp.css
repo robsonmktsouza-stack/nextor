@@ -2058,3 +2058,12 @@ body[data-show-tutorials="0"] [data-tutorial]{display:none!important}
 }
 .finance-pix-field textarea{font-family:Consolas,monospace;font-size:10px;line-height:1.45;resize:vertical}
 .finance-billing-actions{display:flex;justify-content:flex-end;margin-top:8px}
+
+
+/* System preferences */
+body[data-show-tutorials="0"] kbd{display:none!important}
+body[data-show-tutorials="0"] [data-tutorial]{display:none!important}
+body[data-show-tutorials="0"] .pdv-modal-help,
+body[data-show-tutorials="0"] .pdv-command-center,
+body[data-show-tutorials="0"] .pdv-cart-nav-hint,
+body[data-show-tutorials="0"] .pdv-split-help{display:none!important}
