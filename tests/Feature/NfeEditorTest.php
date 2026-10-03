@@ -287,6 +287,7 @@ class NfeEditorTest extends TestCase
             'product_name'=>$product->name,
             'product_sku'=>$product->sku,
             'quantity'=>2,
+            'dimension_quantity'=>1.5,
             'unit_price'=>100,
             'cfop'=>'',
             'origin'=>'0',
@@ -337,10 +338,11 @@ class NfeEditorTest extends TestCase
         $this->assertSame('17',$draft->payment_type);
         $this->assertSame('0',data_get($draft->transport_data,'freight_mode'));
         $this->assertEquals(10.0,(float)data_get($draft->transport_data,'freight_value'));
-        $this->assertEquals(200.0,(float)data_get($draft->totals,'products'));
-        $this->assertEquals(20.0,(float)data_get($draft->totals,'ipi'));
-        $this->assertEquals(220.0,(float)data_get($draft->totals,'total'));
-        $this->assertEquals(190.0,(float)data_get($draft->invoice_data,'net_value'));
+        $this->assertEquals(300.0,(float)data_get($draft->totals,'products'));
+        $this->assertEquals(30.0,(float)data_get($draft->totals,'ipi'));
+        $this->assertEquals(330.0,(float)data_get($draft->totals,'total'));
+        $this->assertEquals(290.0,(float)data_get($draft->invoice_data,'net_value'));
+        $this->assertEquals(290.0,(float)data_get($draft->payments,'0.amount'));
         $this->assertSame('Cliente Teste Ltda',data_get($draft->recipient_snapshot,'name'));
         $this->assertSame('2927408',data_get($draft->recipient_snapshot,'city_ibge_code'));
 
@@ -349,10 +351,11 @@ class NfeEditorTest extends TestCase
             'product_id'=>$product->id,
             'cfop'=>'5102',
             'ncm'=>'12345678',
-            'line_total'=>200,
+            'line_total'=>300,
         ]);
 
         $item=$draft->items()->firstOrFail();
+        $this->assertEquals(1.5,(float)$item->dimension_quantity);
         $this->assertSame('300',data_get($item->tax_data,'icms_csosn_export'));
         $this->assertSame('400',data_get($item->tax_data,'icms_csosn_inbound'));
         $this->assertSame('210203001',data_get($item->special_data,'anp_code'));
