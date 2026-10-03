@@ -179,9 +179,9 @@
 
   byId('nfeNature')?.addEventListener('change',()=>{
     const nature=selectedNature(); if(!nature) return;
-    if(byId('nfeOperationType')) byId('nfeOperationType').value=nature.operation_type||'outbound';
-    if(byId('nfePurpose')) byId('nfePurpose').value=nature.purpose||'normal';
-    if(byId('nfePresence')) byId('nfePresence').value=nature.presence_default||'not_applicable';
+    setSelect('nfeOperationType',nature.operation_type||'outbound');
+    setSelect('nfePurpose',nature.purpose||'normal');
+    setSelect('nfePresence',nature.presence_default||'not_applicable');
     const final=byId('nfeFinalConsumer'); if(final) final.checked=!!nature.final_consumer_default;
     const additional=document.querySelector('[name="additional_info"]');
     const fiscal=document.querySelector('[name="tax_authority_info"]');
@@ -207,6 +207,12 @@
   };
 
   const setField=(id,value)=>{const el=byId(id);if(el)el.value=value??'';};
+  const setSelect=(id,value)=>{
+    const el=byId(id);
+    if(!el) return;
+    el.value=value??'';
+    el.dispatchEvent(new Event('change',{bubbles:true}));
+  };
   const getField=id=>byId(id)?.value??'';
 
   const taxFields={
@@ -385,8 +391,9 @@
       event.preventDefault();if(!itemDialog?.open)openNewItem();return;
     }
     if(event.key==='F8'){
-      const validation=byId('nfeValidateForm');
-      if(validation){event.preventDefault();syncHidden();validation.requestSubmit();}
+      const button=byId('nfeValidateCurrent');
+      const form=byId('nfeDraftForm');
+      if(button && form){event.preventDefault();syncHidden();form.requestSubmit(button);}
     }
   });
 
