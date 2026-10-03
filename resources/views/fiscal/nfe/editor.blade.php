@@ -311,7 +311,7 @@ $origins=[
         <div class="delivery-card-title">
           <div>
             <h3>Duplicatas</h3>
-            <p class="table-subtitle">O sistema comprado usa as parcelas da venda para gerar as tags de duplicata.</p>
+
           </div>
           <button type="button" class="btn btn-secondary" data-dialog-open="nfeDuplicateDialog">@include('partials.icon',['name'=>'plus','size'=>15]) Adicionar</button>
         </div>
@@ -321,14 +321,14 @@ $origins=[
             <tbody id="nfeDuplicateBody"></tbody>
           </table>
         </div>
-        <p class="inline-note">A fatura principal é calculada automaticamente a partir dos produtos, desconto e acréscimo. Ela não precisa ser digitada manualmente.</p>
+
       </div>
     </section>
 
     <section class="editor-tab-panel" data-tab-panel="nfe-other" hidden>
       <div class="editor-panel">
         <div class="delivery-card-title">
-          <div><h3>NF-e referenciadas</h3><p class="table-subtitle">O sistema comprado grava e envia a chave em refNFe.</p></div>
+          <div><h3>NF-e referenciadas</h3></div>
           <button type="button" class="btn btn-secondary" data-dialog-open="nfeReferenceDialog">@include('partials.icon',['name'=>'plus','size'=>15]) Referenciar NF-e</button>
         </div>
         <div class="table-scroll">
@@ -344,7 +344,7 @@ $origins=[
           <span>Informação adicional</span>
           <textarea name="additional_info" rows="5" placeholder="Observação da operação">{{ old('additional_info',$draft->additional_info) }}</textarea>
         </label>
-        <p class="inline-note">Na emissão, o NEXTOR poderá acrescentar textos automáticos de configuração, pagamento e transparência antes de enviar o conteúdo ao ACBr.</p>
+
       </div>
     </section>
   </div>
@@ -358,7 +358,7 @@ $origins=[
       <a class="btn btn-secondary" href="{{ route('fiscal.index',['tab'=>'nfe']) }}">Cancelar <kbd data-tutorial>Esc</kbd></a>
       <button class="btn btn-primary" type="submit">Apenas salvar <kbd data-tutorial>Ctrl+S</kbd></button>
       <button class="btn btn-secondary" type="submit" name="after_save" value="validate" id="nfeValidateCurrent">Validar <kbd data-tutorial>F8</kbd></button>
-      <button class="btn btn-success" type="button" disabled data-tooltip="A emissão será conectada pelo Adapter ACBr">Emitir NF-e</button>
+      <button class="btn btn-success" type="button" disabled data-tooltip="Emissão indisponível">Emitir NF-e</button>
     </div>
   </div>
 </form>
@@ -366,7 +366,7 @@ $origins=[
 
 <dialog class="erp-dialog nfe-item-dialog" id="nfeItemDialog">
   <div class="dialog-header">
-    <div><h2>Item da NF-e</h2><p>Campos comerciais e fiscais mapeados do emissor comprado.</p></div>
+    <div><h2>Item da NF-e</h2></div>
     <button type="button" data-dialog-close class="close-dialog" aria-label="Fechar">@include('partials.icon',['name'=>'x'])</button>
   </div>
 
@@ -413,7 +413,7 @@ $origins=[
           <label class="field col-1"><span>Item</span><input id="nfeItemPurchaseOrderItem"></label>
           <label class="field col-12"><span>Observação do item</span><input id="nfeItemNotes"></label>
         </div>
-        <p class="inline-note">A busca é opcional. Se o produto não estiver cadastrado, informe a descrição e os dados do item normalmente.</p>
+
       </div>
     </section>
 
@@ -495,7 +495,7 @@ $origins=[
     <section class="editor-tab-panel" data-nfe-item-panel="item-difal" hidden>
       <div class="editor-panel">
         <h3>ICMS destino / FCP</h3>
-        <p class="inline-note">O emissor comprado usa estes percentuais quando a operação é interestadual para consumidor final.</p>
+
         <div class="editor-grid cols-12">
           <label class="field col-4"><span>ICMS interestadual %</span><input id="nfeTaxInterstateRate" type="number" step="0.0001"></label>
           <label class="field col-4"><span>ICMS interno destino %</span><input id="nfeTaxInternalRate" type="number" step="0.0001"></label>
@@ -538,7 +538,7 @@ $origins=[
     <section class="editor-tab-panel" data-nfe-item-panel="item-ibscbs" hidden>
       <div class="editor-panel">
         <h3>IBS / CBS — estrutura NEXTOR</h3>
-        <p class="inline-note">Este bloco não existe no emissor comprado. Ele permanece separado porque será mapeado para o ACBr conforme o leiaute atual da Reforma Tributária.</p>
+
         <div class="editor-grid cols-12">
           <label class="field col-3"><span>CST IBS</span><input id="nfeTaxIbsCst"></label>
           <label class="field col-3"><span>CST CBS</span><input id="nfeTaxCbsCst"></label>
