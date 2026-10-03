@@ -133,15 +133,14 @@
       <div class="pdv-search-box">
         <span class="pdv-search-icon">@include('partials.icon',['name'=>'barcode','size'=>22])</span>
         <input id="pdvSearch" type="search" autocomplete="off"
-               placeholder="Código, código de barras, produto ou serviço..." aria-label="Buscar item no PDV">
+               placeholder="Código, código de barras ou produto..." aria-label="Buscar produto no PDV">
         <kbd>F2</kbd>
       </div>
 
-      <div class="pdv-search-tools">
-        <div class="pdv-kind-tabs" role="group" aria-label="Tipo de item">
-          <button type="button" class="active" data-pdv-kind="all">Todos</button>
-          <button type="button" data-pdv-kind="product">@include('partials.icon',['name'=>'products','size'=>15]) Produtos</button>
-          <button type="button" data-pdv-kind="service">@include('partials.icon',['name'=>'services','size'=>15]) Serviços</button>
+      <div class="pdv-search-tools pdv-search-tools-products-only">
+        <div class="pdv-product-search-label">
+          @include('partials.icon',['name'=>'products','size'=>15])
+          <span>Produtos</span>
         </div>
         <div class="pdv-search-keyboard">
           <span><kbd>↑</kbd><kbd>↓</kbd> Navegar</span>
@@ -152,8 +151,8 @@
 
     <div class="pdv-results-head">
       <div>
-        <h2>Itens</h2>
-        <p id="pdvResultsCaption">Digite para localizar um produto ou serviço.</p>
+        <h2>Produtos</h2>
+        <p id="pdvResultsCaption">Digite para localizar um produto.</p>
       </div>
       <span class="pdv-scan-status">@include('partials.icon',['name'=>'barcode','size'=>15]) Busca / leitor prontos</span>
     </div>
@@ -162,7 +161,7 @@
       <div class="pdv-empty-state" id="pdvSearchEmpty">
         @include('partials.icon',['name'=>'search','size'=>28])
         <strong>Localize um item para começar</strong>
-        <span>Use nome, SKU, EAN/GTIN ou item de serviço. O leitor de código de barras também pode digitar aqui.</span>
+        <span>Use nome, SKU ou EAN/GTIN. O leitor de código de barras também pode digitar aqui.</span>
       </div>
     </div>
 
