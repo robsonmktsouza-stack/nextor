@@ -872,7 +872,9 @@
       citySelect.innerHTML='<option value="">Selecione a cidade</option>';
       cities.forEach(city=>{
         const option=document.createElement('option');
-        option.value=city.nome; option.textContent=city.nome;
+        option.value=city.nome;
+        option.textContent=city.nome;
+        option.dataset.ibgeCode=String(city.id||'');
         if(preferred && city.nome.toLocaleLowerCase('pt-BR')===preferred.toLocaleLowerCase('pt-BR')) option.selected=true;
         citySelect.appendChild(option);
       });
@@ -887,6 +889,12 @@
   });
   document.addEventListener('change',e=>{
     if(e.target.matches('[data-uf-select]') && !e.detail?.skipCities) loadCities(e.target,'');
+    if(e.target.matches('[data-city-select]')){
+      const scope=e.target.closest('[data-address-scope]');
+      const codeInput=scope?.querySelector('[data-city-code-input]');
+      const option=e.target.options[e.target.selectedIndex];
+      if(codeInput && option?.dataset?.ibgeCode) codeInput.value=option.dataset.ibgeCode;
+    }
   });
 
   // Busca de CEP
