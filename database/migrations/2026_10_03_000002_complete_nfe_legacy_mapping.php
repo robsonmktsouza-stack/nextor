@@ -23,6 +23,10 @@ return new class extends Migration {
             $table->string('card_authorization_code',40)->nullable()->after('card_acquirer_document');
         });
 
+        Schema::table('nfe_draft_items', function (Blueprint $table) {
+            $table->decimal('dimension_quantity',14,4)->default(1)->after('quantity');
+        });
+
         Schema::table('customers', function (Blueprint $table) {
             $table->string('city_ibge_code',10)->nullable()->after('city');
             $table->string('country_code',10)->nullable()->after('district');
@@ -43,6 +47,10 @@ return new class extends Migration {
 
         Schema::table('customers', function (Blueprint $table) {
             $table->dropColumn(['city_ibge_code','country_code','country_name','foreign_id']);
+        });
+
+        Schema::table('nfe_draft_items', function (Blueprint $table) {
+            $table->dropColumn('dimension_quantity');
         });
 
         Schema::table('nfe_drafts', function (Blueprint $table) {
