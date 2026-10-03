@@ -21,11 +21,15 @@
 <section class="cms-card sales-module-card">
   <div class="grid-actionbar">
     <div class="grid-actions-left">
-      @if($tab==='nfce' && auth()->user()->canAccess('pdv'))
+      @if($tab==='nfe')
+        <a class="grid-primary-action" href="{{ route('fiscal.nfe.create') }}" data-tooltip="Criar nova NF-e">
+          @include('partials.icon',['name'=>'plus','size'=>17]) <span>Nova</span>
+        </a>
+      @elseif($tab==='nfce' && auth()->user()->canAccess('pdv'))
         <a class="grid-primary-action" href="{{ route('pdv.index') }}" data-tooltip="Abrir PDV para nova NFC-e">
           @include('partials.icon',['name'=>'plus','size'=>17]) <span>Nova</span>
         </a>
-      @elseif(in_array($tab,['nfe','nfse'],true) && auth()->user()->canAccess('sales'))
+      @elseif($tab==='nfse' && auth()->user()->canAccess('sales'))
         <a class="grid-primary-action" href="{{ route('sales.create') }}" data-tooltip="Criar a partir de uma venda">
           @include('partials.icon',['name'=>'plus','size'=>17]) <span>Nova</span>
         </a>
@@ -41,6 +45,14 @@
         <button class="grid-tool" type="button" data-refresh-page data-tooltip="Atualizar">
           @include('partials.icon',['name'=>'refresh','size'=>18])
         </button>
+        @if($tab==='nfe')
+          <a class="grid-tool grid-tool-wide" href="{{ route('fiscal.nfe.drafts.index') }}" data-tooltip="Rascunhos de NF-e">
+            @include('partials.icon',['name'=>'edit','size'=>17]) <span>Rascunhos</span>
+          </a>
+          <a class="grid-tool" href="{{ route('fiscal.nfe.natures.index') }}" data-tooltip="Naturezas de Operação">
+            @include('partials.icon',['name'=>'tag','size'=>18])
+          </a>
+        @endif
         @if(auth()->user()->canAccess('settings'))
           <a class="grid-tool" href="{{ route('settings.index',['tab'=>$configuration['settings_tab']]) }}" data-tooltip="Configurações">
             @include('partials.icon',['name'=>'settings','size'=>18])
