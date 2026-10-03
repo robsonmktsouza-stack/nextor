@@ -16,6 +16,25 @@ use Illuminate\Validation\ValidationException;
 
 class NfeDraftController extends Controller
 {
+    public function index(Request $request)
+    {
+        $term=trim((string)$request->query('search',''));
+
+        $drafts=NfeDraft::query()
+            ->with(['customer','operationNature','user'])
+            ->when($term,fn($query)=>$query->where(function($where) use($term) {
+                $like='%'.$term.'%';
+                $where->where('id','like',$like)
+                    ->orWhereHas('customer',fn($customer)=>$customer->where('name','like',$like))
+                    ->orWhereHas('operationNature',fn($nature)=>$nature->where('name','like',$like));
+            }))
+            ->latest('updated_at')
+            ->paginate(AppSetting::tablePerPage($request))
+            ->withQueryString();
+
+        return view('fiscal.nfe.drafts',compact('drafts','term'));
+    }
+
     public function create()
     {
         return $this->editor(new NfeDraft([
