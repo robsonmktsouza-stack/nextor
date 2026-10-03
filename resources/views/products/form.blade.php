@@ -4,6 +4,7 @@
 @section('content')
 @php
 $units=['UN'=>'UN — Unidade','KG'=>'KG — Quilograma','G'=>'G — Grama','M'=>'M — Metro','M2'=>'M² — Metro quadrado','M3'=>'M³ — Metro cúbico','L'=>'L — Litro','ML'=>'ML — Mililitro','CX'=>'CX — Caixa','PC'=>'PC — Peça','PCT'=>'PCT — Pacote'];
+$taxDefaults=old('tax_defaults',$product->tax_defaults ?? []);
 $origins=[
  '0'=>'0 - Nacional, exceto as indicadas nos códigos 3, 4, 5 e 8',
  '1'=>'1 - Estrangeira: importação direta',
@@ -119,6 +120,92 @@ $origins=[
            <option value="both" @selected(old('ignore_taxes_mode',$product->ignore_taxes_mode)==='both')>Ignorar na compra e venda</option>
          </select>
        </label>
+     </div>
+   </div>
+
+   <div class="editor-panel">
+     <h3>CFOP padrão da NF-e</h3>
+     <div class="editor-grid cols-12">
+       <label class="field col-3"><span>Saída dentro do estado</span><input name="tax_defaults[cfop_outbound_internal]" value="{{ data_get($taxDefaults,'cfop_outbound_internal') }}" maxlength="10" placeholder="5102"></label>
+       <label class="field col-3"><span>Saída para outro estado</span><input name="tax_defaults[cfop_outbound_interstate]" value="{{ data_get($taxDefaults,'cfop_outbound_interstate') }}" maxlength="10" placeholder="6102"></label>
+       <label class="field col-3"><span>Entrada dentro do estado</span><input name="tax_defaults[cfop_inbound_internal]" value="{{ data_get($taxDefaults,'cfop_inbound_internal') }}" maxlength="10" placeholder="1102"></label>
+       <label class="field col-3"><span>Entrada de outro estado</span><input name="tax_defaults[cfop_inbound_interstate]" value="{{ data_get($taxDefaults,'cfop_inbound_interstate') }}" maxlength="10" placeholder="2102"></label>
+     </div>
+   </div>
+
+   <div class="editor-panel">
+     <h3>ICMS / Simples Nacional</h3>
+     <div class="editor-grid cols-12">
+       <label class="field col-2"><span>CSOSN</span><input name="tax_defaults[icms_csosn]" value="{{ data_get($taxDefaults,'icms_csosn',data_get($taxDefaults,'icms_csosn_default')) }}" maxlength="4"></label>
+       <label class="field col-2"><span>CST ICMS</span><input name="tax_defaults[icms_cst]" value="{{ data_get($taxDefaults,'icms_cst',data_get($taxDefaults,'icms_cst_default')) }}" maxlength="4"></label>
+       <label class="field col-2"><span>CSOSN exportação</span><input name="tax_defaults[icms_csosn_export]" value="{{ data_get($taxDefaults,'icms_csosn_export') }}" maxlength="4"></label>
+       <label class="field col-2"><span>CSOSN entrada</span><input name="tax_defaults[icms_csosn_inbound]" value="{{ data_get($taxDefaults,'icms_csosn_inbound') }}" maxlength="4"></label>
+       <label class="field col-2"><span>CST ICMS entrada</span><input name="tax_defaults[icms_cst_inbound]" value="{{ data_get($taxDefaults,'icms_cst_inbound') }}" maxlength="4"></label>
+       <label class="field col-2"><span>ICMS %</span><input type="number" step="0.0001" min="0" name="tax_defaults[icms_rate]" value="{{ data_get($taxDefaults,'icms_rate') }}"></label>
+       <label class="field col-2"><span>Redução BC %</span><input type="number" step="0.0001" min="0" name="tax_defaults[base_reduction_rate]" value="{{ data_get($taxDefaults,'base_reduction_rate') }}"></label>
+       <label class="field col-2"><span>Crédito Simples %</span><input type="number" step="0.0001" min="0" name="tax_defaults[simple_credit_rate]" value="{{ data_get($taxDefaults,'simple_credit_rate') }}"></label>
+
+       <label class="field col-2"><span>Modalidade BC</span><input name="tax_defaults[mod_bc]" value="{{ data_get($taxDefaults,'mod_bc') }}"></label>
+       <label class="field col-2"><span>Modalidade BC ST</span><input name="tax_defaults[mod_bc_st]" value="{{ data_get($taxDefaults,'mod_bc_st') }}"></label>
+       <label class="field col-2"><span>ICMS ST %</span><input type="number" step="0.0001" min="0" name="tax_defaults[icms_st_rate]" value="{{ data_get($taxDefaults,'icms_st_rate') }}"></label>
+       <label class="field col-2"><span>MVA %</span><input type="number" step="0.0001" min="0" name="tax_defaults[mva_rate]" value="{{ data_get($taxDefaults,'mva_rate') }}"></label>
+     </div>
+   </div>
+
+   <div class="editor-panel">
+     <h3>PIS / COFINS / IPI / ISS</h3>
+     <div class="editor-grid cols-12">
+       <label class="field col-2"><span>CST PIS</span><input name="tax_defaults[pis_cst]" value="{{ data_get($taxDefaults,'pis_cst',data_get($taxDefaults,'pis_cst_default')) }}" maxlength="4"></label>
+       <label class="field col-2"><span>PIS %</span><input type="number" step="0.0001" min="0" name="tax_defaults[pis_rate]" value="{{ data_get($taxDefaults,'pis_rate') }}"></label>
+       <label class="field col-2"><span>CST PIS entrada</span><input name="tax_defaults[pis_cst_inbound]" value="{{ data_get($taxDefaults,'pis_cst_inbound') }}" maxlength="4"></label>
+       <label class="field col-2"><span>CST COFINS</span><input name="tax_defaults[cofins_cst]" value="{{ data_get($taxDefaults,'cofins_cst',data_get($taxDefaults,'cofins_cst_default')) }}" maxlength="4"></label>
+       <label class="field col-2"><span>COFINS %</span><input type="number" step="0.0001" min="0" name="tax_defaults[cofins_rate]" value="{{ data_get($taxDefaults,'cofins_rate') }}"></label>
+       <label class="field col-2"><span>CST COFINS entrada</span><input name="tax_defaults[cofins_cst_inbound]" value="{{ data_get($taxDefaults,'cofins_cst_inbound') }}" maxlength="4"></label>
+       <label class="field col-2"><span>CST IPI</span><input name="tax_defaults[ipi_cst]" value="{{ data_get($taxDefaults,'ipi_cst',data_get($taxDefaults,'ipi_cst_default')) }}" maxlength="4"></label>
+       <label class="field col-2"><span>IPI %</span><input type="number" step="0.0001" min="0" name="tax_defaults[ipi_rate]" value="{{ data_get($taxDefaults,'ipi_rate') }}"></label>
+       <label class="field col-2"><span>CST IPI entrada</span><input name="tax_defaults[ipi_cst_inbound]" value="{{ data_get($taxDefaults,'ipi_cst_inbound') }}" maxlength="4"></label>
+
+       <label class="field col-3"><span>Enquadramento IPI</span><input name="tax_defaults[ipi_enq]" value="{{ data_get($taxDefaults,'ipi_enq','999') }}" maxlength="10"></label>
+       <label class="field col-3"><span>ISS %</span><input type="number" step="0.0001" min="0" name="tax_defaults[iss_rate]" value="{{ data_get($taxDefaults,'iss_rate',data_get($taxDefaults,'iss_rate_default')) }}"></label>
+       <label class="field col-3"><span>Item lista de serviço</span><input name="tax_defaults[service_list_code]" value="{{ data_get($taxDefaults,'service_list_code') }}"></label>
+       <label class="field col-3"><span>Qtd. tributável por unidade</span><input type="number" step="0.0001" min="0" name="tax_defaults[tax_quantity_factor]" value="{{ data_get($taxDefaults,'tax_quantity_factor',1) }}"></label>
+     </div>
+   </div>
+
+   <div class="editor-panel">
+     <h3>DIFAL / FCP</h3>
+     <div class="editor-grid cols-12">
+       <label class="field col-4"><span>ICMS interestadual %</span><input type="number" step="0.0001" min="0" name="tax_defaults[interstate_icms_rate]" value="{{ data_get($taxDefaults,'interstate_icms_rate') }}"></label>
+       <label class="field col-4"><span>ICMS interno destino %</span><input type="number" step="0.0001" min="0" name="tax_defaults[internal_icms_rate]" value="{{ data_get($taxDefaults,'internal_icms_rate') }}"></label>
+       <label class="field col-4"><span>FCP interestadual %</span><input type="number" step="0.0001" min="0" name="tax_defaults[fcp_interstate_rate]" value="{{ data_get($taxDefaults,'fcp_interstate_rate',data_get($taxDefaults,'fcp_rate_default')) }}"></label>
+     </div>
+   </div>
+
+   <div class="editor-panel">
+     <h3>Combustível / ANP</h3>
+     <div class="editor-grid cols-12">
+       <div class="field col-3"><span>Derivado de petróleo?</span>
+         <label class="switch-field">
+           <input type="hidden" name="tax_defaults[petroleum_derived]" value="0">
+           <input type="checkbox" name="tax_defaults[petroleum_derived]" value="1" @checked(old('tax_defaults.petroleum_derived',data_get($taxDefaults,'petroleum_derived')))>
+           <span class="switch-track"></span><strong data-switch-label>Sim</strong>
+         </label>
+       </div>
+       <label class="field col-3"><span>Código ANP</span><input name="tax_defaults[anp_code]" value="{{ data_get($taxDefaults,'anp_code') }}"></label>
+       <label class="field col-6"><span>Descrição ANP</span><input name="tax_defaults[anp_description]" value="{{ data_get($taxDefaults,'anp_description') }}"></label>
+       <label class="field col-3"><span>% GLP</span><input type="number" step="0.0001" min="0" name="tax_defaults[glp_rate]" value="{{ data_get($taxDefaults,'glp_rate') }}"></label>
+       <label class="field col-3"><span>% GNn</span><input type="number" step="0.0001" min="0" name="tax_defaults[gnn_rate]" value="{{ data_get($taxDefaults,'gnn_rate') }}"></label>
+       <label class="field col-3"><span>% GNi</span><input type="number" step="0.0001" min="0" name="tax_defaults[gni_rate]" value="{{ data_get($taxDefaults,'gni_rate') }}"></label>
+       <label class="field col-3"><span>Valor de partida</span><input type="number" step="0.0001" min="0" name="tax_defaults[starting_value]" value="{{ data_get($taxDefaults,'starting_value') }}"></label>
+     </div>
+   </div>
+
+   <div class="editor-panel">
+     <h3>IBS / CBS</h3>
+     <div class="editor-grid cols-12">
+       <label class="field col-3"><span>CST IBS</span><input name="tax_defaults[ibs_cst]" value="{{ data_get($taxDefaults,'ibs_cst',data_get($taxDefaults,'ibs_cst_default')) }}"></label>
+       <label class="field col-3"><span>CST CBS</span><input name="tax_defaults[cbs_cst]" value="{{ data_get($taxDefaults,'cbs_cst',data_get($taxDefaults,'cbs_cst_default')) }}"></label>
+       <label class="field col-6"><span>Classificação tributária</span><input name="tax_defaults[tax_classification_code]" value="{{ data_get($taxDefaults,'tax_classification_code') }}"></label>
      </div>
    </div>
 

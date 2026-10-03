@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class OperationNature extends Model
 {
     protected $fillable=[
-        'name','operation_type','purpose','cfop_internal','cfop_interstate','cfop_foreign',
+        'name','operation_type','purpose','cfop_internal','cfop_interstate',
+        'cfop_inbound_internal','cfop_inbound_interstate','cfop_foreign',
         'override_product_cfop','final_consumer_default','presence_default','move_stock',
         'generate_finance','allow_referenced_document','require_transport','require_invoice',
         'require_duplicates','additional_info','tax_authority_info','is_active',

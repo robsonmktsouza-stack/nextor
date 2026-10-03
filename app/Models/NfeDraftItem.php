@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class NfeDraftItem extends Model
 {
     protected $fillable=[
-        'nfe_draft_id','product_id','item_number','product_name','product_sku','quantity',
+        'nfe_draft_id','product_id','item_number','product_name','product_sku','quantity','dimension_quantity',
         'unit_price','freight','insurance','other_expenses','discount','line_total','cfop',
         'origin','ean_gtin','unit','tax_unit','ncm','cest','ipi_exception','fiscal_benefit_code',
         'purchase_order','purchase_order_item','notes','tax_data','special_data',
@@ -18,6 +18,7 @@ class NfeDraftItem extends Model
     {
         return [
             'quantity'=>'decimal:4',
+            'dimension_quantity'=>'decimal:4',
             'unit_price'=>'decimal:4',
             'freight'=>'decimal:2',
             'insurance'=>'decimal:2',

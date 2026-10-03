@@ -23,18 +23,34 @@
     <table class="cms-table">
       <thead>
         <tr>
-          <th>Natureza</th><th>Tipo</th><th>Finalidade</th><th>CFOP interno</th>
-          <th>CFOP interestadual</th><th>Status</th><th class="action-cell">Detalhes</th>
+          <th>Natureza</th>
+          <th>Finalidade</th>
+          <th>CFOP saída</th>
+          <th>CFOP entrada</th>
+          <th>CFOP do produto</th>
+          <th>Estoque</th>
+          <th>Status</th>
+          <th class="action-cell"></th>
         </tr>
       </thead>
       <tbody>
       @forelse($natures as $nature)
         <tr>
-          <td><strong class="table-title">{{ $nature->name }}</strong></td>
-          <td><span class="status status-blue">{{ $nature->operation_type==='outbound'?'Saída':'Entrada' }}</span></td>
-          <td>{{ ['normal'=>'Normal','complementary'=>'Complementar','adjustment'=>'Ajuste','return'=>'Devolução'][$nature->purpose] ?? $nature->purpose }}</td>
-          <td>{{ $nature->cfop_internal ?: '—' }}</td>
-          <td>{{ $nature->cfop_interstate ?: '—' }}</td>
+          <td>
+            <strong class="table-title">{{ $nature->name }}</strong>
+            <small class="table-subtitle">Padrão: {{ $nature->operation_type==='outbound'?'Saída':'Entrada' }}</small>
+          </td>
+          <td>{{ ['normal'=>'1 - Normal','complementary'=>'2 - Complementar','adjustment'=>'3 - Ajuste','return'=>'4 - Devolução'][$nature->purpose] ?? $nature->purpose }}</td>
+          <td>
+            <span class="code-tag">{{ $nature->cfop_internal ?: '—' }}</span>
+            <small class="table-subtitle">Interestadual: {{ $nature->cfop_interstate ?: '—' }}</small>
+          </td>
+          <td>
+            <span class="code-tag">{{ $nature->cfop_inbound_internal ?: '—' }}</span>
+            <small class="table-subtitle">Interestadual: {{ $nature->cfop_inbound_interstate ?: '—' }}</small>
+          </td>
+          <td>{{ $nature->override_product_cfop?'Sobrescreve':'Mantém quando informado' }}</td>
+          <td>{{ $nature->move_stock?'Movimenta':'Não movimenta' }}</td>
           <td><span class="status {{ $nature->is_active?'status-ok':'status-muted' }}">{{ $nature->is_active?'Ativa':'Inativa' }}</span></td>
           <td class="action-cell">
             <button class="btn-icon" type="button" data-dialog-open="nature-edit-{{ $nature->id }}" data-tooltip="Editar">
@@ -43,27 +59,41 @@
           </td>
         </tr>
       @empty
-        <tr><td colspan="7" class="empty-cell">Nenhuma natureza de operação cadastrada. Cadastre a primeira para iniciar uma NF-e.</td></tr>
+        <tr><td colspan="8" class="empty-cell">Nenhuma natureza de operação cadastrada.</td></tr>
       @endforelse
       </tbody>
     </table>
   </div>
 </section>
 
-<dialog class="erp-dialog nature-dialog" id="nature-create">
-  <form method="post" action="{{ route('fiscal.nfe.natures.store') }}">@csrf
-    <div class="dialog-header"><div><h2>Nova natureza de operação</h2><p>Regras padrão usadas no preenchimento da NF-e.</p></div><button type="button" data-dialog-close class="close-dialog">@include('partials.icon',['name'=>'x'])</button></div>
-    <div class="dialog-body">@include('fiscal.nfe._nature_form',['nature'=>new \App\Models\OperationNature()])</div>
-    <div class="dialog-footer"><button type="button" data-dialog-close class="btn btn-secondary">Cancelar</button><button class="btn btn-success">Salvar</button></div>
+<dialog class="erp-dialog nfe-wide-dialog" id="nature-create">
+  <form method="post" action="{{ route('fiscal.nfe.natures.store') }}">
+    @csrf
+    <div class="dialog-header">
+      <div><h2>Nova natureza de operação</h2><p>CFOPs e comportamento padrão usados pela NF-e.</p></div>
+      <button type="button" data-dialog-close class="close-dialog" aria-label="Fechar">@include('partials.icon',['name'=>'x'])</button>
+    </div>
+    <div class="dialog-body">@include('fiscal.nfe._nature_form')</div>
+    <div class="dialog-footer">
+      <button type="button" data-dialog-close class="btn btn-secondary">Cancelar</button>
+      <button class="btn btn-success">Salvar</button>
+    </div>
   </form>
 </dialog>
 
 @foreach($natures as $nature)
-<dialog class="erp-dialog nature-dialog" id="nature-edit-{{ $nature->id }}">
-  <form method="post" action="{{ route('fiscal.nfe.natures.update',$nature) }}">@csrf @method('PUT')
-    <div class="dialog-header"><div><h2>Editar natureza</h2><p>{{ $nature->name }}</p></div><button type="button" data-dialog-close class="close-dialog">@include('partials.icon',['name'=>'x'])</button></div>
-    <div class="dialog-body">@include('fiscal.nfe._nature_form',['nature'=>$nature,'prefix'=>'nature-'.$nature->id])</div>
-    <div class="dialog-footer"><button type="button" data-dialog-close class="btn btn-secondary">Cancelar</button><button class="btn btn-success">Salvar alterações</button></div>
+<dialog class="erp-dialog nfe-wide-dialog" id="nature-edit-{{ $nature->id }}">
+  <form method="post" action="{{ route('fiscal.nfe.natures.update',$nature) }}">
+    @csrf @method('PUT')
+    <div class="dialog-header">
+      <div><h2>Editar natureza de operação</h2><p>{{ $nature->name }}</p></div>
+      <button type="button" data-dialog-close class="close-dialog" aria-label="Fechar">@include('partials.icon',['name'=>'x'])</button>
+    </div>
+    <div class="dialog-body">@include('fiscal.nfe._nature_form',['nature'=>$nature])</div>
+    <div class="dialog-footer">
+      <button type="button" data-dialog-close class="btn btn-secondary">Cancelar</button>
+      <button class="btn btn-success">Salvar alterações</button>
+    </div>
   </form>
 </dialog>
 @endforeach

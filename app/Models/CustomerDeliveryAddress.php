@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CustomerDeliveryAddress extends Model {
     protected $fillable=[
-        'name','document','state_registration','zip_code','state','city',
+        'name','document','state_registration','zip_code','state','city','city_ibge_code',
         'address','address_number','address_complement','district','email','phone'
     ];
 

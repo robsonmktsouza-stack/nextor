@@ -96,6 +96,8 @@ class CustomerController extends Controller {
             'customer'=>new Customer([
                 'is_customer'=>true,
                 'ie_indicator'=>'non_contributor',
+                'country_code'=>'1058',
+                'country_name'=>'BRASIL',
                 'lgpd_legal_basis'=>'default',
             ]),
             'editing'=>false,
@@ -122,10 +124,14 @@ class CustomerController extends Controller {
             'zip_code'=>['nullable','string','max:10'],
             'state'=>['nullable','string','size:2'],
             'city'=>['nullable','string','max:120'],
+            'city_ibge_code'=>['nullable','string','max:10'],
             'address'=>['nullable','string','max:190'],
             'address_number'=>['nullable','string','max:30'],
             'address_complement'=>['nullable','string','max:120'],
             'district'=>['nullable','string','max:120'],
+            'country_code'=>['nullable','string','max:10'],
+            'country_name'=>['nullable','string','max:80'],
+            'foreign_id'=>['nullable','string','max:40'],
 
             'final_consumer'=>['nullable','boolean'],
             'ie_indicator'=>['nullable','string','max:32'],
@@ -152,6 +158,7 @@ class CustomerController extends Controller {
             'delivery_addresses.*.zip_code'=>['nullable','string','max:10'],
             'delivery_addresses.*.state'=>['nullable','string','size:2'],
             'delivery_addresses.*.city'=>['nullable','string','max:120'],
+            'delivery_addresses.*.city_ibge_code'=>['nullable','string','max:10'],
             'delivery_addresses.*.address'=>['nullable','string','max:190'],
             'delivery_addresses.*.address_number'=>['nullable','string','max:30'],
             'delivery_addresses.*.address_complement'=>['nullable','string','max:120'],
@@ -210,7 +217,7 @@ class CustomerController extends Controller {
                 $copy->save();
                 foreach($customer->deliveryAddresses as $address) {
                     $copy->deliveryAddresses()->create($address->only([
-                        'name','document','state_registration','zip_code','state','city','address',
+                        'name','document','state_registration','zip_code','state','city','city_ibge_code','address',
                         'address_number','address_complement','district','email','phone'
                     ]));
                 }

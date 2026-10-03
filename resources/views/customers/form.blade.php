@@ -69,10 +69,13 @@ $deliveryAddresses=collect(old('delivery_addresses',$customer->exists ? $custome
            @foreach($ufs as $uf=>$label)<option value="{{ $uf }}" @selected(old('state',$customer->state)===$uf)>{{ $uf }} — {{ $label }}</option>@endforeach
          </select>
        </label>
-       <label class="field col-6"><span>Cidade</span>
+       <label class="field col-4"><span>Cidade</span>
          <select name="city" data-city-select data-current-city="{{ old('city',$customer->city) }}">
            <option value="{{ old('city',$customer->city) }}">{{ old('city',$customer->city) ?: 'Selecione o estado' }}</option>
          </select>
+       </label>
+       <label class="field col-2"><span>Código IBGE</span>
+         <input name="city_ibge_code" value="{{ old('city_ibge_code',$customer->city_ibge_code) }}" data-city-code-input maxlength="10">
        </label>
 
        <label class="field col-10"><span>Endereço</span><input name="address" value="{{ old('address',$customer->address) }}" data-address-input></label>
@@ -93,7 +96,8 @@ $deliveryAddresses=collect(old('delivery_addresses',$customer->exists ? $custome
          <div class="editor-grid cols-12" data-address-scope>
            <label class="field col-3"><span>CEP</span><div class="input-action-group compact-action"><input name="delivery_addresses[{{ $index }}][zip_code]" value="{{ $address['zip_code'] ?? '' }}" data-cep-input><button type="button" class="input-action-button" data-cep-search>@include('partials.icon',['name'=>'search','size'=>15])</button></div></label>
            <label class="field col-3"><span>Estado</span><select name="delivery_addresses[{{ $index }}][state]" data-uf-select><option value="">Selecione</option>@foreach($ufs as $uf=>$label)<option value="{{ $uf }}" @selected(($address['state'] ?? '')===$uf)>{{ $uf }} — {{ $label }}</option>@endforeach</select></label>
-           <label class="field col-6"><span>Cidade</span><select name="delivery_addresses[{{ $index }}][city]" data-city-select data-current-city="{{ $address['city'] ?? '' }}"><option value="{{ $address['city'] ?? '' }}">{{ $address['city'] ?? 'Selecione o estado' }}</option></select></label>
+           <label class="field col-4"><span>Cidade</span><select name="delivery_addresses[{{ $index }}][city]" data-city-select data-current-city="{{ $address['city'] ?? '' }}"><option value="{{ $address['city'] ?? '' }}">{{ $address['city'] ?? 'Selecione o estado' }}</option></select></label>
+           <label class="field col-2"><span>Código IBGE</span><input name="delivery_addresses[{{ $index }}][city_ibge_code]" value="{{ $address['city_ibge_code'] ?? '' }}" data-city-code-input></label>
 
            <label class="field col-5"><span>Nome ou Razão social</span><input name="delivery_addresses[{{ $index }}][name]" value="{{ $address['name'] ?? '' }}"></label>
            <label class="field col-4"><span>CPF/CNPJ destinatário</span><input name="delivery_addresses[{{ $index }}][document]" value="{{ $address['document'] ?? '' }}"></label>
@@ -139,6 +143,10 @@ $deliveryAddresses=collect(old('delivery_addresses',$customer->exists ? $custome
            <option value="other" @selected(old('government_entity',$customer->government_entity)==='other')>Outros</option>
          </select>
        </label>
+
+       <label class="field col-3"><span>Código do país</span><input name="country_code" value="{{ old('country_code',$customer->country_code ?: '1058') }}" maxlength="10"></label>
+       <label class="field col-3"><span>País</span><input name="country_name" value="{{ old('country_name',$customer->country_name ?: 'BRASIL') }}" maxlength="80"></label>
+       <label class="field col-6"><span>Identificação do estrangeiro</span><input name="foreign_id" value="{{ old('foreign_id',$customer->foreign_id) }}" maxlength="40" placeholder="Somente para destinatário do exterior"></label>
 
        <label class="field col-3"><span>RNTRC</span><input name="rntrc" value="{{ old('rntrc',$customer->rntrc) }}"></label>
        <label class="field col-3"><span>Tipo de transportador (MDF-e)</span>
@@ -195,7 +203,8 @@ $deliveryAddresses=collect(old('delivery_addresses',$customer->exists ? $custome
   <div class="editor-grid cols-12" data-address-scope>
    <label class="field col-3"><span>CEP</span><div class="input-action-group compact-action"><input name="delivery_addresses[__INDEX__][zip_code]" data-cep-input><button type="button" class="input-action-button" data-cep-search>@include('partials.icon',['name'=>'search','size'=>15])</button></div></label>
    <label class="field col-3"><span>Estado</span><select name="delivery_addresses[__INDEX__][state]" data-uf-select><option value="">Selecione</option>@foreach($ufs as $uf=>$label)<option value="{{ $uf }}">{{ $uf }} — {{ $label }}</option>@endforeach</select></label>
-   <label class="field col-6"><span>Cidade</span><select name="delivery_addresses[__INDEX__][city]" data-city-select><option value="">Selecione o estado</option></select></label>
+   <label class="field col-4"><span>Cidade</span><select name="delivery_addresses[__INDEX__][city]" data-city-select><option value="">Selecione o estado</option></select></label>
+   <label class="field col-2"><span>Código IBGE</span><input name="delivery_addresses[__INDEX__][city_ibge_code]" data-city-code-input></label>
    <label class="field col-5"><span>Nome ou Razão social</span><input name="delivery_addresses[__INDEX__][name]"></label>
    <label class="field col-4"><span>CPF/CNPJ destinatário</span><input name="delivery_addresses[__INDEX__][document]"></label>
    <label class="field col-3"><span>Inscrição Estadual</span><input name="delivery_addresses[__INDEX__][state_registration]"></label>
