@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\AppSetting;
 use App\Models\FiscalDocumentJob;
-use App\Models\Sale;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -75,17 +74,6 @@ class FiscalController extends Controller
             $environment='';
         }
 
-        $listedSaleIds=(clone $query)
-            ->whereNotNull('sale_id')
-            ->pluck('sale_id')
-            ->filter()
-            ->unique()
-            ->values();
-
-        $listedAmount=$listedSaleIds->isEmpty()
-            ? 0.0
-            : (float)Sale::query()->whereIn('id',$listedSaleIds)->sum('total');
-
         $documents=$query
             ->latest('prepared_at')
             ->latest('id')
@@ -109,7 +97,6 @@ class FiscalController extends Controller
             'prevMonth'=>$period->copy()->subMonth()->format('Y-m'),
             'nextMonth'=>$period->copy()->addMonth()->format('Y-m'),
             'monthLabel'=>$monthNames[(int)$period->format('n')].' '.$period->format('Y'),
-            'listedAmount'=>$listedAmount,
             'configuration'=>$this->configurationFor($tab),
             'dateFormat'=>AppSetting::dateFormat(),
         ]);
