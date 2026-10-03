@@ -141,7 +141,7 @@
               </a>
               <small class="table-subtitle">{{ $tabMeta['label'] }} #{{ $document->id }}</small>
             </td>
-            <td class="nowrap">{{ ($document->prepared_at ?? $document->created_at)?->format(AppModelsAppSetting::dateFormat().' H:i') }}</td>
+            <td class="nowrap">{{ ($document->prepared_at ?? $document->created_at)?->format($dateFormat.' H:i') }}</td>
             <td>
               @if($document->sale && auth()->user()->canAccess('sales'))
                 <a class="table-link" href="{{ route('sales.show',$document->sale) }}">Venda #{{ $document->sale_id }}</a>
