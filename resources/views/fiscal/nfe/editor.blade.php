@@ -622,6 +622,7 @@ $origins=[
 <script type="application/json" id="nfe-products-data">@json($productData)</script>
 <script type="application/json" id="nfe-customers-data">@json($customerData)</script>
 <script type="application/json" id="nfe-natures-data">@json($natureData)</script>
+<script type="application/json" id="nfe-tax-defaults-data">@json($taxDefaults)</script>
 <script type="application/json" id="nfe-emitter-state">@json($company->state)</script>
 @endsection
 
