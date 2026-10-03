@@ -35,6 +35,8 @@ class OperationNatureController extends Controller
             'purpose'=>['required',Rule::in(['normal','complementary','adjustment','return'])],
             'cfop_internal'=>['nullable','string','max:10'],
             'cfop_interstate'=>['nullable','string','max:10'],
+            'cfop_inbound_internal'=>['nullable','string','max:10'],
+            'cfop_inbound_interstate'=>['nullable','string','max:10'],
             'cfop_foreign'=>['nullable','string','max:10'],
             'presence_default'=>['required',Rule::in(['not_applicable','presential','internet','phone','outside_establishment','other'])],
             'additional_info'=>['nullable','string','max:5000'],
