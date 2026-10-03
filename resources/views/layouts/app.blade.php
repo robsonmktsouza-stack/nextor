@@ -35,6 +35,13 @@
             <a href="{{ route('sales.index') }}">Vendas</a>
             <a href="{{ route('sales.create') }}">Nova venda</a>
           @endif
+          @if(auth()->user()->canAccess('fiscal'))
+            <a href="{{ route('fiscal.index') }}">Fiscal</a>
+            <a href="{{ route('fiscal.index',['tab'=>'nfe']) }}">NF-e</a>
+            <a href="{{ route('fiscal.index',['tab'=>'nfce']) }}">NFC-e</a>
+            <a href="{{ route('fiscal.index',['tab'=>'nfse']) }}">NFS-e</a>
+            <a href="{{ route('fiscal.index',['tab'=>'cte']) }}">CT-e</a>
+          @endif
           @if(auth()->user()->canAccess('returns'))
             <a href="{{ route('sales.returns.index') }}">Devoluções</a>
             <a href="{{ route('sales.returns.create') }}">Nova devolução</a>
@@ -105,6 +112,12 @@
     @if(auth()->user()->canAccess('stock'))
     <a href="{{ route('stock.index') }}" class="sidebar-link {{ request()->routeIs('stock.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'stock'])<span>Estoque</span></a>
+    @endif
+
+    @if(auth()->user()->canAccess('fiscal'))
+    <div class="sidebar-section-label">FISCAL</div>
+    <a href="{{ route('fiscal.index') }}" class="sidebar-link {{ request()->routeIs('fiscal.*') ? 'active' : '' }}">
+      @include('partials.icon',['name'=>'shield'])<span>Fiscal</span></a>
     @endif
 
     <div class="sidebar-spacer"></div>
