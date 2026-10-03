@@ -139,6 +139,8 @@ $origins=[
        <label class="field col-2"><span>CSOSN</span><input name="tax_defaults[icms_csosn]" value="{{ data_get($taxDefaults,'icms_csosn',data_get($taxDefaults,'icms_csosn_default')) }}" maxlength="4"></label>
        <label class="field col-2"><span>CST ICMS</span><input name="tax_defaults[icms_cst]" value="{{ data_get($taxDefaults,'icms_cst',data_get($taxDefaults,'icms_cst_default')) }}" maxlength="4"></label>
        <label class="field col-2"><span>CSOSN exportação</span><input name="tax_defaults[icms_csosn_export]" value="{{ data_get($taxDefaults,'icms_csosn_export') }}" maxlength="4"></label>
+       <label class="field col-2"><span>CSOSN entrada</span><input name="tax_defaults[icms_csosn_inbound]" value="{{ data_get($taxDefaults,'icms_csosn_inbound') }}" maxlength="4"></label>
+       <label class="field col-2"><span>CST ICMS entrada</span><input name="tax_defaults[icms_cst_inbound]" value="{{ data_get($taxDefaults,'icms_cst_inbound') }}" maxlength="4"></label>
        <label class="field col-2"><span>ICMS %</span><input type="number" step="0.0001" min="0" name="tax_defaults[icms_rate]" value="{{ data_get($taxDefaults,'icms_rate') }}"></label>
        <label class="field col-2"><span>Redução BC %</span><input type="number" step="0.0001" min="0" name="tax_defaults[base_reduction_rate]" value="{{ data_get($taxDefaults,'base_reduction_rate') }}"></label>
        <label class="field col-2"><span>Crédito Simples %</span><input type="number" step="0.0001" min="0" name="tax_defaults[simple_credit_rate]" value="{{ data_get($taxDefaults,'simple_credit_rate') }}"></label>
@@ -155,10 +157,13 @@ $origins=[
      <div class="editor-grid cols-12">
        <label class="field col-2"><span>CST PIS</span><input name="tax_defaults[pis_cst]" value="{{ data_get($taxDefaults,'pis_cst',data_get($taxDefaults,'pis_cst_default')) }}" maxlength="4"></label>
        <label class="field col-2"><span>PIS %</span><input type="number" step="0.0001" min="0" name="tax_defaults[pis_rate]" value="{{ data_get($taxDefaults,'pis_rate') }}"></label>
+       <label class="field col-2"><span>CST PIS entrada</span><input name="tax_defaults[pis_cst_inbound]" value="{{ data_get($taxDefaults,'pis_cst_inbound') }}" maxlength="4"></label>
        <label class="field col-2"><span>CST COFINS</span><input name="tax_defaults[cofins_cst]" value="{{ data_get($taxDefaults,'cofins_cst',data_get($taxDefaults,'cofins_cst_default')) }}" maxlength="4"></label>
        <label class="field col-2"><span>COFINS %</span><input type="number" step="0.0001" min="0" name="tax_defaults[cofins_rate]" value="{{ data_get($taxDefaults,'cofins_rate') }}"></label>
+       <label class="field col-2"><span>CST COFINS entrada</span><input name="tax_defaults[cofins_cst_inbound]" value="{{ data_get($taxDefaults,'cofins_cst_inbound') }}" maxlength="4"></label>
        <label class="field col-2"><span>CST IPI</span><input name="tax_defaults[ipi_cst]" value="{{ data_get($taxDefaults,'ipi_cst',data_get($taxDefaults,'ipi_cst_default')) }}" maxlength="4"></label>
        <label class="field col-2"><span>IPI %</span><input type="number" step="0.0001" min="0" name="tax_defaults[ipi_rate]" value="{{ data_get($taxDefaults,'ipi_rate') }}"></label>
+       <label class="field col-2"><span>CST IPI entrada</span><input name="tax_defaults[ipi_cst_inbound]" value="{{ data_get($taxDefaults,'ipi_cst_inbound') }}" maxlength="4"></label>
 
        <label class="field col-3"><span>Enquadramento IPI</span><input name="tax_defaults[ipi_enq]" value="{{ data_get($taxDefaults,'ipi_enq','999') }}" maxlength="10"></label>
        <label class="field col-3"><span>ISS %</span><input type="number" step="0.0001" min="0" name="tax_defaults[iss_rate]" value="{{ data_get($taxDefaults,'iss_rate',data_get($taxDefaults,'iss_rate_default')) }}"></label>
