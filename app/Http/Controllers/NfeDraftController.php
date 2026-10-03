@@ -400,13 +400,13 @@ class NfeDraftController extends Controller
             'payments'=>[[
                 'type'=>$data['payment_type'],
                 'condition'=>$data['payment_condition'],
-                'amount'=>$data['payment_type']==='90' ? 0 : $totals['total'],
+                'amount'=>$data['payment_type']==='90' ? 0 : round($totals['products']-$discount+$surcharge,2),
                 'other_description'=>$data['payment_other_description'] ?? null,
                 'card_brand'=>$data['card_brand'] ?? null,
                 'acquirer_document'=>$data['card_acquirer_document'] ?? null,
                 'authorization_code'=>$data['card_authorization_code'] ?? null,
             ]],
-            'references'=>$this->decodeArray($data['references_json'] ?? null,'documentos referenciados'),
+            'references'=>$this->validatedReferences($data['references_json'] ?? null),
             'custom_fields'=>[],
             'additional_info'=>$data['additional_info'] ?? $nature->additional_info,
             'tax_authority_info'=>null,
@@ -434,8 +434,10 @@ class NfeDraftController extends Controller
             }
 
             $quantity=max(0,(float)($item['quantity'] ?? 0));
+            $dimensionQuantity=max(0,(float)($item['dimension_quantity'] ?? 1));
+            if($dimensionQuantity<=0) $dimensionQuantity=1;
             $unitPrice=max(0,(float)($item['unit_price'] ?? 0));
-            $lineTotal=max(0,$quantity*$unitPrice);
+            $lineTotal=max(0,$quantity*$dimensionQuantity*$unitPrice);
 
             $taxData=array_replace(
                 is_array($product->tax_defaults) ? $product->tax_defaults : [],
@@ -459,6 +461,7 @@ class NfeDraftController extends Controller
                 'product_name'=>$item['product_name'] ?? $product->name,
                 'product_sku'=>$item['product_sku'] ?? $product->sku,
                 'quantity'=>$quantity,
+                'dimension_quantity'=>$dimensionQuantity,
                 'unit_price'=>$unitPrice,
                 'freight'=>0,
                 'insurance'=>0,
@@ -484,6 +487,7 @@ class NfeDraftController extends Controller
 
         $storedItems=$draft->items()->get()->map(fn($item)=>[
             'quantity'=>(float)$item->quantity,
+            'dimension_quantity'=>(float)$item->dimension_quantity,
             'unit_price'=>(float)$item->unit_price,
             'tax_data'=>$item->tax_data ?? [],
         ])->all();
@@ -502,7 +506,7 @@ class NfeDraftController extends Controller
             'payments'=>[[
                 'type'=>$draft->payment_type,
                 'condition'=>$draft->payment_condition,
-                'amount'=>$draft->payment_type==='90' ? 0 : $totals['total'],
+                'amount'=>$draft->payment_type==='90' ? 0 : round($totals['products']-(float)$draft->discount+(float)$draft->surcharge,2),
                 'other_description'=>$draft->payment_other_description,
                 'card_brand'=>$draft->card_brand,
                 'acquirer_document'=>$draft->card_acquirer_document,
@@ -572,7 +576,10 @@ class NfeDraftController extends Controller
         ];
 
         foreach($items as $item) {
-            $value=max(0,(float)($item['quantity'] ?? 0))*max(0,(float)($item['unit_price'] ?? 0));
+            $quantity=max(0,(float)($item['quantity'] ?? 0));
+            $dimension=max(0,(float)($item['dimension_quantity'] ?? 1));
+            if($dimension<=0) $dimension=1;
+            $value=$quantity*$dimension*max(0,(float)($item['unit_price'] ?? 0));
             $totals['products']+=$value;
 
             $tax=is_array($item['tax_data'] ?? null) ? $item['tax_data'] : [];
@@ -586,6 +593,24 @@ class NfeDraftController extends Controller
         );
 
         return array_map(fn($value)=>round($value,2),$totals);
+    }
+
+    private function validatedReferences(?string $json): array
+    {
+        $references=$this->decodeArray($json,'documentos referenciados');
+
+        foreach($references as $reference) {
+            $key=preg_replace('/\D/','',(string)($reference['key'] ?? ''));
+            if(strlen($key)!==44) {
+                throw ValidationException::withMessages([
+                    'references_json'=>'Toda NF-e referenciada deve possuir chave de acesso com 44 dígitos.',
+                ]);
+            }
+        }
+
+        return array_values(array_map(fn($reference)=>[
+            'key'=>preg_replace('/\D/','',(string)($reference['key'] ?? '')),
+        ],$references));
     }
 
     private function decodeArray(?string $json,string $label): array
