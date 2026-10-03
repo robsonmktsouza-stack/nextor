@@ -165,12 +165,19 @@ class NfeDraftController extends Controller
             if($item->origin===null || trim((string)$item->origin)==='') $errors[]=$prefix.'origem da mercadoria não informada.';
             if($item->unit===null || trim((string)$item->unit)==='') $errors[]=$prefix.'unidade comercial não informada.';
 
-            if($issRate<=0 && empty($tax['icms_cst']) && empty($tax['icms_csosn'])) {
+            $inbound=$draft->operation_type==='inbound';
+            $icmsCst=$inbound ? ($tax['icms_cst_inbound'] ?? $tax['icms_cst'] ?? null) : ($tax['icms_cst'] ?? null);
+            $icmsCsosn=$inbound ? ($tax['icms_csosn_inbound'] ?? $tax['icms_csosn'] ?? null) : ($tax['icms_csosn'] ?? null);
+            $pisCst=$inbound ? ($tax['pis_cst_inbound'] ?? $tax['pis_cst'] ?? null) : ($tax['pis_cst'] ?? null);
+            $cofinsCst=$inbound ? ($tax['cofins_cst_inbound'] ?? $tax['cofins_cst'] ?? null) : ($tax['cofins_cst'] ?? null);
+            $ipiCst=$inbound ? ($tax['ipi_cst_inbound'] ?? $tax['ipi_cst'] ?? null) : ($tax['ipi_cst'] ?? null);
+
+            if($issRate<=0 && empty($icmsCst) && empty($icmsCsosn)) {
                 $errors[]=$prefix.'CST/CSOSN do ICMS não informado.';
             }
-            if(empty($tax['pis_cst'])) $errors[]=$prefix.'CST do PIS não informado.';
-            if(empty($tax['cofins_cst'])) $errors[]=$prefix.'CST da COFINS não informado.';
-            if(empty($tax['ipi_cst'])) $errors[]=$prefix.'CST do IPI não informado.';
+            if(empty($pisCst)) $errors[]=$prefix.'CST do PIS não informado.';
+            if(empty($cofinsCst)) $errors[]=$prefix.'CST da COFINS não informado.';
+            if(empty($ipiCst)) $errors[]=$prefix.'CST do IPI não informado.';
         }
 
         if($errors) {
