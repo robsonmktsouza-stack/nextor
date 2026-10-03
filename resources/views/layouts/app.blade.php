@@ -23,7 +23,7 @@
       <div class="command-box">
         @include('partials.icon',['name'=>'search','size'=>18])
         <input id="commandSearch" autocomplete="off" placeholder="Buscar no sistema..." aria-label="Buscar páginas">
-        <kbd>Ctrl K</kbd>
+        <kbd data-tutorial>Ctrl K</kbd>
         <div class="command-results" id="commandResults" hidden>
           @if(auth()->user()->canAccess('dashboard'))<a href="{{ route('dashboard') }}">Painel geral</a>@endif
           @if(auth()->user()->canAccess('products'))<a href="{{ route('products.index') }}">Produtos</a>@endif
