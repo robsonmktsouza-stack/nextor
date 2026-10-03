@@ -38,26 +38,16 @@ class OperationNatureController extends Controller
             'cfop_inbound_internal'=>['nullable','string','max:10'],
             'cfop_inbound_interstate'=>['nullable','string','max:10'],
             'cfop_foreign'=>['nullable','string','max:10'],
-            'presence_default'=>['required',Rule::in(['not_applicable','presential','internet','phone','outside_establishment','other'])],
             'additional_info'=>['nullable','string','max:5000'],
-            'tax_authority_info'=>['nullable','string','max:5000'],
             'override_product_cfop'=>['nullable','boolean'],
-            'final_consumer_default'=>['nullable','boolean'],
             'move_stock'=>['nullable','boolean'],
-            'generate_finance'=>['nullable','boolean'],
-            'allow_referenced_document'=>['nullable','boolean'],
-            'require_transport'=>['nullable','boolean'],
-            'require_invoice'=>['nullable','boolean'],
-            'require_duplicates'=>['nullable','boolean'],
             'is_active'=>['nullable','boolean'],
         ]);
 
-        foreach([
-            'override_product_cfop','final_consumer_default','move_stock','generate_finance',
-            'allow_referenced_document','require_transport','require_invoice','require_duplicates','is_active'
-        ] as $key) {
-            $data[$key]=$request->boolean($key);
-        }
+        $data['override_product_cfop']=$request->boolean('override_product_cfop');
+        $data['move_stock']=$request->boolean('move_stock');
+        $data['is_active']=$request->boolean('is_active');
+        $data['presence_default']='presential';
 
         return $data;
     }
