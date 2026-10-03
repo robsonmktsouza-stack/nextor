@@ -28,7 +28,7 @@
   <div><span>Status</span><strong class="status {{ $statusInfo[1] }}">{{ $statusInfo[0] }}</strong></div>
   <div><span>Ambiente</span><strong>{{ $document->environment==='production'?'Produção':'Homologação' }}</strong></div>
   <div><span>Emissão</span><strong>{{ $document->emission_mode==='offline'?'Contingência':'Normal' }}</strong></div>
-  <div><span>Preparado em</span><strong>{{ ($document->prepared_at ?? $document->created_at)?->format(AppModelsAppSetting::dateFormat().' H:i') }}</strong></div>
+  <div><span>Preparado em</span><strong>{{ ($document->prepared_at ?? $document->created_at)?->format($dateFormat.' H:i') }}</strong></div>
 </div>
 
 <div class="fiscal-detail-grid">
@@ -39,8 +39,8 @@
       <div><dt>Série / número</dt><dd>{{ $document->series ?? '—' }} / {{ $document->document_number ?? '—' }}</dd></div>
       <div><dt>Chave de acesso</dt><dd class="fiscal-key">{{ $document->access_key ?: '—' }}</dd></div>
       <div><dt>Protocolo</dt><dd>{{ $document->protocol ?: '—' }}</dd></div>
-      <div><dt>Autorizado em</dt><dd>{{ $document->authorized_at?->format(AppModelsAppSetting::dateFormat().' H:i:s') ?? '—' }}</dd></div>
-      <div><dt>Processado em</dt><dd>{{ $document->processed_at?->format(AppModelsAppSetting::dateFormat().' H:i:s') ?? '—' }}</dd></div>
+      <div><dt>Autorizado em</dt><dd>{{ $document->authorized_at?->format($dateFormat.' H:i:s') ?? '—' }}</dd></div>
+      <div><dt>Processado em</dt><dd>{{ $document->processed_at?->format($dateFormat.' H:i:s') ?? '—' }}</dd></div>
     </dl>
   </section>
 
@@ -79,8 +79,8 @@
     <div class="card-header"><div><h2>Cancelamento</h2><p>Estado do evento de cancelamento.</p></div></div>
     <dl class="fiscal-data-list">
       <div><dt>Status</dt><dd>{{ $document->cancellation_status ?: ($document->cancelled_at?'Concluído':'—') }}</dd></div>
-      <div><dt>Solicitado em</dt><dd>{{ $document->cancellation_requested_at?->format(AppModelsAppSetting::dateFormat().' H:i:s') ?? '—' }}</dd></div>
-      <div><dt>Cancelado em</dt><dd>{{ $document->cancelled_at?->format(AppModelsAppSetting::dateFormat().' H:i:s') ?? '—' }}</dd></div>
+      <div><dt>Solicitado em</dt><dd>{{ $document->cancellation_requested_at?->format($dateFormat.' H:i:s') ?? '—' }}</dd></div>
+      <div><dt>Cancelado em</dt><dd>{{ $document->cancelled_at?->format($dateFormat.' H:i:s') ?? '—' }}</dd></div>
       <div><dt>Motivo</dt><dd>{{ $document->cancellation_reason ?: '—' }}</dd></div>
     </dl>
   </section>
