@@ -2067,3 +2067,52 @@ body[data-show-tutorials="0"] .pdv-modal-help,
 body[data-show-tutorials="0"] .pdv-command-center,
 body[data-show-tutorials="0"] .pdv-cart-nav-hint,
 body[data-show-tutorials="0"] .pdv-split-help{display:none!important}
+
+
+/* Fiscal module */
+.fiscal-tabs{display:flex;align-items:end;gap:2px;margin:0 0 14px;border-bottom:1px solid var(--border,#d9e0e6);overflow-x:auto}
+.fiscal-tabs a{display:inline-flex;align-items:center;gap:7px;min-height:39px;padding:0 15px;border:1px solid transparent;border-bottom:0;border-radius:4px 4px 0 0;color:#536474;font-size:12px;font-weight:700;white-space:nowrap}
+.fiscal-tabs a:hover{background:#f6f8fa;color:#22384b}
+.fiscal-tabs a.active{position:relative;top:1px;background:#fff;border-color:var(--border,#d9e0e6);color:#1f4d73}
+.fiscal-tabs a small{display:grid;place-items:center;min-width:19px;height:19px;padding:0 5px;border-radius:10px;background:#e8eef4;color:#506578;font-size:10px}
+.fiscal-tabs a.active small{background:#dbeafa;color:#2569a4}
+.fiscal-summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:10px}
+.fiscal-summary-card{min-width:0;padding:14px 15px;background:#fff;border:1px solid #dfe5ea;border-radius:5px;display:flex;flex-direction:column;gap:4px}
+.fiscal-summary-card>span{font-size:11px;font-weight:700;color:#71808d;text-transform:uppercase;letter-spacing:.03em}
+.fiscal-summary-card>strong{font-size:24px;line-height:1.1;color:#203547;font-weight:700}
+.fiscal-summary-card>small{font-size:11px;color:#7b8995}
+.fiscal-summary-card.has-alert>strong{color:#b33b32}
+.fiscal-config-strip{display:flex;align-items:stretch;gap:0;margin-bottom:10px;background:#fff;border:1px solid #dfe5ea;border-radius:5px;overflow-x:auto}
+.fiscal-config-strip>div{min-width:130px;flex:1;padding:10px 13px;border-right:1px solid #e7ebef;display:flex;flex-direction:column;gap:4px}
+.fiscal-config-strip>div:last-child{border-right:0}
+.fiscal-config-strip span{font-size:10px;color:#798895;text-transform:uppercase;font-weight:700}
+.fiscal-config-strip strong{font-size:12px;color:#263d50}
+.fiscal-config-strip .status{align-self:flex-start}
+.fiscal-module-card{overflow:hidden}
+.fiscal-table .fiscal-key{display:block;max-width:270px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:10px;color:#566a7c}
+.fiscal-integration-note{display:flex;align-items:flex-start;gap:9px;margin-top:10px;padding:10px 12px;border:1px solid #d8e2eb;border-radius:4px;background:#f7fafc;color:#617384;font-size:11px;line-height:1.45}
+.fiscal-detail-status{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:#fff;border:1px solid #dfe5ea;border-radius:5px;margin-bottom:10px}
+.fiscal-detail-status>div{padding:12px 14px;border-right:1px solid #e7ebef;display:flex;flex-direction:column;gap:5px}
+.fiscal-detail-status>div:last-child{border-right:0}
+.fiscal-detail-status span{font-size:10px;color:#788793;text-transform:uppercase;font-weight:700}
+.fiscal-detail-status strong{font-size:12px;color:#263d50}
+.fiscal-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.fiscal-detail-card{padding-bottom:0}
+.fiscal-data-list{margin:0;padding:0}
+.fiscal-data-list>div{display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px;padding:10px 14px;border-top:1px solid #edf0f2}
+.fiscal-data-list dt{font-size:11px;color:#748391;font-weight:600}
+.fiscal-data-list dd{margin:0;min-width:0;font-size:12px;color:#263d50;font-weight:600;overflow-wrap:anywhere}
+.fiscal-data-list dd.fiscal-key{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:10px}
+.fiscal-error-card,.fiscal-info-card{display:flex;gap:10px;margin-bottom:10px;padding:13px 14px;border-radius:5px}
+.fiscal-error-card{border:1px solid #efc8c4;background:#fff7f6;color:#8b312b}
+.fiscal-error-card strong,.fiscal-info-card strong{display:block;margin-bottom:3px}
+.fiscal-error-card p,.fiscal-info-card p{margin:0;font-size:12px;line-height:1.5}
+.fiscal-info-card{border:1px solid #d7e3ed;background:#f7fafc;color:#4f687c;display:block}
+@media(max-width:900px){
+  .fiscal-summary-grid,.fiscal-detail-status{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .fiscal-detail-grid{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+  .fiscal-summary-grid,.fiscal-detail-status{grid-template-columns:1fr 1fr}
+  .fiscal-config-strip>div{min-width:115px}
+}
