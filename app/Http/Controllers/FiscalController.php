@@ -71,26 +71,16 @@ class FiscalController extends Controller
             ->map(fn($value)=>(int)$value)
             ->all();
 
-        $statusCounts=FiscalDocumentJob::query()
-            ->where('document_type',$tab)
-            ->selectRaw('status, COUNT(*) as total')
-            ->groupBy('status')
-            ->pluck('total','status')
-            ->map(fn($value)=>(int)$value)
-            ->all();
-
         return view('fiscal.index',[
             'tab'=>$tab,
             'tabs'=>self::TABS,
             'tabMeta'=>self::TABS[$tab],
             'tabCounts'=>$tabCounts,
-            'statusCounts'=>$statusCounts,
             'documents'=>$documents,
             'term'=>$term,
             'status'=>$status,
             'environment'=>$environment,
             'configuration'=>$this->configurationFor($tab),
-            'fiscalEnabled'=>(bool)AppSetting::value('fiscal','enabled',false),
             'dateFormat'=>AppSetting::dateFormat(),
         ]);
     }
