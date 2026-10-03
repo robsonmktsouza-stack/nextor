@@ -501,28 +501,9 @@
   <div class="dialog-footer"><button type="button" data-dialog-close class="btn btn-secondary">Cancelar</button><button type="button" class="btn btn-success" id="nfeSavePayment">Adicionar</button></div>
 </dialog>
 
-<script type="application/json" id="nfe-products-data">@json($products->map(fn($p)=>[
-  'id'=>$p->id,'name'=>$p->name,'sku'=>$p->sku,'sale_price'=>(float)$p->sale_price,
-  'origin'=>$p->origin,'ean_gtin'=>$p->ean_gtin,'unit'=>$p->unit,'tax_unit'=>$p->tax_unit,
-  'ncm'=>$p->ncm,'cest'=>$p->cest,'ipi_exception'=>$p->ipi_exception,
-  'fiscal_benefit_code'=>$p->fiscal_benefit_code,'nfe_notes'=>$p->nfe_notes,
-  'tax_defaults'=>$p->tax_defaults ?? [],
-])->values())</script>
-<script type="application/json" id="nfe-customers-data">@json($customers->map(fn($c)=>[
-  'id'=>$c->id,'name'=>$c->name,'document'=>$c->document,'state_registration'=>$c->state_registration,
-  'ie_indicator'=>$c->ie_indicator,'final_consumer'=>(bool)$c->final_consumer,'zip_code'=>$c->zip_code,
-  'state'=>$c->state,'city'=>$c->city,'address'=>$c->address,'address_number'=>$c->address_number,
-  'district'=>$c->district,'delivery_addresses'=>$c->deliveryAddresses->map(fn($a)=>[
-    'id'=>$a->id,'name'=>$a->name,'document'=>$a->document,'state'=>$a->state,'city'=>$a->city,
-    'address'=>$a->address,'address_number'=>$a->address_number,'district'=>$a->district,
-  ])->values(),
-])->values())</script>
-<script type="application/json" id="nfe-natures-data">@json($natures->map(fn($n)=>[
-  'id'=>$n->id,'operation_type'=>$n->operation_type,'purpose'=>$n->purpose,
-  'cfop_internal'=>$n->cfop_internal,'cfop_interstate'=>$n->cfop_interstate,'cfop_foreign'=>$n->cfop_foreign,
-  'override_product_cfop'=>(bool)$n->override_product_cfop,'final_consumer_default'=>(bool)$n->final_consumer_default,
-  'presence_default'=>$n->presence_default,'additional_info'=>$n->additional_info,'tax_authority_info'=>$n->tax_authority_info,
-])->values())</script>
+<script type="application/json" id="nfe-products-data">@json($productData)</script>
+<script type="application/json" id="nfe-customers-data">@json($customerData)</script>
+<script type="application/json" id="nfe-natures-data">@json($natureData)</script>
 <script type="application/json" id="nfe-emitter-state">@json($company->state)</script>
 @endsection
 
