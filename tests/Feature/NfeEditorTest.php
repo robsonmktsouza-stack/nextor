@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\CompanySetting;
 use App\Models\Customer;
 use App\Models\NfeDraft;
 use App\Models\OperationNature;
@@ -25,38 +26,61 @@ class NfeEditorTest extends TestCase
         ]);
     }
 
-    private function nature(): OperationNature
+    private function company(string $state='BA'): CompanySetting
     {
-        return OperationNature::query()->create([
+        $company=CompanySetting::current();
+        $company->update([
+            'legal_name'=>'Empresa Teste Ltda',
+            'document'=>'12345678000100',
+            'state_registration'=>'12345678',
+            'state'=>$state,
+            'city'=>'Salvador',
+            'city_ibge_code'=>'2927408',
+            'address'=>'Rua Emitente',
+            'address_number'=>'10',
+            'district'=>'Centro',
+            'crt'=>'1',
+        ]);
+
+        return $company->refresh();
+    }
+
+    private function nature(array $override=[]): OperationNature
+    {
+        return OperationNature::query()->create(array_merge([
             'name'=>'Venda de mercadoria',
             'operation_type'=>'outbound',
             'purpose'=>'normal',
             'cfop_internal'=>'5102',
             'cfop_interstate'=>'6102',
+            'cfop_inbound_internal'=>'1102',
+            'cfop_inbound_interstate'=>'2102',
+            'cfop_foreign'=>'7102',
             'override_product_cfop'=>true,
-            'presence_default'=>'not_applicable',
+            'presence_default'=>'presential',
             'move_stock'=>true,
-            'generate_finance'=>true,
-            'allow_referenced_document'=>true,
             'is_active'=>true,
-        ]);
+        ],$override));
     }
 
-    private function customer(): Customer
+    private function customer(array $override=[]): Customer
     {
-        return Customer::query()->create([
+        return Customer::query()->create(array_merge([
             'name'=>'Cliente Teste Ltda',
             'document'=>'12345678000190',
             'is_customer'=>true,
             'state'=>'BA',
             'city'=>'Salvador',
+            'city_ibge_code'=>'2927408',
+            'country_code'=>'1058',
+            'country_name'=>'BRASIL',
             'address'=>'Rua Teste',
             'address_number'=>'100',
             'district'=>'Centro',
             'final_consumer'=>false,
             'ie_indicator'=>'contributor',
             'state_registration'=>'123456789',
-        ]);
+        ],$override));
     }
 
     private function product(array $override=[]): Product
@@ -68,21 +92,57 @@ class NfeEditorTest extends TestCase
             'sale_price'=>100,
             'cost_price'=>50,
             'origin'=>'0',
+            'ean_gtin'=>'SEM GTIN',
             'ncm'=>'12345678',
+            'cest'=>'1234567',
+            'fiscal_benefit_code'=>'BENEF01',
             'tax_defaults'=>[
-                'icms_csosn_default'=>'102',
-                'pis_cst_default'=>'49',
-                'cofins_cst_default'=>'49',
-                'ipi_cst_default'=>'99',
-                'ibs_cst_default'=>'000',
-                'cbs_cst_default'=>'000',
+                'cfop_outbound_internal'=>'5101',
+                'cfop_outbound_interstate'=>'6101',
+                'cfop_inbound_internal'=>'1101',
+                'cfop_inbound_interstate'=>'2101',
+                'icms_csosn'=>'102',
+                'icms_csosn_export'=>'300',
+                'icms_csosn_inbound'=>'400',
+                'icms_rate'=>18,
+                'base_reduction_rate'=>10,
+                'simple_credit_rate'=>3,
+                'mod_bc'=>'3',
+                'mod_bc_st'=>'4',
+                'icms_st_rate'=>18,
+                'mva_rate'=>40,
+                'pis_cst'=>'49',
+                'pis_rate'=>0.65,
+                'pis_cst_inbound'=>'98',
+                'cofins_cst'=>'49',
+                'cofins_rate'=>3,
+                'cofins_cst_inbound'=>'98',
+                'ipi_cst'=>'99',
+                'ipi_rate'=>10,
+                'ipi_cst_inbound'=>'49',
+                'ipi_enq'=>'999',
+                'interstate_icms_rate'=>12,
+                'internal_icms_rate'=>18,
+                'fcp_interstate_rate'=>2,
+                'tax_quantity_factor'=>1,
+                'petroleum_derived'=>true,
+                'anp_code'=>'210203001',
+                'anp_description'=>'Produto ANP teste',
+                'glp_rate'=>10,
+                'gnn_rate'=>20,
+                'gni_rate'=>30,
+                'starting_value'=>4.50,
+                'ibs_cst'=>'000',
+                'cbs_cst'=>'000',
+                'tax_classification_code'=>'000001',
             ],
             'is_active'=>true,
         ],$override));
     }
 
-    public function test_new_nfe_opens_mapped_full_screen_editor(): void
+    public function test_new_nfe_uses_nextor_pattern_and_real_legacy_mapping(): void
     {
+        $this->company();
         $this->nature();
         $this->customer();
         $this->product();
@@ -90,56 +150,134 @@ class NfeEditorTest extends TestCase
         $this->actingAs($this->admin())
             ->get(route('fiscal.nfe.create'))
             ->assertOk()
-            ->assertSee('Criando nova NF-e')
+            ->assertSee('Criar nova NF-e')
+            ->assertSee('erp-dialog',false)
+            ->assertSee('dialog-header',false)
+            ->assertSee('editor-tabs',false)
+            ->assertSee('editor-panel',false)
+            ->assertSee('cms-table',false)
+            ->assertSee('dialog-footer',false)
             ->assertSee('Dados gerais')
-            ->assertSee('Dados do destinatário')
-            ->assertSee('Lista de produtos')
-            ->assertSee('Retenções de impostos')
-            ->assertSee('Fatura e duplicatas')
-            ->assertSee('Informações de pagamento')
-            ->assertSee('Dados do transporte')
-            ->assertSee('Informações de compras')
-            ->assertSee('Informações de agropecuária')
-            ->assertSee('Campos de uso livre')
-            ->assertSee('Outras informações')
-            ->assertSee('Dados tributários')
+            ->assertSee('Itens')
+            ->assertSee('Transporte')
+            ->assertSee('Pagamento')
+            ->assertSee('Referências / observações')
+            ->assertSee('Natureza da operação')
+            ->assertSee('Tipo de operação')
+            ->assertSee('Presença do comprador')
+            ->assertSee('Desconto da nota')
+            ->assertSee('Acréscimo da nota')
+            ->assertSee('Modalidade do frete')
+            ->assertSee('Tipo de pagamento')
+            ->assertSee('Duplicatas')
+            ->assertSee('NF-e referenciadas')
+            ->assertSee('Código benefício (cBenef)')
+            ->assertSee('CSOSN exportação')
+            ->assertSee('CSOSN entrada')
+            ->assertSee('Redução da BC')
+            ->assertSee('Modalidade BC ST')
+            ->assertSee('CST PIS entrada')
+            ->assertSee('CST COFINS entrada')
+            ->assertSee('CST IPI entrada')
+            ->assertSee('ICMS interestadual')
+            ->assertSee('FCP interestadual')
+            ->assertSee('Código ANP')
+            ->assertSee('Lote')
+            ->assertSee('RENAVAM')
             ->assertSee('IBS / CBS')
-            ->assertSee('Dados de controle de ST')
-            ->assertSee('Dados de importação')
-            ->assertSee('Dados de exportação / drawback')
-            ->assertSee('Produtos específicos')
-            ->assertSee('Rastreabilidade')
-            ->assertSee('Disponível após a integração ACBr');
+            ->assertDontSee('Retenções de impostos')
+            ->assertDontSee('Informações de agropecuária')
+            ->assertDontSee('Campos de uso livre')
+            ->assertDontSee('Valor original');
     }
 
-    public function test_operation_nature_can_be_created(): void
+    public function test_operation_nature_persists_entry_and_exit_cfops(): void
     {
         $this->actingAs($this->admin())
             ->post(route('fiscal.nfe.natures.store'),[
-                'name'=>'Venda interestadual',
+                'name'=>'Compra e venda de mercadoria',
                 'operation_type'=>'outbound',
                 'purpose'=>'normal',
                 'cfop_internal'=>'5102',
                 'cfop_interstate'=>'6102',
-                'presence_default'=>'not_applicable',
+                'cfop_inbound_internal'=>'1102',
+                'cfop_inbound_interstate'=>'2102',
+                'cfop_foreign'=>'7102',
                 'override_product_cfop'=>'1',
                 'move_stock'=>'1',
-                'generate_finance'=>'1',
-                'allow_referenced_document'=>'1',
                 'is_active'=>'1',
             ])
             ->assertRedirect();
 
         $this->assertDatabaseHas('operation_natures',[
-            'name'=>'Venda interestadual',
+            'name'=>'Compra e venda de mercadoria',
             'cfop_internal'=>'5102',
             'cfop_interstate'=>'6102',
+            'cfop_inbound_internal'=>'1102',
+            'cfop_inbound_interstate'=>'2102',
+            'cfop_foreign'=>'7102',
+            'override_product_cfop'=>1,
+            'move_stock'=>1,
             'is_active'=>1,
         ]);
     }
 
-    public function test_nfe_draft_persists_mapped_item_and_snapshots(): void
+    public function test_product_can_store_mapped_nfe_tax_defaults(): void
     {
+        $response=$this->actingAs($this->admin())
+            ->post(route('products.store'),[
+                'sku'=>'MAP-NFE-001',
+                'name'=>'Produto Fiscal Mapeado',
+                'usage_type'=>'resale',
+                'unit'=>'UN',
+                'cost_price'=>'10.00',
+                'sale_price'=>'20.00',
+                'stock_quantity'=>'0.000',
+                'minimum_stock'=>'0.000',
+                'control_stock'=>'1',
+                'is_active'=>'1',
+                'origin'=>'0',
+                'different_tax_unit'=>'0',
+                'ignore_taxes_mode'=>'none',
+                'tax_defaults'=>[
+                    'cfop_outbound_internal'=>'5102',
+                    'cfop_outbound_interstate'=>'6102',
+                    'cfop_inbound_internal'=>'1102',
+                    'cfop_inbound_interstate'=>'2102',
+                    'icms_csosn'=>'102',
+                    'icms_csosn_export'=>'300',
+                    'icms_csosn_inbound'=>'400',
+                    'pis_cst'=>'49',
+                    'pis_cst_inbound'=>'98',
+                    'cofins_cst'=>'49',
+                    'cofins_cst_inbound'=>'98',
+                    'ipi_cst'=>'99',
+                    'ipi_cst_inbound'=>'49',
+                    'interstate_icms_rate'=>'12',
+                    'internal_icms_rate'=>'18',
+                    'fcp_interstate_rate'=>'2',
+                    'anp_code'=>'210203001',
+                    'petroleum_derived'=>'1',
+                    'ibs_cst'=>'000',
+                    'cbs_cst'=>'000',
+                    'tax_classification_code'=>'000001',
+                ],
+            ]);
+
+        $response->assertRedirect(route('products.index'));
+
+        $product=Product::query()->where('sku','MAP-NFE-001')->firstOrFail();
+        $this->assertSame('5102',data_get($product->tax_defaults,'cfop_outbound_internal'));
+        $this->assertSame('1102',data_get($product->tax_defaults,'cfop_inbound_internal'));
+        $this->assertSame('400',data_get($product->tax_defaults,'icms_csosn_inbound'));
+        $this->assertSame('98',data_get($product->tax_defaults,'pis_cst_inbound'));
+        $this->assertSame('210203001',data_get($product->tax_defaults,'anp_code'));
+        $this->assertTrue((bool)data_get($product->tax_defaults,'petroleum_derived'));
+    }
+
+    public function test_nfe_draft_uses_global_freight_discount_surcharge_and_mapped_item_tax(): void
+    {
+        $this->company('BA');
         $nature=$this->nature();
         $customer=$this->customer();
         $product=$this->product();
@@ -150,31 +288,23 @@ class NfeEditorTest extends TestCase
             'product_sku'=>$product->sku,
             'quantity'=>2,
             'unit_price'=>100,
-            'freight'=>10,
-            'insurance'=>0,
-            'other_expenses'=>5,
-            'discount'=>15,
-            'cfop'=>'5102',
+            'cfop'=>'',
             'origin'=>'0',
-            'ean_gtin'=>'',
+            'ean_gtin'=>'SEM GTIN',
             'unit'=>'UN',
             'tax_unit'=>'UN',
             'ncm'=>'12345678',
-            'cest'=>'',
-            'ipi_exception'=>'',
-            'fiscal_benefit_code'=>'',
+            'cest'=>'1234567',
+            'fiscal_benefit_code'=>'BENEF01',
             'purchase_order'=>'PED-1',
             'purchase_order_item'=>'1',
             'notes'=>'Teste',
-            'tax_data'=>[
-                'icms_csosn'=>'102',
-                'pis_cst'=>'49',
-                'cofins_cst'=>'49',
-                'ipi_cst'=>'99',
-                'ibs_cst'=>'000',
-                'cbs_cst'=>'000',
+            'tax_data'=>$product->tax_defaults,
+            'special_data'=>[
+                'petroleum_derived'=>true,
+                'anp_code'=>'210203001',
+                'batch'=>'LOTE-01',
             ],
-            'special_data'=>['traceability'=>'Lote teste'],
         ]];
 
         $response=$this->actingAs($this->admin())
@@ -182,31 +312,38 @@ class NfeEditorTest extends TestCase
                 'operation_nature_id'=>$nature->id,
                 'customer_id'=>$customer->id,
                 'operation_type'=>'outbound',
-                'destination'=>'auto',
-                'presence'=>'not_applicable',
-                'purpose'=>'normal',
-                'final_consumer'=>'0',
+                'presence'=>'presential',
                 'issue_date'=>'2026-10-03',
                 'issue_time'=>'10:30',
-                'government_purchase'=>'0',
-                'advance_payment'=>'0',
-                'different_delivery'=>'0',
-                'freight_mode'=>'sender',
+                'expected_delivery_date'=>'2026-10-05',
+                'discount'=>'15',
+                'surcharge'=>'5',
+                'freight_mode'=>'0',
+                'freight_value'=>'10',
+                'payment_type'=>'17',
+                'payment_condition'=>'a_vista',
                 'items_json'=>json_encode($items),
                 'duplicates_json'=>'[]',
-                'payments_json'=>json_encode([['payment_method'=>'pix','amount'=>200]]),
-                'references_json'=>'[]',
-                'custom_fields_json'=>json_encode(['purchase_info'=>'Pedido de teste']),
+                'references_json'=>json_encode([['key'=>str_repeat('1',44)]]),
                 'additional_info'=>'Informação complementar',
             ]);
 
         $draft=NfeDraft::query()->firstOrFail();
 
         $response->assertRedirect(route('fiscal.nfe.edit',$draft));
-        $this->assertSame('draft',$draft->status);
-        $this->assertNull($draft->document_number);
+        $this->assertSame('internal',$draft->destination);
+        $this->assertFalse($draft->final_consumer);
+        $this->assertSame('normal',$draft->purpose);
+        $this->assertSame('17',$draft->payment_type);
+        $this->assertSame('0',data_get($draft->transport_data,'freight_mode'));
+        $this->assertEquals(10.0,(float)data_get($draft->transport_data,'freight_value'));
+        $this->assertEquals(200.0,(float)data_get($draft->totals,'products'));
+        $this->assertEquals(20.0,(float)data_get($draft->totals,'ipi'));
+        $this->assertEquals(220.0,(float)data_get($draft->totals,'total'));
+        $this->assertEquals(190.0,(float)data_get($draft->invoice_data,'net_value'));
         $this->assertSame('Cliente Teste Ltda',data_get($draft->recipient_snapshot,'name'));
-        $this->assertEquals(200.0,(float)data_get($draft->totals,'total'));
+        $this->assertSame('2927408',data_get($draft->recipient_snapshot,'city_ibge_code'));
+
         $this->assertDatabaseHas('nfe_draft_items',[
             'nfe_draft_id'=>$draft->id,
             'product_id'=>$product->id,
@@ -214,10 +351,56 @@ class NfeEditorTest extends TestCase
             'ncm'=>'12345678',
             'line_total'=>200,
         ]);
+
+        $item=$draft->items()->firstOrFail();
+        $this->assertSame('300',data_get($item->tax_data,'icms_csosn_export'));
+        $this->assertSame('400',data_get($item->tax_data,'icms_csosn_inbound'));
+        $this->assertSame('210203001',data_get($item->special_data,'anp_code'));
+    }
+
+    public function test_destination_and_cfop_are_derived_for_interstate_operation(): void
+    {
+        $this->company('BA');
+        $nature=$this->nature();
+        $customer=$this->customer(['state'=>'SP','city'=>'São Paulo','city_ibge_code'=>'3550308']);
+        $product=$this->product();
+
+        $items=[[
+            'product_id'=>$product->id,
+            'product_name'=>$product->name,
+            'product_sku'=>$product->sku,
+            'quantity'=>1,
+            'unit_price'=>100,
+            'origin'=>'0',
+            'unit'=>'UN',
+            'ncm'=>'12345678',
+            'tax_data'=>$product->tax_defaults,
+        ]];
+
+        $this->actingAs($this->admin())
+            ->post(route('fiscal.nfe.store'),[
+                'operation_nature_id'=>$nature->id,
+                'customer_id'=>$customer->id,
+                'operation_type'=>'outbound',
+                'presence'=>'presential',
+                'issue_date'=>'2026-10-03',
+                'freight_mode'=>'9',
+                'payment_type'=>'01',
+                'payment_condition'=>'a_vista',
+                'items_json'=>json_encode($items),
+                'duplicates_json'=>'[]',
+                'references_json'=>'[]',
+            ])
+            ->assertRedirect();
+
+        $draft=NfeDraft::query()->firstOrFail();
+        $this->assertSame('interstate',$draft->destination);
+        $this->assertSame('6102',$draft->items()->firstOrFail()->cfop);
     }
 
     public function test_validate_action_saves_current_form_before_checking(): void
     {
+        $this->company();
         $nature=$this->nature();
         $customer=$this->customer();
         $product=$this->product();
@@ -236,6 +419,7 @@ class NfeEditorTest extends TestCase
                 'icms_csosn'=>'102',
                 'pis_cst'=>'49',
                 'cofins_cst'=>'49',
+                'ipi_cst'=>'99',
             ],
         ]];
 
@@ -244,21 +428,18 @@ class NfeEditorTest extends TestCase
                 'operation_nature_id'=>$nature->id,
                 'customer_id'=>$customer->id,
                 'operation_type'=>'outbound',
-                'destination'=>'auto',
-                'presence'=>'not_applicable',
-                'purpose'=>'normal',
-                'final_consumer'=>'0',
+                'presence'=>'presential',
                 'issue_date'=>'2026-10-03',
                 'issue_time'=>'10:30',
-                'government_purchase'=>'0',
-                'advance_payment'=>'0',
-                'different_delivery'=>'0',
-                'freight_mode'=>'none',
+                'discount'=>'0',
+                'surcharge'=>'0',
+                'freight_mode'=>'9',
+                'freight_value'=>'0',
+                'payment_type'=>'01',
+                'payment_condition'=>'a_vista',
                 'items_json'=>json_encode($items),
                 'duplicates_json'=>'[]',
-                'payments_json'=>'[]',
                 'references_json'=>'[]',
-                'custom_fields_json'=>'{}',
                 'after_save'=>'validate',
             ])
             ->assertRedirect();
@@ -267,7 +448,25 @@ class NfeEditorTest extends TestCase
         $this->assertNotNull($draft->validated_at);
     }
 
-    public function test_fiscal_nfe_toolbar_opens_editor_and_drafts(): void
+    public function test_product_fiscal_tab_exposes_legacy_mapped_defaults(): void
+    {
+        $product=$this->product();
+
+        $this->actingAs($this->admin())
+            ->get(route('products.edit',$product))
+            ->assertOk()
+            ->assertSee('CFOP padrão da NF-e')
+            ->assertSee('CSOSN exportação')
+            ->assertSee('CSOSN entrada')
+            ->assertSee('CST PIS entrada')
+            ->assertSee('CST COFINS entrada')
+            ->assertSee('CST IPI entrada')
+            ->assertSee('DIFAL / FCP')
+            ->assertSee('Combustível / ANP')
+            ->assertSee('IBS / CBS');
+    }
+
+    public function test_fiscal_nfe_toolbar_opens_editor_drafts_and_natures(): void
     {
         $this->actingAs($this->admin())
             ->get(route('fiscal.index',['tab'=>'nfe','month'=>'2026-10']))
