@@ -157,6 +157,10 @@ class NfeDraftController extends Controller
             if(!$draft->customer?->city_ibge_code) $errors[]='O destinatário está sem código IBGE do município.';
         }
 
+        if($draft->has_referenced_document && empty($draft->references)) {
+            $errors[]='Informe ao menos um documento referenciado.';
+        }
+
         if($draft->items->isEmpty()) $errors[]='Adicione pelo menos um produto.';
 
         foreach($draft->items as $item) {
