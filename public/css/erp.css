@@ -3106,3 +3106,129 @@ body{
   align-self:stretch;
   margin:0;
 }
+
+
+/* NF-e custom modal system: independent from native <dialog> */
+body.nfe-modal-open{overflow:hidden}
+
+.nextor-modal-layer{
+  position:fixed;
+  inset:0;
+  z-index:6000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:14px;
+  background:#091827b8;
+  box-sizing:border-box;
+}
+.nextor-modal-layer[hidden]{display:none!important}
+.nextor-modal-layer.is-open:not([hidden]){display:flex}
+
+#nfeItemDialog,
+#nfeReferenceDialog,
+#nfeDuplicateDialog{
+  z-index:6100;
+  background:#091827c9;
+}
+
+.nextor-modal-window{
+  position:relative;
+  margin:0;
+  padding:0;
+  background:#fff;
+  color:var(--text);
+  border:1px solid #b9c9d5;
+  border-radius:6px;
+  box-shadow:0 28px 90px #07121f70;
+  overflow:hidden;
+}
+
+.nfe-modal-layer .nfe-workspace-dialog{
+  width:min(1420px,calc(100vw - 28px));
+  height:calc(100dvh - 28px);
+  min-height:0;
+  max-height:calc(100dvh - 28px);
+  display:block;
+  overflow:hidden;
+}
+
+.nfe-modal-layer .nfe-workspace-dialog>form{
+  width:100%;
+  height:100%;
+  min-height:0;
+  max-height:none;
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr) auto;
+  overflow:hidden;
+}
+
+.nfe-modal-layer .nfe-workspace-body{
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  overscroll-behavior:contain;
+}
+
+.nfe-modal-layer .nfe-dialog-footer{
+  position:relative;
+  inset:auto;
+  flex:0 0 auto;
+  margin:0;
+  align-self:stretch;
+}
+
+.nfe-modal-layer .nfe-item-dialog{
+  width:min(1180px,calc(100vw - 40px));
+  height:min(820px,calc(100dvh - 40px));
+  max-width:none;
+  max-height:calc(100dvh - 40px);
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr) auto;
+  overflow:hidden;
+}
+
+.nfe-modal-layer .nfe-item-body{
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+}
+
+.nfe-modal-layer .nfe-small-modal-window{
+  width:min(460px,calc(100vw - 32px));
+  max-width:460px;
+  max-height:calc(100dvh - 40px);
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr) auto;
+  overflow:hidden;
+}
+
+.nfe-modal-layer .nfe-small-modal-window .dialog-body{
+  min-height:0;
+  overflow-y:auto;
+}
+
+@media(max-width:1100px){
+  .nextor-modal-layer{padding:9px}
+  .nfe-modal-layer .nfe-workspace-dialog{
+    width:calc(100vw - 18px);
+    height:calc(100dvh - 18px);
+    max-height:calc(100dvh - 18px);
+  }
+}
+
+@media(max-width:760px){
+  .nextor-modal-layer{padding:0}
+  .nfe-modal-layer .nfe-workspace-dialog,
+  .nfe-modal-layer .nfe-item-dialog{
+    width:100vw;
+    height:100dvh;
+    max-height:100dvh;
+    border:0;
+    border-radius:0;
+  }
+  .nfe-modal-layer .nfe-small-modal-window{
+    width:calc(100vw - 20px);
+    max-width:none;
+  }
+}

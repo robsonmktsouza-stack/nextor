@@ -59,7 +59,8 @@ $origins=[
 ];
 @endphp
 
-<dialog class="erp-dialog nfe-workspace-dialog" id="nfeEditorDialog">
+<div class="nextor-modal-layer nfe-modal-layer is-open" id="nfeEditorDialog" data-nfe-modal aria-hidden="false">
+  <div class="erp-dialog nfe-workspace-dialog nextor-modal-window" role="dialog" aria-modal="true" aria-labelledby="nfeEditorTitle">
 <form id="nfeDraftForm" method="post"
       action="{{ $isEditing ? route('fiscal.nfe.update',$draft) : route('fiscal.nfe.store') }}">
   @csrf
@@ -71,7 +72,7 @@ $origins=[
 
   <div class="dialog-header">
     <div>
-      <h2>{{ $isEditing ? 'Editar NF-e em rascunho' : 'Criar nova NF-e' }}</h2>
+      <h2 id="nfeEditorTitle">{{ $isEditing ? 'Editar NF-e em rascunho' : 'Criar nova NF-e' }}</h2>
     </div>
     <a class="close-dialog" href="{{ route('fiscal.index',['tab'=>'nfe']) }}" aria-label="Fechar">
       @include('partials.icon',['name'=>'x','size'=>18])
@@ -441,7 +442,7 @@ $origins=[
             <h3>Duplicatas</h3>
 
           </div>
-          <button type="button" class="btn btn-secondary" data-dialog-open="nfeDuplicateDialog">@include('partials.icon',['name'=>'plus','size'=>15]) Adicionar</button>
+          <button type="button" class="btn btn-secondary" data-nfe-modal-open="nfeDuplicateDialog">@include('partials.icon',['name'=>'plus','size'=>15]) Adicionar</button>
         </div>
         <div class="table-scroll">
           <table class="cms-table">
@@ -457,7 +458,7 @@ $origins=[
       <div class="editor-panel">
         <div class="delivery-card-title">
           <div><h3>NF-e referenciadas</h3></div>
-          <button type="button" class="btn btn-secondary" data-dialog-open="nfeReferenceDialog">@include('partials.icon',['name'=>'plus','size'=>15]) Referenciar NF-e</button>
+          <button type="button" class="btn btn-secondary" data-nfe-modal-open="nfeReferenceDialog">@include('partials.icon',['name'=>'plus','size'=>15]) Referenciar NF-e</button>
         </div>
         <div class="table-scroll">
           <table class="cms-table">
@@ -490,12 +491,14 @@ $origins=[
     </div>
   </div>
 </form>
-</dialog>
+  </div>
+</div>
 
-<dialog class="erp-dialog nfe-item-dialog" id="nfeItemDialog">
+<div class="nextor-modal-layer nfe-modal-layer" id="nfeItemDialog" data-nfe-modal aria-hidden="true" hidden>
+  <div class="erp-dialog nfe-item-dialog nextor-modal-window" role="dialog" aria-modal="true" aria-labelledby="nfeItemTitle">
   <div class="dialog-header">
-    <div><h2>Item da NF-e</h2></div>
-    <button type="button" data-dialog-close class="close-dialog" aria-label="Fechar">@include('partials.icon',['name'=>'x'])</button>
+    <div><h2 id="nfeItemTitle">Item da NF-e</h2></div>
+    <button type="button" data-nfe-modal-close class="close-dialog" aria-label="Fechar">@include('partials.icon',['name'=>'x'])</button>
   </div>
 
   <div class="dialog-body nfe-item-body">
@@ -677,29 +680,33 @@ $origins=[
   </div>
 
   <div class="dialog-footer">
-    <button type="button" data-dialog-close class="btn btn-secondary">Cancelar</button>
+    <button type="button" data-nfe-modal-close class="btn btn-secondary">Cancelar</button>
     <button type="button" class="btn btn-success" id="nfeSaveItem">Salvar item</button>
   </div>
-</dialog>
+  </div>
+</div>
 
-<dialog class="erp-dialog small-dialog" id="nfeReferenceDialog">
+<div class="nextor-modal-layer nfe-modal-layer" id="nfeReferenceDialog" data-nfe-modal aria-hidden="true" hidden>
+  <div class="erp-dialog small-dialog nextor-modal-window nfe-small-modal-window" role="dialog" aria-modal="true" aria-labelledby="nfeReferenceTitle">
   <div class="dialog-header">
-    <div><h2>Referenciar NF-e</h2><p>Informe a chave de acesso do documento referenciado.</p></div>
-    <button type="button" data-dialog-close class="close-dialog">@include('partials.icon',['name'=>'x'])</button>
+    <div><h2 id="nfeReferenceTitle">Referenciar NF-e</h2><p>Informe a chave de acesso do documento referenciado.</p></div>
+    <button type="button" data-nfe-modal-close class="close-dialog">@include('partials.icon',['name'=>'x'])</button>
   </div>
   <div class="dialog-body">
     <label class="field"><span>Chave de acesso</span><input id="nfeReferenceKey" maxlength="44"></label>
   </div>
   <div class="dialog-footer">
-    <button type="button" data-dialog-close class="btn btn-secondary">Cancelar</button>
+    <button type="button" data-nfe-modal-close class="btn btn-secondary">Cancelar</button>
     <button type="button" class="btn btn-success" id="nfeSaveReference">Adicionar</button>
   </div>
-</dialog>
+  </div>
+</div>
 
-<dialog class="erp-dialog small-dialog" id="nfeDuplicateDialog">
+<div class="nextor-modal-layer nfe-modal-layer" id="nfeDuplicateDialog" data-nfe-modal aria-hidden="true" hidden>
+  <div class="erp-dialog small-dialog nextor-modal-window nfe-small-modal-window" role="dialog" aria-modal="true" aria-labelledby="nfeDuplicateTitle">
   <div class="dialog-header">
-    <div><h2>Adicionar duplicata</h2><p>Parcela usada na cobrança da NF-e.</p></div>
-    <button type="button" data-dialog-close class="close-dialog">@include('partials.icon',['name'=>'x'])</button>
+    <div><h2 id="nfeDuplicateTitle">Adicionar duplicata</h2><p>Parcela usada na cobrança da NF-e.</p></div>
+    <button type="button" data-nfe-modal-close class="close-dialog">@include('partials.icon',['name'=>'x'])</button>
   </div>
   <div class="dialog-body">
     <div class="form-grid">
@@ -714,10 +721,11 @@ $origins=[
     </div>
   </div>
   <div class="dialog-footer">
-    <button type="button" data-dialog-close class="btn btn-secondary">Cancelar</button>
+    <button type="button" data-nfe-modal-close class="btn btn-secondary">Cancelar</button>
     <button type="button" class="btn btn-success" id="nfeSaveDuplicate">Adicionar</button>
   </div>
-</dialog>
+  </div>
+</div>
 
 <script type="application/json" id="nfe-products-data">@json($productData)</script>
 <script type="application/json" id="nfe-customers-data">@json($customerData)</script>
@@ -728,7 +736,5 @@ $origins=[
 
 @push('scripts')
 <script src="{{ asset('js/nfe-editor.js') }}"></script>
-<script>
-document.addEventListener('DOMContentLoaded',()=>document.getElementById('nfeEditorDialog')?.showModal());
-</script>
+
 @endpush

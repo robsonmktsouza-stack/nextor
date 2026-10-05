@@ -1,5 +1,47 @@
 (()=>{
   const byId=id=>document.getElementById(id);
+
+  const modalIsOpen=modal=>!!modal && !modal.hidden && modal.classList.contains('is-open');
+
+  const openModal=modal=>{
+    if(!modal) return;
+    modal.hidden=false;
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden','false');
+    document.body.classList.add('nfe-modal-open');
+
+    const focusable=modal.querySelector(
+      '[autofocus], .dialog-body input:not([type="hidden"]):not(:disabled), .dialog-body select:not(:disabled), .dialog-body textarea:not(:disabled), input:not([type="hidden"]):not(:disabled), select:not(:disabled), textarea:not(:disabled), button:not(:disabled), a[href]'
+    );
+    window.setTimeout(()=>focusable?.focus(),0);
+  };
+
+  const closeModal=modal=>{
+    if(!modal) return;
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden','true');
+    modal.hidden=true;
+
+    if(!document.querySelector('[data-nfe-modal].is-open')){
+      document.body.classList.remove('nfe-modal-open');
+    }
+  };
+
+  document.addEventListener('click',event=>{
+    const opener=event.target.closest('[data-nfe-modal-open]');
+    if(opener){
+      event.preventDefault();
+      openModal(byId(opener.getAttribute('data-nfe-modal-open')));
+      return;
+    }
+
+    const closer=event.target.closest('[data-nfe-modal-close]');
+    if(closer){
+      event.preventDefault();
+      closeModal(closer.closest('[data-nfe-modal]'));
+    }
+  });
+
   const parseJson=id=>{
     const el=byId(id);
     if(!el) return [];
@@ -552,7 +594,7 @@
 
   const openNewItem=()=>{
     populateItemDialog(newItemDefaults(),'');
-    itemDialog?.showModal();
+    openModal(itemDialog);
     setTimeout(()=>byId('nfeItemProductSearch')?.focus(),0);
   };
 
@@ -560,7 +602,7 @@
     const item=items[index];
     if(!item) return;
     populateItemDialog(item,index);
-    itemDialog?.showModal();
+    openModal(itemDialog);
   };
 
   const applyProductToItemDialog=product=>{
@@ -714,7 +756,7 @@
     if(index==='') items.push(item);
     else items[Number(index)]=item;
 
-    itemDialog?.close();
+    closeModal(itemDialog);
     renderItems();
   });
 
@@ -732,7 +774,7 @@
       referenceToggle.dispatchEvent(new Event('change',{bubbles:true}));
     }
     setField('nfeReferenceKey','');
-    byId('nfeReferenceDialog')?.close();
+    closeModal(byId('nfeReferenceDialog'));
     renderReferences();
   });
 
@@ -748,7 +790,7 @@
     setField('nfeDuplicateNumber','');
     setField('nfeDuplicateDue','');
     setField('nfeDuplicateValue','');
-    byId('nfeDuplicateDialog')?.close();
+    closeModal(byId('nfeDuplicateDialog'));
     renderDuplicates();
   });
 
@@ -769,13 +811,30 @@
   byId('nfeDraftForm')?.addEventListener('submit',syncHidden);
 
   const mainDialog=byId('nfeEditorDialog');
-  mainDialog?.addEventListener('cancel',event=>{
-    event.preventDefault();
-    window.location.href=mainDialog.querySelector('.close-dialog')?.href||'/fiscal?tab=nfe';
-  });
+  document.body.classList.add('nfe-modal-open');
 
   document.addEventListener('keydown',event=>{
-    if(!mainDialog?.open) return;
+    const openLayers=[...document.querySelectorAll('[data-nfe-modal].is-open:not([hidden])')];
+
+    if(event.key==='Escape'){
+      const top=openLayers.at(-1);
+      if(top && top!==mainDialog){
+        event.preventDefault();
+        closeModal(top);
+        return;
+      }
+
+      if(top===mainDialog){
+        event.preventDefault();
+        window.location.href=mainDialog.querySelector('.close-dialog')?.href||'/fiscal?tab=nfe';
+        return;
+      }
+    }
+
+    if(!modalIsOpen(mainDialog)) return;
+
+    const topModal=openLayers.at(-1);
+    if(topModal && topModal!==mainDialog) return;
 
     if((event.ctrlKey||event.metaKey) && event.key.toLowerCase()==='s'){
       event.preventDefault();
@@ -792,7 +851,7 @@
 
     if(event.key==='F6'){
       event.preventDefault();
-      if(!itemDialog?.open) openNewItem();
+      if(!modalIsOpen(itemDialog)) openNewItem();
       return;
     }
 
