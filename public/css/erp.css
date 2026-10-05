@@ -3335,3 +3335,172 @@ body.nfe-modal-open{overflow:hidden}
     max-height:72px!important;
   }
 }
+
+
+/* NEXTOR shell light balance */
+:root{
+  --cms-topbar:#1f3548;
+  --cms-sidebar:#2c4254;
+  --cms-module:#5d879a;
+  --cms-module-dark:#4f788b;
+  --page:#edf2f6;
+}
+
+.cms-topbar{
+  background:#1f3548;
+  border-top-color:#4b9bd1;
+  box-shadow:0 2px 8px #10203018;
+}
+.cms-topbar-brand{
+  background:#1b3042;
+}
+.command-box input{
+  background:#1b3042;
+  border-color:#456075;
+}
+.command-box input:focus{
+  background:#203a4f;
+}
+.topbar-pdv-shortcut{
+  background:#29475d;
+  border-color:#527086;
+}
+
+.cms-sidebar{
+  background:#2c4254;
+}
+.sidebar-link{
+  color:#d5dee6;
+}
+.sidebar-link:hover{
+  background:#354d60;
+}
+.sidebar-link.active{
+  background:#416883;
+  box-shadow:inset 0 1px 0 #ffffff0a,inset 0 -1px 0 #0000000d;
+}
+.sidebar-link.active:before{
+  background:#8bc9ef;
+}
+.sidebar-link.active svg{
+  color:#c0e3f7;
+}
+.sidebar-section-label{
+  color:#9cafbf;
+}
+.sidebar-settings-link{
+  background:#294052;
+}
+
+.page-heading{
+  background:#5d879a;
+  border-bottom-color:#4f788b;
+  box-shadow:none;
+}
+.page-heading h1{
+  color:#fff;
+}
+.page-title-meta{
+  background:#ffffff18;
+  border-color:#ffffff2c;
+}
+
+/* Tabs: light surfaces, color only on active tab */
+.sales-module-tabs,
+.finance-module-tabs,
+.settings-main-tabs{
+  border-bottom:1px solid #c8d4de;
+}
+.sales-module-tabs a,
+.finance-module-tabs a,
+.settings-main-tabs a{
+  background:#f7f9fb;
+  color:#526777;
+  border:1px solid #cbd7e0;
+  border-bottom:0;
+  box-shadow:none;
+}
+.sales-module-tabs a:hover,
+.finance-module-tabs a:hover,
+.settings-main-tabs a:hover{
+  background:#edf3f7;
+  color:#355f7d;
+  border-color:#b9cbd8;
+}
+.sales-module-tabs a.active,
+.finance-module-tabs a.active,
+.settings-main-tabs a.active{
+  background:#3184bd;
+  border-color:#3184bd;
+  color:#fff;
+  box-shadow:inset 0 2px 0 #ffffff55;
+}
+.finance-module-tabs .finance-settings-tab{
+  background:#eef3f6;
+  color:#607587;
+}
+.finance-module-tabs .finance-settings-tab:hover{
+  background:#e4edf3;
+}
+
+/* Reduce dark blocks around operational areas */
+.grid-actionbar{
+  background:#fbfcfd;
+  border-bottom-color:#d7e0e7;
+}
+.cms-card{
+  background:#fff;
+}
+.cms-table th{
+  background:#f2f5f8;
+  color:#5b6f80;
+}
+.table-footerbar{
+  background:#fafbfc;
+}
+.grid-tool{
+  background:#fff;
+}
+.grid-tool:hover:not(:disabled){
+  background:#eef5fa;
+}
+.period-current{
+  background:#fff;
+}
+.grid-filter-panel{
+  background:#fafbfc;
+}
+
+/* Keep action colors as accents, not as large surfaces */
+.grid-primary-action,
+.btn-success{
+  background:#25a867;
+  border-color:#25a867;
+}
+.grid-primary-action:hover,
+.btn-success:hover{
+  background:#1d8a54;
+  border-color:#1d8a54;
+}
+.grid-filter-button,
+.btn-primary{
+  background:#3184bd;
+  border-color:#3184bd;
+}
+.grid-filter-button:hover,
+.btn-primary:hover{
+  background:#276d9d;
+  border-color:#276d9d;
+}
+
+/* Softer empty states */
+.empty-cell,
+.finance-reconcile-empty{
+  color:#8b99a8;
+  background:#fcfdfe;
+}
+
+/* Fiscal list: avoid dark-on-dark stacking */
+.sales-module-card{
+  border-top-color:#cbd7e0;
+}
