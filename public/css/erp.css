@@ -2118,8 +2118,13 @@ body[data-show-tutorials="0"] .pdv-split-help{display:none!important}
 }
 .nfe-workspace-dialog[open]{display:block}
 .nfe-workspace-dialog>form{
-  height:100%;min-height:0;
-  display:grid;grid-template-rows:auto minmax(0,1fr) auto;
+  width:100%;
+  height:calc(100dvh - 28px);
+  min-height:calc(100dvh - 28px);
+  max-height:calc(100dvh - 28px);
+  box-sizing:border-box;
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr) auto;
   overflow:hidden
 }
 .nfe-workspace-body{
@@ -2231,6 +2236,7 @@ body[data-show-tutorials="0"] .pdv-split-help{display:none!important}
 .nfe-wide-dialog .dialog-body{max-height:72vh;overflow:auto;background:#fff}
 @media(max-width:1100px){
   .nfe-workspace-dialog{width:calc(100vw - 18px);height:calc(100dvh - 18px);max-height:calc(100dvh - 18px)}
+  .nfe-workspace-dialog>form{height:calc(100dvh - 18px);min-height:calc(100dvh - 18px);max-height:calc(100dvh - 18px)}
   .nfe-editor-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}
   .nfe-item-tabs{grid-template-columns:repeat(4,minmax(0,1fr))}
   .nfe-emitter-summary{grid-template-columns:120px minmax(0,1fr) 240px}
@@ -2239,6 +2245,7 @@ body[data-show-tutorials="0"] .pdv-split-help{display:none!important}
 }
 @media(max-width:760px){
   .nfe-workspace-dialog,.nfe-item-dialog{width:100vw;height:100dvh;max-height:100dvh;border:0;border-radius:0}
+  .nfe-workspace-dialog>form{height:100dvh;min-height:100dvh;max-height:100dvh}
   .nfe-editor-tabs,.nfe-item-tabs{grid-template-columns:1fr 1fr}
   .nfe-emitter-summary{grid-template-columns:1fr;gap:10px;padding:14px}
   .nfe-emitter-logo{min-height:70px;border-right:0;border-bottom:1px solid #edf0f3}
@@ -2802,10 +2809,6 @@ body{
 .switch-field{
   border-color:#cbd5de;
 }
-.switch-field:has(input:checked){
-  background:#e8f5ee;
-  border-color:#b8dec9;
-}
 
 /* Modais */
 .erp-dialog{
@@ -3085,4 +3088,21 @@ body{
   .finance-reconcile-layout{
     grid-template-columns:1fr;
   }
+}
+
+
+/* NF-e switch/dialog stability */
+.nfe-workspace-dialog .switch-field{
+  background:#e8eaec;
+  border-color:#cbd5de;
+}
+.nfe-workspace-dialog .switch-field input:checked + .switch-track{
+  background:#4f9ce9;
+}
+.nfe-workspace-dialog .switch-field input:checked ~ strong{
+  color:#38566f;
+}
+.nfe-workspace-dialog .nfe-dialog-footer{
+  align-self:stretch;
+  margin:0;
 }
