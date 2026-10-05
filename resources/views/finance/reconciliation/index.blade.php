@@ -81,7 +81,7 @@
           </tbody>
         </table>
       @else
-        <div class="empty-cell">Importe um extrato OFX, CSV ou XLSX para iniciar.</div>
+        <div class="finance-reconcile-empty">Importe um extrato OFX, CSV ou XLSX para iniciar.</div>
       @endif
     </div>
   </div>
