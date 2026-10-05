@@ -60,7 +60,7 @@ $origins=[
 @endphp
 
 <div class="nextor-modal-layer nfe-modal-layer is-open" id="nfeEditorDialog" data-nfe-modal aria-hidden="false">
-  <div class="erp-dialog nfe-workspace-dialog nextor-modal-window" role="dialog" aria-modal="true" aria-labelledby="nfeEditorTitle">
+  <div class="erp-dialog nfe-workspace-dialog nextor-modal-window nfe-fixed-shell" role="dialog" aria-modal="true" aria-labelledby="nfeEditorTitle">
 <form id="nfeDraftForm" method="post"
       action="{{ $isEditing ? route('fiscal.nfe.update',$draft) : route('fiscal.nfe.store') }}">
   @csrf
