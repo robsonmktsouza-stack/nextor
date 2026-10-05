@@ -141,6 +141,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/finance/entries/{entry}/attachment',[FinanceController::class,'attachment'])->name('finance.entries.attachment')->middleware('permission:finance');
 
+    Route::get('/company/logo',[SettingsController::class,'companyLogo'])->name('company.logo');
     Route::get('/settings',[SettingsController::class,'index'])->name('settings.index')->middleware('permission:settings');
     Route::post('/settings/company',[SettingsController::class,'updateCompany'])->name('settings.company.update')->middleware('permission:settings');
     Route::post('/settings/printing',[SettingsController::class,'updatePrinting'])->name('settings.printing.update')->middleware('permission:settings');
