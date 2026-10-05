@@ -9,6 +9,7 @@ use App\Models\OperationNature;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class NfeEditorTest extends TestCase
@@ -223,6 +224,28 @@ class NfeEditorTest extends TestCase
             ->assertDontSee('Informações de agropecuária')
             ->assertDontSee('Campos de uso livre')
             ->assertDontSee('Valor original');
+    }
+
+    public function test_company_logo_is_served_without_public_storage_symlink(): void
+    {
+        Storage::fake('public');
+
+        $company=$this->company();
+        Storage::disk('public')->put('company/logo.png','fake-logo-bytes');
+        $company->update(['logo_path'=>'company/logo.png']);
+
+        $this->actingAs($this->admin())
+            ->get(route('company.logo'))
+            ->assertOk()
+            ->assertContent('fake-logo-bytes');
+
+        $this->nature();
+        $this->customer();
+        $this->product();
+
+        $this->get(route('fiscal.nfe.create'))
+            ->assertOk()
+            ->assertSee(route('company.logo'),false);
     }
 
     public function test_operation_nature_persists_entry_and_exit_cfops(): void
