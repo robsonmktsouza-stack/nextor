@@ -91,7 +91,7 @@ $origins=[
       <div class="nfe-emitter-summary">
         <div class="nfe-emitter-logo">
           @if($company->logo_path)
-            <img src="{{ route('company.logo') }}" alt="Logomarca da empresa">
+            <img src="{{ route('company.logo') }}" alt="">
           @endif
         </div>
 
