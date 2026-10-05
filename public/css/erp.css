@@ -2113,11 +2113,18 @@ body[data-show-tutorials="0"] .pdv-split-help{display:none!important}
 /* NF-e editor: composição; controles seguem o padrão visual do NEXTOR */
 .nfe-workspace-dialog{
   width:min(1420px,calc(100vw - 36px));max-width:none;
-  height:calc(100vh - 28px);max-height:none;overflow:hidden
+  height:calc(100dvh - 28px);max-height:calc(100dvh - 28px);
+  overflow:hidden
 }
-.nfe-workspace-dialog[open]{display:grid;grid-template-rows:auto minmax(0,1fr) auto}
-.nfe-workspace-dialog>form{display:contents}
-.nfe-workspace-body{overflow:auto;background:#fff}
+.nfe-workspace-dialog[open]{display:block}
+.nfe-workspace-dialog>form{
+  height:100%;min-height:0;
+  display:grid;grid-template-rows:auto minmax(0,1fr) auto;
+  overflow:hidden
+}
+.nfe-workspace-body{
+  min-height:0;overflow:auto;overscroll-behavior:contain;background:#fff
+}
 .nfe-editor-tabs{grid-template-columns:repeat(5,minmax(0,1fr));margin-bottom:14px}
 .nfe-workspace-body .editor-tab-panel{gap:14px}
 .nfe-workspace-body .editor-panel{background:#f1f2f4}
@@ -2126,16 +2133,17 @@ body[data-show-tutorials="0"] .pdv-split-help{display:none!important}
 .nfe-workspace-body .readonly-field small{display:block;margin-top:4px;line-height:1.45}
 
 .nfe-emitter-summary{
-  display:grid;grid-template-columns:150px minmax(0,1fr) 280px;gap:20px;
-  align-items:center;margin:0 0 14px;padding:18px 20px;border:1px solid #dce3ea;
+  display:grid;grid-template-columns:120px minmax(0,1fr) 270px;gap:16px;
+  align-items:center;margin:0 0 12px;padding:14px 16px;border:1px solid #dce3ea;
   border-radius:5px;background:#fff
 }
 .nfe-emitter-logo{
-  min-height:100px;display:flex;align-items:center;justify-content:center;
-  padding:8px;border-right:1px solid #edf0f3
+  min-height:78px;display:flex;align-items:center;justify-content:center;
+  padding:6px;border-right:1px solid #edf0f3
 }
+.nfe-emitter-logo:empty{min-height:62px}
 .nfe-emitter-logo img{
-  display:block;max-width:120px;max-height:84px;width:auto;height:auto;object-fit:contain
+  display:block;max-width:100px;max-height:68px;width:auto;height:auto;object-fit:contain
 }
 .nfe-emitter-identity{min-width:0;display:flex;flex-direction:column;gap:3px}
 .nfe-emitter-name{display:flex;align-items:baseline;flex-wrap:wrap;gap:5px;color:#566675}
@@ -2203,7 +2211,10 @@ body[data-show-tutorials="0"] .pdv-split-help{display:none!important}
 .nfe-manual-suggestion strong{color:#2877c7}
 .nfe-item-source-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;color:#7c8995;font-size:11px}
 .nfe-product-register{min-height:39px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
-.nfe-dialog-footer{justify-content:space-between}
+.nfe-dialog-footer{
+  justify-content:space-between;flex:0 0 auto;position:relative;z-index:3;
+  box-shadow:0 -1px 0 #e4e9ef
+}
 .nfe-dialog-footer>div:last-child,.nfe-dialog-status{display:flex;align-items:center;gap:8px}
 .nfe-dialog-status>strong{font-size:15px;color:#334458}
 .nfe-item-dialog{
@@ -2219,7 +2230,7 @@ body[data-show-tutorials="0"] .pdv-split-help{display:none!important}
 .nfe-wide-dialog{width:min(1050px,calc(100vw - 48px));max-width:none}
 .nfe-wide-dialog .dialog-body{max-height:72vh;overflow:auto;background:#fff}
 @media(max-width:1100px){
-  .nfe-workspace-dialog{width:calc(100vw - 18px);height:calc(100vh - 18px)}
+  .nfe-workspace-dialog{width:calc(100vw - 18px);height:calc(100dvh - 18px);max-height:calc(100dvh - 18px)}
   .nfe-editor-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}
   .nfe-item-tabs{grid-template-columns:repeat(4,minmax(0,1fr))}
   .nfe-emitter-summary{grid-template-columns:120px minmax(0,1fr) 240px}
@@ -2227,7 +2238,7 @@ body[data-show-tutorials="0"] .pdv-split-help{display:none!important}
   .nfe-general-dates{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-left:0;border-top:1px solid #e3e8ed}
 }
 @media(max-width:760px){
-  .nfe-workspace-dialog,.nfe-item-dialog{width:100vw;height:100vh;border:0;border-radius:0}
+  .nfe-workspace-dialog,.nfe-item-dialog{width:100vw;height:100dvh;max-height:100dvh;border:0;border-radius:0}
   .nfe-editor-tabs,.nfe-item-tabs{grid-template-columns:1fr 1fr}
   .nfe-emitter-summary{grid-template-columns:1fr;gap:10px;padding:14px}
   .nfe-emitter-logo{min-height:70px;border-right:0;border-bottom:1px solid #edf0f3}
