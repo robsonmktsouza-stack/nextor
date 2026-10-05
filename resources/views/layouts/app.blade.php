@@ -16,7 +16,7 @@
       <button class="cms-topbar-icon" type="button" data-sidebar-toggle aria-label="Alternar menu">@include('partials.icon',['name'=>'menu','size'=>20])</button>
       <a class="brand-home-link" href="{{ route(auth()->user()->canAccess('dashboard') ? 'dashboard' : auth()->user()->homeRouteName()) }}" data-tooltip="Abrir dashboard" aria-label="Abrir dashboard">
         <span class="cms-logo-mark">@include('partials.icon',['name'=>'shield','size'=>17])</span>
-        <strong class="brand-name">ERP</strong>
+        <strong class="brand-name">NEXTOR</strong>
       </a>
     </div>
     <div class="topbar-content">
