@@ -3504,3 +3504,126 @@ body.nfe-modal-open{overflow:hidden}
 .sales-module-card{
   border-top-color:#cbd7e0;
 }
+
+
+/* NEXTOR light topbar + sidebar */
+.cms-topbar{
+  background:#f8fafc;
+  border-top-color:#4e9ed2;
+  border-bottom:1px solid #d6e0e8;
+  box-shadow:0 1px 5px #13293d12;
+  color:#33485a;
+}
+.cms-topbar-brand{
+  background:#f8fafc;
+  border-right:1px solid #dbe4eb;
+}
+.brand-name{
+  color:#2f4355;
+}
+.cms-logo-mark{
+  background:#3184bd;
+}
+.cms-topbar-icon{
+  color:#536a7d;
+}
+.cms-topbar-icon:hover,
+.brand-home-link:hover,
+.user-menu summary:hover{
+  background:#eaf1f6;
+}
+.command-box input{
+  background:#fff;
+  border-color:#cbd6df;
+  color:#34495b;
+}
+.command-box input::placeholder{
+  color:#8a98a6;
+}
+.command-box input:focus{
+  background:#fff;
+  border-color:#6ea6cb;
+  box-shadow:0 0 0 2px #3184bd18;
+}
+.command-shortcut{
+  color:#708191;
+  border-color:#cbd6df;
+  background:#f1f5f8;
+}
+.topbar-pdv-shortcut{
+  background:#eef4f8;
+  border-color:#c4d2dc;
+  color:#3f6077;
+}
+.topbar-pdv-shortcut:hover{
+  background:#e3edf4;
+  border-color:#aebfcd;
+}
+.topbar-admin-badge{
+  color:#5f7284;
+  border-color:#cbd6df;
+  background:#f4f7f9;
+}
+.user-menu summary{
+  color:#3d5365;
+}
+.user-avatar{
+  background:#3184bd;
+  color:#fff;
+}
+.user-meta strong{
+  color:#31485a;
+}
+.user-meta small{
+  color:#7d8c99;
+}
+
+.cms-sidebar{
+  background:#f3f6f8;
+  border-right:1px solid #d3dde5;
+  box-shadow:2px 0 10px #1b2f4210;
+}
+.sidebar-section-label{
+  color:#91a0ad;
+}
+.sidebar-link{
+  color:#4f6273;
+}
+.sidebar-link svg{
+  color:#718394;
+}
+.sidebar-link:hover{
+  background:#e8eff4;
+  color:#2f4a5e;
+}
+.sidebar-link.active{
+  background:#dfeef8;
+  color:#235f87;
+  box-shadow:inset 0 1px 0 #ffffff99,inset 0 -1px 0 #cbdde9;
+}
+.sidebar-link.active:before{
+  background:#3184bd;
+}
+.sidebar-link.active svg{
+  color:#3184bd;
+}
+.sidebar-settings-link{
+  background:#eef3f6;
+  border-top-color:#d8e1e8;
+  color:#536778;
+}
+.sidebar-settings-link:hover{
+  background:#e4edf3;
+  color:#315c79;
+}
+.sidebar-footer{
+  border-top-color:#d8e1e8;
+}
+
+/* Collapsed sidebar keeps the same light visual language */
+.app-root.sidebar-collapsed .cms-sidebar{
+  background:#f3f6f8;
+}
+.app-root.sidebar-collapsed .sidebar-link.active{
+  background:#dfeef8;
+}
