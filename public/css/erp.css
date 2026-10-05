@@ -3232,3 +3232,106 @@ body.nfe-modal-open{overflow:hidden}
     max-width:none;
   }
 }
+
+
+/* NF-e fixed modal shell: header/body/footer are physically pinned */
+.nfe-modal-layer .nfe-fixed-shell{
+  position:fixed!important;
+  top:14px!important;
+  bottom:14px!important;
+  left:50%!important;
+  right:auto!important;
+  transform:translateX(-50%)!important;
+  width:min(1420px,calc(100vw - 28px))!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  display:block!important;
+  overflow:hidden!important;
+}
+
+.nfe-modal-layer .nfe-fixed-shell>form{
+  position:absolute!important;
+  inset:0!important;
+  width:auto!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  display:block!important;
+  overflow:hidden!important;
+}
+
+.nfe-modal-layer .nfe-fixed-shell .dialog-header{
+  position:absolute!important;
+  top:0!important;
+  left:0!important;
+  right:0!important;
+  height:58px!important;
+  min-height:58px!important;
+  z-index:4!important;
+  box-sizing:border-box!important;
+  margin:0!important;
+}
+
+.nfe-modal-layer .nfe-fixed-shell .nfe-workspace-body{
+  position:absolute!important;
+  top:58px!important;
+  bottom:64px!important;
+  left:0!important;
+  right:0!important;
+  width:auto!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  box-sizing:border-box!important;
+  margin:0!important;
+}
+
+.nfe-modal-layer .nfe-fixed-shell .nfe-dialog-footer{
+  position:absolute!important;
+  left:0!important;
+  right:0!important;
+  bottom:0!important;
+  top:auto!important;
+  height:64px!important;
+  min-height:64px!important;
+  max-height:64px!important;
+  box-sizing:border-box!important;
+  margin:0!important;
+  z-index:5!important;
+}
+
+@media(max-width:1100px){
+  .nfe-modal-layer .nfe-fixed-shell{
+    top:9px!important;
+    bottom:9px!important;
+    width:calc(100vw - 18px)!important;
+  }
+}
+
+@media(max-width:760px){
+  .nfe-modal-layer .nfe-fixed-shell{
+    top:0!important;
+    bottom:0!important;
+    left:0!important;
+    right:0!important;
+    transform:none!important;
+    width:100vw!important;
+    border-radius:0!important;
+  }
+  .nfe-modal-layer .nfe-fixed-shell .dialog-header{
+    height:56px!important;
+    min-height:56px!important;
+  }
+  .nfe-modal-layer .nfe-fixed-shell .nfe-workspace-body{
+    top:56px!important;
+    bottom:72px!important;
+  }
+  .nfe-modal-layer .nfe-fixed-shell .nfe-dialog-footer{
+    height:72px!important;
+    min-height:72px!important;
+    max-height:72px!important;
+  }
+}
