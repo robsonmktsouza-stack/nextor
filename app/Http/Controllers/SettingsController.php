@@ -91,11 +91,13 @@ class SettingsController extends Controller
             404
         );
 
-        return Storage::disk('public')->response(
-            $company->logo_path,
-            basename($company->logo_path),
-            ['Cache-Control'=>'private, max-age=3600']
-        );
+        $disk=Storage::disk('public');
+        $mime=$disk->mimeType($company->logo_path) ?: 'application/octet-stream';
+
+        return response($disk->get($company->logo_path),200,[
+            'Content-Type'=>$mime,
+            'Cache-Control'=>'private, max-age=3600',
+        ]);
     }
 
     public function updateCompany(Request $request)
