@@ -11,7 +11,7 @@
     document.body.classList.add('nfe-modal-open');
 
     const focusable=modal.querySelector(
-      '[autofocus], input:not([type="hidden"]):not(:disabled), select:not(:disabled), textarea:not(:disabled), button:not(:disabled), a[href]'
+      '[autofocus], .dialog-body input:not([type="hidden"]):not(:disabled), .dialog-body select:not(:disabled), .dialog-body textarea:not(:disabled), input:not([type="hidden"]):not(:disabled), select:not(:disabled), textarea:not(:disabled), button:not(:disabled), a[href]'
     );
     window.setTimeout(()=>focusable?.focus(),0);
   };
@@ -832,6 +832,9 @@
     }
 
     if(!modalIsOpen(mainDialog)) return;
+
+    const topModal=openLayers.at(-1);
+    if(topModal && topModal!==mainDialog) return;
 
     if((event.ctrlKey||event.metaKey) && event.key.toLowerCase()==='s'){
       event.preventDefault();
