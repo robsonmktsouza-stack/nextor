@@ -202,7 +202,7 @@ foreach($primaryTabs as $key=>$item){
       <div class="settings-brand-grid">
         <div class="settings-logo-box">
           @if($company->logo_path)
-            <img src="{{ route('company.logo') }}" alt="Logomarca da empresa">
+            <img src="{{ route('company.logo') }}" alt="">
           @else
             <div class="settings-logo-empty">@include('partials.icon',['name'=>'products','size'=>30])<span>Sem logomarca</span></div>
           @endif
