@@ -82,6 +82,22 @@ class SettingsController extends Controller
         ]);
     }
 
+    public function companyLogo()
+    {
+        $company=CompanySetting::current();
+
+        abort_unless(
+            $company->logo_path && Storage::disk('public')->exists($company->logo_path),
+            404
+        );
+
+        return Storage::disk('public')->response(
+            $company->logo_path,
+            basename($company->logo_path),
+            ['Cache-Control'=>'private, max-age=3600']
+        );
+    }
+
     public function updateCompany(Request $request)
     {
         $data=$request->validate([
