@@ -2927,3 +2927,162 @@ body{
     padding:9px 10px;
   }
 }
+
+
+/* NEXTOR visual balance pass */
+.page-heading{
+  min-height:54px;
+  padding:0 18px;
+  margin-bottom:12px;
+  background:#49788f;
+}
+.page-heading-main{
+  min-height:54px;
+}
+.page-heading h1{
+  font-size:18px;
+  font-weight:650;
+}
+.page-title-meta{
+  height:21px;
+  min-height:21px;
+  padding:0 7px;
+  font-size:9.5px;
+}
+
+.cms-sidebar{
+  background:#243648;
+}
+.sidebar-section-label{
+  height:31px;
+  padding:13px 18px 5px;
+  color:#8295a8;
+}
+.sidebar-link{
+  min-height:40px;
+  padding:8px 16px 8px 18px;
+}
+.sidebar-link.active{
+  background:#2d475d;
+  box-shadow:inset 0 1px 0 #ffffff05,inset 0 -1px 0 #00000012;
+}
+.sidebar-link.active:before{
+  background:#55a9dc;
+  width:3px;
+}
+.sidebar-link.active svg{
+  color:#9acceb;
+}
+
+.sales-module-tabs,
+.finance-module-tabs,
+.settings-main-tabs{
+  gap:4px;
+  margin-bottom:9px;
+}
+.sales-module-tabs a,
+.finance-module-tabs a,
+.settings-main-tabs a{
+  min-height:39px;
+  padding:0 14px;
+  background:#5d7481;
+  border-color:#526976;
+  font-size:11.5px;
+  box-shadow:none;
+}
+.sales-module-tabs a:hover,
+.finance-module-tabs a:hover,
+.settings-main-tabs a:hover{
+  background:#526d7b;
+}
+.sales-module-tabs a.active,
+.settings-main-tabs a.active,
+.finance-module-tabs a.active{
+  box-shadow:inset 0 2px 0 #ffffff45;
+}
+.finance-module-tabs .finance-settings-tab{
+  margin-left:0;
+  min-width:39px;
+  padding:0 11px;
+}
+.finance-module-tabs .finance-settings-tab:last-child{
+  margin-right:auto;
+}
+
+.grid-actionbar{
+  min-height:56px;
+  padding:8px 12px;
+}
+.grid-primary-action,
+.grid-tool,
+.grid-filter-button,
+.period-current,
+.bulk-action-select,
+.bulk-actions .ui-select-trigger,
+.bulk-apply{
+  height:37px;
+}
+.grid-primary-action{
+  padding:0 12px;
+}
+.grid-filter-button{
+  width:40px;
+}
+.period-arrow{
+  width:31px;
+  height:37px;
+}
+
+.cms-card{
+  box-shadow:0 1px 2px #1424370a,0 5px 16px #1424370a;
+}
+.cms-table th{
+  height:37px;
+  background:#edf2f6;
+  color:#566a7b;
+}
+.cms-table td{
+  height:46px;
+}
+.status{
+  padding:3px 7px;
+  font-size:9.5px;
+}
+
+.finance-reconcile-layout{
+  min-height:0;
+  grid-template-columns:250px minmax(0,1fr);
+}
+.finance-import-list{
+  min-height:210px;
+  background:#fbfcfd;
+}
+.finance-reconcile-table{
+  min-height:210px;
+  background:#fff;
+}
+.finance-reconcile-empty{
+  min-height:210px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:28px;
+  color:#8a99a9;
+  font-size:12px;
+  text-align:center;
+}
+.finance-operational-card{
+  overflow:hidden;
+}
+
+@media(max-width:900px){
+  .page-heading{
+    min-height:50px;
+  }
+  .page-heading-main{
+    min-height:50px;
+  }
+  .finance-reconcile-layout{
+    grid-template-columns:1fr;
+  }
+}
