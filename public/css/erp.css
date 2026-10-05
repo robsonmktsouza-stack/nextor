@@ -3627,3 +3627,231 @@ body.nfe-modal-open{overflow:hidden}
 .app-root.sidebar-collapsed .sidebar-link.active{
   background:#dfeef8;
 }
+
+
+/* NEXTOR color hierarchy inspired by the fiscal base system */
+:root{
+  --base-topbar:#ededed;
+  --base-topbar-border:#d2d6d9;
+  --base-sidebar:#37474f;
+  --base-sidebar-active:#263238;
+  --base-module:#648493;
+  --base-tab:#567381;
+  --base-tab-hover:#4b6876;
+  --base-green:#3ec300;
+  --base-green-dark:#32a500;
+}
+
+/* Topbar: clear neutral surface */
+.cms-topbar{
+  background:var(--base-topbar);
+  border-top:0;
+  border-bottom:1px solid var(--base-topbar-border);
+  box-shadow:0 1px 4px #1d2b3614;
+  color:#4f5b63;
+}
+.cms-topbar-brand{
+  background:var(--base-topbar);
+  border-right:1px solid #d4d8db;
+}
+.brand-name{
+  color:#4b565d;
+}
+.cms-logo-mark{
+  background:#5a7e8e;
+  box-shadow:none;
+}
+.cms-topbar-icon{
+  color:#596970;
+}
+.cms-topbar-icon:hover,
+.brand-home-link:hover,
+.user-menu summary:hover{
+  background:#dedede;
+}
+.command-box input{
+  background:#f7f7f7;
+  border-color:#c8ced2;
+  color:#4b565d;
+}
+.command-box input::placeholder{
+  color:#8a9399;
+}
+.command-box input:focus{
+  background:#fff;
+  border-color:#8fa8b4;
+  box-shadow:0 0 0 2px #6484931c;
+}
+.command-shortcut{
+  background:#e6e6e6;
+  border-color:#c8ced2;
+  color:#6e777d;
+}
+.topbar-pdv-shortcut,
+.topbar-admin-badge{
+  background:#e2e2e2;
+  border-color:#c6cbce;
+  color:#55636a;
+}
+.topbar-pdv-shortcut:hover{
+  background:#d7dde0;
+  border-color:#b9c1c5;
+}
+.user-menu summary{
+  color:#48545b;
+}
+.user-avatar{
+  background:#6a8794;
+  color:#fff;
+}
+.user-meta strong{
+  color:#465159;
+}
+.user-meta small{
+  color:#7d878d;
+}
+
+/* Sidebar: same dark slate hierarchy as the base system */
+.cms-sidebar{
+  background:var(--base-sidebar);
+  border-right:1px solid #2f3d44;
+  box-shadow:none;
+}
+.sidebar-section-label{
+  color:#9aa9b0;
+}
+.sidebar-link{
+  color:#edf1f3;
+}
+.sidebar-link svg{
+  color:#d6dee2;
+}
+.sidebar-link:hover{
+  background:#314048;
+  color:#fff;
+}
+.sidebar-link.active{
+  background:var(--base-sidebar-active);
+  color:#fff;
+  box-shadow:none;
+}
+.sidebar-link.active:before{
+  background:var(--base-green);
+}
+.sidebar-link.active svg{
+  color:#fff;
+}
+.sidebar-settings-link{
+  background:#33434b;
+  border-top-color:#465861;
+  color:#edf1f3;
+}
+.sidebar-settings-link:hover{
+  background:#2d3b42;
+  color:#fff;
+}
+.sidebar-footer{
+  border-top-color:#465861;
+}
+.app-root.sidebar-collapsed .cms-sidebar{
+  background:var(--base-sidebar);
+}
+.app-root.sidebar-collapsed .sidebar-link.active{
+  background:var(--base-sidebar-active);
+}
+
+/* Module title strip */
+.page-heading{
+  background:var(--base-module);
+  border-bottom:1px solid #587886;
+  box-shadow:none;
+}
+.page-heading h1{
+  color:#fff;
+}
+.page-title-meta{
+  background:#ffffff13;
+  border-color:#ffffff2b;
+  color:#f3f6f7;
+}
+
+/* Module navigation: dark tabs with green active tab */
+.sales-module-tabs,
+.finance-module-tabs,
+.settings-main-tabs{
+  border-bottom:1px solid var(--base-green);
+}
+.sales-module-tabs a,
+.finance-module-tabs a,
+.settings-main-tabs a{
+  background:var(--base-tab);
+  color:#fff;
+  border-color:var(--base-tab);
+  border-bottom:0;
+  box-shadow:none;
+}
+.sales-module-tabs a:hover,
+.finance-module-tabs a:hover,
+.settings-main-tabs a:hover{
+  background:var(--base-tab-hover);
+  border-color:var(--base-tab-hover);
+  color:#fff;
+}
+.sales-module-tabs a.active,
+.finance-module-tabs a.active,
+.settings-main-tabs a.active{
+  background:var(--base-green);
+  border-color:var(--base-green);
+  color:#fff;
+  box-shadow:none;
+}
+.finance-module-tabs .finance-settings-tab{
+  background:var(--base-tab);
+  color:#fff;
+}
+.finance-module-tabs .finance-settings-tab:hover{
+  background:var(--base-tab-hover);
+  color:#fff;
+}
+
+/* Action hierarchy follows the same pattern */
+.grid-primary-action,
+.btn-success{
+  background:var(--base-green);
+  border-color:var(--base-green);
+  color:#fff;
+}
+.grid-primary-action:hover,
+.btn-success:hover{
+  background:var(--base-green-dark);
+  border-color:var(--base-green-dark);
+}
+.grid-filter-button,
+.btn-primary{
+  background:#2e7eb7;
+  border-color:#2e7eb7;
+}
+.grid-filter-button:hover,
+.btn-primary:hover{
+  background:#256a9a;
+  border-color:#256a9a;
+}
+
+/* Keep the content area bright, like the base system */
+.grid-actionbar,
+.table-footerbar,
+.cms-table th,
+.grid-filter-panel{
+  background:#fff;
+}
+.cms-table th{
+  color:#53616a;
+  border-bottom-color:#d7dcdf;
+}
+.cms-card{
+  border-color:#d8dde0;
+  box-shadow:0 1px 2px #17242d0a;
+}
+.main-content{
+  background:#eef0f3;
+}
