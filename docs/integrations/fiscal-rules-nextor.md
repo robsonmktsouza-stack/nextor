@@ -103,7 +103,7 @@ A referência eGestor serviu apenas para a cobertura de campos e a organização
 
 ## Autocomplete fiscal — campo de busca com sugestões
 
-Os controles fiscais de código não apresentam mais um select com uma segunda barra de pesquisa. A interface usa **um único campo de busca** (com lista de sugestões imediatamente abaixo): digite código ou descrição, navegue com as setas e escolha com Enter ou mouse. Escape restaura o último código confirmado. O texto de descrição **não** é enviado ao servidor — somente o código original, mantido num campo oculto.
+Os controles fiscais de código não apresentam mais um select com uma segunda barra de pesquisa. A interface usa **um único campo de busca**: digite código ou descrição, navegue com as setas e escolha com Enter ou mouse. A lista abre em uma camada flutuante ancorada ao campo, com **até 4 resultados sem barra de rolagem**; o formulário não muda de altura e a lista não abre automaticamente quando um campo apenas recebe foco. Escape restaura o último código confirmado. O texto de descrição **não** é enviado ao servidor — somente o código original, mantido num campo oculto.
 
 A seleção não é automática ao digitar um trecho: o usuário precisa escolher um item. CFOPs não listados e cClassTrib não contidos na referência local podem ser informados digitando o código inteiro e escolhendo **Usar este código (conferir)**. Itens legados permanecem disponíveis, marcados para conferência. O componente é utilizado também nos formulários fiscais adicionados por modal, sem modificar os selects gerais do sistema.
 
