@@ -48,6 +48,7 @@ final class ACBrNFeService
         $header = <<<'CDEF'
             int NFE_Inicializar(const char *eArqConfig, const char *eChaveCrypt);
             int NFE_Finalizar(void);
+            int NFE_Nome(char *sNome, int *esTamanho);
             int NFE_Versao(char *sVersao, int *esTamanho);
             int NFE_UltimoRetorno(char *sMensagem, int *esTamanho);
         CDEF;
@@ -60,6 +61,19 @@ final class ACBrNFeService
             throw new RuntimeException("ACBr NFE_Inicializar falhou ({$status}): {$reason}");
         }
         $this->initialized = true;
+    }
+
+    public function name(): string
+    {
+        $this->initialize();
+        $size = FFI::new('int');
+        $size->cdata = 4096;
+        $buffer = FFI::new('char[4096]');
+        $status = $this->lib->NFE_Nome($buffer, FFI::addr($size));
+        if ($status !== 0) {
+            throw new RuntimeException("ACBr NFE_Nome falhou ({$status}): ".$this->lastReturn());
+        }
+        return FFI::string($buffer);
     }
 
     public function version(): string
@@ -97,8 +111,14 @@ final class ACBrNFeService
             $size = FFI::new('int');
             $size->cdata = 4096;
             $buffer = FFI::new('char[4096]');
-            $this->lib->NFE_UltimoRetorno($buffer, FFI::addr($size));
-            return FFI::string($buffer);
+            $status = $this->lib->NFE_UltimoRetorno($buffer, FFI::addr($size));
+            if ($size->cdata >= 4096 && $size->cdata < 1048576) {
+                $capacity = $size->cdata + 1;
+                $buffer = FFI::new("char[{$capacity}]");
+                $size->cdata = $capacity;
+                $status = $this->lib->NFE_UltimoRetorno($buffer, FFI::addr($size));
+            }
+            return $status === 0 ? FFI::string($buffer) : "NFE_UltimoRetorno retornou {$status}";
         } catch (Throwable) {
             return 'não foi possível consultar o último retorno';
         }
