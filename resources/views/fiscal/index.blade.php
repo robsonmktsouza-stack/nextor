@@ -53,6 +53,11 @@
             @include('partials.icon',['name'=>'tag','size'=>18])
           </a>
         @endif
+        @if(auth()->user()->canAccess('settings') && $tab==='nfce')
+          <a class="grid-tool grid-tool-wide" href="{{ route('fiscal.tax-rules.index') }}" data-tooltip="Regras fiscais da NFC-e">
+            @include('partials.icon',['name'=>'layers','size'=>17]) <span>Regras fiscais</span>
+          </a>
+        @endif
         @if(auth()->user()->canAccess('settings'))
           <a class="grid-tool" href="{{ route('settings.index',['tab'=>$configuration['settings_tab']]) }}" data-tooltip="Configurações">
             @include('partials.icon',['name'=>'settings','size'=>18])
