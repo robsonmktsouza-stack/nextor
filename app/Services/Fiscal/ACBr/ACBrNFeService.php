@@ -97,7 +97,7 @@ final class ACBrNFeService
             }
             $buffer = FFI::new("char[{$length}]");
             $size->cdata = $length;
-            $status = $this->lib->NFE_Versao($buffer, FFI::addr($size));
+            $status = $this->lib->NFE_Versao($this->handle, $buffer, FFI::addr($size));
             if ($status !== 0) {
                 throw new RuntimeException("ACBr NFE_Versao falhou ({$status}).");
             }
