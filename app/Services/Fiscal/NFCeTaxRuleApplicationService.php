@@ -39,7 +39,7 @@ final class NFCeTaxRuleApplicationService
                 throw new RuntimeException('A NFC-e não possui itens válidos.');
             }
 
-            $date = $source['operation_date'] ?: $job->created_at?->toDateString();
+            $date = ($source['operation_date'] ?? null) ?: $job->created_at?->toDateString();
             foreach ($items as $index => &$item) {
                 if (($item['item_type'] ?? '') !== 'product') {
                     throw new RuntimeException('Regras iniciais disponíveis apenas para produtos.');
