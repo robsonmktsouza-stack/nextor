@@ -604,6 +604,7 @@ foreach($primaryTabs as $key=>$item){
         <label class="field col-3"><span>Ambiente</span><select name="environment"><option value="homologation" @selected($nfce['environment']==='homologation')>Homologação</option><option value="production" @selected($nfce['environment']==='production')>Produção</option></select></label>
         <label class="field col-2"><span>Série</span><input type="number" min="0" max="999" name="series" value="{{ $nfce['series'] }}"></label>
         <label class="field col-3"><span>Próximo número</span><input type="number" min="1" name="next_number" value="{{ $nfce['next_number'] }}"></label>
+        <label class="field col-2"><span>CFOP padrão</span><input name="default_cfop" value="{{ $nfce[\'default_cfop\'] ?? \'\' }}" maxlength="4" placeholder="Ex.: 5102"></label>
         <label class="field col-2"><span>ID CSC</span><input name="csc_id" value="{{ $nfce['csc_id'] }}"></label>
         <label class="field col-6"><span>CSC / Token</span><input type="password" name="csc_token" placeholder="{{ $nfce['csc_token'] ? 'CSC já configurado' : 'Informe o CSC' }}"></label>
       </div>
