@@ -1,0 +1,43 @@
+name: ACBr integration checks
+on:
+  push:
+    branches:
+      - feature/acbr-nfe-bootstrap
+  pull_request:
+
+jobs:
+  php:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, openssl, pdo_sqlite, dom, xml
+          coverage: none
+      - name: PHP syntax check
+        run: |
+          for f in \
+            app/Services/Fiscal/ACBr/ACBrNFeService.php \
+            app/Services/Fiscal/NFCeIniBuilder.php \
+            app/Services/Fiscal/NFCePreflightService.php \
+            app/Services/Fiscal/NFCeTransmissionService.php \
+            app/Services/FiscalPreparationService.php \
+            app/Services/SalesService.php \
+            app/Jobs/ProcessNFCeJob.php \
+            app/Http/Controllers/FiscalController.php \
+            app/Console/Commands/ACBrNFCeStatus.php \
+            tests/Feature/NFCeIniBuilderTest.php; do
+            php -l "$f"
+          done
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Prepare Laravel
+        run: |
+          cp .env.example .env || touch .env
+          php artisan key:generate --force
+      - name: Check NFC-e builder
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+        run: php artisan test --filter=NFCeIniBuilderTest
