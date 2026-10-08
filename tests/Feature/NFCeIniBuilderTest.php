@@ -126,5 +126,14 @@ final class NFCeIniBuilderTest extends TestCase
         self::assertStringContainsString('vNF=10.00', $ini);
         self::assertStringContainsString("[pag001]\r\ntPag=17\r\nvPag=4.00", $ini);
         self::assertStringContainsString("[pag002]\r\ntPag=01\r\nvPag=10.00\r\nvTroco=4.00", $ini);
+
+        // Mesmo com o dinheiro antes do PIX, o vTroco deve estar na
+        // última seção pag, pois a ACBr lê o valor como total do grupo.
+        $snapshot = $document->source_snapshot;
+        $snapshot['payments'] = array_reverse($snapshot['payments']);
+        $document->source_snapshot = $snapshot;
+        $ini = app(NFCeIniBuilder::class)->build($document, $company);
+        self::assertStringContainsString("[pag001]\r\ntPag=01\r\nvPag=10.00", $ini);
+        self::assertStringContainsString("[pag002]\r\ntPag=17\r\nvPag=4.00\r\nvTroco=4.00", $ini);
     }
 }
