@@ -53,6 +53,8 @@ final class ACBrNFeService
             int NFE_Versao(void *libHandle, char *sVersao, int *esTamanho);
             int NFE_UltimoRetorno(void *libHandle, char *sMensagem, int *esTamanho);
             int NFE_ConfigLerValor(void *libHandle, const char *eSessao, const char *eChave, char *sValor, int *esTamanho);
+            int NFE_ConfigGravarValor(void *libHandle, const char *eSessao, const char *eChave, const char *eValor);
+            int NFE_StatusServico(void *libHandle, char *sResposta, int *esTamanho);
         CDEF;
 
         $this->lib = FFI::cdef($header, $path);
@@ -102,6 +104,32 @@ final class ACBrNFeService
             if ($status !== 0) {
                 throw new RuntimeException("ACBr NFE_Versao falhou ({$status}).");
             }
+        }
+        return FFI::string($buffer);
+    }
+
+    public function setConfig(string $section, string $key, string $value): void
+    {
+        $this->initialize();
+        $status = $this->lib->NFE_ConfigGravarValor($this->handle, $section, $key, $value);
+        if ($status !== 0) {
+            throw new RuntimeException("ACBr não configurou {$section}.{$key} ({$status}): ".$this->lastReturn());
+        }
+    }
+
+    public function statusServico(): string
+    {
+        $this->initialize();
+        $length = 65536;
+        $buffer = FFI::new("char[{$length}]");
+        $size = FFI::new('int');
+        $size->cdata = $length;
+        $status = $this->lib->NFE_StatusServico($this->handle, $buffer, FFI::addr($size));
+        if ($status !== 0) {
+            throw new RuntimeException("Consulta SEFAZ falhou ({$status}): ".$this->lastReturn());
+        }
+        if ($size->cdata >= $length) {
+            throw new RuntimeException('Resposta SEFAZ excedeu o buffer de 64 KB.');
         }
         return FFI::string($buffer);
     }
