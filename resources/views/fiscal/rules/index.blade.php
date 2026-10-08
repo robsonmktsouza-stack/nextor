@@ -15,80 +15,6 @@
 
 @section('content')
 <section class="editor-panel settings-panel" style="margin-bottom:14px">
-  <div class="settings-panel-head">
-    <div><h2>Conferir tributação de um produto</h2></div>
-  </div>
-  <form method="get" action="{{ route('fiscal.tax-rules.index') }}" class="editor-grid cols-12 settings-grid" style="align-items:end">
-    <label class="field col-7">
-      <span>Produto</span>
-      <select name="simulate_product_id" required>
-        <option value="">Selecione um produto</option>
-        @foreach($products as $product)
-          <option value="{{ $product->id }}" @selected((string)$previewProductId===(string)$product->id)>
-            {{ $product->sku }} — {{ $product->name }}
-          </option>
-        @endforeach
-      </select>
-    </label>
-    <label class="field col-3">
-      <span>Data da operação</span>
-      <input name="simulate_date" type="date" value="{{ $previewDate }}" required>
-    </label>
-    <div class="col-2">
-      <button class="btn btn-secondary" type="submit" style="width:100%">
-        @include('partials.icon',['name'=>'search','size'=>15]) Conferir
-      </button>
-    </div>
-  </form>
-
-  @if($preview)
-    <div class="fiscal-simulation-result" style="margin-top:16px">
-      <div class="settings-panel-head" style="margin-bottom:10px">
-        <div>
-          <h3 style="margin:0;font-size:14px">{{ $preview['product']->name }}</h3>
-          <p>{{ $preview['origin'] }} · {{ $preview['name'] }} · Revisão {{ $preview['revision'] }}</p>
-        </div>
-        <span class="status status-ok">Classificação encontrada</span>
-      </div>
-      <div class="editor-grid cols-12 settings-grid">
-        <div class="field col-3"><span>CFOP</span><strong>{{ $preview['tax']['cfop'] }}</strong></div>
-        <div class="field col-3"><span>CSOSN</span><strong>{{ $preview['tax']['icms_csosn'] }}</strong></div>
-        <div class="field col-3"><span>CST PIS</span><strong>{{ $preview['tax']['pis_cst'] }}</strong></div>
-        <div class="field col-3"><span>CST COFINS</span><strong>{{ $preview['tax']['cofins_cst'] }}</strong></div>
-      </div>
-      <p class="editor-help" style="margin-top:10px">Conferência do enquadramento cadastrado. Não gera nota nem altera a venda.</p>
-    </div>
-  @elseif($previewError)
-    <div class="fiscal-simulation-result" style="margin-top:16px">
-      <strong>Revisar configuração fiscal</strong>
-      <p style="margin-top:6px">{{ $previewError }}</p>
-    </div>
-  @endif
-</section>
-
-<section class="editor-panel settings-panel" style="margin-bottom:14px">
-  <div class="settings-panel-head">
-    <div>
-      <h2>Regras fiscais</h2>
-      <p>Defina as exceções por produto, NCM, destino e período.</p>
-    </div>
-  </div>
-  <form method="post" action="{{ route('fiscal.tax-rules.mode') }}" class="editor-grid cols-12 settings-grid" style="align-items:end;margin-top:12px">
-    @csrf
-    <label class="field col-8"><span>Aplicação de regras ao emitir</span>
-      <select name="enabled">
-        <option value="0" @selected(!$useFiscalRules)>Desativada — manter comportamento atual</option>
-        <option value="1" @selected($useFiscalRules)>Ativada — exigir regra fiscal aplicada em NFC-e preparada</option>
-      </select>
-    </label>
-    <div class="col-4">
-      <button type="submit" class="btn btn-success">@include('partials.icon',['name'=>'check','size'=>15]) Salvar configuração</button>
-    </div>
-  </form>
-  <p class="editor-help">Ao ativar, as novas notas precisam de uma regra fiscal definida antes da emissão.</p>
-</section>
-
-<section class="editor-panel settings-panel" style="margin-bottom:14px">
   <div class="settings-panel-head"><div><h2>Nova regra</h2><p>Cadastre as condições e os códigos de tributação.</p></div></div>
   <form method="post" action="{{ route('fiscal.tax-rules.store') }}" class="settings-editor">
     @csrf
@@ -114,9 +40,9 @@
       <label class="field col-2"><span>Prioridade</span><input required name="priority" type="number" min="-100" max="100" value="{{ old('priority',0) }}"></label>
       <label class="field col-3"><span>Início da vigência</span><input type="date" name="valid_from" value="{{ old('valid_from') }}"></label>
       <label class="field col-3"><span>Fim da vigência</span><input type="date" name="valid_until" value="{{ old('valid_until') }}"></label>
-      <div class="field col-6"><span>Conferência</span>
+      <div class="field col-6"><span>Situação</span>
         <label class="settings-switch"><input type="checkbox" name="is_active" value="1" @checked(old('is_active'))>
-          <span><strong>Regra ativa</strong><small>Ative somente após validar o enquadramento.</small></span>
+          <span><strong>Regra ativa</strong><small>Regra utilizada nas operações configuradas.</small></span>
         </label>
       </div>
       <label class="field col-12"><span>Observações / fundamento para conferência</span>
