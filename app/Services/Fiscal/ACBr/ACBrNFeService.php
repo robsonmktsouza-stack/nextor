@@ -157,7 +157,8 @@ final class ACBrNFeService
             $buffer = FFI::new("char[{$capacity}]");
             $size = FFI::new('int');
             $size->cdata = $capacity;
-            $status = $this->lib->$method($this->handle, ...$args, $buffer, FFI::addr($size));
+            $arguments = array_merge([$this->handle], $args, [$buffer, FFI::addr($size)]);
+            $status = $this->lib->$method(...$arguments);
             if ($size->cdata >= $capacity && $size->cdata < 8388608) {
                 $capacity = $size->cdata + 1;
                 continue;
