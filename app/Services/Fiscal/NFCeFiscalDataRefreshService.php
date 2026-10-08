@@ -69,6 +69,7 @@ final class NFCeFiscalDataRefreshService
                 $item['origin'] = $product->origin;
                 $item['gtin'] = $product->ean_gtin;
                 $item['tax_defaults'] = $product->tax_defaults ?? [];
+                $item['fiscal_tax_group_id'] = $product->fiscal_tax_group_id;
             }
             unset($item);
 
