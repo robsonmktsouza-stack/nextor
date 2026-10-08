@@ -9,6 +9,17 @@
       <button type="submit" class="btn btn-success">@include('partials.icon',['name'=>'check','size'=>16]) Emitir NFC-e</button>
     </form>
   @endif
+  @if($tab==='nfce' && $document->status==='pending' && $document->access_key && auth()->user()->canAccess('fiscal'))
+    <form method="post" action="{{ route('fiscal.nfce.consult',$document) }}">
+      @csrf
+      <button type="submit" class="btn btn-secondary">@include('partials.icon',['name'=>'refresh-cw','size'=>16]) Consultar SEFAZ</button>
+    </form>
+  @endif
+  @if($tab==='nfce' && $document->xml_path && auth()->user()->canAccess('fiscal'))
+    <a class="btn btn-secondary" href="{{ route('fiscal.nfce.xml',$document) }}">
+      @include('partials.icon',['name'=>'download','size'=>16]) {{ $document->status==='authorized' && str_ends_with($document->xml_path,'authorized.xml') ? 'XML autorizado' : 'XML assinado' }}
+    </a>
+  @endif
   @if(auth()->user()->canAccess('settings'))
     <a class="btn btn-secondary" href="{{ route('settings.index',['tab'=>$configuration['settings_tab']]) }}">@include('partials.icon',['name'=>'settings','size'=>16]) Configurar</a>
   @endif
