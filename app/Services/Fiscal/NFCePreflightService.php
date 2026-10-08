@@ -63,8 +63,8 @@ final class NFCePreflightService
                 $n = $index + 1;
                 $tax = $item['tax_defaults'] ?? [];
                 $tax = is_array($tax) ? $tax : [];
-                $cfop = (string) ($tax['nfce_cfop'] ?? $tax['cfop'] ?? AppSetting::value('nfce', 'default_cfop', ''));
-                $csosn = (string) ($tax['csosn'] ?? $tax['icms_csosn_default'] ?? AppSetting::value('tax', 'icms_csosn_default', ''));
+                $cfop = (string) ($tax['cfop_outbound_internal'] ?? $tax['nfce_cfop'] ?? $tax['cfop'] ?? AppSetting::value('nfce', 'default_cfop', ''));
+                $csosn = (string) ($tax['icms_csosn'] ?? $tax['csosn'] ?? $tax['icms_csosn_default'] ?? AppSetting::value('tax', 'icms_csosn_default', ''));
                 $pis = (string) ($tax['pis_cst'] ?? $tax['pis_cst_default'] ?? AppSetting::value('tax', 'pis_cst_default', ''));
                 $cofins = (string) ($tax['cofins_cst'] ?? $tax['cofins_cst_default'] ?? AppSetting::value('tax', 'cofins_cst_default', ''));
                 if (($item['item_type'] ?? '') !== 'product' || !($item['product_id'] ?? null)) {
@@ -100,7 +100,11 @@ final class NFCePreflightService
             $sum = 0;
             foreach ($payments as $payment) {
                 $kind = strtolower((string) ($payment['payment_kind'] ?? $payment['payment_method'] ?? ''));
-                if (!in_array($kind, ['cash', 'money', 'pix', 'credit_card', 'debit_card', 'bank_slip', 'bank_transfer'], true)) {
+                if ($kind === 'card') {
+                    $code = strtolower((string) ($payment['payment_method'] ?? ''));
+                    $kind = str_contains($code, 'debit') || str_contains($code, 'debito') ? 'debit_card' : (str_contains($code, 'credit') || str_contains($code, 'credito') ? 'credit_card' : 'card');
+                }
+                if (!in_array($kind, ['cash', 'money', 'pix', 'credit_card', 'debit_card', 'bank_slip', 'bank_transfer', 'transfer'], true)) {
                     $errors[] = 'Forma de pagamento sem mapeamento fiscal: '.$kind;
                 }
                 $sum += (int) round((float) ($payment['amount'] ?? 0) * 100);
