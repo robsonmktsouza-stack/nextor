@@ -102,6 +102,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/fiscal/nfe/natures',[OperationNatureController::class,'store'])->name('fiscal.nfe.natures.store')->middleware('permission:fiscal');
     Route::put('/fiscal/nfe/natures/{operationNature}',[OperationNatureController::class,'update'])->name('fiscal.nfe.natures.update')->middleware('permission:fiscal');
 
+    Route::post('/fiscal/{fiscalDocumentJob}/emit-nfce',[FiscalController::class,'issueNfce'])->name('fiscal.nfce.emit')->middleware('permission:fiscal');
+
     Route::get('/fiscal/{fiscalDocumentJob}',[FiscalController::class,'show'])->name('fiscal.show')->middleware('permission:fiscal');
 
     Route::get('/finance',[FinanceController::class,'dashboard'])->name('finance.dashboard')->middleware('permission:finance');
