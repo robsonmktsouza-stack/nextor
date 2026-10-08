@@ -53,6 +53,7 @@ jobs:
             tests/Unit/NFCeProtocolXmlServiceTest.php \
             tests/Unit/NFCeTaxGroupTranslatorTest.php \
             tests/Feature/FiscalTaxGroupPersistenceTest.php \
+            tests/Feature/FiscalFcpRulePersistenceTest.php \
             tests/Unit/NFCeDanfeServiceTest.php \
             tests/Unit/NFCeSefazResponseParserTest.php; do
             php -l "$f"
@@ -74,4 +75,4 @@ jobs:
         env:
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
-        run: php vendor/bin/phpunit --filter='NFCe|FiscalTaxRule|FiscalTaxGroup'
+        run: php vendor/bin/phpunit --filter='NFCe|FiscalTaxRule|FiscalTaxGroup|FiscalFcpRule'
