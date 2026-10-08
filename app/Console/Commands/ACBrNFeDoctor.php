@@ -16,6 +16,9 @@ final class ACBrNFeDoctor extends Command
         $service = new ACBrNFeService();
 
         try {
+            $service->initialize();
+            $this->components->info('NFE_Inicializar: OK');
+            $this->line('Nome: '.$service->name());
             $version = $service->version();
             $this->components->info('ACBrLibNFe inicializada. Versão: '.$version);
             return self::SUCCESS;
