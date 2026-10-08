@@ -1,49 +1,61 @@
-# ACBrLibNFe — NFC-e no NEXTOR
+# NFC-e integrada ao PDV do NEXTOR (ACBrLibNFe)
 
-## Estado atual
+## Funcionamento
 
-A biblioteca ACBr Pro (ACBrLibNFe MT/Cdecl) já foi inicializada e o serviço NFC-e da SEFAZ-BA em homologação respondeu **cStat 107**. O PDV possui agora integração em desenvolvimento para preparar NFC-e a partir de vendas, assinar/validar XML e transmitir pela fila fiscal. **Uma autorização cStat 100 ainda não foi comprovada**; não usar emissão em produção antes da homologação ponta a ponta.
+A NFC-e modelo 65 utiliza o mesmo pedido, venda, estoque e financeiro do PDV. Quando **Fiscal** e **NFC-e** estão habilitados, cada venda de produtos cria um único registro em `fiscal_document_jobs`, com série/número reservado e snapshot de produtos/tributação/pagamentos.
 
-## Dependências locais
+- **Emissão manual:** após a venda, o comprovante interno leva à tela fiscal; `Emitir NFC-e` inicia o processamento.
+- **Emissão automática:** habilitando a opção no PDV/NFC-e, a fila processa o documento depois da confirmação da venda. Não há segunda venda nem nova movimentação de estoque.
+- **SEFAZ autorizou (cStat 100/150 individual):** exige chave de 44 dígitos, protocolo de 15 dígitos e chave igual à do XML assinado. Persiste status, XML assinado, retorno SEFAZ e, quando há dados completos, `authorized.xml` com `nfeProc`.
+- **Falha após a transmissão:** status `pending`; **não há reenvio automático**. Na tela fiscal, `Consultar SEFAZ` verifica a chave já preservada.
+- **Baixar XML:** documento fiscal → `XML autorizado` ou `XML assinado`, conforme arquivo disponível. Acesso limitado à permissão fiscal.
 
-- PHP 8.3+ com FFI habilitada na **CLI**, binários ACBrLib e dependências instaladas fora do repositório.
-- Certificado A1 PFX salvo no armazenamento privado do NEXTOR com senha criptografada, CSC de homologação e configurações da empresa.
-- `.env`: `ACBr_NFE_LIBRARY_PATH`, `ACBr_NFE_CONFIG_PATH`, `ACBr_NFE_SCHEMAS_PATH` (opcional se os schemas estiverem em pasta padrão), `QUEUE_CONNECTION=database`.
-- `ACBr_NFE_PRODUCTION_ENABLED` deve continuar **false** até aprovação em homologação.
-- `DB_QUEUE_RETRY_AFTER` precisa ser superior ao `$timeout=180` segundos do worker fiscal (recomendado 240+), especialmente quando múltiplos workers estiverem ativos.
-- Binários, INI contendo senha, arquivos XML e certificados nunca ficam no diretório público ou no GitHub.
+O recibo atual do PDV é comprovante **não fiscal**, não DANFE NFC-e. Impressão oficial com QR Code, eventos de cancelamento/inutilização e contingência offline ainda exigem desenvolvimento antes da produção.
 
-## Passos para verificar o ambiente
+## Execução local e publicação
 
-```bat
-git pull
-php artisan migrate
-php artisan optimize:clear
-vendor\bin\phpunit --filter NFCeIniBuilderTest
-php artisan acbr:nfce-check
-php artisan acbr:nfce-status
-```
+Ambiente homologação BA já teve retorno **cStat 107**, indicando conexão com a SEFAZ. A biblioteca é a variante ACBrLibNFe MT Cdecl x64, instalada no Windows local. Use os binários equivalentes para Linux caso o worker fiscal execute em servidor Linux.
 
-Para verificar a sintaxe, execute `php -l app\Services\Fiscal\NFCeIniBuilder.php` e `php artisan route:list --name=fiscal.nfce.emit`.
+Variáveis de configuração:
+- `ACBr_NFE_LIBRARY_PATH`: DLL/SO nativa.
+- `ACBr_NFE_CONFIG_PATH`: INI exclusivo para os comandos de diagnóstico; o processamento da NFC-e cria um INI privado por execução e o descarta ao terminar.
+- `ACBr_NFE_SCHEMAS_PATH`: schemas NFe, se não estiverem nos caminhos padrão.
+- `QUEUE_CONNECTION=database`: fila fiscal persistente.
+- `ACBr_NFE_PRODUCTION_ENABLED=false`: produção bloqueada até validação ponta a ponta.
 
-## Fluxo definitivo pelo PDV
-
-1. Nas configurações, habilite **Fiscal** e **NFC-e**; ambiente **homologação**. Inicialmente deixe **Emissão automática do PDV** desativada.
-2. Configure CFOP/CSOSN/PIS/COFINS **corretos para o produto e operação**. O pré-check atual aceita apenas produtos de CSOSN 102 e PIS/COFINS 49, por enquanto; não force essas classificações se não forem aplicáveis.
-3. Finalize uma venda controlada no **PDV existente**. A venda já movimenta estoque e financeiro **mesmo que a NFC-e seja em homologação**.
-4. O sistema prepara `fiscal_document_jobs` vinculado à venda, sem transmitir automaticamente. Acesse o documento pela tela do comprovante ou módulo Fiscal → NFC-e.
-5. Confira as pendências na tela do documento. Ao aprovar, use **Emitir NFC-e** (usuário com permissão fiscal).
-6. Mantenha um worker ativo em outro terminal Laragon:
+Após atualizar o projeto, rodar a migração se pendente e iniciar o worker fiscal em um processo separado, configurado para reiniciar automaticamente no ambiente operacional:
 
 ```bat
 php artisan queue:work database --queue=fiscal --tries=1 --timeout=180
 ```
 
-7. Consulte a situação no módulo Fiscal. Uma falha de comunicação depois do envio gera estado **pendente**, sem reenvio automático. Não faça outra venda nem gere outro número para tentar corrigir uma falha incerta.
+O timeout da fila do banco é de **pelo menos 240 segundos**, evitando a liberação prematura de documentos em processamento. Cada job fiscal permite uma única execução.
 
-## Limitações e próximos requisitos
+## Validação integrada única
 
-- Ainda falta comprovar assinatura, validação e retorno de autorização com um XML real em homologação.
-- O recibo térmico atual é **comprovante interno, sem valor fiscal**: a impressão do DANFE NFC-e oficial com QR Code ainda deve ser integrada.
-- Contingência offline, cancelamento/inutilização fiscal efetivos, consulta de chave pendente, regras fiscais mais amplas e separação completa por organização/emitente ainda não estão homologados.
-- Nunca habilite produção apenas porque a consulta de status retornou cStat 107.
+O workflow `acbr-integration-checks.yml` verifica sintaxe PHP e a suíte de regressão. No Laragon, a conferência consolidada pode ser executada em uma única rodada:
+
+```bat
+git pull
+php artisan optimize:clear
+vendor\bin\phpunit --filter NFCe
+php artisan acbr:nfce-status
+php artisan route:list --name=fiscal.nfce
+```
+
+Não é preciso repetir os testes unitários anteriores: estes já foram concluídos. Depois de verificar a suíte consolidada, habilitar **Fiscal** e **NFC-e** em homologação, manter transmissão automática desativada, verificar NCM/CFOP/CSOSN/PIS/COFINS corretos, manter o worker ativo e concluir **uma venda controlada pelo PDV existente**. A venda movimenta estoque e financeiro reais do NEXTOR, mesmo com NFC-e em homologação.
+
+## Limitações deliberadas
+
+- Só estão implementados e pré-validados, por ora, **CRT 1, CSOSN 102 e PIS/COFINS CST 49**. O sistema bloqueia tributação não mapeada para evitar inventar impostos; isso não significa que esses códigos sejam corretos para todos os produtos.
+- O modelo de emissão cobre NFC-e BA em modo normal. Outras UFs, natureza fiscal especial, contingência, tributação completa e novos grupos da reforma tributária requerem suporte específico.
+- A comunicação de status `107` **não equivale a uma NFC-e autorizada**. A autorização real precisa retornar `100` ou `150`, com chave/protocolo da nota enviados e validados.
+- Não executar `NFE_Enviar` novamente para uma nota pendente. Consultar a situação pela chave primeiro.
+- Não liberar produção até emitir/autorizá-la em homologação, revisar o XML `nfeProc` e confirmar a impressão oficial do DANFE NFC-e.
+
+## Documentação ACBr
+
+- https://acbr.sourceforge.io/ACBrLib/Modelo2-NFCeINI.html
+- https://acbr.sourceforge.io/ACBrLib/ConfiguracoesdaBiblioteca16.html
+- https://acbr.sourceforge.io/ACBrLib/NFE_Enviar.html
+- https://acbr.sourceforge.io/ACBrLib/NFE_Consultar.html
