@@ -23,6 +23,8 @@ jobs:
             app/Services/Fiscal/NFCePreflightService.php \
             app/Services/Fiscal/NFCeTransmissionService.php \
             app/Services/Fiscal/NFCeProtocolXmlService.php \
+            app/Services/Fiscal/NFCeDanfeService.php \
+            app/Http/Controllers/NFCeDanfeController.php \
             app/Services/Fiscal/NFCeAuthorizedXmlRecoveryService.php \
             app/Services/Fiscal/NFCeSefazResponseParser.php \
             app/Services/FiscalPreparationService.php \
@@ -33,6 +35,7 @@ jobs:
             app/Console/Commands/ACBrNFCeStatus.php \
             tests/Feature/NFCeIniBuilderTest.php \
             tests/Unit/NFCeProtocolXmlServiceTest.php \
+            tests/Unit/NFCeDanfeServiceTest.php \
             tests/Unit/NFCeSefazResponseParserTest.php; do
             php -l "$f"
           done
