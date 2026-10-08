@@ -56,6 +56,36 @@ final class NFCeSefazResponseParser
         return $result;
     }
 
+    public function parseConsult(string $raw): array
+    {
+        $result = $this->parse($raw);
+        $sections = @parse_ini_string($raw, true, INI_SCANNER_RAW);
+        if (!is_array($sections)) {
+            return $result;
+        }
+
+        foreach ($sections as $name => $data) {
+            if (strtoupper((string) $name) !== 'CONSULTA' || !is_array($data)) {
+                continue;
+            }
+            $values = array_change_key_case($data, CASE_LOWER);
+            $key = (string) ($values['chdfe'] ?? $values['chnfe'] ?? '');
+            $protocol = (string) ($values['nprot'] ?? '');
+            return [
+                'cstat' => (string) ($values['cstat'] ?? ''),
+                'reason' => (string) ($values['xmotivo'] ?? ''),
+                'key' => preg_match('/^\d{44}$/', $key) ? $key : null,
+                'protocol' => preg_match('/^\d{15}$/', $protocol) ? $protocol : null,
+                'received_at' => (string) ($values['dhrecbto'] ?? ''),
+                'digest' => (string) ($values['digval'] ?? ''),
+                'environment' => (string) ($values['tpamb'] ?? ''),
+                'application' => (string) ($values['veraplic'] ?? ''),
+                'individual' => true,
+            ];
+        }
+        return $result;
+    }
+
     public function authorized(array $response): bool
     {
         return ($response['individual'] ?? false) === true
