@@ -604,13 +604,13 @@ foreach($primaryTabs as $key=>$item){
         <label class="field col-3"><span>Ambiente</span><select name="environment"><option value="homologation" @selected($nfce['environment']==='homologation')>Homologação</option><option value="production" @selected($nfce['environment']==='production')>Produção</option></select></label>
         <label class="field col-2"><span>Série</span><input type="number" min="0" max="999" name="series" value="{{ $nfce['series'] }}"></label>
         <label class="field col-3"><span>Próximo número</span><input type="number" min="1" name="next_number" value="{{ $nfce['next_number'] }}"></label>
-        <label class="field col-2"><span>CFOP padrão</span><input name="default_cfop" value="{{ $nfce[\'default_cfop\'] ?? \'\' }}" maxlength="4" placeholder="Ex.: 5102"></label>
+        <label class="field col-2"><span>CFOP padrão</span><input name="default_cfop" value="{{ $nfce['default_cfop'] ?? '' }}" maxlength="4" placeholder="Ex.: 5102"></label>
         <label class="field col-2"><span>ID CSC</span><input name="csc_id" value="{{ $nfce['csc_id'] }}"></label>
         <label class="field col-6"><span>CSC / Token</span><input type="password" name="csc_token" placeholder="{{ $nfce['csc_token'] ? 'CSC já configurado' : 'Informe o CSC' }}"></label>
       </div>
       <div class="settings-switch-grid">
         <label class="settings-switch"><input type="checkbox" name="enabled" value="1" @checked($nfce['enabled'])><span><strong>NFC-e habilitada</strong><small>Disponibiliza esta configuração ao emissor.</small></span></label>
-        <label class="settings-switch"><input type="checkbox" name="auto_from_pdv" value="1" @checked($nfce['auto_from_pdv'])><span><strong>Integrar ao PDV</strong><small>Preferência para emissão a partir da venda do PDV.</small></span></label>
+        <label class="settings-switch"><input type="checkbox" name="auto_from_pdv" value="1" @checked($nfce['auto_from_pdv'])><span><strong>Transmitir NFC-e automaticamente pelo PDV</strong><small>Desative para revisar a nota e emitir manualmente após a venda. A opção de emissão automática também precisa estar desativada nas configurações do PDV.</small></span></label>
         <label class="settings-switch"><input type="checkbox" name="print_danfe" value="1" @checked($nfce['print_danfe'])><span><strong>Imprimir DANFE NFC-e</strong><small>Preferência de impressão do comprovante.</small></span></label>
       </div>
       <div class="settings-warning">A configuração do CSC é separada do certificado A1. O Nextor guarda o token criptografado.</div>
