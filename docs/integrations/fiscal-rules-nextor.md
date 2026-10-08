@@ -130,3 +130,13 @@ git pull
 php artisan optimize:clear
 vendor\bin\phpunit --filter "FiscalCodeCatalog|NFCe|FiscalTaxRule|FiscalTaxGroup"
 ```
+
+
+## Conferência das regras por produto — 08/10/2026
+
+A tela **Configurações → Tributação → Regras por produto / NCM** oferece uma conferência sem transmissão: selecionar um produto cadastrado e a data. O resultado indica de qual fonte veio a configuração (grupo vinculado ao produto, regra específica ou grupo padrão), revisão e CFOP/CSOSN/CST PIS/COFINS correspondentes. Sem regra elegível, FCP aplicável ainda não calculado, conflito de regras ou tratamento não suportado, a tela informa a pendência sem inventar enquadramento.
+
+O serviço compartilhado `NFCeFiscalProfileService` aplica a mesma seleção ao documento NFC-e preparado, evitando divergência entre prévia e documento real. Não calcula tributos adicionais, não executa venda e não chama ACBr. A prévia está inicialmente restrita ao cenário NFC-e interna da BA para CRT 1, conforme a configuração da empresa. O modo de aplicação das regras à emissão continua opt-in.
+
+Cobertura em `tests/Feature/NFCeFiscalProfileServiceTest.php`: regra específica antes de grupo padrão, grupo explícito antes de regra, vigência, ausência de regra, conflitos, FCP, NCM e incompatibilidade tributária.
+
