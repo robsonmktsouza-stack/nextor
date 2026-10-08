@@ -121,7 +121,13 @@ class SaleController extends Controller
         $sale->load(['items.product','items.service','payments','customer','user']);
         $saleReturns=$sale->returns()->withCount('items')->orderByDesc('return_date')->orderByDesc('id')->get();
         $paymentLabels=PaymentMethod::query()->orderBy('sort_order')->pluck('name','code')->all();
-        return view('sales.show',compact('sale','saleReturns','paymentLabels'));
+        $nfceDocument=\App\Models\FiscalDocumentJob::query()
+            ->where('sale_id',$sale->id)
+            ->where('document_type','nfce')
+            ->latest('id')
+            ->first();
+
+        return view('sales.show',compact('sale','saleReturns','paymentLabels','nfceDocument'));
     }
 
     public function cancel(Request $request, Sale $sale, SalesService $sales)
