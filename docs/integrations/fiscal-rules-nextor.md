@@ -11,10 +11,10 @@ A primeira versão é **deliberadamente restrita** a NFC-e (65), saída interna 
 1. Após executar migrations, acesse **Configurações → Tributação → Gerenciar regras fiscais**, ou **Fiscal → NFC-e → Regras fiscais**.
 2. Cadastre regras específicas por produto ou prefixo NCM; é possível cadastrar regra genérica, porém ela só deve ser ativada após revisão.
 3. Configure prioridade e datas de vigência, ative as regras aprovadas.
-4. Ative o modo **Exigir regras fiscais** na tela de regras. Esse modo inicia **desativado** e não altera as notas já emitidas.
-5. Uma venda concluída cria uma NFC-e preparada pelo fluxo anterior. Na tela da nota preparada, use **Aplicar regras fiscais** antes de transmitir.
+4. As configurações fiscais são aplicadas automaticamente na preparação de cada NFC-e, sem modo manual.
+5. Uma venda concluída cria a NFC-e preparada com a classificação fiscal já registrada no documento.
 6. O serviço valida o contexto, encontra a regra válida para cada item e congela CFOP/CSOSN/CST e identificador/revisão no snapshot. Ele não altera venda, estoque, financeiro, número, série ou valores.
-7. Enquanto esse modo estiver ativo, a pré-validação **bloqueia** NFC-e preparada sem regra aplicada. Conflitos de prioridade também bloqueiam a aplicação.
+7. A pré-validação **bloqueia** NFC-e sem dados fiscais completos e compatíveis. Conflitos entre regras configuradas também bloqueiam a emissão.
 8. A NFC-e inicial aceita CFOP 5xxx, CSOSN 102 e PIS/COFINS 49; regras de outros enquadramentos só poderão ser aplicadas depois que o construtor INI, o cálculo e os testes desses grupos estiverem implementados.
 
 Nenhuma regra é populada automaticamente ou presume que todo produto esteja enquadrado no CSOSN 102.
@@ -30,7 +30,7 @@ Nenhuma regra é populada automaticamente ou presume que todo produto esteja enq
 
 - Associar regras às naturezas de operação de NF-e existentes e ao tipo de destinatário; estender cobertura por UF/regime e por operações.
 - Construir os grupos de cálculo e XML faltantes, com fórmulas parametrizadas e testes por enquadramento, evitando bases e alíquotas genéricas.
-- Acrescentar simulação em lote de produtos, histórico de quem aprovou cada regra e exportação para conferência.
+- Acrescentar histórico de alterações com autoria e documentação legal das configurações.
 - Revisar os fluxos e formulários com capturas do eGestor fornecidas pelo operador — documentação pública do eGestor não reproduz toda a navegação interna.
 
 
@@ -44,7 +44,7 @@ O NEXTOR adiciona **Configurações → Tributação → Grupos de tributação*
 - CFOP base literal (por exemplo, 5102) ou prefixo parametrizado (por exemplo, x102). A tradução de x102 para 5102 **só ocorre** na NFC-e interna da Bahia já suportada.
 - ICMS: CSOSN geral e alternativa específica para NFC-e, CST regime normal, campos de alíquota, crédito e ST.
 - PIS/COFINS, IPI, ISS, IS e IBS/CBS possuem campos específicos de código e percentual. **Cadastrar é diferente de calcular ou transmitir**: os campos ainda não suportados pelo emissor são bloqueados se forem utilizados como regra de emissão, não descartados silenciosamente.
-- Histórico por revisão numérica. Atualizar o cadastro não muda documentos já preparados/assinados, exceto por reaplicação explícita de snapshot **somente** antes de assinar/transmitir.
+- Histórico por revisão numérica. Atualizar o cadastro não muda documentos assinados; a atualização dos dados fiscais de uma NFC-e preparada e nunca transmitida reaplica as configurações sem alterar a venda.
 
 ### Produtos e serviços
 
@@ -55,7 +55,7 @@ O NEXTOR adiciona **Configurações → Tributação → Grupos de tributação*
 
 ### NFC-e
 
-O modo **Exigir regras fiscais** continua desativado por padrão. Quando ativado, antes da emissão é necessário abrir o documento preparado e acionar **Aplicar regras fiscais**. O snapshot da NFC-e recebe a identificação e revisão do grupo, mais CFOP, CSOSN e CST efetivamente utilizados. Nenhum cálculo comercial, venda, estoque, financeiro, série ou número muda.
+Ao concluir a venda, o NEXTOR usa os grupos e regras configurados, registra os códigos tributários na NFC-e preparada e mantém venda, estoque, financeiro, série e número intactos. Não há botão de simulação, verificação manual ou aplicação de regras por documento. Falta de configuração ou tratamento fiscal não suportado impede a transmissão. Os códigos fiscais já cadastrados nos produtos continuam aceitos, desde que completos e compatíveis.
 
 A primeira etapa mantém a emissão validada da BA no Simples Nacional: CFOP 5xxx, CSOSN 102 e CST 49 para PIS/COFINS. Grupo com outros códigos ou dados de tributos que exigiriam cálculos/emitiriam grupos XML ausentes não pode ser aplicado neste emissor.
 
@@ -77,7 +77,7 @@ Testar o cadastro e a aplicação somente com notas preparadas, sem gerar outra 
 - **Cálculos e aplicação** das variações por UF/município, FCP por UF/NCM, ANP e tratamentos específicos. Os formulários e armazenamento destas configurações já existem.
 - Motor de cálculo por CST/CSOSN, incluindo ICMS-ST, PIS/COFINS não zerados e reforma tributária, com testes de totais.
 - Integração da mesma classificação a NF-e interestadual e NFS-e, respeitando os respectivos modelos e legislações.
-- Simulador de regras por produto/lote, aprovação por usuário e registro de fundamento por período.
+- Histórico de aprovação por usuário e registro de fundamento por período.
 
 As imagens do eGestor servem como referência de organização e variações; não são fonte de alíquotas ou de enquadramento fiscal.
 
@@ -131,12 +131,12 @@ php artisan optimize:clear
 vendor\bin\phpunit --filter "FiscalCodeCatalog|NFCe|FiscalTaxRule|FiscalTaxGroup"
 ```
 
+## Aplicação automática das configurações fiscais
 
-## Conferência das regras por produto — 08/10/2026
+A tela de simulação/conferência de produto foi removida. A configuração é feita pelo responsável no cadastro de grupos, produtos e regras; o caixa não escolhe tributação por venda.
 
-A tela **Configurações → Tributação → Regras por produto / NCM** oferece uma conferência sem transmissão: selecionar um produto cadastrado e a data. O resultado indica de qual fonte veio a configuração (grupo vinculado ao produto, regra específica ou grupo padrão), revisão e CFOP/CSOSN/CST PIS/COFINS correspondentes. Sem regra elegível, FCP aplicável ainda não calculado, conflito de regras ou tratamento não suportado, a tela informa a pendência sem inventar enquadramento.
+Para NFC-e interna BA/CRT 1, a ordem é: **grupo explicitamente vinculado ao produto**, **regra específica cadastrada**, **grupo padrão ativo**, **dados fiscais completos previamente cadastrados no produto (compatibilidade)**. A aplicação grava os códigos de CFOP, CSOSN e CST e a identificação da fonte no snapshot do documento preparado. Nenhuma classificação é inferida sem uma regra configurada.
 
-O serviço compartilhado `NFCeFiscalProfileService` aplica a mesma seleção ao documento NFC-e preparado, evitando divergência entre prévia e documento real. Não calcula tributos adicionais, não executa venda e não chama ACBr. A prévia está inicialmente restrita ao cenário NFC-e interna da BA para CRT 1, conforme a configuração da empresa. O modo de aplicação das regras à emissão continua opt-in.
+A aplicação ocorre durante `FiscalPreparationService::prepare`. Quando dados fiscais forem atualizados em documento ainda não transmitido, `NFCeFiscalDataRefreshService::refresh` aplica novamente as configurações. Ausência de configuração, conflito, FCP aplicável ainda não calculado ou tributo não suportado impedem a emissão, sem cancelar a venda já concluída e sem provocar nova transmissão.
 
-Cobertura em `tests/Feature/NFCeFiscalProfileServiceTest.php`: regra específica antes de grupo padrão, grupo explícito antes de regra, vigência, ausência de regra, conflitos, FCP, NCM e incompatibilidade tributária.
-
+Essa integração ainda não implementa cálculos gerais de ICMS-ST, DIFAL, IBS, CBS e demais tratamentos. O sistema não pode garantir sozinho a correção jurídica da parametrização: ela depende de cadastro e revisão adequada antes do uso em produção.
