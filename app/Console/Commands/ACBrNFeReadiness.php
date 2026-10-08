@@ -34,6 +34,20 @@ final class ACBrNFeReadiness extends Command
             'Número NFC-e válido' => (int) AppSetting::value('nfce', 'next_number', 0) >= 1,
             'NFC-e habilitada' => (bool) AppSetting::value('nfce', 'enabled', false),
         ];
+        $certIsValid = false;
+        if ($certificatePath !== '' && Storage::disk('local')->exists($certificatePath) && function_exists('openssl_pkcs12_read')) {
+            try {
+                $bytes = Storage::disk('local')->get($certificatePath);
+                $certs = [];
+                $certIsValid = @openssl_pkcs12_read($bytes, $certs, (string) $company->certificate_password)
+                    && !empty($certs['cert'])
+                    && !empty($certs['pkey']);
+            } catch (\\Throwable) {
+                $certIsValid = false;
+            }
+        }
+        $checks['PKCS#12 abre com chave privada'] = $certIsValid;
+
         foreach ($checks as $label => $ok) {
             $this->line(($ok ? '[OK] ' : '[PENDENTE] ').$label);
         }
