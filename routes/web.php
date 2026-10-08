@@ -5,6 +5,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\FiscalController;
+use App\Http\Controllers\NFCeDanfeController;
 use App\Http\Controllers\NfeDraftController;
 use App\Http\Controllers\OperationNatureController;
 use App\Http\Controllers\FinancialReconciliationController;
@@ -75,6 +76,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/pdv/nfce/{fiscalJob}/cancel',[PdvController::class,'requestNfceCancellation'])->name('pdv.nfce.cancel')->middleware('permission:pdv');
     Route::get('/pdv/receipt/{sale}',[PdvController::class,'receipt'])->name('pdv.receipt')->middleware('permission:pdv');
     Route::post('/pdv/receipt/{sale}/prepare-nfce',[PdvController::class,'prepareNfce'])->name('pdv.receipt.nfce.prepare')->middleware('permission:pdv');
+    Route::get('/pdv/nfce/{fiscalDocumentJob}/danfe',NFCeDanfeController::class)->name('pdv.nfce.danfe')->middleware('permission:pdv');
     Route::post('/pdv',[PdvController::class,'store'])->name('pdv.store')->middleware('permission:pdv');
     Route::get('/sales',[SaleController::class,'index'])->name('sales.index')->middleware('permission:sales');
     Route::get('/sales/create',[SaleController::class,'create'])->name('sales.create')->middleware('permission:sales');
@@ -107,6 +109,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/fiscal/{fiscalDocumentJob}/emit-nfce',[FiscalController::class,'issueNfce'])->name('fiscal.nfce.emit')->middleware('permission:fiscal');
     Route::post('/fiscal/{fiscalDocumentJob}/consult-nfce',[FiscalController::class,'consultNfce'])->name('fiscal.nfce.consult')->middleware('permission:fiscal');
     Route::get('/fiscal/{fiscalDocumentJob}/xml',[FiscalController::class,'downloadNfceXml'])->name('fiscal.nfce.xml')->middleware('permission:fiscal');
+    Route::get('/fiscal/{fiscalDocumentJob}/danfe',NFCeDanfeController::class)->name('fiscal.nfce.danfe')->middleware('permission:fiscal');
     Route::post('/fiscal/{fiscalDocumentJob}/recover-nfce-xml',[FiscalController::class,'recoverNfceXml'])->name('fiscal.nfce.recover-xml')->middleware('permission:fiscal');
 
     Route::get('/fiscal/{fiscalDocumentJob}',[FiscalController::class,'show'])->name('fiscal.show')->middleware('permission:fiscal');
