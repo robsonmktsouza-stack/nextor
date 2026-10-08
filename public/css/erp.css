@@ -81,6 +81,8 @@
 .ui-select-search{position:sticky;top:0;z-index:2;display:block;width:100%;height:35px;margin:0 0 5px;padding:0 10px;background:#fff;border:1px solid #c7d4e2;border-radius:4px;color:#24394e;font:inherit;font-size:12px;outline:none;box-sizing:border-box}
 .ui-select-search:focus{border-color:#2877c7;box-shadow:0 0 0 2px #2877c715}
 .ui-select-option[hidden]{display:none!important}
+.fiscal-cfop-manual{display:block;width:100%;height:38px;margin-top:6px;padding:0 10px;border:1px solid #c7d4e2;border-radius:4px;background:#fff;color:#24394e;box-sizing:border-box}
+.fiscal-cfop-manual[hidden]{display:none!important}
 .ui-select-menu:has(.ui-select-search){min-width:min(380px,calc(100vw - 28px));max-height:min(340px,60vh)}
 
 .ui-select-option.selected{background:#2877c7;color:#fff}
