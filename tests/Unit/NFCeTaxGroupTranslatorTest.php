@@ -66,6 +66,43 @@ final class NFCeTaxGroupTranslatorTest extends TestCase
         (new NFCeTaxGroupTranslator())->translate($this->group(['is_active'=>false]));
     }
 
+    public function test_rejects_anp_codes_not_emitted_in_nfce(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('anp_code');
+        (new NFCeTaxGroupTranslator())->translate($this->group(['tax_config'=>['anp_code'=>'12345678']]));
+    }
+
+    public function test_rejects_cbenef_not_emitted_in_nfce(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('fiscal_benefit_code');
+        (new NFCeTaxGroupTranslator())->translate($this->group(['tax_config'=>['fiscal_benefit_code'=>'BA1234']]));
+    }
+
+    public function test_rejects_nonzero_deferral_rate(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('não está implementado');
+        (new NFCeTaxGroupTranslator())->translate($this->group(['tax_config'=>['cbs_deferral_rate'=>0.2]]));
+    }
+
+    public function test_rejects_unimplemented_percentage_pis_method(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('pis_calc_type');
+        (new NFCeTaxGroupTranslator())->translate($this->group(['tax_config'=>['pis_calc_type'=>'percentage']]));
+    }
+
+    public function test_rejects_municipal_overrides_not_emitted_in_nfce(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('variações municipais');
+        (new NFCeTaxGroupTranslator())->translate($this->group([
+            'tax_config'=>['municipal_variations'=>[['city_ibge'=>'2926806','rate'=>'0.1']]],
+        ]));
+    }
+
     public function test_rejects_service_profile_in_nfce(): void
     {
         $this->expectException(RuntimeException::class);
