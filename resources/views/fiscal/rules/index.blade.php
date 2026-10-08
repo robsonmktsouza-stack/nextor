@@ -8,6 +8,9 @@
   <a class="btn btn-secondary" href="{{ route('fiscal.index',['tab'=>'nfce']) }}">
     @include('partials.icon',['name'=>'receipt','size'=>16]) NFC-e
   </a>
+  <a class="btn btn-secondary" href="{{ route('fiscal.tax-groups.index') }}">
+    @include('partials.icon',['name'=>'layers','size'=>16]) Grupos de tributação
+  </a>
 @endsection
 
 @section('content')
