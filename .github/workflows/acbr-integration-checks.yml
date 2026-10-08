@@ -21,6 +21,11 @@ jobs:
             app/Services/Fiscal/ACBr/ACBrNFeService.php \
             app/Services/Fiscal/NFCeIniBuilder.php \
             app/Services/Fiscal/NFCePreflightService.php \
+            app/Models/FiscalTaxRule.php \
+            app/Services/Fiscal/FiscalTaxRuleResolver.php \
+            app/Services/Fiscal/NFCeTaxRuleApplicationService.php \
+            app/Http/Controllers/FiscalTaxRuleController.php \
+            database/migrations/2026_10_08_200000_create_fiscal_tax_rules_table.php \
             app/Services/Fiscal/NFCeTransmissionService.php \
             app/Services/Fiscal/NFCeProtocolXmlService.php \
             app/Services/Fiscal/NFCeDanfeService.php \
@@ -34,6 +39,7 @@ jobs:
             app/Http/Controllers/FiscalController.php \
             app/Console/Commands/ACBrNFCeStatus.php \
             tests/Feature/NFCeIniBuilderTest.php \
+            tests/Feature/FiscalTaxRuleResolverTest.php \
             tests/Unit/NFCeProtocolXmlServiceTest.php \
             tests/Unit/NFCeDanfeServiceTest.php \
             tests/Unit/NFCeSefazResponseParserTest.php; do
@@ -54,4 +60,4 @@ jobs:
         env:
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
-        run: php vendor/bin/phpunit --filter=NFCe
+        run: php vendor/bin/phpunit --filter='NFCe|FiscalTaxRule'
