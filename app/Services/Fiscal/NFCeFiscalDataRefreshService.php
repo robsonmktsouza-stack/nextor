@@ -78,6 +78,12 @@ final class NFCeFiscalDataRefreshService
                 'source_snapshot' => $snapshot,
                 'error_message' => null,
             ]);
+
+            try {
+                app(NFCeTaxRuleApplicationService::class)->apply($job->id);
+            } catch (\RuntimeException $exception) {
+                $job->update(['error_message' => 'Configuração fiscal: '.$exception->getMessage()]);
+            }
         }, 3);
     }
 }
