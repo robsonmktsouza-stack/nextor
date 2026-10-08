@@ -176,6 +176,18 @@ final class NFCeFiscalProfileServiceTest extends TestCase
         app(NFCeFiscalProfileService::class)->classify($item, '2026-10-08');
     }
 
+    public function test_configured_product_tax_rate_never_silently_becomes_zero(): void
+    {
+        $group = $this->createGroup();
+        $item = $this->item(21, $group->id);
+        $item['tax_defaults'] = ['pis_rate' => '1.65'];
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('pis_rate');
+
+        app(NFCeFiscalProfileService::class)->classify($item, '2026-10-08');
+    }
+
     public function test_missing_ncm_blocks_classification(): void
     {
         $item = $this->item();
@@ -185,7 +197,7 @@ final class NFCeFiscalProfileServiceTest extends TestCase
         app(NFCeFiscalProfileService::class)->classify($item, '2026-10-08');
     }
 
-    public function test_cannot_use_unsupported_group_in_preview(): void
+    public function test_cannot_apply_unsupported_group_to_nfce(): void
     {
         $group = $this->createGroup(['tax_config' => ['icms_st_rate' => '18']]);
         $this->expectException(RuntimeException::class);
