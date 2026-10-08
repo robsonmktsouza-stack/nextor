@@ -119,7 +119,10 @@
     source.required=false;
     source.type='hidden';
     source.replaceWith(wrapper);
-    wrapper.append(source,search,list);
+    wrapper.append(source,search);
+    // Portal no body: nenhum grid, modal ou card muda de altura ou corta o menu.
+    document.body.appendChild(list);
+    wrapper.fiscalResultList=list;
 
     const allowManual=['cfop','cfop_pattern','ibs_cbs_class'].includes(type);
     const manualPattern=type==='ibs_cbs_class'?/^\d{6}$/
@@ -178,21 +181,46 @@
       });
       const active=items[highlighted];
       search.setAttribute('aria-activedescendant',active.id);
-      active.scrollIntoView({block:'nearest'});
+      // Resultados curtos e sem rolagem interna: o item sempre está visível.
+    };
+    const positionResults=()=>{
+      if(list.hidden)return;
+      const rect=search.getBoundingClientRect();
+      if(rect.bottom<0||rect.top>window.innerHeight){close();return;}
+      const width=Math.min(rect.width,window.innerWidth-16);
+      list.style.width=Math.max(150,width)+'px';
+      list.style.left=Math.max(8,Math.min(rect.left,window.innerWidth-width-8))+'px';
+      const height=list.offsetHeight;
+      const below=window.innerHeight-rect.bottom-8;
+      const above=rect.top-8;
+      const showAbove=below<height+6&&above>below;
+      list.style.top=(showAbove
+        ?Math.max(8,rect.top-height-5)
+        :Math.min(window.innerHeight-height-8,rect.bottom+5))+'px';
+    };
+    const reposition=()=>{
+      if(wrapper.classList.contains('open'))positionResults();
     };
     const close=()=>{
       wrapper.classList.remove('open');
       list.hidden=true;
       search.setAttribute('aria-expanded','false');
       search.removeAttribute('aria-activedescendant');
+      document.removeEventListener('scroll',reposition,true);
+      window.removeEventListener('resize',reposition);
     };
     const open=()=>{
-      if(search.disabled)return;
+      if(search.disabled||search.readOnly)return;
+      // Apenas uma lista fiscal de cada vez.
+      document.querySelectorAll('.fiscal-code-field.open').forEach(field=>{
+        if(field!==wrapper)field.dispatchEvent(new Event('fiscal-code-close'));
+      });
       wrapper.classList.add('open');
       list.hidden=false;
       search.setAttribute('aria-expanded','true');
-      // Lista no fluxo do formulário: abre abaixo do campo e move a
-      // próxima linha, sem cobrir os outros impostos nem cards adjacentes.
+      positionResults();
+      document.addEventListener('scroll',reposition,true);
+      window.addEventListener('resize',reposition);
     };
 
     const choose=code=>{
@@ -221,7 +249,7 @@
       const q=normalize(query);
       list.replaceChildren();
       const matches=catalogItems.filter(item=>isAllowed(item.code)&&item.search.includes(q));
-      matches.slice(0,7).forEach(item=>option(item.code,item.description));
+      matches.slice(0,4).forEach(item=>option(item.code,item.description));
       if(allowManual&&manualPattern.test(String(query).trim())
         && !matches.some(item=>item.code===String(query).trim())
         && isAllowed(String(query).trim())){
@@ -232,11 +260,6 @@
         empty.className='fiscal-code-empty';
         empty.textContent='Nenhum código encontrado';
         list.appendChild(empty);
-      }else if(matches.length>7){
-        const help=document.createElement('p');
-        help.className='fiscal-code-empty';
-        help.textContent='Continue digitando para ver mais resultados';
-        list.appendChild(help);
       }
       highlighted=0;
       const items=available();
@@ -251,7 +274,7 @@
 
     search.addEventListener('focus',()=>{
       if(search.readOnly)return;
-      render('');
+      // A lista só abre ao digitar, sem poluir a tela ao focar o campo.
       if(source.value)search.select();
     });
     search.addEventListener('input',()=>{
@@ -259,7 +282,8 @@
       source.value='';
       source.dispatchEvent(new Event('change',{bubbles:true}));
       validate();
-      render(typed);
+      if(typed.trim())render(typed);
+      else close();
     });
     search.addEventListener('keydown',event=>{
       if(event.key==='ArrowDown'||event.key==='ArrowUp'){
@@ -332,7 +356,10 @@
   new MutationObserver(queueUpgrade).observe(document.body,{childList:true,subtree:true});
   document.addEventListener('pointerdown',event=>{
     document.querySelectorAll('.fiscal-code-field.open').forEach(field=>{
-      if(!field.contains(event.target))field.dispatchEvent(new Event('fiscal-code-close'));
+      if(!field.contains(event.target)
+        && !field.fiscalResultList?.contains(event.target)){
+        field.dispatchEvent(new Event('fiscal-code-close'));
+      }
     });
   });
   upgrade();
