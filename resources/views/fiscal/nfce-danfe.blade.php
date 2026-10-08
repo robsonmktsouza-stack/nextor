@@ -115,7 +115,7 @@
       <div id="danfeQrStatus" class="danfe-qr-placeholder">Gerando QR Code...</div>
     </div>
     @if($danfe['consumer_id'])
-      <div class="danfe-consumer">CONSUMIDOR {{ strlen(preg_replace('/\D/','',$danfe['consumer_id']))===14 ? 'CNPJ' : 'CPF' }}: {{ $taxId($danfe['consumer_id']) }}</div>
+      <div class="danfe-consumer">CONSUMIDOR {{ $danfe['consumer_type'] }}: {{ $taxId($danfe['consumer_id']) }}</div>
       @if($danfe['consumer_name'])<div class="danfe-center">{{ $danfe['consumer_name'] }}</div>@endif
       @if($danfe['delivery_address'])<div class="danfe-center">{{ $danfe['delivery_address'] }}</div>@endif
     @else
