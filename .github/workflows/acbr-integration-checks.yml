@@ -23,6 +23,8 @@ jobs:
             app/Services/Fiscal/NFCePreflightService.php \
             app/Models/FiscalTaxRule.php \
             app/Models/FiscalTaxGroup.php \
+            app/Support/FiscalCodeCatalog.php \
+            app/Http/Controllers/FiscalCodeCatalogController.php \
             app/Models/FiscalFcpRule.php \
             app/Http/Controllers/FiscalFcpRuleController.php \
             database/migrations/2026_10_08_203000_create_fiscal_fcp_rules_table.php \
@@ -52,12 +54,17 @@ jobs:
             tests/Feature/FiscalTaxRuleResolverTest.php \
             tests/Unit/NFCeProtocolXmlServiceTest.php \
             tests/Unit/NFCeTaxGroupTranslatorTest.php \
+            tests/Unit/FiscalCodeCatalogTest.php \
             tests/Feature/FiscalTaxGroupPersistenceTest.php \
             tests/Feature/FiscalFcpRulePersistenceTest.php \
             tests/Unit/NFCeDanfeServiceTest.php \
             tests/Unit/NFCeSefazResponseParserTest.php; do
             php -l "$f"
           done
+      - name: Validate JavaScript syntax
+        run: |
+          node --check public/js/erp.js
+          node --check public/js/fiscal-codes.js
       - name: Install PHP dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
       - name: Prepare Laravel
@@ -67,6 +74,7 @@ jobs:
       - name: Validate registered routes and compiled Blade syntax
         run: |
           php artisan route:list --path=fiscal/fcp
+          php artisan route:list --path=reference/fiscal-codes
           php artisan route:list --path=fiscal/tax-groups
           php artisan route:list --path=danfe
           php artisan view:cache
@@ -75,4 +83,4 @@ jobs:
         env:
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
-        run: php vendor/bin/phpunit --filter='NFCe|FiscalTaxRule|FiscalTaxGroup|FiscalFcpRule'
+        run: php vendor/bin/phpunit --filter='NFCe|FiscalTaxRule|FiscalTaxGroup|FiscalFcpRule|FiscalCodeCatalog'
