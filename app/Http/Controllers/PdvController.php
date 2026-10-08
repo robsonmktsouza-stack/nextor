@@ -678,7 +678,7 @@ class PdvController extends Controller
 
         return $document
             ? redirect()->route('fiscal.show', $document)
-            : redirect()->route('pdv.receipt', $sale)
+            : redirect()->route('pdv.receipt', ['sale' => $sale->id, 'print' => 0])
                 ->with('error', 'A NFC-e não foi preparada. Confira se o módulo fiscal está habilitado.');
     }
 
