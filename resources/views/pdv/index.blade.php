@@ -115,6 +115,13 @@
     @endif
   </div>
   <div class="pdv-last-sale-actions">
+    @if($lastPdvNfceDocument?->status==='authorized'
+        && (str_ends_with((string)$lastPdvNfceDocument->xml_path,'authorized.xml')
+            || str_ends_with((string)$lastPdvNfceDocument->xml_path,'authorized-recovered.xml')))
+      <a href="{{ route('pdv.nfce.danfe',$lastPdvNfceDocument) }}" target="_blank" rel="noopener noreferrer">
+        Imprimir DANFE NFC-e
+      </a>
+    @endif
     @if(auth()->user()->canAccess('fiscal'))
       <a href="{{ $lastPdvNfceDocument
         ? route('fiscal.show', $lastPdvNfceDocument)
