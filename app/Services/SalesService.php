@@ -268,7 +268,16 @@ class SalesService
                 ->where('status', 'prepared')
                 ->first();
             if ($fiscalJob) {
-                \App\Jobs\ProcessNFCeJob::dispatch($fiscalJob->id)->onConnection('database');
+                try {
+                    \App\Jobs\ProcessNFCeJob::dispatch($fiscalJob->id)->onConnection('database');
+                } catch (\Throwable $e) {
+                    // A venda já foi confirmada. Nunca retornar erro HTTP para
+                    // não induzir o caixa a finalizar a mesma venda novamente.
+                    \Illuminate\Support\Facades\Log::error('Falha ao enfileirar NFC-e', [
+                        'fiscal_job_id' => $fiscalJob->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
             }
         }
 
