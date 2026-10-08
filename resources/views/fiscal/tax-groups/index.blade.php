@@ -13,13 +13,8 @@
   <div class="card-header">
     <div>
       <h2>Grupos fiscais</h2>
-      <p>Configuração compartilhada entre produtos ou serviços, com variação específica para NFC-e. Cada cadastro mantém os parâmetros e sua revisão.</p>
+      <p>Cadastre e organize os grupos de tributação dos produtos e serviços.</p>
     </div>
-  </div>
-  <div class="inline-note" style="margin:12px 16px">
-    O cadastro é uma referência para parametrização, não uma tabela automática de enquadramento.
-    <strong>Somente a NFC-e interna BA / Simples Nacional com CFOP 5xxx, CSOSN 102 e PIS/COFINS 49 está conectada ao emissor atual.</strong>
-    Os campos de IBS/CBS, IS e demais impostos ficam armazenados para evolução, mas não são calculados ou transmitidos por este módulo.
   </div>
   <div class="grid-actionbar" style="margin-bottom:12px">
     <div class="grid-actions-left">
