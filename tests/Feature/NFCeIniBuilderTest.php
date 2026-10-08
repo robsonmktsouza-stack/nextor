@@ -38,7 +38,7 @@ final class NFCeIniBuilderTest extends TestCase
                     'sku' => 'PROD-5',
                     'unit' => 'UN',
                     'name' => 'PRODUTO FICTICIO',
-                    'ncm' => '22021000',
+                    'ncm' => '6913.90.00',
                     'origin' => '0',
                     'quantity' => '1.000',
                     'unit_price' => '10.00',
@@ -69,6 +69,7 @@ final class NFCeIniBuilderTest extends TestCase
         self::assertStringContainsString('tpAmb=2', $ini);
         self::assertStringContainsString('[Produto001]', $ini);
         self::assertStringContainsString('CFOP=5102', $ini);
+        self::assertStringContainsString('NCM=69139000', $ini);
         self::assertStringContainsString('CSOSN=102', $ini);
         self::assertStringContainsString('[pag001]', $ini);
         self::assertStringContainsString('tPag=01', $ini);
