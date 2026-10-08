@@ -194,7 +194,33 @@ final class ACBrNFeService
 
     public function send(int $lot): string
     {
-        return $this->response('NFE_Enviar', [$lot, false, true, false]);
+        // CRÍTICO: NFE_Enviar é uma operação de efeito externo. NUNCA
+        // reinvocá-la por truncamento de buffer, timeout ou falha de retorno.
+        // A rotina response() é reservada para chamadas que possam ser
+        // repetidas com segurança (por exemplo, NFE_ObterXml).
+        $this->initialize();
+        $capacity = 1048576;
+        $buffer = FFI::new("char[{$capacity}]");
+        $size = FFI::new('int');
+        $size->cdata = $capacity;
+
+        $status = $this->lib->NFE_Enviar(
+            $this->handle,
+            $lot,
+            false,
+            true,
+            false,
+            $buffer,
+            FFI::addr($size)
+        );
+        if ($size->cdata >= $capacity) {
+            throw new RuntimeException('Resposta da transmissão NFC-e excedeu 1 MB; situação fiscal indeterminada. Não reenviar sem consulta pela chave.');
+        }
+        if ($status !== 0) {
+            throw new RuntimeException("ACBr NFE_Enviar falhou ({$status}): ".$this->lastReturn());
+        }
+
+        return FFI::string($buffer);
     }
 
     public function readConfig(string $section, string $key): string
