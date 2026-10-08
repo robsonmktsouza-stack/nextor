@@ -62,6 +62,9 @@ final class NFCeIniBuilderTest extends TestCase
 
         self::assertStringContainsString('[Identificacao]', $ini);
         self::assertStringContainsString('cUF=29', $ini);
+        self::assertStringContainsString('dEmi=', $ini);
+        self::assertStringContainsString('Origem=0', $ini);
+        self::assertStringNotContainsString('dhEmi=', $ini);
         self::assertStringContainsString('mod=65', $ini);
         self::assertStringContainsString('tpAmb=2', $ini);
         self::assertStringContainsString('[Produto001]', $ini);
@@ -72,5 +75,55 @@ final class NFCeIniBuilderTest extends TestCase
         self::assertStringContainsString('vNF=10.00', $ini);
         self::assertStringNotContainsString('Senha', $ini);
         self::assertStringNotContainsString('CSC', $ini);
+    }
+
+    public function test_change_in_cash_payment_matches_the_paid_amount_and_net_sale(): void
+    {
+        $company = new CompanySetting([
+            'document' => '39323356000100',
+            'legal_name' => 'EMPRESA EXEMPLO LTDA',
+            'state_registration' => '172036473',
+            'crt' => '1',
+            'address' => 'RUA EXEMPLO',
+            'address_number' => '100',
+            'district' => 'CENTRO',
+            'city' => 'Rio do Antônio',
+            'city_ibge_code' => '2926806',
+            'state' => 'BA',
+            'zip_code' => '46220000',
+        ]);
+
+        $document = new FiscalDocumentJob([
+            'document_type' => 'nfce',
+            'environment' => 'homologation',
+            'series' => 1,
+            'document_number' => 11,
+            'source_snapshot' => [
+                'total' => '10.00',
+                'items' => [[
+                    'item_type' => 'product',
+                    'product_id' => 5,
+                    'sku' => 'PROD-5',
+                    'unit' => 'UN',
+                    'name' => 'PRODUTO',
+                    'ncm' => '22021000',
+                    'origin' => '0',
+                    'quantity' => '1.000',
+                    'unit_price' => '10.00',
+                    'line_total' => '10.00',
+                    'discount' => '0.00',
+                    'tax_defaults' => ['cfop_outbound_internal' => '5102', 'icms_csosn' => '102', 'pis_cst' => '49', 'cofins_cst' => '49'],
+                ]],
+                'payments' => [
+                    ['payment_method' => 'dinheiro', 'payment_kind' => 'cash', 'amount' => '10.00'],
+                ],
+                'change_amount' => '10.00',
+            ],
+        ]);
+
+        $ini = app(NFCeIniBuilder::class)->build($document, $company);
+        self::assertStringContainsString('vNF=10.00', $ini);
+        self::assertStringContainsString('vPag=20.00', $ini);
+        self::assertStringContainsString('vTroco=10.00', $ini);
     }
 }
