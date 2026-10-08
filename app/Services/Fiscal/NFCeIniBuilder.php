@@ -37,7 +37,7 @@ final class NFCeIniBuilder
             'cUF' => '29',
             'cNF' => $cNF,
             'natOp' => 'VENDA DE MERCADORIA',
-            'mod' => '65',
+            'Modelo' => '65',
             'serie' => (string) $job->series,
             'nNF' => (string) $job->document_number,
             'dhEmi' => now()->format('d/m/Y H:i:s'),
