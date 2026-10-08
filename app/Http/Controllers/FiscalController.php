@@ -143,6 +143,38 @@ class FiscalController extends Controller
         return back()->with('success', 'Emissão colocada na fila fiscal. Acompanhe o resultado neste documento.');
     }
 
+    public function consultNfce(FiscalDocumentJob $fiscalDocumentJob)
+    {
+        abort_unless($fiscalDocumentJob->document_type === 'nfce', 404);
+        if ($fiscalDocumentJob->status !== 'pending'
+            || preg_match('/^\d{44}$/', (string) $fiscalDocumentJob->access_key) !== 1) {
+            return back()->with('error', 'Apenas NFC-e pendente com chave de acesso pode ser consultada.');
+        }
+        if (config('queue.default') !== 'database') {
+            return back()->with('error', 'A fila fiscal deve estar configurada como database.');
+        }
+        \App\Jobs\ConsultNFCeJob::dispatch($fiscalDocumentJob->id)->onConnection('database');
+
+        return back()->with('success', 'Consulta da NFC-e enviada à fila. A nota não será retransmitida.');
+    }
+
+    public function downloadNfceXml(FiscalDocumentJob $fiscalDocumentJob)
+    {
+        abort_unless($fiscalDocumentJob->document_type === 'nfce', 404);
+        $path = (string) $fiscalDocumentJob->xml_path;
+        $allowed = [
+            'fiscal/nfce/'.$fiscalDocumentJob->id.'/signed.xml',
+            'fiscal/nfce/'.$fiscalDocumentJob->id.'/authorized.xml',
+        ];
+        abort_unless(in_array($path, $allowed, true)
+            && \Illuminate\Support\Facades\Storage::disk('local')->exists($path), 404);
+
+        $suffix = str_ends_with($path, 'authorized.xml') ? 'autorizada' : 'assinada';
+        $filename = 'NFCe-'.$fiscalDocumentJob->document_number.'-'.$suffix.'.xml';
+        return \Illuminate\Support\Facades\Storage::disk('local')
+            ->download($path, $filename, ['Content-Type' => 'application/xml']);
+    }
+
     private function configurationFor(string $tab): array
     {
         if($tab==='cte') {
