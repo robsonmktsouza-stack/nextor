@@ -3,20 +3,6 @@
 @section('titleMeta','Documento fiscal')
 @section('actions')
   <a class="btn btn-secondary" href="{{ route('fiscal.index',['tab'=>$tab]) }}">@include('partials.icon',['name'=>'arrow-left','size'=>16]) Voltar</a>
-  @if($tab==='nfce' && $document->status==='prepared' && (bool) \App\Models\AppSetting::value('tax','use_fiscal_rules',false)
-      && !$document->xml_path && !$document->access_key && !$document->response_path
-      && auth()->user()->canAccess('fiscal'))
-    <form method="post" action="{{ route('fiscal.tax-rules.apply',$document) }}"
-       data-confirm-submit="Aplicar ao snapshot da NFC-e preparada as regras fiscais atualmente ativas? A venda e sua numeração serão preservadas."
-       data-confirm-kind="action"
-       data-confirm-title="Aplicar regras fiscais"
-       data-confirm-label="Aplicar regras">
-      @csrf
-      <button type="submit" class="btn btn-secondary">
-        @include('partials.icon',['name'=>'layers','size'=>16]) Aplicar regras fiscais
-      </button>
-    </form>
-  @endif
   @if($tab==='nfce' && $document->status==='prepared' && empty($nfcePreflightErrors) && auth()->user()->canAccess('fiscal'))
     <form method="post" action="{{ route('fiscal.nfce.emit',$document) }}"
       data-confirm-submit="Deseja transmitir a NFC-e série {{ $document->series }}/{{ $document->document_number }} para a SEFAZ em ambiente de {{ $document->environment==='homologation' ? 'homologação' : 'produção' }}?"
