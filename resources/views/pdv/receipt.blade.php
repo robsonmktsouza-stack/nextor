@@ -21,6 +21,9 @@
       min(700, $baseHeight + ($sale->items->count() * $itemHeight) + ($sale->payments->count() * 7) + ($sale->notes ? 16 : 0))
   );
   $companyName = $company->trade_name ?: $company->legal_name ?: config('app.name','NEXTOR');
+  $receiptAfterPrintUrl = $nfceDocument && !$nfceAuto && auth()->user()->canAccess('fiscal')
+      ? route('fiscal.show', $nfceDocument)
+      : route('pdv.index');
   $companyDocument = $company->document;
   $companyAddress = collect([
       $company->address,
@@ -190,11 +193,7 @@ body{font-size:9px}
   window.addEventListener('afterprint',()=>{
     if(!automatic) return;
     automatic=false;
-    window.setTimeout(()=>window.location.replace(@json(
-      $nfceDocument && !$nfceAuto && auth()->user()->canAccess('fiscal')
-        ? route('fiscal.show', $nfceDocument)
-        : route('pdv.index')
-    )),120);
+    window.setTimeout(()=>window.location.replace(@json($receiptAfterPrintUrl)),120);
   });
   printButton?.addEventListener('click',()=>{automatic=false;window.print();});
 })();
