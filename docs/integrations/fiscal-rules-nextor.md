@@ -74,9 +74,28 @@ Testar o cadastro e a aplicação somente com notas preparadas, sem gerar outra 
 
 ### Próximas etapas, ainda não implementadas
 
-- Regras por UF/município, FCP por UF/NCM, ANP e outros tratamentos específicos.
+- **Cálculos e aplicação** das variações por UF/município, FCP por UF/NCM, ANP e tratamentos específicos. Os formulários e armazenamento destas configurações já existem.
 - Motor de cálculo por CST/CSOSN, incluindo ICMS-ST, PIS/COFINS não zerados e reforma tributária, com testes de totais.
 - Integração da mesma classificação a NF-e interestadual e NFS-e, respeitando os respectivos modelos e legislações.
 - Simulador de regras por produto/lote, aprovação por usuário e registro de fundamento por período.
 
 As imagens do eGestor servem como referência de organização e variações; não são fonte de alíquotas ou de enquadramento fiscal.
+
+
+## Conferência de cobertura da referência eGestor — outubro/2026
+
+O formulário de grupos de tributação agora inclui, como **configurações editáveis**:
+
+- **Geral:** tipo e descrição do grupo, cBenef/benefício fiscal da UF, CFOP `x102`, CFOP fixo para UF diferente e opção de forçá-lo.
+- **ICMS:** CST/CSOSN, alternativa para NFC-e, crédito Simples, alíquota ICMS, ST/MVA e diferimento FCP.
+- **IPI:** CST e alíquota.
+- **PIS/COFINS:** CST, alíquotas, tipo de cálculo (porcentagem/quantidade/não usar), tipo de cálculo ST e alíquotas relacionadas.
+- **IS:** CST, classificação tributária e alíquota.
+- **IBS/CBS:** CST, classificação, CBS/IBS UF/IBS municipal com alíquota, diferimento e redução separados; variações repetíveis por código IBGE municipal e por UF de destino.
+- **Combustíveis/ANP:** código e descrição ANP, percentual de mistura de biodiesel, indicador de origem, UF produtor/importador e percentual de origem.
+- **Serviços:** exigibilidade de ISS, incentivo fiscal e alíquota ISS.
+- **FCP:** página separada `/fiscal/fcp` com regras por UF, NCM, alíquota, vigência, situação ativa e “usar também no FCP próprio”.
+
+**Não significam cálculos concluídos.** Fora da classificação já suportada pela NFC-e BA/Simples, qualquer código ou percentual que requeira emissão diferente deve ser bloqueado. FCP ativo aplicável à UF/NCM bloqueia aplicação das regras até que se implemente o cálculo correspondente. Exceções interestaduais não são executadas na NFC-e interna.
+
+A referência eGestor serviu apenas para a cobertura de campos e a organização funcional; não foram copiados padrões de alíquotas, códigos tributários, nem assumidas regras legais.
