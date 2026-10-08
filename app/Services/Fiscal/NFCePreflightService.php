@@ -70,7 +70,12 @@ final class NFCePreflightService
                 if (($item['item_type'] ?? '') !== 'product' || !($item['product_id'] ?? null)) {
                     $errors[] = "Item {$n}: somente produto cadastrado pode ser emitido.";
                 }
-                if (!preg_match('/^\d{8}$/', (string) ($item['ncm'] ?? ''))) {
+                // O cadastro pode exibir NCM formatado (6913.90.00).
+                // O XML exige somente os oito dígitos, como já faz o INI builder.
+                $ncmRaw = trim((string) ($item['ncm'] ?? ''));
+                $ncm = preg_replace('/\D/', '', $ncmRaw);
+                if (preg_match('/^\d{8}$/', $ncm) !== 1
+                    || preg_match('/^[0-9.\s-]+$/', $ncmRaw) !== 1) {
                     $errors[] = "Item {$n}: informe NCM de 8 dígitos.";
                 }
                 if (!preg_match('/^5\d{3}$/', $cfop)) {
