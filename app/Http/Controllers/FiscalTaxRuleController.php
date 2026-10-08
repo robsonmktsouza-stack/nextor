@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\AppSetting;
 use App\Models\FiscalDocumentJob;
 use App\Models\FiscalTaxRule;
+use App\Models\Product;
+use App\Models\CompanySetting;
+use App\Services\Fiscal\NFCeFiscalProfileService;
 use App\Services\Fiscal\NFCeTaxRuleApplicationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -15,12 +18,44 @@ use Throwable;
 
 final class FiscalTaxRuleController extends Controller
 {
-    public function index()
+    public function index(Request $request, NFCeFiscalProfileService $profiles)
     {
+        $preview = null;
+        $previewError = null;
+        $productId = $request->query('simulate_product_id');
+        $previewDate = $request->query('simulate_date') ?: now()->toDateString();
+
+        if ($productId !== null && $productId !== '') {
+            $input = $request->validate([
+                'simulate_product_id' => ['required', 'integer', 'exists:products,id'],
+                'simulate_date' => ['nullable', 'date_format:Y-m-d'],
+            ]);
+            $product = Product::query()->findOrFail($input['simulate_product_id']);
+            try {
+                $company = CompanySetting::current();
+                if ((string) $company->crt !== '1'
+                    || strtoupper((string) $company->state) !== 'BA') {
+                    throw new RuntimeException(
+                        'Prévia disponível inicialmente para empresas do Simples Nacional na Bahia.'
+                    );
+                }
+                $preview = $profiles->classifyProduct($product, $previewDate);
+                $preview['product'] = $product;
+            } catch (RuntimeException $exception) {
+                $previewError = $exception->getMessage();
+            }
+        }
+
         return view('fiscal.rules.index', [
-            'rules' => FiscalTaxRule::query()->orderByDesc('is_active')->orderByDesc('priority')->orderBy('name')->get(),
+            'rules' => FiscalTaxRule::query()
+                ->orderByDesc('is_active')->orderByDesc('priority')->orderBy('name')->get(),
             'useFiscalRules' => (bool) AppSetting::value('tax', 'use_fiscal_rules', false),
-            'products' => \App\Models\Product::query()->where('is_active', true)->orderBy('name')->get(['id', 'name', 'sku']),
+            'products' => Product::query()->where('is_active', true)
+                ->orderBy('name')->get(['id', 'name', 'sku', 'ncm', 'fiscal_tax_group_id']),
+            'preview' => $preview,
+            'previewError' => $previewError,
+            'previewProductId' => $productId,
+            'previewDate' => $previewDate,
         ]);
     }
 
