@@ -16,6 +16,25 @@ final class ACBrNFCeStatus extends Command
         $service = new ACBrNFeService();
         try {
             $service->initialize();
+            $schemaCandidates = [
+                'C:/laragon/acbr/dep/Schemas/NFe',
+                'C:/laragon/acbr/Schemas/NFe',
+                'C:/laragon/acbr/dep/Schemas',
+                'C:/laragon/acbr/Schemas',
+            ];
+            $schemas = (string) env('ACBr_NFE_SCHEMAS_PATH', '');
+            if ($schemas === '') {
+                foreach ($schemaCandidates as $candidate) {
+                    if (is_dir($candidate)) {
+                        $schemas = $candidate;
+                        break;
+                    }
+                }
+            }
+            if ($schemas === '' || !is_dir($schemas)) {
+                throw new \RuntimeException('Schemas NFe não encontrados. Configure ACBr_NFE_SCHEMAS_PATH no .env com a pasta dos arquivos XSD.');
+            }
+            $service->setConfig('NFe', 'PathSchemas', $schemas);
             $service->setConfig('DFe', 'UF', 'BA');
             $service->setConfig('NFe', 'ModeloDF', '1');
             $service->setConfig('NFe', 'Ambiente', '1');
