@@ -22,12 +22,17 @@ jobs:
             app/Services/Fiscal/NFCeIniBuilder.php \
             app/Services/Fiscal/NFCePreflightService.php \
             app/Services/Fiscal/NFCeTransmissionService.php \
+            app/Services/Fiscal/NFCeProtocolXmlService.php \
+            app/Services/Fiscal/NFCeSefazResponseParser.php \
             app/Services/FiscalPreparationService.php \
             app/Services/SalesService.php \
             app/Jobs/ProcessNFCeJob.php \
+            app/Jobs/ConsultNFCeJob.php \
             app/Http/Controllers/FiscalController.php \
             app/Console/Commands/ACBrNFCeStatus.php \
-            tests/Feature/NFCeIniBuilderTest.php; do
+            tests/Feature/NFCeIniBuilderTest.php \
+            tests/Unit/NFCeProtocolXmlServiceTest.php \
+            tests/Unit/NFCeSefazResponseParserTest.php; do
             php -l "$f"
           done
       - name: Install PHP dependencies
@@ -36,8 +41,8 @@ jobs:
         run: |
           cp .env.example .env || touch .env
           php artisan key:generate --force
-      - name: Check NFC-e builder
+      - name: Check NFC-e emission and SEFAZ response handling
         env:
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
-        run: php vendor/bin/phpunit --filter=NFCeIniBuilderTest
+        run: php vendor/bin/phpunit --filter=NFCe
