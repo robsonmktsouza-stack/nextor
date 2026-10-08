@@ -21,9 +21,18 @@
       min(700, $baseHeight + ($sale->items->count() * $itemHeight) + ($sale->payments->count() * 7) + ($sale->notes ? 16 : 0))
   );
   $companyName = $company->trade_name ?: $company->legal_name ?: config('app.name','NEXTOR');
-  $receiptAfterPrintUrl = $nfceDocument && !$nfceAuto && auth()->user()->canAccess('fiscal')
-      ? route('fiscal.show', $nfceDocument)
-      : route('pdv.index');
+  // Não ocultar ausência de documento fiscal retornando automaticamente ao PDV.
+  // Depois de imprimir (ou cancelar), apresentar a pendência nesta mesma venda.
+  $receiptAfterPrintUrl = $nfceDocument
+      ? ($nfceAuto
+          ? route('pdv.index')
+          : (auth()->user()->canAccess('fiscal') ? route('fiscal.show', $nfceDocument) : null))
+      : null;
+  $canPrepareNfce = auth()->user()->canAccess('fiscal')
+      && $sale->status === 'completed'
+      && $sale->operation_type === 'sale'
+      && (bool) \App\Models\AppSetting::value('fiscal', 'enabled', false)
+      && (bool) \App\Models\AppSetting::value('nfce', 'enabled', false);
   $companyDocument = $company->document;
   $companyAddress = collect([
       $company->address,
@@ -44,6 +53,13 @@ body{font-size:9px}
 .screen-actions{width:{{ $receiptWidth }}mm;max-width:calc(100vw - 24px);margin:16px auto 10px;display:flex;gap:8px}
 .screen-actions a,.screen-actions button{flex:1;min-height:38px;display:flex;align-items:center;justify-content:center;border:1px solid #cbd4dc;border-radius:5px;background:#fff;color:#29455e;font:600 11px Arial,sans-serif;text-decoration:none;cursor:pointer}
 .screen-actions button{background:#2877c7;border-color:#2877c7;color:#fff}
+.post-sale-status{max-width:460px;margin:0 auto 14px;padding:12px 14px;background:#fff;border:1px solid #d2dae4;border-radius:5px;font-size:12px;line-height:1.5}
+.post-sale-status strong{display:block;margin-bottom:3px;font-size:13px}
+.post-sale-status p{margin:3px 0 10px}
+.post-sale-status form{margin:0}
+.post-sale-status button,.post-sale-status a.action{display:inline-block;padding:9px 12px;border:0;border-radius:4px;background:#2877c7;color:#fff;text-decoration:none;font:600 12px Arial,sans-serif;cursor:pointer}
+.post-sale-status .receipt-alert{margin-bottom:8px;color:#8f260f;font-weight:700}
+
 .receipt{width:{{ $receiptWidth }}mm;max-width:100%;margin:0 auto 24px;padding:{{ $receiptWidth==='58'?'3':'4' }}mm;background:#fff}
 .receipt-copy+.receipt-copy{margin-top:12px}
 .center{text-align:center}
@@ -68,7 +84,7 @@ body{font-size:9px}
 @page{size:{{ $receiptWidth }}mm {{ $receiptHeightMm }}mm;margin:0}
 @media print{
   html,body{width:{{ $receiptWidth }}mm!important;min-width:{{ $receiptWidth }}mm!important;max-width:{{ $receiptWidth }}mm!important;background:#fff!important}
-  .screen-actions{display:none!important}
+  .screen-actions,.post-sale-status{display:none!important}
   .receipt{width:{{ $receiptWidth }}mm!important;min-width:{{ $receiptWidth }}mm!important;max-width:{{ $receiptWidth }}mm!important;margin:0!important;padding:{{ $receiptWidth==='58'?'3':'4' }}mm!important;page-break-after:always}
   .receipt:last-of-type{page-break-after:auto}
 }
@@ -80,8 +96,36 @@ body{font-size:9px}
   @if($nfceDocument && auth()->user()->canAccess('fiscal'))
     <a href="{{ route('fiscal.show', $nfceDocument) }}">NFC-e {{ $nfceDocument->status==='authorized' ? 'autorizada' : 'da venda' }}</a>
   @endif
-  <button type="button">Imprimir novamente</button>
+  <button type="button" data-reprint-receipt>Imprimir novamente</button>
 </div>
+<section class="post-sale-status" aria-live="polite">
+  @if(session('error'))
+    <div class="receipt-alert">{{ session('error') }}</div>
+  @endif
+  @if($nfceDocument)
+    <strong>NFC-e da venda #{{ $sale->id }}: {{ $nfceDocument->status === 'prepared' ? 'preparada para revisão' : $nfceDocument->status }}</strong>
+    <p>A venda foi concluída e o documento fiscal está vinculado a ela. Cancelar a impressão não altera a NFC-e.</p>
+    @if(auth()->user()->canAccess('fiscal'))
+      <a class="action" href="{{ route('fiscal.show', $nfceDocument) }}">Abrir NFC-e da venda</a>
+    @else
+      <p>Solicite a um usuário com permissão fiscal que revise o documento.</p>
+    @endif
+  @else
+    <strong>Venda #{{ $sale->id }} concluída — NFC-e ainda não preparada</strong>
+    <p>O estoque e o financeiro desta venda já foram registrados. Não registre outra venda para tentar gerar a nota.</p>
+    @if($canPrepareNfce)
+      <form method="post" action="{{ route('pdv.receipt.nfce.prepare', $sale) }}">
+        @csrf
+        <button type="submit">Preparar NFC-e desta venda</button>
+      </form>
+    @else
+      <p>Confira se os módulos Fiscal e NFC-e estão habilitados. Para preparar o documento, também é necessária permissão fiscal.</p>
+      @if(auth()->user()->canAccess('settings'))
+        <a class="action" href="{{ route('settings.index', ['tab'=>'fiscal']) }}">Conferir configurações fiscais</a>
+      @endif
+    @endif
+  @endif
+</section>
 
 @for($copy=1;$copy<=$receiptCopies;$copy++)
 <main class="receipt receipt-copy">
@@ -187,13 +231,16 @@ body{font-size:9px}
 
 <script>
 (()=>{
-  let automatic=true;
-  const printButton=document.querySelector('.screen-actions button');
+  let automatic=@json(request()->query('print') !== '0');
+  const afterPrintUrl=@json($receiptAfterPrintUrl);
+  const printButton=document.querySelector('[data-reprint-receipt]');
   window.addEventListener('load',()=>window.setTimeout(()=>{if(automatic) window.print();},250));
   window.addEventListener('afterprint',()=>{
     if(!automatic) return;
     automatic=false;
-    window.setTimeout(()=>window.location.replace(@json($receiptAfterPrintUrl)),120);
+    // Se a nota não foi preparada, manter o resumo da venda visível,
+    // mesmo quando o operador cancelar o diálogo de impressão.
+    if(afterPrintUrl) window.setTimeout(()=>window.location.assign(afterPrintUrl),150);
   });
   printButton?.addEventListener('click',()=>{automatic=false;window.print();});
 })();
