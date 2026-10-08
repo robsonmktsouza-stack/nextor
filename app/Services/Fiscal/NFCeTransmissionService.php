@@ -45,7 +45,15 @@ final class NFCeTransmissionService
                 return;
             }
 
-            $service = new ACBrNFeService();
+            // Um INI privado por documento: não utilizar o arquivo ACBr global
+            // que pode persistir senha do A1 em texto puro.
+            $runtimeDir = storage_path('app/acbr-runtime');
+            if (!is_dir($runtimeDir) && !mkdir($runtimeDir, 0700, true) && !is_dir($runtimeDir)) {
+                $job->update(['status' => 'prepared', 'error_message' => 'Diretório ACBr temporário indisponível.']);
+                return;
+            }
+            $runtimeIni = $runtimeDir.'/nfce-'.$job->id.'-'.bin2hex(random_bytes(8)).'.ini';
+            $service = new ACBrNFeService(null, $runtimeIni);
             $transmissionAttempted = false;
             $company = CompanySetting::current();
             $password = (string) $company->certificate_password;
@@ -119,7 +127,13 @@ final class NFCeTransmissionService
                     'processed_at' => now(),
                 ]);
             } finally {
-                $service->close();
+                try {
+                    $service->close();
+                } finally {
+                    if (is_file($runtimeIni)) {
+                        @unlink($runtimeIni);
+                    }
+                }
             }
         } finally {
             $lock->release();
