@@ -88,6 +88,34 @@ $origins=[
  </section>
 
  <section class="editor-tab-panel" data-tab-panel="product-fiscal" hidden>
+   <div class="editor-panel tax-group-panel">
+     <h3>Grupo tributário</h3>
+     <div class="editor-grid cols-12">
+       <label class="field col-8"><span>Tributação para produtos</span>
+         <select name="fiscal_tax_group_id">
+           <option value="">Sem grupo específico — usar padrão cadastrado, se houver</option>
+           @foreach($fiscalTaxGroups as $fiscalGroup)
+             <option value="{{ $fiscalGroup->id }}" @selected((string)old('fiscal_tax_group_id',$product->fiscal_tax_group_id)===(string)$fiscalGroup->id)>
+               {{ $fiscalGroup->name }}{{ $fiscalGroup->is_default ? ' · Padrão' : '' }}{{ !$fiscalGroup->is_active ? ' · Inativo' : '' }}
+             </option>
+           @endforeach
+         </select>
+       </label>
+       <div class="field col-4">
+         <span>Administração</span>
+         @if(auth()->user()->canAccess('settings'))
+           <a class="btn btn-secondary" href="{{ route('fiscal.tax-groups.index') }}">Gerenciar grupos</a>
+         @else
+           <p class="editor-help">O grupo é definido nas configurações fiscais.</p>
+         @endif
+       </div>
+     </div>
+     <p class="editor-help">O grupo determina a classificação a ser conferida antes de gerar o XML. Dados fiscais detalhados deste produto continuam disponíveis acima.</p>
+     @if($product->tax_group)
+       <p class="editor-help">Referência legada anterior: {{ $product->tax_group }}</p>
+     @endif
+   </div>
+
    <div class="editor-panel">
      <div class="editor-grid cols-12">
        <label class="field col-12"><span>Origem</span>
@@ -213,33 +241,7 @@ $origins=[
      <label class="field"><span>Anotações para Nota Fiscal eletrônica</span><textarea name="nfe_notes" rows="3" placeholder="Informações adicionais para NF-e">{{ old('nfe_notes',$product->nfe_notes) }}</textarea></label>
    </div>
 
-   <div class="editor-panel tax-group-panel">
-     <h3>Grupo tributário</h3>
-     <div class="editor-grid cols-12">
-       <label class="field col-8"><span>Tributação para produtos</span>
-         <select name="fiscal_tax_group_id">
-           <option value="">Sem grupo específico — usar padrão cadastrado, se houver</option>
-           @foreach($fiscalTaxGroups as $fiscalGroup)
-             <option value="{{ $fiscalGroup->id }}" @selected((string)old('fiscal_tax_group_id',$product->fiscal_tax_group_id)===(string)$fiscalGroup->id)>
-               {{ $fiscalGroup->name }}{{ $fiscalGroup->is_default ? ' · Padrão' : '' }}{{ !$fiscalGroup->is_active ? ' · Inativo' : '' }}
-             </option>
-           @endforeach
-         </select>
-       </label>
-       <div class="field col-4">
-         <span>Administração</span>
-         @if(auth()->user()->canAccess('settings'))
-           <a class="btn btn-secondary" href="{{ route('fiscal.tax-groups.index') }}">Gerenciar grupos</a>
-         @else
-           <p class="editor-help">O grupo é definido nas configurações fiscais.</p>
-         @endif
-       </div>
-     </div>
-     <p class="editor-help">O grupo determina a classificação a ser conferida antes de gerar o XML. Dados fiscais detalhados deste produto continuam disponíveis acima.</p>
-     @if($product->tax_group)
-       <p class="editor-help">Referência legada anterior: {{ $product->tax_group }}</p>
-     @endif
-   </div>
+
  </section>
 
  <section class="editor-tab-panel" data-tab-panel="product-media" hidden>
