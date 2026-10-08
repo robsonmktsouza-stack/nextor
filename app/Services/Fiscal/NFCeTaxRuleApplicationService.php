@@ -2,7 +2,6 @@
 
 namespace App\Services\Fiscal;
 
-use App\Models\AppSetting;
 use App\Models\CompanySetting;
 use App\Models\FiscalDocumentJob;
 use Illuminate\Support\Facades\DB;
@@ -26,9 +25,6 @@ final class NFCeTaxRuleApplicationService
                 || $job->access_key || $job->protocol || $job->xml_path
                 || $job->response_path || $job->authorized_at) {
                 throw new RuntimeException('Regras só podem ser aplicadas antes de assinar ou transmitir a NFC-e.');
-            }
-            if (!(bool) AppSetting::value('tax', 'use_fiscal_rules', false)) {
-                throw new RuntimeException('Ative as regras fiscais nas configurações para utilizá-las.');
             }
             $company = CompanySetting::current();
             if ((string) $company->crt !== '1' || strtoupper((string) $company->state) !== 'BA') {
