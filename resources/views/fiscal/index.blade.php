@@ -54,8 +54,11 @@
           </a>
         @endif
         @if(auth()->user()->canAccess('settings') && $tab==='nfce')
-          <a class="grid-tool grid-tool-wide" href="{{ route('fiscal.tax-rules.index') }}" data-tooltip="Regras fiscais da NFC-e">
-            @include('partials.icon',['name'=>'layers','size'=>17]) <span>Regras fiscais</span>
+          <a class="grid-tool grid-tool-wide" href="{{ route('fiscal.tax-groups.index') }}" data-tooltip="Grupos tributários de produtos e serviços">
+            @include('partials.icon',['name'=>'layers','size'=>17]) <span>Grupos tributários</span>
+          </a>
+          <a class="grid-tool" href="{{ route('fiscal.tax-rules.index') }}" data-tooltip="Regras específicas por NCM / produto">
+            @include('partials.icon',['name'=>'tag','size'=>17])
           </a>
         @endif
         @if(auth()->user()->canAccess('settings'))
