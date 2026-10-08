@@ -49,6 +49,42 @@
 </div>
 
 @if($tab==='nfce' && $document->status==='prepared')
+  @if(!$document->access_key && !$document->protocol && !$document->xml_path && !$document->response_path && !$document->authorized_at && auth()->user()->canAccess('fiscal'))
+    <section class="cms-card fiscal-detail-card">
+      <div class="card-header">
+        <div>
+          <h2>Conferência dos produtos</h2>
+          <p>Corrija os campos fiscais no cadastro do produto e atualize os dados desta NFC-e. Não é necessário fazer outra venda.</p>
+        </div>
+      </div>
+      <div style="padding:16px;display:grid;gap:14px">
+        @foreach(($document->source_snapshot['items'] ?? []) as $index => $fiscalItem)
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+            <div>
+              <strong>{{ $index + 1 }}. {{ $fiscalItem['name'] ?? 'Produto' }}</strong>
+              <div style="font-size:12px;color:var(--text-muted,#64748b);margin-top:4px">
+                NCM: {{ $fiscalItem['ncm'] ?: 'Não informado' }}
+                · PIS: {{ data_get($fiscalItem,'tax_defaults.pis_cst') ?: 'Não informado' }}
+                · COFINS: {{ data_get($fiscalItem,'tax_defaults.cofins_cst') ?: 'Não informado' }}
+              </div>
+            </div>
+            @if(!empty($fiscalItem['product_id']) && auth()->user()->canAccess('products'))
+              <a class="btn btn-secondary" target="_blank" rel="noopener noreferrer" href="{{ route('products.edit',$fiscalItem['product_id']) }}">
+                @include('partials.icon',['name'=>'edit','size'=>16]) Corrigir cadastro
+              </a>
+            @endif
+          </div>
+        @endforeach
+        <form method="post" action="{{ route('fiscal.nfce.refresh-data',$document) }}">
+          @csrf
+          <button type="submit" class="btn btn-secondary">
+            @include('partials.icon',['name'=>'refresh-cw','size'=>16]) Atualizar dados fiscais desta NFC-e
+          </button>
+        </form>
+        <small style="color:var(--text-muted,#64748b)">Mantém os itens, valores, pagamentos, série e número da venda original. Só atualiza a classificação fiscal dos produtos antes de qualquer assinatura ou transmissão.</small>
+      </div>
+    </section>
+  @endif
   @if(count($nfcePreflightErrors))
     <section class="fiscal-error-card">
       @include('partials.icon',['name'=>'alert','size'=>20])
