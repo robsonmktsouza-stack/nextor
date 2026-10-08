@@ -41,6 +41,34 @@ final class NFCeTaxGroupTranslator
                 throw new RuntimeException('Grupo "'.$group->name.'": classificação '.$name.' informada, mas os grupos de IBS/CBS/IS ainda não são gerados pelo XML NFC-e atual.');
             }
         }
+        // Outros parâmetros cadastráveis ainda não foram mapeados para o
+        // emissor ACBr. Nunca descartá-los silenciosamente ao aplicar regras.
+        $unsupported=[
+            'fiscal_benefit_code','anp_code','anp_description',
+            'fuel_origin_indicator','fuel_origin_uf',
+        ];
+        foreach ($unsupported as $name) {
+            if (trim((string) ($config[$name] ?? '')) !== '') {
+                throw new RuntimeException('Grupo "'.$group->name.'": o campo '.$name.' está configurado, mas não é suportado pela NFC-e atual.');
+            }
+        }
+        foreach (['pis_calc_type','pis_st_calc_type','cofins_calc_type','cofins_st_calc_type'] as $name) {
+            if (!in_array(($config[$name] ?? null),[null,'','none'],true)) {
+                throw new RuntimeException('Grupo "'.$group->name.'": o tipo de cálculo '.$name.' ainda não é implementado na NFC-e atual.');
+            }
+        }
+        if (!empty($config['municipal_variations'])) {
+            throw new RuntimeException('Grupo "'.$group->name.'": a emissão com variações municipais ainda não está implementada.');
+        }
+        // Variações para outras UFs não afetam a NFC-e estritamente interna
+        // e devem ser verificadas pelo emissor de NF-e quando implementado.
+        if (!empty($config['state_variations'])) {
+            foreach ($config['state_variations'] as $variation) {
+                if (($variation['uf'] ?? '') === 'BA') {
+                    throw new RuntimeException('Grupo "'.$group->name.'": variação ativa para BA não é suportada pela NFC-e atual.');
+                }
+            }
+        }
         if ($group->kind !== 'products' || $group->iss_exigibility) {
             throw new RuntimeException('Grupo "'.$group->name.'": parâmetros de serviços/ISS não são suportados pela NFC-e de mercadorias.');
         }
