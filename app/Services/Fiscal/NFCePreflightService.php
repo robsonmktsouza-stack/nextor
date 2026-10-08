@@ -64,7 +64,8 @@ final class NFCePreflightService
                 $tax = $item['tax_defaults'] ?? [];
                 $tax = is_array($tax) ? $tax : [];
                 if (!( ((int) ($tax['fiscal_rule_id'] ?? 0) > 0 && (int) ($tax['fiscal_rule_revision'] ?? 0) > 0)
-                    || ((int) ($tax['fiscal_group_id'] ?? 0) > 0 && (int) ($tax['fiscal_group_revision'] ?? 0) > 0) )) {
+                    || ((int) ($tax['fiscal_group_id'] ?? 0) > 0 && (int) ($tax['fiscal_group_revision'] ?? 0) > 0)
+                    || ($tax['fiscal_config_source'] ?? null) === 'product' )) {
                     $errors[] = "Item {$n}: configure um grupo tributário ou uma regra fiscal válida para este produto.";
                 }
                 $cfop = (string) ($tax['cfop_outbound_internal'] ?? $tax['nfce_cfop'] ?? $tax['cfop'] ?? AppSetting::value('nfce', 'default_cfop', ''));
