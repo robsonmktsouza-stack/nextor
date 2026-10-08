@@ -74,6 +74,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/pdv/nfce/contingency',[PdvController::class,'setNfceContingency'])->name('pdv.nfce.contingency')->middleware('permission:pdv');
     Route::post('/pdv/nfce/{fiscalJob}/cancel',[PdvController::class,'requestNfceCancellation'])->name('pdv.nfce.cancel')->middleware('permission:pdv');
     Route::get('/pdv/receipt/{sale}',[PdvController::class,'receipt'])->name('pdv.receipt')->middleware('permission:pdv');
+    Route::post('/pdv/receipt/{sale}/prepare-nfce',[PdvController::class,'prepareNfce'])->name('pdv.receipt.nfce.prepare')->middleware('permission:pdv');
     Route::post('/pdv',[PdvController::class,'store'])->name('pdv.store')->middleware('permission:pdv');
     Route::get('/sales',[SaleController::class,'index'])->name('sales.index')->middleware('permission:sales');
     Route::get('/sales/create',[SaleController::class,'create'])->name('sales.create')->middleware('permission:sales');
