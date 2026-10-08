@@ -93,9 +93,20 @@ class PdvController extends Controller
                 ->first()
             : null;
 
+        $lastPdvNfceStatusLabel=$lastPdvNfceDocument ? match($lastPdvNfceDocument->status) {
+            'prepared'=>'preparada',
+            'processing'=>'processando',
+            'pending'=>'pendente',
+            'authorized'=>'autorizada',
+            'rejected'=>'rejeitada',
+            'cancelled'=>'cancelada',
+            default=>'verificar',
+        } : 'ainda não preparada';
+
         return view('pdv.index',[
             'lastCompletedPdvSale'=>$lastCompletedPdvSale,
             'lastPdvNfceDocument'=>$lastPdvNfceDocument,
+            'lastPdvNfceStatusLabel'=>$lastPdvNfceStatusLabel,
             'customers'=>Customer::query()
                 ->where('is_customer',true)
                 ->orderBy('name')
