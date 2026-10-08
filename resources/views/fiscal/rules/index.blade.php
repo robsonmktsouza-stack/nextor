@@ -68,11 +68,11 @@
       <label class="field col-2"><span>Prioridade</span><input required name="priority" type="number" min="-100" max="100" value="{{ old('priority',0) }}"></label>
       <label class="field col-3"><span>Início da vigência</span><input type="date" name="valid_from" value="{{ old('valid_from') }}"></label>
       <label class="field col-3"><span>Fim da vigência</span><input type="date" name="valid_until" value="{{ old('valid_until') }}"></label>
-      <label class="field col-6"><span>Conferência</span>
+      <div class="field col-6"><span>Conferência</span>
         <label class="settings-switch"><input type="checkbox" name="is_active" value="1" @checked(old('is_active'))>
           <span><strong>Regra ativa</strong><small>Ative somente após validar o enquadramento.</small></span>
         </label>
-      </label>
+      </div>
       <label class="field col-12"><span>Observações / fundamento para conferência</span>
         <textarea name="notes" rows="2" placeholder="Anotações internas; a regra não é parecer fiscal">{{ old('notes') }}</textarea>
       </label>
@@ -134,11 +134,11 @@
                   <label class="field col-2"><span>Prioridade</span><input name="priority" type="number" required min="-100" max="100" value="{{ $rule->priority }}"></label>
                   <label class="field col-3"><span>Início</span><input type="date" name="valid_from" value="{{ $rule->valid_from?->format('Y-m-d') }}"></label>
                   <label class="field col-3"><span>Fim</span><input type="date" name="valid_until" value="{{ $rule->valid_until?->format('Y-m-d') }}"></label>
-                  <label class="field col-6"><span>Situação</span>
+                  <div class="field col-6"><span>Situação</span>
                     <label class="settings-switch"><input type="checkbox" name="is_active" value="1" @checked($rule->is_active)>
                       <span><strong>Regra ativa</strong></span>
                     </label>
-                  </label>
+                  </div>
                   <label class="field col-12"><span>Observações</span><textarea name="notes" rows="2">{{ $rule->notes }}</textarea></label>
                 </div>
                 <button type="submit" class="btn btn-success">Salvar alterações</button>
