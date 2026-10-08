@@ -107,6 +107,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/fiscal/{fiscalDocumentJob}/emit-nfce',[FiscalController::class,'issueNfce'])->name('fiscal.nfce.emit')->middleware('permission:fiscal');
     Route::post('/fiscal/{fiscalDocumentJob}/consult-nfce',[FiscalController::class,'consultNfce'])->name('fiscal.nfce.consult')->middleware('permission:fiscal');
     Route::get('/fiscal/{fiscalDocumentJob}/xml',[FiscalController::class,'downloadNfceXml'])->name('fiscal.nfce.xml')->middleware('permission:fiscal');
+    Route::post('/fiscal/{fiscalDocumentJob}/recover-nfce-xml',[FiscalController::class,'recoverNfceXml'])->name('fiscal.nfce.recover-xml')->middleware('permission:fiscal');
 
     Route::get('/fiscal/{fiscalDocumentJob}',[FiscalController::class,'show'])->name('fiscal.show')->middleware('permission:fiscal');
 
