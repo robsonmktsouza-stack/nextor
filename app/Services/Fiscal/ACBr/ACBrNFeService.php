@@ -118,7 +118,8 @@ final class ACBrNFeService
                 $size->cdata = $capacity;
                 $status = $this->lib->NFE_UltimoRetorno($buffer, FFI::addr($size));
             }
-            return $status === 0 ? FFI::string($buffer) : "NFE_UltimoRetorno retornou {$status}";
+            $message = FFI::string($buffer);
+            return $message !== '' ? $message : "NFE_UltimoRetorno retornou {$status} sem mensagem";
         } catch (Throwable) {
             return 'não foi possível consultar o último retorno';
         }
