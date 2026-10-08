@@ -426,7 +426,7 @@ foreach($primaryTabs as $key=>$item){
         <label class="settings-switch"><input type="checkbox" name="allow_split_payment" value="1" @checked($pdv['allow_split_payment'])><span><strong>Permitir pagamento dividido</strong><small>Permite combinar dinheiro, PIX, cartão e outras formas na mesma venda.</small></span></label>
         <label class="settings-switch"><input type="checkbox" name="allow_cash_movements" value="1" @checked($pdv['allow_cash_movements'])><span><strong>Permitir sangria e suprimento</strong><small>Registra entradas e retiradas manuais do caixa durante o turno.</small></span></label>
         <label class="settings-switch"><input type="checkbox" name="show_stock" value="1" @checked($pdv['show_stock'])><span><strong>Mostrar estoque</strong><small>Exibe saldo disponível na busca de produtos.</small></span></label>
-        <label class="settings-switch"><input type="checkbox" name="auto_nfce" value="1" @checked($pdv['auto_nfce'])><span><strong>NFC-e automática</strong><small>Prepara a NFC-e após concluir venda quando o módulo fiscal estiver habilitado.</small></span></label>
+        <label class="settings-switch"><input type="checkbox" name="auto_nfce" value="1" @checked($pdv['auto_nfce'])><span><strong>Transmitir NFC-e automaticamente</strong><small>Com esta opção desativada, a nota fica preparada para revisão e emissão manual após a venda.</small></span></label>
       </div>
     </section>
   
