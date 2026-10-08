@@ -109,11 +109,7 @@
     <span>R$ {{ number_format((float)$lastCompletedPdvSale->total,2,',','.') }}</span>
     <span>{{ ($lastCompletedPdvSale->completed_at ?? $lastCompletedPdvSale->created_at)?->format('d/m H:i') }}</span>
     @if($lastPdvNfceDocument)
-      <span class="pdv-last-sale-fiscal-status">NFC-e: {{ match($lastPdvNfceDocument->status) {
-        'prepared'=>'preparada', 'processing'=>'processando', 'pending'=>'pendente',
-        'authorized'=>'autorizada', 'rejected'=>'rejeitada', 'cancelled'=>'cancelada',
-        default=>'verificar'
-      } }}</span>
+      <span class="pdv-last-sale-fiscal-status">NFC-e: {{ $lastPdvNfceStatusLabel }}</span>
     @else
       <span class="pdv-last-sale-fiscal-status">NFC-e ainda não preparada</span>
     @endif
