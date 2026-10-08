@@ -17,7 +17,15 @@ final class ACBrNFCeStatus extends Command
 
     public function handle(): int
     {
-        $service = new ACBrNFeService();
+        // Evita reutilizar o ACBrNFe.ini global: nele a ACBr pode persistir
+        // dados sensíveis do certificado em texto claro.
+        $runtimeDir = storage_path('app/acbr-runtime');
+        if (!is_dir($runtimeDir) && !mkdir($runtimeDir, 0700, true) && !is_dir($runtimeDir)) {
+            $this->components->error('Não foi possível criar diretório ACBr privado.');
+            return self::FAILURE;
+        }
+        $runtimeIni = $runtimeDir.'/status-'.bin2hex(random_bytes(8)).'.ini';
+        $service = new ACBrNFeService(null, $runtimeIni);
         $company = CompanySetting::current();
 
         if ($company->state !== 'BA' || AppSetting::value('nfce', 'environment') !== 'homologation') {
@@ -108,7 +116,13 @@ final class ACBrNFCeStatus extends Command
             $this->components->error('Consulta falhou: '.$message);
             return self::FAILURE;
         } finally {
-            $service->close();
+            try {
+                $service->close();
+            } finally {
+                if (is_file($runtimeIni)) {
+                    @unlink($runtimeIni);
+                }
+            }
         }
     }
 }
