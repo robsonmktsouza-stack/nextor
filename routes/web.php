@@ -5,6 +5,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\FiscalController;
+use App\Http\Controllers\FiscalCodeCatalogController;
 use App\Http\Controllers\FiscalTaxRuleController;
 use App\Http\Controllers\FiscalTaxGroupController;
 use App\Http\Controllers\FiscalFcpRuleController;
@@ -40,6 +41,7 @@ Route::middleware('guest')->group(function () {
 });
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class,'logout'])->name('logout');
+    Route::get('/reference/fiscal-codes', FiscalCodeCatalogController::class)->name('reference.fiscal-codes');
     Route::get('/dashboard', DashboardController::class)->name('dashboard')->middleware('permission:dashboard');
     Route::get('/products',[ProductController::class,'index'])->name('products.index')->middleware('permission:products');
     Route::get('/products/create',[ProductController::class,'create'])->name('products.create')->middleware('permission:products');
