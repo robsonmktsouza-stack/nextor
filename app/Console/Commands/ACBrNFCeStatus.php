@@ -53,7 +53,7 @@ final class ACBrNFCeStatus extends Command
             return self::FAILURE;
         }
 
-        $schemas = (string) env('ACBr_NFE_SCHEMAS_PATH', '');
+        $schemas = (string) config('services.acbr_nfe.schemas_path', '');
         if ($schemas === '') {
             foreach ([
                 'C:/laragon/acbr/dep/Schemas/NFe',
