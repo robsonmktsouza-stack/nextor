@@ -105,7 +105,7 @@ final class NFCeFiscalProfileService
         $cofins = (string) ($tax['cofins_cst'] ?? $tax['cofins_cst_default'] ?? '');
 
         if ($cfop !== '' || $csosn !== '' || $pis !== '' || $cofins !== '') {
-            if (!preg_match('/^5\\d{3}$/', $cfop)
+            if (!preg_match('/^5\d{3}$/', $cfop)
                 || $csosn !== '102' || $pis !== '49' || $cofins !== '49') {
                 throw new RuntimeException(
                     'Os dados fiscais do produto estão incompletos ou não são suportados nesta NFC-e. Atualize a tributação configurada.'
