@@ -118,6 +118,10 @@ class FiscalController extends Controller
             'configuration'=>$this->configurationFor($tab),
             'fiscalEnabled'=>(bool)AppSetting::value('fiscal','enabled',false),
             'dateFormat'=>AppSetting::dateFormat(),
+            'nfcePreflightErrors'=>$fiscalDocumentJob->document_type==='nfce'
+                && $fiscalDocumentJob->status==='prepared'
+                    ? app(\\App\\Services\\Fiscal\\NFCePreflightService::class)->validate($fiscalDocumentJob)
+                    : [],
         ]);
     }
 
