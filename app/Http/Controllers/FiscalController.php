@@ -125,6 +125,23 @@ class FiscalController extends Controller
         ]);
     }
 
+    public function refreshNfceFiscalData(
+        FiscalDocumentJob $fiscalDocumentJob,
+        \App\Services\Fiscal\NFCeFiscalDataRefreshService $refresh
+    ) {
+        abort_unless($fiscalDocumentJob->document_type === 'nfce', 404);
+
+        try {
+            $refresh->refresh($fiscalDocumentJob);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->route('fiscal.show', $fiscalDocumentJob)
+                ->with('error', collect($e->errors())->flatten()->implode(' '));
+        }
+
+        return redirect()->route('fiscal.show', $fiscalDocumentJob)
+            ->with('success', 'Dados fiscais dos produtos atualizados nesta NFC-e. A venda e a numeração foram preservadas.');
+    }
+
     public function issueNfce(FiscalDocumentJob $fiscalDocumentJob, \App\Services\Fiscal\NFCePreflightService $preflight)
     {
         abort_unless($fiscalDocumentJob->document_type === 'nfce', 404);
