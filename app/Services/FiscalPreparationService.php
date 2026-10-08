@@ -126,6 +126,7 @@ class FiscalPreparationService
                         'tax_defaults'=>$item->product?->tax_defaults
                             ?? $item->service?->tax_defaults
                             ?? AppSetting::groupValues('tax',[]),
+                        'fiscal_tax_group_id'=>$item->product?->fiscal_tax_group_id ?? $item->service?->fiscal_tax_group_id,
                         'origin'=>$item->product?->origin,
                         'ncm'=>$item->product?->ncm,
                         'cest'=>$item->product?->cest,
