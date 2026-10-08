@@ -214,7 +214,31 @@ $origins=[
    </div>
 
    <div class="editor-panel tax-group-panel">
-     <label class="field"><span>Grupo tributário vinculado</span><input name="tax_group" value="{{ old('tax_group',$product->tax_group) }}" placeholder="Ex.: Revenda — Simples Nacional"></label>
+     <h3>Grupo tributário</h3>
+     <div class="editor-grid cols-12">
+       <label class="field col-8"><span>Tributação para produtos</span>
+         <select name="fiscal_tax_group_id">
+           <option value="">Sem grupo específico — usar padrão cadastrado, se houver</option>
+           @foreach($fiscalTaxGroups as $fiscalGroup)
+             <option value="{{ $fiscalGroup->id }}" @selected((string)old('fiscal_tax_group_id',$product->fiscal_tax_group_id)===(string)$fiscalGroup->id)>
+               {{ $fiscalGroup->name }}{{ $fiscalGroup->is_default ? ' · Padrão' : '' }}{{ !$fiscalGroup->is_active ? ' · Inativo' : '' }}
+             </option>
+           @endforeach
+         </select>
+       </label>
+       <div class="field col-4">
+         <span>Administração</span>
+         @if(auth()->user()->canAccess('settings'))
+           <a class="btn btn-secondary" href="{{ route('fiscal.tax-groups.index') }}">Gerenciar grupos</a>
+         @else
+           <p class="editor-help">O grupo é definido nas configurações fiscais.</p>
+         @endif
+       </div>
+     </div>
+     <p class="editor-help">O grupo determina a classificação a ser conferida antes de gerar o XML. Dados fiscais detalhados deste produto continuam disponíveis acima.</p>
+     @if($product->tax_group)
+       <p class="editor-help">Referência legada anterior: {{ $product->tax_group }}</p>
+     @endif
    </div>
  </section>
 
