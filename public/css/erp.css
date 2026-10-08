@@ -3880,13 +3880,27 @@ body.nfe-modal-open{overflow:hidden}
 .fiscal-code-field:after{content:'';position:absolute;top:14px;right:13px;width:14px;height:14px;pointer-events:none;opacity:.6;background:transparent;border:2px solid #728198;border-radius:50%;width:9px;height:9px}
 .fiscal-code-field:before{content:'';position:absolute;top:25px;right:10px;width:6px;height:2px;pointer-events:none;background:#728198;transform:rotate(48deg);z-index:1}
 .fiscal-code-field.open>.fiscal-code-search,.fiscal-code-field>.fiscal-code-search:focus{border-color:#78a7d8;box-shadow:0 0 0 2px #2877c715}
-.fiscal-code-results{position:absolute;top:calc(100% + 4px);left:0;width:max(100%,min(390px,calc(100vw - 40px)));max-width:min(520px,calc(100vw - 28px));max-height:290px;overflow:auto;padding:4px;border:1px solid #cfd8e2;border-radius:5px;background:#fff;box-shadow:0 12px 30px #17283a20;z-index:800}
+.fiscal-code-results{position:static;width:100%;min-width:0;max-width:100%;max-height:186px;overflow-y:auto;overflow-x:hidden;margin-top:5px;padding:4px;border:1px solid #cfd8e2;border-radius:5px;background:#fff;box-shadow:0 5px 14px #17283a10;box-sizing:border-box}
 .fiscal-code-results[hidden]{display:none!important}
-.fiscal-code-field.drop-up .fiscal-code-results{top:auto;bottom:calc(100% + 4px)}
+
 .fiscal-code-result{display:flex;align-items:baseline;gap:10px;width:100%;min-height:34px;border:0;border-radius:4px;padding:8px 10px;text-align:left;font-size:12px;font-weight:400;background:#fff;color:#3c4d61;cursor:pointer}
 .fiscal-code-result strong{flex:0 0 43px;color:#2c638c;font-weight:700;font-variant-numeric:tabular-nums}
 .fiscal-code-result span{min-width:0;white-space:normal;line-height:1.4}
 .fiscal-code-result:hover,.fiscal-code-result.active{background:#ebf4fc;color:#1d5484}
 .fiscal-code-result.manual strong{flex:0 0 auto}
 .fiscal-code-empty{padding:10px;font-size:11px;color:#8793a2;font-weight:400;margin:0}
-@media(max-width:760px){.fiscal-code-results{width:100%;min-width:100%;max-width:min(420px,calc(100vw - 28px))}}
+
+
+/* Em formulários com seis códigos na mesma linha, dar espaço para a descrição. */
+.editor-grid.cols-12>.field.col-2:has(>.fiscal-code-field){grid-column:span 3}
+@media(max-width:1180px){
+  .editor-grid.cols-12>.field.col-2:has(>.fiscal-code-field){grid-column:span 6}
+}
+@media(max-width:760px){
+  .editor-grid.cols-12>.field.col-2:has(>.fiscal-code-field){grid-column:1 / -1}
+}
+/* A lista faz parte do fluxo: abre o espaço necessário sem cobrir impostos. */
+.fiscal-code-field.open{z-index:auto}
+.fiscal-code-result{padding:7px 9px;min-height:32px;gap:8px}
+.fiscal-code-result strong{flex:0 0 44px}
+.fiscal-code-field>.fiscal-code-search{max-width:100%}
