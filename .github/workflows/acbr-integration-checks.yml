@@ -35,6 +35,7 @@ jobs:
             database/migrations/2026_10_08_201000_create_fiscal_tax_groups_table.php \
             database/migrations/2026_10_08_202000_link_fiscal_tax_groups_to_catalog.php \
             app/Services/Fiscal/FiscalTaxRuleResolver.php \
+            app/Services/Fiscal/NFCeFiscalProfileService.php \
             app/Services/Fiscal/NFCeTaxRuleApplicationService.php \
             app/Http/Controllers/FiscalTaxRuleController.php \
             database/migrations/2026_10_08_200000_create_fiscal_tax_rules_table.php \
@@ -52,6 +53,7 @@ jobs:
             app/Console/Commands/ACBrNFCeStatus.php \
             tests/Feature/NFCeIniBuilderTest.php \
             tests/Feature/FiscalTaxRuleResolverTest.php \
+            tests/Feature/NFCeFiscalProfileServiceTest.php \
             tests/Unit/NFCeProtocolXmlServiceTest.php \
             tests/Unit/NFCeTaxGroupTranslatorTest.php \
             tests/Unit/FiscalCodeCatalogTest.php \
@@ -73,6 +75,7 @@ jobs:
           php artisan key:generate --force
       - name: Validate registered routes and compiled Blade syntax
         run: |
+          php artisan route:list --path=fiscal/rules
           php artisan route:list --path=fiscal/fcp
           php artisan route:list --path=reference/fiscal-codes
           php artisan route:list --path=fiscal/tax-groups
