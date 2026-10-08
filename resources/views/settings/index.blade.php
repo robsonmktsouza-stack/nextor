@@ -543,9 +543,14 @@ foreach($primaryTabs as $key=>$item){
     <section class="editor-panel settings-panel">
       <div class="settings-panel-head">
         <div><h2>Dados tributários</h2><p>Padrões de preenchimento para produtos, serviços e documentos. Estes valores não substituem a análise da operação.</p></div>
-        <a class="btn btn-secondary" href="{{ route('fiscal.tax-rules.index') }}">
-          @include('partials.icon',['name'=>'layers','size'=>15]) Gerenciar regras fiscais
-        </a>
+        <div class="row" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <a class="btn btn-secondary" href="{{ route('fiscal.tax-groups.index') }}">
+            @include('partials.icon',['name'=>'layers','size'=>15]) Grupos de tributação
+          </a>
+          <a class="btn btn-secondary" href="{{ route('fiscal.tax-rules.index') }}">
+            @include('partials.icon',['name'=>'tag','size'=>15]) Regras por produto / NCM
+          </a>
+        </div>
         
       </div>
       <div class="editor-grid cols-12 settings-grid">
