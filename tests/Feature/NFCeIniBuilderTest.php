@@ -65,7 +65,7 @@ final class NFCeIniBuilderTest extends TestCase
         self::assertStringContainsString('dhEmi=', $ini);
         self::assertStringContainsString('orig=0', $ini);
         self::assertStringNotContainsString('dEmi=', $ini);
-        self::assertStringContainsString('mod=65', $ini);
+        self::assertStringContainsString('Modelo=65', $ini);
         self::assertStringContainsString('tpAmb=2', $ini);
         self::assertStringContainsString('[Produto001]', $ini);
         self::assertStringContainsString('CFOP=5102', $ini);
