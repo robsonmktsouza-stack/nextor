@@ -75,7 +75,27 @@ class PdvController extends Controller
             ->limit(12)
             ->get();
 
+        // A última venda deve vir do banco: flash/session é consumida na
+        // visualização do comprovante e não sobrevive ao retorno ao PDV.
+        $lastCompletedPdvSale=Sale::query()
+            ->where('source','pdv')
+            ->where('operation_type','sale')
+            ->where('status','completed')
+            ->where('user_id',$request->user()->id)
+            ->latest('id')
+            ->first(['id','total','completed_at','created_at']);
+
+        $lastPdvNfceDocument=$lastCompletedPdvSale
+            ? FiscalDocumentJob::query()
+                ->where('sale_id',$lastCompletedPdvSale->id)
+                ->where('document_type','nfce')
+                ->latest('id')
+                ->first()
+            : null;
+
         return view('pdv.index',[
+            'lastCompletedPdvSale'=>$lastCompletedPdvSale,
+            'lastPdvNfceDocument'=>$lastPdvNfceDocument,
             'customers'=>Customer::query()
                 ->where('is_customer',true)
                 ->orderBy('name')
