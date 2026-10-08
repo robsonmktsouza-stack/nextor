@@ -5,12 +5,16 @@ namespace App\Services\Fiscal;
 use App\Models\AppSetting;
 use App\Models\CompanySetting;
 use App\Models\FiscalDocumentJob;
+use App\Models\FiscalTaxGroup;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 final class NFCeTaxRuleApplicationService
 {
-    public function __construct(private readonly FiscalTaxRuleResolver $resolver) {}
+    public function __construct(
+        private readonly FiscalTaxRuleResolver $resolver,
+        private readonly NFCeTaxGroupTranslator $groups,
+    ) {}
 
     /**
      * Atualiza somente o snapshot tributário de uma NFC-e preparada, sem
@@ -44,31 +48,69 @@ final class NFCeTaxRuleApplicationService
                 if (($item['item_type'] ?? '') !== 'product') {
                     throw new RuntimeException('Regras iniciais disponíveis apenas para produtos.');
                 }
-                $rule = $this->resolver->resolve('nfce', 'BA', 'BA', '1', $item, $date);
-                if (!$rule) {
-                    throw new RuntimeException('Item '.($index + 1).': nenhuma regra fiscal ativa encontrada para o produto/NCM.');
-                }
-                // Nunca mascarar um grupo tributário que o emissor ainda não
-                // implementa. Guardar a regra é diferente de poder transmitir.
-                if (!preg_match('/^5\d{3}$/', $rule->cfop)
-                    || $rule->csosn !== '102'
-                    || $rule->pis_cst !== '49'
-                    || $rule->cofins_cst !== '49') {
-                    throw new RuntimeException('Item '.($index + 1).': a regra '.$rule->name.' não é compatível com o emissor NFC-e atual (CFOP 5xxx, CSOSN 102 e PIS/COFINS 49).');
+                $group = null;
+                $rule = null;
+                $explicitId = (int) ($item['fiscal_tax_group_id'] ?? 0);
+
+                if ($explicitId > 0) {
+                    // Grupo explicitamente vinculado ao produto: não aceitar
+                    // substituição silenciosa por grupo padrão ou regra genérica.
+                    $group=FiscalTaxGroup::query()->find($explicitId);
+                    if (!$group) {
+                        throw new RuntimeException('Item '.($index+1).': grupo tributário vinculado não existe.');
+                    }
+                } else {
+                    // Regras específicas por produto/NCM prevalecem sobre o
+                    // grupo padrão, conforme o cadastro fiscal anterior.
+                    $rule=$this->resolver->resolve('nfce','BA','BA','1',$item,$date);
+                    if (!$rule) {
+                        $defaults=FiscalTaxGroup::query()
+                            ->where('kind','products')->where('is_active',true)
+                            ->where('is_default',true)->limit(2)->get();
+                        if ($defaults->count()>1) {
+                            throw new RuntimeException('Existem grupos tributários padrão conflitantes para produtos.');
+                        }
+                        $group=$defaults->first();
+                    }
                 }
 
-                $tax = is_array($item['tax_defaults'] ?? null) ? $item['tax_defaults'] : [];
-                $item['tax_defaults'] = array_replace($tax, [
-                    'cfop_outbound_internal' => $rule->cfop,
-                    'nfce_cfop' => $rule->cfop,
-                    'cfop' => $rule->cfop,
-                    'icms_csosn' => $rule->csosn,
-                    'pis_cst' => $rule->pis_cst,
-                    'cofins_cst' => $rule->cofins_cst,
-                    'fiscal_rule_id' => $rule->id,
-                    'fiscal_rule_revision' => $rule->revision,
-                    'fiscal_rule_name' => $rule->name,
-                ]);
+                $tax=is_array($item['tax_defaults'] ?? null) ? $item['tax_defaults'] : [];
+                // Ao reaplicar, não preservar identificadores de uma regra
+                // anterior no snapshot do documento.
+                unset(
+                    $tax['fiscal_rule_id'],$tax['fiscal_rule_revision'],$tax['fiscal_rule_name'],
+                    $tax['fiscal_group_id'],$tax['fiscal_group_revision'],$tax['fiscal_group_name']
+                );
+
+                if ($group) {
+                    try {
+                        $classification=$this->groups->translate($group);
+                    } catch (RuntimeException $e) {
+                        throw new RuntimeException('Item '.($index+1).': '.$e->getMessage(),0,$e);
+                    }
+                } elseif ($rule) {
+                    if (!preg_match('/^5\d{3}$/',$rule->cfop)
+                        || $rule->csosn!=='102'
+                        || $rule->pis_cst!=='49'
+                        || $rule->cofins_cst!=='49') {
+                        throw new RuntimeException('Item '.($index+1).': regra '.$rule->name.' incompatível com a NFC-e atual.');
+                    }
+                    $classification=[
+                        'cfop_outbound_internal'=>$rule->cfop,
+                        'nfce_cfop'=>$rule->cfop,
+                        'cfop'=>$rule->cfop,
+                        'icms_csosn'=>$rule->csosn,
+                        'pis_cst'=>$rule->pis_cst,
+                        'cofins_cst'=>$rule->cofins_cst,
+                        'fiscal_rule_id'=>$rule->id,
+                        'fiscal_rule_revision'=>$rule->revision,
+                        'fiscal_rule_name'=>$rule->name,
+                    ];
+                } else {
+                    throw new RuntimeException('Item '.($index+1).': nenhum grupo ou regra fiscal ativa corresponde ao produto/NCM.');
+                }
+
+                $item['tax_defaults']=array_replace($tax,$classification);
             }
             unset($item);
             $source['items'] = $items;
