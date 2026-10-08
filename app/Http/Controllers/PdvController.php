@@ -621,6 +621,67 @@ class PdvController extends Controller
         );
     }
 
+    /**
+     * Recupera a preparação fiscal de uma venda já finalizada pelo PDV.
+     * Não conclui outra venda nem movimenta estoque/financeiro.
+     */
+    public function prepareNfce(Request $request, Sale $sale, \App\Services\FiscalPreparationService $fiscalPreparation)
+    {
+        abort_unless($request->user()?->canAccess('fiscal'), 403);
+        abort_unless($sale->source === 'pdv', 404);
+
+        $existing = FiscalDocumentJob::query()
+            ->where('sale_id', $sale->id)
+            ->where('document_type', 'nfce')
+            ->first();
+        if ($existing) {
+            return redirect()->route('fiscal.show', $existing);
+        }
+
+        if ($sale->status !== 'completed' || $sale->operation_type !== 'sale') {
+            return redirect()->route('pdv.receipt', $sale)
+                ->with('error', 'A NFC-e só pode ser preparada para uma venda concluída.');
+        }
+
+        if (!(bool) AppSetting::value('fiscal', 'enabled', false)
+            || !(bool) AppSetting::value('nfce', 'enabled', false)) {
+            return redirect()->route('pdv.receipt', $sale)
+                ->with('error', 'Habilite Fiscal e NFC-e nas configurações antes de preparar este documento.');
+        }
+
+        $sale->loadMissing('items');
+        if ($sale->items->isEmpty() || !$sale->items->every(
+            fn ($item) => $item->item_type === 'product' && $item->product_id
+        )) {
+            return redirect()->route('pdv.receipt', $sale)
+                ->with('error', 'Esta venda contém itens que não podem ser emitidos como NFC-e de produtos.');
+        }
+
+        try {
+            // Idempotência garantida por prepareForSale: verifica documento por
+            // venda antes de reservar outro número de NFC-e.
+            $fiscalPreparation->prepareForSale($sale);
+        } catch (\Throwable $error) {
+            \Illuminate\Support\Facades\Log::error('Falha ao recuperar preparação da NFC-e do PDV', [
+                'sale_id' => $sale->id,
+                'error' => $error->getMessage(),
+            ]);
+
+            return redirect()->route('pdv.receipt', $sale)
+                ->with('error', 'Não foi possível preparar a NFC-e desta venda. Consulte o log do NEXTOR.');
+        }
+
+        $document = FiscalDocumentJob::query()
+            ->where('sale_id', $sale->id)
+            ->where('document_type', 'nfce')
+            ->first();
+
+        return $document
+            ? redirect()->route('fiscal.show', $document)
+            : redirect()->route('pdv.receipt', $sale)
+                ->with('error', 'A NFC-e não foi preparada. Confira se o módulo fiscal está habilitado.');
+    }
+
     public function receipt(Sale $sale)
     {
         abort_unless($sale->source==='pdv',404);
