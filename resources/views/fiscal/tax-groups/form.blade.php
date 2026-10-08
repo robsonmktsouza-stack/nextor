@@ -107,10 +107,12 @@
     </div>
   </section>
 
+  @include('fiscal.tax-groups._advanced')
+
   <section class="editor-panel settings-panel">
-    <div class="settings-panel-head"><div><h2>Variações e informações</h2><p>Variações por UF, NCM e FCP serão mantidas como regras específicas. Não presumimos alíquotas por estado.</p></div></div>
+    <div class="settings-panel-head"><div><h2>Variações e informações</h2><p>Exceções por estado, município e FCP estão disponíveis nas seções anteriores. Não presumimos alíquotas por UF.</p></div></div>
     <div class="inline-note">
-      Para exceções por produto/NCM ou UF use o cadastro de <a href="{{ route('fiscal.tax-rules.index') }}">Regras fiscais</a>.
+      Para exceções específicas por produto/NCM também existe o cadastro de <a href="{{ route('fiscal.tax-rules.index') }}">Regras fiscais</a>.
       A aplicação dessas exceções à NF-e interestadual, FCP e IBS de outras UFs será liberada somente quando os respectivos cálculos estiverem implementados e testados.
     </div>
     <label class="field"><span>Observações e fundamento para conferência</span>
