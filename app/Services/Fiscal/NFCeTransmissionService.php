@@ -152,7 +152,7 @@ final class NFCeTransmissionService
         }
 
         $certPath = Storage::disk('local')->path($company->certificate_path);
-        $schemas = (string) env('ACBr_NFE_SCHEMAS_PATH', '');
+        $schemas = (string) config('services.acbr_nfe.schemas_path', '');
         if ($schemas === '') {
             foreach ([
                 'C:/laragon/acbr/dep/Schemas/NFe',
