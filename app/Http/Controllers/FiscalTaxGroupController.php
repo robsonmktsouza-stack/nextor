@@ -81,7 +81,7 @@ final class FiscalTaxGroupController extends Controller
             if ($data['is_default']) {
                 FiscalTaxGroup::query()
                     ->where('kind',$data['kind'])
-                    ->whereKeyNot($group->id)
+                    ->where('id','!=',$group->id)
                     ->update(['is_default'=>false]);
             }
             $data['revision']=$group->revision+1;
