@@ -153,6 +153,102 @@ final class NFCeTransmissionService
         }
     }
 
+    /**
+     * Reconcilia um envio incerto SEM transmiti-lo novamente.
+     * Consulta exclusivamente a chave do XML assinado já armazenado.
+     */
+    public function consult(int $id): void
+    {
+        $lock = Cache::lock('nextor:nfce:'.$id, 300);
+        if (!$lock->get()) {
+            return;
+        }
+
+        try {
+            $job = FiscalDocumentJob::query()->findOrFail($id);
+            if ($job->document_type !== 'nfce' || $job->status !== 'pending'
+                || preg_match('/^\d{44}$/', (string) $job->access_key) !== 1) {
+                return;
+            }
+            $signedPath = 'fiscal/nfce/'.$job->id.'/signed.xml';
+            if (!Storage::disk('local')->exists($signedPath)) {
+                $job->update(['error_message' => 'XML assinado não encontrado; consultar manualmente antes de alterar o documento.']);
+                return;
+            }
+            $signedXml = Storage::disk('local')->get($signedPath);
+            $signedKey = $this->protocolXml->verifySigned($signedXml, $job);
+            if (!hash_equals($signedKey, $job->access_key)) {
+                $job->update(['error_message' => 'Chave salva não corresponde ao XML assinado; requer conciliação.']);
+                return;
+            }
+
+            $runtimeDir = storage_path('app/acbr-runtime');
+            if (!is_dir($runtimeDir) && !mkdir($runtimeDir, 0700, true) && !is_dir($runtimeDir)) {
+                throw new RuntimeException('Diretório ACBr temporário indisponível.');
+            }
+            $runtimeIni = $runtimeDir.'/consulta-'.$job->id.'-'.bin2hex(random_bytes(8)).'.ini';
+            $service = new ACBrNFeService(null, $runtimeIni);
+            $company = CompanySetting::current();
+            $password = (string) $company->certificate_password;
+            $csc = (string) AppSetting::value('nfce', 'csc_token', '');
+
+            try {
+                $this->configure($service, $company, $job, $password, $csc);
+                $raw = $service->consultByKey($signedKey);
+                $responsePath = 'fiscal/nfce/'.$job->id.'/consult-response.ini';
+                if (!Storage::disk('local')->put($responsePath, $raw)) {
+                    throw new RuntimeException('Falha ao arquivar consulta da SEFAZ.');
+                }
+                $data = $this->responses->parseConsult($raw);
+                $job->update(['response_path' => $responsePath, 'processed_at' => now()]);
+
+                if ($this->responses->authorized($data)) {
+                    if (!hash_equals($signedKey, $data['key'])) {
+                        throw new RuntimeException('Chave da consulta difere do XML assinado.');
+                    }
+                    $xmlPath = $signedPath;
+                    $warning = null;
+                    try {
+                        $xml = $this->protocolXml->buildAuthorized($signedXml, $data);
+                        $authorizedPath = 'fiscal/nfce/'.$job->id.'/authorized.xml';
+                        if (!Storage::disk('local')->put($authorizedPath, $xml)) {
+                            throw new RuntimeException('Falha ao armazenar nfeProc.');
+                        }
+                        $xmlPath = $authorizedPath;
+                    } catch (Throwable $error) {
+                        $warning = 'Autorizada, mas não foi possível montar XML protocolado: '.$error->getMessage();
+                    }
+                    $job->update([
+                        'status' => 'authorized',
+                        'protocol' => $data['protocol'],
+                        'xml_path' => $xmlPath,
+                        'authorized_at' => now(),
+                        'processed_at' => now(),
+                        'error_message' => $warning,
+                    ]);
+                } else {
+                    $job->update([
+                        'error_message' => 'Consulta SEFAZ: '.($data['cstat'] ?: 'sem status').' - '.$data['reason'].
+                            '. Não retransmita sem solucionar a situação.',
+                    ]);
+                }
+            } catch (Throwable $error) {
+                $message = str_replace(array_filter([$password, $csc]), '[protegido]', $error->getMessage());
+                $job->update(['error_message' => mb_substr($message, 0, 1800), 'processed_at' => now()]);
+            } finally {
+                try {
+                    $service->close();
+                } finally {
+                    if (is_file($runtimeIni)) {
+                        @unlink($runtimeIni);
+                    }
+                }
+            }
+        } finally {
+            $lock->release();
+        }
+    }
+
     private function configure(
         ACBrNFeService $service,
         CompanySetting $company,
