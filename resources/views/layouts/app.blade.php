@@ -5,9 +5,11 @@
 <title>@yield('title','Painel') — {{ config('app.name') }}</title>
 <link rel="stylesheet" href="{{ asset('css/erp.css') }}">
 <script defer src="{{ asset('js/erp.js') }}"></script>
+<script defer src="{{ asset('js/fiscal-codes.js') }}"></script>
 </head><body
   class="{{ \App\Models\AppSetting::value('system','compact_mode',true) ? 'system-compact' : 'system-comfortable' }}"
   data-live-search-delay="{{ \App\Models\AppSetting::value('system','search_delay',240) }}"
+  data-fiscal-catalog-url="{{ route('reference.fiscal-codes') }}"
   data-confirm-destructive="{{ \App\Models\AppSetting::value('system','confirm_destructive_actions',true) ? '1' : '0' }}"
   data-show-tutorials="{{ \App\Models\AppSetting::value('system','show_tutorials',true) ? '1' : '0' }}">
 <div class="app-root" id="appRoot">
