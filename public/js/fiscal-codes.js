@@ -140,7 +140,7 @@
     const display=code=>{
       if(!code)return '';
       const description=entries[code]||'Código informado (conferir)';
-      const brief=description.length>38 ? description.slice(0,36).trimEnd()+'…' : description;
+      const brief=description.length>30 ? description.slice(0,28).trimEnd()+'…' : description;
       search.title=code+' — '+description;
       return code+' — '+brief;
     };
