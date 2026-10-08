@@ -5,7 +5,7 @@
 @endphp
 
 <section class="editor-panel settings-panel">
-  <div class="settings-panel-head"><div><h2>Geral — benefícios e CFOP por destino</h2><p>Complementos do perfil fiscal, independentes do cadastro básico da empresa.</p></div></div>
+  <div class="settings-panel-head"><div><h2>CFOP e benefício fiscal</h2></div></div>
   <div class="editor-grid cols-12 settings-grid">
     <label class="field col-3"><span>Código de benefício fiscal na UF</span>
       <input maxlength="20" name="tax_config[fiscal_benefit_code]" value="{{ $val('fiscal_benefit_code') }}" placeholder="cBenef">
@@ -15,14 +15,14 @@
     </label>
     <div class="field col-6"><span>Comportamento interestadual</span>
       <label class="settings-switch"><input type="checkbox" name="tax_config[force_interstate_cfop]" value="1" @checked($val('force_interstate_cfop'))>
-        <span><strong>Forçar CFOP fora da UF</strong><small>Somente quando houver operação interestadual suportada; não altera a NFC-e interna.</small></span>
+        <span><strong>Forçar CFOP fora da UF</strong></span>
       </label>
     </div>
   </div>
 </section>
 
 <section class="editor-panel settings-panel">
-  <div class="settings-panel-head"><div><h2>ICMS — FCP diferido</h2><p>Complemento à situação tributária e ao crédito do Simples Nacional.</p></div></div>
+  <div class="settings-panel-head"><div><h2>FCP</h2></div></div>
   <div class="editor-grid cols-12 settings-grid">
     <label class="field col-3"><span>Alíquota de diferimento FCP (%)</span>
       <input type="number" name="tax_config[fcp_deferral_rate]" step="0.0001" min="0" max="100" value="{{ $val('fcp_deferral_rate') }}">
@@ -34,7 +34,7 @@
 </section>
 
 <section class="editor-panel settings-panel">
-  <div class="settings-panel-head"><div><h2>PIS / COFINS — modalidades de cálculo e ST</h2><p>Selecione o tipo de cálculo e informe alíquotas. Os valores só serão transmitidos após implementar os grupos XML correspondentes.</p></div></div>
+  <div class="settings-panel-head"><div><h2>Tipos de cálculo — PIS / COFINS</h2></div></div>
   <div class="editor-grid cols-12 settings-grid">
     @foreach(['pis'=>'PIS','cofins'=>'COFINS'] as $prefix=>$label)
       <label class="field col-3"><span>Tipo de cálculo {{ $label }}</span>
@@ -64,7 +64,7 @@
 </section>
 
 <section class="editor-panel settings-panel">
-  <div class="settings-panel-head"><div><h2>IBS / CBS — diferimentos e reduções</h2><p>Campos separados para CBS, IBS estadual e IBS municipal, conforme as informações que você apresentou do eGestor.</p></div></div>
+  <div class="settings-panel-head"><div><h2>Diferimentos e reduções — IBS / CBS</h2></div></div>
   <div class="editor-grid cols-12 settings-grid">
     @foreach([
       ['cbs_deferral_rate','Diferimento CBS (%)'],
@@ -78,11 +78,10 @@
       </label>
     @endforeach
   </div>
-  <p class="editor-help">Os campos existentes de alíquota CBS, redução CBS, alíquota IBS UF e alíquota IBS municipal permanecem na seção anterior. Nenhuma alíquota será preenchida automaticamente.</p>
 </section>
 
 <section class="editor-panel settings-panel">
-  <div class="settings-panel-head"><div><h2>IBS — municípios do próprio estado</h2><p>Adicione grupos por código IBGE do município e seus percentuais específicos.</p></div></div>
+  <div class="settings-panel-head"><div><h2>IBS municipal — exceções por município</h2></div></div>
   <div data-variation-list="municipal">
     @foreach($municipalVariations as $rowIndex=>$row)
       <div class="editor-grid cols-12 settings-grid" data-variation-row="municipal" style="margin-bottom:10px">
@@ -107,7 +106,7 @@
 </section>
 
 <section class="editor-panel settings-panel">
-  <div class="settings-panel-head"><div><h2>Variações para vendas para outros estados</h2><p>Exceções parametrizadas por UF de destino. Não são usadas pela NFC-e interna.</p></div></div>
+  <div class="settings-panel-head"><div><h2>Variações por estado</h2></div></div>
   <div data-variation-list="state">
     @foreach($stateVariations as $rowIndex=>$row)
       <div class="editor-grid cols-12 settings-grid" data-variation-row="state" style="margin-bottom:10px">
@@ -140,7 +139,7 @@
 </section>
 
 <section class="editor-panel settings-panel">
-  <div class="settings-panel-head"><div><h2>Dados ANP — combustíveis</h2><p>Somente para produtos enquadrados na obrigação de informar a ANP.</p></div></div>
+  <div class="settings-panel-head"><div><h2>Combustíveis — ANP</h2></div></div>
   <div class="editor-grid cols-12 settings-grid">
     <label class="field col-3"><span>Código ANP</span><input name="tax_config[anp_code]" maxlength="12" inputmode="numeric" value="{{ $val('anp_code') }}" placeholder="Código oficial"></label>
     <label class="field col-6"><span>Descrição conforme ANP</span><input name="tax_config[anp_description]" maxlength="190" value="{{ $val('anp_description') }}"></label>
@@ -154,7 +153,7 @@
 </section>
 
 <section class="editor-panel settings-panel">
-  <div class="settings-panel-head"><div><h2>Serviços — ISS</h2><p>Complementa o código de exigibilidade do ISS configurado acima.</p></div></div>
+  <div class="settings-panel-head"><div><h2>Serviços — ISS</h2></div></div>
   <div class="editor-grid cols-12 settings-grid">
     <div class="field col-4"><span>Incentivo fiscal</span>
       <label class="settings-switch"><input type="checkbox" name="tax_config[iss_incentive]" value="1" @checked($val('iss_incentive'))>
