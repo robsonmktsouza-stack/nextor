@@ -103,6 +103,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/fiscal/nfe/natures',[OperationNatureController::class,'store'])->name('fiscal.nfe.natures.store')->middleware('permission:fiscal');
     Route::put('/fiscal/nfe/natures/{operationNature}',[OperationNatureController::class,'update'])->name('fiscal.nfe.natures.update')->middleware('permission:fiscal');
 
+    Route::post('/fiscal/{fiscalDocumentJob}/refresh-nfce-fiscal-data',[FiscalController::class,'refreshNfceFiscalData'])->name('fiscal.nfce.refresh-data')->middleware('permission:fiscal');
     Route::post('/fiscal/{fiscalDocumentJob}/emit-nfce',[FiscalController::class,'issueNfce'])->name('fiscal.nfce.emit')->middleware('permission:fiscal');
     Route::post('/fiscal/{fiscalDocumentJob}/consult-nfce',[FiscalController::class,'consultNfce'])->name('fiscal.nfce.consult')->middleware('permission:fiscal');
     Route::get('/fiscal/{fiscalDocumentJob}/xml',[FiscalController::class,'downloadNfceXml'])->name('fiscal.nfce.xml')->middleware('permission:fiscal');
