@@ -24,11 +24,11 @@ class FiscalPreparationService
                 return;
             }
 
-            $pdvAuto=(bool)AppSetting::value('pdv','auto_nfce',false);
-            $nfceAuto=(bool)AppSetting::value('nfce','auto_from_pdv',false);
-
-            if(($pdvAuto || $nfceAuto) && (bool)AppSetting::value('nfce','enabled',false)) {
-                $this->prepare($sale,'nfce','nfce','next_number');
+            // A NFC-e é criada a partir da venda do PDV independentemente
+            // da transmissão automática. Isso permite revisão e emissão
+            // manual pelo mesmo fluxo fiscal, sem duplicar venda/numeração.
+            if ((bool) AppSetting::value('nfce', 'enabled', false)) {
+                $this->prepare($sale, 'nfce', 'nfce', 'next_number');
             }
 
             return;
