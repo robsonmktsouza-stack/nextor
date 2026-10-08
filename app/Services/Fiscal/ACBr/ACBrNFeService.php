@@ -52,6 +52,7 @@ final class ACBrNFeService
             int NFE_Nome(void *libHandle, char *sNome, int *esTamanho);
             int NFE_Versao(void *libHandle, char *sVersao, int *esTamanho);
             int NFE_UltimoRetorno(void *libHandle, char *sMensagem, int *esTamanho);
+            int NFE_ConfigLerValor(void *libHandle, const char *eSessao, const char *eChave, char *sValor, int *esTamanho);
         CDEF;
 
         $this->lib = FFI::cdef($header, $path);
@@ -105,6 +106,19 @@ final class ACBrNFeService
         return FFI::string($buffer);
     }
 
+    public function readConfig(string $section, string $key): string
+    {
+        $this->initialize();
+        $size = FFI::new('int');
+        $size->cdata = 4096;
+        $buffer = FFI::new('char[4096]');
+        $status = $this->lib->NFE_ConfigLerValor($this->handle, $section, $key, $buffer, FFI::addr($size));
+        if ($status !== 0) {
+            throw new RuntimeException("ACBr NFE_ConfigLerValor falhou ({$status}): ".$this->lastReturn());
+        }
+        return FFI::string($buffer);
+    }
+
     private function lastReturn(): string
     {
         if ($this->lib === null) {
@@ -119,7 +133,7 @@ final class ACBrNFeService
                 $capacity = $size->cdata + 1;
                 $buffer = FFI::new("char[{$capacity}]");
                 $size->cdata = $capacity;
-                $status = $this->lib->NFE_UltimoRetorno($buffer, FFI::addr($size));
+                $status = $this->lib->NFE_UltimoRetorno($this->handle, $buffer, FFI::addr($size));
             }
             $message = FFI::string($buffer);
             return $message !== '' ? $message : "NFE_UltimoRetorno retornou {$status} sem mensagem";
