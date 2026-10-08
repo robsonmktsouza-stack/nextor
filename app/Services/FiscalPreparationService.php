@@ -116,6 +116,10 @@ class FiscalPreparationService
                         'product_id'=>$item->product_id,
                         'service_id'=>$item->service_id,
                         'name'=>$item->product_name,
+                        'sku'=>$item->product_sku,
+                        'unit'=>$item->product?->unit,
+                        'discount'=>(string)$item->discount,
+                        'gtin'=>$item->product?->ean_gtin,
                         'quantity'=>(string)$item->quantity,
                         'unit_price'=>(string)$item->unit_price,
                         'line_total'=>(string)$item->line_total,
@@ -133,6 +137,7 @@ class FiscalPreparationService
                     ])->values()->all(),
                     'payments'=>$sale->payments->map(fn($payment)=>[
                         'payment_method'=>$payment->payment_method,
+                        'payment_kind'=>\App\Models\PaymentMethod::query()->where('code',$payment->payment_method)->value('kind'),
                         'amount'=>(string)$payment->amount,
                         'due_date'=>optional($payment->due_date)->toDateString(),
                         'integration_type'=>$payment->integration_type,
