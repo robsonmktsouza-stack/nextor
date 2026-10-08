@@ -643,7 +643,14 @@ class PdvController extends Controller
 
         session()->keep(['pdv_last_sale','pdv_change']);
 
+        $nfceDocument=FiscalDocumentJob::query()
+            ->where('sale_id',$sale->id)
+            ->where('document_type','nfce')
+            ->latest('id')
+            ->first();
+
         return view('pdv.receipt',[
+            'nfceDocument'=>$nfceDocument,
             'sale'=>$sale,
             'paymentLabels'=>$paymentLabels,
             'paymentKinds'=>$paymentKinds,
