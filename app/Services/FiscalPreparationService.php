@@ -90,7 +90,7 @@ class FiscalPreparationService
                 unset($safeSettings[$secretKey]);
             }
 
-            FiscalDocumentJob::query()->create([
+            $job = FiscalDocumentJob::query()->create([
                 'document_type'=>$documentType,
                 'sale_id'=>$sale->id,
                 'status'=>'prepared',
@@ -154,6 +154,19 @@ class FiscalPreparationService
                 ],
                 'prepared_at'=>now(),
             ]);
+
+            if ($documentType === 'nfce') {
+                // As regras configuradas são aplicadas ao documento ao prepará-lo.
+                // Não depende de conferência ou botão do operador.
+                try {
+                    app(\App\Services\Fiscal\NFCeTaxRuleApplicationService::class)
+                        ->apply($job->id);
+                } catch (\RuntimeException $e) {
+                    // A venda já foi concluída. Preservar o documento reservado,
+                    // com pendência fiscal; o preflight impedirá a transmissão.
+                    $job->update(['error_message' => 'Configuração fiscal: '.$e->getMessage()]);
+                }
+            }
         },3);
     }
 }
