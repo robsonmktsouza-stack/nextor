@@ -99,7 +99,7 @@ final class NFCeFiscalProfileServiceTest extends TestCase
     {
         $this->createRule(['valid_from' => '2027-01-01']);
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Nenhuma regra fiscal ativa');
+        $this->expectExceptionMessage('Configure o grupo tributário');
         app(NFCeFiscalProfileService::class)->classify($this->item(), '2026-10-08');
     }
 
@@ -146,6 +146,34 @@ final class NFCeFiscalProfileServiceTest extends TestCase
             'Grupo padrão',
             app(NFCeFiscalProfileService::class)->classify($this->item(), '2026-10-08')['origin']
         );
+    }
+
+    public function test_explicit_legacy_product_tax_values_are_preserved_without_new_group(): void
+    {
+        $item = $this->item();
+        $item['tax_defaults'] = [
+            'cfop_outbound_internal' => '5102',
+            'icms_csosn' => '102',
+            'pis_cst' => '49',
+            'cofins_cst' => '49',
+        ];
+
+        $result = app(NFCeFiscalProfileService::class)->classify($item, '2026-10-08');
+
+        self::assertSame('Cadastro fiscal', $result['origin']);
+        self::assertSame('product', $result['tax']['fiscal_config_source']);
+        self::assertSame('5102', $result['tax']['cfop_outbound_internal']);
+    }
+
+    public function test_partial_legacy_tax_values_do_not_generate_guessed_codes(): void
+    {
+        $item = $this->item();
+        $item['tax_defaults'] = ['icms_csosn' => '102'];
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('incompletos');
+
+        app(NFCeFiscalProfileService::class)->classify($item, '2026-10-08');
     }
 
     public function test_missing_ncm_blocks_classification(): void
