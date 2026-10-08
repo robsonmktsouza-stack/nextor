@@ -30,7 +30,7 @@
     && !input.hasAttribute('data-no-fiscal-catalog') && fieldType(input.name)
   );
 
-  if(!codeInputs(document).length) return;
+  // Não encerrar aqui: algumas telas fiscais criam campos apenas ao abrir um modal.
   let catalogs=null;
   let request=null;
 
