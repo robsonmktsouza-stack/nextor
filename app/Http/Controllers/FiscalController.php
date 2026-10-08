@@ -175,6 +175,33 @@ class FiscalController extends Controller
         return back()->with('success', 'Consulta da NFC-e enviada à fila. A nota não será retransmitida.');
     }
 
+    /**
+     * Reprocessa SOMENTE o arquivo autorizado com os registros originais.
+     * Nunca envia novamente a NFC-e à SEFAZ.
+     */
+    public function recoverNfceXml(
+        FiscalDocumentJob $fiscalDocumentJob,
+        \App\Services\Fiscal\NFCeAuthorizedXmlRecoveryService $recovery
+    ) {
+        abort_unless($fiscalDocumentJob->document_type === 'nfce', 404);
+        if ($fiscalDocumentJob->status !== 'authorized') {
+            return back()->with('error', 'Somente NFC-e autorizada pode ter o XML reconstruído.');
+        }
+
+        try {
+            $recovery->recover($fiscalDocumentJob);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Falha na reconstrução do XML autorizado da NFC-e', [
+                'fiscal_document_job_id' => $fiscalDocumentJob->id,
+                'reason' => $e->getMessage(),
+            ]);
+            return back()->with('error', 'Não foi possível recuperar o XML. Consulte o log do NEXTOR. Nenhuma nota foi retransmitida.');
+        }
+
+        return redirect()->route('fiscal.show', $fiscalDocumentJob)
+            ->with('success', 'XML autorizado recuperado a partir dos arquivos originais. A NFC-e não foi retransmitida.');
+    }
+
     public function downloadNfceXml(FiscalDocumentJob $fiscalDocumentJob)
     {
         abort_unless($fiscalDocumentJob->document_type === 'nfce', 404);
