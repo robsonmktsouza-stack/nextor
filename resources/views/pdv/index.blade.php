@@ -101,20 +101,32 @@
 <form id="pdvForm" method="post" action="{{ route('pdv.store') }}">
 @csrf
 
-@if(session('pdv_last_sale'))
+@if($lastCompletedPdvSale)
 <div class="pdv-last-sale">
   <div>
     @include('partials.icon',['name'=>'check','size'=>18])
-    <span>Venda <strong>#{{ str_pad((string)session('pdv_last_sale'),5,'0',STR_PAD_LEFT) }}</strong> finalizada.</span>
-    @if((float)session('pdv_change',0)>0)
-      <span>Troco: <strong>R$ {{ number_format((float)session('pdv_change'),2,',','.') }}</strong></span>
+    <span>Última venda: <strong>#{{ str_pad((string)$lastCompletedPdvSale->id,5,'0',STR_PAD_LEFT) }}</strong></span>
+    <span>R$ {{ number_format((float)$lastCompletedPdvSale->total,2,',','.') }}</span>
+    <span>{{ ($lastCompletedPdvSale->completed_at ?? $lastCompletedPdvSale->created_at)?->format('d/m H:i') }}</span>
+    @if($lastPdvNfceDocument)
+      <span class="pdv-last-sale-fiscal-status">NFC-e: {{ match($lastPdvNfceDocument->status) {
+        'prepared'=>'preparada', 'processing'=>'processando', 'pending'=>'pendente',
+        'authorized'=>'autorizada', 'rejected'=>'rejeitada', 'cancelled'=>'cancelada',
+        default=>'verificar'
+      } }}</span>
+    @else
+      <span class="pdv-last-sale-fiscal-status">NFC-e ainda não preparada</span>
     @endif
   </div>
   <div class="pdv-last-sale-actions">
     @if(auth()->user()->canAccess('fiscal'))
-      <a href="{{ route('pdv.receipt', ['sale' => session('pdv_last_sale'), 'print' => 0]) }}">Conferir NFC-e</a>
+      <a href="{{ $lastPdvNfceDocument
+        ? route('fiscal.show', $lastPdvNfceDocument)
+        : route('pdv.receipt', ['sale' => $lastCompletedPdvSale->id, 'print' => 0]) }}">Conferir NFC-e</a>
     @endif
-    <a href="{{ route('sales.show',session('pdv_last_sale')) }}">Abrir venda</a>
+    @if(auth()->user()->canAccess('sales'))
+      <a href="{{ route('sales.show',$lastCompletedPdvSale) }}">Abrir venda</a>
+    @endif
   </div>
 </div>
 @endif
