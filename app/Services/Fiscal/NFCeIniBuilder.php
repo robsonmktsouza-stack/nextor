@@ -183,11 +183,15 @@ final class NFCeIniBuilder
                 ];
             }
             if ((float) ($source['change_amount'] ?? 0) > 0 && !$cashChangeAssigned && in_array($kind, ['cash', 'money'], true)) {
-                // O pagamento informado na NFC-e inclui o dinheiro efetivamente recebido.
-                // A venda financeira permanece pelo valor líquido, sem duplicar o troco.
+                // O valor recebido em espécie inclui o troco; o lançamento da
+                // venda/financeiro permanece pelo valor efetivo da parcela.
                 $fields['vPag'] = $price((float) $payment['amount'] + (float) $source['change_amount']);
-                $fields['vTroco'] = $price($source['change_amount']);
                 $cashChangeAssigned = true;
+            }
+            // A ACBr lê vTroco como total do grupo pag e pode sobrescrevê-lo
+            // ao processar as seções seguintes. Informar somente na última.
+            if ($index === count($source['payments'] ?? []) - 1 && (float) ($source['change_amount'] ?? 0) > 0) {
+                $fields['vTroco'] = $price($source['change_amount']);
             }
             $add('pag'.sprintf('%03d', $index + 1), $fields);
         }
