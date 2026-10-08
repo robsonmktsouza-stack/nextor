@@ -40,6 +40,7 @@ final class NFCeDanfeController extends Controller
         return response()->view('fiscal.nfce-danfe', [
             'danfe' => $document,
             'paper' => $paper,
+            'printRoute' => $request->routeIs('pdv.nfce.danfe') ? 'pdv.nfce.danfe' : 'fiscal.nfce.danfe',
             'fiscalDocument' => $fiscalDocumentJob,
         ])->header('Cache-Control', 'private, no-store, no-cache, must-revalidate')
           ->header('X-Content-Type-Options', 'nosniff');
