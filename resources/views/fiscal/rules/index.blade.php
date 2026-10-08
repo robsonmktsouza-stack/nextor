@@ -18,13 +18,8 @@
   <div class="settings-panel-head">
     <div>
       <h2>Regras fiscais</h2>
-      <p>Regras por produto ou NCM, regime, UF, prioridade e período. O cadastro não determina a tributação correta: os enquadramentos devem ser validados pela contabilidade.</p>
+      <p>Defina as exceções por produto, NCM, destino e período.</p>
     </div>
-  </div>
-  <div class="inline-note">
-    <strong>Primeira etapa:</strong> NFC-e de saída interna na Bahia, CRT 1 (Simples Nacional).
-    O emissor atualmente aceita CFOP 5xxx, CSOSN 102 e CST 49 para PIS e COFINS.
-    Os demais grupos fiscais ainda exigem desenvolvimento. Regras não são aplicadas retroativamente.
   </div>
   <form method="post" action="{{ route('fiscal.tax-rules.mode') }}" class="editor-grid cols-12 settings-grid" style="align-items:end;margin-top:12px">
     @csrf
@@ -38,15 +33,11 @@
       <button type="submit" class="btn btn-success">@include('partials.icon',['name'=>'check','size'=>15]) Salvar configuração</button>
     </div>
   </form>
-  <p style="font-size:12px;color:var(--text-secondary,#667085);margin-top:9px">
-    Com as regras ativadas, documentos sem uma regra aplicada serão bloqueados na pré-validação.
-    Para cada NFC-e preparada, abra o documento e clique em <strong>Aplicar regras fiscais</strong>.
-    Venda, estoque, pagamento e numeração permanecem intactos.
-  </p>
+  <p class="editor-help">Ao ativar, as novas notas precisam de uma regra fiscal definida antes da emissão.</p>
 </section>
 
 <section class="editor-panel settings-panel" style="margin-bottom:14px">
-  <div class="settings-panel-head"><div><h2>Nova regra</h2><p>Defina um critério específico e um enquadramento conferido. Deixe a regra inativa até revisar.</p></div></div>
+  <div class="settings-panel-head"><div><h2>Nova regra</h2><p>Cadastre as condições e os códigos de tributação.</p></div></div>
   <form method="post" action="{{ route('fiscal.tax-rules.store') }}" class="settings-editor">
     @csrf
     <input type="hidden" name="document_type" value="nfce">
