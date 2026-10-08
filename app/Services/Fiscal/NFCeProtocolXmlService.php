@@ -55,34 +55,84 @@ final class NFCeProtocolXmlService
             || !hash_equals($signedKey, (string) $response['key'])) {
             throw new RuntimeException('Protocolo SEFAZ não corresponde à chave da NFC-e assinada.');
         }
-        $document = new DOMDocument('1.0', 'UTF-8');
-        $document->formatOutput = false;
-        $document->preserveWhiteSpace = true;
-        $root = $document->createElementNS(self::NS, 'nfeProc');
-        $root->setAttribute('versao', '4.00');
-        $document->appendChild($root);
-        $root->appendChild($document->importNode($signed->documentElement, true));
-
-        $protocol = $document->createElementNS(self::NS, 'protNFe');
-        $protocol->setAttribute('versao', '4.00');
-        $infProt = $document->createElementNS(self::NS, 'infProt');
-        foreach ([
-            'tpAmb' => 'environment',
-            'verAplic' => 'application',
-            'chNFe' => 'key',
-            'dhRecbto' => 'received_at',
-            'nProt' => 'protocol',
-            'digVal' => 'digest',
-            'cStat' => 'cstat',
-            'xMotivo' => 'reason',
-        ] as $tag => $field) {
-            $infProt->appendChild($document->createElementNS(self::NS, $tag))
-                ->appendChild($document->createTextNode((string) $response[$field]));
+        // A assinatura XML usa C14N inclusiva. DOM::importNode() pode mover
+        // declarações de namespaces para um ancestral diferente e invalidar
+        // DigestValue/SignatureValue, apesar de a SEFAZ ter autorizado.
+        // Preservar o NFe assinado byte a byte ao montar nfeProc.
+        $receivedAt = $this->receivedAtIso((string) $response['received_at']);
+        $fields = [
+            'tpAmb' => (string) $response['environment'],
+            'verAplic' => (string) $response['application'],
+            'chNFe' => (string) $response['key'],
+            'dhRecbto' => $receivedAt,
+            'nProt' => (string) $response['protocol'],
+            'digVal' => (string) $response['digest'],
+            'cStat' => (string) $response['cstat'],
+            'xMotivo' => (string) $response['reason'],
+        ];
+        $protocolXml = '<protNFe versao="4.00"><infProt>';
+        foreach ($fields as $tag => $value) {
+            $protocolXml .= '<'.$tag.'>'.htmlspecialchars($value, ENT_XML1 | ENT_QUOTES, 'UTF-8').'</'.$tag.'>';
         }
-        $protocol->appendChild($infProt);
-        $root->appendChild($protocol);
+        $protocolXml .= '</infProt></protNFe>';
 
-        return $document->saveXML() ?: throw new RuntimeException('Falha ao montar o XML autorizado.');
+        $nfeXml = trim((string) preg_replace('/^(?:\xEF\xBB\xBF)?\s*<\?xml\s+[^?]*\?>\s*/i', '', $signedXml));
+        if (str_starts_with($nfeXml, '<?xml')) {
+            // Remover apenas declaração XML externa; nunca modificar elementos
+            // ou namespaces do NFe assinado.
+            $nfeXml = trim((string) preg_replace('/^<\?xml\s+[^?]*\?>\s*/i', '', $nfeXml));
+        }
+        $authorizedXml = '<?xml version="1.0" encoding="UTF-8"?>'
+            .'<nfeProc xmlns="'.self::NS.'" versao="4.00">'
+            .$nfeXml
+            .$protocolXml
+            .'</nfeProc>';
+
+        $authorized = $this->load($authorizedXml);
+        if ($authorized->documentElement?->localName !== 'nfeProc'
+            || $authorized->documentElement?->namespaceURI !== self::NS) {
+            throw new RuntimeException('Falha ao montar nfeProc autorizado.');
+        }
+
+        // Impedir o salvamento de XML que altere o escopo canônico utilizado na
+        // assinatura. Mesmo assinaturas válidas podem ser danificadas por importNode.
+        foreach ([
+            [self::NS, 'infNFe'],
+            ['http://www.w3.org/2000/09/xmldsig#', 'SignedInfo'],
+        ] as [$namespace, $tag]) {
+            $before = $signed->getElementsByTagNameNS($namespace, $tag)->item(0);
+            $after = $authorized->getElementsByTagNameNS($namespace, $tag)->item(0);
+            if (!$before instanceof DOMElement || !$after instanceof DOMElement
+                || !hash_equals((string) $before->C14N(), (string) $after->C14N())) {
+                throw new RuntimeException('Empacotamento da NFC-e alterou a canonicalização da assinatura digital.');
+            }
+        }
+
+        return $authorizedXml;
+    }
+
+    private function receivedAtIso(string $input): string
+    {
+        $value = trim($input);
+        if (preg_match('/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}$/', $value)) {
+            // Este emissor só habilita BA; o horário de resposta da ACBr é
+            // fornecido na hora local da SEFAZ, sem deslocamento explícito.
+            $date = \DateTimeImmutable::createFromFormat('!d/m/Y H:i:s', $value, new \DateTimeZone('America/Bahia'));
+            if (!$date || $date->format('d/m/Y H:i:s') !== $value) {
+                throw new RuntimeException('Data de recebimento SEFAZ inválida.');
+            }
+
+            return $date->format('Y-m-d\TH:i:sP');
+        }
+
+        if (preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:Z|[+-]\d{2}:\d{2})$/', $value)) {
+            $date = \DateTimeImmutable::createFromFormat('!Y-m-d\TH:i:sP', $value);
+            if ($date instanceof \DateTimeImmutable) {
+                return $date->format('Y-m-d\TH:i:sP');
+            }
+        }
+
+        throw new RuntimeException('Formato de data de recebimento da SEFAZ não reconhecido.');
     }
 
     private function assertValue(DOMElement $info, string $tag, string $expected): void
