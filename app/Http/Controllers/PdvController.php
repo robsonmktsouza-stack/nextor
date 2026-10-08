@@ -651,6 +651,7 @@ class PdvController extends Controller
 
         return view('pdv.receipt',[
             'nfceDocument'=>$nfceDocument,
+            'nfceAuto'=>(bool)AppSetting::value('pdv','auto_nfce',false) || (bool)AppSetting::value('nfce','auto_from_pdv',false),
             'sale'=>$sale,
             'paymentLabels'=>$paymentLabels,
             'paymentKinds'=>$paymentKinds,
