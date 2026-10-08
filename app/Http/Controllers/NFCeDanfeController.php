@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\FiscalDocumentJob;
+use App\Models\AppSetting;
 use App\Services\Fiscal\NFCeDanfeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -35,7 +36,8 @@ final class NFCeDanfeController extends Controller
             abort(409, 'DANFE NFC-e indisponível: '.$e->getMessage());
         }
 
-        $paper = $request->query('paper') === '58' ? '58' : '80';
+        $defaultPaper = (string) AppSetting::value('pdv', 'receipt_width', '80');
+        $paper = (string) $request->query('paper', $defaultPaper) === '58' ? '58' : '80';
 
         return response()->view('fiscal.nfce-danfe', [
             'danfe' => $document,
