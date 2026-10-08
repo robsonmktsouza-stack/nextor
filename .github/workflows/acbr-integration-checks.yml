@@ -23,6 +23,7 @@ jobs:
             app/Services/Fiscal/NFCePreflightService.php \
             app/Services/Fiscal/NFCeTransmissionService.php \
             app/Services/Fiscal/NFCeProtocolXmlService.php \
+            app/Services/Fiscal/NFCeAuthorizedXmlRecoveryService.php \
             app/Services/Fiscal/NFCeSefazResponseParser.php \
             app/Services/FiscalPreparationService.php \
             app/Services/SalesService.php \
