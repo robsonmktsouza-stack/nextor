@@ -59,3 +59,23 @@ Não é preciso repetir os testes unitários anteriores: estes já foram conclu�
 - https://acbr.sourceforge.io/ACBrLib/ConfiguracoesdaBiblioteca16.html
 - https://acbr.sourceforge.io/ACBrLib/NFE_Enviar.html
 - https://acbr.sourceforge.io/ACBrLib/NFE_Consultar.html
+
+
+## DANFE NFC-e térmico (58 e 80 mm)
+
+O NEXTOR disponibiliza o DANFE NFC-e somente para notas autorizadas, gerado a partir do arquivo nfeProc arquivado. A página não utiliza o comprovante interno do PDV, não cria outra venda e não aciona ACBr ou SEFAZ.
+
+- Fiscal → NFC-e → documento autorizado → **Imprimir DANFE NFC-e** abre a prévia.
+- PDV → Última venda: quando a nota está autorizada, também oferece **Imprimir DANFE NFC-e**.
+- Comprovante interno: mantém seu botão separado e não substitui o DANFE.
+- Na prévia, selecione 58 mm ou 80 mm e clique em **Imprimir DANFE NFC-e**.
+- Windows: instale o driver da impressora térmica USB/rede, selecione a impressora no Chrome, configure a largura do papel, escala 100%, margens nenhuma e desative cabeçalho/rodapé.
+- Papel com largura mínima de 56 mm e margens laterais de 2 mm; QR Code de no mínimo 25 × 25 mm (o layout usa 32/36 mm).
+- O QR Code é gerado localmente no navegador pela biblioteca MIT qrcode-generator com exatamente a URL infNFeSupl/qrCode arquivada no XML. Não reconstitui CSC nem envia a URL a serviços externos. Impressão bloqueada se o QR não puder ser gerado.
+- O documento mostra emitente, itens, totais, pagamentos, troco, consulta por chave (11 grupos de 4 dígitos), QR Code, consumidor, emissão, série/número, protocolo e a mensagem obrigatória de homologação quando tpAmb=2.
+- Por enquanto, os endereços de consulta e QR Code são restritos a *.sefaz.ba.gov.br, pois o emissor é específico da Bahia.
+- A impressão ocorre pelo diálogo do navegador. Impressão silenciosa dependeria de aplicativo local ou de configuração administrada do navegador; não existe instalação de driver pelo site.
+
+Se o arquivo ainda é só assinado ou falta nfeProc, use **Recuperar XML autorizado** sem transmitir a nota novamente.
+
+Fonte: Manual de Padrões Técnicos do DANFE NFC-e e QR Code, versão 6.0, março/2025 (Portal Nacional da NF-e).
