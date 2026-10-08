@@ -467,6 +467,7 @@ class SettingsController extends Controller
                 'environment'=>['required',Rule::in(['homologation','production'])],
                 'series'=>['required','integer','min:0','max:999'],
                 'next_number'=>['required','integer','min:1','max:999999999'],
+                'default_cfop'=>['nullable','string','regex:/^5\\d{3}$/'],
                 'csc_id'=>['nullable','string','max:20'],
                 'csc_token'=>['nullable','string','max:255'],
                 'auto_from_pdv'=>['nullable','boolean'],
@@ -582,7 +583,7 @@ class SettingsController extends Controller
             ],
             'nfce'=>[
                 'enabled'=>false,'environment'=>'homologation','series'=>1,'next_number'=>1,
-                'csc_id'=>null,'csc_token'=>null,'auto_from_pdv'=>false,'print_danfe'=>true,
+                'default_cfop'=>null,'csc_id'=>null,'csc_token'=>null,'auto_from_pdv'=>false,'print_danfe'=>true,
             ],
             'nfse'=>[
                 'enabled'=>false,'environment'=>'homologation','provider'=>null,'municipality_code'=>null,
