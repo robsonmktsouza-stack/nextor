@@ -42,7 +42,7 @@ final class ACBrNFeReadiness extends Command
                 $certIsValid = @openssl_pkcs12_read($bytes, $certs, (string) $company->certificate_password)
                     && !empty($certs['cert'])
                     && !empty($certs['pkey']);
-            } catch (\\Throwable) {
+            } catch (\Throwable) {
                 $certIsValid = false;
             }
         }
