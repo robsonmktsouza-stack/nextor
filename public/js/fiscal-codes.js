@@ -75,6 +75,7 @@
     if(input.dataset.fiscalCatalogReady)return;
     input.dataset.fiscalCatalogReady='1';
     const name=input.name;
+    const form=input.closest('form');
     const oldValue=input.value;
     const select=document.createElement('select');
     select.name=name;
@@ -85,9 +86,19 @@
     select.required=input.required;
     select.disabled=input.disabled;
     if(input.getAttribute('aria-label'))select.setAttribute('aria-label',input.getAttribute('aria-label'));
+    const cfopPrefix=(()=>{
+      if(/outbound_internal/.test(name))return '5';
+      if(/outbound_interstate|state_variations/.test(name))return '6';
+      if(/inbound_internal/.test(name))return '1';
+      if(/inbound_interstate/.test(name))return '2';
+      if(name==='cfop' && /\/fiscal\/rules(?:\/|$)/.test(form?.action||''))return '5';
+      return '';
+    })();
     const entries=catalog==='cfop_pattern'
       ? {...(data.cfop||{}),...(data.cfop_pattern||{})}
-      : data[catalog];
+      : catalog==='cfop' && cfopPrefix
+        ? Object.fromEntries(Object.entries(data.cfop||{}).filter(([code])=>code.startsWith(cfopPrefix)))
+        : data[catalog];
     const add=createOptions(select,entries);
 
     if(oldValue && !Object.prototype.hasOwnProperty.call(entries,oldValue)){
@@ -109,14 +120,14 @@
       other.dataset.fiscalCatalogReady='1';
       other.setAttribute('aria-label',catalog==='ibs_cbs_class'?'Outra classificação tributária':'Outro CFOP');
       other.addEventListener('input',()=>{
-        // Bloquear caracteres não permitidos para manter só 4 posições.
+        // Apenas dígitos ou o prefixo x, conforme o código.
         other.value=other.value.replace(catalog==='cfop_pattern'?/[^0-9x]/gi:/\D/g,'').slice(0,other.maxLength);
       });
     }
 
     select.value=oldValue || '';
     if(catalog==='ibs_cbs_class'){
-      const prefix=select.closest('form')?.querySelector(
+      const prefix=form?.querySelector(
         '[name="tax_config[ibs_cbs_cst]"],[name="tax_defaults[ibs_cst]"],[name="ibs_cst_default"]'
       );
       const filterByCst=()=>{
