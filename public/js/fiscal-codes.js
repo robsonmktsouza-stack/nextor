@@ -63,6 +63,7 @@
     const oldValue=source.value;
     const mandatory=source.required;
     const originalClasses=source.className;
+    let committedValue=oldValue;
     const cfopPrefix=(()=>{
       if(/outbound_internal/.test(name))return '5';
       if(/outbound_interstate|state_variations/.test(name))return '6';
@@ -95,6 +96,7 @@
     search.placeholder='Pesquisar código ou descrição...';
     search.required=mandatory;
     search.disabled=source.disabled;
+    search.readOnly=source.readOnly;
     search.setAttribute('role','combobox');
     search.setAttribute('aria-autocomplete','list');
     search.setAttribute('aria-expanded','false');
@@ -153,6 +155,7 @@
     const sync=()=>{
       // Permite que outras rotinas alterem o valor original por "change".
       const code=source.value;
+      committedValue=code;
       if(code&&!Object.prototype.hasOwnProperty.call(entries,code)){
         entries[code]='Código já cadastrado (conferir)';
         catalogItems.push({code,description:entries[code],search:normalize(code+' '+entries[code])});
@@ -251,6 +254,7 @@
     };
 
     search.addEventListener('focus',()=>{
+      if(search.readOnly)return;
       render('');
       if(source.value)search.select();
     });
@@ -279,8 +283,10 @@
       }
       if(event.key==='Escape'&&wrapper.classList.contains('open')){
         event.preventDefault();
+        source.value=committedValue;
         close();
         sync();
+        source.dispatchEvent(new Event('change',{bubbles:true}));
       }
       if(event.key==='Tab')close();
     });
