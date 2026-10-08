@@ -34,6 +34,7 @@ final class NFCeIniBuilder
         $cNF = sprintf('%08d', random_int(1, 99999999));
         $add('infNFe', ['versao' => '4.00']);
         $add('Identificacao', [
+            'cUF' => '29',
             'cNF' => $cNF,
             'natOp' => 'VENDA DE MERCADORIA',
             'mod' => '65',
@@ -178,7 +179,7 @@ final class NFCeIniBuilder
                     'cAut' => $payment['authorization_code'] ?? null,
                 ];
             }
-            if ($index === 0 && (float) ($source['change_amount'] ?? 0) > 0) {
+            if ($index === count($source['payments'] ?? []) - 1 && (float) ($source['change_amount'] ?? 0) > 0) {
                 $fields['vTroco'] = $price($source['change_amount']);
             }
             $add('pag'.sprintf('%03d', $index + 1), $fields);
