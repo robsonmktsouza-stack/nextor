@@ -36,6 +36,14 @@ final class NFCeTaxGroupTranslator
                 throw new RuntimeException('Grupo "'.$group->name.'": a alíquota '.$name.' foi informada, mas seu cálculo ainda não está implementado na NFC-e atual.');
             }
         }
+        foreach (['ibs_cbs_cst','ibs_cbs_class','is_cst','is_class'] as $name) {
+            if (trim((string) ($config[$name] ?? '')) !== '') {
+                throw new RuntimeException('Grupo "'.$group->name.'": classificação '.$name.' informada, mas os grupos de IBS/CBS/IS ainda não são gerados pelo XML NFC-e atual.');
+            }
+        }
+        if ($group->kind !== 'products' || $group->iss_exigibility) {
+            throw new RuntimeException('Grupo "'.$group->name.'": parâmetros de serviços/ISS não são suportados pela NFC-e de mercadorias.');
+        }
         if ($group->icms_cst || $group->ipi_cst) {
             throw new RuntimeException('Grupo "'.$group->name.'": CST do ICMS normal ou IPI informado; o emissor BA/Simples atual não contempla esse tratamento.');
         }
