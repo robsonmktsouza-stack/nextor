@@ -152,7 +152,7 @@
         other.name=name;
         other.required=input.required;
         other.disabled=input.disabled;
-        other.focus();
+        queueMicrotask(()=>other.focus({preventScroll:true}));
       }else{
         other.removeAttribute('name');
         other.required=false;
