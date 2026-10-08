@@ -41,8 +41,8 @@ final class FiscalTaxRuleResolver
                 return !$rule->ncm_prefix || str_starts_with($ncm, $rule->ncm_prefix);
             })
             ->map(function (FiscalTaxRule $rule) {
-                $rule->match_score = ($rule->product_id ? 1000 : 0)
-                    + strlen((string) $rule->ncm_prefix) * 10
+                $rule->match_score = ($rule->product_id ? 1000000 : 0)
+                    + strlen((string) $rule->ncm_prefix) * 1000
                     + $rule->priority;
                 return $rule;
             })
