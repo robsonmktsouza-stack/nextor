@@ -7,6 +7,7 @@ use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\FiscalController;
 use App\Http\Controllers\FiscalTaxRuleController;
 use App\Http\Controllers\FiscalTaxGroupController;
+use App\Http\Controllers\FiscalFcpRuleController;
 use App\Http\Controllers\NFCeDanfeController;
 use App\Http\Controllers\NfeDraftController;
 use App\Http\Controllers\OperationNatureController;
@@ -94,6 +95,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/sales/{sale}/cancel',[SaleController::class,'cancel'])->name('sales.cancel')->middleware('permission:sales');
 
     Route::get('/fiscal',[FiscalController::class,'index'])->name('fiscal.index')->middleware('permission:fiscal');
+    Route::get('/fiscal/fcp',[FiscalFcpRuleController::class,'index'])->name('fiscal.fcp.index')->middleware('permission:settings');
+    Route::post('/fiscal/fcp',[FiscalFcpRuleController::class,'store'])->name('fiscal.fcp.store')->middleware('permission:settings');
+    Route::put('/fiscal/fcp/{fiscalFcpRule}',[FiscalFcpRuleController::class,'update'])->name('fiscal.fcp.update')->middleware('permission:settings');
     Route::get('/fiscal/tax-groups',[FiscalTaxGroupController::class,'index'])->name('fiscal.tax-groups.index')->middleware('permission:settings');
     Route::get('/fiscal/tax-groups/create',[FiscalTaxGroupController::class,'create'])->name('fiscal.tax-groups.create')->middleware('permission:settings');
     Route::post('/fiscal/tax-groups',[FiscalTaxGroupController::class,'store'])->name('fiscal.tax-groups.store')->middleware('permission:settings');
