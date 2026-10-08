@@ -57,11 +57,13 @@ final class NFCeTransmissionService
             $runtimeIni = $runtimeDir.'/nfce-'.$job->id.'-'.bin2hex(random_bytes(8)).'.ini';
             $service = new ACBrNFeService(null, $runtimeIni);
             $transmissionAttempted = false;
-            $company = CompanySetting::current();
-            $password = (string) $company->certificate_password;
-            $csc = (string) AppSetting::value('nfce', 'csc_token', '');
+            $password = '';
+            $csc = '';
 
             try {
+                $company = CompanySetting::current();
+                $password = (string) $company->certificate_password;
+                $csc = (string) AppSetting::value('nfce', 'csc_token', '');
                 $this->configure($service, $company, $job, $password, $csc);
                 $ini = $this->builder->build($job, $company);
                 $service->loadIni($ini);
@@ -243,6 +245,13 @@ final class NFCeTransmissionService
                         @unlink($runtimeIni);
                     }
                 }
+            }
+        } catch (Throwable $error) {
+            if (isset($job) && $job instanceof FiscalDocumentJob && $job->status === 'pending') {
+                $job->update([
+                    'error_message' => mb_substr($error->getMessage(), 0, 1800),
+                    'processed_at' => now(),
+                ]);
             }
         } finally {
             $lock->release();
