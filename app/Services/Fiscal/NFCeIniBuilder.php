@@ -158,6 +158,7 @@ final class NFCeIniBuilder
             'credit_card' => '03', 'debit_card' => '04',
             'bank_slip' => '15', 'bank_transfer' => '18', 'transfer' => '18',
         ];
+        $cashChangeAssigned = false;
         foreach (($source['payments'] ?? []) as $index => $payment) {
             $kind = (string) ($payment['payment_kind'] ?? '');
             $kind = $kind !== '' ? $kind : strtolower((string) ($payment['payment_method'] ?? ''));
@@ -181,13 +182,18 @@ final class NFCeIniBuilder
                     'cAut' => $payment['authorization_code'] ?? null,
                 ];
             }
-            if ((float) ($source['change_amount'] ?? 0) > 0 && $index === 0 && $kind === 'cash') {
+            if ((float) ($source['change_amount'] ?? 0) > 0 && !$cashChangeAssigned && in_array($kind, ['cash', 'money'], true)) {
                 // O pagamento informado na NFC-e inclui o dinheiro efetivamente recebido.
                 // A venda financeira permanece pelo valor líquido, sem duplicar o troco.
                 $fields['vPag'] = $price((float) $payment['amount'] + (float) $source['change_amount']);
                 $fields['vTroco'] = $price($source['change_amount']);
+                $cashChangeAssigned = true;
             }
             $add('pag'.sprintf('%03d', $index + 1), $fields);
+        }
+
+        if ((float) ($source['change_amount'] ?? 0) > 0 && !$cashChangeAssigned) {
+            throw new RuntimeException('Troco em dinheiro não corresponde a nenhum pagamento em espécie.');
         }
 
         return implode("\r\n\r\n", $sections)."\r\n";
