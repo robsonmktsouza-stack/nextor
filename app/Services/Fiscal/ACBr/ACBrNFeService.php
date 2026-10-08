@@ -55,6 +55,12 @@ final class ACBrNFeService
             int NFE_ConfigLerValor(void *libHandle, const char *eSessao, const char *eChave, char *sValor, int *esTamanho);
             int NFE_ConfigGravarValor(void *libHandle, const char *eSessao, const char *eChave, const char *eValor);
             int NFE_StatusServico(void *libHandle, char *sResposta, int *esTamanho);
+            int NFE_LimparLista(void *libHandle);
+            int NFE_CarregarINI(void *libHandle, const char *eArquivoOuINI);
+            int NFE_Assinar(void *libHandle);
+            int NFE_Validar(void *libHandle);
+            int NFE_ObterXml(void *libHandle, int AIndex, char *sResposta, int *esTamanho);
+            int NFE_Enviar(void *libHandle, int ALote, _Bool AImprimir, _Bool ASincrono, _Bool AZipado, char *sResposta, int *esTamanho);
         CDEF;
 
         $this->lib = FFI::cdef($header, $path);
@@ -132,6 +138,62 @@ final class ACBrNFeService
             throw new RuntimeException('Resposta SEFAZ excedeu o buffer de 64 KB.');
         }
         return FFI::string($buffer);
+    }
+
+    private function execute(string $method, array $args = []): void
+    {
+        $this->initialize();
+        $status = $this->lib->$method($this->handle, ...$args);
+        if ($status !== 0) {
+            throw new RuntimeException("ACBr {$method} falhou ({$status}): ".$this->lastReturn());
+        }
+    }
+
+    private function response(string $method, array $args = []): string
+    {
+        $this->initialize();
+        $capacity = 65536;
+        for ($attempt = 0; $attempt < 3; $attempt++) {
+            $buffer = FFI::new("char[{$capacity}]");
+            $size = FFI::new('int');
+            $size->cdata = $capacity;
+            $status = $this->lib->$method($this->handle, ...$args, $buffer, FFI::addr($size));
+            if ($size->cdata >= $capacity && $size->cdata < 8388608) {
+                $capacity = $size->cdata + 1;
+                continue;
+            }
+            if ($status !== 0) {
+                throw new RuntimeException("ACBr {$method} falhou ({$status}): ".$this->lastReturn());
+            }
+            return FFI::string($buffer);
+        }
+        throw new RuntimeException("Resposta ACBr {$method} excedeu o limite.");
+    }
+
+    public function loadIni(string $ini): void
+    {
+        $this->execute('NFE_LimparLista');
+        $this->execute('NFE_CarregarINI', [$ini]);
+    }
+
+    public function sign(): void
+    {
+        $this->execute('NFE_Assinar');
+    }
+
+    public function validateXml(): void
+    {
+        $this->execute('NFE_Validar');
+    }
+
+    public function getXml(): string
+    {
+        return $this->response('NFE_ObterXml', [0]);
+    }
+
+    public function send(int $lot): string
+    {
+        return $this->response('NFE_Enviar', [$lot, false, true, false]);
     }
 
     public function readConfig(string $section, string $key): string
