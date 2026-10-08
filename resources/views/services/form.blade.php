@@ -45,6 +45,30 @@
   </section>
 
   <section class="editor-tab-panel" data-tab-panel="service-fiscal" hidden>
+    <div class="editor-panel tax-group-panel">
+      <h3>Grupo tributário para serviços</h3>
+      <div class="editor-grid cols-12">
+        <label class="field col-8"><span>Tributação para serviços</span>
+          <select name="fiscal_tax_group_id">
+            <option value="">Sem grupo específico — usar padrão cadastrado, se houver</option>
+            @foreach($fiscalTaxGroups as $fiscalGroup)
+              <option value="{{ $fiscalGroup->id }}" @selected((string)old('fiscal_tax_group_id',$service->fiscal_tax_group_id)===(string)$fiscalGroup->id)>
+                {{ $fiscalGroup->name }}{{ $fiscalGroup->is_default ? ' · Padrão' : '' }}{{ !$fiscalGroup->is_active ? ' · Inativo' : '' }}
+              </option>
+            @endforeach
+          </select>
+        </label>
+        <div class="field col-4">
+          <span>Administração</span>
+          @if(auth()->user()->canAccess('settings'))
+            <a class="btn btn-secondary" href="{{ route('fiscal.tax-groups.index') }}">Gerenciar grupos</a>
+          @endif
+        </div>
+      </div>
+      <p class="editor-help">Vinculação para futuros cálculos e emissão de NFS-e. Não ativa automaticamente a emissão fiscal do serviço.</p>
+      @if($service->tax_group)<p class="editor-help">Referência legada anterior: {{ $service->tax_group }}</p>@endif
+    </div>
+
     <div class="editor-panel">
       <div class="editor-grid cols-12">
         <label class="field col-4">
@@ -75,29 +99,7 @@
       </div>
     </div>
 
-    <div class="editor-panel tax-group-panel">
-      <h3>Grupo tributário para serviços</h3>
-      <div class="editor-grid cols-12">
-        <label class="field col-8"><span>Tributação para serviços</span>
-          <select name="fiscal_tax_group_id">
-            <option value="">Sem grupo específico — usar padrão cadastrado, se houver</option>
-            @foreach($fiscalTaxGroups as $fiscalGroup)
-              <option value="{{ $fiscalGroup->id }}" @selected((string)old('fiscal_tax_group_id',$service->fiscal_tax_group_id)===(string)$fiscalGroup->id)>
-                {{ $fiscalGroup->name }}{{ $fiscalGroup->is_default ? ' · Padrão' : '' }}{{ !$fiscalGroup->is_active ? ' · Inativo' : '' }}
-              </option>
-            @endforeach
-          </select>
-        </label>
-        <div class="field col-4">
-          <span>Administração</span>
-          @if(auth()->user()->canAccess('settings'))
-            <a class="btn btn-secondary" href="{{ route('fiscal.tax-groups.index') }}">Gerenciar grupos</a>
-          @endif
-        </div>
-      </div>
-      <p class="editor-help">Vinculação para futuros cálculos e emissão de NFS-e. Não ativa automaticamente a emissão fiscal do serviço.</p>
-      @if($service->tax_group)<p class="editor-help">Referência legada anterior: {{ $service->tax_group }}</p>@endif
-    </div>
+
   </section>
 
   <div class="editor-savebar">
