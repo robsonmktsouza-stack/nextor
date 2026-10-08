@@ -49,6 +49,12 @@ final class NFCeProtocolXmlService
         }
 
         $signed = $this->load($signedXml);
+        $info = $signed->documentElement?->getElementsByTagNameNS(self::NS, 'infNFe')->item(0);
+        $signedKey = $info instanceof DOMElement ? substr($info->getAttribute('Id'), 3) : '';
+        if (preg_match('/^\\d{44}$/', $signedKey) !== 1
+            || !hash_equals($signedKey, (string) $response['key'])) {
+            throw new RuntimeException('Protocolo SEFAZ não corresponde à chave da NFC-e assinada.');
+        }
         $document = new DOMDocument('1.0', 'UTF-8');
         $document->formatOutput = false;
         $document->preserveWhiteSpace = true;
