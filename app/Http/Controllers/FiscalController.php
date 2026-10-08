@@ -125,6 +125,24 @@ class FiscalController extends Controller
         ]);
     }
 
+    public function issueNfce(FiscalDocumentJob $fiscalDocumentJob, \App\Services\Fiscal\NFCePreflightService $preflight)
+    {
+        abort_unless($fiscalDocumentJob->document_type === 'nfce', 404);
+
+        if (config('queue.default') !== 'database') {
+            return back()->with('error', 'Configure QUEUE_CONNECTION=database e inicie o worker fiscal antes de emitir.');
+        }
+
+        $problems = $preflight->validate($fiscalDocumentJob);
+        if ($problems) {
+            return back()->with('error', implode(' | ', $problems));
+        }
+
+        \App\Jobs\ProcessNFCeJob::dispatch($fiscalDocumentJob->id)->onConnection('database');
+
+        return back()->with('success', 'Emissão colocada na fila fiscal. Acompanhe o resultado neste documento.');
+    }
+
     private function configurationFor(string $tab): array
     {
         if($tab==='cte') {
