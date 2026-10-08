@@ -12,7 +12,14 @@ final class FiscalCodeCatalog
 {
     public static function all(): array
     {
+        $community = json_decode((string) @file_get_contents(
+            resource_path('data/fiscal/cclasstrib-community.json')
+        ), true);
+        $classifications = is_array($community['codes'] ?? null)
+            ? $community['codes'] : [];
+
         return [
+            'ibs_cbs_class'=>$classifications,
             'origin' => [
                 '0'=>'Nacional, exceto indicadas nos códigos 3, 4, 5 e 8',
                 '1'=>'Estrangeira — importação direta, exceto código 6',
@@ -207,6 +214,7 @@ final class FiscalCodeCatalog
         $field=preg_replace('/_default$/','',$field);
         if (in_array($field,['origin','icms_origin'],true)) return 'origin';
         if ($field==='crt') return 'crt';
+        if (in_array($field,['ibs_cbs_class','tax_classification_code','cclasstrib'],true)) return 'ibs_cbs_class';
         if (str_contains($field,'csosn')) return 'csosn';
         if (preg_match('/^(?:icms_cst)(?:_|$)/',$field)) return 'icms_cst';
         if (preg_match('/^(?:pis_cst|cofins_cst)(?:_|$)/',$field)) return 'pis_cofins_cst';
