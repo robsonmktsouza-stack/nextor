@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\AppSetting;
 use App\Models\Service;
+use App\Models\FiscalTaxGroup;
+use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -45,12 +47,16 @@ class ServiceController extends Controller
                 'is_active'=>(bool)$catalog['new_services_active'],
             ]),
             'editing'=>false,
+            'fiscalTaxGroups'=>FiscalTaxGroup::query()->where('kind','services')->orderByDesc('is_default')->orderBy('name')->get(),
         ]);
     }
 
     public function edit(Service $service)
     {
-        return view('services.form',compact('service')+['editing'=>true]);
+        return view('services.form',compact('service')+[
+            'editing'=>true,
+            'fiscalTaxGroups'=>FiscalTaxGroup::query()->where('kind','services')->orderByDesc('is_default')->orderBy('name')->get(),
+        ]);
     }
 
     private function rules(): array
@@ -66,6 +72,7 @@ class ServiceController extends Controller
             'national_tax_code'=>['nullable','string','max:40'],
             'nbs'=>['nullable','string','max:20'],
             'tax_group'=>['nullable','string','max:120'],
+            'fiscal_tax_group_id'=>['nullable','integer',Rule::exists('fiscal_tax_groups','id')->where('kind','services')],
             'is_active'=>['nullable','boolean'],
         ];
     }
