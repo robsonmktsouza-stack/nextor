@@ -40,7 +40,7 @@ final class NFCeIniBuilder
             'mod' => '65',
             'serie' => (string) $job->series,
             'nNF' => (string) $job->document_number,
-            'dEmi' => now()->format('d/m/Y H:i:s'),
+            'dhEmi' => now()->format('d/m/Y H:i:s'),
             'tpNF' => '1',
             'idDest' => '1',
             'tpAmb' => $job->environment === 'homologation' ? '2' : '1',
@@ -124,7 +124,7 @@ final class NFCeIniBuilder
             ]);
             $add('ICMS'.$i, [
                 'CSOSN' => $tax['icms_csosn'] ?? $tax['csosn'] ?? $tax['icms_csosn_default'] ?? AppSetting::value('tax', 'icms_csosn_default'),
-                'Origem' => $item['origin'] ?? $tax['icms_origin_default'] ?? AppSetting::value('tax', 'icms_origin_default', '0'),
+                'orig' => $item['origin'] ?? $tax['icms_origin_default'] ?? AppSetting::value('tax', 'icms_origin_default', '0'),
             ]);
             $add('PIS'.$i, [
                 'CST' => $tax['pis_cst'] ?? $tax['pis_cst_default'] ?? AppSetting::value('tax', 'pis_cst_default'),
