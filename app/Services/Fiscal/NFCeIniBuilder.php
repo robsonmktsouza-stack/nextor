@@ -99,10 +99,10 @@ final class NFCeIniBuilder
                 : round($gross - (float) $item['line_total'], 2);
             $totalGross += (int) round($gross * 100);
             $totalDiscount += (int) round($discount * 100);
-            $cfop = $tax['nfce_cfop'] ?? $tax['cfop'] ?? AppSetting::value('nfce', 'default_cfop', '');
+            $cfop = $tax['cfop_outbound_internal'] ?? $tax['nfce_cfop'] ?? $tax['cfop'] ?? AppSetting::value('nfce', 'default_cfop', '');
 
             $add('Produto'.$i, [
-                'cProd' => $item['sku'] ?: 'PROD-'.$item['product_id'],
+                'cProd' => ($item['sku'] ?? null) ?: 'PROD-'.$item['product_id'],
                 'cEAN' => $digits($item['gtin'] ?? '') ?: 'SEM GTIN',
                 'xProd' => $job->environment === 'homologation'
                     ? 'NOTA FISCAL EMITIDA EM AMBIENTE DE HOMOLOGACAO - SEM VALOR FISCAL'
@@ -122,7 +122,7 @@ final class NFCeIniBuilder
                 'indTot' => '1',
             ]);
             $add('ICMS'.$i, [
-                'CSOSN' => $tax['csosn'] ?? $tax['icms_csosn_default'] ?? AppSetting::value('tax', 'icms_csosn_default'),
+                'CSOSN' => $tax['icms_csosn'] ?? $tax['csosn'] ?? $tax['icms_csosn_default'] ?? AppSetting::value('tax', 'icms_csosn_default'),
                 'orig' => $item['origin'] ?? $tax['icms_origin_default'] ?? AppSetting::value('tax', 'icms_origin_default', '0'),
             ]);
             $add('PIS'.$i, [
@@ -153,11 +153,15 @@ final class NFCeIniBuilder
         $methods = [
             'cash' => '01', 'money' => '01', 'pix' => '17',
             'credit_card' => '03', 'debit_card' => '04',
-            'bank_slip' => '15', 'bank_transfer' => '18',
+            'bank_slip' => '15', 'bank_transfer' => '18', 'transfer' => '18',
         ];
         foreach (($source['payments'] ?? []) as $index => $payment) {
             $kind = (string) ($payment['payment_kind'] ?? '');
             $kind = $kind !== '' ? $kind : strtolower((string) ($payment['payment_method'] ?? ''));
+            if ($kind === 'card') {
+                $code = strtolower((string) ($payment['payment_method'] ?? ''));
+                $kind = str_contains($code, 'debit') || str_contains($code, 'debito') ? 'debit_card' : (str_contains($code, 'credit') || str_contains($code, 'credito') ? 'credit_card' : 'card');
+            }
             $paymentType = $methods[$kind] ?? null;
             if ($paymentType === null) {
                 throw new RuntimeException('Forma de pagamento sem mapeamento NFC-e: '.$text($kind));
