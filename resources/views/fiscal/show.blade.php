@@ -31,6 +31,27 @@
   <div><span>Preparado em</span><strong>{{ ($document->prepared_at ?? $document->created_at)?->format($dateFormat.' H:i') }}</strong></div>
 </div>
 
+@if($tab==='nfce' && $document->status==='prepared')
+  @if(count($nfcePreflightErrors))
+    <section class="fiscal-error-card">
+      @include('partials.icon',['name'=>'alert','size'=>20])
+      <div>
+        <strong>Dados pendentes antes da transmissão</strong>
+        <ul>
+          @foreach($nfcePreflightErrors as $error)
+            <li>{{ $error }}</li>
+          @endforeach
+        </ul>
+      </div>
+    </section>
+  @else
+    <section class="fiscal-info-card">
+      <strong>Pré-validação local aprovada</strong>
+      <p>Dados básicos conferidos. A emissão ACBr e a autorização SEFAZ ainda não foram executadas.</p>
+    </section>
+  @endif
+@endif
+
 <div class="fiscal-detail-grid">
   <section class="cms-card fiscal-detail-card">
     <div class="card-header"><div><h2>Documento</h2><p>Identificação e retorno fiscal registrado.</p></div></div>
