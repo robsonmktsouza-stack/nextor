@@ -80,11 +80,17 @@ final class NFCeTransmissionService
 
                 $status = $this->interpret($response);
                 if ($status['cstat'] === '100' && $status['protocol'] && $status['key']) {
-                    $authorizedXml = $service->getXml();
                     $xmlPath = $signedPath;
-                    if (str_contains($authorizedXml, '<protNFe')) {
-                        $xmlPath = $basePath.'/authorized.xml';
-                        Storage::disk('local')->put($xmlPath, $authorizedXml);
+                    try {
+                        $authorizedXml = $service->getXml();
+                        if (str_contains($authorizedXml, '<protNFe')) {
+                            $authorizedPath = $basePath.'/authorized.xml';
+                            if (Storage::disk('local')->put($authorizedPath, $authorizedXml)) {
+                                $xmlPath = $authorizedPath;
+                            }
+                        }
+                    } catch (Throwable) {
+                        // Autorização SEFAZ prevalece; manter XML assinado e protocolo.
                     }
 
                     $job->update([
@@ -108,7 +114,7 @@ final class NFCeTransmissionService
             } catch (Throwable $e) {
                 $message = str_replace(array_filter([$password, $csc]), '[protegido]', $e->getMessage());
                 $job->update([
-                    'status' => $transmissionAttempted ? 'pending' : 'error',
+                    'status' => $transmissionAttempted ? 'pending' : 'prepared',
                     'error_message' => mb_substr($message, 0, 1800),
                     'processed_at' => now(),
                 ]);
