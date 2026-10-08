@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\FiscalTaxGroup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -122,7 +123,10 @@ final class FiscalTaxGroupController extends Controller
                 'is_default'=>'O grupo padrão também deve estar ativo.',
             ]);
         }
-        $data['tax_config']=array_filter($data['tax_config'] ?? [],static fn($v)=>$v!==null && $v!=='');
+        $data['tax_config']=array_filter(
+            Arr::only($data['tax_config'] ?? [],array_merge(self::RATE_FIELDS,array_keys(self::TEXT_FIELDS))),
+            static fn($v)=>$v!==null && $v!==''
+        );
         return $data;
     }
 }
