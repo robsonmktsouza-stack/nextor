@@ -190,7 +190,11 @@ body{font-size:9px}
   window.addEventListener('afterprint',()=>{
     if(!automatic) return;
     automatic=false;
-    window.setTimeout(()=>window.location.replace(@json(route('pdv.index'))),120);
+    window.setTimeout(()=>window.location.replace(@json(
+      $nfceDocument && !$nfceAuto && auth()->user()->canAccess('fiscal')
+        ? route('fiscal.show', $nfceDocument)
+        : route('pdv.index')
+    )),120);
   });
   printButton?.addEventListener('click',()=>{automatic=false;window.print();});
 })();
