@@ -110,7 +110,7 @@ $origins=[
          @endif
        </div>
      </div>
-     <p class="editor-help">O grupo determina a classificação a ser conferida antes de gerar o XML. Os campos fiscais individuais permanecem disponíveis abaixo para conferência e exceções.</p>
+     
      @if($product->tax_group)
        <p class="editor-help">Referência legada anterior: {{ $product->tax_group }}</p>
      @endif
