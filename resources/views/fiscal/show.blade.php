@@ -57,13 +57,13 @@
           <p>Corrija os campos fiscais no cadastro do produto e atualize os dados desta NFC-e. Não é necessário fazer outra venda.</p>
         </div>
       </div>
-      <div style="padding:16px;display:grid;gap:14px">
+      <div class="fiscal-refresh-body">
         @foreach(($document->source_snapshot['items'] ?? []) as $index => $fiscalItem)
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <div class="fiscal-refresh-item">
             <div>
               <strong>{{ $index + 1 }}. {{ $fiscalItem['name'] ?? 'Produto' }}</strong>
-              <div style="font-size:12px;color:var(--text-muted,#64748b);margin-top:4px">
-                NCM: {{ $fiscalItem['ncm'] ?: 'Não informado' }}
+              <div class="fiscal-refresh-values">
+                NCM: {{ ($fiscalItem['ncm'] ?? null) ?: 'Não informado' }}
                 · PIS: {{ data_get($fiscalItem,'tax_defaults.pis_cst') ?: 'Não informado' }}
                 · COFINS: {{ data_get($fiscalItem,'tax_defaults.cofins_cst') ?: 'Não informado' }}
               </div>
@@ -81,7 +81,7 @@
             @include('partials.icon',['name'=>'refresh-cw','size'=>16]) Atualizar dados fiscais desta NFC-e
           </button>
         </form>
-        <small style="color:var(--text-muted,#64748b)">Mantém os itens, valores, pagamentos, série e número da venda original. Só atualiza a classificação fiscal dos produtos antes de qualquer assinatura ou transmissão.</small>
+        <small class="fiscal-refresh-hint">Mantém os itens, valores, pagamentos, série e número da venda original. Só atualiza a classificação fiscal dos produtos antes de qualquer assinatura ou transmissão.</small>
       </div>
     </section>
   @endif
