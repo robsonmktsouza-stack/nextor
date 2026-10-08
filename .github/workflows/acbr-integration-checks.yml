@@ -23,6 +23,9 @@ jobs:
             app/Services/Fiscal/NFCePreflightService.php \
             app/Models/FiscalTaxRule.php \
             app/Models/FiscalTaxGroup.php \
+            app/Models/FiscalFcpRule.php \
+            app/Http/Controllers/FiscalFcpRuleController.php \
+            database/migrations/2026_10_08_203000_create_fiscal_fcp_rules_table.php \
             app/Services/Fiscal/NFCeTaxGroupTranslator.php \
             app/Http/Controllers/FiscalTaxGroupController.php \
             app/Http/Controllers/ProductController.php \
@@ -62,6 +65,7 @@ jobs:
           php artisan key:generate --force
       - name: Validate registered routes and compiled Blade syntax
         run: |
+          php artisan route:list --path=fiscal/fcp
           php artisan route:list --path=fiscal/tax-groups
           php artisan route:list --path=danfe
           php artisan view:cache
