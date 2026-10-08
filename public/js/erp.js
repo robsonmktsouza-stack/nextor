@@ -1051,13 +1051,16 @@
       return;
     }
     const message=form.getAttribute('data-confirm-submit');
-    if(!message || document.body?.dataset.confirmDestructive==='0') return;
+    // Confirmações de exclusão mantêm a preferência global do usuário.
+    // Operações fiscais não são exclusões e precisam de texto e cores próprios.
+    const actionConfirm=form.dataset.confirmKind==='action';
+    if(!message || (!actionConfirm && document.body?.dataset.confirmDestructive==='0')) return;
     e.preventDefault();
     const confirmed=await nextorConfirm(message,{
-      title:'Confirmar exclusão',
-      confirmLabel:'Excluir',
+      title:form.dataset.confirmTitle || (actionConfirm ? 'Confirmar ação' : 'Confirmar exclusão'),
+      confirmLabel:form.dataset.confirmLabel || (actionConfirm ? 'Confirmar' : 'Excluir'),
       cancelLabel:'Cancelar',
-      type:'danger'
+      type:actionConfirm ? 'normal' : 'danger'
     });
     if(!confirmed) return;
     form.dataset.confirmBypass='1';
