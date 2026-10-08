@@ -3,6 +3,12 @@
 @section('titleMeta','Documento fiscal')
 @section('actions')
   <a class="btn btn-secondary" href="{{ route('fiscal.index',['tab'=>$tab]) }}">@include('partials.icon',['name'=>'arrow-left','size'=>16]) Voltar</a>
+  @if($tab==='nfce' && $document->status==='prepared' && empty($nfcePreflightErrors) && auth()->user()->canAccess('fiscal'))
+    <form method="post" action="{{ route('fiscal.nfce.emit',$document) }}" data-confirm-submit="Enviar esta NFC-e para a SEFAZ?">
+      @csrf
+      <button type="submit" class="btn btn-success">@include('partials.icon',['name'=>'check','size'=>16]) Emitir NFC-e</button>
+    </form>
+  @endif
   @if(auth()->user()->canAccess('settings'))
     <a class="btn btn-secondary" href="{{ route('settings.index',['tab'=>$configuration['settings_tab']]) }}">@include('partials.icon',['name'=>'settings','size'=>16]) Configurar</a>
   @endif
