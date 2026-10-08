@@ -639,13 +639,13 @@ class PdvController extends Controller
         }
 
         if ($sale->status !== 'completed' || $sale->operation_type !== 'sale') {
-            return redirect()->route('pdv.receipt', $sale)
+            return redirect()->route('pdv.receipt', ['sale' => $sale->id, 'print' => 0])
                 ->with('error', 'A NFC-e só pode ser preparada para uma venda concluída.');
         }
 
         if (!(bool) AppSetting::value('fiscal', 'enabled', false)
             || !(bool) AppSetting::value('nfce', 'enabled', false)) {
-            return redirect()->route('pdv.receipt', $sale)
+            return redirect()->route('pdv.receipt', ['sale' => $sale->id, 'print' => 0])
                 ->with('error', 'Habilite Fiscal e NFC-e nas configurações antes de preparar este documento.');
         }
 
@@ -653,7 +653,7 @@ class PdvController extends Controller
         if ($sale->items->isEmpty() || !$sale->items->every(
             fn ($item) => $item->item_type === 'product' && $item->product_id
         )) {
-            return redirect()->route('pdv.receipt', $sale)
+            return redirect()->route('pdv.receipt', ['sale' => $sale->id, 'print' => 0])
                 ->with('error', 'Esta venda contém itens que não podem ser emitidos como NFC-e de produtos.');
         }
 
@@ -667,7 +667,7 @@ class PdvController extends Controller
                 'error' => $error->getMessage(),
             ]);
 
-            return redirect()->route('pdv.receipt', $sale)
+            return redirect()->route('pdv.receipt', ['sale' => $sale->id, 'print' => 0])
                 ->with('error', 'Não foi possível preparar a NFC-e desta venda. Consulte o log do NEXTOR.');
         }
 
