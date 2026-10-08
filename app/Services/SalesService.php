@@ -256,6 +256,22 @@ class SalesService
 
         $this->fiscalPreparation->prepareForSale($sale);
 
+        // Emissão fiscal em fila, após efetivar a venda.
+        // Evitar FFI em requisição HTTP com queue sync.
+        if ($sale->source === 'pdv'
+            && config('queue.default') === 'database'
+            && ((bool) AppSetting::value('pdv', 'auto_nfce', false)
+                || (bool) AppSetting::value('nfce', 'auto_from_pdv', false))) {
+            $fiscalJob = \App\Models\FiscalDocumentJob::query()
+                ->where('sale_id', $sale->id)
+                ->where('document_type', 'nfce')
+                ->where('status', 'prepared')
+                ->first();
+            if ($fiscalJob) {
+                \App\Jobs\ProcessNFCeJob::dispatch($fiscalJob->id)->onConnection('database');
+            }
+        }
+
         $this->webhooks->queue(
             $sale->operation_type==='quote' ? 'quote.created' : 'sale.completed',
             [
@@ -286,13 +302,13 @@ class SalesService
 
             $authorizedFiscal=\App\Models\FiscalDocumentJob::query()
                 ->where('sale_id',$locked->id)
-                ->where('status','authorized')
+                ->whereIn('status',['authorized','processing','pending'])
                 ->whereNull('cancelled_at')
                 ->first();
 
             if($authorizedFiscal) {
                 throw ValidationException::withMessages([
-                    'sale'=>'A venda possui documento fiscal autorizado. Solicite e conclua o cancelamento fiscal antes de cancelar a venda.'
+                    'sale'=>'A venda possui documento fiscal autorizado ou pendente. Resolva a situação fiscal antes de cancelar a venda.'
                 ]);
             }
 
