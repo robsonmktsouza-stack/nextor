@@ -69,7 +69,7 @@
           <strong>{{ $money($item['total']) }}</strong>
         </div>
         <div class="danfe-item-measure">
-          {{ $qty($item['qty']) }} {{ $item['unit'] }} × R$ {{ number_format($item['unit_price'], min(4, max(2, strlen(rtrim(substr(strrchr(number_format($item['unit_price'],4,'.',''),'.'),1),'0')))), ',', '.') }}
+          {{ $qty($item['qty']) }} {{ $item['unit'] }} × R$ {{ number_format($item['unit_price'],4,',','.') }}
         </div>
       </div>
     @endforeach
