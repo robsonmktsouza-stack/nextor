@@ -63,6 +63,11 @@ final class NFCePreflightService
                 $n = $index + 1;
                 $tax = $item['tax_defaults'] ?? [];
                 $tax = is_array($tax) ? $tax : [];
+                if ((bool) AppSetting::value('tax', 'use_fiscal_rules', false)
+                    && (!(int) ($tax['fiscal_rule_id'] ?? 0)
+                        || !(int) ($tax['fiscal_rule_revision'] ?? 0))) {
+                    $errors[] = "Item {$n}: nenhuma regra fiscal foi aplicada. Utilize 'Aplicar regras fiscais' antes de transmitir.";
+                }
                 $cfop = (string) ($tax['cfop_outbound_internal'] ?? $tax['nfce_cfop'] ?? $tax['cfop'] ?? AppSetting::value('nfce', 'default_cfop', ''));
                 $csosn = (string) ($tax['icms_csosn'] ?? $tax['csosn'] ?? $tax['icms_csosn_default'] ?? AppSetting::value('tax', 'icms_csosn_default', ''));
                 $pis = (string) ($tax['pis_cst'] ?? $tax['pis_cst_default'] ?? AppSetting::value('tax', 'pis_cst_default', ''));
