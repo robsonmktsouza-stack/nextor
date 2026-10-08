@@ -117,9 +117,11 @@ final class NFCeDanfeService
         $address = $emit instanceof DOMElement
             ? $xp->query('n:enderEmit', $emit)->item(0) : null;
         $recipient = $xp->query('n:dest', $info)->item(0);
-        $recipientId = $recipient instanceof DOMElement
-            ? ($read('n:CNPJ', $recipient) ?: $read('n:CPF', $recipient) ?: $read('n:idEstrangeiro', $recipient))
-            : '';
+        $recipientCnpj = $recipient instanceof DOMElement ? $read('n:CNPJ', $recipient) : '';
+        $recipientCpf = $recipient instanceof DOMElement ? $read('n:CPF', $recipient) : '';
+        $recipientForeign = $recipient instanceof DOMElement ? $read('n:idEstrangeiro', $recipient) : '';
+        $recipientId = $recipientCnpj ?: $recipientCpf ?: $recipientForeign;
+        $recipientType = $recipientCnpj ? 'CNPJ' : ($recipientCpf ? 'CPF' : ($recipientForeign ? 'Id. Estrangeiro' : null));
 
         $issuerTaxId = $read('n:emit/n:CNPJ', $info) ?: $read('n:emit/n:CPF', $info);
         $total = $xp->query('n:total/n:ICMSTot', $info)->item(0);
@@ -165,6 +167,7 @@ final class NFCeDanfeService
             'environment' => $environment,
             'homologation' => $environment === '2',
             'consumer_id' => $recipientId,
+            'consumer_type' => $recipientType,
             'consumer_name' => $recipient instanceof DOMElement ? $read('n:xNome', $recipient) : '',
             'delivery_address' => $recipient instanceof DOMElement ? $read('n:enderDest/n:xLgr', $recipient) : '',
             'qr_url' => $qr,
