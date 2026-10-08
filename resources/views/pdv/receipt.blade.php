@@ -74,6 +74,9 @@ body{font-size:9px}
 <body>
 <div class="screen-actions">
   <a href="{{ route('pdv.index') }}">Voltar ao PDV</a>
+  @if($nfceDocument && auth()->user()->canAccess('fiscal'))
+    <a href="{{ route('fiscal.show', $nfceDocument) }}">NFC-e {{ $nfceDocument->status==='authorized' ? 'autorizada' : 'da venda' }}</a>
+  @endif
   <button type="button">Imprimir novamente</button>
 </div>
 
