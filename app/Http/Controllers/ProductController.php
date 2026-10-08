@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AppSetting;
 use App\Models\Product;
+use App\Models\FiscalTaxGroup;
 use App\Models\StockMovement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -48,6 +49,7 @@ class ProductController extends Controller {
             ]),
             'editing'=>false,
             'stockDecimalPlaces'=>max(0,min(3,(int)AppSetting::value('inventory','stock_decimal_places',3))),
+            'fiscalTaxGroups'=>FiscalTaxGroup::query()->where('kind','products')->orderByDesc('is_default')->orderBy('name')->get(),
         ]);
     }
 
@@ -55,6 +57,7 @@ class ProductController extends Controller {
         return view('products.form',compact('product')+[
             'editing'=>true,
             'stockDecimalPlaces'=>max(0,min(3,(int)AppSetting::value('inventory','stock_decimal_places',3))),
+            'fiscalTaxGroups'=>FiscalTaxGroup::query()->where('kind','products')->orderByDesc('is_default')->orderBy('name')->get(),
         ]);
     }
 
@@ -90,6 +93,7 @@ class ProductController extends Controller {
             'ignore_taxes_mode'=>['required','in:none,purchase,sale,both'],
             'nfe_notes'=>['nullable','string','max:5000'],
             'tax_group'=>['nullable','string','max:120'],
+            'fiscal_tax_group_id'=>['nullable','integer',Rule::exists('fiscal_tax_groups','id')->where('kind','products')],
             'tax_defaults'=>['nullable','array'],
             'tax_defaults.cfop_outbound_internal'=>['nullable','string','max:10'],
             'tax_defaults.cfop_outbound_interstate'=>['nullable','string','max:10'],
