@@ -288,6 +288,8 @@ final class NFCeTransmissionService
             ['DFe', 'SSLHttpLib', '3'],
             ['DFe', 'SSLXmlSignLib', '4'],
             ['NFe', 'PathSchemas', $schemas],
+            ['NFe', 'FormaEmissao', '0'],
+            ['NFe', 'ValidarDigest', '1'],
             ['NFe', 'ModeloDF', '1'],
             ['NFe', 'Ambiente', $job->environment === 'homologation' ? '1' : '0'],
             ['NFe', 'VersaoDF', '3'],
