@@ -1,8 +1,8 @@
 /* DANFE NFC-e v6.0 - impressão térmica 58/80mm, sem dependência de impressora fiscal. */
 :root{font-family:Arial,Helvetica,sans-serif;color:#111;background:#e9eef2}
 *{box-sizing:border-box}
-body{--paper-width:80mm;--danfe-font:10px;margin:0;padding:18px;font-size:var(--danfe-font)}
-body[data-paper="58"]{--paper-width:58mm;--danfe-font:9px}
+body{--paper-width:80mm;--danfe-font:11px;margin:0;padding:18px;font-size:var(--danfe-font)}
+body[data-paper="58"]{--paper-width:58mm;--danfe-font:10px}
 .danfe-tools{max-width:900px;margin:0 auto 18px;padding:16px 18px;background:#fff;border:1px solid #d3dce4;border-radius:7px;color:#263d50}
 .danfe-tools-title{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .danfe-tools-title strong{font-size:16px}
