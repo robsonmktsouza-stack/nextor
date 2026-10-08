@@ -21,8 +21,25 @@
   @endif
   @if($tab==='nfce' && $document->xml_path && auth()->user()->canAccess('fiscal'))
     <a class="btn btn-secondary" href="{{ route('fiscal.nfce.xml',$document) }}">
-      @include('partials.icon',['name'=>'download','size'=>16]) {{ $document->status==='authorized' && str_ends_with($document->xml_path,'authorized.xml') ? 'XML autorizado' : 'XML assinado' }}
+      @include('partials.icon',['name'=>'download','size'=>16])
+      {{ $document->status==='authorized'
+         && (str_ends_with($document->xml_path,'authorized.xml') || str_ends_with($document->xml_path,'authorized-recovered.xml'))
+         ? 'Baixar XML autorizado' : 'Baixar XML assinado' }}
     </a>
+  @endif
+  @if($tab==='nfce' && $document->status==='authorized'
+      && !str_ends_with((string) $document->xml_path,'authorized-recovered.xml')
+      && auth()->user()->canAccess('fiscal'))
+    <form method="post" action="{{ route('fiscal.nfce.recover-xml',$document) }}"
+      data-confirm-submit="Reconstruir somente o XML autorizado com os arquivos já salvos? A NFC-e não será retransmitida."
+      data-confirm-kind="action"
+      data-confirm-title="Recuperar XML autorizado"
+      data-confirm-label="Recuperar XML">
+      @csrf
+      <button type="submit" class="btn btn-secondary">
+        @include('partials.icon',['name'=>'refresh-cw','size'=>16]) Recuperar XML autorizado
+      </button>
+    </form>
   @endif
   @if(auth()->user()->canAccess('settings'))
     <a class="btn btn-secondary" href="{{ route('settings.index',['tab'=>$configuration['settings_tab']]) }}">@include('partials.icon',['name'=>'settings','size'=>16]) Configurar</a>
