@@ -51,7 +51,8 @@ final class NFCeTaxRuleApplicationService
                 $tax = is_array($item['tax_defaults'] ?? null) ? $item['tax_defaults'] : [];
                 unset(
                     $tax['fiscal_rule_id'], $tax['fiscal_rule_revision'], $tax['fiscal_rule_name'],
-                    $tax['fiscal_group_id'], $tax['fiscal_group_revision'], $tax['fiscal_group_name']
+                    $tax['fiscal_group_id'], $tax['fiscal_group_revision'], $tax['fiscal_group_name'],
+                    $tax['fiscal_config_source']
                 );
                 $classification = $result['tax'];
                 $item['tax_defaults']=array_replace($tax,$classification);
