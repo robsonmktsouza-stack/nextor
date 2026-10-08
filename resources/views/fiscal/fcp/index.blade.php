@@ -9,8 +9,7 @@
 $ufOptions=['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO'];
 @endphp
 <section class="editor-panel settings-panel" style="margin-bottom:14px">
-  <div class="settings-panel-head"><div><h2>Regra FCP por estado e NCM</h2><p>Cadastre apenas alíquotas revisadas. Uma UF pode ter várias regras por prefixo NCM, com vigências distintas.</p></div></div>
-  <div class="inline-note">O cadastro não ativa o cálculo de FCP. No emissor NFC-e inicial, um FCP ativo aplicável bloqueia a emissão por regras fiscais até que exista cálculo validado para o caso.</div>
+  <div class="settings-panel-head"><div><h2>Regra FCP por estado e NCM</h2><p>Defina as alíquotas por estado, NCM e período de vigência.</p></div></div>
   <form method="post" action="{{ route('fiscal.fcp.store') }}" class="settings-editor">
     @csrf
     <div class="editor-grid cols-12 settings-grid" style="margin-top:12px">
@@ -30,7 +29,7 @@ $ufOptions=['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA
 </section>
 
 <section class="cms-card">
-  <div class="card-header"><div><h2>Regras FCP cadastradas</h2><p>{{ $rules->count() }} regra(s). Estados sem alíquota configurada não recebem uma alíquota presumida.</p></div></div>
+  <div class="card-header"><div><h2>Regras FCP cadastradas</h2><p>{{ $rules->count() }} regra(s) cadastrada(s)</p></div></div>
   <div class="table-scroll">
     <table class="cms-table">
       <thead><tr><th>UF</th><th>NCM</th><th>Alíquota</th><th>FCP próprio</th><th>Vigência</th><th>Situação</th><th></th></tr></thead>
