@@ -5,6 +5,15 @@
 @if(auth()->user()->canAccess('returns') && $sale->operation_type==='sale' && $sale->status==='completed')
 <a class="btn btn-primary" href="{{ route('sales.returns.create',['sale'=>$sale->id]) }}">@include('partials.icon',['name'=>'return','size'=>16]) Nova devolução</a>
 @endif
+@if($nfceDocument?->status==='authorized'
+    && (auth()->user()->canAccess('fiscal') || auth()->user()->canAccess('pdv'))
+    && (str_ends_with((string)$nfceDocument->xml_path,'authorized.xml')
+        || str_ends_with((string)$nfceDocument->xml_path,'authorized-recovered.xml')))
+<a class="btn btn-success" target="_blank" rel="noopener noreferrer"
+   href="{{ route(auth()->user()->canAccess('fiscal') ? 'fiscal.nfce.danfe' : 'pdv.nfce.danfe',$nfceDocument) }}">
+  @include('partials.icon',['name'=>'print','size'=>16]) Imprimir DANFE NFC-e
+</a>
+@endif
 @if($sale->status==='completed')
 <button class="btn btn-danger-outline" data-dialog-open="sale-cancel" type="button">@include('partials.icon',['name'=>'x','size'=>16]) Cancelar</button>
 @endif
