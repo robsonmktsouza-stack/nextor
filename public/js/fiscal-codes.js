@@ -10,6 +10,7 @@
     const raw=(match ? match[1] : String(name||'')).replace(/_default$/,'');
     if(raw==='origin' || raw==='icms_origin') return 'origin';
     if(raw==='crt') return 'crt';
+    if(['ibs_cbs_class','tax_classification_code','cclasstrib'].includes(raw)) return 'ibs_cbs_class';
     if(raw.includes('csosn')) return 'csosn';
     if(/^icms_cst(?:_|$)/.test(raw)) return 'icms_cst';
     if(/^(?:pis_cst|cofins_cst)(?:_|$)/.test(raw)) return 'pis_cofins_cst';
@@ -93,27 +94,43 @@
       add(oldValue,oldValue+' — Código já cadastrado (conferir)');
     }
 
-    const allowCustom=catalog==='cfop' || catalog==='cfop_pattern';
+    const allowCustom=catalog==='cfop' || catalog==='cfop_pattern' || catalog==='ibs_cbs_class';
     let other=null;
     if(allowCustom){
-      add('__manual__','Outro CFOP — digitar código');
+      add('__manual__',catalog==='ibs_cbs_class' ? 'Outra classificação — informar código (consultar tabela oficial)' : 'Outro CFOP — digitar código');
       other=document.createElement('input');
       other.type='text';
       other.inputMode='numeric';
-      other.maxLength=4;
-      other.pattern=catalog==='cfop_pattern'?'(?:[1-7][0-9]{3}|x[0-9]{3})':'[1-7][0-9]{3}';
-      other.placeholder='Informe o CFOP';
+      other.maxLength=catalog==='ibs_cbs_class'?6:4;
+      other.pattern=catalog==='ibs_cbs_class'?'[0-9]{6}':(catalog==='cfop_pattern'?'(?:[1-7][0-9]{3}|x[0-9]{3})':'[1-7][0-9]{3}');
+      other.placeholder=catalog==='ibs_cbs_class'?'Informe os 6 dígitos':'Informe o CFOP';
       other.className='fiscal-cfop-manual';
       other.hidden=true;
       other.dataset.fiscalCatalogReady='1';
-      other.setAttribute('aria-label','Outro CFOP');
+      other.setAttribute('aria-label',catalog==='ibs_cbs_class'?'Outra classificação tributária':'Outro CFOP');
       other.addEventListener('input',()=>{
         // Bloquear caracteres não permitidos para manter só 4 posições.
-        other.value=other.value.replace(/[^0-9x]/gi,'').slice(0,4);
+        other.value=other.value.replace(catalog==='cfop_pattern'?/[^0-9x]/gi:/\D/g,'').slice(0,other.maxLength);
       });
     }
 
     select.value=oldValue || '';
+    if(catalog==='ibs_cbs_class'){
+      const prefix=select.closest('form')?.querySelector(
+        '[name="tax_config[ibs_cbs_cst]"],[name="tax_defaults[ibs_cst]"],[name="ibs_cst_default"]'
+      );
+      const filterByCst=()=>{
+        const active=String(prefix?.value||'').trim();
+        [...select.options].forEach(option=>{
+          if(/^\d{6}$/.test(option.value)){
+            option.disabled=!!active && /^\d{3}$/.test(active) && !option.value.startsWith(active)
+              && option.value!==select.value;
+          }
+        });
+      };
+      prefix?.addEventListener('change',filterByCst);
+      filterByCst();
+    }
     const syncManual=()=>{
       if(!other)return;
       const manual=select.value==='__manual__';
