@@ -65,7 +65,7 @@
           @endif
         </div>
       </div>
-      <p class="editor-help">Vinculação para futuros cálculos e emissão de NFS-e. Não ativa automaticamente a emissão fiscal do serviço.</p>
+      
       @if($service->tax_group)<p class="editor-help">Referência legada anterior: {{ $service->tax_group }}</p>@endif
     </div>
 
