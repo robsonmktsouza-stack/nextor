@@ -226,18 +226,24 @@ class SettingsController extends Controller
     public function uploadCertificate(Request $request)
     {
         $data=$request->validate([
-            'certificate'=>['required','file','mimes:pfx,p12','max:10240'],
+            'certificate'=>['required','file','extensions:pfx,p12','max:10240'],
             'certificate_password'=>['required','string','max:255'],
         ]);
 
         $bytes=file_get_contents($request->file('certificate')->getRealPath());
         $expiresAt=null;
 
-        if(function_exists('openssl_pkcs12_read')) {
+        if(!function_exists('openssl_pkcs12_read')) {
+            throw ValidationException::withMessages([
+                'certificate'=>'A extensão OpenSSL precisa estar habilitada para validar o certificado A1.',
+            ]);
+        }
+
+        {
             $certs=[];
             if(!@openssl_pkcs12_read($bytes,$certs,$data['certificate_password'])) {
                 throw ValidationException::withMessages([
-                    'certificate'=>'Não foi possível abrir o certificado A1. Confira o arquivo e a senha.',
+                    'certificate'=>'Certificado PKCS#12 inválido ou senha incorreta. Confira o arquivo .pfx/.p12 e a senha.',
                 ]);
             }
 
