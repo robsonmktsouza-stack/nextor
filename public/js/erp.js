@@ -390,9 +390,30 @@
         searchBox.autocomplete='off';
         searchBox.addEventListener('input',filterOptions);
         searchBox.addEventListener('keydown',event=>{
-          if(event.key==='Escape'){event.preventDefault();closeUiSelects();trigger.focus();}
-          if(event.key==='Enter'){event.preventDefault();menu.querySelector('.ui-select-option:not([hidden]):not(:disabled)')?.click();}
+          if(event.key==='Escape'){
+            event.preventDefault();closeUiSelects();trigger.focus();
+          }
+          if(event.key==='Enter'){
+            event.preventDefault();
+            menu.querySelector('.ui-select-option:not([hidden]):not(:disabled)')?.click();
+          }
+          if(event.key==='ArrowDown'){
+            event.preventDefault();
+            menu.querySelector('.ui-select-option:not([hidden]):not(:disabled)')?.focus();
+          }
           event.stopPropagation();
+        });
+        menu.addEventListener('keydown',event=>{
+          if(!event.target.classList.contains('ui-select-option'))return;
+          if(event.key==='Escape'){
+            event.preventDefault();closeUiSelects();trigger.focus();return;
+          }
+          if(!['ArrowDown','ArrowUp'].includes(event.key))return;
+          event.preventDefault();
+          const list=[...menu.querySelectorAll('.ui-select-option:not([hidden]):not(:disabled)')];
+          const current=list.indexOf(event.target);
+          const next=event.key==='ArrowDown'?Math.min(list.length-1,current+1):Math.max(0,current-1);
+          list[next]?.focus();
         });
         menu.appendChild(searchBox);
       }
