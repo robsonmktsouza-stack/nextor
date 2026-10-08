@@ -108,8 +108,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/fiscal/rules',[FiscalTaxRuleController::class,'index'])->name('fiscal.tax-rules.index')->middleware('permission:settings');
     Route::post('/fiscal/rules',[FiscalTaxRuleController::class,'store'])->name('fiscal.tax-rules.store')->middleware('permission:settings');
     Route::put('/fiscal/rules/{fiscalTaxRule}',[FiscalTaxRuleController::class,'update'])->name('fiscal.tax-rules.update')->middleware('permission:settings');
-    Route::post('/fiscal/rules/mode',[FiscalTaxRuleController::class,'mode'])->name('fiscal.tax-rules.mode')->middleware('permission:settings');
-    Route::post('/fiscal/{fiscalDocumentJob}/apply-tax-rules',[FiscalTaxRuleController::class,'apply'])->name('fiscal.tax-rules.apply')->middleware('permission:fiscal');
 
     Route::get('/fiscal/nfe/create',[NfeDraftController::class,'create'])->name('fiscal.nfe.create')->middleware('permission:fiscal');
     Route::get('/fiscal/nfe/drafts',[NfeDraftController::class,'index'])->name('fiscal.nfe.drafts.index')->middleware('permission:fiscal');
