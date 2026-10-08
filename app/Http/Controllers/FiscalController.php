@@ -138,8 +138,14 @@ class FiscalController extends Controller
                 ->with('error', collect($e->errors())->flatten()->implode(' '));
         }
 
+        $error = (string) $fiscalDocumentJob->fresh()?->error_message;
+        if ($error !== '') {
+            return redirect()->route('fiscal.show', $fiscalDocumentJob)
+                ->with('error', $error);
+        }
+
         return redirect()->route('fiscal.show', $fiscalDocumentJob)
-            ->with('success', 'Dados fiscais dos produtos atualizados nesta NFC-e. A venda e a numeração foram preservadas.');
+            ->with('success', 'Dados fiscais atualizados conforme as configurações da empresa.');
     }
 
     public function issueNfce(FiscalDocumentJob $fiscalDocumentJob, \App\Services\Fiscal\NFCePreflightService $preflight)
