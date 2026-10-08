@@ -60,10 +60,9 @@
   <section class="editor-panel settings-panel">
     <div class="settings-panel-head"><div><h2>ICMS</h2></div></div>
     <div class="editor-grid cols-12 settings-grid">
-      <label class="field col-3"><span>CSOSN geral</span><input name="icms_csosn" maxlength="3" inputmode="numeric" value="{{ old('icms_csosn',$group->icms_csosn) }}" placeholder="Ex.: 101"></label>
-      <label class="field col-3"><span>Alternativa para NFC-e</span><input name="nfce_csosn" maxlength="3" inputmode="numeric" value="{{ old('nfce_csosn',$group->nfce_csosn) }}" placeholder="Ex.: 102"></label>
-      <label class="field col-3"><span>CST ICMS (regime normal)</span><input name="icms_cst" maxlength="2" inputmode="numeric" value="{{ old('icms_cst',$group->icms_cst) }}"></label>
-      <label class="field col-3"><span>IPI CST</span><input name="ipi_cst" maxlength="2" inputmode="numeric" value="{{ old('ipi_cst',$group->ipi_cst) }}"></label>
+      <label class="field col-4"><span>CSOSN geral</span><input name="icms_csosn" maxlength="3" inputmode="numeric" value="{{ old('icms_csosn',$group->icms_csosn) }}" placeholder="Ex.: 101"></label>
+      <label class="field col-4"><span>Alternativa para NFC-e</span><input name="nfce_csosn" maxlength="3" inputmode="numeric" value="{{ old('nfce_csosn',$group->nfce_csosn) }}" placeholder="Ex.: 102"></label>
+      <label class="field col-4"><span>CST ICMS (regime normal)</span><input name="icms_cst" maxlength="2" inputmode="numeric" value="{{ old('icms_cst',$group->icms_cst) }}"></label>
     </div>
     <div class="editor-grid cols-12 settings-grid">
       @foreach($sections['ICMS'] as [$key,$label])
@@ -99,6 +98,7 @@
     <div class="editor-grid cols-12 settings-grid">
       <label class="field col-3"><span>CST IS</span><input name="tax_config[is_cst]" maxlength="3" value="{{ $val('is_cst') }}"></label>
       <label class="field col-3"><span>Classificação IS</span><input name="tax_config[is_class]" maxlength="6" value="{{ $val('is_class') }}"></label>
+      <label class="field col-3"><span>CST IPI</span><input name="ipi_cst" maxlength="2" inputmode="numeric" value="{{ old('ipi_cst',$group->ipi_cst) }}"></label>
       @foreach([['is_rate','Alíquota IS (%)'],['ipi_rate','Alíquota IPI (%)'],['iss_rate','Alíquota ISS (%)']] as [$key,$label])
         <label class="field col-2"><span>{{ $label }}</span><input type="number" min="0" max="100" step="0.0001" name="tax_config[{{ $key }}]" value="{{ $val($key) }}"></label>
       @endforeach
