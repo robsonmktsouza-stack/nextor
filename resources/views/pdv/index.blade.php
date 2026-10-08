@@ -110,7 +110,12 @@
       <span>Troco: <strong>R$ {{ number_format((float)session('pdv_change'),2,',','.') }}</strong></span>
     @endif
   </div>
-  <a href="{{ route('sales.show',session('pdv_last_sale')) }}">Abrir venda</a>
+  <div class="pdv-last-sale-actions">
+    @if(auth()->user()->canAccess('fiscal'))
+      <a href="{{ route('pdv.receipt', ['sale' => session('pdv_last_sale'), 'print' => 0]) }}">Conferir NFC-e</a>
+    @endif
+    <a href="{{ route('sales.show',session('pdv_last_sale')) }}">Abrir venda</a>
+  </div>
 </div>
 @endif
 
