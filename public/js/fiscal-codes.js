@@ -139,7 +139,10 @@
     };
     const display=code=>{
       if(!code)return '';
-      return code+' — '+(entries[code]||'Código informado (conferir)');
+      const description=entries[code]||'Código informado (conferir)';
+      const brief=description.length>38 ? description.slice(0,36).trimEnd()+'…' : description;
+      search.title=code+' — '+description;
+      return code+' — '+brief;
     };
     const validate=()=>{
       const code=source.value;
@@ -188,15 +191,8 @@
       wrapper.classList.add('open');
       list.hidden=false;
       search.setAttribute('aria-expanded','true');
-      wrapper.classList.remove('drop-up');
-      requestAnimationFrame(()=>{
-        if(!wrapper.classList.contains('open'))return;
-        const rect=list.getBoundingClientRect();
-        if(rect.bottom>window.innerHeight-8
-          && search.getBoundingClientRect().top>rect.height+8){
-          wrapper.classList.add('drop-up');
-        }
-      });
+      // Lista no fluxo do formulário: abre abaixo do campo e move a
+      // próxima linha, sem cobrir os outros impostos nem cards adjacentes.
     };
 
     const choose=code=>{
@@ -225,7 +221,7 @@
       const q=normalize(query);
       list.replaceChildren();
       const matches=catalogItems.filter(item=>isAllowed(item.code)&&item.search.includes(q));
-      matches.slice(0,45).forEach(item=>option(item.code,item.description));
+      matches.slice(0,7).forEach(item=>option(item.code,item.description));
       if(allowManual&&manualPattern.test(String(query).trim())
         && !matches.some(item=>item.code===String(query).trim())
         && isAllowed(String(query).trim())){
@@ -236,10 +232,10 @@
         empty.className='fiscal-code-empty';
         empty.textContent='Nenhum código encontrado';
         list.appendChild(empty);
-      }else if(matches.length>45){
+      }else if(matches.length>7){
         const help=document.createElement('p');
         help.className='fiscal-code-empty';
-        help.textContent='Digite para refinar a pesquisa';
+        help.textContent='Continue digitando para ver mais resultados';
         list.appendChild(help);
       }
       highlighted=0;
