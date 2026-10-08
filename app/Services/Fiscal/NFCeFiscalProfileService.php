@@ -4,13 +4,12 @@ namespace App\Services\Fiscal;
 
 use App\Models\FiscalFcpRule;
 use App\Models\FiscalTaxGroup;
-use App\Models\Product;
 use Illuminate\Support\Carbon;
 use RuntimeException;
 
 /**
- * Um único ponto de decisão fiscal para prévia e NFC-e preparada.
- * Retorna classificação, nunca transmite nem altera estoque/financeiro.
+ * Utiliza exclusivamente a configuração cadastrada ao preparar a NFC-e.
+ * Não transmite nem altera estoque, venda ou financeiro.
  */
 final class NFCeFiscalProfileService
 {
@@ -128,21 +127,6 @@ final class NFCeFiscalProfileService
         }
 
         throw new RuntimeException('Configure o grupo tributário ou os dados fiscais completos do produto.');
-    }
-
-    public function classifyProduct(Product $product, ?string $date = null): array
-    {
-        if (!$product->is_active) {
-            throw new RuntimeException('O produto está inativo.');
-        }
-
-        return $this->classify([
-            'item_type' => 'product',
-            'product_id' => $product->id,
-            'fiscal_tax_group_id' => $product->fiscal_tax_group_id,
-            'ncm' => $product->ncm,
-            'tax_defaults' => $product->tax_defaults,
-        ], $date);
     }
 
     private function fromGroup(FiscalTaxGroup $group, string $origin): array
