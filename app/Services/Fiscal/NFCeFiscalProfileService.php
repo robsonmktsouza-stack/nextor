@@ -33,6 +33,23 @@ final class NFCeFiscalProfileService
             throw new RuntimeException('Informe um NCM de oito dígitos no produto.');
         }
 
+        // Não descartar alíquotas configuradas no cadastro do produto:
+        // se o emissor atual não calcula o tributo, não transmitir com zero.
+        $savedTaxes = is_array($item['tax_defaults'] ?? null) ? $item['tax_defaults'] : [];
+        foreach ([
+            'icms_rate', 'icms_st_rate', 'base_reduction_rate', 'simple_credit_rate',
+            'mva_rate', 'fcp_rate', 'pis_rate', 'cofins_rate', 'ipi_rate',
+            'cbs_rate', 'ibs_uf_rate', 'ibs_municipal_rate',
+        ] as $field) {
+            $value = $savedTaxes[$field] ?? null;
+            if ($value !== null && $value !== '' && is_numeric($value)
+                && abs((float) $value) > 0.00001) {
+                throw new RuntimeException(
+                    'O produto possui '.$field.' configurado, mas o cálculo correspondente ainda não está disponível nesta NFC-e.'
+                );
+            }
+        }
+
         $hasFcp = FiscalFcpRule::query()
             ->where('uf', 'BA')
             ->where('is_active', true)
