@@ -1,0 +1,64 @@
+/* DANFE NFC-e v6.0 - impressão térmica 58/80mm, sem dependência de impressora fiscal. */
+:root{font-family:Arial,Helvetica,sans-serif;color:#111;background:#e9eef2}
+*{box-sizing:border-box}
+body{--paper-width:80mm;--danfe-font:10px;margin:0;padding:18px;font-size:var(--danfe-font)}
+body[data-paper="58"]{--paper-width:58mm;--danfe-font:9px}
+.danfe-tools{max-width:900px;margin:0 auto 18px;padding:16px 18px;background:#fff;border:1px solid #d3dce4;border-radius:7px;color:#263d50}
+.danfe-tools-title{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.danfe-tools-title strong{font-size:16px}
+.danfe-tools-title span{font-size:12px;color:#536577}
+.danfe-tools-buttons{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:12px}
+.danfe-tools-buttons a,.danfe-tools-buttons button{appearance:none;display:inline-flex;align-items:center;justify-content:center;padding:9px 12px;font-size:12px;font-family:inherit;font-weight:bold;text-decoration:none;border:1px solid #c5d0dc;border-radius:5px;background:#f8fafc;color:#234360;cursor:pointer}
+.danfe-tools-buttons a.selected{border-color:#2877c7;background:#eaf4ff;color:#12598e}
+.danfe-tools-buttons button{border-color:#267c46;background:#267c46;color:#fff}
+.danfe-tools-buttons button:disabled{cursor:not-allowed;opacity:.5}
+.danfe-tools p{font-size:11px;margin:11px 0 0;color:#586878;line-height:1.5}
+.danfe-paper{width:var(--paper-width);margin:0 auto;background:#fff;color:#000;padding:2mm;box-shadow:0 5px 28px #17243735;overflow:hidden;font-size:var(--danfe-font);font-weight:400;line-height:1.3;overflow-wrap:anywhere}
+.danfe-issuer{text-align:center;padding-bottom:6px}
+.danfe-issuer strong{display:block;font-size:1.12em;font-weight:800;line-height:1.25;margin-bottom:3px}
+.danfe-issuer>div{margin:1px 0}
+.danfe-caption{font-weight:700;line-height:1.3;margin-top:6px!important;border-top:1px dashed #111;padding-top:6px}
+.danfe-section{padding:6px 0;border-top:1px dashed #111}
+.danfe-table-heading{display:flex;justify-content:space-between;gap:5px;font-size:.9em;font-weight:800}
+.danfe-table-heading span:last-child{white-space:nowrap;text-align:right}
+.danfe-item{padding:5px 0 3px}
+.danfe-item+.danfe-item{border-top:1px dotted #8a8a8a}
+.danfe-item-head{display:grid;grid-template-columns:minmax(0,1fr) max-content;gap:5px}
+.danfe-item-head strong{font-weight:700;text-align:right;white-space:nowrap}
+.danfe-item-code{font-weight:bold}
+.danfe-item-measure{margin-top:2px;color:#222}
+.danfe-totals{font-size:1em}
+.danfe-line{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:2px 0}
+.danfe-line span:first-child{min-width:0}
+.danfe-line strong,.danfe-line span:last-child{white-space:nowrap}
+.danfe-grand-total{font-weight:800;font-size:1.18em;border-top:1px solid #222;margin-top:4px;padding-top:6px}
+.danfe-payment-heading{margin:6px 0 2px;border-top:1px dotted #888;padding-top:6px}
+.danfe-small{font-size:.88em;margin-top:5px}
+.danfe-lookup{text-align:center}
+.danfe-lookup strong{font-weight:800}
+.danfe-url{font-size:.92em;margin:3px 0 6px;overflow-wrap:anywhere}
+.danfe-access-key{font-family:ui-monospace,Consolas,monospace;letter-spacing:.03em;line-height:1.5;font-size:1.03em;font-weight:700;overflow-wrap:anywhere}
+.danfe-qr-section{text-align:center}
+.danfe-qr-title{font-weight:700;margin-bottom:3px}
+.danfe-qr{display:flex;align-items:center;justify-content:center;min-height:38mm;margin:3px auto 8px}
+.danfe-qr svg{display:block!important;width:36mm!important;height:36mm!important;max-width:100%;image-rendering:pixelated;shape-rendering:crispEdges;background:#fff}
+body[data-paper="58"] .danfe-qr svg{width:32mm!important;height:32mm!important}
+.danfe-qr-placeholder{font-weight:700;padding:8px;line-height:1.5}
+.danfe-consumer{font-weight:800;font-size:.95em;line-height:1.4;margin-top:3px}
+.danfe-center{text-align:center;margin:2px 0}
+.danfe-authorization{text-align:center;line-height:1.45}
+.danfe-authorization>div{margin:1px 0}
+.danfe-notes{white-space:pre-line;font-size:.95em;text-align:center}
+.danfe-homologation{font-weight:900;font-size:1em;text-align:center;line-height:1.45;text-transform:uppercase}
+@media(max-width:600px){
+  body{padding:8px}
+  .danfe-tools{padding:12px}
+}
+@media print{
+  @page{margin:0}
+  html,body{margin:0!important;padding:0!important;background:#fff!important;color:#000!important}
+  .danfe-tools{display:none!important}
+  .danfe-paper{margin:0!important;padding:2mm!important;box-shadow:none!important;max-width:none!important;width:var(--paper-width)!important}
+  .danfe-section,.danfe-item{break-inside:avoid}
+  .danfe-qr,.danfe-qr svg{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
