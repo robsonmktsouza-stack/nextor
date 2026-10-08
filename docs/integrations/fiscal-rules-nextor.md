@@ -99,3 +99,28 @@ O formulário de grupos de tributação agora inclui, como **configurações edi
 **Não significam cálculos concluídos.** Fora da classificação já suportada pela NFC-e BA/Simples, qualquer código ou percentual que requeira emissão diferente deve ser bloqueado. FCP ativo aplicável à UF/NCM bloqueia aplicação das regras até que se implemente o cálculo correspondente. Exceções interestaduais não são executadas na NFC-e interna.
 
 A referência eGestor serviu apenas para a cobertura de campos e a organização funcional; não foram copiados padrões de alíquotas, códigos tributários, nem assumidas regras legais.
+
+
+## Seletores fiscais centralizados — outubro/2026
+
+Implementação compartilhada:
+- `App\\Support\\FiscalCodeCatalog`: catálogos de códigos/descrições com chaves preservadas como texto, inclusive CST começando com zero.
+- `GET /reference/fiscal-codes`: endpoint autenticado para todos os formulários.
+- `public/js/fiscal-codes.js`: transforma automaticamente campos fiscais compatíveis em selects pesquisáveis, preservando `name`, valor antigo e validações existentes; observa modais/formulários adicionados dinamicamente.
+- `public/js/erp.js`: o seletor visual do NEXTOR agora tem pesquisa por código ou descrição e navegação pelo teclado.
+- O mesmo catálogo atende campos de produtos, padrões tributários, grupos fiscais, regras fiscais e formulários dinâmicos que usem os mesmos nomes.
+
+Catálogos embutidos: origem da mercadoria, CSOSN, CST ICMS, CST PIS/COFINS, CST IPI, CRT, CST IBS/CBS, modalidade BC ICMS e BC ST, exigibilidade ISS, CFOPs frequentes e CFOP paramétrico `x102`.
+ 
+Classificação IBS/CBS (`cClassTrib`): seleção por código e descrição, filtrada pelo CST de três dígitos. A referência inicial (`resources/data/fiscal/cclasstrib-community.json`) reproduz **141 códigos de uma fonte comunitária**, preservando a licença em `resources/data/fiscal/ModelagemRTC.LICENSE`; **não é a tabela oficial completa vigente em outubro de 2026**. A opção **Outra classificação — informar código** atende códigos ausentes. Antes de produção, é obrigatório confrontar a versão vigente do Portal NF-e / IT 2025.002. Fonte pública: https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=%2FNJarYc9nus%3D.
+
+CFOP: a lista embarcada contém os códigos mais comuns. O seletor filtra prefixos por operação quando identificável e permite **Outro CFOP** para manter códigos válidos fora dessa lista. O catálogo de referência não significa que qualquer CFOP listado seja válido para uma operação.
+
+Os catálogos **não substituem** a legislação, não geram alíquotas e não modificam as regras de emissão ACBr. Dados IS/ANP, NCM, NBS e códigos municipais dependem de tabelas específicas, versionadas e atualizadas por órgão responsável — não devem ser substituídos por listas inventadas ou incompletas tratadas como definitivas.
+
+Para validar em Windows:
+```bat
+git pull
+php artisan optimize:clear
+vendor\bin\phpunit --filter "FiscalCodeCatalog|NFCe|FiscalTaxRule|FiscalTaxGroup"
+```
