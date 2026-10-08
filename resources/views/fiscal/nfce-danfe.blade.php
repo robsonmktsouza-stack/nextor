@@ -32,9 +32,9 @@
     <span>Série {{ $danfe['series'] }} · nº {{ $danfe['number'] }} · {{ $danfe['homologation'] ? 'Homologação' : 'Produção' }}</span>
   </div>
   <div class="danfe-tools-buttons">
-    <a href="{{ route('fiscal.nfce.danfe',['fiscalDocumentJob'=>$fiscalDocument,'paper'=>'80']) }}"
+    <a href="{{ route($printRoute,['fiscalDocumentJob'=>$fiscalDocument,'paper'=>'80']) }}"
        class="{{ $paper === '80' ? 'selected' : '' }}" aria-current="{{ $paper === '80' ? 'page' : 'false' }}">80 mm</a>
-    <a href="{{ route('fiscal.nfce.danfe',['fiscalDocumentJob'=>$fiscalDocument,'paper'=>'58']) }}"
+    <a href="{{ route($printRoute,['fiscalDocumentJob'=>$fiscalDocument,'paper'=>'58']) }}"
        class="{{ $paper === '58' ? 'selected' : '' }}" aria-current="{{ $paper === '58' ? 'page' : 'false' }}">58 mm</a>
     <button id="printDanfe" type="button" disabled>Preparando QR Code...</button>
     @if(auth()->user()->canAccess('fiscal'))
