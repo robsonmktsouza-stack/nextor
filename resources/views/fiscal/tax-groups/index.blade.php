@@ -4,6 +4,7 @@
 @section('actions')
   <a class="btn btn-secondary" href="{{ route('settings.index',['tab'=>'tax']) }}">@include('partials.icon',['name'=>'arrow-left','size'=>16]) Tributação</a>
   <a class="btn btn-secondary" href="{{ route('fiscal.tax-rules.index') }}">@include('partials.icon',['name'=>'layers','size'=>16]) Regras por NCM / produto</a>
+  <a class="btn btn-secondary" href="{{ route('fiscal.fcp.index') }}">@include('partials.icon',['name'=>'layers','size'=>16]) Tabela FCP</a>
   <a class="btn btn-success" href="{{ route('fiscal.tax-groups.create') }}">@include('partials.icon',['name'=>'plus','size'=>16]) Novo grupo</a>
 @endsection
 
