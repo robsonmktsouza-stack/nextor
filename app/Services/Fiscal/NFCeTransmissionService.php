@@ -17,6 +17,8 @@ final class NFCeTransmissionService
     public function __construct(
         private readonly NFCePreflightService $preflight,
         private readonly NFCeIniBuilder $builder,
+        private readonly NFCeSefazResponseParser $responses,
+        private readonly NFCeProtocolXmlService $protocolXml,
     ) {}
 
     public function process(int $id): void
@@ -67,16 +69,17 @@ final class NFCeTransmissionService
                 $service->validateXml();
                 $signedXml = $service->getXml();
 
-                if (!str_contains($signedXml, '<Signature') || !str_contains($signedXml, '<NFe')) {
-                    throw new RuntimeException('ACBr não retornou XML NFC-e assinado.');
-                }
+                // Verificar a assinatura e chave da NFC-e efetivamente gerada.
+                $signedKey = $this->protocolXml->verifySigned($signedXml, $job);
 
                 $basePath = 'fiscal/nfce/'.$job->id;
                 $signedPath = $basePath.'/signed.xml';
                 if (!Storage::disk('local')->put($signedPath, $signedXml)) {
                     throw new RuntimeException('Falha ao preservar XML assinado antes da transmissão.');
                 }
-                $job->update(['xml_path' => $signedPath]);
+                // Preservar chave antes da chamada externa: em caso de timeout
+                // a consulta poderá usar a MESMA chave, sem reemitir.
+                $job->update(['xml_path' => $signedPath, 'access_key' => $signedKey]);
 
                 // A partir daqui qualquer falha é situação INDETERMINADA:
                 // nunca repetir envio automaticamente com novo cNF ou nova numeração.
@@ -86,36 +89,46 @@ final class NFCeTransmissionService
                 Storage::disk('local')->put($responsePath, $response);
                 $job->update(['response_path' => $responsePath]);
 
-                $status = $this->interpret($response);
-                if ($status['cstat'] === '100' && $status['protocol'] && $status['key']) {
+                $status = $this->responses->parse($response);
+                if ($this->responses->authorized($status)) {
+                    // A chave retornada pela SEFAZ deve ser exatamente a chave
+                    // do XML assinado que foi armazenado antes do envio.
+                    if (!hash_equals($signedKey, $status['key'])) {
+                        throw new RuntimeException('A chave autorizada pela SEFAZ difere do XML enviado; conciliação necessária.');
+                    }
+
                     $xmlPath = $signedPath;
+                    $xmlWarning = null;
                     try {
-                        $authorizedXml = $service->getXml();
-                        if (str_contains($authorizedXml, '<protNFe')) {
-                            $authorizedPath = $basePath.'/authorized.xml';
-                            if (Storage::disk('local')->put($authorizedPath, $authorizedXml)) {
-                                $xmlPath = $authorizedPath;
-                            }
+                        $authorizedXml = $this->protocolXml->buildAuthorized($signedXml, $status);
+                        $authorizedPath = $basePath.'/authorized.xml';
+                        if (!Storage::disk('local')->put($authorizedPath, $authorizedXml)) {
+                            throw new RuntimeException('Não foi possível guardar nfeProc.');
                         }
-                    } catch (Throwable) {
-                        // Autorização SEFAZ prevalece; manter XML assinado e protocolo.
+                        $xmlPath = $authorizedPath;
+                    } catch (Throwable $error) {
+                        // SEFAZ autorizou; erro ao materializar XML não pode
+                        // desautorizar o documento nem provocar outro envio.
+                        $xmlWarning = 'NFC-e autorizada, porém XML com protocolo indisponível: '.$error->getMessage();
                     }
 
                     $job->update([
                         'status' => 'authorized',
-                        'access_key' => $status['key'],
+                        'access_key' => $signedKey,
                         'protocol' => $status['protocol'],
                         'xml_path' => $xmlPath,
                         'authorized_at' => now(),
                         'processed_at' => now(),
-                        'error_message' => null,
+                        'error_message' => $xmlWarning,
                     ]);
                 } else {
+                    $code = (string) ($status['cstat'] ?? '');
+                    $indeterminate = !$status['individual'] || in_array($code, ['103', '104', '105', '204', '539', '656'], true);
                     $job->update([
-                        'status' => $status['cstat'] !== null && (int) $status['cstat'] >= 200 && (int) $status['cstat'] < 1000
+                        'status' => !$indeterminate && ctype_digit($code) && (int) $code >= 200 && (int) $code < 1000
                             ? 'rejected'
                             : 'pending',
-                        'error_message' => 'Retorno SEFAZ: '.($status['cstat'] ?? 'desconhecido').' - '.$status['reason'],
+                        'error_message' => 'Retorno SEFAZ: '.($code ?: 'não identificado').' - '.$status['reason'],
                         'processed_at' => now(),
                     ]);
                 }
@@ -189,29 +202,4 @@ final class NFCeTransmissionService
         }
     }
 
-    private function interpret(string $response): array
-    {
-        $sections = @parse_ini_string($response, true, INI_SCANNER_RAW);
-        $result = ['cstat' => null, 'reason' => 'Resposta não interpretada', 'protocol' => null, 'key' => null];
-        if (!is_array($sections)) {
-            return $result;
-        }
-
-        foreach ($sections as $name => $section) {
-            if (!is_array($section)) {
-                continue;
-            }
-            // A resposta individual da NFC-e deve prevalecer sobre ENVIO/RETORNO.
-            if (preg_match('/^NFE\d+$/i', (string) $name)) {
-                $result['cstat'] = (string) ($section['CStat'] ?? $section['cStat'] ?? '');
-                $result['reason'] = (string) ($section['XMotivo'] ?? $section['xMotivo'] ?? '');
-                $result['protocol'] = (string) ($section['NProt'] ?? $section['nProt'] ?? '');
-                $result['key'] = (string) ($section['chDFe'] ?? $section['ChNFe'] ?? $section['chNFe'] ?? '');
-                return $result;
-            }
-            $result['cstat'] = (string) ($section['CStat'] ?? $section['cStat'] ?? $result['cstat']);
-            $result['reason'] = (string) ($section['XMotivo'] ?? $section['xMotivo'] ?? $result['reason']);
-        }
-        return $result;
-    }
 }
