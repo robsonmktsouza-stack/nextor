@@ -17,6 +17,7 @@ class Service extends Model
         'national_tax_code',
         'nbs',
         'tax_group',
+        'fiscal_tax_group_id',
         'tax_defaults',
         'is_active',
     ];
