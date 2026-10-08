@@ -28,6 +28,15 @@
     </a>
   @endif
   @if($tab==='nfce' && $document->status==='authorized'
+      && (str_ends_with((string)$document->xml_path,'authorized.xml')
+          || str_ends_with((string)$document->xml_path,'authorized-recovered.xml'))
+      && auth()->user()->canAccess('fiscal'))
+    <a class="btn btn-success" target="_blank" rel="noopener noreferrer"
+      href="{{ route('fiscal.nfce.danfe',$document) }}">
+      @include('partials.icon',['name'=>'print','size'=>16]) Imprimir DANFE NFC-e
+    </a>
+  @endif
+  @if($tab==='nfce' && $document->status==='authorized'
       && !str_ends_with((string) $document->xml_path,'authorized-recovered.xml')
       && auth()->user()->canAccess('fiscal'))
     <form method="post" action="{{ route('fiscal.nfce.recover-xml',$document) }}"
