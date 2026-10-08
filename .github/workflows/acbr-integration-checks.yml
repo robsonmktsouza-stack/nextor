@@ -45,6 +45,11 @@ jobs:
         run: |
           cp .env.example .env || touch .env
           php artisan key:generate --force
+      - name: Validate registered routes and compiled Blade syntax
+        run: |
+          php artisan route:list --path=danfe
+          php artisan view:cache
+          find storage/framework/views -name '*.php' -print0 | xargs -0 -n1 php -l
       - name: Check NFC-e emission and SEFAZ response handling
         env:
           DB_CONNECTION: sqlite
