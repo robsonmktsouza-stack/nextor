@@ -1,8 +1,10 @@
-/* DANFE NFC-e v6.0 - impressão térmica 58/80mm, sem dependência de impressora fiscal. */
+/* DANFE NFC-e: a largura visual deve coincidir com a largura IMPRIMIVEL,
+   nao com a largura nominal da bobina. POS80 ~72mm, POS58(48) ~48mm.
+   Papel/corte/comprimento permanecem configurados no driver de impressao. */
 :root{font-family:Arial,Helvetica,sans-serif;color:#111;background:#e9eef2}
 *{box-sizing:border-box}
-body{--paper-width:80mm;--danfe-font:11px;margin:0;padding:18px;font-size:var(--danfe-font)}
-body[data-paper="58"]{--paper-width:58mm;--danfe-font:10px}
+body{--paper-width:72mm;--danfe-font:11px;margin:0;padding:18px;font-size:var(--danfe-font)}
+body[data-paper="58"]{--paper-width:48mm;--danfe-font:10px}
 .danfe-tools{max-width:900px;margin:0 auto 18px;padding:16px 18px;background:#fff;border:1px solid #d3dce4;border-radius:7px;color:#263d50}
 .danfe-tools-title{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .danfe-tools-title strong{font-size:16px}
@@ -58,7 +60,7 @@ body[data-paper="58"] .danfe-qr svg{width:32mm!important;height:32mm!important}
   @page{margin:0}
   html,body{margin:0!important;padding:0!important;background:#fff!important;color:#000!important}
   .danfe-tools{display:none!important}
-  .danfe-paper{margin:0!important;padding:2mm!important;box-shadow:none!important;max-width:none!important;width:var(--paper-width)!important}
+  .danfe-paper{margin:0 auto!important;padding:2mm!important;box-shadow:none!important;max-width:none!important;width:var(--paper-width)!important}
   .danfe-section,.danfe-item{break-inside:avoid}
   .danfe-qr,.danfe-qr svg{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
