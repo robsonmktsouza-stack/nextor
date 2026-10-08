@@ -96,7 +96,7 @@ final class NFCeProtocolXmlService
         $document = new DOMDocument('1.0', 'UTF-8');
         $previous = libxml_use_internal_errors(true);
         try {
-            if (!$document->loadXML($xml, LIBXML_NONET | LIBXML_NOBLANKS)) {
+            if (!$document->loadXML($xml, LIBXML_NONET)) {
                 throw new RuntimeException('XML fiscal retornado pela ACBr não pode ser interpretado.');
             }
         } finally {
