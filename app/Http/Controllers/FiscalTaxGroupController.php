@@ -169,6 +169,14 @@ final class FiscalTaxGroupController extends Controller
             throw ValidationException::withMessages(['is_default'=>'O grupo padrão também deve estar ativo.']);
         }
 
+        $ibsCst=(string) data_get($data,'tax_config.ibs_cbs_cst','');
+        $ibsClass=(string) data_get($data,'tax_config.ibs_cbs_class','');
+        if ($ibsCst!=='' && $ibsClass!=='' && !str_starts_with($ibsClass,$ibsCst)) {
+            throw ValidationException::withMessages([
+                'tax_config.ibs_cbs_class'=>'A classificação tributária deve pertencer ao CST IBS/CBS selecionado.',
+            ]);
+        }
+
         $config=Arr::only($data['tax_config'] ?? [],
             array_merge(self::RATE_FIELDS,array_keys(self::TEXT_FIELDS),self::CALC_FIELDS,
                 ['force_interstate_cfop','iss_incentive','municipal_variations','state_variations']));
