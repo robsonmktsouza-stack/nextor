@@ -9,6 +9,7 @@ use App\Services\Fiscal\NFCeTaxRuleApplicationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use RuntimeException;
 use Throwable;
 
@@ -83,9 +84,16 @@ final class FiscalTaxRuleController extends Controller
             'cofins_cst' => ['required','regex:/^[0-9]{2}$/'],
             'priority' => ['required','integer','between:-100,100'],
             'valid_from' => ['nullable','date'],
-            'valid_until' => ['nullable','date','after_or_equal:valid_from'],
+            'valid_until' => ['nullable','date'],
             'notes' => ['nullable','string','max:2000'],
         ]);
+        if (!empty($data['valid_from']) && !empty($data['valid_until'])
+            && $data['valid_until'] < $data['valid_from']) {
+            throw ValidationException::withMessages([
+                'valid_until' => 'O fim da vigência não pode ser anterior ao início.',
+            ]);
+        }
+
         $data['ncm_prefix'] = trim((string) ($data['ncm_prefix'] ?? '')) ?: null;
         $data['is_active'] = $request->boolean('is_active');
 
