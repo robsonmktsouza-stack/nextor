@@ -101,6 +101,12 @@ O formulário de grupos de tributação agora inclui, como **configurações edi
 A referência eGestor serviu apenas para a cobertura de campos e a organização funcional; não foram copiados padrões de alíquotas, códigos tributários, nem assumidas regras legais.
 
 
+## Autocomplete fiscal — campo de busca com sugestões
+
+Os controles fiscais de código não apresentam mais um select com uma segunda barra de pesquisa. A interface usa **um único campo de busca** (com lista de sugestões imediatamente abaixo): digite código ou descrição, navegue com as setas e escolha com Enter ou mouse. Escape restaura o último código confirmado. O texto de descrição **não** é enviado ao servidor — somente o código original, mantido num campo oculto.
+
+A seleção não é automática ao digitar um trecho: o usuário precisa escolher um item. CFOPs não listados e cClassTrib não contidos na referência local podem ser informados digitando o código inteiro e escolhendo **Usar este código (conferir)**. Itens legados permanecem disponíveis, marcados para conferência. O componente é utilizado também nos formulários fiscais adicionados por modal, sem modificar os selects gerais do sistema.
+
 ## Seletores fiscais centralizados — outubro/2026
 
 Implementação compartilhada:
