@@ -12,6 +12,7 @@ class FiscalDocumentJob extends Model
         'environment','series','document_number','access_key','protocol','authorized_at',
         'cancellation_status','cancellation_reason','cancellation_requested_at','cancelled_at',
         'settings_snapshot','source_snapshot','error_message','prepared_at','processed_at',
+        'xml_path','response_path',
     ];
 
     protected function casts(): array
