@@ -120,7 +120,7 @@ class FiscalController extends Controller
             'dateFormat'=>AppSetting::dateFormat(),
             'nfcePreflightErrors'=>$fiscalDocumentJob->document_type==='nfce'
                 && $fiscalDocumentJob->status==='prepared'
-                    ? app(\\App\\Services\\Fiscal\\NFCePreflightService::class)->validate($fiscalDocumentJob)
+                    ? app(\App\Services\Fiscal\NFCePreflightService::class)->validate($fiscalDocumentJob)
                     : [],
         ]);
     }
