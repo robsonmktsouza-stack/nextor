@@ -40,7 +40,7 @@ final class NFCeIniBuilder
             'mod' => '65',
             'serie' => (string) $job->series,
             'nNF' => (string) $job->document_number,
-            'dhEmi' => now()->format('d/m/Y H:i:s'),
+            'dEmi' => now()->format('d/m/Y H:i:s'),
             'tpNF' => '1',
             'idDest' => '1',
             'tpAmb' => $job->environment === 'homologation' ? '2' : '1',
@@ -124,16 +124,18 @@ final class NFCeIniBuilder
             ]);
             $add('ICMS'.$i, [
                 'CSOSN' => $tax['icms_csosn'] ?? $tax['csosn'] ?? $tax['icms_csosn_default'] ?? AppSetting::value('tax', 'icms_csosn_default'),
-                'orig' => $item['origin'] ?? $tax['icms_origin_default'] ?? AppSetting::value('tax', 'icms_origin_default', '0'),
+                'Origem' => $item['origin'] ?? $tax['icms_origin_default'] ?? AppSetting::value('tax', 'icms_origin_default', '0'),
             ]);
             $add('PIS'.$i, [
                 'CST' => $tax['pis_cst'] ?? $tax['pis_cst_default'] ?? AppSetting::value('tax', 'pis_cst_default'),
                 'vBC' => '0.00',
+                'pPIS' => '0.00',
                 'vPIS' => '0.00',
             ]);
             $add('COFINS'.$i, [
                 'CST' => $tax['cofins_cst'] ?? $tax['cofins_cst_default'] ?? AppSetting::value('tax', 'cofins_cst_default'),
                 'vBC' => '0.00',
+                'pCOFINS' => '0.00',
                 'vCOFINS' => '0.00',
             ]);
         }
@@ -179,7 +181,10 @@ final class NFCeIniBuilder
                     'cAut' => $payment['authorization_code'] ?? null,
                 ];
             }
-            if ($index === count($source['payments'] ?? []) - 1 && (float) ($source['change_amount'] ?? 0) > 0) {
+            if ((float) ($source['change_amount'] ?? 0) > 0 && $index === 0 && $kind === 'cash') {
+                // O pagamento informado na NFC-e inclui o dinheiro efetivamente recebido.
+                // A venda financeira permanece pelo valor líquido, sem duplicar o troco.
+                $fields['vPag'] = $price((float) $payment['amount'] + (float) $source['change_amount']);
                 $fields['vTroco'] = $price($source['change_amount']);
             }
             $add('pag'.sprintf('%03d', $index + 1), $fields);
