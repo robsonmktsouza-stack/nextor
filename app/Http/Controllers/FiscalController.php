@@ -209,11 +209,12 @@ class FiscalController extends Controller
         $allowed = [
             'fiscal/nfce/'.$fiscalDocumentJob->id.'/signed.xml',
             'fiscal/nfce/'.$fiscalDocumentJob->id.'/authorized.xml',
+            'fiscal/nfce/'.$fiscalDocumentJob->id.'/authorized-recovered.xml',
         ];
         abort_unless(in_array($path, $allowed, true)
             && \Illuminate\Support\Facades\Storage::disk('local')->exists($path), 404);
 
-        $suffix = str_ends_with($path, 'authorized.xml') ? 'autorizada' : 'assinada';
+        $suffix = str_contains($path, '/authorized-') || str_ends_with($path, '/authorized.xml') ? 'autorizada' : 'assinada';
         $filename = 'NFCe-'.$fiscalDocumentJob->document_number.'-'.$suffix.'.xml';
         return \Illuminate\Support\Facades\Storage::disk('local')
             ->download($path, $filename, ['Content-Type' => 'application/xml']);
