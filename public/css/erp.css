@@ -2101,6 +2101,14 @@ body[data-show-tutorials="0"] .pdv-split-help{display:none!important}
 .fiscal-error-card strong,.fiscal-info-card strong{display:block;margin-bottom:3px}
 .fiscal-error-card p,.fiscal-info-card p{margin:0;font-size:12px;line-height:1.5}
 .fiscal-info-card{border:1px solid #d7e3ed;background:#f7fafc;color:#4f687c;display:block}
+/* NFC-e: correção fiscal dos itens sem recriar a venda */
+.fiscal-refresh-body{padding:14px 16px;display:grid;gap:13px}
+.fiscal-refresh-item{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;padding:10px 0;border-bottom:1px solid #edf0f2}
+.fiscal-refresh-item>div{min-width:0}
+.fiscal-refresh-item strong{display:block;font-size:12px;color:#263d50}
+.fiscal-refresh-values{margin-top:5px;font-size:11px;line-height:1.5;color:#687988}
+.fiscal-refresh-hint{display:block;color:#687988;font-size:11px;line-height:1.45}
+
 @media(max-width:760px){
   .fiscal-detail-status{grid-template-columns:repeat(2,minmax(0,1fr))}
   .fiscal-detail-grid{grid-template-columns:1fr}
