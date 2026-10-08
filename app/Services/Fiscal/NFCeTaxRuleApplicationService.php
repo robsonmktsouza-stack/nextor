@@ -6,6 +6,7 @@ use App\Models\AppSetting;
 use App\Models\CompanySetting;
 use App\Models\FiscalDocumentJob;
 use App\Models\FiscalTaxGroup;
+use App\Models\FiscalFcpRule;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -44,9 +45,24 @@ final class NFCeTaxRuleApplicationService
             }
 
             $date = ($source['operation_date'] ?? null) ?: $job->created_at?->toDateString();
+            $day=$date ?: now()->toDateString();
+            $fcpRules=FiscalFcpRule::query()
+                ->where('uf','BA')
+                ->where('is_active',true)
+                ->where('rate','>',0)
+                ->where(fn($query)=>$query->whereNull('valid_from')->orWhereDate('valid_from','<=',$day))
+                ->where(fn($query)=>$query->whereNull('valid_until')->orWhereDate('valid_until','>=',$day))
+                ->get();
             foreach ($items as $index => &$item) {
                 if (($item['item_type'] ?? '') !== 'product') {
                     throw new RuntimeException('Regras iniciais disponíveis apenas para produtos.');
+                }
+                $ncm=preg_replace('/\D/','',(string)($item['ncm'] ?? ''));
+                foreach ($fcpRules as $fcp) {
+                    if ($fcp->ncm_prefix === null
+                        || str_starts_with($ncm,$fcp->ncm_prefix)) {
+                        throw new RuntimeException('Item '.($index+1).': existe regra ativa de FCP aplicável à UF/NCM, mas o cálculo não está implementado para esta NFC-e. Desative apenas mediante revisão fiscal ou conclua o motor de FCP.');
+                    }
                 }
                 $group = null;
                 $rule = null;
