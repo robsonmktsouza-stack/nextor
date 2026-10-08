@@ -40,4 +40,4 @@ jobs:
         env:
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
-        run: php artisan test --filter=NFCeIniBuilderTest
+        run: php vendor/bin/phpunit --filter=NFCeIniBuilderTest
