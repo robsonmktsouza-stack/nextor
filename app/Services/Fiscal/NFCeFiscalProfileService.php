@@ -141,6 +141,7 @@ final class NFCeFiscalProfileService
             'product_id' => $product->id,
             'fiscal_tax_group_id' => $product->fiscal_tax_group_id,
             'ncm' => $product->ncm,
+            'tax_defaults' => $product->tax_defaults,
         ], $date);
     }
 
