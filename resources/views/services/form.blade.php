@@ -76,11 +76,27 @@
     </div>
 
     <div class="editor-panel tax-group-panel">
-      <label class="field">
-        <span>Grupo tributário vinculado</span>
-        <input name="tax_group" value="{{ old('tax_group',$service->tax_group) }}"
-               maxlength="120" placeholder="Ex.: Serviços — Simples Nacional">
-      </label>
+      <h3>Grupo tributário para serviços</h3>
+      <div class="editor-grid cols-12">
+        <label class="field col-8"><span>Tributação para serviços</span>
+          <select name="fiscal_tax_group_id">
+            <option value="">Sem grupo específico — usar padrão cadastrado, se houver</option>
+            @foreach($fiscalTaxGroups as $fiscalGroup)
+              <option value="{{ $fiscalGroup->id }}" @selected((string)old('fiscal_tax_group_id',$service->fiscal_tax_group_id)===(string)$fiscalGroup->id)>
+                {{ $fiscalGroup->name }}{{ $fiscalGroup->is_default ? ' · Padrão' : '' }}{{ !$fiscalGroup->is_active ? ' · Inativo' : '' }}
+              </option>
+            @endforeach
+          </select>
+        </label>
+        <div class="field col-4">
+          <span>Administração</span>
+          @if(auth()->user()->canAccess('settings'))
+            <a class="btn btn-secondary" href="{{ route('fiscal.tax-groups.index') }}">Gerenciar grupos</a>
+          @endif
+        </div>
+      </div>
+      <p class="editor-help">Vinculação para futuros cálculos e emissão de NFS-e. Não ativa automaticamente a emissão fiscal do serviço.</p>
+      @if($service->tax_group)<p class="editor-help">Referência legada anterior: {{ $service->tax_group }}</p>@endif
     </div>
   </section>
 
