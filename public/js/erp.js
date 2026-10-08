@@ -368,8 +368,34 @@
     wrapper.appendChild(menu);
 
     let optionsBuilt=false;
+    const searchable=select.hasAttribute('data-searchable');
+    let searchBox=null;
+    const filterOptions=()=>{
+      if(!searchBox) return;
+      const q=searchBox.value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').trim();
+      menu.querySelectorAll('.ui-select-option').forEach(item=>{
+        const label=item.textContent.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR');
+        item.hidden=!!q && !label.includes(q);
+      });
+    };
     const buildOptions=()=>{
       menu.innerHTML='';
+      searchBox=null;
+      if(searchable){
+        searchBox=document.createElement('input');
+        searchBox.type='search';
+        searchBox.className='ui-select-search';
+        searchBox.placeholder='Pesquisar código ou descrição...';
+        searchBox.setAttribute('aria-label','Pesquisar código ou descrição');
+        searchBox.autocomplete='off';
+        searchBox.addEventListener('input',filterOptions);
+        searchBox.addEventListener('keydown',event=>{
+          if(event.key==='Escape'){event.preventDefault();closeUiSelects();trigger.focus();}
+          if(event.key==='Enter'){event.preventDefault();menu.querySelector('.ui-select-option:not([hidden]):not(:disabled)')?.click();}
+          event.stopPropagation();
+        });
+        menu.appendChild(searchBox);
+      }
       [...select.options].forEach(option=>{
         const item=document.createElement('button');
         item.type='button';
@@ -393,6 +419,7 @@
         menu.appendChild(item);
       });
       optionsBuilt=true;
+      filterOptions();
     };
     const ensureOptions=()=>{if(!optionsBuilt) buildOptions();};
     const sync=()=>{
@@ -416,6 +443,7 @@
       menu.hidden=!willOpen;
       if(willOpen){
         ensureOptions();
+        if(searchBox){searchBox.value='';filterOptions();}
         sync();
         wrapper.classList.remove('drop-up');
         requestAnimationFrame(()=>{
@@ -424,6 +452,7 @@
         });
         const selected=menu.querySelector('.ui-select-option.selected:not(:disabled)');
         selected?.scrollIntoView({block:'nearest'});
+        if(searchBox)searchBox.focus({preventScroll:true});
       }
     };
 
@@ -473,6 +502,7 @@
     if(!e.target.closest('.ui-select')) closeUiSelects();
   });
   document.querySelectorAll('select').forEach(enhanceSelect);
+  window.NextorEnhanceSelect=enhanceSelect;
 
   // Campos numéricos e monetários padronizados do Nextor
   const numberIconSvg='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 6h10M10 12h10M10 18h10M4 6h1M4 12h1M4 18h1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
