@@ -4,7 +4,11 @@
 @section('actions')
   <a class="btn btn-secondary" href="{{ route('fiscal.index',['tab'=>$tab]) }}">@include('partials.icon',['name'=>'arrow-left','size'=>16]) Voltar</a>
   @if($tab==='nfce' && $document->status==='prepared' && empty($nfcePreflightErrors) && auth()->user()->canAccess('fiscal'))
-    <form method="post" action="{{ route('fiscal.nfce.emit',$document) }}" data-confirm-submit="Enviar esta NFC-e para a SEFAZ?">
+    <form method="post" action="{{ route('fiscal.nfce.emit',$document) }}"
+      data-confirm-submit="Deseja transmitir a NFC-e série {{ $document->series }}/{{ $document->document_number }} para a SEFAZ em ambiente de {{ $document->environment==='homologation' ? 'homologação' : 'produção' }}?"
+      data-confirm-kind="action"
+      data-confirm-title="Confirmar emissão da NFC-e"
+      data-confirm-label="Transmitir NFC-e">
       @csrf
       <button type="submit" class="btn btn-success">@include('partials.icon',['name'=>'check','size'=>16]) Emitir NFC-e</button>
     </form>
