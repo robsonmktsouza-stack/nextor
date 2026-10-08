@@ -49,6 +49,7 @@ jobs:
             tests/Feature/FiscalTaxRuleResolverTest.php \
             tests/Unit/NFCeProtocolXmlServiceTest.php \
             tests/Unit/NFCeTaxGroupTranslatorTest.php \
+            tests/Feature/FiscalTaxGroupPersistenceTest.php \
             tests/Unit/NFCeDanfeServiceTest.php \
             tests/Unit/NFCeSefazResponseParserTest.php; do
             php -l "$f"
