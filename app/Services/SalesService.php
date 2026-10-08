@@ -254,7 +254,16 @@ class SalesService
             return $sale->refresh();
         },3);
 
-        $this->fiscalPreparation->prepareForSale($sale);
+        try {
+            $this->fiscalPreparation->prepareForSale($sale);
+        } catch (\Throwable $e) {
+            // Venda, estoque e financeiro já foram confirmados. Evitar erro HTTP
+            // que leve o caixa a registrar outra venda por engano.
+            \Illuminate\Support\Facades\Log::error('Falha ao preparar documento fiscal', [
+                'sale_id' => $sale->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         // Emissão fiscal em fila, após efetivar a venda.
         // Evitar FFI em requisição HTTP com queue sync.
