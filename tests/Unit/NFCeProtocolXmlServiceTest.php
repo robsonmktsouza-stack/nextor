@@ -65,6 +65,39 @@ final class NFCeProtocolXmlServiceTest extends TestCase
         self::assertSame(str_repeat('2', 15), $document->getElementsByTagNameNS('http://www.portalfiscal.inf.br/nfe', 'nProt')->item(0)->textContent);
     }
 
+    public function test_acbr_date_is_normalized_and_signed_canonicalization_preserved(): void
+    {
+        $signed = $this->signedXml();
+        $response = [
+            'individual' => true,
+            'cstat' => '100',
+            'reason' => 'Autorizado o uso da NF-e',
+            'key' => str_repeat('1', 44),
+            'protocol' => str_repeat('2', 15),
+            'received_at' => '08/10/2026 13:55:37',
+            'digest' => 'BASE64DIGEST=',
+            'environment' => '2',
+            'application' => 'SVRS_TESTE',
+        ];
+
+        $document = new DOMDocument();
+        self::assertTrue($document->loadXML((new NFCeProtocolXmlService())->buildAuthorized($signed, $response)));
+        $original = new DOMDocument();
+        self::assertTrue($original->loadXML($signed));
+
+        $ns = 'http://www.portalfiscal.inf.br/nfe';
+        $sigNs = 'http://www.w3.org/2000/09/xmldsig#';
+        foreach ([[$ns, 'infNFe'], [$sigNs, 'SignedInfo']] as [$namespace, $tag]) {
+            $old = $original->getElementsByTagNameNS($namespace, $tag)->item(0);
+            $new = $document->getElementsByTagNameNS($namespace, $tag)->item(0);
+            self::assertSame($old->C14N(), $new->C14N());
+        }
+        self::assertSame(
+            '2026-10-08T13:55:37-03:00',
+            $document->getElementsByTagNameNS($ns, 'dhRecbto')->item(0)->textContent
+        );
+    }
+
     public function test_rejects_a_protocol_for_another_access_key(): void
     {
         $this->expectException(RuntimeException::class);
