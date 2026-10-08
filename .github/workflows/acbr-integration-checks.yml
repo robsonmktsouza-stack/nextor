@@ -22,6 +22,13 @@ jobs:
             app/Services/Fiscal/NFCeIniBuilder.php \
             app/Services/Fiscal/NFCePreflightService.php \
             app/Models/FiscalTaxRule.php \
+            app/Models/FiscalTaxGroup.php \
+            app/Services/Fiscal/NFCeTaxGroupTranslator.php \
+            app/Http/Controllers/FiscalTaxGroupController.php \
+            app/Http/Controllers/ProductController.php \
+            app/Http/Controllers/ServiceController.php \
+            database/migrations/2026_10_08_201000_create_fiscal_tax_groups_table.php \
+            database/migrations/2026_10_08_202000_link_fiscal_tax_groups_to_catalog.php \
             app/Services/Fiscal/FiscalTaxRuleResolver.php \
             app/Services/Fiscal/NFCeTaxRuleApplicationService.php \
             app/Http/Controllers/FiscalTaxRuleController.php \
@@ -41,6 +48,7 @@ jobs:
             tests/Feature/NFCeIniBuilderTest.php \
             tests/Feature/FiscalTaxRuleResolverTest.php \
             tests/Unit/NFCeProtocolXmlServiceTest.php \
+            tests/Unit/NFCeTaxGroupTranslatorTest.php \
             tests/Unit/NFCeDanfeServiceTest.php \
             tests/Unit/NFCeSefazResponseParserTest.php; do
             php -l "$f"
@@ -53,6 +61,7 @@ jobs:
           php artisan key:generate --force
       - name: Validate registered routes and compiled Blade syntax
         run: |
+          php artisan route:list --path=fiscal/tax-groups
           php artisan route:list --path=danfe
           php artisan view:cache
           find storage/framework/views -name '*.php' -print0 | xargs -0 -n1 php -l
@@ -60,4 +69,4 @@ jobs:
         env:
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
-        run: php vendor/bin/phpunit --filter='NFCe|FiscalTaxRule'
+        run: php vendor/bin/phpunit --filter='NFCe|FiscalTaxRule|FiscalTaxGroup'
