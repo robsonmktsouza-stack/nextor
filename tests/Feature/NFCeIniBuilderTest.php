@@ -77,7 +77,7 @@ final class NFCeIniBuilderTest extends TestCase
         self::assertStringNotContainsString('CSC', $ini);
     }
 
-    public function test_change_in_cash_payment_matches_the_paid_amount_and_net_sale(): void
+    public function test_split_payment_assigns_cash_change_only_to_cash_part(): void
     {
         $company = new CompanySetting([
             'document' => '39323356000100',
@@ -115,15 +115,16 @@ final class NFCeIniBuilderTest extends TestCase
                     'tax_defaults' => ['cfop_outbound_internal' => '5102', 'icms_csosn' => '102', 'pis_cst' => '49', 'cofins_cst' => '49'],
                 ]],
                 'payments' => [
-                    ['payment_method' => 'dinheiro', 'payment_kind' => 'cash', 'amount' => '10.00'],
+                    ['payment_method' => 'pix', 'payment_kind' => 'pix', 'amount' => '4.00'],
+                    ['payment_method' => 'dinheiro', 'payment_kind' => 'cash', 'amount' => '6.00'],
                 ],
-                'change_amount' => '10.00',
+                'change_amount' => '4.00',
             ],
         ]);
 
         $ini = app(NFCeIniBuilder::class)->build($document, $company);
         self::assertStringContainsString('vNF=10.00', $ini);
-        self::assertStringContainsString('vPag=20.00', $ini);
-        self::assertStringContainsString('vTroco=10.00', $ini);
+        self::assertStringContainsString("[pag001]\r\ntPag=17\r\nvPag=4.00", $ini);
+        self::assertStringContainsString("[pag002]\r\ntPag=01\r\nvPag=10.00\r\nvTroco=4.00", $ini);
     }
 }
