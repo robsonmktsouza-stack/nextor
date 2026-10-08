@@ -32,3 +32,51 @@ Nenhuma regra é populada automaticamente ou presume que todo produto esteja enq
 - Construir os grupos de cálculo e XML faltantes, com fórmulas parametrizadas e testes por enquadramento, evitando bases e alíquotas genéricas.
 - Acrescentar simulação em lote de produtos, histórico de quem aprovou cada regra e exportação para conferência.
 - Revisar os fluxos e formulários com capturas do eGestor fornecidas pelo operador — documentação pública do eGestor não reproduz toda a navegação interna.
+
+
+## Grupos de tributação — estrutura inspirada no eGestor
+
+O NEXTOR adiciona **Configurações → Tributação → Grupos de tributação**.
+
+### Cadastro
+
+- Grupo de produtos ou serviços; ativo/inativo e, opcionalmente, um único padrão por tipo.
+- CFOP base literal (por exemplo, 5102) ou prefixo parametrizado (por exemplo, x102). A tradução de x102 para 5102 **só ocorre** na NFC-e interna da Bahia já suportada.
+- ICMS: CSOSN geral e alternativa específica para NFC-e, CST regime normal, campos de alíquota, crédito e ST.
+- PIS/COFINS, IPI, ISS, IS e IBS/CBS possuem campos específicos de código e percentual. **Cadastrar é diferente de calcular ou transmitir**: os campos ainda não suportados pelo emissor são bloqueados se forem utilizados como regra de emissão, não descartados silenciosamente.
+- Histórico por revisão numérica. Atualizar o cadastro não muda documentos já preparados/assinados, exceto por reaplicação explícita de snapshot **somente** antes de assinar/transmitir.
+
+### Produtos e serviços
+
+- No cadastro do produto/serviço, aba Dados fiscais, selecione um grupo existente. A associação usa `fiscal_tax_group_id` com chave estrangeira; o antigo campo livre `tax_group` permanece no banco para não perder dados legados.
+- Sem vínculo explícito: primeiro verifica a regra específica por produto/NCM, depois o grupo padrão ativo de produtos (quando houver).
+- Com grupo explícito: não substitui silenciosamente o grupo pela regra genérica. O grupo inativo ou incompatível bloqueia a aplicação.
+- O grupo de serviços é cadastro preparatório: ele **não autoriza automaticamente** a NFS-e nem muda os cálculos atuais de serviços.
+
+### NFC-e
+
+O modo **Exigir regras fiscais** continua desativado por padrão. Quando ativado, antes da emissão é necessário abrir o documento preparado e acionar **Aplicar regras fiscais**. O snapshot da NFC-e recebe a identificação e revisão do grupo, mais CFOP, CSOSN e CST efetivamente utilizados. Nenhum cálculo comercial, venda, estoque, financeiro, série ou número muda.
+
+A primeira etapa mantém a emissão validada da BA no Simples Nacional: CFOP 5xxx, CSOSN 102 e CST 49 para PIS/COFINS. Grupo com outros códigos ou dados de tributos que exigiriam cálculos/emitiriam grupos XML ausentes não pode ser aplicado neste emissor.
+
+### Instalação e validação
+
+Depois de atualizar a branch:
+
+```bat
+git pull
+php artisan migrate
+php artisan optimize:clear
+vendor\bin\phpunit --filter "NFCe|FiscalTaxRule|FiscalTaxGroup"
+```
+
+Testar o cadastro e a aplicação somente com notas preparadas, sem gerar outra venda de PDV exclusivamente para isso. Se desejar testar transmissão de um novo perfil fiscal, usar cenário homologado, cadastro revisado e não reutilizar a chave de uma nota já autorizada.
+
+### Próximas etapas, ainda não implementadas
+
+- Regras por UF/município, FCP por UF/NCM, ANP e outros tratamentos específicos.
+- Motor de cálculo por CST/CSOSN, incluindo ICMS-ST, PIS/COFINS não zerados e reforma tributária, com testes de totais.
+- Integração da mesma classificação a NF-e interestadual e NFS-e, respeitando os respectivos modelos e legislações.
+- Simulador de regras por produto/lote, aprovação por usuário e registro de fundamento por período.
+
+As imagens do eGestor servem como referência de organização e variações; não são fonte de alíquotas ou de enquadramento fiscal.
