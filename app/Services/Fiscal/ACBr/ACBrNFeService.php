@@ -61,6 +61,7 @@ final class ACBrNFeService
             int NFE_Validar(void *libHandle);
             int NFE_ObterXml(void *libHandle, int AIndex, char *sResposta, int *esTamanho);
             int NFE_Enviar(void *libHandle, int ALote, _Bool AImprimir, _Bool ASincrono, _Bool AZipado, char *sResposta, int *esTamanho);
+            int NFE_Consultar(void *libHandle, const char *eChaveOuNFe, _Bool AExtrairEventos, char *sResposta, int *esTamanho);
         CDEF;
 
         $this->lib = FFI::cdef($header, $path);
@@ -221,6 +222,15 @@ final class ACBrNFeService
         }
 
         return FFI::string($buffer);
+    }
+
+    public function consultByKey(string $accessKey): string
+    {
+        if (preg_match('/^\d{44}$/', $accessKey) !== 1) {
+            throw new RuntimeException('Chave de acesso inválida para consulta.');
+        }
+        // Consulta é exclusivamente leitura: jamais implica outra NFE_Enviar.
+        return $this->response('NFE_Consultar', [$accessKey, false]);
     }
 
     public function readConfig(string $section, string $key): string
