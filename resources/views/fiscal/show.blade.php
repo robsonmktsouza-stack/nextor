@@ -110,6 +110,19 @@
                 NCM: {{ ($fiscalItem['ncm'] ?? null) ?: 'Não informado' }}
                 · PIS: {{ data_get($fiscalItem,'tax_defaults.pis_cst') ?: 'Não informado' }}
                 · COFINS: {{ data_get($fiscalItem,'tax_defaults.cofins_cst') ?: 'Não informado' }}
+                @if(data_get($fiscalItem,'tax_defaults.fiscal_group_id'))
+                  <div>Grupo aplicado: <strong>{{ data_get($fiscalItem,'tax_defaults.fiscal_group_name') }}</strong>
+                    · revisão {{ data_get($fiscalItem,'tax_defaults.fiscal_group_revision') }}
+                    · CFOP {{ data_get($fiscalItem,'tax_defaults.cfop_outbound_internal') }}
+                    · CSOSN {{ data_get($fiscalItem,'tax_defaults.icms_csosn') }}
+                  </div>
+                @elseif(data_get($fiscalItem,'tax_defaults.fiscal_rule_id'))
+                  <div>Regra aplicada: <strong>{{ data_get($fiscalItem,'tax_defaults.fiscal_rule_name') }}</strong>
+                    · revisão {{ data_get($fiscalItem,'tax_defaults.fiscal_rule_revision') }}
+                  </div>
+                @elseif(data_get($fiscalItem,'fiscal_tax_group_id'))
+                  <div>Grupo vinculado #{{ data_get($fiscalItem,'fiscal_tax_group_id') }} — aguardando aplicação de regra fiscal.</div>
+                @endif
               </div>
             </div>
             @if(!empty($fiscalItem['product_id']) && auth()->user()->canAccess('products'))
