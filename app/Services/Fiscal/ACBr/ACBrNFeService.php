@@ -7,12 +7,13 @@ use RuntimeException;
 use Throwable;
 
 /**
- * Bootstrap da ACBrLibNFe Cdecl x64. Não compartilhe a mesma instância
+ * Bootstrap da ACBrLibNFe MT Cdecl x64. Não compartilhe a mesma instância
  * entre empresas ou requisições simultâneas sem isolamento por processo.
  */
 final class ACBrNFeService
 {
     private ?FFI $lib = null;
+    private $handle = null;
     private bool $initialized = false;
 
     public function __construct(
@@ -43,21 +44,23 @@ final class ACBrNFeService
             throw new RuntimeException('Diretório de configuração ACBr inexistente ou sem permissão de escrita.');
         }
 
-        // Assinaturas oficiais ACBrLibNFe Cdecl. Para Windows, use DLL Cdecl,
-        // nunca a variante StdCall.
+        // ACBrLib MT exige ponteiro de instância em TODAS as chamadas.
+        // Para Windows, usar a DLL MT/Cdecl, nunca StdCall ou ST.
         $header = <<<'CDEF'
-            int NFE_Inicializar(const char *eArqConfig, const char *eChaveCrypt);
-            int NFE_Finalizar(void);
-            int NFE_Nome(char *sNome, int *esTamanho);
-            int NFE_Versao(char *sVersao, int *esTamanho);
-            int NFE_UltimoRetorno(char *sMensagem, int *esTamanho);
+            int NFE_Inicializar(void **libHandle, const char *eArqConfig, const char *eChaveCrypt);
+            int NFE_Finalizar(void *libHandle);
+            int NFE_Nome(void *libHandle, char *sNome, int *esTamanho);
+            int NFE_Versao(void *libHandle, char *sVersao, int *esTamanho);
+            int NFE_UltimoRetorno(void *libHandle, char *sMensagem, int *esTamanho);
         CDEF;
 
         $this->lib = FFI::cdef($header, $path);
-        $status = $this->lib->NFE_Inicializar($ini, '');
+        $this->handle = FFI::new('void *');
+        $status = $this->lib->NFE_Inicializar(FFI::addr($this->handle), $ini, '');
         if ($status !== 0) {
             $reason = $this->lastReturn();
             $this->lib = null;
+            $this->handle = null;
             throw new RuntimeException("ACBr NFE_Inicializar falhou ({$status}): {$reason}");
         }
         $this->initialized = true;
@@ -69,7 +72,7 @@ final class ACBrNFeService
         $size = FFI::new('int');
         $size->cdata = 4096;
         $buffer = FFI::new('char[4096]');
-        $status = $this->lib->NFE_Nome($buffer, FFI::addr($size));
+        $status = $this->lib->NFE_Nome($this->handle, $buffer, FFI::addr($size));
         if ($status !== 0) {
             throw new RuntimeException("ACBr NFE_Nome falhou ({$status}): ".$this->lastReturn());
         }
@@ -82,7 +85,7 @@ final class ACBrNFeService
         $size = FFI::new('int');
         $size->cdata = 4096;
         $buffer = FFI::new('char[4096]');
-        $status = $this->lib->NFE_Versao($buffer, FFI::addr($size));
+        $status = $this->lib->NFE_Versao($this->handle, $buffer, FFI::addr($size));
 
         if ($status !== 0) {
             throw new RuntimeException("ACBr NFE_Versao falhou ({$status}): ".$this->lastReturn());
@@ -111,7 +114,7 @@ final class ACBrNFeService
             $size = FFI::new('int');
             $size->cdata = 4096;
             $buffer = FFI::new('char[4096]');
-            $status = $this->lib->NFE_UltimoRetorno($buffer, FFI::addr($size));
+            $status = $this->lib->NFE_UltimoRetorno($this->handle, $buffer, FFI::addr($size));
             if ($size->cdata >= 4096 && $size->cdata < 1048576) {
                 $capacity = $size->cdata + 1;
                 $buffer = FFI::new("char[{$capacity}]");
@@ -128,10 +131,11 @@ final class ACBrNFeService
     public function close(): void
     {
         if ($this->initialized && $this->lib !== null) {
-            $this->lib->NFE_Finalizar();
+            $this->lib->NFE_Finalizar($this->handle);
         }
         $this->initialized = false;
         $this->lib = null;
+        $this->handle = null;
     }
 
     public function __destruct()
