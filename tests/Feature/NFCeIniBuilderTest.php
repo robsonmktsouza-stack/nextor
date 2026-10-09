@@ -78,6 +78,82 @@ final class NFCeIniBuilderTest extends TestCase
         self::assertStringNotContainsString('CSC', $ini);
     }
 
+    public function test_homologation_changes_only_first_product_description_but_keeps_all_codes(): void
+    {
+        $company = new CompanySetting([
+            'document'=>'39323356000100',
+            'legal_name'=>'EMPRESA DE TESTE LTDA',
+            'state_registration'=>'172036473',
+            'crt'=>'1',
+            'address'=>'RUA EXEMPLO',
+            'address_number'=>'100',
+            'district'=>'CENTRO',
+            'city'=>'Rio do Antonio',
+            'city_ibge_code'=>'2926806',
+            'state'=>'BA',
+            'zip_code'=>'46220000',
+        ]);
+        $item=[
+            'item_type'=>'product',
+            'product_id'=>1,
+            'sku'=>'COD-01',
+            'name'=>'COCA COLA 2L',
+            'unit'=>'UN',
+            'ncm'=>'22021000',
+            'origin'=>'0',
+            'quantity'=>'1.000',
+            'unit_price'=>'10.00',
+            'line_total'=>'10.00',
+            'discount'=>'0.00',
+            'tax_defaults'=>[
+                'cfop_outbound_internal'=>'5102',
+                'icms_csosn'=>'102',
+                'pis_cst'=>'49',
+                'cofins_cst'=>'49',
+            ],
+        ];
+        $second=array_replace($item,[
+            'product_id'=>2,
+            'sku'=>'COD-02',
+            'name'=>'AGUA MINERAL 500ML',
+        ]);
+        $document=new FiscalDocumentJob([
+            'document_type'=>'nfce',
+            'environment'=>'homologation',
+            'series'=>1,
+            'document_number'=>33,
+            'source_snapshot'=>[
+                'total'=>'20.00',
+                'items'=>[$item,$second],
+                'payments'=>[[
+                    'payment_method'=>'dinheiro',
+                    'payment_kind'=>'cash',
+                    'amount'=>'20.00',
+                ]],
+                'change_amount'=>'0.00',
+            ],
+        ]);
+
+        $ini=app(NFCeIniBuilder::class)->build($document,$company);
+        self::assertStringContainsString("cProd=COD-01\r\n",$ini);
+        self::assertStringContainsString("cProd=COD-02\r\n",$ini);
+        self::assertStringContainsString(
+            'xProd=NOTA FISCAL EMITIDA EM AMBIENTE DE HOMOLOGACAO - SEM VALOR FISCAL',
+            $ini
+        );
+        self::assertStringContainsString('xProd=AGUA MINERAL 500ML',$ini);
+        self::assertStringNotContainsString('xProd=COCA COLA 2L',$ini);
+
+        $document->environment='production';
+        $production=app(NFCeIniBuilder::class)->build($document,$company);
+        self::assertStringContainsString('xProd=COCA COLA 2L',$production);
+        self::assertStringContainsString('xProd=AGUA MINERAL 500ML',$production);
+        self::assertStringNotContainsString(
+            'xProd=NOTA FISCAL EMITIDA EM AMBIENTE DE HOMOLOGACAO',
+            $production
+        );
+    }
+
     public function test_split_payment_assigns_cash_change_only_to_cash_part(): void
     {
         $company = new CompanySetting([
