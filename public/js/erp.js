@@ -354,8 +354,11 @@
     if(!select || select.dataset.uiSelectReady==='1' || select.multiple) return;
     select.dataset.uiSelectReady='1';
     select.classList.add('ui-select-native');
+    const catalogField=/(product|service|customer|supplier|vendor|provider|transport|category|account|city|municip|cfop|cst|csosn|ncm|natureza|cliente|produto|fornecedor|conta|categoria)/i
+      .test((select.name||'')+' '+(select.id||''));
     const searchable=!select.hasAttribute('data-no-search') &&
-      (select.hasAttribute('data-searchable') ||
+      !select.closest('.bulk-actions,.table-page-size-form') &&
+      (select.hasAttribute('data-searchable') || catalogField ||
        [...select.options].filter(option=>!option.disabled && option.value!=='').length>=4);
 
     const wrapper=document.createElement('div');
@@ -531,7 +534,10 @@
       event.preventDefault();
       if(!wrapper.classList.contains('open')){
         open();
-        if(searchable && key==='Enter'){trigger.select();return;}
+        if(key==='Enter'||key===' '){
+          if(searchable)trigger.select();
+          return;
+        }
       }
       const items=[...menu.querySelectorAll('.ui-select-option:not([hidden]):not(:disabled)')];
       if(!items.length)return;
