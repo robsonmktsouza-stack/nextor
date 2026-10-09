@@ -1,6 +1,5 @@
 @extends('layouts.app')
 @section('title','Transferências')
-@section('titleMeta'){{ $transfers->total() }} registro(s)@endsection
 @section('content')
 @include('finance._nav')
 
