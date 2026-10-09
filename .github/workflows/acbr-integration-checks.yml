@@ -54,6 +54,7 @@ jobs:
             tests/Feature/NFCeIniBuilderTest.php \
             tests/Feature/FiscalTaxRuleResolverTest.php \
             tests/Feature/NFCeFiscalProfileServiceTest.php \
+            tests/Feature/NFCeAutomaticFiscalConfigurationTest.php \
             tests/Unit/NFCeProtocolXmlServiceTest.php \
             tests/Unit/NFCeTaxGroupTranslatorTest.php \
             tests/Unit/FiscalCodeCatalogTest.php \
