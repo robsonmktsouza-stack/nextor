@@ -38,7 +38,7 @@ final class NFCeFiscalProfileService
         $savedTaxes = is_array($item['tax_defaults'] ?? null) ? $item['tax_defaults'] : [];
         foreach ([
             'icms_rate', 'icms_st_rate', 'base_reduction_rate', 'simple_credit_rate',
-            'mva_rate', 'fcp_rate', 'pis_rate', 'cofins_rate', 'ipi_rate',
+            'mva_rate', 'fcp_rate', 'ipi_rate',
             'cbs_rate', 'ibs_uf_rate', 'ibs_municipal_rate',
         ] as $field) {
             $value = $savedTaxes[$field] ?? null;
@@ -77,8 +77,8 @@ final class NFCeFiscalProfileService
         $rule = $this->rules->resolve('nfce', 'BA', 'BA', '1', $item, $day);
         if ($rule) {
             if (!in_array($rule->csosn, ['102','103','300','400','500'], true)
-                || !in_array($rule->pis_cst, ['01','02','04','06','07','08','09','49','99'], true)
-                || !in_array($rule->cofins_cst, ['01','02','04','06','07','08','09','49','99'], true)
+                || !in_array($rule->pis_cst, ['01','02','03','04','06','07','08','09','49','99'], true)
+                || !in_array($rule->cofins_cst, ['01','02','03','04','06','07','08','09','49','99'], true)
                 || !in_array($rule->cfop, $rule->csosn === '500'
                     ? ['5405','5656','5667'] : ['5101','5102','5103','5104','5115'], true)) {
                 throw new RuntimeException('A regra "'.$rule->name.'" não é compatível com a NFC-e disponível.');
@@ -123,8 +123,8 @@ final class NFCeFiscalProfileService
 
         if ($cfop !== '' || $csosn !== '' || $pis !== '' || $cofins !== '') {
             if (!in_array($csosn, ['102','103','300','400','500'], true)
-                || !in_array($pis, ['01','02','04','06','07','08','09','49','99'], true)
-                || !in_array($cofins, ['01','02','04','06','07','08','09','49','99'], true)
+                || !in_array($pis, ['01','02','03','04','06','07','08','09','49','99'], true)
+                || !in_array($cofins, ['01','02','03','04','06','07','08','09','49','99'], true)
                 || !in_array($cfop, $csosn === '500'
                     ? ['5405','5656','5667'] : ['5101','5102','5103','5104','5115'], true)) {
                 throw new RuntimeException(
