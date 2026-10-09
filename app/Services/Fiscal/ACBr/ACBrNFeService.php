@@ -57,6 +57,8 @@ final class ACBrNFeService
             int NFE_StatusServico(void *libHandle, char *sResposta, int *esTamanho);
             int NFE_LimparLista(void *libHandle);
             int NFE_CarregarINI(void *libHandle, const char *eArquivoOuINI);
+            int NFE_CarregarXML(void *libHandle, const char *eArquivoOuXML);
+            int NFE_SalvarPDF(void *libHandle, char *sResposta, int *esTamanho);
             int NFE_Assinar(void *libHandle);
             int NFE_Validar(void *libHandle);
             int NFE_ObterXml(void *libHandle, int AIndex, char *sResposta, int *esTamanho);
@@ -176,6 +178,25 @@ final class ACBrNFeService
     {
         $this->execute('NFE_LimparLista');
         $this->execute('NFE_CarregarINI', [$ini]);
+    }
+
+    public function loadXml(string $xml): void
+    {
+        $this->execute('NFE_LimparLista');
+        $this->execute('NFE_CarregarXML', [$xml]);
+    }
+
+    /**
+     * A ACBr retorna o PDF em Base64; nunca cria arquivo publico.
+     */
+    public function savePdf(): string
+    {
+        $encoded = $this->response('NFE_SalvarPDF');
+        $pdf = base64_decode(trim($encoded), true);
+        if ($pdf === false || !str_starts_with($pdf, '%PDF-')) {
+            throw new RuntimeException('A ACBr não retornou um DANFE PDF válido.');
+        }
+        return $pdf;
     }
 
     public function sign(): void
