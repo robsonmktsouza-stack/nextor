@@ -26,35 +26,6 @@
       return $value;
   };
 @endphp
-<div class="danfe-tools" aria-label="Ferramentas de impressão">
-  <div class="danfe-tools-title">
-    <strong>DANFE NFC-e</strong>
-    <span>Série {{ $danfe['series'] }} · nº {{ $danfe['number'] }} · {{ $danfe['homologation'] ? 'Homologação' : 'Produção' }}</span>
-  </div>
-  <div class="danfe-tools-buttons">
-    <a href="{{ route($printRoute,['fiscalDocumentJob'=>$fiscalDocument,'paper'=>'80']) }}"
-       class="{{ $paper === '80' ? 'selected' : '' }}" aria-current="{{ $paper === '80' ? 'page' : 'false' }}">80 mm (72 mm úteis)</a>
-    <a href="{{ route($printRoute,['fiscalDocumentJob'=>$fiscalDocument,'paper'=>'58']) }}"
-       class="{{ $paper === '58' ? 'selected' : '' }}" aria-current="{{ $paper === '58' ? 'page' : 'false' }}">58 mm (48 mm úteis)</a>
-    <button id="printDanfe" type="button" disabled>Preparando QR Code...</button>
-    @if(auth()->user()->canAccess('fiscal'))
-      <a href="{{ route('fiscal.show',$fiscalDocument) }}">Voltar à NFC-e</a>
-    @else
-      <a href="{{ route('pdv.index') }}">Voltar ao PDV</a>
-    @endif
-  </div>
-  <p>
-    @if($paper === '58')
-      Use o tamanho de papel <strong>58(48) mm</strong> do driver. O DANFE ocupa os 48 mm imprimíveis.
-    @else
-      Use a bobina de <strong>80 mm</strong> do driver. O DANFE ocupa 72 mm imprimíveis.
-    @endif
-    No Chrome, escolha <strong>margens: nenhuma</strong>, <strong>escala: 100%</strong>
-    e desative cabeçalhos/rodapés. O corte e a sobra de papel no fim dependem do tamanho de página
-    e do driver instalado. A opção A4 serve apenas para salvar/imprimir em uma folha A4, não para simular a bobina.
-  </p>
-</div>
-
 <main class="danfe-paper" id="danfePaper" aria-label="Documento auxiliar da NFC-e">
   <header class="danfe-issuer">
     <strong>{{ $danfe['issuer']['name'] }}</strong>
@@ -157,25 +128,36 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const qrTarget=document.getElementById('danfeQr');
-  const printButton=document.getElementById('printDanfe');
   const qrUrl=@json($danfe['qr_url']);
   try {
-    if(typeof qrcode!=='function') throw new Error('Gerador local indisponível');
+    if(typeof qrcode!=='function') throw new Error('Gerador de QR Code indisponível');
     const qr=qrcode(0,'M');
     qr.addData(qrUrl);
     qr.make();
     qrTarget.innerHTML=qr.createSvgTag({cellSize:5,margin:20,scalable:true});
     const svg=qrTarget.querySelector('svg');
-    if(!svg) throw new Error('QR Code não renderizado');
+    if(!svg) throw new Error('QR Code inválido');
     svg.setAttribute('role','img');
     svg.setAttribute('aria-label','QR Code de consulta da NFC-e');
-    printButton.disabled=false;
-    printButton.textContent='Imprimir DANFE NFC-e';
-    printButton.addEventListener('click',()=>window.print());
+
+    // Configuração da impressão vem do NEXTOR. A caixa nativa do Chrome
+    // é aberta somente depois do QR Code ter sido renderizado.
+    const printNow=()=>{
+      const paper=document.body.dataset.paper;
+      if(paper==='58'||paper==='80') {
+        const sheet=document.createElement('style');
+        const receiptHeight=document.getElementById('danfePaper').getBoundingClientRect().height;
+        const millimeters=Math.ceil(receiptHeight*25.4/96)+8;
+        const pageHeight=Math.max(100,Math.min(millimeters,1500));
+        sheet.textContent='@page{size:'+paper+'mm '+pageHeight+'mm;margin:0}';
+        document.head.appendChild(sheet);
+      }
+      window.print();
+    };
+    requestAnimationFrame(()=>requestAnimationFrame(printNow));
   } catch(error) {
-    qrTarget.textContent='Não foi possível gerar o QR Code. Impressão bloqueada.';
-    printButton.textContent='QR Code indisponível';
-    printButton.disabled=true;
+    document.body.classList.add('print-unavailable');
+    qrTarget.textContent='Impressão indisponível: QR Code não gerado.';
   }
 });
 </script>
