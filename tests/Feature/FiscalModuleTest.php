@@ -138,6 +138,17 @@ class FiscalModuleTest extends TestCase
             ->assertSee('Autorizado');
     }
 
+    public function test_nfce_utilities_contain_cancel_and_inutilization(): void
+    {
+        $this->actingAs($this->admin())
+            ->get(route('fiscal.index',['tab'=>'nfce']))
+            ->assertOk()
+            ->assertSee('data-fiscal-cancel',false)
+            ->assertSee('Cancelamento')
+            ->assertSee('Inutilização')
+            ->assertSee('nfceCancelDialog');
+    }
+
     public function test_user_without_fiscal_permission_cannot_open_module(): void
     {
         $user=User::query()->create([
