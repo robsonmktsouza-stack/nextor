@@ -52,6 +52,7 @@ jobs:
             app/Services/Fiscal/NFCeProtocolXmlService.php \
             app/Services/Fiscal/NFCeDanfeService.php \
             app/Services/Fiscal/NFCePdfService.php \
+            app/Jobs/GenerateNFCeDanfePdfJob.php \
             app/Http/Controllers/NFCeDanfeController.php \
             app/Services/Fiscal/NFCeAuthorizedXmlRecoveryService.php \
             app/Services/Fiscal/NFCeSefazResponseParser.php \
