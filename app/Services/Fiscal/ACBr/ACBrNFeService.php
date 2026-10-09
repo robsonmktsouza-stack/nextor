@@ -64,6 +64,8 @@ final class ACBrNFeService
             int NFE_ObterXml(void *libHandle, int AIndex, char *sResposta, int *esTamanho);
             int NFE_Enviar(void *libHandle, int ALote, _Bool AImprimir, _Bool ASincrono, _Bool AZipado, char *sResposta, int *esTamanho);
             int NFE_Consultar(void *libHandle, const char *eChaveOuNFe, _Bool AExtrairEventos, char *sResposta, int *esTamanho);
+            int NFE_Cancelar(void *libHandle, const char *eChave, const char *eJustificativa, const char *eCNPJ, int ALote, char *sResposta, int *esTamanho);
+            int NFE_Inutilizar(void *libHandle, const char *ACNPJ, const char *AJustificativa, int Ano, int Modelo, int Serie, int NumeroInicial, int NumeroFinal, char *sResposta, int *esTamanho);
         CDEF;
 
         $this->lib = FFI::cdef($header, $path);
@@ -243,6 +245,46 @@ final class ACBrNFeService
         }
 
         return FFI::string($buffer);
+    }
+
+    /**
+     * Eventos fiscais alteram o estado na SEFAZ: chamar UMA ÚNICA VEZ.
+     * Buffer insuficiente e timeout deixam resultado indeterminado;
+     * nunca repetir automaticamente e nunca confundir sucesso FFI com cStat=135.
+     */
+    private function fiscalEventOnce(string $method, array $args): string
+    {
+        $this->initialize();
+        $capacity=1048576;
+        $buffer=FFI::new("char[{$capacity}]");
+        $size=FFI::new('int');
+        $size->cdata=$capacity;
+        $status=$this->lib->$method($this->handle,...$args,$buffer,FFI::addr($size));
+        if ($size->cdata >= $capacity) {
+            throw new RuntimeException("Retorno {$method} excedeu 1 MB; resultado indeterminado. Consulte a SEFAZ antes de qualquer nova tentativa.");
+        }
+        if ($status !== 0) {
+            throw new RuntimeException("ACBr {$method} falhou ({$status}); o evento pode ter sido recebido. ".$this->lastReturn());
+        }
+        return FFI::string($buffer);
+    }
+
+    public function cancel(string $key,string $reason,string $cnpj,int $lot): string
+    {
+        if (!preg_match('/^\\d{44}$/',$key) || !preg_match('/^\\d{14}$/',$cnpj) || mb_strlen($reason)<15) {
+            throw new RuntimeException('Chave, CNPJ ou justificativa inválidos para cancelamento.');
+        }
+        return $this->fiscalEventOnce('NFE_Cancelar',[$key,$reason,$cnpj,$lot]);
+    }
+
+    public function inutilize(string $cnpj,string $reason,int $year,int $series,int $first,int $last): string
+    {
+        if (!preg_match('/^\\d{14}$/',$cnpj) || mb_strlen($reason)<15 || $year<2020 || $year>2100
+            || $series<0 || $series>999 || $first<1 || $last<$first || $last>999999999 || $last-$first>999) {
+            throw new RuntimeException('Identificação ou faixa de inutilização inválida.');
+        }
+        // Manual ACBr: Ano usa dois dígitos, Modelo NFC-e é 65.
+        return $this->fiscalEventOnce('NFE_Inutilizar',[$cnpj,$reason,$year%100,65,$series,$first,$last]);
     }
 
     public function consultByKey(string $accessKey): string
