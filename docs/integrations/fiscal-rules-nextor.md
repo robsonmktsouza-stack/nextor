@@ -1,4 +1,7 @@
-# NEXTOR — Regras fiscais (primeira etapa)
+# NEXTOR — Regras fiscais (histórico e configurações)
+
+> **Cobertura atual:** consultar [Matriz fiscal 2026](fiscal-coverage-2026.md).
+> Os exemplos iniciais abaixo (CRT 1, CSOSN 102, CST 49) descrevem a primeira implementação; a cobertura vigente foi ampliada na branch e só pode ser considerada pronta após os testes e a homologação indicados naquela matriz.
 
 ## Referência funcional e limites
 
