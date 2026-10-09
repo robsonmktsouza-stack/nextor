@@ -25,7 +25,7 @@
   <div class="table-scroll">
     <table class="cms-table">
       <thead><tr>
-        <th>Cód.</th><th>Descrição</th><th>Tipo</th><th>CFOP</th><th>ICMS / NFC-e</th><th>PIS / COFINS</th><th>Vínculos</th><th>Situação</th><th class="action-cell">Editar</th>
+        <th>Cód.</th><th>Descrição</th><th>Tipo</th><th>CFOP / Serviço</th><th>ICMS / ISS</th><th>Tributação / Código</th><th>Vínculos</th><th>Situação</th><th class="action-cell">Editar</th>
       </tr></thead>
       <tbody>
       @forelse($groups as $group)
@@ -35,9 +35,9 @@
             <small class="table-subtitle">Revisão {{ $group->revision }} @if($group->is_default) · Padrão para {{ $group->kind==='products' ? 'produtos' : 'serviços' }} @endif</small>
           </td>
           <td><span class="code-tag">{{ $group->kind==='products' ? 'Produtos' : 'Serviços' }}</span></td>
-          <td>{{ $group->cfop_pattern ?: '—' }}</td>
-          <td>{{ $group->icms_csosn ?: ($group->icms_cst ?: '—') }} @if($group->nfce_csosn)<small class="table-subtitle">NFC-e: {{ $group->nfce_csosn }}</small>@endif</td>
-          <td>{{ $group->pis_cst ?: '—' }} / {{ $group->cofins_cst ?: '—' }}</td>
+          <td>{{ $group->kind==='services' ? data_get($group->tax_config,'service_list_item','—') : ($group->cfop_pattern ?: '—') }}</td>
+          <td>@if($group->kind==='services'){{ $group->iss_exigibility==='1' ? 'ISS exigível' : ('ISS: '.($group->iss_exigibility ?: '—')) }}@else{{ $group->icms_csosn ?: ($group->icms_cst ?: '—') }} @if($group->nfce_csosn)<small class="table-subtitle">NFC-e: {{ $group->nfce_csosn }}</small>@endif @endif</td>
+          <td>@if($group->kind==='services'){{ data_get($group->tax_config,'national_tax_code','—') }}@else{{ $group->pis_cst ?: '—' }} / {{ $group->cofins_cst ?: '—' }}@endif</td>
           <td>{{ $group->kind==='products' ? $group->products_count : $group->services_count }}</td>
           <td><span class="status {{ $group->is_active ? 'status-ok' : 'status-muted' }}">{{ $group->is_active ? 'Ativo' : 'Inativo' }}</span></td>
           <td class="action-cell"><a class="btn-icon" href="{{ route('fiscal.tax-groups.edit',$group) }}" data-tooltip="Editar grupo">@include('partials.icon',['name'=>'edit','size'=>16])</a></td>
