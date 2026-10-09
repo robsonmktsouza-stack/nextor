@@ -191,31 +191,69 @@
     el('nfceConsumerDocument').value=option?.dataset.document||'';
     el('nfceConsumerName').value=option?.dataset.name||'';
   });
+  let submitting=false;
+  function invalid(event,message,tab,focus){
+    event.preventDefault();
+    const box=el('nfceFormError');
+    box.textContent=message;
+    box.hidden=false;
+    activateTab(tab);
+    focus?.focus();
+  }
+
   form.addEventListener('submit',event=>{
-    if(!newMode()) {
+    if(submitting) {event.preventDefault();return;}
+    el('nfceFormError').hidden=true;
+    if(!newMode()){
       if(!el('nfceSale').value){
-        event.preventDefault();activateTab('general');
-        el('nfceSale').focus();
+        invalid(event,'Selecione uma venda concluída.','general',el('nfceSale'));
+        return;
       }
-      return;
+    } else {
+      const documentValue=el('nfceConsumerDocument').value.replace(/\D/g,'');
+      if(documentValue && ![11,14].includes(documentValue.length)){
+        invalid(event,'Informe CPF ou CNPJ válido, ou deixe em branco.','consumer',el('nfceConsumerDocument'));
+        return;
+      }
+      if(!rowItems.length){
+        invalid(event,'Adicione pelo menos um produto.','products',search);
+        return;
+      }
+      for(const row of rowItems){
+        const qty=Number(String(row.quantity).replace(',','.'));
+        const unit=Number(String(row.unit_price).replace(',','.'));
+        const disc=Number(String(row.discount).replace(',','.'));
+        if(!(qty>0&&qty<=9999999999&&unit>=0&&disc>=0)
+          || Math.round(qty*1000)!==qty*1000
+          || Math.round(unit*100)!==unit*100
+          || Math.round(disc*100)!==disc*100
+          || cents(row.discount)>Math.round(cents(row.unit_price)*mills(row.quantity)/1000)){
+          invalid(event,'Confira as quantidades, preços e descontos dos produtos.','products',el('nfceItems').querySelector('input[type=number]'));
+          return;
+        }
+      }
+      if(!payments.length || payments.some(p=>!p.payment_method||cents(p.amount)<=0)){
+        invalid(event,'Informe uma forma de pagamento e um valor válido.','payment',el('nfcePayments').querySelector('input'));
+        return;
+      }
+      const line=sum();
+      if(payments.reduce((n,p)=>n+cents(p.amount),0)!==line.total){
+        invalid(event,'O total dos pagamentos precisa ser igual ao total da NFC-e.','payment',el('nfcePayments').querySelector('input'));
+        el('nfcePaymentTotal').classList.add('nfce-amount-warning');
+        return;
+      }
     }
-    if(!rowItems.length){event.preventDefault();activateTab('products');search.focus();return;}
-    if(!payments.length){event.preventDefault();activateTab('payment');return;}
-    const line=sum();
-    if(line.discount>line.subtotal){event.preventDefault();activateTab('products');return;}
-    if(payments.reduce((n,p)=>n+cents(p.amount),0)!==line.total){
-      event.preventDefault();activateTab('payment');
-      el('nfcePaymentTotal').classList.add('nfce-amount-warning');
-      el('nfcePayments').querySelector('input')?.focus();
-      return;
-    }
-    // Browser's native required/number validation already handles field limits.
+
+    const submitMode=event.submitter?.value==='save'?'save':'issue';
+    // Preserve which action was clicked even after disabling both buttons.
+    const hidden=document.createElement('input');
+    hidden.type='hidden';hidden.name='submit_mode';hidden.value=submitMode;
+    form.appendChild(hidden);
+    submitting=true;
+    form.querySelectorAll('button[type=submit]').forEach(button=>button.disabled=true);
   });
 
   renderItems();renderPayments();
-  if(methods.length && payments.length===1 && payments[0].amount==='') {
-    // Preserve the payment amount as a user choice, not an unvalidated guess.
-  }
   if(el('nfceMode').selectedOptions[0]?.disabled) el('nfceMode').value='existing';
   setMode();
 })();
