@@ -76,6 +76,7 @@ jobs:
             tests/Feature/NFSeTaxRuleApplicationServiceTest.php \
             tests/Feature/FiscalFcpRulePersistenceTest.php \
             tests/Unit/NFCeDanfeServiceTest.php \
+            tests/Feature/NFCePrintSettingsTest.php \
             tests/Unit/NFCeSefazResponseParserTest.php; do
             php -l "$f"
           done
@@ -103,7 +104,7 @@ jobs:
         env:
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
-        run: php vendor/bin/phpunit --filter='NFCe|FiscalTaxRule|FiscalTaxGroup|FiscalFcpRule|FiscalCodeCatalog|FiscalServicePreset|NFSeTaxRuleApplication|FiscalUtilities'
+        run: php vendor/bin/phpunit --filter='NFCe|FiscalTaxRule|FiscalTaxGroup|FiscalFcpRule|FiscalCodeCatalog|FiscalServicePreset|NFSeTaxRuleApplication|FiscalUtilities|NFCePrintSettings'
 
       - name: Full Laravel regression suite
         env:
