@@ -152,8 +152,9 @@ class FiscalController extends Controller
     {
         abort_unless($fiscalDocumentJob->document_type === 'nfce', 404);
 
-        if (config('queue.default') !== 'database') {
-            return back()->with('error', 'Configure QUEUE_CONNECTION=database e inicie o worker fiscal antes de emitir.');
+        $queueConnection=(string)config('queue.default','sync');
+        if (in_array($queueConnection,['sync','null',''],true)) {
+            return back()->with('error','Configure o processamento em segundo plano antes de emitir.');
         }
 
         $problems = $preflight->validate($fiscalDocumentJob);
@@ -161,7 +162,7 @@ class FiscalController extends Controller
             return back()->with('error', implode(' | ', $problems));
         }
 
-        \App\Jobs\ProcessNFCeJob::dispatch($fiscalDocumentJob->id)->onConnection('database');
+        \App\Jobs\ProcessNFCeJob::dispatch($fiscalDocumentJob->id)->onConnection($queueConnection);
 
         return back()->with('success', 'Emissão colocada na fila fiscal. Acompanhe o resultado neste documento.');
     }
@@ -173,10 +174,11 @@ class FiscalController extends Controller
             || preg_match('/^\d{44}$/', (string) $fiscalDocumentJob->access_key) !== 1) {
             return back()->with('error', 'Apenas NFC-e pendente com chave de acesso pode ser consultada.');
         }
-        if (config('queue.default') !== 'database') {
-            return back()->with('error', 'A fila fiscal deve estar configurada como database.');
+        $queueConnection=(string)config('queue.default','sync');
+        if (in_array($queueConnection,['sync','null',''],true)) {
+            return back()->with('error','Configure o processamento em segundo plano para consultar a nota.');
         }
-        \App\Jobs\ConsultNFCeJob::dispatch($fiscalDocumentJob->id)->onConnection('database');
+        \App\Jobs\ConsultNFCeJob::dispatch($fiscalDocumentJob->id)->onConnection($queueConnection);
 
         return back()->with('success', 'Consulta da NFC-e enviada à fila. A nota não será retransmitida.');
     }
