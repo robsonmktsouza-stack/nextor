@@ -23,6 +23,11 @@ final class FiscalTaxGroupController extends Controller
 
     private const TEXT_FIELDS = [
         'mod_bc' => 1,
+        'service_list_item' => 5,
+        'national_tax_code' => 6,
+        'iss_calculation' => 25,
+        'iss_city_ibge' => 7,
+        'iss_legal_reference' => 190,
         'ibs_cbs_cst' => 3,
         'ibs_cbs_class' => 6,
         'is_cst' => 3,
@@ -125,7 +130,7 @@ final class FiscalTaxGroupController extends Controller
             'pis_cst'=>['nullable','regex:/^[0-9]{2}$/'],
             'cofins_cst'=>['nullable','regex:/^[0-9]{2}$/'],
             'ipi_cst'=>['nullable','regex:/^[0-9]{2}$/'],
-            'iss_exigibility'=>['nullable','string','max:2'],
+            'iss_exigibility'=>['nullable',Rule::in(['1','2','3','4','5','6','7'])],
             'notes'=>['nullable','string','max:3000'],
             'tax_config'=>['nullable','array'],
             'tax_config.municipal_variations'=>['nullable','array','max:100'],
@@ -162,6 +167,10 @@ final class FiscalTaxGroupController extends Controller
         $rules['tax_config.ibs_cbs_class']=['nullable','regex:/^[0-9]{6}$/'];
         $rules['tax_config.is_cst']=['nullable','regex:/^[0-9]{3}$/'];
         $rules['tax_config.is_class']=['nullable','regex:/^[0-9]{6}$/'];
+        $rules['tax_config.service_list_item']=['nullable','regex:/^[0-9]{2}\.[0-9]{2}$/'];
+        $rules['tax_config.national_tax_code']=['nullable','regex:/^[0-9]{6}$/'];
+        $rules['tax_config.iss_calculation']=['nullable',Rule::in(['municipal_or_simples','municipal','simples_effective','mei_fixed'])];
+        $rules['tax_config.iss_city_ibge']=['nullable','regex:/^[0-9]{7}$/'];
         $rules['tax_config.anp_code']=['nullable','regex:/^[0-9]{1,12}$/'];
 
         $data=$request->validate($rules);
@@ -169,6 +178,31 @@ final class FiscalTaxGroupController extends Controller
         $data['is_default']=$request->boolean('is_default');
         if ($data['is_default'] && !$data['is_active']) {
             throw ValidationException::withMessages(['is_default'=>'O grupo padrão também deve estar ativo.']);
+        }
+
+        if (($data['kind'] ?? '') === 'services') {
+            $national = (string) data_get($data, 'tax_config.national_tax_code', '');
+            $item = (string) data_get($data, 'tax_config.service_list_item', '');
+            if (($national !== '' || $item !== '')
+                && ($national === '' || $item !== ''
+                    && \App\Support\FiscalServicePresetCatalog::item($national) !== $item)) {
+                throw ValidationException::withMessages([
+                    'tax_config.national_tax_code'=>'Código de serviço nacional diferente do item da lista.',
+                ]);
+            }
+            if (($data['is_active'] ?? false) && ($national === '' || $item === '')) {
+                throw ValidationException::withMessages([
+                    'tax_config.national_tax_code'=>'Selecione um código de serviço para ativar este grupo.',
+                ]);
+            }
+            if (data_get($data,'tax_config.iss_rate') !== null
+                && data_get($data,'tax_config.iss_rate') !== ''
+                && (empty(data_get($data,'tax_config.iss_city_ibge'))
+                    || empty(data_get($data,'tax_config.iss_legal_reference')))) {
+                throw ValidationException::withMessages([
+                    'tax_config.iss_rate'=>'Para informar a alíquota, indique o município e a lei municipal.',
+                ]);
+            }
         }
 
         $ibsCst=(string) data_get($data,'tax_config.ibs_cbs_cst','');
