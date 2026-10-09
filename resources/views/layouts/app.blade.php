@@ -3,9 +3,9 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>@yield('title','Painel') — {{ config('app.name') }}</title>
-<link rel="stylesheet" href="{{ asset('css/erp.css') }}">
+<link rel="stylesheet" href="{{ asset('css/erp.css') }}?v={{ filemtime(public_path('css/erp.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/ui-refinement.css') }}?v={{ filemtime(public_path('css/ui-refinement.css')) }}">
-<script defer src="{{ asset('js/erp.js') }}"></script>
+<script defer src="{{ asset('js/erp.js') }}?v={{ filemtime(public_path('js/erp.js')) }}"></script>
 <script defer src="{{ asset('js/fiscal-codes.js') }}"></script>
 </head><body
   class="{{ \App\Models\AppSetting::value('system','compact_mode',true) ? 'system-compact' : 'system-comfortable' }}"
