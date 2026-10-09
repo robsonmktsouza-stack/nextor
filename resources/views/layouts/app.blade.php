@@ -4,6 +4,7 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>@yield('title','Painel') — {{ config('app.name') }}</title>
 <link rel="stylesheet" href="{{ asset('css/erp.css') }}">
+<link rel="stylesheet" href="{{ asset('css/ui-refinement.css') }}?v={{ filemtime(public_path('css/ui-refinement.css')) }}">
 <script defer src="{{ asset('js/erp.js') }}"></script>
 <script defer src="{{ asset('js/fiscal-codes.js') }}"></script>
 </head><body
