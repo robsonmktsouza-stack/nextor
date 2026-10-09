@@ -31,6 +31,7 @@ class FiscalModuleTest extends TestCase
             ->assertSee('NFC-e')
             ->assertSee('NFS-e')
             ->assertSee('CT-e')
+            ->assertSee('MDF-e')
             ->assertDontSee('fiscal-summary-grid',false)
             ->assertDontSee('fiscal-config-strip',false)
             ->assertDontSee('Em processamento')
