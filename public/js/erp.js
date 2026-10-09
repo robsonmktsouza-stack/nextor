@@ -326,9 +326,9 @@
     try{url=new URL(link.href,window.location.href);}catch(_){return;}
     if(url.origin!==window.location.origin)return;
     // Mesmo sem atributo download, alguns endpoints respondem com attachment.
-    if(/\\.(?:xml|pdf|csv|xlsx?|zip)(?:$|[?#])/i.test(url.pathname)
-      || /\\/(?:download|export)(?:\\/|$)/i.test(url.pathname)
-      || /\\/(?:xml|danfe)(?:\\/|$)/i.test(url.pathname))return;
+    if(/\.(?:xml|pdf|csv|xlsx?|zip)$/i.test(url.pathname)
+      || /\/(?:download|export)(?:\/|$)/i.test(url.pathname)
+      || /\/(?:xml|danfe)(?:\/|$)/i.test(url.pathname))return;
     setTimeout(()=>{if(!event.defaultPrevented)beginNavigationLoading();},0);
   });
 
