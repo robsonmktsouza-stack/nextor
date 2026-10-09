@@ -1210,7 +1210,6 @@
     if(!getAll()) return;
 
     const getRows=()=>[...card.querySelectorAll('[data-row-select]')];
-    const count=card.querySelector('[data-selection-count]');
     const menu=card.querySelector('[data-bulk-menu]');
     const apply=card.querySelector('[data-bulk-apply]');
     const fiscalXml=card.querySelector('[data-fiscal-download-xml]');
@@ -1232,10 +1231,6 @@
       if(fiscalAuxiliary) fiscalAuxiliary.disabled=selected.length!==1 || !selected[0]?.dataset.fiscalAuxiliaryUrl;
       if(menu) menu.disabled=selected.length===0;
       if(apply) apply.disabled=selected.length===0 || !menu?.value;
-      if(count){
-        count.hidden=selected.length===0;
-        count.textContent=selected.length+' selecionado'+(selected.length===1?'':'s');
-      }
     };
 
     card.addEventListener('change',event=>{
