@@ -79,55 +79,6 @@
 </div>
 
 @if($tab==='nfce' && $document->status==='prepared')
-  @if(!$document->access_key && !$document->protocol && !$document->xml_path && !$document->response_path && !$document->authorized_at && auth()->user()->canAccess('fiscal'))
-    <section class="cms-card fiscal-detail-card">
-      <div class="card-header">
-        <div>
-          <h2>Conferência dos produtos</h2>
-          <p>Corrija os campos fiscais no cadastro do produto e atualize os dados desta NFC-e. Não é necessário fazer outra venda.</p>
-        </div>
-      </div>
-      <div class="fiscal-refresh-body">
-        @foreach(($document->source_snapshot['items'] ?? []) as $index => $fiscalItem)
-          <div class="fiscal-refresh-item">
-            <div>
-              <strong>{{ $index + 1 }}. {{ $fiscalItem['name'] ?? 'Produto' }}</strong>
-              <div class="fiscal-refresh-values">
-                NCM: {{ ($fiscalItem['ncm'] ?? null) ?: 'Não informado' }}
-                · PIS: {{ data_get($fiscalItem,'tax_defaults.pis_cst') ?: 'Não informado' }}
-                · COFINS: {{ data_get($fiscalItem,'tax_defaults.cofins_cst') ?: 'Não informado' }}
-                @if(data_get($fiscalItem,'tax_defaults.fiscal_group_id'))
-                  <div>Grupo aplicado: <strong>{{ data_get($fiscalItem,'tax_defaults.fiscal_group_name') }}</strong>
-                    · revisão {{ data_get($fiscalItem,'tax_defaults.fiscal_group_revision') }}
-                    · CFOP {{ data_get($fiscalItem,'tax_defaults.cfop_outbound_internal') }}
-                    · CSOSN {{ data_get($fiscalItem,'tax_defaults.icms_csosn') }}
-                  </div>
-                @elseif(data_get($fiscalItem,'tax_defaults.fiscal_rule_id'))
-                  <div>Regra aplicada: <strong>{{ data_get($fiscalItem,'tax_defaults.fiscal_rule_name') }}</strong>
-                    · revisão {{ data_get($fiscalItem,'tax_defaults.fiscal_rule_revision') }}
-                  </div>
-                @elseif(data_get($fiscalItem,'fiscal_tax_group_id'))
-                  <div>Grupo vinculado #{{ data_get($fiscalItem,'fiscal_tax_group_id') }} — aguardando aplicação de regra fiscal.</div>
-                @endif
-              </div>
-            </div>
-            @if(!empty($fiscalItem['product_id']) && auth()->user()->canAccess('products'))
-              <a class="btn btn-secondary" target="_blank" rel="noopener noreferrer" href="{{ route('products.edit',$fiscalItem['product_id']) }}">
-                @include('partials.icon',['name'=>'edit','size'=>16]) Corrigir cadastro
-              </a>
-            @endif
-          </div>
-        @endforeach
-        <form method="post" action="{{ route('fiscal.nfce.refresh-data',$document) }}">
-          @csrf
-          <button type="submit" class="btn btn-secondary">
-            @include('partials.icon',['name'=>'refresh-cw','size'=>16]) Atualizar dados fiscais desta NFC-e
-          </button>
-        </form>
-        <small class="fiscal-refresh-hint">Mantém os itens, valores, pagamentos, série e número da venda original. Só atualiza a classificação fiscal dos produtos antes de qualquer assinatura ou transmissão.</small>
-      </div>
-    </section>
-  @endif
   @if(count($nfcePreflightErrors))
     <section class="fiscal-error-card">
       @include('partials.icon',['name'=>'alert','size'=>20])
@@ -138,12 +89,16 @@
             <li>{{ $error }}</li>
           @endforeach
         </ul>
+        @if(!$document->access_key && !$document->protocol && !$document->xml_path && !$document->response_path
+          && !$document->authorized_at && auth()->user()->canAccess('fiscal'))
+          <form method="post" action="{{ route('fiscal.nfce.refresh-data',$document) }}" style="margin-top:12px">
+            @csrf
+            <button class="btn btn-secondary" type="submit">
+              @include('partials.icon',['name'=>'refresh-cw','size'=>16]) Recarregar configuração fiscal
+            </button>
+          </form>
+        @endif
       </div>
-    </section>
-  @else
-    <section class="fiscal-info-card">
-      <strong>Pré-validação local aprovada</strong>
-      <p>Dados básicos conferidos. A emissão ACBr e a autorização SEFAZ ainda não foram executadas.</p>
     </section>
   @endif
 @endif
