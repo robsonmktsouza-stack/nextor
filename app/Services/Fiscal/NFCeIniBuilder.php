@@ -47,7 +47,11 @@ final class NFCeIniBuilder
             'idDest' => '1',
             'tpAmb' => $job->environment === 'homologation' ? '2' : '1',
             'tpImp' => '4',
-            'tpEmis' => '1',
+            'tpEmis' => $job->emission_mode==='offline' ? '9' : '1',
+            'dhCont' => $job->emission_mode==='offline'
+                ? $job->contingency_started_at?->timezone($company->timezone ?: 'America/Bahia')->format('d/m/Y H:i:s')
+                : null,
+            'xJust' => $job->emission_mode==='offline' ? $job->contingency_reason : null,
             'finNFe' => '1',
             'indFinal' => '1',
             'indPres' => '1',
