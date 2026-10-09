@@ -41,6 +41,9 @@ final class NFCeFiscalProfileService
             'mva_rate', 'fcp_rate', 'ipi_rate',
             'cbs_rate', 'ibs_uf_rate', 'ibs_municipal_rate',
         ] as $field) {
+            if (in_array($crt, ['2','3'], true) && in_array($field, ['icms_rate','base_reduction_rate'], true)) {
+                continue;
+            }
             $value = $savedTaxes[$field] ?? null;
             if ($value !== null && $value !== '' && is_numeric($value)
                 && abs((float) $value) > 0.00001) {
@@ -71,10 +74,12 @@ final class NFCeFiscalProfileService
             if (!$group) {
                 throw new RuntimeException('O grupo tributário associado ao produto não foi encontrado.');
             }
-            return $this->fromGroup($group, 'Grupo do produto');
+            return $this->fromGroup($group, 'Grupo do produto', $crt);
         }
 
-        $rule = $this->rules->resolve('nfce', 'BA', 'BA', $crt, $item, $day);
+        $rule = in_array($crt, ['2','3'], true)
+            ? null // Regras legadas do Simples possuem CSOSN e não CST normal.
+            : $this->rules->resolve('nfce', 'BA', 'BA', $crt, $item, $day);
         if ($rule) {
             if (!in_array($rule->csosn, ['102','103','300','400','500'], true)
                 || !in_array($rule->pis_cst, ['01','02','03','04','06','07','08','09','49','99'], true)
@@ -110,7 +115,7 @@ final class NFCeFiscalProfileService
             throw new RuntimeException('Há mais de um grupo tributário padrão para produtos.');
         }
         if ($defaults->first()) {
-            return $this->fromGroup($defaults->first(), 'Grupo padrão');
+            return $this->fromGroup($defaults->first(), 'Grupo padrão', $crt);
         }
 
         // Compatibilidade: produtos já parametrizados antes do cadastro de
@@ -118,14 +123,17 @@ final class NFCeFiscalProfileService
         $tax = is_array($item['tax_defaults'] ?? null) ? $item['tax_defaults'] : [];
         $cfop = (string) ($tax['cfop_outbound_internal'] ?? $tax['nfce_cfop'] ?? $tax['cfop'] ?? '');
         $csosn = (string) ($tax['icms_csosn'] ?? $tax['csosn'] ?? $tax['icms_csosn_default'] ?? '');
+        $normal = in_array($crt, ['2','3'], true);
+        $icmsCst = (string) ($tax['icms_cst'] ?? $tax['icms_cst_default'] ?? '');
         $pis = (string) ($tax['pis_cst'] ?? $tax['pis_cst_default'] ?? '');
         $cofins = (string) ($tax['cofins_cst'] ?? $tax['cofins_cst_default'] ?? '');
 
-        if ($cfop !== '' || $csosn !== '' || $pis !== '' || $cofins !== '') {
-            if (!in_array($csosn, ['102','103','300','400','500'], true)
+        if ($cfop !== '' || ($normal ? $icmsCst !== '' : $csosn !== '') || $pis !== '' || $cofins !== '') {
+            if (($normal && !in_array($icmsCst, ['00','20'], true))
+                || (!$normal && !in_array($csosn, ['102','103','300','400','500'], true))
                 || !in_array($pis, ['01','02','03','04','06','07','08','09','49','99'], true)
                 || !in_array($cofins, ['01','02','03','04','06','07','08','09','49','99'], true)
-                || !in_array($cfop, $csosn === '500'
+                || !in_array($cfop, (!$normal && $csosn === '500')
                     ? ['5405','5656','5667'] : ['5101','5102','5103','5104','5115'], true)) {
                 throw new RuntimeException(
                     'Os dados fiscais do produto estão incompletos ou não são suportados nesta NFC-e. Atualize a tributação configurada.'
@@ -139,7 +147,7 @@ final class NFCeFiscalProfileService
                     'cfop_outbound_internal' => $cfop,
                     'nfce_cfop' => $cfop,
                     'cfop' => $cfop,
-                    'icms_csosn' => $csosn,
+                    ($normal ? 'icms_cst' : 'icms_csosn') => ($normal ? $icmsCst : $csosn),
                     'pis_cst' => $pis,
                     'cofins_cst' => $cofins,
                     'fiscal_config_source' => 'product',
@@ -150,13 +158,13 @@ final class NFCeFiscalProfileService
         throw new RuntimeException('Configure o grupo tributário ou os dados fiscais completos do produto.');
     }
 
-    private function fromGroup(FiscalTaxGroup $group, string $origin): array
+    private function fromGroup(FiscalTaxGroup $group, string $origin, string $crt): array
     {
         return [
             'origin' => $origin,
             'name' => $group->name,
             'revision' => (int) $group->revision,
-            'tax' => $this->groups->translate($group),
+            'tax' => $this->groups->translate($group, $crt),
         ];
     }
 }
