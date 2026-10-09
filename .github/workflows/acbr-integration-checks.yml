@@ -91,22 +91,28 @@ jobs:
           node --check public/js/fiscal-codes.js
           node --check public/js/nfce-editor.js
           test -s public/css/ui-refinement.css
-      - name: Visual dropdown viewport regression (Chromium)
+      - name: Visual table and dropdown regression (Chromium)
         run: |
           BROWSER="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
           if [ -z "$BROWSER" ]; then
             echo "Chromium not available; running static checks only"
           else
-            "$BROWSER" --headless=new --no-sandbox --disable-gpu --no-first-run \
-              --disable-background-networking --allow-file-access-from-files \
-              --window-size=900,700 --virtual-time-budget=1800 \
-              --dump-dom "file://$PWD/tests/browser/ui-select-viewport.html" \
-              > /tmp/nextor-ui-select-test.html 2>/tmp/nextor-ui-select-chrome.log
-            grep -q 'data-ui-select-test="passed"' /tmp/nextor-ui-select-test.html || {
-              grep -A2 -B2 'id="results"' /tmp/nextor-ui-select-test.html || true
-              tail -n 20 /tmp/nextor-ui-select-chrome.log || true
-              exit 1
-            }
+            for case in ui-select-viewport table-row-density; do
+              "$BROWSER" --headless=new --no-sandbox --disable-gpu --no-first-run \
+                --disable-background-networking --allow-file-access-from-files \
+                --window-size=1100,800 --virtual-time-budget=1800 \
+                --dump-dom "file://$PWD/tests/browser/$case.html" \
+                > "/tmp/nextor-$case.html" 2> "/tmp/nextor-$case-chrome.log"
+              case "$case" in
+                ui-select-viewport) marker='data-ui-select-test="passed"' ;;
+                table-row-density) marker='data-table-density-test="passed"' ;;
+              esac
+              grep -q "$marker" "/tmp/nextor-$case.html" || {
+                grep -A2 -B2 'id="testResult"\|id="results"' "/tmp/nextor-$case.html" || true
+                tail -n 20 "/tmp/nextor-$case-chrome.log" || true
+                exit 1
+              }
+            done
           fi
       - name: Install PHP dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
