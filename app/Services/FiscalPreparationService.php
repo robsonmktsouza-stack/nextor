@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\AppSetting;
 use App\Models\FiscalDocumentJob;
 use App\Models\Sale;
+use App\Services\Fiscal\FiscalDocumentSettings;
 use Illuminate\Support\Facades\DB;
 
 class FiscalPreparationService
@@ -12,6 +13,7 @@ class FiscalPreparationService
     public function prepareForSale(Sale $sale): void
     {
         if($sale->operation_type!=='sale' || $sale->status!=='completed') return;
+        $fiscalSettings=app(FiscalDocumentSettings::class);
         if(!(bool)AppSetting::value('fiscal','enabled',false)) return;
 
         $sale->loadMissing(['items.product','items.service','customer','payments']);
@@ -27,7 +29,7 @@ class FiscalPreparationService
             // A NFC-e é criada a partir da venda do PDV independentemente
             // da transmissão automática. Isso permite revisão e emissão
             // manual pelo mesmo fluxo fiscal, sem duplicar venda/numeração.
-            if ((bool) AppSetting::value('nfce', 'enabled', false)) {
+            if ($fiscalSettings->enabled('nfce')) {
                 $this->prepare($sale, 'nfce', 'nfce', 'next_number');
             }
 
@@ -38,14 +40,14 @@ class FiscalPreparationService
         $hasServices=$sale->items->contains(fn($item)=>$item->item_type==='service');
 
         if($hasProducts
-            && (bool)AppSetting::value('nfe','enabled',false)
+            && $fiscalSettings->enabled('nfe')
             && (bool)AppSetting::value('nfe','auto_from_sale',false)
         ) {
             $this->prepare($sale,'nfe','nfe','next_number');
         }
 
         if($hasServices
-            && (bool)AppSetting::value('nfse','enabled',false)
+            && $fiscalSettings->enabled('nfse')
             && (bool)AppSetting::value('nfse','auto_from_sale',false)
         ) {
             $this->prepare($sale,'nfse','nfse','next_rps');
@@ -65,8 +67,7 @@ class FiscalPreparationService
 
             $settings=AppSetting::groupValues($group,[]);
             $number=AppSetting::reserveInteger($group,$sequenceKey,1);
-            $environment=(string)($settings['environment']
-                ?? AppSetting::value('fiscal','default_environment','homologation'));
+            $environment=app(FiscalDocumentSettings::class)->environment($documentType);
             $series=isset($settings['series']) ? (int)$settings['series'] : null;
 
             $offline=$documentType==='nfce'
