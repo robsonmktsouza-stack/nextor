@@ -3,31 +3,34 @@
 namespace App\Services\Fiscal;
 
 use App\Models\AppSetting;
-use App\Models\CompanySetting;
 use App\Models\FiscalDocumentJob;
-use App\Services\Fiscal\ACBr\ACBrNFeService;
-use RuntimeException;
 use Illuminate\Support\Facades\Storage;
+use RuntimeException;
 
 /**
- * Gera PDF real do DANFE a partir do nfeProc autorizado, sem reemitir nota.
- * Cada requisição usa uma instância ACBr e INI privado descartado no final.
+ * Usa o próprio DANFE do NEXTOR (HTML/CSS oficial) como fonte única.
+ * O Chrome instalado no servidor converte a página em PDF. O leitor
+ * nativo do navegador abre o PDF sem alterar o layout do documento.
+ *
+ * Nenhuma API da SEFAZ é chamada, e a ACBr não gera outro modelo visual.
+ * Executado apenas pelo worker fiscal, nunca na requisição HTTP.
  */
 class NFCePdfService
 {
+    private const LAYOUT_VERSION='nextor-original-v1';
+
     public function paper(): string
     {
         $previous=(string)AppSetting::value('pdv','receipt_width','80');
-        $paper=(string)AppSetting::value('printing','nfce_paper',$previous);
-        return in_array($paper,['58','80','a4'],true) ? $paper : '80';
+        $configured=(string)AppSetting::value('printing','nfce_paper',$previous);
+        return in_array($configured,['58','80','a4'],true) ? $configured : '80';
     }
 
-    /** The selected paper and XML contents uniquely identify this exact PDF. */
     public function storedPath(FiscalDocumentJob $document, string $authorizedXml): string
     {
-        $paper=$this->paper();
         $digest=substr(hash('sha256',$authorizedXml),0,20);
-        return 'fiscal/nfce/'.$document->id.'/danfe-v2-'.$paper.'-'.$digest.'.pdf';
+        return 'fiscal/nfce/'.$document->id.'/danfe-'.self::LAYOUT_VERSION
+            .'-'.$this->paper().'-'.$digest.'.pdf';
     }
 
     public function existingPath(FiscalDocumentJob $document, string $authorizedXml): ?string
@@ -36,10 +39,6 @@ class NFCePdfService
         return Storage::disk('local')->exists($path) ? $path : null;
     }
 
-    /**
-     * Used only by the fiscal queue worker: the web PHP process must not
-     * load ACBr DLLs and does not require the PHP FFI extension.
-     */
     public function generate(FiscalDocumentJob $document, string $authorizedXml): string
     {
         if ($existing=$this->existingPath($document,$authorizedXml)) {
@@ -47,9 +46,10 @@ class NFCePdfService
         }
 
         $pdf=$this->render($document,$authorizedXml);
-        if (!str_starts_with($pdf,'%PDF-') || !str_contains($pdf,'%%EOF')) {
-            throw new RuntimeException('O gerador não retornou um documento PDF completo.');
+        if (!str_starts_with($pdf,'%PDF-') || !str_contains(substr($pdf,-1024),'%%EOF')) {
+            throw new RuntimeException('O PDF do DANFE não foi gerado corretamente.');
         }
+
         $path=$this->storedPath($document,$authorizedXml);
         if (!Storage::disk('local')->put($path,$pdf)) {
             throw new RuntimeException('Não foi possível salvar o DANFE PDF.');
@@ -57,58 +57,172 @@ class NFCePdfService
         return $path;
     }
 
+    /**
+     * Gera exatamente o template já existente, com os dados obtidos
+     * do nfeProc autorizado e o CSS que o NEXTOR usava originalmente.
+     */
+    public function renderHtml(FiscalDocumentJob $document, string $authorizedXml): string
+    {
+        $danfe=app(NFCeDanfeService::class)->parse($authorizedXml,$document);
+        return view('fiscal.nfce-danfe',[
+            'danfe'=>$danfe,
+            'paper'=>$this->paper(),
+            'pdfExport'=>true,
+        ])->render();
+    }
+
     public function render(FiscalDocumentJob $document, string $authorizedXml): string
     {
-        if ($document->document_type !== 'nfce' || $document->status !== 'authorized') {
-            throw new RuntimeException('O DANFE PDF está disponível somente para NFC-e autorizada.');
+        if ($document->document_type!=='nfce' || $document->status!=='authorized') {
+            throw new RuntimeException('O DANFE somente pode ser gerado para NFC-e autorizada.');
         }
 
-        $dir=storage_path('app/acbr-runtime');
-        if (!is_dir($dir) && !mkdir($dir,0700,true) && !is_dir($dir)) {
-            throw new RuntimeException('Não foi possível preparar o DANFE PDF.');
+        $chrome=$this->chromeExecutable();
+        if ($chrome===null) {
+            throw new RuntimeException('Chrome ou Chromium não encontrado no servidor para gerar o DANFE PDF.');
         }
-        $ini=$dir.'/nfce-pdf-'.$document->id.'-'.bin2hex(random_bytes(8)).'.ini';
-        $acbr=new ACBrNFeService(null,$ini);
+        if (!function_exists('proc_open')) {
+            throw new RuntimeException('O PHP não permite executar o gerador local de PDF.');
+        }
+
+        $base=storage_path('app/nfce-pdf-runtime');
+        if (!is_dir($base) && !mkdir($base,0700,true) && !is_dir($base)) {
+            throw new RuntimeException('Não foi possível preparar a pasta de impressão fiscal.');
+        }
+        $working=$base.'/danfe-'.$document->id.'-'.bin2hex(random_bytes(8));
+        if (!mkdir($working,0700)) {
+            throw new RuntimeException('Não foi possível preparar a impressão fiscal.');
+        }
+
+        $input=$working.'/documento.html';
+        $output=$working.'/documento.pdf';
+        $profile=$working.'/chrome-profile';
 
         try {
-            $paper=$this->paper();
-            $company=CompanySetting::current();
-            $acbr->initialize();
-
-            // Configurações oficiais ACBrLib: Fortes é capaz de gerar PDF.
-            // Nunca ativar EscPos aqui, pois é exclusivo da impressora térmica.
-            $acbr->setConfig('DFe','UF',strtoupper((string)($company->state ?: 'BA')));
-            $acbr->setConfig('NFe','ModeloDF','1'); // NFC-e 65
-            $acbr->setConfig('NFe','Ambiente',$document->environment==='production' ? '0' : '1');
-            $acbr->setConfig('DANFE','TipoDANFE','4'); // DANFE NFC-e
-            $acbr->setConfig('DANFE','MostraPreview','0');
-            $acbr->setConfig('DANFE','MostraSetup','0');
-            $acbr->setConfig('DANFENFCe','TipoRelatorioBobina',$paper==='a4' ? '2' : '0');
-            $acbr->setConfig('DANFENFCe','ImprimeEmUmaLinha','0');
-            $acbr->setConfig('DANFENFCe','ImprimeEmDuasLinhas','1');
-            $acbr->setConfig('DANFENFCe','FonteLinhaItem.Name','Arial');
-            $acbr->setConfig('DANFENFCe','FonteLinhaItem.Size','10');
-            $acbr->setConfig('DANFENFCe','ImprimeQRCodeLateral','0');
-            $acbr->setConfig('DANFENFCe','EspacoFinal','0');
-            $acbr->setConfig('DANFENFCe','MargemEsquerda','0.6');
-            $acbr->setConfig('DANFENFCe','MargemDireita','0.4');
-            $acbr->setConfig('DANFENFCe','MargemSuperior','0.4');
-            $acbr->setConfig('DANFENFCe','MargemInferior','0.01');
-            if ($paper!=='a4') {
-                // Valores do componente Fortes: 302 (bobina 80 mm),
-                // 200 (bobina 58 mm). Não são milímetros diretos.
-                $acbr->setConfig('DANFENFCe','LarguraBobina',$paper==='58' ? '200' : '302');
+            if (file_put_contents($input,$this->renderHtml($document,$authorizedXml))===false) {
+                throw new RuntimeException('Não foi possível preparar o DANFE original.');
             }
-            $acbr->loadXml($authorizedXml);
-            return $acbr->savePdf();
-        } finally {
-            try {
-                $acbr->close();
-            } finally {
-                if (is_file($ini)) {
-                    @unlink($ini);
+
+            $command=[
+                $chrome,
+                '--headless=new',
+                '--disable-gpu',
+                '--disable-background-networking',
+                '--disable-extensions',
+                '--no-first-run',
+                '--no-default-browser-check',
+                '--no-pdf-header-footer',
+                '--virtual-time-budget=6500',
+                '--user-data-dir='.$profile,
+                '--print-to-pdf='.$output,
+                $this->fileUrl($input),
+            ];
+            if (PHP_OS_FAMILY!=='Windows' && function_exists('posix_geteuid') && posix_geteuid()===0) {
+                $command[]='--no-sandbox';
+            }
+
+            $descriptors=[
+                0=>['pipe','r'],
+                1=>['pipe','w'],
+                2=>['pipe','w'],
+            ];
+            $process=proc_open($command,$descriptors,$pipes,$working);
+            if (!is_resource($process)) {
+                throw new RuntimeException('Não foi possível iniciar o gerador do DANFE PDF.');
+            }
+
+            fclose($pipes[0]);
+            stream_set_blocking($pipes[1],false);
+            stream_set_blocking($pipes[2],false);
+            $logs='';
+            $timedOut=false;
+
+            do {
+                $status=proc_get_status($process);
+                $logs.=substr(stream_get_contents($pipes[1]) ?: '',-1024);
+                $logs.=substr(stream_get_contents($pipes[2]) ?: '',-1024);
+                $logs=substr($logs,-3000);
+                if (!$status['running']) {
+                    break;
                 }
+                if (microtime(true)-(float)($start??=microtime(true))>35) {
+                    $timedOut=true;
+                    proc_terminate($process);
+                    break;
+                }
+                usleep(150000);
+            } while (true);
+
+            fclose($pipes[1]);
+            fclose($pipes[2]);
+            proc_close($process);
+
+            if ($timedOut || !is_file($output)) {
+                throw new RuntimeException('Não foi possível gerar o PDF com o Chrome local. '.substr($logs,-600));
+            }
+
+            $pdf=file_get_contents($output);
+            if ($pdf===false || !str_starts_with($pdf,'%PDF-') || !str_contains(substr($pdf,-1024),'%%EOF')) {
+                throw new RuntimeException('O Chrome retornou um arquivo PDF inválido.');
+            }
+            return $pdf;
+        } finally {
+            $this->removeDirectory($working);
+        }
+    }
+
+    private function chromeExecutable(): ?string
+    {
+        $local=(string)(getenv('LOCALAPPDATA') ?: '');
+        $program=(string)(getenv('PROGRAMFILES') ?: '');
+        $programX86=(string)(getenv('PROGRAMFILES(X86)') ?: '');
+        $configured=(string)config('services.chromium.path','');
+
+        $candidates=array_filter([
+            $configured,
+            $program ? $program.'/Google/Chrome/Application/chrome.exe' : '',
+            $programX86 ? $programX86.'/Google/Chrome/Application/chrome.exe' : '',
+            $local ? $local.'/Google/Chrome/Application/chrome.exe' : '',
+            $program ? $program.'/Microsoft/Edge/Application/msedge.exe' : '',
+            $programX86 ? $programX86.'/Microsoft/Edge/Application/msedge.exe' : '',
+            '/usr/bin/google-chrome',
+            '/usr/bin/chromium',
+            '/usr/bin/chromium-browser',
+            '/opt/google/chrome/chrome',
+        ]);
+
+        foreach ($candidates as $candidate) {
+            if (is_file($candidate)) {
+                return $candidate;
             }
         }
+        return null;
+    }
+
+    private function fileUrl(string $path): string
+    {
+        $path=str_replace('\\','/',$path);
+        $parts=explode('/',$path);
+        $escaped=implode('/',array_map('rawurlencode',$parts));
+        return str_starts_with($path,'/') ? 'file://'.$escaped : 'file:///'.$escaped;
+    }
+
+    private function removeDirectory(string $path): void
+    {
+        if (!is_dir($path)) {
+            return;
+        }
+        $contents=new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($path,\FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST
+        );
+        foreach ($contents as $entry) {
+            if ($entry->isDir() && !$entry->isLink()) {
+                @rmdir($entry->getPathname());
+            } else {
+                @unlink($entry->getPathname());
+            }
+        }
+        @rmdir($path);
     }
 }
