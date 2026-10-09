@@ -76,10 +76,11 @@ final class NFCeFiscalProfileService
 
         $rule = $this->rules->resolve('nfce', 'BA', 'BA', '1', $item, $day);
         if ($rule) {
-            if (!preg_match('/^5\d{3}$/', $rule->cfop)
-                || $rule->csosn !== '102'
-                || $rule->pis_cst !== '49'
-                || $rule->cofins_cst !== '49') {
+            if (!in_array($rule->csosn, ['102','103','300','400','500'], true)
+                || !in_array($rule->pis_cst, ['01','02','04','06','07','08','09','49','99'], true)
+                || !in_array($rule->cofins_cst, ['01','02','04','06','07','08','09','49','99'], true)
+                || !in_array($rule->cfop, $rule->csosn === '500'
+                    ? ['5405','5656','5667'] : ['5101','5102','5103','5104','5115'], true)) {
                 throw new RuntimeException('A regra "'.$rule->name.'" não é compatível com a NFC-e disponível.');
             }
             return [
@@ -121,8 +122,11 @@ final class NFCeFiscalProfileService
         $cofins = (string) ($tax['cofins_cst'] ?? $tax['cofins_cst_default'] ?? '');
 
         if ($cfop !== '' || $csosn !== '' || $pis !== '' || $cofins !== '') {
-            if (!preg_match('/^5\d{3}$/', $cfop)
-                || $csosn !== '102' || $pis !== '49' || $cofins !== '49') {
+            if (!in_array($csosn, ['102','103','300','400','500'], true)
+                || !in_array($pis, ['01','02','04','06','07','08','09','49','99'], true)
+                || !in_array($cofins, ['01','02','04','06','07','08','09','49','99'], true)
+                || !in_array($cfop, $csosn === '500'
+                    ? ['5405','5656','5667'] : ['5101','5102','5103','5104','5115'], true)) {
                 throw new RuntimeException(
                     'Os dados fiscais do produto estão incompletos ou não são suportados nesta NFC-e. Atualize a tributação configurada.'
                 );
