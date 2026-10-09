@@ -11,7 +11,7 @@ use RuntimeException;
  */
 final class NFCeTaxGroupTranslator
 {
-    public function translate(FiscalTaxGroup $group): array
+    public function translate(FiscalTaxGroup $group, string $crt = '1'): array
     {
         if (!$group->is_active || $group->kind !== 'products') {
             throw new RuntimeException('Grupo tributário inativo ou não destinado a produtos.');
@@ -20,21 +20,25 @@ final class NFCeTaxGroupTranslator
         $pattern=(string) $group->cfop_pattern;
         $cfop=preg_match('/^x\d{3}$/',$pattern) ? '5'.substr($pattern,1) : $pattern;
         $csosn=(string) ($group->nfce_csosn ?: $group->icms_csosn);
-        if (!in_array($csosn, ['102','103','300','400','500'], true)
+        $normal = in_array($crt, ['2','3'], true);
+        $icmsCst = (string)$group->icms_cst;
+        if (($normal && !in_array($icmsCst, ['00','20'], true))
+            || (!$normal && !in_array($csosn, ['102','103','300','400','500'], true))
             || !in_array((string)$group->pis_cst, ['01','02','03','04','06','07','08','09','49','99'], true)
             || !in_array((string)$group->cofins_cst, ['01','02','03','04','06','07','08','09','49','99'], true)) {
             throw new RuntimeException('Grupo "'.$group->name.'": código fiscal sem cálculo NFC-e homologado.');
         }
-        $permittedCfops = $csosn === '500'
+        $permittedCfops = !$normal && $csosn === '500'
             ? ['5405','5656','5667']
             : ['5101','5102','5103','5104','5115'];
         if (!in_array($cfop, $permittedCfops, true)) {
-            throw new RuntimeException('Grupo "'.$group->name.'": CFOP incompatível com CSOSN '.$csosn.' na NFC-e.');
+            throw new RuntimeException('Grupo "'.$group->name.'": CFOP incompatível com a classificação de ICMS na NFC-e.');
         }
 
         $config=$group->tax_config ?? [];
         foreach ($config as $name=>$value) {
-            if (in_array($name, ['pis_rate', 'cofins_rate', 'pis_quantity_rate', 'cofins_quantity_rate'], true)) {
+            if (in_array($name, ['pis_rate', 'cofins_rate', 'pis_quantity_rate', 'cofins_quantity_rate'], true)
+                || ($normal && in_array($name, ['icms_rate','base_reduction_rate'], true))) {
                 continue; // Cálculo percentual é feito no serviço fiscal.
             }
             if (!str_ends_with((string)$name,'_rate') && $name !== 'mva_rate') {
@@ -98,22 +102,30 @@ final class NFCeTaxGroupTranslator
         if ($group->kind !== 'products' || $group->iss_exigibility) {
             throw new RuntimeException('Grupo "'.$group->name.'": parâmetros de serviços/ISS não são suportados pela NFC-e de mercadorias.');
         }
-        if ($group->icms_cst || $group->ipi_cst) {
-            throw new RuntimeException('Grupo "'.$group->name.'": CST do ICMS normal ou IPI informado; o emissor BA/Simples atual não contempla esse tratamento.');
+        if (($group->icms_cst && !$normal) || $group->ipi_cst) {
+            throw new RuntimeException('Grupo "'.$group->name.'": CST do ICMS normal ou IPI incompatível com este regime e emissor.');
+        }
+        if ($normal && (
+            !isset($config['icms_rate']) || $config['icms_rate'] === ''
+            || !isset($config['mod_bc']) || $config['mod_bc'] === ''
+            || ($icmsCst === '20' && (!isset($config['base_reduction_rate']) || $config['base_reduction_rate'] === ''))
+        )) {
+            throw new RuntimeException('Grupo "'.$group->name.'": configure modalidade, ICMS e redução de base quando aplicável.');
         }
 
         $mapped = [
             'cfop_outbound_internal'=>$cfop,
             'nfce_cfop'=>$cfop,
             'cfop'=>$cfop,
-            'icms_csosn'=>$csosn,
+            ($normal ? 'icms_cst' : 'icms_csosn')=>($normal ? $icmsCst : $csosn),
             'pis_cst'=>$group->pis_cst,
             'cofins_cst'=>$group->cofins_cst,
             'fiscal_group_id'=>$group->id,
             'fiscal_group_revision'=>$group->revision,
             'fiscal_group_name'=>$group->name,
         ];
-        foreach (['pis_rate','cofins_rate','pis_quantity_rate','cofins_quantity_rate','pis_calc_type','cofins_calc_type'] as $field) {
+        foreach (['pis_rate','cofins_rate','pis_quantity_rate','cofins_quantity_rate','pis_calc_type','cofins_calc_type',
+            'icms_rate','base_reduction_rate','mod_bc'] as $field) {
             if (array_key_exists($field,$config) && $config[$field] !== '') {
                 $mapped[$field] = $config[$field];
             }
