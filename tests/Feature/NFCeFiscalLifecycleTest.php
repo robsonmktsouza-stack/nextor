@@ -87,9 +87,21 @@ final class NFCeFiscalLifecycleTest extends TestCase
         $inutil='<?xml version="1.0" encoding="UTF-8"?>'
             .'<retInutNFe xmlns="http://www.portalfiscal.inf.br/nfe"><infInut>'
             .'<tpAmb>2</tpAmb><cStat>102</cStat><nProt>129260000000002</nProt>'
+            .'<CNPJ>39323356000100</CNPJ><ano>26</ano><mod>65</mod>'
+            .'<serie>1</serie><nNFIni>20</nNFIni><nNFFin>23</nNFFin>'
             .'</infInut></retInutNFe>';
         $data=$parser->parse("[Inutilizacao]\nCStat=102\nTpAmb=2\nXml=".$inutil."\n",'inutilizacao');
         self::assertTrue($parser->inutilizationAccepted($data,'homologation'));
+        $range=new NFCeInutilization([
+            'issuer_document'=>'39323356000100','year'=>2026,'series'=>1,
+            'first_number'=>20,'last_number'=>23,'environment'=>'homologation',
+        ]);
+        self::assertTrue($parser->inutilizationMatchesRange($data,$range));
+        $range->first_number=19;
+        self::assertFalse($parser->inutilizationMatchesRange($data,$range));
+        $range->first_number=20;
+        $range->issuer_document='39323356000101';
+        self::assertFalse($parser->inutilizationMatchesRange($data,$range));
 
         // cStat alone is insufficient without a SEFAZ proof.
         $data=$parser->parse("[Inutilizacao]\nCStat=102\nTpAmb=2\n",'inutilizacao');
@@ -133,14 +145,11 @@ final class NFCeFiscalLifecycleTest extends TestCase
         }
     }
 
-    public function test_inutilization_confirms_only_sefaz_102_with_protocol(): void
+    public function test_inutilization_never_confirms_by_ini_code_alone(): void
     {
         $parser=new NFCeFiscalEventResponse();
-        $data=$parser->parse("[Inutilizacao]\nCStat=102\nTpAmb=2\nNProt=129260000000002\nXMotivo=Inutilização homologada\n",'inutilizacao');
-        self::assertTrue($parser->inutilizationAccepted($data,'homologation'));
-        $data['protocol']='';
+        $data=$parser->parse("[Inutilizacao]\\nCStat=102\\nTpAmb=2\\nNProt=129260000000002\\nXMotivo=Inutilização homologada\\n",'inutilizacao');
         self::assertFalse($parser->inutilizationAccepted($data,'homologation'));
-        $data['protocol']='129260000000002';
         self::assertFalse($parser->inutilizationAccepted($data,'production'));
     }
 }
