@@ -48,7 +48,7 @@ final class NFCeManualController extends Controller
             'company'=>CompanySetting::current(),
             'settings'=>app(FiscalDocumentSettings::class),
             'products'=>Product::query()->where('is_active',true)
-                ->orderBy('name')->get(['id','name','sku','sale_price','unit','stock_quantity','control_stock']),
+                ->orderBy('name')->get(['id','name','sku','ean_gtin','sale_price','unit','stock_quantity','control_stock']),
             'customers'=>Customer::query()->orderBy('name')
                 ->get(['id','name','document','final_consumer']),
             'sales'=>$sales,
