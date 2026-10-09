@@ -10,6 +10,9 @@
   $values=old('tax_config',$group->tax_config ?? []);
   $val=fn(string $key)=>data_get($values,$key,'');
   $selectedKind=old('kind',$group->kind ?? 'products');
+  $groupCrt=(string)($group->target_crt ?? '');
+  $isSimplePreset=in_array($groupCrt,['1','4'],true);
+  $isNormalPreset=in_array($groupCrt,['2','3'],true);
   $sections=[
     'ICMS'=>[
       ['icms_rate','Alíquota ICMS (%)'],['base_reduction_rate','Redução BC ICMS (%)'],['credit_rate','Crédito Simples (%)'],
@@ -98,10 +101,10 @@
   <section class="editor-panel settings-panel" data-group-kind="products" @if($selectedKind==='services') hidden @endif>
     <div class="settings-panel-head"><div><h2>ICMS</h2></div></div>
     <div class="editor-grid cols-12 settings-grid">
-      <label class="field col-4"><span>CSOSN geral</span><input name="icms_csosn" maxlength="3" inputmode="numeric" value="{{ old('icms_csosn',$group->icms_csosn) }}" placeholder="Ex.: 101"></label>
-      <label class="field col-4"><span>Alternativa para NFC-e</span><input name="nfce_csosn" maxlength="3" inputmode="numeric" value="{{ old('nfce_csosn',$group->nfce_csosn) }}" placeholder="Ex.: 102"></label>
-      <label class="field col-4"><span>CST ICMS (regime normal)</span><input name="icms_cst" maxlength="2" inputmode="numeric" value="{{ old('icms_cst',$group->icms_cst) }}"></label>
-      <label class="field col-4"><span>Modalidade da base ICMS</span>
+      <label class="field col-4" @if($isNormalPreset) hidden @endif><span>CSOSN geral</span><input name="icms_csosn" maxlength="3" inputmode="numeric" value="{{ old('icms_csosn',$group->icms_csosn) }}" placeholder="Ex.: 101"></label>
+      <label class="field col-4" @if($isNormalPreset) hidden @endif><span>Alternativa para NFC-e</span><input name="nfce_csosn" maxlength="3" inputmode="numeric" value="{{ old('nfce_csosn',$group->nfce_csosn) }}" placeholder="Ex.: 102"></label>
+      <label class="field col-4" @if($isSimplePreset) hidden @endif><span>CST ICMS (regime normal)</span><input name="icms_cst" maxlength="2" inputmode="numeric" value="{{ old('icms_cst',$group->icms_cst) }}"></label>
+      <label class="field col-4" @if($isSimplePreset) hidden @endif><span>Modalidade da base ICMS</span>
         <select name="tax_config[mod_bc]">
           <option value="">Selecione</option>
           <option value="0" @selected($val('mod_bc')==='0')>0 — Margem de valor agregado</option>
@@ -113,7 +116,7 @@
     </div>
     <div class="editor-grid cols-12 settings-grid">
       @foreach($sections['ICMS'] as [$key,$label])
-        <label class="field col-3"><span>{{ $label }}</span><input type="number" step="0.0001" min="0" max="100" name="tax_config[{{ $key }}]" value="{{ $val($key) }}" placeholder="—"></label>
+        <label class="field col-3" @if($isSimplePreset || ($isNormalPreset && !in_array($key,['icms_rate','base_reduction_rate']))) hidden @endif><span>{{ $label }}</span><input type="number" step="0.0001" min="0" max="100" name="tax_config[{{ $key }}]" value="{{ $val($key) }}" placeholder="—"></label>
       @endforeach
     </div>
   </section>
@@ -124,11 +127,13 @@
       <label class="field col-3"><span>CST PIS</span><input name="pis_cst" maxlength="2" inputmode="numeric" value="{{ old('pis_cst',$group->pis_cst) }}" placeholder="Ex.: 49"></label>
       <label class="field col-3"><span>CST COFINS</span><input name="cofins_cst" maxlength="2" inputmode="numeric" value="{{ old('cofins_cst',$group->cofins_cst) }}" placeholder="Ex.: 49"></label>
       @foreach($sections['PIS / COFINS'] as [$key,$label])
-        <label class="field col-3"><span>{{ $label }}</span><input type="number" step="0.0001" min="0" max="100" name="tax_config[{{ $key }}]" value="{{ $val($key) }}"></label>
+        <label class="field col-3" @if($groupCrt!=='' && ($key==='pis_rate' ? !in_array($group->pis_cst,['01','02'],true) : !in_array($group->cofins_cst,['01','02'],true))) hidden @endif><span>{{ $label }}</span><input type="number" step="0.0001" min="0" max="100" name="tax_config[{{ $key }}]" value="{{ $val($key) }}"></label>
       @endforeach
     </div>
   </section>
 
+  <details data-group-kind="products" @if($selectedKind==='services') hidden @endif style="margin-bottom:14px">
+    <summary class="btn btn-secondary" style="cursor:pointer;display:inline-flex">Outros tributos</summary>
   <section class="editor-panel settings-panel" data-group-kind="products" @if($selectedKind==='services') hidden @endif>
     <div class="settings-panel-head"><div><h2>IBS / CBS</h2></div></div>
     <div class="editor-grid cols-12 settings-grid">
@@ -156,6 +161,8 @@
   <div data-group-kind="products" @if($selectedKind==='services') hidden @endif>
     @include('fiscal.tax-groups._advanced')
   </div>
+
+  </details>
 
   <section class="editor-panel settings-panel">
     <div class="settings-panel-head"><div><h2>Observações</h2></div></div>
