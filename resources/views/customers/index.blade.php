@@ -1,5 +1,4 @@
 @extends('layouts.app')
-@section('titleMeta'){{ $customers->total() }} {{ $customers->total() === 1 ? 'registro' : 'registros' }}@endsection
 @section('title','Clientes')
 @section('description','Mantenha os dados dos compradores organizados para registrar vendas.')
 @section('content')
@@ -24,7 +23,6 @@
       </select>
       <button class="bulk-apply" type="button" data-bulk-apply disabled>Aplicar</button>
     </div>
-    <span class="selection-count" data-selection-count hidden></span>
     <form id="customers-duplicate" method="post" action="{{ route('customers.bulk-duplicate') }}" hidden>@csrf</form>
     <form id="customers-delete" method="post" action="{{ route('customers.bulk-delete') }}" hidden>@csrf @method('DELETE')</form>
   </div>
