@@ -181,4 +181,23 @@ final class NFCeTaxCalculationServiceTest extends TestCase
         $calculator->calculate($this->item(['icms_cst'=>'00', 'mod_bc'=>'1', 'icms_rate'=>'18']), '3');
     }
 
+    public function test_normal_icms_cst_40_41_have_no_icms_own_amounts(): void
+    {
+        foreach (['40','41'] as $cst) {
+            $tax = (new NFCeTaxCalculationService())->calculate(
+                $this->item(['icms_cst'=>$cst]), '3'
+            );
+            self::assertSame(['orig'=>'0','CST'=>$cst], $tax['icms']);
+        }
+    }
+
+    public function test_normal_cst_40_requires_separate_mapping_for_desoneration(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('icms_desoneration_reason');
+        (new NFCeTaxCalculationService())->calculate(
+            $this->item(['icms_cst'=>'40','icms_desoneration_reason'=>'SUFRAMA']), '3'
+        );
+    }
+
 }
