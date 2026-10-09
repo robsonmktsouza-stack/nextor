@@ -527,35 +527,11 @@ class PdvController extends Controller
         return redirect()->route('pdv.index')->with('success','Contingência NFC-e encerrada para novas vendas.');
     }
 
-    public function requestNfceCancellation(Request $request, FiscalDocumentJob $fiscalJob)
+    public function requestNfceCancellation(Request $request,FiscalDocumentJob $fiscalJob)
     {
-        $data=$request->validate([
-            'reason'=>['required','string','min:15','max:255'],
-        ]);
-
-        if($fiscalJob->document_type!=='nfce') abort(404);
-
-        if($fiscalJob->status!=='authorized' || !$fiscalJob->access_key) {
-            throw ValidationException::withMessages([
-                'reason'=>'Somente uma NFC-e autorizada e com chave de acesso pode entrar na fila de cancelamento.',
-            ]);
-        }
-
-        if($fiscalJob->cancelled_at || $fiscalJob->cancellation_status==='pending') {
-            throw ValidationException::withMessages([
-                'reason'=>'Esta NFC-e já foi cancelada ou já possui cancelamento pendente.',
-            ]);
-        }
-
-        $fiscalJob->update([
-            'cancellation_status'=>'pending',
-            'cancellation_reason'=>trim($data['reason']),
-            'cancellation_requested_at'=>now(),
-        ]);
-
-        return redirect()->route('pdv.index')->with(
-            'warning',
-            'Cancelamento fiscal colocado na fila. A transmissão será executada pelo motor fiscal conectado.'
+        abort_unless($fiscalJob->document_type==='nfce',404);
+        return app(\App\Http\Controllers\NFCeFiscalEventsController::class)->cancel(
+            $request,$fiscalJob,app(\App\Services\Fiscal\NFCeCancellationService::class)
         );
     }
 
