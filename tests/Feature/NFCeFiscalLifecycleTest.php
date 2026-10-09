@@ -153,6 +153,36 @@ final class NFCeFiscalLifecycleTest extends TestCase
         self::assertFalse($parser->inutilizationAccepted($data,'production'));
     }
 
+    public function test_offline_signed_xml_can_be_wrapped_with_sefaz_authorization(): void
+    {
+        // Avoids regressions in the 44-digit key validation used AFTER the
+        // SEFAZ has accepted the contingency XML.
+        $key=str_repeat('1',44);
+        $signed='<?xml version="1.0" encoding="UTF-8"?>'
+            .'<NFe xmlns="http://www.portalfiscal.inf.br/nfe">'
+            .'<infNFe Id="NFe'.$key.'"><ide>'
+            .'<mod>65</mod><serie>1</serie><nNF>5</nNF><tpAmb>2</tpAmb>'
+            .'<tpEmis>9</tpEmis><dhCont>2026-10-09T20:00:00-03:00</dhCont>'
+            .'<xJust>Interrupcao tecnica durante homologacao.</xJust>'
+            .'</ide></infNFe>'
+            .'<Signature xmlns="http://www.w3.org/2000/09/xmldsig#">'
+            .'<SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/></SignedInfo>'
+            .'</Signature></NFe>';
+        $response=[
+            'individual'=>true,'cstat'=>'100','reason'=>'Autorizado o uso da NF-e',
+            'key'=>$key,'protocol'=>str_repeat('2',15),
+            'received_at'=>'09/10/2026 20:30:00',
+            'digest'=>'YQ==','environment'=>'2','application'=>'SVRSnfce-teste',
+        ];
+
+        $authorized=app(\App\Services\Fiscal\NFCeProtocolXmlService::class)
+            ->buildAuthorized($signed,$response);
+        $this->assertStringContainsString('<nfeProc ', $authorized);
+        $this->assertStringContainsString('<chNFe>'.$key.'</chNFe>', $authorized);
+        $this->assertStringContainsString('<nProt>'.str_repeat('2',15).'</nProt>', $authorized);
+        $this->assertStringContainsString('<tpEmis>9</tpEmis>', $authorized);
+    }
+
     public function test_unapproved_production_blocks_cancellation_inutilization_and_offline(): void
     {
         $this->issuer();
