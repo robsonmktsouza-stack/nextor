@@ -455,6 +455,38 @@
         item.setAttribute('aria-selected',active?'true':'false');
       });
     };
+    // A largura do popup nunca deve depender diretamente do comprimento
+    // do texto da opção: no estoque isso ultrapassava o cartão e a tela.
+    const positionMenu=()=>{
+      if(!wrapper.classList.contains('open') || menu.hidden) return;
+      const rect=trigger.getBoundingClientRect();
+      const wrapperRect=wrapper.getBoundingClientRect();
+      const viewportWidth=document.documentElement.clientWidth || window.innerWidth;
+      const viewportHeight=document.documentElement.clientHeight || window.innerHeight;
+      const margin=10;
+      const toolbar=!!wrapper.closest('.toolbar-filters');
+      const maxWidth=Math.max(120,viewportWidth-margin*2);
+      const preferred=toolbar ? rect.width : Math.max(rect.width,Math.min(380,menu.scrollWidth));
+      const width=Math.min(preferred,maxWidth);
+      // Align with the trigger until it would leave the viewport, then
+      // slide LEFT instead of covering space outside the window.
+      const left=Math.max(margin,Math.min(rect.left,viewportWidth-margin-width));
+      menu.style.width=width+'px';
+      menu.style.minWidth='0';
+      menu.style.maxWidth=width+'px';
+      menu.style.left=(left-wrapperRect.left)+'px';
+      menu.style.right='auto';
+
+      const below=Math.max(0,viewportHeight-rect.bottom-margin-4);
+      const above=Math.max(0,rect.top-margin-4);
+      const preferredHeight=Math.min(searchable?340:260,menu.scrollHeight);
+      const dropUp=below<Math.min(140,preferredHeight) && above>below;
+      wrapper.classList.toggle('drop-up',dropUp);
+      const space=dropUp?above:below;
+      menu.style.maxHeight=Math.max(52,Math.min(searchable?340:260,space))+'px';
+    };
+    // One shared handler for every open select; no extra listeners per field.
+    wrapper._nextorLayout=positionMenu;
     const open=()=>{
       if(select.disabled) return;
       const willOpen=!wrapper.classList.contains('open');
@@ -466,13 +498,15 @@
         ensureOptions();
         if(searchBox){searchBox.value='';filterOptions();}
         sync();
-        wrapper.classList.remove('drop-up');
-        requestAnimationFrame(()=>{
-          const rect=menu.getBoundingClientRect();
-          if(rect.bottom>window.innerHeight-12 && trigger.getBoundingClientRect().top>rect.height+12) wrapper.classList.add('drop-up');
-        });
+        positionMenu();
+        // Scroll only the popup, never the whole browser window.
         const selected=menu.querySelector('.ui-select-option.selected:not(:disabled)');
-        selected?.scrollIntoView({block:'nearest'});
+        if(selected){
+          const box=menu.getBoundingClientRect();
+          const item=selected.getBoundingClientRect();
+          if(item.bottom>box.bottom) menu.scrollTop+=item.bottom-box.bottom+8;
+          if(item.top<box.top) menu.scrollTop-=box.top-item.top+8;
+        }
         if(searchBox)searchBox.focus({preventScroll:true});
       }
     };
@@ -519,6 +553,15 @@
     sync();
   };
 
+  // Reflow dropdowns on viewport changes, zoom and nested-container scroll.
+  const repositionOpenSelects=()=>{
+    document.querySelectorAll('.ui-select.open').forEach(wrapper=>wrapper._nextorLayout?.());
+  };
+  window.addEventListener('resize',repositionOpenSelects);
+  document.addEventListener('scroll',event=>{
+    if(event.target?.closest?.('.ui-select-menu')) return;
+    repositionOpenSelects();
+  },true);
   document.addEventListener('click',e=>{
     if(!e.target.closest('.ui-select')) closeUiSelects();
   });
