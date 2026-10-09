@@ -60,12 +60,36 @@ final class NFCeTaxCalculationServiceTest extends TestCase
     {
         $result = (new NFCeTaxCalculationService())->calculate($this->item([
             'cfop'=>'5405', 'icms_csosn'=>'500',
-            'icms_st_retained_base'=>'90.00',
-            'icms_st_retained_value'=>'16.20',
+            'icms_st_retained_base'=>'45.00',
+            'icms_st_retained_value'=>'8.10',
+            'st_retained_amount_scope'=>'unit',
         ]));
         self::assertSame('500', $result['icms']['CSOSN']);
         self::assertSame('90.00', $result['icms']['vBCSTRet']);
         self::assertSame('16.20', $result['icms']['vICMSSTRet']);
+    }
+
+    public function test_line_scoped_retained_st_is_not_multiplied_by_quantity(): void
+    {
+        $result = (new NFCeTaxCalculationService())->calculate($this->item([
+            'cfop'=>'5405', 'icms_csosn'=>'500',
+            'icms_st_retained_base'=>'90.00',
+            'icms_st_retained_value'=>'16.20',
+            'st_retained_amount_scope'=>'line',
+        ]));
+        self::assertSame('90.00', $result['icms']['vBCSTRet']);
+        self::assertSame('16.20', $result['icms']['vICMSSTRet']);
+    }
+
+    public function test_retained_st_without_scope_is_rejected(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('por unidade ou pelo item');
+        (new NFCeTaxCalculationService())->calculate($this->item([
+            'cfop'=>'5405', 'icms_csosn'=>'500',
+            'icms_st_retained_base'=>'90.00',
+            'icms_st_retained_value'=>'16.20',
+        ]));
     }
 
     public function test_rejects_unconfigured_st_retention(): void
