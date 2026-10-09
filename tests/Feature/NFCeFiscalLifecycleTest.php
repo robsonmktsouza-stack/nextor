@@ -23,6 +23,10 @@ final class NFCeFiscalLifecycleTest extends TestCase
             'legal_name'=>'Emissor teste','document'=>'39323356000100',
             'state'=>'BA','crt'=>'1','state_registration'=>'172036473',
         ]);
+        \App\Models\User::query()->create([
+            'name'=>'Fiscal de teste','email'=>'nfce-event-test@example.com',
+            'password'=>'securePassword123','role'=>'admin','is_active'=>true,
+        ]);
         AppSetting::put('fiscal','enabled',true);
         AppSetting::put('nfce','enabled',true);
         AppSetting::put('nfce','environment','homologation');
