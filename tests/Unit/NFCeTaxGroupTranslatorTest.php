@@ -121,4 +121,19 @@ final class NFCeTaxGroupTranslatorTest extends TestCase
         self::assertArrayNotHasKey('icms_csosn',$tax);
     }
 
+    public function test_configured_quantity_rates_are_translated_without_silent_zero(): void
+    {
+        $group = $this->group([
+            'pis_cst'=>'03', 'cofins_cst'=>'03',
+            'tax_config'=>[
+                'pis_calc_type'=>'quantity', 'pis_quantity_rate'=>'0.1200',
+                'cofins_calc_type'=>'quantity', 'cofins_quantity_rate'=>'0.5500',
+            ],
+        ]);
+        $tax=(new NFCeTaxGroupTranslator())->translate($group);
+        self::assertSame('quantity', $tax['pis_calc_type']);
+        self::assertSame('0.1200', $tax['pis_quantity_rate']);
+        self::assertSame('0.5500', $tax['cofins_quantity_rate']);
+    }
+
 }
