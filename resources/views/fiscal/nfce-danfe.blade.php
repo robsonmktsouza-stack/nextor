@@ -166,8 +166,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const preparePaper=()=>{
       const paper=document.body.dataset.paper;
       if(paper==='58'||paper==='80') {
-        const receipt=document.getElementById('danfePaper');
-        const height=receipt.getBoundingClientRect().height;
+        // Em contingência há duas vias. Dimensionar o papel pela mais
+        // alta para impedir corte da segunda via na impressão térmica.
+        const receipts=[...document.querySelectorAll('.danfe-paper')];
+        const height=Math.max(...receipts.map(receipt=>receipt.getBoundingClientRect().height));
         const millimeters=Math.ceil(height*25.4/96)+8;
         const pageHeight=Math.max(100,Math.min(millimeters,1500));
         @if($pdfExport ?? false)
