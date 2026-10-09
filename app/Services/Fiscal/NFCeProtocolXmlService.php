@@ -119,7 +119,7 @@ final class NFCeProtocolXmlService
         return $authorizedXml;
     }
 
-    private function receivedAtIso(string $input): string
+    public function receivedAtIso(string $input): string
     {
         $value = trim($input);
         if (preg_match('/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}$/', $value)) {
