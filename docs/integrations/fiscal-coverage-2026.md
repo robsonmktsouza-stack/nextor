@@ -48,3 +48,28 @@ Verificar versões de tabela e schemas no momento de cada publicação. A tabela
 O caixa não escolhe códigos fiscais e não recebe etapa de conferência tributária. Configurações ausentes geram pendência objetiva para correção pelo responsável.
 
 Rodar a suíte fiscal, PHP lint, compilação das views e testes em homologação antes de qualquer ativação de produção. Não confundir cStat 107 (serviço operante) com autorização efetiva de uma nota.
+
+
+## Liberação granular de produção
+
+Além de ACBr_NFE_PRODUCTION_ENABLED=true (somente depois da homologação), informe
+ACBr_NFE_PRODUCTION_APPROVED_PROFILES com uma lista de perfis previamente
+homologados separados por vírgula. Cada chave usa:
+UF:MODELO:CRT:CFOP:ICMS_CST_OU_CSOSN:PIS_CST:COFINS_CST.
+
+Exemplo apenas ilustrativo, **não significa homologação**:
+BA:65:1:5102:102:49:49
+
+Sem um perfil explicitamente listado a pré-validação impede produção.
+O perfil é verificado item a item. Alteração de CST, CSOSN, CFOP ou CRT gera
+uma chave distinta que precisa ser homologada separadamente.
+
+**A lista de perfis não substitui as validações de operação, NCM, alíquota,
+benefício, vigência, UF ou schema**; a chave não contém todas as alíquotas e
+regras especiais. Somente ativar um perfil depois que o XML completo houver
+sido validado e uma nota do mesmo contexto autorizada em homologação.
+A opção de liberação é técnica e não decide classificação tributária.
+
+Os testes de CI executam tanto a suíte fiscal quanto todo o projeto Laravel.
+Nenhum teste simula autorização efetiva da SEFAZ ou a presença da DLL ACBr
+instalada no ambiente do cliente.
