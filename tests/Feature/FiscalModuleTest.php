@@ -192,6 +192,18 @@ class FiscalModuleTest extends TestCase
         }
     }
 
+    public function test_inutilization_page_identifies_test_environment_and_always_requires_confirmation(): void
+    {
+        \App\Models\AppSetting::put('nfce','environment','homologation');
+
+        $this->actingAs($this->admin())
+            ->get(route('fiscal.nfce.inutilizations'))
+            ->assertOk()
+            ->assertSee('Homologação — teste')
+            ->assertSee('data-confirm-kind="action"',false)
+            ->assertSee('Confirmar inutilização');
+    }
+
     public function test_user_without_fiscal_permission_cannot_open_module(): void
     {
         $user=User::query()->create([
