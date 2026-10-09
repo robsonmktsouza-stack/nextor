@@ -71,6 +71,31 @@ final class NFCeFiscalLifecycleTest extends TestCase
         self::assertFalse($parser->cancellationAccepted($rejected,$key,'homologation'));
     }
 
+    public function test_event_protocol_can_be_verified_in_embedded_sefaz_xml(): void
+    {
+        $parser=new NFCeFiscalEventResponse();
+        $key=str_repeat('7',44);
+        $cancel='<?xml version="1.0" encoding="UTF-8"?>'
+            .'<retEnvEvento xmlns="http://www.portalfiscal.inf.br/nfe"><retEvento><infEvento>'
+            .'<tpAmb>2</tpAmb><cStat>135</cStat><chNFe>'.$key.'</chNFe>'
+            .'<tpEvento>110111</tpEvento><nProt>129260000000001</nProt>'
+            .'</infEvento></retEvento></retEnvEvento>';
+        $ini="[Cancelamento]\nCStat=135\nTpAmb=2\nXml=".$cancel."\n";
+        $data=$parser->parse($ini,'cancelamento');
+        self::assertTrue($parser->cancellationAccepted($data,$key,'homologation'));
+
+        $inutil='<?xml version="1.0" encoding="UTF-8"?>'
+            .'<retInutNFe xmlns="http://www.portalfiscal.inf.br/nfe"><infInut>'
+            .'<tpAmb>2</tpAmb><cStat>102</cStat><nProt>129260000000002</nProt>'
+            .'</infInut></retInutNFe>';
+        $data=$parser->parse("[Inutilizacao]\nCStat=102\nTpAmb=2\nXml=".$inutil."\n",'inutilizacao');
+        self::assertTrue($parser->inutilizationAccepted($data,'homologation'));
+
+        // cStat alone is insufficient without a SEFAZ proof.
+        $data=$parser->parse("[Inutilizacao]\nCStat=102\nTpAmb=2\n",'inutilizacao');
+        self::assertFalse($parser->inutilizationAccepted($data,'homologation'));
+    }
+
     public function test_inutilization_only_allows_unused_gap_before_next_number(): void
     {
         $this->issuer();
