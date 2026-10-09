@@ -52,7 +52,7 @@ final class FiscalUtilitiesController extends Controller
         }
 
         $zip=new ZipArchive();
-        if ($zip->open($temporary,ZipArchive::OVERWRITE)!==true) {
+        if ($zip->open($temporary,ZipArchive::CREATE | ZipArchive::OVERWRITE)!==true) {
             @unlink($temporary);
             return back()->with('error','Não foi possível criar o ZIP dos XMLs.');
         }
