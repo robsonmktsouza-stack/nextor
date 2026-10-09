@@ -50,30 +50,33 @@ O caixa não escolhe códigos fiscais e não recebe etapa de conferência tribut
 Rodar a suíte fiscal, PHP lint, compilação das views e testes em homologação antes de qualquer ativação de produção. Não confundir cStat 107 (serviço operante) com autorização efetiva de uma nota.
 
 
-## Liberação granular de produção
+## Configuração da produção no NEXTOR
 
-Além de ACBr_NFE_PRODUCTION_ENABLED=true (somente depois da homologação), informe
-ACBr_NFE_PRODUCTION_APPROVED_PROFILES com uma lista de perfis previamente
-homologados separados por vírgula. Cada chave usa:
-UF:MODELO:CRT:CFOP:ICMS_CST_OU_CSOSN:PIS_CST:COFINS_CST.
+A permissão de produção não depende mais de modificar .env nem de listas
+estáticas de perfis. Está nas configurações de cada documento:
+NF-e, NFC-e, NFS-e, CT-e e MDF-e.
 
-Exemplo apenas ilustrativo, **não significa homologação**:
-BA:65:1:5102:102:49:49
+Os cinco tipos utilizam a mesma política de configurações
+(`App/Services/Fiscal/FiscalDocumentSettings.php`):
+- recursos fiscais habilitados globalmente;
+- documento habilitado;
+- ambiente escolhido;
+- permissão de produção, inicialmente desativada.
 
-Sem um perfil explicitamente listado a pré-validação impede produção.
-O perfil é verificado item a item. Alteração de CST, CSOSN, CFOP ou CRT gera
-uma chave distinta que precisa ser homologada separadamente.
+Quando um transmissor estiver implementado, deverá usar a política central
+para impedir envio não autorizado. Hoje apenas a NFC-e possui transmissor ACBr
+nesta branch; NF-e, NFS-e, CT-e e MDF-e continuam com telas, cadastro de
+parâmetros e preparação de documentos, sem transmissão final implementada.
+Ativar opções na tela não cria um emissor nem garante autorização SEFAZ.
 
-**A lista de perfis não substitui as validações de operação, NCM, alíquota,
-benefício, vigência, UF ou schema**; a chave não contém todas as alíquotas e
-regras especiais. Somente ativar um perfil depois que o XML completo houver
-sido validado e uma nota do mesmo contexto autorizada em homologação.
-A opção de liberação é técnica e não decide classificação tributária.
+Para NFC-e, a validação tributária permanece por produto, CST/CSOSN, CFOP,
+NCM, alíquotas, pagamentos e totalização. Não permitir CST ou tributo não
+implementado, nem contingência offline, sem cálculo e XML correspondente.
+O emissor atual ainda é específico para BA — UF diferente exige efetiva
+adaptação do XML, SEFAZ e QR Code, não só uma opção visual.
 
-Os testes de CI executam tanto a suíte fiscal quanto todo o projeto Laravel.
-Nenhum teste simula autorização efetiva da SEFAZ ou a presença da DLL ACBr
-instalada no ambiente do cliente.
-
+A escolha de produção deve seguir homologação real dos cenários relevantes.
+Testes automatizados não substituem autorização da SEFAZ.
 
 ## CSOSN 500 — valores de retenção
 
