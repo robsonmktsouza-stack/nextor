@@ -57,11 +57,6 @@
             @include('partials.icon',['name'=>'tag','size'=>18])
           </a>
         @endif
-        @if($tab==='nfce')
-          <a class="grid-tool grid-tool-wide" href="{{ route('fiscal.nfce.inutilizations') }}" data-tooltip="Inutilizar numeração não usada na SEFAZ">
-            @include('partials.icon',['name'=>'file-minus','size'=>16]) <span>Inutilização</span>
-          </a>
-        @endif
         @if($tab==='nfce' && auth()->user()->canAccess('pdv'))
           <a class="grid-tool" href="{{ route('pdv.index') }}" data-tooltip="Abrir PDV">
             @include('partials.icon',['name'=>'sales','size'=>17])
@@ -95,6 +90,16 @@
               @include('partials.icon',['name'=>'print','size'=>16])
               <span>{{ $tab==='nfce' ? 'Imprimir / salvar '.$auxiliaryLabel : 'Baixar '.$auxiliaryLabel }}</span>
             </button>
+            @if($tab==='nfce')
+              <button type="button" data-fiscal-cancel disabled title="Selecione uma NFC-e autorizada dentro do prazo de cancelamento">
+                @include('partials.icon',['name'=>'x','size'=>16])
+                <span>Cancelamento</span>
+              </button>
+              <a href="{{ route('fiscal.nfce.inutilizations') }}" title="Inutilizar uma faixa de numeração não utilizada na SEFAZ">
+                @include('partials.icon',['name'=>'file-minus','size'=>16])
+                <span>Inutilização</span>
+              </a>
+            @endif
           </div>
         </details>
       </div>
@@ -209,12 +214,24 @@
               ?? $document->created_at;
             $xmlAvailable=$fiscalUtilities->xmlPath($document)!==null;
             $auxiliaryAvailable=$fiscalUtilities->canOpenAuxiliary($document);
+            $canCancelNfce=$tab==='nfce'
+              && $document->status==='authorized'
+              && !$document->cancellation_status
+              && !$document->cancelled_at
+              && $document->authorized_at
+              && !$document->authorized_at->isFuture()
+              && $document->authorized_at->copy()->addMinutes(30)->isFuture();
           @endphp
           <tr>
             <td class="select-cell">
               <input type="checkbox" data-row-select value="{{ $document->id }}"
                 data-fiscal-xml="{{ $xmlAvailable ? '1' : '0' }}"
                 data-fiscal-auxiliary-url="{{ $auxiliaryAvailable ? route('fiscal.utilities.auxiliary',$document) : '' }}"
+                @if($tab==='nfce')
+                  data-fiscal-cancellable="{{ $canCancelNfce ? '1' : '0' }}"
+                  data-fiscal-cancel-url="{{ $canCancelNfce ? route('fiscal.nfce.cancel',$document) : '' }}"
+                  data-fiscal-document-label="{{ ($document->series ?? '—').'/'.($document->document_number ?? '—') }}"
+                @endif
                 aria-label="Selecionar {{ $tabMeta['label'] }} {{ $document->document_number ?? $document->id }}">
             </td>
             <td>
@@ -252,4 +269,39 @@
     @include('partials.table-footer',['paginator'=>$documents])
   </div>
 </section>
+
+@if($tab==='nfce')
+<dialog class="erp-dialog small-dialog" id="nfceCancelDialog" aria-labelledby="nfce-cancel-title">
+  <form method="post" data-confirm-submit="Confirma o envio do cancelamento à SEFAZ? O evento autorizado não poderá ser desfeito."
+    data-confirm-title="Confirmar cancelamento fiscal" data-confirm-kind="danger"
+    data-confirm-label="Confirmar cancelamento">
+    @csrf
+    <div class="dialog-header">
+      <div>
+        <h2 id="nfce-cancel-title">Cancelamento de NFC-e</h2>
+        <p data-fiscal-cancel-identification>NFC-e selecionada</p>
+      </div>
+      <button type="button" class="close-dialog" data-dialog-close aria-label="Fechar">×</button>
+    </div>
+    <div class="dialog-body">
+      <p>O cancelamento será solicitado à SEFAZ. A nota continuará autorizada até a confirmação do evento.</p>
+      <label class="field wide">
+        <span>Justificativa do cancelamento</span>
+        <textarea name="reason" minlength="15" maxlength="255" rows="3" required
+          placeholder="Informe o motivo (15 a 255 caracteres)"></textarea>
+      </label>
+      <label class="field wide">
+        <span style="display:flex;align-items:center;gap:8px;font-weight:400">
+          <input type="checkbox" name="no_circulation" value="1" required>
+          Confirmo que a mercadoria não circulou.
+        </span>
+      </label>
+    </div>
+    <div class="dialog-footer">
+      <button type="button" class="btn btn-secondary" data-dialog-close>Voltar</button>
+      <button type="submit" class="btn btn-danger">Solicitar cancelamento</button>
+    </div>
+  </form>
+</dialog>
+@endif
 @endsection
