@@ -23,6 +23,13 @@ final class NFCeTransmissionService
 
     public function process(int $id): void
     {
+        $document=FiscalDocumentJob::query()->findOrFail($id);
+        if($document->emission_mode==='offline'){
+            // Offline is signed and printed WITHOUT any SEFAZ call.
+            // A distinct explicit action transmits the signed XML later.
+            app(NFCeOfflineService::class)->prepare($id);
+            return;
+        }
         $lock = Cache::lock('nextor:nfce:'.$id, 300);
         if (!$lock->get()) {
             return;
