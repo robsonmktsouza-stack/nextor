@@ -44,7 +44,7 @@ final class NFCePreflightService
             'Endereço' => trim((string) $company->address) !== '' && trim((string) $company->district) !== '',
             'CEP' => strlen(preg_replace('/\D/', '', (string) $company->zip_code)) === 8,
             'Município IBGE' => preg_match('/^\d{7}$/', (string) $company->city_ibge_code) === 1,
-            'CRT Simples Nacional/MEI' => in_array((string) $company->crt, ['1','4'], true),
+            'CRT do emitente' => in_array((string) $company->crt, ['1','2','3','4'], true),
             'UF BA' => $company->state === 'BA',
             'Certificado A1' => $company->certificate_path && Storage::disk('local')->exists($company->certificate_path),
             'Senha do certificado' => !empty($company->certificate_password),
