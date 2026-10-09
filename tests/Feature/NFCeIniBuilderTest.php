@@ -78,6 +78,47 @@ final class NFCeIniBuilderTest extends TestCase
         self::assertStringNotContainsString('CSC', $ini);
     }
 
+    public function test_offline_ini_keeps_signed_contingency_fields_for_later_same_key(): void
+    {
+        $company=new CompanySetting([
+            'document'=>'39323356000100','legal_name'=>'EMPRESA TESTE',
+            'state_registration'=>'172036473','crt'=>'1',
+            'address'=>'RUA EXEMPLO','address_number'=>'1','district'=>'CENTRO',
+            'city'=>'Rio do Antonio','city_ibge_code'=>'2926806',
+            'state'=>'BA','zip_code'=>'46220000',
+            'timezone'=>'America/Bahia',
+        ]);
+        $job=new FiscalDocumentJob([
+            'document_type'=>'nfce','emission_mode'=>'offline',
+            'environment'=>'homologation','series'=>1,'document_number'=>11,
+            'contingency_reason'=>'Sem comunicação com o ambiente autorizador.',
+            'contingency_started_at'=>'2026-10-09T10:00:00-03:00',
+            'source_snapshot'=>[
+                'total'=>'10.00','items'=>[[
+                    'item_type'=>'product','product_id'=>1,
+                    'sku'=>'TESTE','name'=>'MERCADORIA','unit'=>'UN',
+                    'origin'=>'0','ncm'=>'22021000','quantity'=>'1.000',
+                    'unit_price'=>'10.00','line_total'=>'10.00','discount'=>'0.00',
+                    'tax_defaults'=>[
+                        'cfop_outbound_internal'=>'5102','icms_csosn'=>'102',
+                        'pis_cst'=>'49','cofins_cst'=>'49',
+                    ],
+                ]],
+                'payments'=>[['payment_method'=>'dinheiro','payment_kind'=>'cash','amount'=>'10.00']],
+                'change_amount'=>'0.00',
+            ],
+        ]);
+        $ini=app(NFCeIniBuilder::class)->build($job,$company);
+        self::assertStringContainsString('tpEmis=9',$ini);
+        self::assertStringContainsString('dhCont=09/10/2026 10:00:00',$ini);
+        self::assertStringContainsString('xJust=Sem comunicação com o ambiente autorizador.',$ini);
+        $job->emission_mode='normal';
+        $normal=app(NFCeIniBuilder::class)->build($job,$company);
+        self::assertStringContainsString('tpEmis=1',$normal);
+        self::assertStringNotContainsString('dhCont=',$normal);
+        self::assertStringNotContainsString('xJust=',$normal);
+    }
+
     public function test_homologation_changes_only_first_product_description_but_keeps_all_codes(): void
     {
         $company = new CompanySetting([
