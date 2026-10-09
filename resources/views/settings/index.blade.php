@@ -223,6 +223,19 @@ foreach($primaryTabs as $key=>$item){
         </div>
       </div>
     </section>
+    <section class="editor-panel settings-panel">
+      <div class="settings-panel-head"><div><h2>Impressão fiscal</h2></div></div>
+      <div class="editor-grid cols-12 settings-grid">
+        <label class="field col-4">
+          <span>Papel do DANFE NFC-e</span>
+          <select name="nfce_paper">
+            <option value="80" @selected((string)old('nfce_paper',$printing['nfce_paper'])==='80')>Bobina 80 mm</option>
+            <option value="58" @selected((string)old('nfce_paper',$printing['nfce_paper'])==='58')>Bobina 58 mm</option>
+            <option value="a4" @selected((string)old('nfce_paper',$printing['nfce_paper'])==='a4')>A4</option>
+          </select>
+        </label>
+      </div>
+    </section>
   
   <div class="editor-savebar settings-savebar">
     <button class="btn btn-success" type="submit">@include('partials.icon',['name'=>'check','size'=>15]) Salvar</button>
