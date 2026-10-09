@@ -90,6 +90,39 @@ final class UiRefinementTest extends TestCase
         self::assertStringNotContainsString('.pdv-cart-row{',$css);
     }
 
+    public function test_listings_do_not_show_total_or_selected_count_badges(): void
+    {
+        $this->actingAs($this->admin());
+
+        foreach ([
+            route('products.index'),
+            route('stock.index'),
+            route('sales.index'),
+            route('fiscal.index',['tab'=>'nfce']),
+        ] as $url) {
+            $response=$this->get($url)->assertOk();
+            $response->assertDontSee('data-selection-count',false);
+            $response->assertDontSee('table-records-count',false);
+            $response->assertDontSee('page-title-meta',false);
+            $response->assertDontSee('Exibindo');
+            $response->assertSee('table-page-size-select',false);
+            $response->assertSee('table-pager-compact',false);
+            // Removing the visual counters does not disable bulk selections.
+            $response->assertSee('data-check-all',false);
+        }
+
+        $js=file_get_contents(public_path('js/erp.js'));
+        self::assertNotFalse($js);
+        self::assertStringNotContainsString("const count=card.querySelector('[data-selection-count]')",$js);
+        self::assertStringContainsString('selected.length===0',$js);
+        self::assertStringContainsString("card.addEventListener('change'",$js);
+
+        $footer=file_get_contents(resource_path('views/partials/table-footer.blade.php'));
+        self::assertNotFalse($footer);
+        self::assertStringNotContainsString('table-records-count',$footer);
+        self::assertStringContainsString('per_page',$footer);
+    }
+
     public function test_all_shared_css_files_have_balanced_blocks(): void
     {
         foreach (['erp.css','ui-refinement.css','pdv.css'] as $file) {
