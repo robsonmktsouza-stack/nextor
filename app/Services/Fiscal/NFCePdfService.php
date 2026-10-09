@@ -88,7 +88,7 @@ class NFCePdfService
     public function render(FiscalDocumentJob $document, string $authorizedXml): string
     {
         $offline=$document->emission_mode==='offline'
-            && in_array($document->status,['offline_signed','offline_print_pending'],true);
+            && in_array($document->status,['offline_signed','offline_print_pending','offline_sending','pending'],true);
         if ($document->document_type!=='nfce' || (!$offline && $document->status!=='authorized')) {
             throw new RuntimeException('DANFE indisponível para esta situação fiscal.');
         }
