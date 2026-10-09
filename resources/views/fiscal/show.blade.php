@@ -109,10 +109,7 @@
 
 @if($canCancelNfce)
 <dialog class="erp-dialog small-dialog" id="nfceCancelDialog" aria-labelledby="nfceCancelTitle">
-  <form method="post" action="{{ route('fiscal.nfce.cancel',$document) }}"
-    data-confirm-submit="Confirma a solicitação de cancelamento à SEFAZ? Uma vez autorizado, o evento não poderá ser desfeito."
-    data-confirm-title="Confirmar cancelamento fiscal" data-confirm-kind="danger"
-    data-confirm-label="Solicitar cancelamento">
+  <form method="post" action="{{ route('fiscal.nfce.cancel',$document) }}">
     @csrf
     <div class="dialog-header">
       <div>
