@@ -506,6 +506,10 @@ class PdvController extends Controller
         }
 
         if($data['action']==='start') {
+            // Em produção, não ativar um modo que o worker fiscal bloquearia.
+            // A venda não deve ser concluída com contingência indisponível.
+            app(\App\Services\Fiscal\NFCeProductionGate::class)
+                ->assertAllowed(app(\App\Services\Fiscal\FiscalDocumentSettings::class)->environment('nfce'));
             $reason=trim((string)($data['reason'] ?? ''));
             if(mb_strlen($reason)<15) {
                 throw ValidationException::withMessages([
