@@ -87,6 +87,11 @@ class FiscalPreparationService
             $existing=FiscalDocumentJob::query()
                 ->where('sale_id',$locked->id)->where('document_type','nfce')->first();
             if ($existing) {
+                if ($existing->status==='cancelled') {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'sale_id'=>'Esta venda possui NFC-e cancelada. Faça uma nova venda quando cabível.',
+                    ]);
+                }
                 return $existing;
             }
 
