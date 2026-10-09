@@ -107,7 +107,7 @@ final class NFCeInutilizationService
                     throw new RuntimeException('Retorno SEFAZ não foi preservado.');
                 }
                 $data=app(NFCeFiscalEventResponse::class)->parse($response,'inutilizacao');
-                if (!app(NFCeFiscalEventResponse::class)->inutilizationAccepted($data,$row->environment)) {
+                if (!app(NFCeFiscalEventResponse::class)->inutilizationMatchesRange($data,$row)) {
                     $uncertain=$data['cstat']==='102';
                     $row->update([
                         'status'=>$uncertain?'uncertain':'rejected',
