@@ -3913,3 +3913,16 @@ body.nfe-modal-open{overflow:hidden}
 .fiscal-code-result strong{flex:0 0 44px;font-size:12px;line-height:1.4}
 .fiscal-code-result span{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;font-size:12px;line-height:1.4}
 .fiscal-code-field>.fiscal-code-search{max-width:100%;text-overflow:ellipsis}
+
+
+/* Atalho compacto de utilitários em todas as listagens fiscais. */
+.grid-tool-group .fiscal-utilities{position:relative;flex:0 0 auto}
+.fiscal-utilities>summary{list-style:none;cursor:pointer;border-radius:0 4px 4px 0;gap:7px;color:#4d6175}
+.fiscal-utilities>summary::-webkit-details-marker{display:none}
+.fiscal-utilities[open]>summary{background:#eef5fb;color:#245d89}
+.fiscal-utilities-dropdown{position:absolute;right:0;top:calc(100% + 5px);width:235px;z-index:120;border:1px solid #d4dee8;border-radius:5px;background:#fff;padding:5px;box-shadow:0 13px 32px #20354d25}
+.fiscal-utilities-dropdown button{display:flex;align-items:center;gap:9px;width:100%;padding:10px 11px;border:0;border-radius:3px;background:transparent;color:#40546b;text-align:left;font-size:12px;white-space:nowrap;cursor:pointer}
+.fiscal-utilities-dropdown button:hover:not(:disabled){background:#eef5fb;color:#245d89}
+.fiscal-utilities-dropdown button:disabled{color:#acb6c0;cursor:not-allowed}
+.fiscal-utilities-dropdown button svg{flex:none}
+@media(max-width:560px){.fiscal-utilities>summary{min-width:38px;padding:0 8px}.fiscal-utilities-dropdown{right:0}}
