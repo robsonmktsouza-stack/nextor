@@ -21,8 +21,8 @@ final class NFCeTaxGroupTranslator
         $cfop=preg_match('/^x\d{3}$/',$pattern) ? '5'.substr($pattern,1) : $pattern;
         $csosn=(string) ($group->nfce_csosn ?: $group->icms_csosn);
         if (!in_array($csosn, ['102','103','300','400','500'], true)
-            || !in_array((string)$group->pis_cst, ['01','02','04','06','07','08','09','49','99'], true)
-            || !in_array((string)$group->cofins_cst, ['01','02','04','06','07','08','09','49','99'], true)) {
+            || !in_array((string)$group->pis_cst, ['01','02','03','04','06','07','08','09','49','99'], true)
+            || !in_array((string)$group->cofins_cst, ['01','02','03','04','06','07','08','09','49','99'], true)) {
             throw new RuntimeException('Grupo "'.$group->name.'": código fiscal sem cálculo NFC-e homologado.');
         }
         $permittedCfops = $csosn === '500'
@@ -34,7 +34,7 @@ final class NFCeTaxGroupTranslator
 
         $config=$group->tax_config ?? [];
         foreach ($config as $name=>$value) {
-            if (in_array($name, ['pis_rate', 'cofins_rate'], true)) {
+            if (in_array($name, ['pis_rate', 'cofins_rate', 'pis_quantity_rate', 'cofins_quantity_rate'], true)) {
                 continue; // Cálculo percentual é feito no serviço fiscal.
             }
             if (!str_ends_with((string)$name,'_rate') && $name !== 'mva_rate') {
@@ -67,6 +67,14 @@ final class NFCeTaxGroupTranslator
                 if (!in_array((string)$group->{$kind.'_cst'}, ['01','02','49','99'], true)
                     || $rate === null || $rate === '' || !is_numeric($rate)) {
                     throw new RuntimeException('Grupo "'.$group->name.'": '.$kind.'_calc_type exige CST compatível e alíquota configurada.');
+                }
+            } elseif ($method === 'quantity') {
+                $quantityRate = $config[$kind.'_quantity_rate'] ?? null;
+                if (!in_array((string)$group->{$kind.'_cst'}, ['03','49','99'], true)
+                    || $quantityRate === null || $quantityRate === '' || !is_numeric($quantityRate)
+                    || ($rate !== null && $rate !== '' && (float)$rate > 0)
+                || (isset($config[$kind.'_quantity_rate']) && (float)$config[$kind.'_quantity_rate'] > 0)) {
+                    throw new RuntimeException('Grupo "'.$group->name.'": '.$kind.'_calc_type exige CST por quantidade e alíquota unitária.');
                 }
             } elseif (!in_array($method, ['','none'], true)
                 || ($rate !== null && $rate !== '' && (float)$rate > 0)) {
@@ -106,7 +114,7 @@ final class NFCeTaxGroupTranslator
             'fiscal_group_revision'=>$group->revision,
             'fiscal_group_name'=>$group->name,
         ];
-        foreach (['pis_rate','cofins_rate','pis_calc_type','cofins_calc_type'] as $field) {
+        foreach (['pis_rate','cofins_rate','pis_quantity_rate','cofins_quantity_rate','pis_calc_type','cofins_calc_type'] as $field) {
             if (array_key_exists($field,$config) && $config[$field] !== '') {
                 $mapped[$field] = $config[$field];
             }
