@@ -199,6 +199,12 @@ class FiscalModuleTest extends TestCase
         $this->actingAs($this->admin())
             ->get(route('fiscal.nfce.inutilizations'))
             ->assertOk()
+            ->assertSee('sales-module-tabs',false)
+            ->assertSee('NF-e')
+            ->assertSee('NFS-e')
+            ->assertSee('CT-e')
+            ->assertSee('MDF-e')
+            ->assertSee('NFC-e')
             ->assertSee('Homologação — teste')
             ->assertSee('data-confirm-kind="action"',false)
             ->assertSee('Confirmar inutilização');
