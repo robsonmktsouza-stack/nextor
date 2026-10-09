@@ -123,6 +123,17 @@ final class NFCeTransmissionService
                         'processed_at' => now(),
                         'error_message' => $xmlWarning,
                     ]);
+                    if ($xmlPath !== $signedPath) {
+                        try {
+                            \App\Jobs\GenerateNFCeDanfePdfJob::dispatch($job->id)
+                                ->onConnection((string)config('queue.default','database'));
+                        } catch (Throwable $exception) {
+                            \Illuminate\Support\Facades\Log::warning('NFC-e autorizada sem DANFE PDF pré-gerado',[
+                                'fiscal_document_job_id'=>$job->id,
+                                'reason'=>$exception->getMessage(),
+                            ]);
+                        }
+                    }
                 } else {
                     $code = (string) ($status['cstat'] ?? '');
                     $indeterminate = !$status['individual'] || in_array($code, ['103', '104', '105', '204', '539', '656'], true);
@@ -228,6 +239,17 @@ final class NFCeTransmissionService
                         'processed_at' => now(),
                         'error_message' => $warning,
                     ]);
+                    if ($xmlPath !== $signedPath) {
+                        try {
+                            \App\Jobs\GenerateNFCeDanfePdfJob::dispatch($job->id)
+                                ->onConnection((string)config('queue.default','database'));
+                        } catch (Throwable $exception) {
+                            \Illuminate\Support\Facades\Log::warning('NFC-e autorizada sem DANFE PDF pré-gerado',[
+                                'fiscal_document_job_id'=>$job->id,
+                                'reason'=>$exception->getMessage(),
+                            ]);
+                        }
+                    }
                 } else {
                     $job->update([
                         'error_message' => 'Consulta SEFAZ: '.($data['cstat'] ?: 'sem status').' - '.$data['reason'].
