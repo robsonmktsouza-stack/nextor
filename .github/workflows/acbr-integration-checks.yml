@@ -51,6 +51,7 @@ jobs:
             app/Services/Fiscal/NFCeTransmissionService.php \
             app/Services/Fiscal/NFCeProtocolXmlService.php \
             app/Services/Fiscal/NFCeDanfeService.php \
+            app/Services/Fiscal/NFCePdfService.php \
             app/Http/Controllers/NFCeDanfeController.php \
             app/Services/Fiscal/NFCeAuthorizedXmlRecoveryService.php \
             app/Services/Fiscal/NFCeSefazResponseParser.php \
@@ -98,6 +99,7 @@ jobs:
           php artisan route:list --path=fiscal/tax-groups
           php artisan route:list --path=fiscal/utilities
           php artisan route:list --path=danfe
+          php artisan route:list --path=fiscal/utilities
           php artisan view:cache
           find storage/framework/views -name '*.php' -print0 | xargs -0 -n1 php -l
       - name: Check NFC-e emission and SEFAZ response handling
