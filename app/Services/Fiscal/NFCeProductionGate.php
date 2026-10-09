@@ -3,7 +3,7 @@
 namespace App\Services\Fiscal;
 
 use App\Models\AppSetting;
-use RuntimeException;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Fiscal lifecycle operations are disabled in production by default.
@@ -16,9 +16,9 @@ final class NFCeProductionGate
     {
         if ($environment === 'production'
             && !(bool)AppSetting::value('nfce','advanced_operations_production_approved',false)) {
-            throw new RuntimeException(
-                'Cancelamento, inutilização e contingência em produção ainda não foram homologados nesta instalação.'
-            );
+            throw ValidationException::withMessages([
+                'fiscal' => 'Cancelamento, inutilização e contingência em produção ainda não foram homologados nesta instalação.',
+            ]);
         }
     }
 }
