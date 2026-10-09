@@ -1,6 +1,5 @@
 @extends('layouts.app')
 @section('title','Recorrência')
-@section('titleMeta'){{ $recurrences->total() }} registro(s)@endsection
 @section('content')
 @include('finance._nav')
 
