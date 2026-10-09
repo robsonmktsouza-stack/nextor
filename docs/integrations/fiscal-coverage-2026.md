@@ -2,7 +2,7 @@
 
 O sistema utiliza exclusivamente CFOP, CST, CSOSN e alíquotas configurados pelo responsável. Campos de cadastro não são prova de emissão homologada. A ACBrLib assina, valida e transmite: o cálculo fiscal e a escolha correta da parametrização pertencem ao NEXTOR e ao responsável pela configuração.
 
-## NFC-e 65, Bahia, CRT 1 (nesta branch)
+## NFC-e 65, Bahia, CRT 1/2/3/4 (nesta branch)
 
 | Grupo | Implementação | Situação |
 |---|---|---|
@@ -15,7 +15,9 @@ O sistema utiliza exclusivamente CFOP, CST, CSOSN e alíquotas configurados pelo
 | PIS/COFINS 04 / 06 / 07 / 08 / 09 | Grupos não tributados, sem inventar valores | testes unitários |
 | PIS/COFINS 49 / 99 | Com cálculo configurado ou compatibilidade explícita com padrão legado sem alíquota | testes unitários |
 | FCP, ICMS-ST nova, IPI, DIFAL, IBS/CBS/IS | Requer cálculo, XML e validação completos | bloqueado |
-| CRT 2 / 3 / 4, outras UFs e NF-e 55 | Exigem fluxo, regra e emissão específicos | bloqueado |
+| CRT 2/3 (CST 00 e 20) | Base modo 3, ICMS percentual e redução explícita para CST 20 | testes automatizados; homologação pendente |
+| CRT 4 (MEI) | NFC-e restrita a CSOSN 102/300 e CFOP 5102 | testes automatizados; UF pendente |
+| Outros CST do regime normal, outras UFs e NF-e 55 | Exigem fluxo, regra e emissão específicos | bloqueado |
 
 Regras de compatibilidade CFOP/CSOSN na NFC-e:
 - 102, 103, 300, 400: CFOP 5101, 5102, 5103, 5104 e 5115 no subconjunto implementado.
