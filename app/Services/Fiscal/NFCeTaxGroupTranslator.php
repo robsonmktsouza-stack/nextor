@@ -22,7 +22,7 @@ final class NFCeTaxGroupTranslator
         $csosn=(string) ($group->nfce_csosn ?: $group->icms_csosn);
         $normal = in_array($crt, ['2','3'], true);
         $icmsCst = (string)$group->icms_cst;
-        if (($normal && !in_array($icmsCst, ['00','20'], true))
+        if (($normal && !in_array($icmsCst, ['00','20','40','41'], true))
             || (!$normal && !in_array($csosn, ['102','103','300','400','500'], true))
             || !in_array((string)$group->pis_cst, ['01','02','03','04','06','07','08','09','49','99'], true)
             || !in_array((string)$group->cofins_cst, ['01','02','03','04','06','07','08','09','49','99'], true)) {
@@ -105,12 +105,18 @@ final class NFCeTaxGroupTranslator
         if (($group->icms_cst && !$normal) || $group->ipi_cst) {
             throw new RuntimeException('Grupo "'.$group->name.'": CST do ICMS normal ou IPI incompatível com este regime e emissor.');
         }
-        if ($normal && (
+        if ($normal && in_array($icmsCst, ['00','20'], true) && (
             !isset($config['icms_rate']) || $config['icms_rate'] === ''
             || !isset($config['mod_bc']) || $config['mod_bc'] === ''
             || ($icmsCst === '20' && (!isset($config['base_reduction_rate']) || $config['base_reduction_rate'] === ''))
         )) {
             throw new RuntimeException('Grupo "'.$group->name.'": configure modalidade, ICMS e redução de base quando aplicável.');
+        }
+
+        if ($normal && in_array($icmsCst, ['40','41'], true)
+            && ((isset($config['icms_rate']) && (float)$config['icms_rate'] > 0)
+                || (isset($config['base_reduction_rate']) && (float)$config['base_reduction_rate'] > 0))) {
+            throw new RuntimeException('Grupo "'.$group->name.'": CST 40/41 não admite alíquota ICMS ou redução de base neste fluxo.');
         }
 
         $mapped = [
