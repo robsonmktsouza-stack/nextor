@@ -1,0 +1,305 @@
+/*
+ * NEXTOR — visual system refinement
+ *
+ * One shared finish for real controls. Keep fiscal printouts, inputs and
+ * passive containers flat. Load AFTER erp.css and (in the PDV) pdv.css.
+ * This stylesheet never changes business logic or clickable semantics.
+ */
+
+:root{
+  --ui-control-height:38px;
+  --ui-control-height-comfortable:41px;
+  --ui-radius:5px;
+  --ui-border:#cbd6df;
+  --ui-border-hover:#9eb6c8;
+  --ui-text:#43576c;
+  --ui-action-blue:#2c7fb8;
+  --ui-action-green:#3cbd13;
+  --ui-focus:#2f83bf;
+  --ui-shadow:0 1px 2px rgba(21,44,65,.13);
+  --ui-shadow-raised:0 3px 7px rgba(21,44,65,.14);
+  --ui-inset:inset 0 1px 0 rgba(255,255,255,.8);
+}
+.system-comfortable{--ui-control-height:41px}
+
+/* Keep form grids from exceeding their own columns at normal zoom. */
+.app-root :is(.editor-grid,.settings-form-grid,.settings-grid,.cms-card,.grid-actionbar,.grid-actions-right,.grid-actions-left,.editor-panel,.dialog-body,.table-scroll){
+  min-width:0;
+}
+.app-root :is(.editor-grid,.settings-form-grid,.settings-grid) > *{min-width:0}
+.app-root .field{min-width:0}
+.app-root .field > span{line-height:1.35}
+.app-root .field :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]),select,textarea,.ui-select-trigger){
+  max-width:100%;
+  min-width:0;
+  border-radius:var(--ui-radius);
+  border-color:var(--ui-border);
+  box-shadow:inset 0 1px 2px rgba(27,53,75,.035);
+}
+.app-root .field :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]),select,.ui-select-trigger){
+  min-height:var(--ui-control-height);
+}
+.app-root .field :is(input,select,textarea,.ui-select-trigger):hover:not(:disabled):not([readonly]){
+  border-color:var(--ui-border-hover);
+}
+.app-root .field :is(input,select,textarea,.ui-select-trigger):focus-visible{
+  outline:0;
+  border-color:var(--ui-focus);
+  box-shadow:0 0 0 3px rgba(47,131,191,.14),inset 0 1px 1px rgba(27,53,75,.025);
+}
+.app-root .field :is(input,textarea)[readonly]{
+  background:#f3f6f8;
+  border-color:#d9e1e8;
+  color:#64788a;
+}
+.app-root .field :is(input,select,textarea):disabled{
+  background:#f4f6f8;
+  border-color:#e0e5e9;
+  color:#8998a6;
+  cursor:not-allowed;
+}
+.app-root :is(.field,.editor-grid) textarea{height:auto;min-height:84px;resize:vertical}
+.app-root input[type="number"]:not(.keep-native-spinner){appearance:textfield;-moz-appearance:textfield}
+.app-root input[type="number"]:not(.keep-native-spinner)::-webkit-outer-spin-button,
+.app-root input[type="number"]:not(.keep-native-spinner)::-webkit-inner-spin-button{
+  -webkit-appearance:none;margin:0
+}
+
+/* The slightly raised surface belongs to actions, not to every card. */
+.app-root :is(.btn,.grid-primary-action,.grid-filter-button,.bulk-apply,.btn-icon,.input-action-button,
+  .table-search-submit,.finance-action-icon,.finance-action-split,.finance-action-main,
+  .finance-action-caret,.pager-button){
+  box-shadow:var(--ui-inset),var(--ui-shadow);
+  transition:background .13s ease,border-color .13s ease,box-shadow .13s ease,transform .13s ease,color .13s ease;
+}
+.app-root :is(.btn,.grid-primary-action,.grid-filter-button,.bulk-apply,.btn-icon,.input-action-button,
+  .table-search-submit,.finance-action-icon,.finance-action-split,.finance-action-main,
+  .finance-action-caret,.pager-button):active:not(:disabled):not(.disabled){
+  transform:translateY(1px);
+  box-shadow:inset 0 2px 4px rgba(23,53,76,.18);
+}
+.app-root :is(.btn,.grid-primary-action,.grid-filter-button,.bulk-apply,.btn-icon,.input-action-button,
+  .table-search-submit,.finance-action-icon,.finance-action-split,.finance-action-main,
+  .finance-action-caret,.pager-button):hover:not(:disabled):not(.disabled){
+  box-shadow:var(--ui-inset),var(--ui-shadow-raised);
+}
+.app-root :is(.btn,.btn-icon,.finance-action-icon,.finance-action-main,.finance-action-caret,
+  .finance-action-split,.grid-primary-action,.bulk-apply):disabled{
+  opacity:.58;
+  box-shadow:none;
+  transform:none;
+  cursor:not-allowed;
+}
+.app-root .btn{
+  border-radius:var(--ui-radius);
+  gap:7px;
+  font-weight:650;
+}
+.app-root :is(.btn-secondary,.btn-light,.btn-icon,.input-action-button,.table-search-submit,
+  .finance-action-icon,.finance-action-split,.finance-action-main,.finance-action-caret,
+  .bulk-apply,.pager-button){
+  background:linear-gradient(180deg,#fff 0%,#f2f5f8 100%);
+  border-color:var(--ui-border);
+  color:var(--ui-text);
+}
+.app-root :is(.btn-secondary,.btn-light,.btn-icon,.input-action-button,.table-search-submit,
+  .finance-action-icon,.finance-action-split,.finance-action-main,.finance-action-caret,
+  .bulk-apply,.pager-button):hover:not(:disabled):not(.disabled){
+  background:linear-gradient(180deg,#fff 0%,#e8f1f8 100%);
+  border-color:var(--ui-border-hover);
+  color:#27658e;
+}
+.app-root :is(.btn-primary,.grid-filter-button){
+  color:#fff;
+  background:linear-gradient(180deg,#4096d1 0%,#2a78ad 100%);
+  border-color:#236b9e;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.23),0 2px 4px rgba(31,101,157,.18);
+}
+.app-root :is(.btn-primary,.grid-filter-button):hover:not(:disabled){
+  color:#fff;
+  background:linear-gradient(180deg,#449dd8 0%,#236da2 100%);
+  border-color:#1f618e;
+}
+.app-root :is(.btn-success,.grid-primary-action){
+  color:#fff;
+  background:linear-gradient(180deg,#4bcf1b 0%,#32a909 100%);
+  border-color:#2d9810;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.27),0 2px 4px rgba(39,123,36,.18);
+}
+.app-root :is(.btn-success,.grid-primary-action):hover:not(:disabled){
+  color:#fff;
+  background:linear-gradient(180deg,#53d821 0%,#2c9909 100%);
+  border-color:#24830b;
+}
+.app-root .btn-danger{
+  background:linear-gradient(180deg,#e7686b,#c64048);
+  border-color:#b93640;color:#fff;
+}
+.app-root :is(.btn-danger-outline,.grid-tool-danger):hover:not(:disabled){
+  border-color:#d9a7aa;
+  color:#a8363e;
+  background:linear-gradient(180deg,#fff,#fff0ef);
+}
+
+/* Segmented tabs: clear hit targets and an actual selected state. */
+.app-root .editor-tabs{
+  min-width:0;
+  border-radius:7px;
+  background:linear-gradient(180deg,#e8edf1,#dce5ec);
+  border-color:#cbd7e0;
+  box-shadow:inset 0 1px 3px rgba(23,52,76,.09);
+}
+.app-root .editor-tab{
+  min-width:0;
+  cursor:pointer;
+  border:1px solid #c9d6e0;
+  border-radius:5px;
+  background:linear-gradient(180deg,#fff,#f0f4f7);
+  color:#425f73;
+  box-shadow:inset 0 1px 0 #fff,0 1px 1px rgba(25,50,71,.045);
+  transition:background .13s,border-color .13s,box-shadow .13s,transform .13s;
+}
+.app-root .editor-tab:hover:not(:disabled):not(.active){
+  background:linear-gradient(180deg,#fff,#e8f1f8);
+  border-color:#b3c9d9;
+}
+.app-root .editor-tab.active,
+.app-root .editor-tab[aria-selected="true"]{
+  background:linear-gradient(180deg,#3d92ca,#2c77aa);
+  border-color:#246995;
+  color:#fff;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.27),0 1px 3px rgba(20,70,107,.17);
+}
+.app-root .editor-tab:active:not(:disabled){transform:translateY(1px)}
+.app-root .editor-tab:disabled{opacity:.48;background:#e8edf1;box-shadow:none}
+.app-root [data-tab-panel][hidden],
+.app-root [data-nfce-panel][hidden],
+.app-root .editor-tab-panel[hidden]{display:none!important}
+
+/* Module navigation remains in the user's existing color language. */
+.app-root :is(.sales-module-tabs,.finance-module-tabs,.settings-main-tabs) a{
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.17),0 1px 2px rgba(21,44,65,.12);
+  transition:background .13s,border-color .13s,box-shadow .13s;
+}
+.app-root :is(.sales-module-tabs,.finance-module-tabs,.settings-main-tabs) a.active{
+  background:linear-gradient(180deg,#49c919,#34ac0c);
+  border-color:#2fa30b;color:#fff;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.23),0 2px 3px rgba(37,104,24,.15);
+}
+.app-root .settings-subtabs a.active{
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 2px 4px rgba(35,89,130,.1);
+}
+.app-root :is(.grid-tool-group,.bulk-actions){min-width:0}
+.app-root .grid-tool-group{box-shadow:var(--ui-shadow);border-radius:var(--ui-radius)}
+.app-root .grid-tool{
+  min-width:37px;
+  background:linear-gradient(180deg,#fff,#f2f5f8);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8);
+}
+.app-root .grid-tool:hover:not(:disabled){
+  background:linear-gradient(180deg,#fff,#e9f2f8);
+  border-color:#b4c7d5;
+  color:#286c9a;
+}
+.app-root .grid-tool:active:not(:disabled){box-shadow:inset 0 2px 4px rgba(21,44,65,.12)}
+.app-root :is(.grid-actionbar,.page-heading-main,.card-header,.table-toolbar,.settings-panel-head){min-width:0}
+.app-root .grid-actions-right{flex-wrap:wrap;justify-content:flex-end}
+.app-root .selection-count{font-variant-numeric:tabular-nums}
+.app-root :is(.table-search-group,.table-search,.table-search input,.table-search-group input){min-width:0}
+.app-root :is(.table-search-group,.table-search,.input-filter){border-color:var(--ui-border)}
+.app-root :is(.table-search-group,.table-search,.input-filter):focus-within{
+  border-color:var(--ui-focus);
+  box-shadow:0 0 0 3px rgba(47,131,191,.12);
+}
+.app-root .cms-table :is(th,td){vertical-align:middle}
+.app-root .cms-table .action-cell :is(a,button){vertical-align:middle}
+.app-root .cms-table .btn-icon{box-shadow:var(--ui-inset),0 1px 1px rgba(21,44,65,.09)}
+.app-root .pager-button.active{color:#fff;background:linear-gradient(180deg,#4694ce,#2c7eb7);border-color:#246c9d}
+
+/* Editor panels stay flat: stop multiplying gradients and dark blocks. */
+.app-root :is(.editor-panel,.settings-panel,.cms-card){min-width:0}
+.app-root :is(.editor-panel,.settings-panel){border-color:#d7e1e9}
+.app-root :is(.dialog-header,.dialog-footer,.editor-savebar,.settings-savebar){min-width:0}
+.app-root :is(.dialog-footer,.editor-savebar,.settings-savebar){
+  border-top-color:#d3dfe7;
+  box-shadow:0 -3px 14px rgba(22,49,69,.065);
+}
+.app-root .nfe-modal-layer .nfe-workspace-body,
+.app-root .nextor-modal-layer .dialog-body{
+  overscroll-behavior:contain;
+}
+.app-root :is(.nfe-workspace-body,.nfe-item-body,.table-scroll,.cms-sidebar,.ui-select-options){
+  scrollbar-width:thin;
+  scrollbar-color:#b9c8d4 transparent;
+}
+
+/* The NFC-e footer is physically inside the modal, not fixed to the sidebar. */
+#nfceEditor .nfce-savebar{
+  position:absolute!important;
+  left:0!important;
+  right:0!important;
+  bottom:0!important;
+  top:auto!important;
+  height:64px;
+  z-index:6;
+  margin:0;
+  border-radius:0;
+}
+#nfceEditor .nfe-workspace-body{bottom:64px!important}
+#nfceEditor .nfce-savebar :is(.nfce-save-total,.nfce-save-buttons){min-width:0}
+
+/* The PDV is a separate layout, retaining its keyboard geometry. */
+.pdv-body .pdv-topbar-button{
+  background:linear-gradient(180deg,#29465f,#1b3148);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.09),0 2px 3px rgba(6,20,32,.22);
+  transition:background .14s,border-color .14s,box-shadow .14s,transform .14s;
+}
+.pdv-body .pdv-topbar-button:hover{
+  background:linear-gradient(180deg,#32546f,#25415c);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.13),0 3px 7px rgba(6,20,32,.25);
+}
+.pdv-body .pdv-topbar-button:active{transform:translateY(1px)}
+.pdv-body :is(.pdv-payment-options button,.pdv-operations-list>button,.pdv-suspended-resume){
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 1px 2px rgba(21,44,65,.11);
+  background-image:linear-gradient(180deg,#fff,#f4f7fa);
+  transition:background .14s,border-color .14s,box-shadow .14s,transform .14s;
+}
+.pdv-body :is(.pdv-payment-options button,.pdv-operations-list>button,.pdv-suspended-resume):hover:not(:disabled){
+  background-image:linear-gradient(180deg,#fff,#eaf3fa);
+  box-shadow:0 2px 6px rgba(21,44,65,.13);
+}
+.pdv-body :is(.pdv-payment-options button,.pdv-operations-list>button,.pdv-suspended-resume):active:not(:disabled){
+  transform:translateY(1px);
+}
+.pdv-body .pdv-modal-primary{
+  background-image:linear-gradient(180deg,#4bcf1b,#33a80d);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 2px 5px rgba(30,104,43,.2);
+}
+.pdv-body .pdv-modal-primary:hover:not(:disabled){
+  background-image:linear-gradient(180deg,#52d823,#2a990b);
+}
+.pdv-body .pdv-search-box:focus-within{
+  box-shadow:0 0 0 3px rgba(47,131,191,.12);
+}
+.pdv-body :is(.pdv-cart-remove,.pdv-modal-close):focus-visible{
+  outline:2px solid #58a2dc;
+  outline-offset:2px;
+}
+.pdv-body :is(.pdv-quick-modal,.pdv-operations-modal) .pdv-modal-footer{box-shadow:0 -3px 12px rgba(22,49,69,.07)}
+
+@media(max-width:760px){
+  .app-root .editor-tabs{gap:4px}
+  .app-root :is(.grid-actionbar,.card-header,.table-toolbar){gap:8px}
+  .app-root .grid-actions-right{width:100%;flex-wrap:wrap}
+  .app-root .editor-grid.cols-12>*{min-width:0}
+  #nfceEditor .nfce-savebar{height:72px;padding:9px 12px;gap:8px}
+  #nfceEditor .nfe-workspace-body{bottom:72px!important}
+  #nfceEditor .nfce-save-total strong{font-size:17px}
+}
+@media(prefers-reduced-motion:reduce){
+  .app-root :is(.btn,.editor-tab,.grid-tool,.grid-primary-action,.btn-icon),
+  .pdv-body :is(.pdv-topbar-button,.pdv-payment-options button,.pdv-modal-primary){
+    transition:none!important;
+    transform:none!important;
+  }
+}
