@@ -13,7 +13,7 @@ use Throwable;
 final class ACBrNFCeStatus extends Command
 {
     protected $signature = 'acbr:nfce-status';
-    protected $description = 'Consulta SEFAZ-BA NFC-e em homologação sem emitir documento';
+    protected $description = 'Consulta serviço NFC-e no ambiente cadastrado sem transmitir nota';
 
     public function handle(): int
     {
@@ -28,8 +28,13 @@ final class ACBrNFCeStatus extends Command
         $service = new ACBrNFeService(null, $runtimeIni);
         $company = CompanySetting::current();
 
-        if ($company->state !== 'BA' || AppSetting::value('nfce', 'environment') !== 'homologation') {
-            $this->components->error('Bloqueado: empresa deve estar na BA e NFC-e em homologação.');
+        $environment=(string)AppSetting::value('nfce','environment','homologation');
+        if ($company->state !== 'BA') {
+            $this->components->error('O emissor atual atende SEFAZ-BA; outras UFs exigem integração própria.');
+            return self::FAILURE;
+        }
+        if (!in_array($environment,['homologation','production'],true)) {
+            $this->components->error('Selecione um ambiente válido nas configurações da NFC-e.');
             return self::FAILURE;
         }
 
@@ -83,13 +88,14 @@ final class ACBrNFCeStatus extends Command
                 ['DFe', 'SSLXmlSignLib', '4'],
                 ['NFe', 'PathSchemas', $schemas],
                 ['NFe', 'ModeloDF', '1'],
-                ['NFe', 'Ambiente', '1'],
+                ['NFe', 'Ambiente', $environment === 'homologation' ? '1' : '0'],
                 ['NFe', 'VersaoDF', '3'],
             ] as [$section, $key, $value]) {
                 $service->setConfig($section, $key, $value);
             }
 
-            $this->line('ACBr configurada: certificado, schemas, SSL, NFC-e 65, homologação BA.');
+            $this->line('ACBr configurada: certificado, schemas, SSL, NFC-e 65, '
+                .($environment === 'homologation' ? 'homologação' : 'produção').' BA.');
             $response = $service->statusServico();
 
             $data = @parse_ini_string($response, true, INI_SCANNER_RAW);
