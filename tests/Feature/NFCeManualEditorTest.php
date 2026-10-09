@@ -90,6 +90,31 @@ final class NFCeManualEditorTest extends TestCase
             ->assertSee('7891234567895');
     }
 
+    public function test_tabs_hide_inactive_panels_and_use_trash_icons_for_removal(): void
+    {
+        $this->configure();
+        $this->actingAs($this->admin());
+
+        $response=$this->get(route('fiscal.nfce.create'))->assertOk()
+            ->assertSee('role="tablist"',false)
+            ->assertSee('id="nfceTab-general"',false)
+            ->assertSee('id="nfcePanel-general"',false);
+
+        foreach (['consumer','products','payment','summary'] as $tab) {
+            $response->assertSee('data-nfce-panel="'.$tab.'" hidden',false);
+        }
+
+        $script=file_get_contents(public_path('js/nfce-editor.js'));
+        self::assertNotFalse($script);
+        self::assertStringContainsString('panel.hidden=!active',$script);
+        self::assertStringContainsString('panel.classList.toggle(',$script);
+        self::assertStringContainsString('data-remove-item',$script);
+        self::assertStringContainsString('data-remove-payment',$script);
+        self::assertStringContainsString("const trashIcon='<svg",$script);
+        self::assertStringNotContainsString('aria-label="Remover produto">×</button>',$script);
+        self::assertStringNotContainsString('aria-label="Remover pagamento">×</button>',$script);
+    }
+
     public function test_manual_new_nfce_uses_same_sale_stock_finance_and_fiscal_records_as_pdv(): void
     {
         $product=$this->configure();
