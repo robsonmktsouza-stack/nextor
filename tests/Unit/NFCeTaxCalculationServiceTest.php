@@ -139,4 +139,14 @@ final class NFCeTaxCalculationServiceTest extends TestCase
         ]));
     }
 
+    public function test_crt_four_mei_mapping_is_restricted(): void
+    {
+        $calculator = new NFCeTaxCalculationService();
+        self::assertSame('102', $calculator->calculate($this->item(), '4')['icms']['CSOSN']);
+        self::assertSame('300', $calculator->calculate($this->item(['icms_csosn'=>'300']), '4')['icms']['CSOSN']);
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('MEI');
+        $calculator->calculate($this->item(['icms_csosn'=>'103']), '4');
+    }
+
 }
