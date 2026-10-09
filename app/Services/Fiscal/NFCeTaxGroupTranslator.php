@@ -16,6 +16,10 @@ final class NFCeTaxGroupTranslator
         if (!$group->is_active || $group->kind !== 'products') {
             throw new RuntimeException('Grupo tributário inativo ou não destinado a produtos.');
         }
+        if ($group->target_crt !== null && (string)$group->target_crt !== $crt) {
+            throw new RuntimeException('Este modelo fiscal é exclusivo do CRT '.$group->target_crt
+                .'. Regime do emitente: CRT '.$crt.'.');
+        }
 
         $pattern=(string) $group->cfop_pattern;
         $cfop=preg_match('/^x\d{3}$/',$pattern) ? '5'.substr($pattern,1) : $pattern;
