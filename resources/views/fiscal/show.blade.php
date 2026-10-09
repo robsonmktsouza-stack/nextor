@@ -21,10 +21,17 @@
   </a>
   @if($nfceFiscalUser && $document->status==='prepared' && empty($nfcePreflightErrors))
     <form method="post" action="{{ route('fiscal.nfce.emit',$document) }}"
-      data-confirm-submit="Deseja transmitir a NFC-e série {{ $document->series }}/{{ $document->document_number }} para a SEFAZ em ambiente de {{ $document->environment==='homologation' ? 'homologação' : 'produção' }}?"
-      data-confirm-kind="action" data-confirm-title="Confirmar emissão da NFC-e" data-confirm-label="Transmitir NFC-e">
+      data-confirm-submit="{{ $document->emission_mode==='offline'
+        ? 'Preparar a NFC-e série '.$document->series.'/'.$document->document_number.' em contingência? O sistema assinará o XML e gerará o DANFE sem enviar à SEFAZ.'
+        : 'Deseja transmitir a NFC-e série '.$document->series.'/'.$document->document_number.' para a SEFAZ em ambiente de '.($document->environment==='homologation'?'homologação':'produção').'?' }}"
+      data-confirm-kind="action"
+      data-confirm-title="{{ $document->emission_mode==='offline'?'Preparar NFC-e offline':'Confirmar emissão da NFC-e' }}"
+      data-confirm-label="{{ $document->emission_mode==='offline'?'Preparar contingência':'Transmitir NFC-e' }}">
       @csrf
-      <button type="submit" class="btn btn-success">@include('partials.icon',['name'=>'check','size'=>16]) Emitir NFC-e</button>
+      <button type="submit" class="btn btn-success">
+        @include('partials.icon',['name'=>'check','size'=>16])
+        {{ $document->emission_mode==='offline'?'Preparar contingência':'Emitir NFC-e' }}
+      </button>
     </form>
   @endif
   @if($nfceFiscalUser && $document->status==='pending' && $document->access_key)
