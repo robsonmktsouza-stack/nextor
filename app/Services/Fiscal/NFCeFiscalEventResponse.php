@@ -38,10 +38,14 @@ final class NFCeFiscalEventResponse
         // official XML response. XML metadata is accepted only when the
         // embedded individual cStat, key and environment are consistent.
         $xml=trim((string)($values['xml']??''));
+        $proof=null;
         if (str_starts_with($xml,'<') || str_starts_with($xml,'<?xml')) {
             $verified=$this->xmlProof($xml,$section);
             if ($verified !== null && $verified['cstat']===$code
-                && (!isset($values['tpamb']) || $values['tpamb']===$verified['environment'])) {
+                && (!isset($values['tpamb']) || $values['tpamb']===$verified['environment'])
+                && (!isset($values['nprot']) || $values['nprot']===$verified['protocol'])
+                && (!isset($values['chdfe']) || $values['chdfe']===$verified['key'] || $verified['key']==='')) {
+                $proof=$verified;
                 foreach (['nprot'=>'protocol','chdfe'=>'key','tpamb'=>'environment'] as $key=>$field) {
                     if (($values[$key]??'')==='' && ($verified[$field]??'')!=='') {
                         $values[$key]=$verified[$field];
@@ -58,6 +62,7 @@ final class NFCeFiscalEventResponse
             'environment'=>(string)($values['tpamb']??''),
             'xml'=>(string)($values['xml']??''),
             'received_at'=>(string)($values['dhrecbto']??''),
+            'xml_proof'=>$proof,
         ];
     }
 
@@ -85,6 +90,12 @@ final class NFCeFiscalEventResponse
             'protocol'=>$read('nProt'),
             'key'=>$section==='cancelamento'?$read('chNFe'):'',
             'environment'=>$read('tpAmb'),
+            'issuer'=>$read('CNPJ'),
+            'year'=>$read('ano'),
+            'model'=>$read('mod'),
+            'series'=>$read('serie'),
+            'first_number'=>$read('nNFIni'),
+            'last_number'=>$read('nNFFin'),
         ];
     }
 
@@ -98,8 +109,29 @@ final class NFCeFiscalEventResponse
 
     public function inutilizationAccepted(array $data,string $environment): bool
     {
+        $proof=$data['xml_proof']??null;
         return ($data['cstat']??'')==='102'
             && preg_match('/^\d{15}$/',(string)($data['protocol']??''))===1
-            && ($data['environment']??'') === ($environment==='production'?'1':'2');
+            && ($data['environment']??'') === ($environment==='production'?'1':'2')
+            && is_array($proof)
+            && ($proof['cstat']??'')==='102'
+            && ($proof['environment']??'')===($data['environment']??'')
+            && hash_equals((string)$data['protocol'],(string)($proof['protocol']??''));
+    }
+
+    public function inutilizationMatchesRange(array $data,\App\Models\NFCeInutilization $row): bool
+    {
+        if (!$this->inutilizationAccepted($data,(string)$row->environment))return false;
+        $proof=$data['xml_proof'];
+        return preg_match('/^\d{14}$/',(string)($proof['issuer']??''))===1
+            && hash_equals((string)$row->issuer_document,(string)$proof['issuer'])
+            && (int)($proof['year']??-1)===(int)$row->year%100
+            && (string)($proof['model']??'')==='65'
+            && ctype_digit((string)($proof['series']??''))
+            && (int)$proof['series']===(int)$row->series
+            && ctype_digit((string)($proof['first_number']??''))
+            && (int)$proof['first_number']===(int)$row->first_number
+            && ctype_digit((string)($proof['last_number']??''))
+            && (int)$proof['last_number']===(int)$row->last_number;
     }
 }
