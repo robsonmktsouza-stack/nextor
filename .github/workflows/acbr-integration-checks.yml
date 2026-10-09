@@ -81,6 +81,7 @@ jobs:
             tests/Unit/NFCeDanfeServiceTest.php \
             tests/Feature/NFCePrintSettingsTest.php \
             tests/Feature/NFCeManualEditorTest.php \
+            tests/Feature/UiRefinementTest.php \
             tests/Unit/NFCeSefazResponseParserTest.php; do
             php -l "$f"
           done
@@ -89,6 +90,7 @@ jobs:
           node --check public/js/erp.js
           node --check public/js/fiscal-codes.js
           node --check public/js/nfce-editor.js
+          test -s public/css/ui-refinement.css
       - name: Install PHP dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
       - name: Prepare Laravel
