@@ -74,7 +74,10 @@
       data-confirm-submit="Solicitar cancelamento desta NFC-e à SEFAZ? Não poderá ser revertido após autorizado."
       data-confirm-title="Cancelamento fiscal" data-confirm-kind="danger">
       @csrf
-      <input type="hidden" name="no_circulation" value="1">
+      <label class="field" style="display:flex;align-items:center;gap:7px">
+        <input type="checkbox" name="no_circulation" value="1" required>
+        <span>Confirmo que a mercadoria não circulou.</span>
+      </label>
       <label class="field"><span>Justificativa de cancelamento</span>
         <input name="reason" required minlength="15" maxlength="255" placeholder="Motivo (mínimo 15 caracteres)" style="min-width:240px">
       </label>
@@ -94,6 +97,9 @@
     'authorized'=>['Autorizado','status-ok'],
     'processing'=>['Processando','status-blue'],
     'pending'=>['Pendente','status-blue'],
+    'offline_signed'=>['Contingência impressa','status-blue'],
+    'offline_print_pending'=>['Contingência: DANFE pendente','status-danger'],
+    'offline_sending'=>['Transmitindo contingência','status-blue'],
     'rejected'=>['Rejeitado','status-danger'],
     'error'=>['Erro','status-danger'],
     'failed'=>['Falha','status-danger'],
