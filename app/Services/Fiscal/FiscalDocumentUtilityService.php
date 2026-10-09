@@ -66,7 +66,7 @@ final class FiscalDocumentUtilityService
     {
         // A NFC-e dispõe de um DANFE real renderizado a partir do nfeProc.
         // Outros modelos apenas podem servir PDFs previamente gerados.
-        return ($document->document_type==='nfce' && $this->xmlPath($document)!==null)
+        return ($document->document_type==='nfce' && $document->status==='authorized' && $this->xmlPath($document)!==null)
             || $this->auxiliaryPath($document)!==null;
     }
 
