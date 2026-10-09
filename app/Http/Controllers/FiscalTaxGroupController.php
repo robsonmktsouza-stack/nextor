@@ -110,6 +110,12 @@ final class FiscalTaxGroupController extends Controller
                     ->where('id','!=',$group->id)
                     ->update(['is_default'=>false]);
             }
+            if ($group->kind === 'services' && $data['kind'] === 'services') {
+                // Campos do formulário de produtos ficam ocultos na edição
+                // de serviços. Não apagar configurações fiscais existentes.
+                $merged = array_replace($group->tax_config ?? [], $data['tax_config'] ?? []);
+                $data['tax_config'] = $merged;
+            }
             $data['revision']=$group->revision+1;
             $group->update($data);
         });
