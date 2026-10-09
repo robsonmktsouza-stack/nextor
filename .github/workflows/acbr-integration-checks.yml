@@ -26,6 +26,7 @@ jobs:
             app/Models/FiscalTaxRule.php \
             app/Models/FiscalTaxGroup.php \
             app/Support/FiscalCodeCatalog.php \
+            app/Support/FiscalTaxPresetCatalog.php \
             app/Http/Controllers/FiscalCodeCatalogController.php \
             app/Models/FiscalFcpRule.php \
             app/Http/Controllers/FiscalFcpRuleController.php \
@@ -36,6 +37,7 @@ jobs:
             app/Http/Controllers/ServiceController.php \
             database/migrations/2026_10_08_201000_create_fiscal_tax_groups_table.php \
             database/migrations/2026_10_08_202000_link_fiscal_tax_groups_to_catalog.php \
+            database/migrations/2026_10_09_000001_install_fiscal_tax_group_presets.php \
             app/Services/Fiscal/FiscalTaxRuleResolver.php \
             app/Services/Fiscal/NFCeFiscalProfileService.php \
             app/Services/Fiscal/NFCeTaxRuleApplicationService.php \
@@ -63,6 +65,7 @@ jobs:
             tests/Unit/NFCeTaxGroupTranslatorTest.php \
             tests/Unit/FiscalCodeCatalogTest.php \
             tests/Feature/FiscalTaxGroupPersistenceTest.php \
+            tests/Feature/FiscalTaxPresetMigrationTest.php \
             tests/Feature/FiscalFcpRulePersistenceTest.php \
             tests/Unit/NFCeDanfeServiceTest.php \
             tests/Unit/NFCeSefazResponseParserTest.php; do
