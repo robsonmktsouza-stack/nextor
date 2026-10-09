@@ -218,10 +218,10 @@
               && $document->status==='authorized'
               && !$document->cancellation_status
               && !$document->cancelled_at
-              && preg_match('/^\\d{44}$/',(string)$document->access_key)===1
-              && preg_match('/^\\d{15}$/',(string)$document->protocol)===1
+              && preg_match('/^\d{44}$/',(string)$document->access_key)===1
+              && preg_match('/^\d{15}$/',(string)$document->protocol)===1
               && ($document->environment!=='production'
-                || (bool)\\App\\Models\\AppSetting::value('nfce','advanced_operations_production_approved',false))
+                || (bool)\App\Models\AppSetting::value('nfce','advanced_operations_production_approved',false))
               && $document->authorized_at
               && !$document->authorized_at->isFuture()
               && $document->authorized_at->copy()->addMinutes(30)->isFuture();
