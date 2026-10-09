@@ -20,15 +20,23 @@ final class NFCeTaxGroupTranslator
         $pattern=(string) $group->cfop_pattern;
         $cfop=preg_match('/^x\d{3}$/',$pattern) ? '5'.substr($pattern,1) : $pattern;
         $csosn=(string) ($group->nfce_csosn ?: $group->icms_csosn);
-        if (!preg_match('/^5\d{3}$/',$cfop)
-            || $csosn !== '102'
-            || $group->pis_cst !== '49'
-            || $group->cofins_cst !== '49') {
-            throw new RuntimeException('Grupo "'.$group->name.'": o emissor inicial exige CFOP 5xxx, CSOSN 102 e CST 49 para PIS/COFINS; complete o suporte tributário antes de usar outra classificação.');
+        if (!in_array($csosn, ['102','103','300','400','500'], true)
+            || !in_array((string)$group->pis_cst, ['01','02','04','06','07','08','09','49','99'], true)
+            || !in_array((string)$group->cofins_cst, ['01','02','04','06','07','08','09','49','99'], true)) {
+            throw new RuntimeException('Grupo "'.$group->name.'": código fiscal sem cálculo NFC-e homologado.');
+        }
+        $permittedCfops = $csosn === '500'
+            ? ['5405','5656','5667']
+            : ['5101','5102','5103','5104','5115'];
+        if (!in_array($cfop, $permittedCfops, true)) {
+            throw new RuntimeException('Grupo "'.$group->name.'": CFOP incompatível com CSOSN '.$csosn.' na NFC-e.');
         }
 
         $config=$group->tax_config ?? [];
         foreach ($config as $name=>$value) {
+            if (in_array($name, ['pis_rate', 'cofins_rate'], true)) {
+                continue; // Cálculo percentual é feito no serviço fiscal.
+            }
             if (!str_ends_with((string)$name,'_rate') && $name !== 'mva_rate') {
                 continue;
             }
@@ -52,9 +60,20 @@ final class NFCeTaxGroupTranslator
                 throw new RuntimeException('Grupo "'.$group->name.'": o campo '.$name.' está configurado, mas não é suportado pela NFC-e atual.');
             }
         }
-        foreach (['pis_calc_type','pis_st_calc_type','cofins_calc_type','cofins_st_calc_type'] as $name) {
-            if (!in_array(($config[$name] ?? null),[null,'','none'],true)) {
-                throw new RuntimeException('Grupo "'.$group->name.'": o tipo de cálculo '.$name.' ainda não é implementado na NFC-e atual.');
+        foreach (['pis','cofins'] as $kind) {
+            $method = (string)($config[$kind.'_calc_type'] ?? 'none');
+            $rate = $config[$kind.'_rate'] ?? null;
+            if ($method === 'percentage') {
+                if (!in_array((string)$group->{$kind.'_cst'}, ['01','02','49','99'], true)
+                    || $rate === null || $rate === '' || !is_numeric($rate)) {
+                    throw new RuntimeException('Grupo "'.$group->name.'": '.$kind.'_calc_type exige CST compatível e alíquota configurada.');
+                }
+            } elseif (!in_array($method, ['','none'], true)
+                || ($rate !== null && $rate !== '' && (float)$rate > 0)) {
+                throw new RuntimeException('Grupo "'.$group->name.'": '.$kind.'_calc_type não corresponde ao cálculo e alíquota configurados.');
+            }
+            if (!in_array(($config[$kind.'_st_calc_type'] ?? null),[null,'','none'],true)) {
+                throw new RuntimeException('Grupo "'.$group->name.'": '.$kind.'_st_calc_type ainda não é implementado na NFC-e atual.');
             }
         }
         if (!empty($config['municipal_variations'])) {
@@ -76,7 +95,7 @@ final class NFCeTaxGroupTranslator
             throw new RuntimeException('Grupo "'.$group->name.'": CST do ICMS normal ou IPI informado; o emissor BA/Simples atual não contempla esse tratamento.');
         }
 
-        return [
+        $mapped = [
             'cfop_outbound_internal'=>$cfop,
             'nfce_cfop'=>$cfop,
             'cfop'=>$cfop,
@@ -87,5 +106,11 @@ final class NFCeTaxGroupTranslator
             'fiscal_group_revision'=>$group->revision,
             'fiscal_group_name'=>$group->name,
         ];
+        foreach (['pis_rate','cofins_rate','pis_calc_type','cofins_calc_type'] as $field) {
+            if (array_key_exists($field,$config) && $config[$field] !== '') {
+                $mapped[$field] = $config[$field];
+            }
+        }
+        return $mapped;
     }
 }
