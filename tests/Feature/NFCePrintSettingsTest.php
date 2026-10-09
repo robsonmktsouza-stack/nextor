@@ -104,7 +104,7 @@ final class NFCePrintSettingsTest extends TestCase
         }
     }
 
-    public function test_missing_pdf_is_queued_for_worker_without_loading_native_library_in_web(): void
+    public function test_missing_pdf_is_generated_on_first_open_without_a_queue_worker(): void
     {
         Storage::fake('local');
         Queue::fake();
@@ -112,14 +112,45 @@ final class NFCePrintSettingsTest extends TestCase
         $this->actingAs($this->admin());
         $job=$this->document();
 
+        $renderer=\Mockery::mock(\App\Services\Fiscal\NFCePdfService::class)->makePartial();
+        $renderer->shouldReceive('generate')->once()
+            ->andReturnUsing(function($document,$xml) use ($renderer) {
+                $path=$renderer->storedPath($document,$xml);
+                Storage::disk('local')->put($path,"%PDF-1.7\nTEST PDF\n%%EOF");
+                return $path;
+            });
+        $this->app->instance(\App\Services\Fiscal\NFCePdfService::class,$renderer);
+
         $this->get(route('fiscal.nfce.danfe',$job))
-            ->assertStatus(202)
-            ->assertSee('Preparando DANFE');
-        Queue::assertPushed(GenerateNFCeDanfePdfJob::class,1);
+            ->assertOk()
+            ->assertHeader('Content-Type','application/pdf');
+        Queue::assertNothingPushed();
+
+        // Opening again takes the saved fast path.
+        $this->get(route('fiscal.nfce.danfe',$job))
+            ->assertOk()
+            ->assertHeader('Content-Type','application/pdf');
+    }
+
+    public function test_failed_pdf_render_displays_retry_without_a_long_loading_screen(): void
+    {
+        Storage::fake('local');
+        $this->actingAs($this->admin());
+        $job=$this->document();
+
+        $renderer=\Mockery::mock(\App\Services\Fiscal\NFCePdfService::class)->makePartial();
+        $renderer->shouldReceive('generate')->once()
+            ->andThrow(new \RuntimeException('Falha controlada na conversão PDF'));
+        $this->app->instance(\App\Services\Fiscal\NFCePdfService::class,$renderer);
+
+        $this->get(route('fiscal.nfce.danfe',$job))
+            ->assertOk()
+            ->assertSee('Não foi possível preparar o DANFE.')
+            ->assertSee('[hidden]{display:none!important}',false)
+            ->assertSee('Tentar novamente');
 
         $this->get(route('fiscal.nfce.danfe',['fiscalDocumentJob'=>$job,'status'=>1]))
-            ->assertOk()
-            ->assertJson(['status'=>'pending']);
+            ->assertOk()->assertJson(['status'=>'failed']);
     }
 
     public function test_pdf_worker_persists_valid_real_pdf_without_retransmitting_nfce(): void
