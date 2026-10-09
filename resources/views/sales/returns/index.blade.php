@@ -1,6 +1,5 @@
 @extends('layouts.app')
 @section('title','Vendas')
-@section('titleMeta'){{ $returns->total() }} {{ $returns->total()===1?'devolução':'devoluções' }}@endsection
 @section('content')
 @include('sales._nav')
 
