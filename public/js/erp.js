@@ -1175,6 +1175,20 @@
       document.addEventListener('keydown',e=>{ if ((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();search.focus();search.select();} if(e.key==='Escape')results.hidden=true; });
     }
   }
+  document.querySelectorAll('.page-actions [data-fiscal-utilities]').forEach(menu=>{
+    document.addEventListener('click',event=>{
+      if(menu.open && !menu.contains(event.target)) menu.open=false;
+    });
+    menu.addEventListener('keydown',event=>{
+      if(event.key==='Escape'){
+        menu.open=false;
+        menu.querySelector('summary')?.focus();
+      }
+    });
+    menu.querySelectorAll('[data-dialog-open]').forEach(button=>button.addEventListener('click',()=>{
+      menu.open=false;
+    }));
+  });
   document.querySelectorAll('[data-dialog-open]').forEach(button=>button.addEventListener('click',()=>{
     const id=button.getAttribute('data-dialog-open');document.getElementById(id)?.showModal();
   }));
