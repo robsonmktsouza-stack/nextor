@@ -7,6 +7,7 @@ use App\Models\CompanySetting;
 use App\Models\FiscalDocumentJob;
 use App\Services\Fiscal\ACBr\ACBrNFeService;
 use RuntimeException;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Gera PDF real do DANFE a partir do nfeProc autorizado, sem reemitir nota.
@@ -19,6 +20,41 @@ class NFCePdfService
         $previous=(string)AppSetting::value('pdv','receipt_width','80');
         $paper=(string)AppSetting::value('printing','nfce_paper',$previous);
         return in_array($paper,['58','80','a4'],true) ? $paper : '80';
+    }
+
+    /** The selected paper and XML contents uniquely identify this exact PDF. */
+    public function storedPath(FiscalDocumentJob $document, string $authorizedXml): string
+    {
+        $paper=$this->paper();
+        $digest=substr(hash('sha256',$authorizedXml),0,20);
+        return 'fiscal/nfce/'.$document->id.'/danfe-'.$paper.'-'.$digest.'.pdf';
+    }
+
+    public function existingPath(FiscalDocumentJob $document, string $authorizedXml): ?string
+    {
+        $path=$this->storedPath($document,$authorizedXml);
+        return Storage::disk('local')->exists($path) ? $path : null;
+    }
+
+    /**
+     * Used only by the fiscal queue worker: the web PHP process must not
+     * load ACBr DLLs and does not require the PHP FFI extension.
+     */
+    public function generate(FiscalDocumentJob $document, string $authorizedXml): string
+    {
+        if ($existing=$this->existingPath($document,$authorizedXml)) {
+            return $existing;
+        }
+
+        $pdf=$this->render($document,$authorizedXml);
+        if (!str_starts_with($pdf,'%PDF-') || !str_contains($pdf,'%%EOF')) {
+            throw new RuntimeException('O gerador não retornou um documento PDF completo.');
+        }
+        $path=$this->storedPath($document,$authorizedXml);
+        if (!Storage::disk('local')->put($path,$pdf)) {
+            throw new RuntimeException('Não foi possível salvar o DANFE PDF.');
+        }
+        return $path;
     }
 
     public function render(FiscalDocumentJob $document, string $authorizedXml): string
@@ -44,11 +80,13 @@ class NFCePdfService
             $acbr->setConfig('DFe','UF',strtoupper((string)($company->state ?: 'BA')));
             $acbr->setConfig('NFe','ModeloDF','1'); // NFC-e 65
             $acbr->setConfig('NFe','Ambiente',$document->environment==='production' ? '0' : '1');
+            $acbr->setConfig('DANFE','TipoDANFE','4'); // DANFE NFC-e
             $acbr->setConfig('DANFE','MostraPreview','0');
             $acbr->setConfig('DANFE','MostraSetup','0');
             $acbr->setConfig('DANFENFCe','TipoRelatorioBobina',$paper==='a4' ? '2' : '0');
             if ($paper!=='a4') {
-                $acbr->setConfig('DANFENFCe','LarguraBobina',$paper);
+                // ACBr uses report widths around 280-400, not paper mm.
+                $acbr->setConfig('DANFENFCe','LarguraBobina',$paper==='58' ? '280' : '400');
             }
             $acbr->loadXml($authorizedXml);
             return $acbr->savePdf();
