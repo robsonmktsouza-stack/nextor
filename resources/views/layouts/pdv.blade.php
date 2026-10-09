@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>PDV — {{ config('app.name') }}</title>
-<link rel="stylesheet" href="{{ asset('css/erp.css') }}">
+<link rel="stylesheet" href="{{ asset('css/erp.css') }}?v={{ filemtime(public_path('css/erp.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/pdv.css') }}">
 <link rel="stylesheet" href="{{ asset('css/ui-refinement.css') }}?v={{ filemtime(public_path('css/ui-refinement.css')) }}">
-<script defer src="{{ asset('js/erp.js') }}"></script>
+<script defer src="{{ asset('js/erp.js') }}?v={{ filemtime(public_path('js/erp.js')) }}"></script>
 </head>
 <body
   class="pdv-body"
