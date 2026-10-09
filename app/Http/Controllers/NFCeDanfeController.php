@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\FiscalDocumentJob;
-use App\Models\AppSetting;
+use App\Services\Fiscal\NFCePdfService;
+use Illuminate\Support\Facades\Log;
 use App\Services\Fiscal\NFCeDanfeService;
 use Illuminate\Support\Facades\Storage;
 
@@ -11,7 +12,8 @@ final class NFCeDanfeController extends Controller
 {
     public function __invoke(
         FiscalDocumentJob $fiscalDocumentJob,
-        NFCeDanfeService $danfe
+        NFCeDanfeService $danfe,
+        NFCePdfService $pdf
     ) {
         abort_unless($fiscalDocumentJob->document_type === 'nfce'
             && $fiscalDocumentJob->status === 'authorized', 404);
@@ -28,20 +30,32 @@ final class NFCeDanfeController extends Controller
         $disk = Storage::disk('local');
         abort_unless($disk->exists($path), 409, 'Arquivo autorizado indisponível no armazenamento fiscal.');
 
+        $xml=$disk->get($path);
         try {
-            $document = $danfe->parse($disk->get($path), $fiscalDocumentJob);
+            // Verifica chave, protocolo, ambiente e QR Code autorizados
+            // antes de preparar o documento auxiliar.
+            $danfe->parse($xml,$fiscalDocumentJob);
         } catch (\RuntimeException $e) {
             abort(409, 'DANFE NFC-e indisponível: '.$e->getMessage());
         }
 
-        $previousDefault = (string) AppSetting::value('pdv', 'receipt_width', '80');
-        $configured = (string) AppSetting::value('printing', 'nfce_paper', $previousDefault);
-        $paper = in_array($configured, ['58', '80', 'a4'], true) ? $configured : '80';
+        try {
+            $content=$pdf->render($fiscalDocumentJob,$xml);
+        } catch (\Throwable $e) {
+            Log::error('Falha ao gerar DANFE NFC-e em PDF',[
+                'fiscal_document_job_id'=>$fiscalDocumentJob->id,
+                'reason'=>$e->getMessage(),
+            ]);
+            abort(503, 'Não foi possível gerar o DANFE PDF. Consulte o registro do sistema.');
+        }
 
-        return response()->view('fiscal.nfce-danfe', [
-            'danfe' => $document,
-            'paper' => $paper,
-        ])->header('Cache-Control', 'private, no-store, no-cache, must-revalidate')
-          ->header('X-Content-Type-Options', 'nosniff');
+        $name='DANFE-NFCe-'.$fiscalDocumentJob->series.'-'.$fiscalDocumentJob->document_number.'.pdf';
+
+        return response($content,200,[
+            'Content-Type'=>'application/pdf',
+            'Content-Disposition'=>'inline; filename="'.$name.'"',
+            'Cache-Control'=>'private, no-store, no-cache, must-revalidate',
+            'X-Content-Type-Options'=>'nosniff',
+        ]);
     }
 }
