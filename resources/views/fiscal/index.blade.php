@@ -30,8 +30,8 @@
         <a class="grid-primary-action" href="{{ route('fiscal.nfe.create') }}" data-tooltip="Criar nova NF-e">
           @include('partials.icon',['name'=>'plus','size'=>17]) <span>Nova</span>
         </a>
-      @elseif($tab==='nfce' && auth()->user()->canAccess('pdv'))
-        <a class="grid-primary-action" href="{{ route('pdv.index') }}" data-tooltip="Abrir PDV para nova NFC-e">
+      @elseif($tab==='nfce')
+        <a class="grid-primary-action" href="{{ route('fiscal.nfce.create') }}" data-tooltip="Nova NFC-e">
           @include('partials.icon',['name'=>'plus','size'=>17]) <span>Nova</span>
         </a>
       @elseif($tab==='nfse' && auth()->user()->canAccess('sales'))
@@ -56,6 +56,11 @@
           </a>
           <a class="grid-tool" href="{{ route('fiscal.nfe.natures.index') }}" data-tooltip="Naturezas de Operação">
             @include('partials.icon',['name'=>'tag','size'=>18])
+          </a>
+        @endif
+        @if($tab==='nfce' && auth()->user()->canAccess('pdv'))
+          <a class="grid-tool" href="{{ route('pdv.index') }}" data-tooltip="Abrir PDV">
+            @include('partials.icon',['name'=>'shopping-cart','size'=>17])
           </a>
         @endif
         @if(auth()->user()->canAccess('settings') && $tab==='nfce')
