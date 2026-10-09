@@ -49,10 +49,13 @@
       <h3>Grupo tributário para serviços</h3>
       <div class="editor-grid cols-12">
         <label class="field col-8"><span>Tributação para serviços</span>
-          <select name="fiscal_tax_group_id">
-            <option value="">Sem grupo específico — usar padrão cadastrado, se houver</option>
+          <select name="fiscal_tax_group_id" id="service-group">
+            <option value="">Selecione um grupo tributário</option>
             @foreach($fiscalTaxGroups as $fiscalGroup)
-              <option value="{{ $fiscalGroup->id }}" @selected((string)old('fiscal_tax_group_id',$service->fiscal_tax_group_id)===(string)$fiscalGroup->id)>
+              <option value="{{ $fiscalGroup->id }}"
+                data-national-code="{{ data_get($fiscalGroup->tax_config,'national_tax_code','') }}"
+                data-service-item="{{ data_get($fiscalGroup->tax_config,'service_list_item','') }}"
+                @selected((string)old('fiscal_tax_group_id',$service->fiscal_tax_group_id)===(string)$fiscalGroup->id)>
                 {{ $fiscalGroup->name }}{{ $fiscalGroup->is_default ? ' · Padrão' : '' }}{{ !$fiscalGroup->is_active ? ' · Inativo' : '' }}
               </option>
             @endforeach
@@ -73,7 +76,7 @@
       <div class="editor-grid cols-12">
         <label class="field col-4">
           <span>Item lista serviço</span>
-          <input name="service_list_item" value="{{ old('service_list_item',$service->service_list_item) }}"
+          <input name="service_list_item" id="service-item-code" value="{{ old('service_list_item',$service->service_list_item) }}"
                  maxlength="20" placeholder="Ex.: 14.01">
         </label>
 
@@ -89,7 +92,7 @@
 
         <label class="field col-4">
           <span>Código de tributação nacional</span>
-          <input name="national_tax_code" value="{{ old('national_tax_code',$service->national_tax_code) }}" maxlength="40">
+          <input name="national_tax_code" id="service-national-code" value="{{ old('national_tax_code',$service->national_tax_code) }}" maxlength="40">
         </label>
 
         <label class="field col-4">
@@ -107,4 +110,24 @@
     <a class="btn btn-secondary" href="{{ route('services.index') }}">Cancelar</a>
   </div>
 </form>
+<script>
+(function () {
+  const group = document.getElementById('service-group');
+  const national = document.getElementById('service-national-code');
+  const item = document.getElementById('service-item-code');
+  if (!group || !national || !item) return;
+  const sync = () => {
+    const option = group.selectedOptions[0];
+    const controlled = Boolean(option && option.dataset.nationalCode);
+    if (controlled) {
+      national.value = option.dataset.nationalCode;
+      item.value = option.dataset.serviceItem || '';
+    }
+    national.readOnly = controlled;
+    item.readOnly = controlled;
+  };
+  group.addEventListener('change', sync);
+  sync();
+})();
+</script>
 @endsection
