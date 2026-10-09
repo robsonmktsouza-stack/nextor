@@ -412,8 +412,11 @@ class OperationalSettingsTest extends TestCase
             'authorized_at'=>now(),
         ]);
 
+        config()->set('queue.default','database');
+        \Illuminate\Support\Facades\Queue::fake();
         $this->actingAs($user)->post(route('pdv.nfce.cancel',$job),[
             'reason'=>'Venda cancelada antes da saída da mercadoria do estabelecimento.',
+            'no_circulation'=>'1',
         ])->assertSessionHasNoErrors();
 
         $job=$job->fresh();
