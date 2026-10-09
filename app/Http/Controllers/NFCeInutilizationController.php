@@ -15,6 +15,8 @@ final class NFCeInutilizationController extends Controller
     public function index()
     {
         return view('fiscal.nfce.inutilizations',[
+            'tabs'=>FiscalController::TABS,
+            'tab'=>'nfce',
             'rows'=>NFCeInutilization::query()->latest('id')->paginate(25),
             'series'=>(int)AppSetting::value('nfce','series',1),
             'nextNumber'=>(int)AppSetting::value('nfce','next_number',1),
