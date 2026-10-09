@@ -120,7 +120,7 @@ class SettingsController extends Controller
             'address_complement'=>['nullable','string','max:120'],
             'district'=>['nullable','string','max:120'],
             'tax_regime'=>['nullable','string','max:60'],
-            'crt'=>['nullable','string','max:4'],
+            'crt'=>['nullable',Rule::in(['1','2','3','4'])],
             'simple_rate'=>['nullable','numeric','min:0','max:100','decimal:0,4'],
             'main_activity'=>['nullable','string','max:40'],
             'print_header'=>['nullable','string','max:5000'],
@@ -130,6 +130,19 @@ class SettingsController extends Controller
         ]);
 
         $company=CompanySetting::current();
+        $regime=(string)($data['tax_regime'] ?? $company->tax_regime ?? '');
+        $crt=(string)($data['crt'] ?? $company->crt ?? '');
+        $validForRegime=match($regime) {
+            'mei'=>['4'],
+            'simples_nacional'=>['1','2'],
+            'lucro_real','lucro_presumido'=>['3'],
+            default=>[],
+        };
+        if ($crt!=='' && $validForRegime!==[] && !in_array($crt,$validForRegime,true)) {
+            throw ValidationException::withMessages([
+                'crt'=>'O CRT selecionado não corresponde ao regime tributário da empresa.',
+            ]);
+        }
         $data['show_currency_prefix']=$request->boolean('show_currency_prefix');
 
         if($request->hasFile('logo')) {
