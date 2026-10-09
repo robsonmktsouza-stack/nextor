@@ -331,7 +331,8 @@ final class NFCeTransmissionService
             ['DFe', 'SSLHttpLib', '3'],
             ['DFe', 'SSLXmlSignLib', '4'],
             ['NFe', 'PathSchemas', $schemas],
-            ['NFe', 'FormaEmissao', '0'],
+            // ACBrLib enum index: 0=normal, 8=teOffLine (XML tpEmis=9).
+            ['NFe', 'FormaEmissao', $job->emission_mode==='offline' ? '8' : '0'],
             ['NFe', 'ValidarDigest', '1'],
             ['NFe', 'ModeloDF', '1'],
             ['NFe', 'Ambiente', $job->environment === 'homologation' ? '1' : '0'],
