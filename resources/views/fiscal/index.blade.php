@@ -60,7 +60,7 @@
         @endif
         @if($tab==='nfce' && auth()->user()->canAccess('pdv'))
           <a class="grid-tool" href="{{ route('pdv.index') }}" data-tooltip="Abrir PDV">
-            @include('partials.icon',['name'=>'shopping-cart','size'=>17])
+            @include('partials.icon',['name'=>'sales','size'=>17])
           </a>
         @endif
         @if(auth()->user()->canAccess('settings') && $tab==='nfce')
