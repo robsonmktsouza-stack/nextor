@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="../../public/css/erp.css">
+<link rel="stylesheet" href="../../public/css/ui-refinement.css">
+<style>
+  body{min-height:100vh}
+  .app-root{padding:14px}
+  .cms-card{width:100%;max-width:1020px}
+  #densityLong{max-width:150px;white-space:normal}
+  #testResult{font:14px monospace;display:block;padding:12px}
+</style>
+</head>
+<body class="system-compact">
+<div class="app-root">
+<section class="cms-card">
+ <div class="table-scroll">
+  <table class="cms-table">
+   <thead><tr><th>Emissão</th><th>Produto</th><th>Situação</th><th>Ações</th></tr></thead>
+   <tbody>
+    <tr id="densitySingle"><td>09/10/2026</td><td>Consumidor não identificado</td><td><span class="status status-blue">Preparada</span></td><td><a class="btn-icon">›</a></td></tr>
+    <tr id="densityDouble"><td>08/10/2026</td><td><strong class="table-title">AÇÚCAR CRISTAL</strong><small class="table-subtitle">PROD-00002</small></td><td><span class="status status-ok">Autorizada</span></td><td><a class="btn-icon">›</a></td></tr>
+    <tr id="densityLongRow"><td>09/10/2026</td><td id="densityLong"><strong class="table-title">Descrição que ocupa várias linhas no campo de um produto de teste e precisa permanecer completamente visível sem sobreposições.</strong></td><td>Concluído</td><td>›</td></tr>
+   </tbody>
+  </table>
+ </div>
+</section>
+<strong id="testResult">AGUARDANDO</strong>
+</div>
+<script>
+window.addEventListener('load',()=>{
+  const $=id=>document.getElementById(id);
+  const measured=el=>el.getBoundingClientRect().height;
+  const assert=(ok,message)=>{if(!ok)throw new Error(message)};
+  const check=(expected)=>{
+    const header=measured(document.querySelector('.cms-table thead tr'));
+    const one=measured($('densitySingle'));
+    const two=measured($('densityDouble'));
+    const tall=measured($('densityLongRow'));
+    assert(Math.abs(one-expected)<=2,'linha simples '+one+' esperada '+expected);
+    assert(Math.abs(two-expected)<=3,'linha com dois textos '+two+' esperada '+expected);
+    assert(Math.abs(one-two)<=3,'alturas incoerentes '+one+' e '+two);
+    assert(tall>expected,'texto longo foi cortado');
+    assert(header<=expected,'cabeçalho maior que linha '+header);
+  };
+  try{
+    check(46);
+    document.body.classList.remove('system-compact');
+    document.body.classList.add('system-comfortable');
+    check(50);
+    document.body.dataset.tableDensityTest='passed';
+    $('testResult').textContent='PASS: uniform-list-table-rows';
+  }catch(error){
+    document.body.dataset.tableDensityTest='failed';
+    $('testResult').textContent='FAIL: '+error.message;
+  }
+});
+</script>
+</body>
+</html>
