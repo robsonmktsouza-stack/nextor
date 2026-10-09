@@ -176,4 +176,36 @@ final class NFCeIniBuilderTest extends TestCase
         self::assertStringContainsString("vPIS=1.49\r\nvCOFINS=6.84\r\nvNF=90.00", $ini);
     }
 
+    public function test_normal_crt_three_writes_icms_values_and_total_to_acbr_ini(): void
+    {
+        $company = new CompanySetting([
+            'document'=>'39323356000100', 'legal_name'=>'EMPRESA EXEMPLO LTDA',
+            'state_registration'=>'172036473', 'crt'=>'3', 'address'=>'RUA EXEMPLO',
+            'address_number'=>'100', 'district'=>'CENTRO', 'city'=>'Rio do Antonio',
+            'city_ibge_code'=>'2926806', 'state'=>'BA', 'zip_code'=>'46220000',
+        ]);
+        $job = new FiscalDocumentJob([
+            'document_type'=>'nfce', 'environment'=>'homologation', 'series'=>1, 'document_number'=>21,
+            'source_snapshot'=>[
+                'total'=>'90.00',
+                'items'=>[[
+                    'item_type'=>'product', 'product_id'=>1, 'sku'=>'CST20', 'name'=>'PRODUTO',
+                    'unit'=>'UN', 'ncm'=>'69139000', 'origin'=>'0', 'quantity'=>'1.000',
+                    'unit_price'=>'100.00', 'discount'=>'10.00', 'line_total'=>'90.00',
+                    'tax_defaults'=>[
+                        'cfop_outbound_internal'=>'5102','icms_cst'=>'20',
+                        'mod_bc'=>'3','icms_rate'=>'18','base_reduction_rate'=>'20',
+                        'pis_cst'=>'49','cofins_cst'=>'49',
+                    ],
+                ]],
+                'payments'=>[['payment_method'=>'cash','payment_kind'=>'cash','amount'=>'90.00']],
+                'change_amount'=>'0.00',
+            ],
+        ]);
+        $ini = app(NFCeIniBuilder::class)->build($job, $company);
+        self::assertStringContainsString("[ICMS001]\r\norig=0\r\nCST=20\r\nmodBC=3\r\npRedBC=20.0000\r\nvBC=72.00\r\npICMS=18.0000\r\nvICMS=12.96", $ini);
+        self::assertStringContainsString("[Total]\r\nvBC=72.00\r\nvICMS=12.96", $ini);
+        self::assertStringContainsString("vNF=90.00", $ini);
+    }
+
 }
