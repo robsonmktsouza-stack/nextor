@@ -9,7 +9,10 @@ use Illuminate\Support\Facades\Storage;
 
 final class NFCePreflightService
 {
-    public function __construct(private readonly NFCeTaxCalculationService $calculator) {}
+    public function __construct(
+        private readonly NFCeTaxCalculationService $calculator,
+        private readonly NFCeProductionProfilePolicy $productionProfiles,
+    ) {}
 
     public function validate(FiscalDocumentJob $job): array
     {
@@ -92,6 +95,11 @@ final class NFCePreflightService
                 // Nenhum perfil não implementado pode chegar à transmissão.
                 try {
                     $this->calculator->calculate($item, (string)$company->crt);
+                    if ($job->environment === 'production'
+                        && !$this->productionProfiles->approved((string)$company->crt, $tax)) {
+                        $key = $this->productionProfiles->key((string)$company->crt, $tax);
+                        $errors[] = "Item {$n}: perfil fiscal {$key} ainda não homologado para produção.";
+                    }
                 } catch (\RuntimeException $exception) {
                     $errors[] = "Item {$n}: ".$exception->getMessage();
                 }
