@@ -177,6 +177,13 @@ $origins=[
        <label class="field col-2"><span>Modalidade BC ST</span><input name="tax_defaults[mod_bc_st]" value="{{ data_get($taxDefaults,'mod_bc_st') }}"></label>
        <label class="field col-2"><span>ICMS ST %</span><input type="number" step="0.0001" min="0" name="tax_defaults[icms_st_rate]" value="{{ data_get($taxDefaults,'icms_st_rate') }}"></label>
        <label class="field col-2"><span>MVA %</span><input type="number" step="0.0001" min="0" name="tax_defaults[mva_rate]" value="{{ data_get($taxDefaults,'mva_rate') }}"></label>
+        <label class="field col-3"><span>Valores ICMS-ST retido</span>
+          <select name="tax_defaults[st_retained_amount_scope]">
+            <option value="">Selecione para CSOSN 500</option>
+            <option value="unit" @selected(data_get($taxDefaults,'st_retained_amount_scope')==='unit')>Por unidade</option>
+            <option value="line" @selected(data_get($taxDefaults,'st_retained_amount_scope')==='line')>Total do item</option>
+          </select>
+        </label>
         <label class="field col-3"><span>BC do ICMS-ST retido (R$)</span><input type="number" step="0.01" min="0" name="tax_defaults[icms_st_retained_base]" value="{{ data_get($taxDefaults,'icms_st_retained_base') }}"></label>
         <label class="field col-3"><span>Valor ICMS-ST retido (R$)</span><input type="number" step="0.01" min="0" name="tax_defaults[icms_st_retained_value]" value="{{ data_get($taxDefaults,'icms_st_retained_value') }}"></label>
         <label class="field col-2"><span>Alíquota ST retida %</span><input type="number" step="0.0001" min="0" name="tax_defaults[st_retained_rate]" value="{{ data_get($taxDefaults,'st_retained_rate') }}"></label>
