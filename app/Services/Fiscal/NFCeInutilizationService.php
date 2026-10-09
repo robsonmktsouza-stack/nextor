@@ -26,6 +26,7 @@ final class NFCeInutilizationService
             $company=CompanySetting::current();
             $cnpj=preg_replace('/\D/','',(string)$company->document);
             $environment=app(FiscalDocumentSettings::class)->environment('nfce');
+            app(NFCeProductionGate::class)->assertAllowed($environment);
             $series=(int)$input['series'];
             $first=(int)$input['first_number'];
             $last=(int)$input['last_number'];
@@ -71,6 +72,7 @@ final class NFCeInutilizationService
         if (!$lock->get())return;
         try {
             $row=NFCeInutilization::query()->findOrFail($id);
+            app(NFCeProductionGate::class)->assertAllowed((string)$row->environment);
             if ($row->status!=='pending')return;
             $claimed=NFCeInutilization::query()->whereKey($id)
                 ->where('status','pending')->update(['status'=>'processing']);
