@@ -61,6 +61,9 @@ class SettingsController extends Controller
                 ['allow_negative_stock'=>(bool)AppSetting::value('operations','allow_negative_stock',false)]
             )),
             'pdv'=>AppSetting::groupValues('pdv',$this->defaults('pdv')),
+            'printing'=>AppSetting::groupValues('printing',[
+                'nfce_paper'=>(string)AppSetting::value('pdv','receipt_width','80'),
+            ]),
             'billing'=>AppSetting::groupValues('billing',$this->defaults('billing')),
             'fiscal'=>AppSetting::groupValues('fiscal',$this->defaults('fiscal')),
             'tax'=>AppSetting::groupValues('tax',$this->defaults('tax')),
@@ -161,8 +164,12 @@ class SettingsController extends Controller
         $data=$request->validate([
             'print_header'=>['nullable','string','max:5000'],
             'print_footer'=>['nullable','string','max:5000'],
+            'nfce_paper'=>['required',Rule::in(['58','80','a4'])],
             'logo'=>['nullable','image','mimes:jpg,jpeg,png,webp','max:4096'],
         ]);
+
+        AppSetting::put('printing','nfce_paper',$data['nfce_paper']);
+        unset($data['nfce_paper']);
 
         $company=CompanySetting::current();
         $data['show_currency_prefix']=$request->boolean('show_currency_prefix');
