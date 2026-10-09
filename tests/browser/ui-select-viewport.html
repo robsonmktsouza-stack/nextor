@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="../../public/css/erp.css">
+<link rel="stylesheet" href="../../public/css/ui-refinement.css">
+<style>
+html,body{margin:0;width:100%;height:100%}
+body{min-height:980px}
+.app-root{width:100%;padding:16px}
+#filterCase{display:flex;justify-content:flex-end;align-items:center;max-width:100%;padding:12px 14px}
+#filterCase .ui-select,#filterCase select{width:230px}
+#generalCase{margin:100px 8px 0 auto;width:160px}
+#generalCase .ui-select,#generalCase select{width:160px}
+#results{display:block;margin:12px;font:14px monospace}
+</style>
+<script defer src="../../public/js/erp.js"></script>
+</head>
+<body>
+<div class="app-root">
+<section class="cms-card">
+ <div class="grid-filter-panel" id="filterCase">
+  <form class="toolbar-filters">
+    <select id="stockProduct">
+      <option value="">Todos os produtos</option>
+      <option value="1">AÇUCAR CRISTAL 1K (PROD-000002)</option>
+      <option value="2">VASO DECORATIVO CERÂMICO — TESTE NFC-e COM UMA DESCRIÇÃO MUITO LONGA (TESTE-NFCE-001)</option>
+    </select>
+  </form>
+ </div>
+ <div class="table-scroll"><table class="cms-table"><tr><th>Produto</th><th>Quantidade</th></tr><tr><td>AÇUCAR</td><td>8</td></tr></table></div>
+</section>
+<div id="generalCase">
+<select id="otherSelect">
+<option value="">Selecionar</option>
+<option value="1">Opção com um texto grande e muitos detalhes para testar o posicionamento automático do menu junto à borda da janela do navegador.</option>
+</select>
+</div>
+<strong id="results">AGUARDANDO</strong>
+</div>
+<script>
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    const result=document.getElementById('results');
+    try {
+      const viewport=document.documentElement.clientWidth;
+      const stockTrigger=document.querySelector('#filterCase .ui-select-trigger');
+      const stockMenu=document.querySelector('#filterCase .ui-select-menu');
+      if(!stockTrigger||!stockMenu)throw Error('select de estoque não foi aprimorado');
+      stockTrigger.click();
+      if(stockMenu.hidden)throw Error('menu não abriu');
+      const rect=stockMenu.getBoundingClientRect();
+      const control=stockTrigger.getBoundingClientRect();
+      if(rect.right>viewport-8)throw Error('menu do estoque ultrapassa viewport: '+rect.right+' / '+viewport);
+      if(rect.width>control.width+2)throw Error('menu do estoque ficou maior que seletor');
+      if(rect.left<8)throw Error('menu do estoque escapou pela esquerda');
+      if(document.documentElement.scrollWidth>viewport+1)throw Error('a página gerou barra horizontal');
+      stockTrigger.click();
+
+      const general=document.querySelector('#generalCase .ui-select-trigger');
+      const popup=document.querySelector('#generalCase .ui-select-menu');
+      general.click();
+      if(popup.hidden)throw Error('segundo menu não abriu');
+      const other=popup.getBoundingClientRect();
+      if(other.right>viewport-8 || other.left<8)throw Error('segundo menu escapou da tela');
+      if(document.documentElement.scrollWidth>viewport+1)throw Error('segundo menu criou scroll lateral');
+      general.click();
+
+      result.textContent='PASS:menus-sem-overflow';
+      document.body.dataset.uiSelectTest='passed';
+    } catch(e) {
+      result.textContent='FAIL: '+e.message;
+      document.body.dataset.uiSelectTest='failed';
+    }
+  },250);
+});
+</script>
+</body>
+</html>
