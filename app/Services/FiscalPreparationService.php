@@ -155,6 +155,17 @@ class FiscalPreparationService
                 'prepared_at'=>now(),
             ]);
 
+
+            if ($documentType === 'nfse') {
+                // Códigos oficiais são obtidos do grupo do serviço, nunca do caixa.
+                try {
+                    app(\App\Services\Fiscal\NFSeTaxRuleApplicationService::class)->apply($job->id);
+                } catch (\RuntimeException $e) {
+                    // A venda não se perde: manter a NFS-e preparada com a
+                    // pendência do cadastro, sem fabricar impostos.
+                    $job->update(['error_message'=>'Cadastro do serviço: '.$e->getMessage()]);
+                }
+            }
             if ($documentType === 'nfce') {
                 // As regras configuradas são aplicadas ao documento ao prepará-lo.
                 // Não depende de conferência ou botão do operador.
