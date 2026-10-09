@@ -109,6 +109,7 @@ class ProductController extends Controller {
             'tax_defaults.simple_credit_rate'=>['nullable','numeric','min:0','max:100'],
             'tax_defaults.mod_bc'=>['nullable','string','max:4'],
             'tax_defaults.mod_bc_st'=>['nullable','string','max:4'],
+            'tax_defaults.st_retained_amount_scope'=>['nullable',\Illuminate\Validation\Rule::in(['unit','line'])],
             'tax_defaults.icms_st_retained_base'=>['nullable','numeric','min:0'],
             'tax_defaults.icms_st_retained_value'=>['nullable','numeric','min:0'],
             'tax_defaults.st_retained_rate'=>['nullable','numeric','min:0','max:100'],
