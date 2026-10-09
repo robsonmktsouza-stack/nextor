@@ -93,7 +93,7 @@ $origins=[
      <div class="editor-grid cols-12">
        <label class="field col-8"><span>Tributação para produtos</span>
          <select name="fiscal_tax_group_id">
-           <option value="">Selecione a tributação do produto (ou mantenha configuração já cadastrada)</option>
+           <option value="">Selecione um grupo tributário</option>
            @foreach($fiscalTaxGroups as $fiscalGroup)
              <option value="{{ $fiscalGroup->id }}" @selected((string)old('fiscal_tax_group_id',$product->fiscal_tax_group_id)===(string)$fiscalGroup->id)>
                {{ $fiscalGroup->name }}{{ $fiscalGroup->is_default ? ' · Padrão' : '' }}{{ !$fiscalGroup->is_active ? ' · Inativo' : '' }}
@@ -101,7 +101,6 @@ $origins=[
            @endforeach
          </select>
        </label>
-       <p class="editor-help col-12">Modelos fiscais pré-configurados para o CRT da empresa. Escolha conforme a operação e o produto; o sistema não presume monofásico, ST, imunidade ou alíquota apenas pelo NCM.</p>
        <div class="field col-4">
          <span>Administração</span>
          @if(auth()->user()->canAccess('settings'))
