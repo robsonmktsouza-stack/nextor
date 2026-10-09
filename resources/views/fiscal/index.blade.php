@@ -16,6 +16,11 @@
     'failed'=>'Falha',
     'cancelled'=>'Cancelada',
   ];
+  $fiscalUtilities=app(\App\Services\Fiscal\FiscalDocumentUtilityService::class);
+  $auxiliaryLabel=match($tab){
+    'nfse'=>'DANFSe', 'cte'=>'DACTE', 'mdfe'=>'DAMDFE',
+    default=>'DANFE',
+  };
 @endphp
 
 <section class="cms-card sales-module-card">
@@ -66,7 +71,29 @@
             @include('partials.icon',['name'=>'settings','size'=>18])
           </a>
         @endif
+        <details class="fiscal-utilities" data-fiscal-utilities>
+          <summary class="grid-tool grid-tool-wide" aria-label="Abrir utilitários fiscais">
+            @include('partials.icon',['name'=>'layers','size'=>16])
+            <span>Utilitários</span>
+            @include('partials.icon',['name'=>'down','size'=>13])
+          </summary>
+          <div class="fiscal-utilities-dropdown">
+            <button type="button" data-fiscal-download-xml disabled>
+              @include('partials.icon',['name'=>'download','size'=>16])
+              <span>Baixar XML</span>
+            </button>
+            <button type="button" data-fiscal-download-auxiliary disabled>
+              @include('partials.icon',['name'=>'print','size'=>16])
+              <span>{{ $tab==='nfce' ? 'Imprimir / salvar '.$auxiliaryLabel : 'Baixar '.$auxiliaryLabel }}</span>
+            </button>
+          </div>
+        </details>
       </div>
+
+      <form id="fiscal-xml-download" action="{{ route('fiscal.utilities.xml') }}" method="post" hidden>
+        @csrf
+        <input type="hidden" name="document_type" value="{{ $tab }}">
+      </form>
 
       <div class="bulk-actions">
         <select class="bulk-action-select" data-bulk-menu disabled aria-label="Ações em massa">
@@ -172,10 +199,15 @@
             $emissionDate=$document->sale?->operation_date
               ?? $document->prepared_at
               ?? $document->created_at;
+            $xmlAvailable=$fiscalUtilities->xmlPath($document)!==null;
+            $auxiliaryAvailable=$fiscalUtilities->canOpenAuxiliary($document);
           @endphp
           <tr>
             <td class="select-cell">
-              <input type="checkbox" data-row-select value="{{ $document->id }}" aria-label="Selecionar {{ $tabMeta['label'] }} {{ $document->document_number ?? $document->id }}">
+              <input type="checkbox" data-row-select value="{{ $document->id }}"
+                data-fiscal-xml="{{ $xmlAvailable ? '1' : '0' }}"
+                data-fiscal-auxiliary-url="{{ $auxiliaryAvailable ? route('fiscal.utilities.auxiliary',$document) : '' }}"
+                aria-label="Selecionar {{ $tabMeta['label'] }} {{ $document->document_number ?? $document->id }}">
             </td>
             <td>
               <a class="table-link" href="{{ route('fiscal.show',$document) }}">{{ $document->document_number ?? '—' }}</a>
