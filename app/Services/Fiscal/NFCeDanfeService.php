@@ -24,7 +24,7 @@ final class NFCeDanfeService
     public function parse(string $xml, FiscalDocumentJob $job): array
     {
         $offline=$job->emission_mode==='offline'
-            && in_array($job->status,['offline_signed','offline_print_pending'],true);
+            && in_array($job->status,['offline_signed','offline_print_pending','offline_sending','pending'],true);
         if ($job->document_type!=='nfce') {
             throw new RuntimeException('Modelo de DANFE inválido.');
         }
