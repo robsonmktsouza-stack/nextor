@@ -7,11 +7,12 @@
 @include('fiscal._nav',['tab'=>'nfce'])
 <section class="cms-card">
   <div class="card-header"><div><h2>Inutilização de numeração</h2>
-  <p>Somente para lacunas de números não utilizados. Uma NFC-e já emitida ou cancelada nunca deve ser inutilizada.</p></div></div>
+  <p>Somente para lacunas de números não utilizados. Uma NFC-e já emitida ou cancelada nunca deve ser inutilizada.</p></div>
+  <span class="status {{ $environment==='homologation'?'status-blue':'status-danger' }}">{{ $environment==='homologation'?'Homologação — teste':'Produção — operação fiscal real' }}</span></div>
   @if($errors->any())<div class="alert alert-danger">{{ $errors->first() }}</div>@endif
   <form method="post" action="{{ route('fiscal.nfce.inutilizations.store') }}" class="dialog-body"
     data-confirm-submit="Confirma que a faixa informada nunca foi utilizada? A inutilização será transmitida à SEFAZ e não poderá ser revertida automaticamente."
-    data-confirm-title="Confirmar inutilização" data-confirm-kind="danger">
+    data-confirm-title="Confirmar inutilização" data-confirm-kind="action" data-confirm-label="Confirmar inutilização">
     @csrf
     <div class="form-grid">
       <label class="field"><span>Ano</span><input type="number" name="year" min="2020" max="{{ now()->year }}" value="{{ old('year',now()->year) }}" required></label>
@@ -20,7 +21,7 @@
       <label class="field"><span>Número final</span><input type="number" name="last_number" value="{{ old('last_number') }}" min="1" max="{{ max(1,$nextNumber-1) }}" required></label>
       <label class="field wide"><span>Justificativa</span><input type="text" name="reason" minlength="15" maxlength="255" required value="{{ old('reason') }}" placeholder="Explique a quebra de sequência da numeração"></label>
     </div>
-    <p class="nfce-muted">Próximo número reservado: {{ $nextNumber }}. Verifique se a faixa é realmente uma lacuna antes de solicitar.</p>
+    <p class="nfce-muted">Próximo número disponível: {{ $nextNumber }}. A faixa informada deve ser anterior a esse número e comprovadamente não utilizada.</p>
     <button class="btn btn-primary" type="submit">Solicitar inutilização à SEFAZ</button>
   </form>
 </section>
