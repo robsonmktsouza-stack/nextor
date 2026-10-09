@@ -148,7 +148,7 @@ final class NFCeFiscalLifecycleTest extends TestCase
     public function test_inutilization_never_confirms_by_ini_code_alone(): void
     {
         $parser=new NFCeFiscalEventResponse();
-        $data=$parser->parse("[Inutilizacao]\\nCStat=102\\nTpAmb=2\\nNProt=129260000000002\\nXMotivo=Inutilização homologada\\n",'inutilizacao');
+        $data=$parser->parse("[Inutilizacao]\nCStat=102\nTpAmb=2\nNProt=129260000000002\nXMotivo=Inutilização homologada\n",'inutilizacao');
         self::assertFalse($parser->inutilizationAccepted($data,'homologation'));
         self::assertFalse($parser->inutilizationAccepted($data,'production'));
     }
