@@ -114,8 +114,14 @@
   <section class="danfe-section danfe-authorization">
     <div><strong>NFC-e nº {{ str_pad((string)$danfe['number'],9,'0',STR_PAD_LEFT) }} Série {{ $danfe['series'] }}</strong></div>
     <div>{{ $danfe['issued_at'] }}</div>
-    <div>Protocolo de autorização: {{ $danfe['protocol'] }}</div>
-    <div>{{ $danfe['authorized_at'] }}</div>
+    @if(!empty($danfe['offline']))
+      <div><strong>EMITIDA EM CONTINGÊNCIA – PENDENTE DE AUTORIZAÇÃO</strong></div>
+      <div><strong>Documento ainda não autorizado pela SEFAZ</strong></div>
+      <div>Imprimir duas vias: consumidor e estabelecimento.</div>
+    @else
+      <div>Protocolo de autorização: {{ $danfe['protocol'] }}</div>
+      <div>{{ $danfe['authorized_at'] }}</div>
+    @endif
   </section>
 
   @if($danfe['fiscal_message'])
