@@ -50,14 +50,52 @@
           <span><strong>Grupo padrão</strong></span>
         </label>
       </div>
-      <label class="field col-4"><span>CFOP base</span><input name="cfop_pattern" maxlength="4" value="{{ old('cfop_pattern',$group->cfop_pattern) }}" placeholder="Ex.: x102">
+      <label class="field col-4" data-group-kind="products" @if($selectedKind==='services') hidden @endif><span>CFOP base</span><input name="cfop_pattern" maxlength="4" value="{{ old('cfop_pattern',$group->cfop_pattern) }}" placeholder="Ex.: x102">
         
       </label>
-      <label class="field col-4"><span>Observação de aplicação na NFC-e</span><input name="tax_config[nfce_note]" maxlength="255" value="{{ $val('nfce_note') }}" placeholder="Ex.: conferir substituição tributária"></label>
+      <label class="field col-4" data-group-kind="products" @if($selectedKind==='services') hidden @endif><span>Observação de aplicação na NFC-e</span><input name="tax_config[nfce_note]" maxlength="255" value="{{ $val('nfce_note') }}" placeholder="Ex.: conferir substituição tributária"></label>
     </div>
   </section>
 
-  <section class="editor-panel settings-panel">
+
+  <section class="editor-panel settings-panel" data-group-kind="services" @if($selectedKind!=='services') hidden @endif>
+    <div class="settings-panel-head"><div><h2>Tributação do serviço</h2></div></div>
+    <div class="editor-grid cols-12 settings-grid">
+      <label class="field col-4"><span>Código nacional do serviço</span>
+        <input name="tax_config[national_tax_code]" maxlength="6" inputmode="numeric" value="{{ $val('national_tax_code') }}" placeholder="Ex.: 171901">
+      </label>
+      <label class="field col-4"><span>Item da lista de serviços</span>
+        <input name="tax_config[service_list_item]" maxlength="5" value="{{ $val('service_list_item') }}" placeholder="Ex.: 17.19">
+      </label>
+      <label class="field col-4"><span>Exigibilidade do ISS</span>
+        <select name="iss_exigibility">
+          <option value="">Selecione</option>
+          @foreach(\App\Support\FiscalCodeCatalog::all()['iss_exigibility'] as $code=>$description)
+            <option value="{{ $code }}" @selected((string)old('iss_exigibility',$group->iss_exigibility)===(string)$code)>{{ $code }} — {{ $description }}</option>
+          @endforeach
+        </select>
+      </label>
+      <label class="field col-4"><span>Apuração do ISS</span>
+        <select name="tax_config[iss_calculation]">
+          <option value="municipal_or_simples" @selected($val('iss_calculation')==='municipal_or_simples')>Conforme o regime da empresa</option>
+          <option value="municipal" @selected($val('iss_calculation')==='municipal')>Alíquota municipal</option>
+          <option value="simples_effective" @selected($val('iss_calculation')==='simples_effective')>Alíquota efetiva do Simples</option>
+          <option value="mei_fixed" @selected($val('iss_calculation')==='mei_fixed')>MEI — recolhimento fixo</option>
+        </select>
+      </label>
+      <label class="field col-2"><span>ISS (%)</span>
+        <input name="tax_config[iss_rate]" type="number" step="0.0001" min="0" max="100" value="{{ $val('iss_rate') }}">
+      </label>
+      <label class="field col-3"><span>Município (IBGE)</span>
+        <input name="tax_config[iss_city_ibge]" maxlength="7" inputmode="numeric" value="{{ $val('iss_city_ibge') }}">
+      </label>
+      <label class="field col-3"><span>Legislação municipal</span>
+        <input name="tax_config[iss_legal_reference]" maxlength="190" value="{{ $val('iss_legal_reference') }}">
+      </label>
+    </div>
+  </section>
+
+  <section class="editor-panel settings-panel" data-group-kind="products" @if($selectedKind==='services') hidden @endif>
     <div class="settings-panel-head"><div><h2>ICMS</h2></div></div>
     <div class="editor-grid cols-12 settings-grid">
       <label class="field col-4"><span>CSOSN geral</span><input name="icms_csosn" maxlength="3" inputmode="numeric" value="{{ old('icms_csosn',$group->icms_csosn) }}" placeholder="Ex.: 101"></label>
@@ -80,7 +118,7 @@
     </div>
   </section>
 
-  <section class="editor-panel settings-panel">
+  <section class="editor-panel settings-panel" data-group-kind="products" @if($selectedKind==='services') hidden @endif>
     <div class="settings-panel-head"><div><h2>PIS / COFINS</h2></div></div>
     <div class="editor-grid cols-12 settings-grid">
       <label class="field col-3"><span>CST PIS</span><input name="pis_cst" maxlength="2" inputmode="numeric" value="{{ old('pis_cst',$group->pis_cst) }}" placeholder="Ex.: 49"></label>
@@ -91,7 +129,7 @@
     </div>
   </section>
 
-  <section class="editor-panel settings-panel">
+  <section class="editor-panel settings-panel" data-group-kind="products" @if($selectedKind==='services') hidden @endif>
     <div class="settings-panel-head"><div><h2>IBS / CBS</h2></div></div>
     <div class="editor-grid cols-12 settings-grid">
       <label class="field col-3"><span>CST IBS/CBS</span><input maxlength="3" inputmode="numeric" name="tax_config[ibs_cbs_cst]" value="{{ $val('ibs_cbs_cst') }}"></label>
@@ -102,7 +140,7 @@
     </div>
   </section>
 
-  <section class="editor-panel settings-panel">
+  <section class="editor-panel settings-panel" data-group-kind="products" @if($selectedKind==='services') hidden @endif>
     <div class="settings-panel-head"><div><h2>Imposto Seletivo, IPI e ISS</h2></div></div>
     <div class="editor-grid cols-12 settings-grid">
       <label class="field col-3"><span>CST IS</span><input name="tax_config[is_cst]" maxlength="3" value="{{ $val('is_cst') }}"></label>
@@ -115,7 +153,9 @@
     </div>
   </section>
 
-  @include('fiscal.tax-groups._advanced')
+  <div data-group-kind="products" @if($selectedKind==='services') hidden @endif>
+    @include('fiscal.tax-groups._advanced')
+  </div>
 
   <section class="editor-panel settings-panel">
     <div class="settings-panel-head"><div><h2>Observações</h2></div></div>
@@ -123,6 +163,22 @@
       <textarea name="notes" rows="3" maxlength="3000" placeholder="Referência legal, orientação do contador, data da conferência...">{{ old('notes',$group->notes) }}</textarea>
     </label>
   </section>
+  <script>
+    (function () {
+      const kind = document.querySelector('select[name="kind"]');
+      if (!kind) return;
+      const toggle = () => {
+        document.querySelectorAll('[data-group-kind]').forEach(element => {
+          element.hidden = element.dataset.groupKind !== kind.value;
+          element.querySelectorAll('input,select,textarea').forEach(control => {
+            control.disabled = element.hidden;
+          });
+        });
+      };
+      kind.addEventListener('change', toggle);
+      toggle();
+    })();
+  </script>
   <div class="editor-savebar settings-savebar">
     <button type="submit" class="btn btn-success">@include('partials.icon',['name'=>'check','size'=>16]) {{ $editing ? 'Salvar alterações' : 'Cadastrar grupo' }}</button>
     <a href="{{ route('fiscal.tax-groups.index') }}" class="btn btn-secondary">Cancelar</a>
