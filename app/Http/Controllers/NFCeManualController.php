@@ -201,7 +201,9 @@ final class NFCeManualController extends Controller
         try {
             ProcessNFCeJob::dispatch($job->id)->onConnection($queue);
             return redirect()->route('fiscal.show',$job)
-                ->with('success','NFC-e enviada para emissão. Acompanhe a autorização nesta tela.');
+                ->with('success',$job->emission_mode==='offline'
+                    ? 'NFC-e na fila de preparação offline: assinatura do XML e geração do DANFE, sem envio à SEFAZ.'
+                    : 'NFC-e enviada para emissão. Acompanhe a autorização nesta tela.');
         } catch (\Throwable $error) {
             \Illuminate\Support\Facades\Log::error('Falha ao enfileirar NFC-e manual',[
                 'fiscal_document_job_id'=>$job->id,'message'=>$error->getMessage(),
