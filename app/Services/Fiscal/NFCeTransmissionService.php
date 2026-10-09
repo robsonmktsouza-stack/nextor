@@ -265,8 +265,9 @@ final class NFCeTransmissionService
         string $password,
         string $csc
     ): void {
-        if ($job->environment === 'production' && !config('services.acbr_nfe.production_enabled', false)) {
-            throw new RuntimeException('Envio em produção bloqueado.');
+        $issue = app(FiscalDocumentSettings::class)->transmissionIssue('nfce', (string)$job->environment);
+        if ($issue !== null) {
+            throw new RuntimeException($issue);
         }
 
         $certPath = Storage::disk('local')->path($company->certificate_path);
