@@ -27,8 +27,8 @@ final class NFCeTaxRuleApplicationService
                 throw new RuntimeException('Regras só podem ser aplicadas antes de assinar ou transmitir a NFC-e.');
             }
             $company = CompanySetting::current();
-            if (!in_array((string) $company->crt, ['1', '4'], true) || strtoupper((string) $company->state) !== 'BA') {
-                throw new RuntimeException('Esta primeira versão suporta somente NFC-e do Simples Nacional ou MEI emitida na Bahia.');
+            if (!in_array((string) $company->crt, ['1', '2', '3', '4'], true) || strtoupper((string) $company->state) !== 'BA') {
+                throw new RuntimeException('Esta primeira versão suporta somente NFC-e de operações internas na Bahia com CRT suportado.');
             }
 
             $source = $job->source_snapshot ?? [];
