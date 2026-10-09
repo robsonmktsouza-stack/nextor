@@ -12,7 +12,7 @@
   $selectedKind=old('kind',$group->kind ?? 'products');
   $sections=[
     'ICMS'=>[
-      ['icms_rate','Alíquota ICMS (%)'],['credit_rate','Crédito Simples (%)'],
+      ['icms_rate','Alíquota ICMS (%)'],['base_reduction_rate','Redução BC ICMS (%)'],['credit_rate','Crédito Simples (%)'],
       ['icms_st_rate','ICMS-ST (%)'],['mva_rate','MVA (%)'],
     ],
     'PIS / COFINS'=>[
@@ -63,6 +63,15 @@
       <label class="field col-4"><span>CSOSN geral</span><input name="icms_csosn" maxlength="3" inputmode="numeric" value="{{ old('icms_csosn',$group->icms_csosn) }}" placeholder="Ex.: 101"></label>
       <label class="field col-4"><span>Alternativa para NFC-e</span><input name="nfce_csosn" maxlength="3" inputmode="numeric" value="{{ old('nfce_csosn',$group->nfce_csosn) }}" placeholder="Ex.: 102"></label>
       <label class="field col-4"><span>CST ICMS (regime normal)</span><input name="icms_cst" maxlength="2" inputmode="numeric" value="{{ old('icms_cst',$group->icms_cst) }}"></label>
+      <label class="field col-4"><span>Modalidade da base ICMS</span>
+        <select name="tax_config[mod_bc]">
+          <option value="">Selecione</option>
+          <option value="0" @selected($val('mod_bc')==='0')>0 — Margem de valor agregado</option>
+          <option value="1" @selected($val('mod_bc')==='1')>1 — Pauta</option>
+          <option value="2" @selected($val('mod_bc')==='2')>2 — Preço máximo sugerido</option>
+          <option value="3" @selected($val('mod_bc')==='3')>3 — Valor da operação</option>
+        </select>
+      </label>
     </div>
     <div class="editor-grid cols-12 settings-grid">
       @foreach($sections['ICMS'] as [$key,$label])
