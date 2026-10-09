@@ -23,7 +23,12 @@ final class NFCeDanfeService
 
     public function parse(string $xml, FiscalDocumentJob $job): array
     {
-        if ($job->document_type !== 'nfce' || $job->status !== 'authorized') {
+        $offline=$job->emission_mode==='offline'
+            && in_array($job->status,['offline_signed','offline_print_pending'],true);
+        if ($job->document_type!=='nfce' && !$offline) {
+            throw new RuntimeException('Modelo de DANFE inválido.');
+        }
+        if (!$offline && ($job->document_type!=='nfce'||$job->status!=='authorized')) {
             throw new RuntimeException('O DANFE NFC-e só pode ser impresso para documento autorizado.');
         }
 
@@ -38,16 +43,18 @@ final class NFCeDanfeService
             libxml_use_internal_errors($old);
         }
 
-        if ($dom->documentElement?->localName !== 'nfeProc'
-            || $dom->documentElement?->namespaceURI !== self::NS) {
-            throw new RuntimeException('É necessário o XML nfeProc autorizado, não apenas a NFC-e assinada.');
+        if ($dom->documentElement?->namespaceURI !== self::NS
+            || $dom->documentElement?->localName !== ($offline?'NFe':'nfeProc')) {
+            throw new RuntimeException($offline
+                ? 'Contingência exige o XML NFC-e assinado.'
+                : 'É necessário o XML nfeProc autorizado.');
         }
 
         $xp = new DOMXPath($dom);
         $xp->registerNamespace('n', self::NS);
-        $info = $xp->query('/n:nfeProc/n:NFe/n:infNFe')->item(0);
-        $protocol = $xp->query('/n:nfeProc/n:protNFe/n:infProt')->item(0);
-        if (!$info instanceof DOMElement || !$protocol instanceof DOMElement) {
+        $info = $xp->query($offline?'/n:NFe/n:infNFe':'/n:nfeProc/n:NFe/n:infNFe')->item(0);
+        $protocol = $offline?null:$xp->query('/n:nfeProc/n:protNFe/n:infProt')->item(0);
+        if (!$info instanceof DOMElement || (!$offline && !$protocol instanceof DOMElement)) {
             throw new RuntimeException('XML sem NFC-e e protocolo de autorização completos.');
         }
 
@@ -58,25 +65,26 @@ final class NFCeDanfeService
         $number = $read('n:ide/n:nNF', $info);
         $series = $read('n:ide/n:serie', $info);
         $environment = $read('n:ide/n:tpAmb', $info);
-        $xmlProtocol = $read('n:nProt', $protocol);
-        $xmlKey = $read('n:chNFe', $protocol);
-        $cstat = $read('n:cStat', $protocol);
+        $xmlProtocol = $offline?'':$read('n:nProt', $protocol);
+        $xmlKey = $offline?$key:$read('n:chNFe', $protocol);
+        $cstat = $offline?'':$read('n:cStat', $protocol);
 
         if (preg_match('/^\d{44}$/', $key) !== 1
             || !hash_equals($key, (string) $job->access_key)
             || !hash_equals($key, $xmlKey)
-            || !hash_equals($xmlProtocol, (string) $job->protocol)
-            || !in_array($cstat, ['100', '150'], true)
+            || (!$offline && !hash_equals($xmlProtocol, (string) $job->protocol))
+            || (!$offline && !in_array($cstat, ['100', '150'], true))
             || $read('n:ide/n:mod', $info) !== '65'
             || !ctype_digit($number) || (int) $number !== (int) $job->document_number
             || !ctype_digit($series) || (int) $series !== (int) $job->series
             || $environment !== ($job->environment === 'homologation' ? '2' : '1')
-            || $read('n:tpAmb', $protocol) !== $environment) {
+            || ($offline && $read('n:ide/n:tpEmis',$info)!=='9')
+            || (!$offline && $read('n:tpAmb', $protocol) !== $environment)) {
             throw new RuntimeException('XML, autorização, ambiente ou numeração não correspondem à NFC-e registrada.');
         }
 
-        $qr = $read('/n:nfeProc/n:NFe/n:infNFeSupl/n:qrCode');
-        $url = $read('/n:nfeProc/n:NFe/n:infNFeSupl/n:urlChave');
+        $qr = $read($offline?'/n:NFe/n:infNFeSupl/n:qrCode':'/n:nfeProc/n:NFe/n:infNFeSupl/n:qrCode');
+        $url = $read($offline?'/n:NFe/n:infNFeSupl/n:urlChave':'/n:nfeProc/n:NFe/n:infNFeSupl/n:urlChave');
         $qrHost = strtolower((string) parse_url($qr, PHP_URL_HOST));
         $urlHost = strtolower((string) parse_url($url, PHP_URL_HOST));
         $validHost = static fn (string $host): bool => $host === 'sefaz.ba.gov.br'
@@ -125,7 +133,7 @@ final class NFCeDanfeService
 
         $issuerTaxId = $read('n:emit/n:CNPJ', $info) ?: $read('n:emit/n:CPF', $info);
         $total = $xp->query('n:total/n:ICMSTot', $info)->item(0);
-        if (!$total instanceof DOMElement || !$issuerTaxId || !$xmlProtocol) {
+        if (!$total instanceof DOMElement || !$issuerTaxId || (!$offline && !$xmlProtocol)) {
             throw new RuntimeException('XML sem emitente, total ou protocolo válidos para impressão.');
         }
 
@@ -162,7 +170,8 @@ final class NFCeDanfeService
             'series' => (int) $series,
             'number' => (int) $number,
             'issued_at' => $this->localDate($read('n:ide/n:dhEmi', $info)),
-            'authorized_at' => $this->localDate($read('n:dhRecbto', $protocol)),
+            'authorized_at' => $offline?'':$this->localDate($read('n:dhRecbto', $protocol)),
+            'offline' => $offline,
             'protocol' => $xmlProtocol,
             'environment' => $environment,
             'homologation' => $environment === '2',
