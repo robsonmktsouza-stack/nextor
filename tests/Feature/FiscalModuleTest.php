@@ -175,6 +175,23 @@ class FiscalModuleTest extends TestCase
             ->assertDontSee('Cancelar NFC-e na SEFAZ');
     }
 
+    public function test_cancellation_modals_do_not_trigger_stacked_confirmation(): void
+    {
+        $this->actingAs($this->admin())
+            ->get(route('fiscal.index',['tab'=>'nfce']))
+            ->assertOk()
+            ->assertSee('id="nfceCancelDialog"',false);
+
+        foreach (['index.blade.php','show.blade.php'] as $view) {
+            $source=file_get_contents(resource_path('views/fiscal/'.$view));
+            $dialog=explode('</dialog>',explode('id="nfceCancelDialog"',$source,2)[1] ?? '',2)[0];
+
+            $this->assertNotSame('',$dialog);
+            $this->assertStringContainsString('name="no_circulation"',$dialog);
+            $this->assertStringNotContainsString('data-confirm-submit',$dialog);
+        }
+    }
+
     public function test_user_without_fiscal_permission_cannot_open_module(): void
     {
         $user=User::query()->create([
