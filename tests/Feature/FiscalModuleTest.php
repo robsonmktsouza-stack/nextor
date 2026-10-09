@@ -146,7 +146,8 @@ class FiscalModuleTest extends TestCase
             ->assertSee('data-fiscal-cancel',false)
             ->assertSee('Cancelamento')
             ->assertSee('Inutilização')
-            ->assertSee('nfceCancelDialog');
+            ->assertSee('nfceCancelDialog')
+            ->assertSee('data-no-loading hidden',false);
     }
 
     public function test_authorized_nfce_detail_uses_compact_utilities_and_modal_cancel(): void
@@ -159,6 +160,7 @@ class FiscalModuleTest extends TestCase
             'document_number'=>3,
             'access_key'=>str_repeat('1',44),
             'protocol'=>str_repeat('2',15),
+            'xml_path'=>'fiscal/nfce/1/authorized.xml',
             'authorized_at'=>now()->subMinute(),
             'prepared_at'=>now()->subMinutes(2),
         ]);
@@ -169,6 +171,7 @@ class FiscalModuleTest extends TestCase
             ->assertSee('fiscal-detail-utilities',false)
             ->assertSee('data-dialog-open="nfceCancelDialog"',false)
             ->assertSee('id="nfceCancelDialog"',false)
+            ->assertSee('data-no-loading download',false)
             ->assertSee('Cancelamento')
             ->assertSee('Inutilização')
             ->assertDontSee('min-width:240px',false)
