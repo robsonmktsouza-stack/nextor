@@ -84,11 +84,19 @@ final class NFCeTaxCalculationService
     private function normalIcMS(array $tax, array $item, string $cfop, string $origin): array
     {
         $cst = (string)($tax['icms_cst'] ?? '');
-        if (!in_array($cst, ['00', '20'], true)) {
+        if (!in_array($cst, ['00', '20', '40', '41'], true)) {
             throw new RuntimeException("CST ICMS {$cst} do regime normal não possui cálculo mapeado.");
         }
         if (!in_array($cfop, self::SIMPLE_CFOPS, true)) {
             throw new RuntimeException("CFOP {$cfop} não contemplado para ICMS CST {$cst} na NFC-e.");
+        }
+        if (in_array($cst, ['40', '41'], true)) {
+            foreach (['icms_rate', 'base_reduction_rate', 'icms_desonerated_value', 'icms_desoneration_reason'] as $field) {
+                if (isset($tax[$field]) && $tax[$field] !== '' && (float)$tax[$field] != 0) {
+                    throw new RuntimeException("CST {$cst} exige tratamento específico do campo {$field}, ainda não mapeado.");
+                }
+            }
+            return ['orig' => $origin, 'CST' => $cst];
         }
         $mod = (string)($tax['mod_bc'] ?? '');
         if ($mod !== '3') {
