@@ -109,7 +109,8 @@ final class FiscalUtilitiesTest extends TestCase
         $this->actingAs($this->admin())
             ->get(route('fiscal.utilities.auxiliary',$doc))
             ->assertOk()
-            ->assertDownload('NFSe-S1-N120-'.$doc->id.'.pdf');
+            ->assertHeader('Content-Type','application/pdf')
+            ->assertHeader('Content-Disposition','inline; filename="NFSe-S1-N120-'.$doc->id.'.pdf"');
     }
 
     public function test_without_pdf_other_models_do_not_offer_fake_auxiliary_document(): void
