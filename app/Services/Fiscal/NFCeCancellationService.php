@@ -84,9 +84,13 @@ final class NFCeCancellationService
                 }
                 $result=app(NFCeFiscalEventResponse::class)->parse($response,'cancelamento');
                 if (!app(NFCeFiscalEventResponse::class)->cancellationAccepted($result,(string)$job->access_key,(string)$job->environment)) {
+                    // cStat indicating a processed event WITHOUT verifiable
+                    // individual proof is NOT a rejection. Require reconciliation.
+                    $uncertain=in_array($result['cstat'],['101','135','155','128'],true);
                     $job->update([
-                        'cancellation_status'=>'rejected',
-                        'error_message'=>'Cancelamento SEFAZ: '.$result['cstat'].' - '.$result['reason'],
+                        'cancellation_status'=>$uncertain?'uncertain':'rejected',
+                        'error_message'=>($uncertain?'Cancelamento pendente de reconciliação: ':'Cancelamento rejeitado: ')
+                            .$result['cstat'].' - '.$result['reason'],
                     ]);
                     return;
                 }
