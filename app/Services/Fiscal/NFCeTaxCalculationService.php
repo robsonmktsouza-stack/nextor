@@ -92,7 +92,8 @@ final class NFCeTaxCalculationService
         }
         if (in_array($cst, ['40', '41'], true)) {
             foreach (['icms_rate', 'base_reduction_rate', 'icms_desonerated_value', 'icms_desoneration_reason'] as $field) {
-                if (isset($tax[$field]) && $tax[$field] !== '' && (float)$tax[$field] != 0) {
+                if (isset($tax[$field]) && trim((string)$tax[$field]) !== ''
+                    && !in_array(trim((string)$tax[$field]), ['0','0.0','0.00'], true)) {
                     throw new RuntimeException("CST {$cst} exige tratamento específico do campo {$field}, ainda não mapeado.");
                 }
             }
