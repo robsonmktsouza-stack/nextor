@@ -12,7 +12,7 @@ use Illuminate\Validation\ValidationException;
 final class FiscalTaxGroupController extends Controller
 {
     private const RATE_FIELDS = [
-        'icms_rate','credit_rate','icms_st_rate','mva_rate','fcp_deferral_rate',
+        'icms_rate','base_reduction_rate','credit_rate','icms_st_rate','mva_rate','fcp_deferral_rate',
         'pis_rate','pis_st_rate','pis_quantity_rate',
         'cofins_rate','cofins_st_rate','cofins_quantity_rate',
         'ipi_rate','iss_rate','is_rate','biodiesel_mix_rate','fuel_origin_rate',
@@ -22,6 +22,7 @@ final class FiscalTaxGroupController extends Controller
     ];
 
     private const TEXT_FIELDS = [
+        'mod_bc' => 1,
         'ibs_cbs_cst' => 3,
         'ibs_cbs_class' => 6,
         'is_cst' => 3,
@@ -151,6 +152,7 @@ final class FiscalTaxGroupController extends Controller
         foreach (self::CALC_FIELDS as $key) {
             $rules['tax_config.'.$key]=['nullable',Rule::in(['none','percentage','quantity'])];
         }
+        $rules['tax_config.mod_bc']=['nullable',Rule::in(['0','1','2','3'])];
         $rules['tax_config.force_interstate_cfop']=['nullable','boolean'];
         $rules['tax_config.iss_incentive']=['nullable','boolean'];
         $rules['tax_config.fuel_origin_uf']=['nullable',Rule::in(self::UF)];
