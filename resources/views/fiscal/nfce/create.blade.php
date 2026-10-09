@@ -198,5 +198,5 @@
 <script type="application/json" id="nfceMethodsJson">@json($methods)</script>
 <script type="application/json" id="nfceOldItems">@json(old('items',[]))</script>
 <script type="application/json" id="nfceOldPayments">@json(old('payments',[]))</script>
-<script defer src="{{ asset('js/nfce-editor.js') }}"></script>
+<script defer src="{{ asset('js/nfce-editor.js') }}?v={{ filemtime(public_path('js/nfce-editor.js')) }}"></script>
 @endsection
