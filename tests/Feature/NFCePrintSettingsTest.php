@@ -182,6 +182,8 @@ final class NFCePrintSettingsTest extends TestCase
         $html=$pdf->renderHtml($job,$xml);
 
         self::assertStringContainsString('data-paper="80"',$html);
+        self::assertStringContainsString('@page{size: 80mm ',$html);
+        self::assertStringContainsString('id="nextorPdfPage"',$html);
         self::assertStringContainsString('class="danfe-paper"',$html);
         self::assertStringContainsString('class="danfe-item-head"',$html);
         self::assertStringContainsString('PRODUTO DE TESTE',$html);
@@ -206,10 +208,24 @@ final class NFCePrintSettingsTest extends TestCase
         $xml=Storage::disk('local')->get($job->xml_path);
         $pdf=app(\App\Services\Fiscal\NFCePdfService::class);
 
-        $bytes=$pdf->render($job,$xml);
-        self::assertStringStartsWith('%PDF-',$bytes);
-        self::assertStringContainsString('%%EOF',substr($bytes,-1024));
-        self::assertGreaterThan(6000,strlen($bytes));
+        foreach (['58'=>164.4,'80'=>226.8,'a4'=>595.3] as $paper=>$expectedWidthPt) {
+            AppSetting::put('printing','nfce_paper',(string)$paper);
+            $bytes=$pdf->render($job,$xml);
+            self::assertStringStartsWith('%PDF-',$bytes);
+            self::assertStringContainsString('%%EOF',substr($bytes,-1024));
+            self::assertGreaterThan(6000,strlen($bytes));
+
+            // Validate REAL page geometry, not merely a CSS declaration:
+            // 58 and 80 mm should be real thermal-width PDF pages.
+            self::assertSame(1,preg_match(
+                '/\\/MediaBox\\s*\\[\\s*0\\s+0\\s+([0-9.]+)\\s+([0-9.]+)\\s*\\]/',
+                $bytes,$box
+            ),'PDF page MediaBox not found');
+            self::assertEqualsWithDelta($expectedWidthPt,(float)$box[1],2.0);
+            if($paper!=='a4') {
+                self::assertLessThan(1200,(float)$box[2],'Thermal PDF should not be an A4 sheet.');
+            }
+        }
     }
 
     public function test_previous_receipt_width_remains_fallback_until_paper_is_configured(): void
