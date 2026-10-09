@@ -105,24 +105,27 @@ class ServiceController extends Controller
                 ]);
             }
             $config=is_array($group->tax_config) ? $group->tax_config : [];
-            // Serviço selecionado determina seus próprios códigos: nunca
-            // usar valores legados divergentes ou código informado à mão.
-            foreach (['national_tax_code','service_list_item'] as $field) {
-                if (isset($config[$field]) && trim((string)$config[$field]) !== '') {
-                    $data[$field]=(string)$config[$field];
-                }
+            $national=(string)($config['national_tax_code'] ?? '');
+            $listItem=(string)($config['service_list_item'] ?? '');
+            if (!preg_match('/^[0-9]{6}$/',$national)
+                || $listItem !== \App\Support\FiscalServicePresetCatalog::item($national)
+                || (string)$group->iss_exigibility === '') {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'fiscal_tax_group_id'=>'Este grupo de serviços está incompleto.',
+                ]);
             }
-            $taxDefaults=$service?->tax_defaults ?? [];
-            if (!is_array($taxDefaults)) {
-                $taxDefaults=[];
-            }
-            $data['tax_defaults']=array_replace($taxDefaults, $config, [
-                'iss_exigibility'=>(string)($group->iss_exigibility ?? ''),
+            // O grupo prevalece sobre os campos anteriores: ao trocar de
+            // atividade, não copiar impostos nem códigos do grupo anterior.
+            $data['national_tax_code']=$national;
+            $data['service_list_item']=$listItem;
+            $data['tax_defaults']=array_replace($config, [
+                'iss_exigibility'=>(string)$group->iss_exigibility,
                 'fiscal_group_id'=>$group->id,
                 'fiscal_group_revision'=>$group->revision,
             ]);
-        } elseif (!$service) {
-            $data['tax_defaults']=AppSetting::groupValues('tax',[]);
+        } else {
+            // Sem grupo: não manter dados de um grupo antigo.
+            $data['tax_defaults']=[];
         }
 
         if($service) {
