@@ -136,7 +136,8 @@ final class NFCeOfflineService
                 $job->update([
                     'status'=>'authorized','xml_path'=>$authPath,
                     'protocol'=>$parsed['protocol'],
-                    'authorized_at'=>now(),'processed_at'=>now(),
+                    'authorized_at'=>\Carbon\Carbon::parse(app(NFCeProtocolXmlService::class)->receivedAtIso((string)$parsed['received_at'])),
+                    'processed_at'=>now(),
                     'error_message'=>null,
                 ]);
             }catch(Throwable $e){
