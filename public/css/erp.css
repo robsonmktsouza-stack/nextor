@@ -3900,6 +3900,27 @@ body.nfe-modal-open{overflow:hidden}
 .fiscal-utilities-dropdown button:hover:not(:disabled),.fiscal-utilities-dropdown a:hover{background:#eef5fb;color:#245d89}
 .fiscal-utilities-dropdown button:disabled{color:#acb6c0;cursor:not-allowed}
 .fiscal-utilities-dropdown button svg,.fiscal-utilities-dropdown a svg{flex:none}
+
+/* NFC-e: ações de detalhe compactas; operações secundárias fora do cabeçalho. */
+.page-heading:has(.fiscal-detail-utilities){position:relative;z-index:30;overflow:visible}
+.page-actions{align-items:center}
+.page-actions>form{display:inline-flex;align-items:center;flex:0 0 auto;margin:0}
+.page-actions>form .btn{width:auto;min-height:38px}
+.page-actions .fiscal-detail-utilities{position:relative;display:inline-flex;flex:0 0 auto;z-index:2}
+.page-actions .fiscal-detail-utilities>summary{display:inline-flex;align-items:center;gap:7px;min-height:38px;border-radius:4px;list-style:none;white-space:nowrap}
+.page-actions .fiscal-detail-utilities .fiscal-utilities-dropdown{width:255px;right:0;top:calc(100% + 7px)}
+.fiscal-detail-utilities .fiscal-utilities-dropdown form{margin:0}
+.nfce-cancel-no-circulation{display:flex;flex-direction:row;align-items:flex-start;gap:9px;margin-top:14px;font-weight:400}
+.nfce-cancel-no-circulation>span{font-weight:500;line-height:1.45;font-size:12px}
+.nfce-cancel-no-circulation input[type="checkbox"]{width:16px;height:16px;min-height:16px;flex:0 0 16px;margin:1px 0 0;padding:0;accent-color:#2877c7}
+.erp-dialog .dialog-body .nfce-cancel-deadline{margin-top:12px;font-size:11px;color:#738397}
+@media(max-width:760px){
+  .page-heading:has(.fiscal-detail-utilities){padding-top:10px;padding-bottom:10px}
+  .page-heading:has(.fiscal-detail-utilities) .page-actions{width:100%;gap:6px}
+  .page-heading:has(.fiscal-detail-utilities) .page-actions .btn{width:auto}
+  .page-actions .fiscal-detail-utilities .fiscal-utilities-dropdown{width:min(255px,calc(100vw - 28px))}
+}
+
 @media(max-width:560px){.fiscal-utilities>summary{min-width:38px;padding:0 8px}.fiscal-utilities-dropdown{right:0}}
 
 
