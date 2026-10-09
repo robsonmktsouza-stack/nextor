@@ -3950,7 +3950,9 @@ body.nfe-modal-open{overflow:hidden}
 #nfceEditor .nfce-item-table td input::-webkit-inner-spin-button,
 #nfceEditor .nfce-item-table td input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 #nfceEditor .nfce-item-table td select{min-width:210px;height:35px}
-#nfceEditor .nfce-remove{border:1px solid transparent;background:transparent;color:#9d3b3b;border-radius:4px;width:30px;height:30px;font-size:19px;cursor:pointer}
+#nfceEditor .nfce-remove{display:inline-flex;align-items:center;justify-content:center;border:1px solid transparent;background:transparent;color:#9d3b3b;border-radius:4px;width:30px;height:30px;cursor:pointer}
+#nfceEditor .nfce-remove svg{width:16px;height:16px;pointer-events:none}
+#nfceEditor .nfce-remove:focus-visible{outline:2px solid #3085bf;outline-offset:2px}
 #nfceEditor .nfce-remove:hover{border-color:#f0caca;background:#fff5f5}
 #nfceEditor .nfce-search-results{max-height:250px;overflow:auto;background:#fff;border:1px solid #cedae6;box-shadow:0 8px 18px #243b531c;border-radius:5px;margin:5px 0 8px}
 #nfceEditor .nfce-search-results[hidden]{display:none!important}
@@ -3984,3 +3986,7 @@ body.nfe-modal-open{overflow:hidden}
 
 #nfceEditor .nfce-form-error{margin:12px 0;padding:10px 12px;background:#fff5f3;border:1px solid #efc0b8;border-radius:5px;color:#a33829;font-size:12px}
 #nfceEditor .nfce-form-error[hidden]{display:none!important}
+
+/* Inactive panels are completely hidden, not just visually deselected. */
+#nfceEditor [data-nfce-panel][hidden]{display:none!important}
+#nfceEditor [data-nfce-panel]:not([hidden]){display:grid}
