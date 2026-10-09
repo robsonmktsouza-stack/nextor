@@ -87,8 +87,10 @@ class NFCePdfService
 
     public function render(FiscalDocumentJob $document, string $authorizedXml): string
     {
-        if ($document->document_type!=='nfce' || $document->status!=='authorized') {
-            throw new RuntimeException('O DANFE somente pode ser gerado para NFC-e autorizada.');
+        $offline=$document->emission_mode==='offline'
+            && in_array($document->status,['offline_signed','offline_print_pending'],true);
+        if ($document->document_type!=='nfce' || (!$offline && $document->status!=='authorized')) {
+            throw new RuntimeException('DANFE indisponível para esta situação fiscal.');
         }
 
         $chrome=$this->chromeExecutable();
