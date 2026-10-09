@@ -7,6 +7,7 @@ use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\FiscalController;
 use App\Http\Controllers\NFCeManualController;
 use App\Http\Controllers\NFCeFiscalEventsController;
+use App\Http\Controllers\NFCeInutilizationController;
 use App\Http\Controllers\FiscalUtilitiesController;
 use App\Http\Controllers\FiscalCodeCatalogController;
 use App\Http\Controllers\FiscalTaxRuleController;
@@ -115,6 +116,8 @@ Route::middleware('auth')->group(function () {
     Route::put('/fiscal/rules/{fiscalTaxRule}',[FiscalTaxRuleController::class,'update'])->name('fiscal.tax-rules.update')->middleware('permission:settings');
 
     Route::get('/fiscal/nfce/create',[NFCeManualController::class,'create'])->name('fiscal.nfce.create')->middleware('permission:fiscal');
+    Route::get('/fiscal/nfce/inutilizations',[NFCeInutilizationController::class,'index'])->name('fiscal.nfce.inutilizations')->middleware('permission:fiscal');
+    Route::post('/fiscal/nfce/inutilizations',[NFCeInutilizationController::class,'store'])->name('fiscal.nfce.inutilizations.store')->middleware('permission:fiscal');
     Route::post('/fiscal/nfce',[NFCeManualController::class,'store'])->name('fiscal.nfce.store')->middleware('permission:fiscal');
     Route::get('/fiscal/nfe/create',[NfeDraftController::class,'create'])->name('fiscal.nfe.create')->middleware('permission:fiscal');
     Route::get('/fiscal/nfe/drafts',[NfeDraftController::class,'index'])->name('fiscal.nfe.drafts.index')->middleware('permission:fiscal');
