@@ -5,6 +5,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\FiscalController;
+use App\Http\Controllers\NFCeManualController;
 use App\Http\Controllers\FiscalUtilitiesController;
 use App\Http\Controllers\FiscalCodeCatalogController;
 use App\Http\Controllers\FiscalTaxRuleController;
@@ -112,6 +113,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/fiscal/rules',[FiscalTaxRuleController::class,'store'])->name('fiscal.tax-rules.store')->middleware('permission:settings');
     Route::put('/fiscal/rules/{fiscalTaxRule}',[FiscalTaxRuleController::class,'update'])->name('fiscal.tax-rules.update')->middleware('permission:settings');
 
+    Route::get('/fiscal/nfce/create',[NFCeManualController::class,'create'])->name('fiscal.nfce.create')->middleware('permission:fiscal');
+    Route::post('/fiscal/nfce',[NFCeManualController::class,'store'])->name('fiscal.nfce.store')->middleware('permission:fiscal');
     Route::get('/fiscal/nfe/create',[NfeDraftController::class,'create'])->name('fiscal.nfe.create')->middleware('permission:fiscal');
     Route::get('/fiscal/nfe/drafts',[NfeDraftController::class,'index'])->name('fiscal.nfe.drafts.index')->middleware('permission:fiscal');
     Route::post('/fiscal/nfe/drafts',[NfeDraftController::class,'store'])->name('fiscal.nfe.store')->middleware('permission:fiscal');
