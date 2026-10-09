@@ -88,9 +88,12 @@ final class FiscalUtilitiesController extends Controller
             return back()->with('error','O documento auxiliar ainda não está disponível para esta nota.');
         }
 
-        return Storage::disk('local')->download(
-            $path,$files->filename($fiscalDocumentJob,'pdf'),
-            ['Content-Type'=>'application/pdf','X-Content-Type-Options'=>'nosniff']
-        );
+        $filename=$files->filename($fiscalDocumentJob,'pdf');
+        return response()->file(Storage::disk('local')->path($path),[
+            'Content-Type'=>'application/pdf',
+            'Content-Disposition'=>'inline; filename="'.$filename.'"',
+            'Cache-Control'=>'private, no-store, no-cache, must-revalidate',
+            'X-Content-Type-Options'=>'nosniff',
+        ]);
     }
 }
