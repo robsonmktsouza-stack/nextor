@@ -129,7 +129,7 @@ final class NFCeFiscalProfileService
         $cofins = (string) ($tax['cofins_cst'] ?? $tax['cofins_cst_default'] ?? '');
 
         if ($cfop !== '' || ($normal ? $icmsCst !== '' : $csosn !== '') || $pis !== '' || $cofins !== '') {
-            if (($normal && !in_array($icmsCst, ['00','20'], true))
+            if (($normal && !in_array($icmsCst, ['00','20','40','41'], true))
                 || (!$normal && !in_array($csosn, ['102','103','300','400','500'], true))
                 || !in_array($pis, ['01','02','03','04','06','07','08','09','49','99'], true)
                 || !in_array($cofins, ['01','02','03','04','06','07','08','09','49','99'], true)
