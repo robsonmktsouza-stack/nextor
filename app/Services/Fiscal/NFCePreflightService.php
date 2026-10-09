@@ -11,7 +11,7 @@ final class NFCePreflightService
 {
     public function __construct(
         private readonly NFCeTaxCalculationService $calculator,
-        private readonly NFCeProductionProfilePolicy $productionProfiles,
+        private readonly FiscalDocumentSettings $documentSettings,
     ) {}
 
     public function validate(FiscalDocumentJob $job): array
@@ -26,8 +26,8 @@ final class NFCePreflightService
         if (!in_array($job->environment, ['homologation', 'production'], true)) {
             $errors[] = 'Ambiente fiscal inválido.';
         }
-        if ($job->environment === 'production' && !config('services.acbr_nfe.production_enabled', false)) {
-            $errors[] = 'Produção bloqueada até a homologação ser validada.';
+        if ($issue = $this->documentSettings->transmissionIssue('nfce', (string)$job->environment)) {
+            $errors[] = $issue;
         }
         if ($job->series === null || (int) $job->series < 0 || (int) $job->series > 999 || (int) $job->document_number < 1) {
             $errors[] = 'Série ou número fiscal inválido.';
@@ -95,11 +95,6 @@ final class NFCePreflightService
                 // Nenhum perfil não implementado pode chegar à transmissão.
                 try {
                     $this->calculator->calculate($item, (string)$company->crt);
-                    if ($job->environment === 'production'
-                        && !$this->productionProfiles->approved((string)$company->crt, $tax)) {
-                        $key = $this->productionProfiles->key((string)$company->crt, $tax);
-                        $errors[] = "Item {$n}: perfil fiscal {$key} ainda não homologado para produção.";
-                    }
                 } catch (\RuntimeException $exception) {
                     $errors[] = "Item {$n}: ".$exception->getMessage();
                 }
