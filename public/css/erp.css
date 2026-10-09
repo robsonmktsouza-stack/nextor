@@ -3896,10 +3896,10 @@ body.nfe-modal-open{overflow:hidden}
 .fiscal-utilities>summary::-webkit-details-marker{display:none}
 .fiscal-utilities[open]>summary{background:#eef5fb;color:#245d89}
 .fiscal-utilities-dropdown{position:absolute;right:0;top:calc(100% + 5px);width:235px;z-index:120;border:1px solid #d4dee8;border-radius:5px;background:#fff;padding:5px;box-shadow:0 13px 32px #20354d25}
-.fiscal-utilities-dropdown button{display:flex;align-items:center;gap:9px;width:100%;padding:10px 11px;border:0;border-radius:3px;background:transparent;color:#40546b;text-align:left;font-size:12px;white-space:nowrap;cursor:pointer}
-.fiscal-utilities-dropdown button:hover:not(:disabled){background:#eef5fb;color:#245d89}
+.fiscal-utilities-dropdown button,.fiscal-utilities-dropdown a{display:flex;align-items:center;gap:9px;width:100%;padding:10px 11px;border:0;border-radius:3px;background:transparent;color:#40546b;text-align:left;text-decoration:none;font-size:12px;white-space:nowrap;cursor:pointer}
+.fiscal-utilities-dropdown button:hover:not(:disabled),.fiscal-utilities-dropdown a:hover{background:#eef5fb;color:#245d89}
 .fiscal-utilities-dropdown button:disabled{color:#acb6c0;cursor:not-allowed}
-.fiscal-utilities-dropdown button svg{flex:none}
+.fiscal-utilities-dropdown button svg,.fiscal-utilities-dropdown a svg{flex:none}
 @media(max-width:560px){.fiscal-utilities>summary{min-width:38px;padding:0 8px}.fiscal-utilities-dropdown{right:0}}
 
 
