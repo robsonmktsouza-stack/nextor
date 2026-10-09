@@ -32,8 +32,13 @@ final class NFCePreflightService
         if ($job->series === null || (int) $job->series < 0 || (int) $job->series > 999 || (int) $job->document_number < 1) {
             $errors[] = 'Série ou número fiscal inválido.';
         }
-        if ($job->emission_mode !== 'normal') {
-            $errors[] = 'Contingência offline ainda não está implementada neste emissor.';
+        if (!in_array($job->emission_mode,['normal','offline'],true)) {
+            $errors[] = 'Modalidade de emissão fiscal inválida.';
+        }
+        if ($job->emission_mode==='offline' &&
+            (!$job->contingency_started_at || mb_strlen(trim((string)$job->contingency_reason))<15
+                || $job->contingency_started_at->isFuture())) {
+            $errors[] = 'Contingência exige motivo com 15 caracteres e data/hora válida.';
         }
         if ($job->access_key || $job->protocol || $job->authorized_at) {
             $errors[] = 'Documento já contém dados de autorização; não reenviar.';
