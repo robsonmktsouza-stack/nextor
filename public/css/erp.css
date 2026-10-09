@@ -3981,3 +3981,6 @@ body.nfe-modal-open{overflow:hidden}
  #nfceEditor .nfe-emitter-summary{display:block}
  #nfceEditor .nfe-document-summary{margin-top:12px}
 }
+
+#nfceEditor .nfce-form-error{margin:12px 0;padding:10px 12px;background:#fff5f3;border:1px solid #efc0b8;border-radius:5px;color:#a33829;font-size:12px}
+#nfceEditor .nfce-form-error[hidden]{display:none!important}
