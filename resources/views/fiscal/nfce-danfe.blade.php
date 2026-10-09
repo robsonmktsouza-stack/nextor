@@ -34,7 +34,12 @@
       return $value;
   };
 @endphp
-<main class="danfe-paper" id="danfePaper" aria-label="Documento auxiliar da NFC-e">
+@for($copy=1;$copy<=(!empty($danfe['offline'])?2:1);$copy++)
+<main class="danfe-paper" id="{{ $copy===1?'danfePaper':'danfePaper2' }}" aria-label="Documento auxiliar da NFC-e"
+  @if(!empty($danfe['offline'])) style="break-after:{{ $copy===1?'page':'auto' }};page-break-after:{{ $copy===1?'always':'auto' }}" @endif>
+  @if(!empty($danfe['offline']))
+    <div class="danfe-section danfe-center"><strong>{{ $copy===1?'1ª VIA – CONSUMIDOR':'2ª VIA – ESTABELECIMENTO' }}</strong></div>
+  @endif
   <header class="danfe-issuer">
     <strong>{{ $danfe['issuer']['name'] }}</strong>
     <div>{{ strlen(preg_replace('/\D/','',$danfe['issuer']['tax_id']))===14 ? 'CNPJ' : 'CPF' }}: {{ $taxId($danfe['issuer']['tax_id']) }}</div>
@@ -99,7 +104,7 @@
 
   <section class="danfe-section danfe-qr-section">
     <div class="danfe-qr-title">Consulta via leitor de QR Code</div>
-    <div id="danfeQr" class="danfe-qr" aria-label="QR Code de consulta pública da NFC-e">
+    <div id="{{ $copy===1?'danfeQr':'danfeQr2' }}" class="danfe-qr" data-danfe-qr aria-label="QR Code de consulta pública da NFC-e">
       <div id="danfeQrStatus" class="danfe-qr-placeholder">Gerando QR Code...</div>
     </div>
     @if($danfe['consumer_id'])
@@ -138,17 +143,19 @@
     <section class="danfe-section danfe-notes">{{ $danfe['additional_message'] }}</section>
   @endif
 </main>
+@endfor
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const qrTarget=document.getElementById('danfeQr');
+  const qrTargets=document.querySelectorAll('[data-danfe-qr]');
   const qrUrl=@json($danfe['qr_url']);
   try {
     if(typeof qrcode!=='function') throw new Error('Gerador de QR Code indisponível');
     const qr=qrcode(0,'M');
     qr.addData(qrUrl);
     qr.make();
-    qrTarget.innerHTML=qr.createSvgTag({cellSize:5,margin:20,scalable:true});
+    qrTargets.forEach(target=>{target.innerHTML=qr.createSvgTag({cellSize:5,margin:20,scalable:true})});
     const svg=qrTarget.querySelector('svg');
     if(!svg) throw new Error('QR Code inválido');
     svg.setAttribute('role','img');
