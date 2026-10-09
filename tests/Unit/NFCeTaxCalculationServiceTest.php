@@ -149,4 +149,36 @@ final class NFCeTaxCalculationServiceTest extends TestCase
         $calculator->calculate($this->item(['icms_csosn'=>'103']), '4');
     }
 
+    public function test_normal_crt_three_calculates_icms_cst_00_and_20_from_configured_base(): void
+    {
+        $calculator = new NFCeTaxCalculationService();
+        $tax = ['icms_cst'=>'00', 'mod_bc'=>'3', 'icms_rate'=>'18.00'];
+        $normal = $calculator->calculate($this->item($tax), '3');
+        self::assertSame('90.00', $normal['icms']['vBC']);
+        self::assertSame('18.0000', $normal['icms']['pICMS']);
+        self::assertSame('16.20', $normal['icms']['vICMS']);
+
+        $reduced = $calculator->calculate($this->item(array_replace($tax, [
+            'icms_cst'=>'20', 'base_reduction_rate'=>'20',
+        ])), '3');
+        self::assertSame('72.00', $reduced['icms']['vBC']);
+        self::assertSame('20.0000', $reduced['icms']['pRedBC']);
+        self::assertSame('12.96', $reduced['icms']['vICMS']);
+    }
+
+    public function test_normal_crt_rejects_unmapped_cst_or_wrong_base_modality(): void
+    {
+        $calculator = new NFCeTaxCalculationService();
+        $item = $this->item(['icms_cst'=>'60', 'mod_bc'=>'3', 'icms_rate'=>'18']);
+        try {
+            $calculator->calculate($item, '3');
+            self::fail('CST 60 cannot use the CST 00 formula');
+        } catch (RuntimeException $exception) {
+            self::assertStringContainsString('não possui cálculo', $exception->getMessage());
+        }
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('modalidade de base 3');
+        $calculator->calculate($this->item(['icms_cst'=>'00', 'mod_bc'=>'1', 'icms_rate'=>'18']), '3');
+    }
+
 }
