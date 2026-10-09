@@ -13,6 +13,7 @@ class FiscalController extends Controller
         'nfe'=>['label'=>'NF-e','description'=>'Nota Fiscal Eletrônica — modelo 55','party'=>'Destinatário'],
         'nfse'=>['label'=>'NFS-e','description'=>'Nota Fiscal de Serviço Eletrônica','party'=>'Tomador'],
         'cte'=>['label'=>'CT-e','description'=>'Conhecimento de Transporte Eletrônico — modelo 57','party'=>'Tomador'],
+        'mdfe'=>['label'=>'MDF-e','description'=>'Manifesto Eletrônico de Documentos Fiscais — modelo 58','party'=>'Emitente'],
         'nfce'=>['label'=>'NFC-e','description'=>'Nota Fiscal de Consumidor Eletrônica — modelo 65','party'=>'Consumidor'],
     ];
 
@@ -230,26 +231,23 @@ class FiscalController extends Controller
 
     private function configurationFor(string $tab): array
     {
-        if($tab==='cte') {
-            $settings=AppSetting::groupValues('cte',[]);
+        $settingsService=app(\App\Services\Fiscal\FiscalDocumentSettings::class);
+        $group=in_array($tab,['cte','mdfe'],true) ? 'cte' : $tab;
+        $settings=AppSetting::groupValues($group,[]);
 
-            return [
-                'enabled'=>(bool)($settings['cte_enabled'] ?? false),
-                'environment'=>$settings['cte_environment'] ?? 'homologation',
-                'series'=>$settings['cte_series'] ?? 1,
-                'next_number'=>$settings['cte_next_number'] ?? 1,
-                'settings_tab'=>'cte',
-            ];
-        }
-
-        $settings=AppSetting::groupValues($tab,[]);
+        $seriesKey=in_array($tab,['cte','mdfe'],true) ? $tab.'_series' : 'series';
+        $numberKey=match($tab) {
+            'nfse'=>'next_rps',
+            'cte','mdfe'=>$tab.'_next_number',
+            default=>'next_number',
+        };
 
         return [
-            'enabled'=>(bool)($settings['enabled'] ?? false),
-            'environment'=>$settings['environment'] ?? AppSetting::value('fiscal','default_environment','homologation'),
-            'series'=>$settings['series'] ?? null,
-            'next_number'=>$tab==='nfse' ? ($settings['next_rps'] ?? 1) : ($settings['next_number'] ?? 1),
-            'settings_tab'=>$tab,
+            'enabled'=>$settingsService->enabled($tab),
+            'environment'=>$settingsService->environment($tab),
+            'series'=>$settings[$seriesKey] ?? null,
+            'next_number'=>$settings[$numberKey] ?? 1,
+            'settings_tab'=>$group,
         ];
     }
 }
