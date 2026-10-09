@@ -3926,3 +3926,58 @@ body.nfe-modal-open{overflow:hidden}
 .fiscal-utilities-dropdown button:disabled{color:#acb6c0;cursor:not-allowed}
 .fiscal-utilities-dropdown button svg{flex:none}
 @media(max-width:560px){.fiscal-utilities>summary{min-width:38px;padding:0 8px}.fiscal-utilities-dropdown{right:0}}
+
+
+/* NFC-e manual editor — same visual language as the NF-e dialog. */
+#nfceEditor .nfe-workspace-dialog{max-width:1150px;width:min(1150px,96vw)}
+#nfceEditor .nfe-workspace-body{padding:0 16px 20px}
+#nfceEditor .nfe-emitter-summary{margin:12px 0 14px}
+#nfceEditor .editor-tab-panel{padding:0}
+#nfceEditor .nfe-general-card{padding:18px 18px 20px}
+#nfceEditor .nfe-section-title{display:flex;justify-content:space-between;align-items:center;gap:12px}
+#nfceEditor .field input[readonly]{background:#f4f7fb;color:#687b8c}
+#nfceEditor .nfce-muted{font-size:12px;color:#66798b;line-height:1.5;margin:9px 0 0}
+#nfceEditor .nfce-existing-block{border-top:1px solid #e6edf3;margin-top:17px;padding-top:15px;display:grid;gap:11px}
+#nfceEditor .nfce-existing-block[hidden]{display:none!important}
+#nfceEditor .nfce-item-table-wrap{overflow-x:auto;margin-top:12px}
+#nfceEditor .nfce-item-table{width:100%;border-collapse:collapse;table-layout:auto;font-size:12px}
+#nfceEditor .nfce-item-table th{text-transform:uppercase;text-align:left;font-size:10px;letter-spacing:.025em;color:#66788b;font-weight:700;border-bottom:1px solid #dce5ed;padding:8px 9px;background:#f7f9fc}
+#nfceEditor .nfce-item-table td{padding:7px 9px;border-bottom:1px solid #e9eef3;vertical-align:middle}
+#nfceEditor .nfce-item-table td:first-child{min-width:210px}
+#nfceEditor .nfce-item-table td strong{font-weight:650}
+#nfceEditor .nfce-item-table td small{display:block;margin-top:2px;color:#8291a0}
+#nfceEditor .nfce-item-table td input[type=number]{width:110px;max-width:100%;height:35px;padding:6px 9px;border:1px solid #ced9e4;border-radius:4px;appearance:textfield;-moz-appearance:textfield}
+#nfceEditor .nfce-item-table td input::-webkit-inner-spin-button,
+#nfceEditor .nfce-item-table td input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+#nfceEditor .nfce-item-table td select{min-width:210px;height:35px}
+#nfceEditor .nfce-remove{border:1px solid transparent;background:transparent;color:#9d3b3b;border-radius:4px;width:30px;height:30px;font-size:19px;cursor:pointer}
+#nfceEditor .nfce-remove:hover{border-color:#f0caca;background:#fff5f5}
+#nfceEditor .nfce-search-results{max-height:250px;overflow:auto;background:#fff;border:1px solid #cedae6;box-shadow:0 8px 18px #243b531c;border-radius:5px;margin:5px 0 8px}
+#nfceEditor .nfce-search-results[hidden]{display:none!important}
+#nfceEditor .nfce-search-results button{width:100%;border:0;background:#fff;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;gap:12px;text-align:left;color:#35475a;cursor:pointer}
+#nfceEditor .nfce-search-results button+button{border-top:1px solid #f0f3f6}
+#nfceEditor .nfce-search-results button:hover,#nfceEditor .nfce-search-results button:focus{background:#eaf3fb}
+#nfceEditor .nfce-search-results button small{display:block;color:#71839a;margin-top:2px}
+#nfceEditor .nfce-search-results button b{white-space:nowrap}
+#nfceEditor .nfce-search-results p{padding:11px;color:#8594a3}
+#nfceEditor .nfce-payment-subtotal{display:flex;align-items:center;justify-content:flex-end;gap:20px;margin-top:14px;font-size:12px}
+#nfceEditor .nfce-payment-subtotal strong{font-size:16px}
+#nfceEditor .nfce-amount-warning{color:#bb2929!important}
+#nfceEditor .nfce-summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+#nfceEditor .nfce-summary-grid>div{border:1px solid #e0e7ee;border-radius:5px;padding:13px;display:grid;gap:5px}
+#nfceEditor .nfce-summary-grid span{color:#71839a;font-size:12px}
+#nfceEditor .nfce-summary-grid strong{font-size:18px}
+#nfceEditor .nfce-note-field{margin-top:17px}
+#nfceEditor .nfce-savebar{justify-content:space-between}
+#nfceEditor .nfce-save-total{display:grid;gap:2px;padding:0 12px}
+#nfceEditor .nfce-save-total span{color:#65798b;font-size:11px}
+#nfceEditor .nfce-save-total strong{font-size:21px;font-weight:750}
+#nfceEditor .nfce-save-buttons{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#nfceEditor .editor-tab:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:740px){
+ #nfceEditor .nfce-summary-grid{grid-template-columns:1fr}
+ #nfceEditor .nfce-item-table td:first-child{min-width:175px}
+ #nfceEditor .nfce-savebar{gap:10px;flex-wrap:wrap}
+ #nfceEditor .nfe-emitter-summary{display:block}
+ #nfceEditor .nfe-document-summary{margin-top:12px}
+}
