@@ -72,8 +72,7 @@ final class NFCeTaxGroupTranslator
                 $quantityRate = $config[$kind.'_quantity_rate'] ?? null;
                 if (!in_array((string)$group->{$kind.'_cst'}, ['03','49','99'], true)
                     || $quantityRate === null || $quantityRate === '' || !is_numeric($quantityRate)
-                    || ($rate !== null && $rate !== '' && (float)$rate > 0)
-                || (isset($config[$kind.'_quantity_rate']) && (float)$config[$kind.'_quantity_rate'] > 0)) {
+                    || ($rate !== null && $rate !== '' && (float)$rate > 0)) {
                     throw new RuntimeException('Grupo "'.$group->name.'": '.$kind.'_calc_type exige CST por quantidade e alíquota unitária.');
                 }
             } elseif (!in_array($method, ['','none'], true)
