@@ -25,7 +25,7 @@ final class NFCeDanfeService
     {
         $offline=$job->emission_mode==='offline'
             && in_array($job->status,['offline_signed','offline_print_pending'],true);
-        if ($job->document_type!=='nfce' && !$offline) {
+        if ($job->document_type!=='nfce') {
             throw new RuntimeException('Modelo de DANFE inválido.');
         }
         if (!$offline && ($job->document_type!=='nfce'||$job->status!=='authorized')) {
