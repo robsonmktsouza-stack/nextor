@@ -1,5 +1,4 @@
 @extends('layouts.app')
-@section('titleMeta'){{ $movements->total() }} {{ $movements->total() === 1 ? 'movimentação' : 'movimentações' }}@endsection
 @section('title','Estoque')
 @section('description','Controle de entradas, saídas e ajustes com histórico completo por produto.')
 @section('content')
@@ -20,7 +19,6 @@
       </select>
       <button class="bulk-apply" type="button" data-bulk-apply disabled>Aplicar</button>
     </div>
-    <span class="selection-count" data-selection-count hidden></span>
   </div>
   @if($minimumStockAlerts && $lowStockCount>0)
     <div class="stock-alert-chip" data-tooltip="{{ $lowStockCount }} produto(s) no estoque mínimo">
