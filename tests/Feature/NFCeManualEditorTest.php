@@ -36,8 +36,8 @@ final class NFCeManualEditorTest extends TestCase
         AppSetting::put('operations','auto_finance_sale',true);
         CompanySetting::query()->create(['state'=>'BA','crt'=>'1']);
 
-        PaymentMethod::query()->create([
-            'code'=>'cash','name'=>'Dinheiro','kind'=>'cash',
+        PaymentMethod::query()->updateOrCreate(['code'=>'cash'],[
+            'name'=>'Dinheiro','kind'=>'cash',
             'is_active'=>true,'pdv_enabled'=>true,'sort_order'=>1,
         ]);
         return Product::query()->create([
