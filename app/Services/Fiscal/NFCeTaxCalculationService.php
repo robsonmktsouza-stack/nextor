@@ -91,8 +91,8 @@ final class NFCeTaxCalculationService
             throw new RuntimeException("CFOP {$cfop} não contemplado para ICMS CST {$cst} na NFC-e.");
         }
         $mod = (string)($tax['mod_bc'] ?? '');
-        if (!in_array($mod, ['0','1','2','3'], true)) {
-            throw new RuntimeException('Informe modalidade de BC do ICMS para regime normal.');
+        if ($mod !== '3') {
+            throw new RuntimeException('CST normal exige modalidade de base 3 (valor da operação); outras modalidades ainda não foram calculadas.');
         }
         $quantity = $this->decimal($item['quantity'] ?? null, 'Quantidade');
         $unit = $this->decimal($item['unit_price'] ?? null, 'Preço unitário');
@@ -103,6 +103,10 @@ final class NFCeTaxCalculationService
         }
         $rate = $this->rate($tax, 'icms_rate');
         $fields = ['orig'=>$origin, 'CST'=>$cst, 'modBC'=>$mod];
+        if ($cst === '00' && isset($tax['base_reduction_rate'])
+            && (float)$tax['base_reduction_rate'] > 0) {
+            throw new RuntimeException('ICMS CST 00 não utiliza redução da base de cálculo.');
+        }
         if ($cst === '20') {
             $reduction = $this->rate($tax, 'base_reduction_rate');
             $fields['pRedBC'] = $reduction;
