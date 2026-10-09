@@ -18,6 +18,7 @@ final class NFCeInutilizationController extends Controller
             'rows'=>NFCeInutilization::query()->latest('id')->paginate(25),
             'series'=>(int)AppSetting::value('nfce','series',1),
             'nextNumber'=>(int)AppSetting::value('nfce','next_number',1),
+            'environment'=>app(\App\Services\Fiscal\FiscalDocumentSettings::class)->environment('nfce'),
         ]);
     }
 
