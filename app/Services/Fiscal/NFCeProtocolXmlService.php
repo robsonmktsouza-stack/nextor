@@ -31,6 +31,14 @@ final class NFCeProtocolXmlService
         $this->assertValue($info, 'tpAmb', $job->environment === 'homologation' ? '2' : '1');
         $this->assertValue($info, 'serie', (string) (int) $job->series);
         $this->assertValue($info, 'nNF', (string) (int) $job->document_number);
+        $this->assertValue($info, 'tpEmis', $job->emission_mode==='offline'?'9':'1');
+        if ($job->emission_mode==='offline') {
+            $reason=trim((string)$info->getElementsByTagNameNS(self::NS,'xJust')->item(0)?->textContent);
+            $date=trim((string)$info->getElementsByTagNameNS(self::NS,'dhCont')->item(0)?->textContent);
+            if (mb_strlen($reason)<15 || !$date) {
+                throw new RuntimeException('XML assinado sem dados obrigatórios de contingência offline.');
+            }
+        }
 
         return $key;
     }
