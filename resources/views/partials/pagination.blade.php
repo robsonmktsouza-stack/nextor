@@ -1,6 +1,5 @@
 @if ($paginator->hasPages())
 <nav class="pager" aria-label="Paginação">
- <span>Exibindo {{ $paginator->firstItem() }}–{{ $paginator->lastItem() }} de {{ $paginator->total() }}</span>
  <div>
  @if($paginator->onFirstPage())<span class="pager-button disabled">Anterior</span>@else<a class="pager-button" href="{{ $paginator->previousPageUrl() }}">Anterior</a>@endif
  @foreach($elements as $element)
