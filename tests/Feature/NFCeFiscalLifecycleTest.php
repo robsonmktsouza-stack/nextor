@@ -152,4 +152,66 @@ final class NFCeFiscalLifecycleTest extends TestCase
         self::assertFalse($parser->inutilizationAccepted($data,'homologation'));
         self::assertFalse($parser->inutilizationAccepted($data,'production'));
     }
+
+    public function test_unapproved_production_blocks_cancellation_inutilization_and_offline(): void
+    {
+        $this->issuer();
+        AppSetting::put('nfce', 'environment', 'production');
+        AppSetting::put('nfce', 'advanced_operations_production_approved', false);
+
+        $authorized = FiscalDocumentJob::query()->create([
+            'document_type' => 'nfce', 'status' => 'authorized',
+            'environment' => 'production', 'series' => 1, 'document_number' => 10,
+            'access_key' => '29261039323356000100650010000000101234567890',
+            'protocol' => '129260000000001', 'authorized_at' => now(),
+        ]);
+        try {
+            app(NFCeCancellationService::class)->request(
+                $authorized, 'Cancelamento solicitado para testar o bloqueio.'
+            );
+            self::fail('Cancelamento de NFC-e em produção deve permanecer bloqueado.');
+        } catch (ValidationException) {
+            self::assertNull($authorized->fresh()->cancellation_status);
+            self::assertSame('authorized', $authorized->fresh()->status);
+        }
+
+        try {
+            app(NFCeInutilizationService::class)->request([
+                'year' => (int) now()->year, 'series' => 1,
+                'first_number' => 20, 'last_number' => 23,
+                'reason' => 'Lacuna artificial para teste de bloqueio.',
+            ], 1);
+            self::fail('Inutilização de NFC-e em produção deve permanecer bloqueada.');
+        } catch (ValidationException) {
+            self::assertSame(0, NFCeInutilization::query()->count());
+        }
+
+        $offline = FiscalDocumentJob::query()->create([
+            'document_type' => 'nfce', 'status' => 'prepared',
+            'environment' => 'production', 'emission_mode' => 'offline',
+            'series' => 1, 'document_number' => 11,
+        ]);
+        try {
+            app(\App\Services\Fiscal\NFCeOfflineService::class)->prepare($offline->id);
+            self::fail('Preparação offline em produção deve permanecer bloqueada.');
+        } catch (ValidationException) {
+            self::assertSame('prepared', $offline->fresh()->status);
+        }
+
+        $offline->update(['status' => 'offline_signed']);
+        try {
+            app(\App\Services\Fiscal\NFCeOfflineService::class)->transmit($offline->id);
+            self::fail('Transmissão offline em produção deve permanecer bloqueada.');
+        } catch (ValidationException) {
+            self::assertSame('offline_signed', $offline->fresh()->status);
+        }
+    }
+
+    public function test_homologation_gate_allows_test_environment_without_approval(): void
+    {
+        AppSetting::put('nfce', 'advanced_operations_production_approved', false);
+        app(\App\Services\Fiscal\NFCeProductionGate::class)->assertAllowed('homologation');
+        self::assertTrue(true);
+    }
+
 }
