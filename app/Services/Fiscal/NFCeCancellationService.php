@@ -20,6 +20,7 @@ final class NFCeCancellationService
         $reason=trim($reason);
         return DB::transaction(function () use($job,$reason) {
             $document=FiscalDocumentJob::query()->lockForUpdate()->findOrFail($job->id);
+            app(NFCeProductionGate::class)->assertAllowed((string)$document->environment);
             if ($document->document_type!=='nfce'||$document->status!=='authorized'
                 || preg_match('/^\d{44}$/',(string)$document->access_key)!==1
                 || preg_match('/^\d{15}$/',(string)$document->protocol)!==1) {
@@ -52,6 +53,7 @@ final class NFCeCancellationService
         if (!$lock->get())return;
         try {
             $job=FiscalDocumentJob::query()->findOrFail($id);
+            app(NFCeProductionGate::class)->assertAllowed((string)$job->environment);
             if ($job->document_type!=='nfce' || $job->status!=='authorized'
                 || $job->cancellation_status!=='pending')return;
 
