@@ -216,6 +216,52 @@
 .app-root .cms-table .btn-icon{box-shadow:var(--ui-inset),0 1px 1px rgba(21,44,65,.09)}
 .app-root .pager-button.active{color:#fff;background:linear-gradient(180deg,#4694ce,#2c7eb7);border-color:#246c9d}
 
+/* Unified LIST row density. NFC-e's 46px row is the reference.
+ * Apply only to read-only listing tables, not PDV baskets, editable sales,
+ * financial forms, document/item tables or intentionally large empty states.
+ * Height is a minimum: wrapped content stays visible instead of clipping. */
+.app-root{
+  --ui-list-header-height:38px;
+  --ui-list-row-height:46px;
+  --ui-list-cell-pad-y:6px;
+}
+.app-root.system-comfortable{
+  --ui-list-header-height:40px;
+  --ui-list-row-height:50px;
+  --ui-list-cell-pad-y:7px;
+}
+.app-root .table-scroll .cms-table thead th{
+  height:var(--ui-list-header-height);
+  padding-top:7px;
+  padding-bottom:7px;
+  line-height:1.25;
+  vertical-align:middle;
+}
+.app-root .table-scroll .cms-table tbody td:not(.empty-cell){
+  height:var(--ui-list-row-height);
+  padding-top:var(--ui-list-cell-pad-y);
+  padding-bottom:var(--ui-list-cell-pad-y);
+  line-height:1.3;
+  vertical-align:middle;
+}
+/* A name and optional secondary identifier occupy a compact two-line row. */
+.app-root .table-scroll .cms-table tbody .table-title{
+  line-height:1.25;
+}
+.app-root .table-scroll .cms-table tbody .table-subtitle{
+  margin-top:2px;
+  line-height:1.15;
+}
+.app-root .table-scroll .cms-table .select-cell :is(input[type="checkbox"],input[type="radio"]){
+  vertical-align:middle;
+}
+/* Keep detail tables and interactive form rows free to grow naturally. */
+.app-root .table-scroll .cms-table tbody td:has(> :is(input,select,textarea,.ui-select,.numeric-input)){
+  height:auto;
+}
+/* Empty states intentionally have larger vertical padding. */
+.app-root .table-scroll .cms-table tbody td.empty-cell{height:auto}
+
 /* Editor panels stay flat: stop multiplying gradients and dark blocks. */
 .app-root :is(.editor-panel,.settings-panel,.cms-card){min-width:0}
 .app-root :is(.editor-panel,.settings-panel){border-color:#d7e1e9}
