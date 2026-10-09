@@ -41,11 +41,16 @@ final class NFCeTaxCalculationService
             if (!in_array($cfop, self::RETAINED_ST_CFOPS, true)) {
                 throw new RuntimeException("CSOSN 500 exige CFOP de operação com ICMS-ST retido compatível.");
             }
+            $scope = (string) ($tax['st_retained_amount_scope'] ?? '');
+            if (!in_array($scope, ['unit', 'line'], true)) {
+                throw new RuntimeException('CSOSN 500: configure se os valores históricos de ICMS-ST são por unidade ou pelo item.');
+            }
+            $factor = $scope === 'unit' ? $this->decimal($item['quantity'] ?? null, 'Quantidade') : 1.0;
             $icms = [
                 'orig' => $origin,
                 'CSOSN' => $csosn,
-                'vBCSTRet' => $this->moneyField($tax, 'icms_st_retained_base'),
-                'vICMSSTRet' => $this->moneyField($tax, 'icms_st_retained_value'),
+                'vBCSTRet' => number_format(round((float)$this->moneyField($tax, 'icms_st_retained_base') * $factor, 2, PHP_ROUND_HALF_UP), 2, '.', ''),
+                'vICMSSTRet' => number_format(round((float)$this->moneyField($tax, 'icms_st_retained_value') * $factor, 2, PHP_ROUND_HALF_UP), 2, '.', ''),
             ];
             // Campos complementares de ICMS efetivo, quando exigidos pela UF,
             // não são presumidos. A validação por UF continua obrigatória.
