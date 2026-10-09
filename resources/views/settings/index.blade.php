@@ -171,7 +171,12 @@ foreach($primaryTabs as $key=>$item){
             @endforeach
           </select>
         </label>
-        <label class="field col-2"><span>CRT</span><input name="crt" value="{{ old('crt',$company->crt) }}" maxlength="4" placeholder="Ex.: 1"></label>
+        <label class="field col-2"><span>CRT</span><select name="crt">
+          <option value="">Selecione</option>
+          @foreach(['1'=>'Simples Nacional','2'=>'Simples - sublimite','3'=>'Regime normal','4'=>'MEI'] as $code=>$name)
+            <option value="{{ $code }}" @selected((string)old('crt',$company->crt)===(string)$code)>{{ $code }} — {{ $name }}</option>
+          @endforeach
+        </select></label>
         <label class="field col-3"><span>Alíquota Simples (%)</span><input type="number" step="0.0001" min="0" max="100" name="simple_rate" value="{{ old('simple_rate',$company->simple_rate) }}"></label>
         <label class="field col-3"><span>Atividade principal</span>
           <select name="main_activity">
@@ -592,6 +597,7 @@ foreach($primaryTabs as $key=>$item){
       </div>
       <div class="settings-switch-grid">
         <label class="settings-switch"><input type="checkbox" name="enabled" value="1" @checked($nfe['enabled'])><span><strong>NF-e habilitada</strong><small>Disponibiliza esta configuração ao emissor.</small></span></label>
+        <label class="settings-switch"><input type="checkbox" name="production_enabled" value="1" @checked($nfe['production_enabled'])><span><strong>Permitir emissão em produção</strong></span></label>
         <label class="settings-switch"><input type="checkbox" name="auto_from_sale" value="1" @checked($nfe['auto_from_sale'])><span><strong>Preparar NF-e após venda</strong><small>Preferência para integração venda → nota.</small></span></label>
         <label class="settings-switch"><input type="checkbox" name="send_email" value="1" @checked($nfe['send_email'])><span><strong>Enviar ao cliente</strong><small>Preferência de envio do XML/DANFE após autorização.</small></span></label>
         <label class="settings-switch"><input type="checkbox" name="print_danfe" value="1" @checked($nfe['print_danfe'])><span><strong>Imprimir DANFE</strong><small>Preferência padrão após autorização.</small></span></label>
@@ -618,6 +624,7 @@ foreach($primaryTabs as $key=>$item){
       </div>
       <div class="settings-switch-grid">
         <label class="settings-switch"><input type="checkbox" name="enabled" value="1" @checked($nfce['enabled'])><span><strong>NFC-e habilitada</strong><small>Disponibiliza esta configuração ao emissor.</small></span></label>
+        <label class="settings-switch"><input type="checkbox" name="production_enabled" value="1" @checked($nfce['production_enabled'])><span><strong>Permitir emissão em produção</strong></span></label>
         <label class="settings-switch"><input type="checkbox" name="auto_from_pdv" value="1" @checked($nfce['auto_from_pdv'])><span><strong>Transmitir NFC-e automaticamente pelo PDV</strong><small>Desative para revisar a nota e emitir manualmente após a venda. A opção de emissão automática também precisa estar desativada nas configurações do PDV.</small></span></label>
         <label class="settings-switch"><input type="checkbox" name="print_danfe" value="1" @checked($nfce['print_danfe'])><span><strong>Imprimir DANFE NFC-e</strong><small>Preferência de impressão do comprovante.</small></span></label>
       </div>
@@ -646,6 +653,7 @@ foreach($primaryTabs as $key=>$item){
       </div>
       <div class="settings-switch-grid">
         <label class="settings-switch"><input type="checkbox" name="enabled" value="1" @checked($nfse['enabled'])><span><strong>NFS-e habilitada</strong><small>Disponibiliza os parâmetros ao emissor de serviços.</small></span></label>
+        <label class="settings-switch"><input type="checkbox" name="production_enabled" value="1" @checked($nfse['production_enabled'])><span><strong>Permitir emissão em produção</strong></span></label>
         <label class="settings-switch"><input type="checkbox" name="auto_from_sale" value="1" @checked($nfse['auto_from_sale'])><span><strong>Integrar com vendas de serviço</strong><small>Preferência para preparar NFS-e a partir da venda.</small></span></label>
         <label class="settings-switch"><input type="checkbox" name="withhold_iss_default" value="1" @checked($nfse['withhold_iss_default'])><span><strong>ISS retido por padrão</strong><small>Preferência inicial; o documento ainda deve respeitar a operação real.</small></span></label>
       </div>
@@ -669,7 +677,7 @@ foreach($primaryTabs as $key=>$item){
           <label class="field col-2"><span>RNTRC</span><input name="rntrc" value="{{ $cte['rntrc'] }}"></label>
           <label class="field col-2"><span>CFOP padrão</span><input name="default_cfop" value="{{ $cte['default_cfop'] }}"></label>
         </div>
-        <label class="settings-switch settings-switch-single"><input type="checkbox" name="cte_enabled" value="1" @checked($cte['cte_enabled'])><span><strong>CT-e habilitado</strong><small>Disponibiliza estes parâmetros ao módulo de transporte.</small></span></label>
+        <div class="settings-switch-grid"><label class="settings-switch"><input type="checkbox" name="cte_enabled" value="1" @checked($cte['cte_enabled'])><span><strong>CT-e habilitado</strong></span></label><label class="settings-switch"><input type="checkbox" name="cte_production_enabled" value="1" @checked($cte['cte_production_enabled'])><span><strong>Permitir produção</strong></span></label></div>
       </div>
       <div class="settings-subsection"><h3>MDF-e</h3>
         <div class="editor-grid cols-12 settings-grid">
@@ -677,7 +685,7 @@ foreach($primaryTabs as $key=>$item){
           <label class="field col-2"><span>Série</span><input type="number" min="0" max="999" name="mdfe_series" value="{{ $cte['mdfe_series'] }}"></label>
           <label class="field col-3"><span>Próximo número</span><input type="number" min="1" name="mdfe_next_number" value="{{ $cte['mdfe_next_number'] }}"></label>
         </div>
-        <label class="settings-switch settings-switch-single"><input type="checkbox" name="mdfe_enabled" value="1" @checked($cte['mdfe_enabled'])><span><strong>MDF-e habilitado</strong><small>Disponibiliza estes parâmetros ao módulo de manifesto.</small></span></label>
+        <div class="settings-switch-grid"><label class="settings-switch"><input type="checkbox" name="mdfe_enabled" value="1" @checked($cte['mdfe_enabled'])><span><strong>MDF-e habilitado</strong></span></label><label class="settings-switch"><input type="checkbox" name="mdfe_production_enabled" value="1" @checked($cte['mdfe_production_enabled'])><span><strong>Permitir produção</strong></span></label></div>
       </div>
     </section>
   
