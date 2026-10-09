@@ -86,6 +86,8 @@ class NFCePdfService
             $acbr->setConfig('DANFENFCe','TipoRelatorioBobina',$paper==='a4' ? '2' : '0');
             $acbr->setConfig('DANFENFCe','ImprimeEmUmaLinha','0');
             $acbr->setConfig('DANFENFCe','ImprimeEmDuasLinhas','1');
+            $acbr->setConfig('DANFENFCe','FonteLinhaItem.Name','Arial');
+            $acbr->setConfig('DANFENFCe','FonteLinhaItem.Size','10');
             $acbr->setConfig('DANFENFCe','ImprimeQRCodeLateral','0');
             $acbr->setConfig('DANFENFCe','EspacoFinal','0');
             $acbr->setConfig('DANFENFCe','MargemEsquerda','0.6');
