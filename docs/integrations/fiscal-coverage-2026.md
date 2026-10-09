@@ -73,3 +73,14 @@ A opção de liberação é técnica e não decide classificação tributária.
 Os testes de CI executam tanto a suíte fiscal quanto todo o projeto Laravel.
 Nenhum teste simula autorização efetiva da SEFAZ ou a presença da DLL ACBr
 instalada no ambiente do cliente.
+
+
+## CSOSN 500 — valores de retenção
+
+No produto, informar vBCSTRet e vICMSSTRet previamente apurados, além de
+"Valores ICMS-ST retido" = "Por unidade" ou "Total do item". Por unidade,
+o cálculo multiplica o valor informado pela quantidade vendida. Por linha,
+utiliza o total informado como já correspondente à linha fiscal.
+Sem essa indicação, bloquear a nota, evitando ST retido incorreto quando a
+venda tem múltiplas unidades. Valores e aplicabilidade continuam sendo
+responsabilidade de quem parametriza e dependem das exigências da UF.
