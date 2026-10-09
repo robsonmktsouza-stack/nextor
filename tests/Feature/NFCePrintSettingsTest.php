@@ -83,21 +83,24 @@ final class NFCePrintSettingsTest extends TestCase
             ->assertSessionHasErrors('nfce_paper');
     }
 
-    public function test_nfce_uses_saved_paper_and_opens_native_browser_print_without_toolbar(): void
+    public function test_nfce_opens_native_chrome_pdf_viewer_not_an_html_print_dialog(): void
     {
         Storage::fake('local');
         $this->actingAs($this->admin());
         $job=$this->document();
+        $renderer=\Mockery::mock(\App\Services\Fiscal\NFCePdfService::class);
+        $renderer->shouldReceive('render')->times(3)->andReturn('%PDF-1.7'."\n".'TEST PDF');
+        $this->app->instance(\App\Services\Fiscal\NFCePdfService::class,$renderer);
 
         foreach (['58','80','a4'] as $paper) {
             AppSetting::put('printing','nfce_paper',$paper);
             $this->get(route('fiscal.nfce.danfe',['fiscalDocumentJob'=>$job,'paper'=>'58']))
                 ->assertOk()
-                ->assertSee('data-paper="'.$paper.'"',false)
-                ->assertSee('window.print()',false)
-                ->assertDontSee('danfe-tools',false)
-                ->assertDontSee('printDanfe',false)
-                ->assertDontSee('80 mm (72 mm úteis)');
+                ->assertHeader('Content-Type','application/pdf')
+                ->assertHeader('Content-Disposition','inline; filename="DANFE-NFCe-1-1.pdf"')
+                ->assertSee('%PDF-1.7',false)
+                ->assertDontSee('window.print()',false)
+                ->assertDontSee('danfe-tools',false);
         }
     }
 
@@ -108,7 +111,9 @@ final class NFCePrintSettingsTest extends TestCase
         $job=$this->document();
         AppSetting::put('pdv','receipt_width','58');
 
-        $this->get(route('fiscal.nfce.danfe',$job))
-            ->assertOk()->assertSee('data-paper="58"',false);
+        self::assertSame('58',app(\App\Services\Fiscal\NFCePdfService::class)->paper());
+
+        AppSetting::put('printing','nfce_paper','a4');
+        self::assertSame('a4',app(\App\Services\Fiscal\NFCePdfService::class)->paper());
     }
 }
