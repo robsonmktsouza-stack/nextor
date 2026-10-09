@@ -27,7 +27,7 @@ class NFCePdfService
     {
         $paper=$this->paper();
         $digest=substr(hash('sha256',$authorizedXml),0,20);
-        return 'fiscal/nfce/'.$document->id.'/danfe-'.$paper.'-'.$digest.'.pdf';
+        return 'fiscal/nfce/'.$document->id.'/danfe-v2-'.$paper.'-'.$digest.'.pdf';
     }
 
     public function existingPath(FiscalDocumentJob $document, string $authorizedXml): ?string
@@ -84,9 +84,18 @@ class NFCePdfService
             $acbr->setConfig('DANFE','MostraPreview','0');
             $acbr->setConfig('DANFE','MostraSetup','0');
             $acbr->setConfig('DANFENFCe','TipoRelatorioBobina',$paper==='a4' ? '2' : '0');
+            $acbr->setConfig('DANFENFCe','ImprimeEmUmaLinha','0');
+            $acbr->setConfig('DANFENFCe','ImprimeEmDuasLinhas','1');
+            $acbr->setConfig('DANFENFCe','ImprimeQRCodeLateral','0');
+            $acbr->setConfig('DANFENFCe','EspacoFinal','0');
+            $acbr->setConfig('DANFENFCe','MargemEsquerda','0.6');
+            $acbr->setConfig('DANFENFCe','MargemDireita','0.4');
+            $acbr->setConfig('DANFENFCe','MargemSuperior','0.4');
+            $acbr->setConfig('DANFENFCe','MargemInferior','0.01');
             if ($paper!=='a4') {
-                // ACBr uses report widths around 280-400, not paper mm.
-                $acbr->setConfig('DANFENFCe','LarguraBobina',$paper==='58' ? '280' : '400');
+                // Valores do componente Fortes: 302 (bobina 80 mm),
+                // 200 (bobina 58 mm). Não são milímetros diretos.
+                $acbr->setConfig('DANFENFCe','LarguraBobina',$paper==='58' ? '200' : '302');
             }
             $acbr->loadXml($authorizedXml);
             return $acbr->savePdf();
