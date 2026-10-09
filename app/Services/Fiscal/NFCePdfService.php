@@ -118,7 +118,7 @@ class NFCePdfService
                 $this->fileUrl($input),
             ];
             if (PHP_OS_FAMILY!=='Windows' && function_exists('posix_geteuid') && posix_geteuid()===0) {
-                $command[]='--no-sandbox';
+                array_splice($command,-1,0,['--no-sandbox']);
             }
 
             $descriptors=[
@@ -136,6 +136,7 @@ class NFCePdfService
             stream_set_blocking($pipes[2],false);
             $logs='';
             $timedOut=false;
+            $start=microtime(true);
 
             do {
                 $status=proc_get_status($process);
@@ -145,7 +146,7 @@ class NFCePdfService
                 if (!$status['running']) {
                     break;
                 }
-                if (microtime(true)-(float)($start??=microtime(true))>35) {
+                if (microtime(true)-$start>35) {
                     $timedOut=true;
                     proc_terminate($process);
                     break;
@@ -201,10 +202,13 @@ class NFCePdfService
 
     private function fileUrl(string $path): string
     {
-        $path=str_replace('\\','/',$path);
-        $parts=explode('/',$path);
-        $escaped=implode('/',array_map('rawurlencode',$parts));
-        return str_starts_with($path,'/') ? 'file://'.$escaped : 'file:///'.$escaped;
+        $normalized=str_replace('\\','/',$path);
+        $parts=explode('/',$normalized);
+        $encoded=implode('/',array_map(static function (string $part): string {
+            // Windows file:///C:/... must preserve the drive colon.
+            return preg_match('/^[A-Za-z]:$/',$part) ? $part : rawurlencode($part);
+        },$parts));
+        return str_starts_with($normalized,'/') ? 'file://'.$encoded : 'file:///'.$encoded;
     }
 
     private function removeDirectory(string $path): void
