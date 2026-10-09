@@ -1,5 +1,4 @@
 @extends('layouts.app')
-@section('titleMeta'){{ $services->total() }} {{ $services->total() === 1 ? 'registro' : 'registros' }}@endsection
 @section('title','Serviços')
 
 @section('content')
@@ -42,7 +41,6 @@
         <button class="bulk-apply" type="button" data-bulk-apply disabled>Aplicar</button>
       </div>
 
-      <span class="selection-count" data-selection-count hidden></span>
 
       <form id="services-duplicate" method="post" action="{{ route('services.bulk-duplicate') }}" hidden>@csrf</form>
       <form id="services-active" method="post" action="{{ route('services.bulk-status') }}" hidden>@csrf<input type="hidden" name="status" value="active"></form>
