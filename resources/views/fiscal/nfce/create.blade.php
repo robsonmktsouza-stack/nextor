@@ -53,15 +53,15 @@
           </div>
         </div>
 
-        <div class="editor-tabs nfe-editor-tabs" data-nfce-tabs>
-          <button type="button" class="editor-tab active" data-nfce-tab="general">Dados gerais</button>
-          <button type="button" class="editor-tab" data-nfce-tab="consumer">Consumidor</button>
-          <button type="button" class="editor-tab" data-nfce-tab="products">Produtos</button>
-          <button type="button" class="editor-tab" data-nfce-tab="payment">Pagamento</button>
-          <button type="button" class="editor-tab" data-nfce-tab="summary">Resumo</button>
+        <div class="editor-tabs nfe-editor-tabs" role="tablist" aria-label="Seções da NFC-e" data-nfce-tabs>
+          <button type="button" role="tab" id="nfceTab-general" aria-controls="nfcePanel-general" aria-selected="true" tabindex="0" class="editor-tab active" data-nfce-tab="general">Dados gerais</button>
+          <button type="button" role="tab" id="nfceTab-consumer" aria-controls="nfcePanel-consumer" aria-selected="false" tabindex="-1" class="editor-tab" data-nfce-tab="consumer">Consumidor</button>
+          <button type="button" role="tab" id="nfceTab-products" aria-controls="nfcePanel-products" aria-selected="false" tabindex="-1" class="editor-tab" data-nfce-tab="products">Produtos</button>
+          <button type="button" role="tab" id="nfceTab-payment" aria-controls="nfcePanel-payment" aria-selected="false" tabindex="-1" class="editor-tab" data-nfce-tab="payment">Pagamento</button>
+          <button type="button" role="tab" id="nfceTab-summary" aria-controls="nfcePanel-summary" aria-selected="false" tabindex="-1" class="editor-tab" data-nfce-tab="summary">Resumo</button>
         </div>
 
-        <section class="editor-tab-panel active" data-nfce-panel="general">
+        <section class="editor-tab-panel active" id="nfcePanel-general" role="tabpanel" aria-labelledby="nfceTab-general" data-nfce-panel="general">
           <div class="nfe-general-card">
             <div class="nfe-section-title"><h3>Dados gerais</h3></div>
             <div class="editor-grid cols-12">
@@ -102,7 +102,7 @@
           </div>
         </section>
 
-        <section class="editor-tab-panel" data-nfce-panel="consumer">
+        <section class="editor-tab-panel" id="nfcePanel-consumer" role="tabpanel" aria-labelledby="nfceTab-consumer" data-nfce-panel="consumer" hidden>
           <div class="nfe-general-card">
             <div class="nfe-section-title"><h3>Consumidor</h3></div>
             <div class="editor-grid cols-12">
@@ -126,7 +126,7 @@
           </div>
         </section>
 
-        <section class="editor-tab-panel" data-nfce-panel="products">
+        <section class="editor-tab-panel" id="nfcePanel-products" role="tabpanel" aria-labelledby="nfceTab-products" data-nfce-panel="products" hidden>
           <div class="nfe-general-card">
             <div class="nfe-section-title">
               <h3>Produtos</h3>
@@ -146,7 +146,7 @@
           </div>
         </section>
 
-        <section class="editor-tab-panel" data-nfce-panel="payment">
+        <section class="editor-tab-panel" id="nfcePanel-payment" role="tabpanel" aria-labelledby="nfceTab-payment" data-nfce-panel="payment" hidden>
           <div class="nfe-general-card">
             <div class="nfe-section-title">
               <h3>Pagamento</h3>
@@ -164,7 +164,7 @@
           </div>
         </section>
 
-        <section class="editor-tab-panel" data-nfce-panel="summary">
+        <section class="editor-tab-panel" id="nfcePanel-summary" role="tabpanel" aria-labelledby="nfceTab-summary" data-nfce-panel="summary" hidden>
           <div class="nfe-general-card">
             <div class="nfe-section-title"><h3>Resumo da NFC-e</h3></div>
             <div class="nfce-summary-grid">
