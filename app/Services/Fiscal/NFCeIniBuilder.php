@@ -116,7 +116,10 @@ final class NFCeIniBuilder
             $add('Produto'.$i, [
                 'cProd' => ($item['sku'] ?? null) ?: 'PROD-'.$item['product_id'],
                 'cEAN' => $digits($item['gtin'] ?? '') ?: 'SEM GTIN',
-                'xProd' => $job->environment === 'homologation'
+                // A SEFAZ exige a descrição especial somente no primeiro
+                // item da NFC-e em homologação (regra I04-10 / rejeição 373).
+                // Os demais itens mantêm o nome real do produto no XML.
+                'xProd' => $job->environment === 'homologation' && $index === 0
                     ? 'NOTA FISCAL EMITIDA EM AMBIENTE DE HOMOLOGACAO - SEM VALOR FISCAL'
                     : $item['name'],
                 'NCM' => $digits($item['ncm'] ?? ''),
