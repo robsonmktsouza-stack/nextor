@@ -181,6 +181,7 @@
   let loadingCount=0;
   let loadingGeneration=0;
   let loadingTimer=null;
+  let loadingHideTimer=null;
   let loadingWatchdogTimer=null;
   let navigationLoadingTimer=null;
   let navigationDismissTimer=null;
@@ -213,6 +214,7 @@
     loadingGeneration++;
     loadingCount=0;
     if(loadingTimer){clearTimeout(loadingTimer);loadingTimer=null;}
+    if(loadingHideTimer){clearTimeout(loadingHideTimer);loadingHideTimer=null;}
     if(loadingWatchdogTimer){clearTimeout(loadingWatchdogTimer);loadingWatchdogTimer=null;}
     clearNavigationLoading();
     loadingOverlay.classList.remove('show','navigation-only');
@@ -221,6 +223,7 @@
   };
   const beginLoading=(message='Carregando...')=>{
     clearNavigationLoading();
+    if(loadingHideTimer){clearTimeout(loadingHideTimer);loadingHideTimer=null;}
     if(loadingCount===0){
       if(loadingWatchdogTimer) clearTimeout(loadingWatchdogTimer);
       loadingWatchdogTimer=setTimeout(()=>{
@@ -235,7 +238,10 @@
     const text=loadingOverlay.querySelector('.nextor-loading-text');
     if(text) text.textContent=message;
     loadingOverlay.classList.remove('navigation-only');
-    if(!loadingTimer && loadingOverlay.hidden){
+    if(!loadingOverlay.hidden){
+      setLoadingState(true);
+      requestAnimationFrame(()=>{if(loadingCount>0)loadingOverlay.classList.add('show');});
+    }else if(!loadingTimer){
       loadingTimer=setTimeout(()=>{
         loadingTimer=null;
         if(loadingCount>0){
@@ -255,7 +261,11 @@
     if(loadingWatchdogTimer){clearTimeout(loadingWatchdogTimer);loadingWatchdogTimer=null;}
     loadingOverlay.classList.remove('show','navigation-only');
     setLoadingState(false);
-    setTimeout(()=>{if(loadingCount===0)loadingOverlay.hidden=true;},40);
+    if(loadingHideTimer)clearTimeout(loadingHideTimer);
+    loadingHideTimer=setTimeout(()=>{
+      loadingHideTimer=null;
+      if(loadingCount===0)loadingOverlay.hidden=true;
+    },40);
   };
   const beginNavigationLoading=()=>{
     clearNavigationLoading();
