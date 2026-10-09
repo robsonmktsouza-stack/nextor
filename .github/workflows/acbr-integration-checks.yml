@@ -21,6 +21,7 @@ jobs:
             app/Services/Fiscal/ACBr/ACBrNFeService.php \
             app/Services/Fiscal/NFCeIniBuilder.php \
             app/Services/Fiscal/NFCeTaxCalculationService.php \
+            app/Services/Fiscal/FiscalDocumentSettings.php \
             app/Services/Fiscal/NFCeProductionProfilePolicy.php \
             app/Services/Fiscal/NFSeTaxRuleApplicationService.php \
             app/Services/Fiscal/NFCePreflightService.php \
@@ -70,6 +71,7 @@ jobs:
             tests/Feature/FiscalTaxGroupPersistenceTest.php \
             tests/Feature/FiscalTaxPresetMigrationTest.php \
             tests/Feature/FiscalServicePresetTest.php \
+            tests/Feature/FiscalDocumentSettingsTest.php \
             tests/Feature/NFSeTaxRuleApplicationServiceTest.php \
             tests/Feature/FiscalFcpRulePersistenceTest.php \
             tests/Unit/NFCeDanfeServiceTest.php \
