@@ -326,6 +326,16 @@
       target.classList.remove('has-icon');
       target.textContent=option?.textContent||'';
     }
+    if(target.classList.contains('ui-select-option')){
+      const subtitle=option?.dataset?.subtitle||option?.dataset?.subtext||option?.dataset?.description||'';
+      if(subtitle){
+        const small=document.createElement('small');
+        small.className='ui-select-option-subtitle';
+        small.textContent=subtitle;
+        target.appendChild(small);
+        target.classList.add('has-subtitle');
+      }
+    }
   };
 
   let uiSelectSeq=0;
@@ -337,24 +347,35 @@
       const menu=wrapper.querySelector('.ui-select-menu');
       if(trigger) trigger.setAttribute('aria-expanded','false');
       if(menu) menu.hidden=true;
+      wrapper._nextorReset?.();
     });
   };
   const enhanceSelect=select=>{
     if(!select || select.dataset.uiSelectReady==='1' || select.multiple) return;
     select.dataset.uiSelectReady='1';
     select.classList.add('ui-select-native');
+    const searchable=!select.hasAttribute('data-no-search') &&
+      (select.hasAttribute('data-searchable') ||
+       [...select.options].filter(option=>!option.disabled && option.value!=='').length>=4);
 
     const wrapper=document.createElement('div');
-    wrapper.className='ui-select';
-    const trigger=document.createElement('button');
-    trigger.type='button';
+    wrapper.className='ui-select'+(searchable?' ui-searchable':'');
+    const trigger=document.createElement(searchable?'input':'button');
+    trigger.type=searchable?'search':'button';
+    if(searchable){
+      trigger.setAttribute('role','combobox');
+      trigger.setAttribute('aria-autocomplete','list');
+      trigger.setAttribute('autocomplete','off');
+      trigger.setAttribute('spellcheck','false');
+      trigger.setAttribute('placeholder','Digite para buscar...');
+    }
     trigger.className='ui-select-trigger';
     trigger.setAttribute('aria-haspopup','listbox');
     trigger.setAttribute('aria-expanded','false');
 
     const value=document.createElement('span');
     value.className='ui-select-value';
-    trigger.appendChild(value);
+    if(!searchable) trigger.appendChild(value);
 
     const menu=document.createElement('div');
     menu.className='ui-select-menu';
@@ -368,55 +389,17 @@
     wrapper.appendChild(menu);
 
     let optionsBuilt=false;
-    const searchable=select.hasAttribute('data-searchable');
-    let searchBox=null;
-    const filterOptions=()=>{
-      if(!searchBox) return;
-      const q=searchBox.value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').trim();
+    const normalize=text=>String(text||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').trim();
+    const filterOptions=(query='')=>{
+      if(!searchable) return;
+      const q=normalize(query);
       menu.querySelectorAll('.ui-select-option').forEach(item=>{
-        const label=item.textContent.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR');
+        const label=normalize(item.dataset.searchValue||item.textContent);
         item.hidden=!!q && !label.includes(q);
       });
     };
     const buildOptions=()=>{
       menu.innerHTML='';
-      searchBox=null;
-      if(searchable){
-        searchBox=document.createElement('input');
-        searchBox.type='search';
-        searchBox.className='ui-select-search';
-        searchBox.placeholder='Pesquisar código ou descrição...';
-        searchBox.setAttribute('aria-label','Pesquisar código ou descrição');
-        searchBox.autocomplete='off';
-        searchBox.addEventListener('input',filterOptions);
-        searchBox.addEventListener('keydown',event=>{
-          if(event.key==='Escape'){
-            event.preventDefault();closeUiSelects();trigger.focus();
-          }
-          if(event.key==='Enter'){
-            event.preventDefault();
-            menu.querySelector('.ui-select-option:not([hidden]):not(:disabled)')?.click();
-          }
-          if(event.key==='ArrowDown'){
-            event.preventDefault();
-            menu.querySelector('.ui-select-option:not([hidden]):not(:disabled)')?.focus();
-          }
-          event.stopPropagation();
-        });
-        menu.addEventListener('keydown',event=>{
-          if(!event.target.classList.contains('ui-select-option'))return;
-          if(event.key==='Escape'){
-            event.preventDefault();closeUiSelects();trigger.focus();return;
-          }
-          if(!['ArrowDown','ArrowUp'].includes(event.key))return;
-          event.preventDefault();
-          const list=[...menu.querySelectorAll('.ui-select-option:not([hidden]):not(:disabled)')];
-          const current=list.indexOf(event.target);
-          const next=event.key==='ArrowDown'?Math.min(list.length-1,current+1):Math.max(0,current-1);
-          list[next]?.focus();
-        });
-        menu.appendChild(searchBox);
-      }
       [...select.options].forEach(option=>{
         const item=document.createElement('button');
         item.type='button';
@@ -424,6 +407,7 @@
         item.setAttribute('role','option');
         item.dataset.value=option.value;
         setUiSelectOptionContent(item,option);
+        item.dataset.searchValue=[option.textContent,option.value,option.dataset.subtitle,option.dataset.subtext,option.dataset.description,option.dataset.search].filter(Boolean).join(' ');
         item.disabled=option.disabled;
         if(option.selected){
           item.classList.add('selected');
@@ -445,7 +429,10 @@
     const ensureOptions=()=>{if(!optionsBuilt) buildOptions();};
     const sync=()=>{
       const option=select.options[select.selectedIndex];
-      if(option) setUiSelectOptionContent(value,option);
+      if(searchable){
+        trigger.value=option?.textContent.trim()||'';
+        trigger.placeholder=select.getAttribute('placeholder') || 'Digite para buscar...';
+      }else if(option) setUiSelectOptionContent(value,option);
       else value.textContent=select.getAttribute('placeholder') || 'Selecione';
       trigger.disabled=select.disabled;
       wrapper.classList.toggle('disabled',select.disabled);
@@ -454,6 +441,9 @@
         item.classList.toggle('selected',active);
         item.setAttribute('aria-selected',active?'true':'false');
       });
+    };
+    wrapper._nextorReset=()=>{
+      if(searchable) trigger.value=select.options[select.selectedIndex]?.textContent.trim()||'';
     };
     // A largura do popup nunca deve depender diretamente do comprimento
     // do texto da opção: no estoque isso ultrapassava o cartão e a tela.
@@ -496,8 +486,8 @@
       menu.hidden=!willOpen;
       if(willOpen){
         ensureOptions();
-        if(searchBox){searchBox.value='';filterOptions();}
         sync();
+        filterOptions('');
         positionMenu();
         // Scroll only the popup, never the whole browser window.
         const selected=menu.querySelector('.ui-select-option.selected:not(:disabled)');
@@ -507,35 +497,72 @@
           if(item.bottom>box.bottom) menu.scrollTop+=item.bottom-box.bottom+8;
           if(item.top<box.top) menu.scrollTop-=box.top-item.top+8;
         }
-        if(searchBox)searchBox.focus({preventScroll:true});
+        if(searchable)trigger.focus({preventScroll:true});
       }
     };
 
-    trigger.addEventListener('click',open);
-    trigger.addEventListener('keydown',e=>{
-      if(['Enter',' ','ArrowDown','ArrowUp'].includes(e.key)) ensureOptions();
-      const items=[...menu.querySelectorAll('.ui-select-option:not(:disabled)')];
-      if(!items.length) return;
-      if(e.key==='Escape'){e.preventDefault();closeUiSelects();return;}
-      if(e.key==='Enter'||e.key===' '){
-        e.preventDefault();
-        const focused=menu.querySelector('.ui-select-option.focused');
-        if(wrapper.classList.contains('open') && focused){focused.click();return;}
-        open();return;
-      }
-      if(e.key==='ArrowDown'||e.key==='ArrowUp'){
-        e.preventDefault();
+    trigger.addEventListener('click',()=>{
+      if(!wrapper.classList.contains('open')){
+        open();
+        if(searchable) trigger.select();
+      }else if(!searchable) open();
+    });
+    if(searchable){
+      trigger.addEventListener('input',()=>{
+        const query=trigger.value;
         if(!wrapper.classList.contains('open')) open();
-        const current=menu.querySelector('.ui-select-option.focused') || menu.querySelector('.ui-select-option.selected');
-        let index=Math.max(0,items.indexOf(current));
-        index=e.key==='ArrowDown'?Math.min(items.length-1,index+1):Math.max(0,index-1);
-        menu.querySelectorAll('.ui-select-option').forEach(x=>x.classList.remove('focused'));
-        items[index].classList.add('focused');
-        const box=menu.getBoundingClientRect();
-        const target=items[index].getBoundingClientRect();
-        if(target.bottom>box.bottom) menu.scrollTop+=target.bottom-box.bottom+6;
-        if(target.top<box.top) menu.scrollTop-=box.top-target.top+6;
+        trigger.value=query;
+        filterOptions(query);
+        menu.querySelectorAll('.ui-select-option.focused').forEach(item=>item.classList.remove('focused'));
+        positionMenu();
+      });
+    }
+    trigger.addEventListener('keydown',event=>{
+      const key=event.key;
+      if(key==='Escape'){
+        if(wrapper.classList.contains('open')){
+          event.preventDefault();closeUiSelects();
+        }
+        return;
       }
+      if(key==='Tab'){closeUiSelects();return;}
+      if(!['Enter',' ','ArrowDown','ArrowUp'].includes(key))return;
+      if(searchable && key===' ')return;
+      event.preventDefault();
+      if(!wrapper.classList.contains('open')){
+        open();
+        if(searchable && key==='Enter'){trigger.select();return;}
+      }
+      const items=[...menu.querySelectorAll('.ui-select-option:not([hidden]):not(:disabled)')];
+      if(!items.length)return;
+      if(key==='Enter'||(!searchable&&key===' ')){
+        (menu.querySelector('.ui-select-option.focused:not([hidden])')||items[0]).click();
+        return;
+      }
+      const current=menu.querySelector('.ui-select-option.focused:not([hidden])');
+      const currentIndex=items.indexOf(current);
+      const index=key==='ArrowDown'
+        ?Math.min(items.length-1,currentIndex+1)
+        :Math.max(0,currentIndex===-1?0:currentIndex-1);
+      items.forEach(item=>item.classList.remove('focused'));
+      items[index].classList.add('focused');
+      const box=menu.getBoundingClientRect();
+      const rect=items[index].getBoundingClientRect();
+      if(rect.bottom>box.bottom)menu.scrollTop+=rect.bottom-box.bottom+6;
+      if(rect.top<box.top)menu.scrollTop-=box.top-rect.top+6;
+    });
+    menu.addEventListener('keydown',event=>{
+      if(!event.target.classList.contains('ui-select-option'))return;
+      if(event.key==='Escape'){
+        event.preventDefault();closeUiSelects();trigger.focus();return;
+      }
+      if(event.key==='Enter'){event.preventDefault();event.target.click();return;}
+      if(!['ArrowDown','ArrowUp'].includes(event.key))return;
+      event.preventDefault();
+      const list=[...menu.querySelectorAll('.ui-select-option:not([hidden]):not(:disabled)')];
+      const current=list.indexOf(event.target);
+      const next=event.key==='ArrowDown'?Math.min(list.length-1,current+1):Math.max(0,current-1);
+      list[next]?.focus({preventScroll:true});
     });
     select.addEventListener('change',sync);
     select.addEventListener('invalid',()=>{
@@ -571,6 +598,17 @@
   });
   document.querySelectorAll('select').forEach(enhanceSelect);
   window.NextorEnhanceSelect=enhanceSelect;
+  // Includes select fields created dynamically by sales and NFC-e forms.
+  const dynamicSelectObserver=new MutationObserver(records=>{
+    const found=[];
+    records.forEach(record=>record.addedNodes.forEach(node=>{
+      if(node.nodeType!==1)return;
+      if(node.matches?.('select'))found.push(node);
+      node.querySelectorAll?.('select').forEach(select=>found.push(select));
+    }));
+    found.forEach(enhanceSelect);
+  });
+  dynamicSelectObserver.observe(document.body,{childList:true,subtree:true});
 
   // Campos numéricos e monetários padronizados do Nextor
   const numberIconSvg='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 6h10M10 12h10M10 18h10M4 6h1M4 12h1M4 18h1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
