@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\FiscalController;
 use App\Http\Controllers\NFCeManualController;
+use App\Http\Controllers\NFCeFiscalEventsController;
 use App\Http\Controllers\FiscalUtilitiesController;
 use App\Http\Controllers\FiscalCodeCatalogController;
 use App\Http\Controllers\FiscalTaxRuleController;
@@ -130,6 +131,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/fiscal/{fiscalDocumentJob}/refresh-nfce-fiscal-data',[FiscalController::class,'refreshNfceFiscalData'])->name('fiscal.nfce.refresh-data')->middleware('permission:fiscal');
     Route::post('/fiscal/{fiscalDocumentJob}/emit-nfce',[FiscalController::class,'issueNfce'])->name('fiscal.nfce.emit')->middleware('permission:fiscal');
     Route::post('/fiscal/{fiscalDocumentJob}/consult-nfce',[FiscalController::class,'consultNfce'])->name('fiscal.nfce.consult')->middleware('permission:fiscal');
+    Route::post('/fiscal/{fiscalDocumentJob}/cancel-nfce',[NFCeFiscalEventsController::class,'cancel'])->name('fiscal.nfce.cancel')->middleware('permission:fiscal');
     Route::get('/fiscal/{fiscalDocumentJob}/xml',[FiscalController::class,'downloadNfceXml'])->name('fiscal.nfce.xml')->middleware('permission:fiscal');
     Route::get('/fiscal/{fiscalDocumentJob}/danfe',NFCeDanfeController::class)->name('fiscal.nfce.danfe')->middleware('permission:fiscal');
     Route::post('/fiscal/{fiscalDocumentJob}/recover-nfce-xml',[FiscalController::class,'recoverNfceXml'])->name('fiscal.nfce.recover-xml')->middleware('permission:fiscal');
