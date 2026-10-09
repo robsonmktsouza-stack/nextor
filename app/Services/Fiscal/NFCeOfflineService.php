@@ -23,6 +23,7 @@ final class NFCeOfflineService
 {
     public function prepare(int $id): void
     {
+        app(NFCeProductionGate::class)->assertAllowed((string)FiscalDocumentJob::query()->findOrFail($id)->environment);
         $lock=Cache::lock('nextor:nfce:'.$id,240);
         if(!$lock->get())return;
         try{
@@ -85,6 +86,7 @@ final class NFCeOfflineService
 
     public function transmit(int $id): void
     {
+        app(NFCeProductionGate::class)->assertAllowed((string)FiscalDocumentJob::query()->findOrFail($id)->environment);
         $lock=Cache::lock('nextor:nfce:'.$id,300);
         if(!$lock->get())return;
         try{
