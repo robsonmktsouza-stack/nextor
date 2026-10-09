@@ -97,7 +97,7 @@ final class NFCeTaxCalculationServiceTest extends TestCase
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('icms_st_retained_base');
         (new NFCeTaxCalculationService())->calculate($this->item([
-            'cfop'=>'5405', 'icms_csosn'=>'500',
+            'cfop'=>'5405', 'icms_csosn'=>'500', 'st_retained_amount_scope'=>'unit',
         ]));
     }
 
