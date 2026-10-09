@@ -531,7 +531,10 @@
         index=e.key==='ArrowDown'?Math.min(items.length-1,index+1):Math.max(0,index-1);
         menu.querySelectorAll('.ui-select-option').forEach(x=>x.classList.remove('focused'));
         items[index].classList.add('focused');
-        items[index].scrollIntoView({block:'nearest'});
+        const box=menu.getBoundingClientRect();
+        const target=items[index].getBoundingClientRect();
+        if(target.bottom>box.bottom) menu.scrollTop+=target.bottom-box.bottom+6;
+        if(target.top<box.top) menu.scrollTop-=box.top-target.top+6;
       }
     });
     select.addEventListener('change',sync);
@@ -542,6 +545,7 @@
       wrapper.classList.add('open');
       menu.hidden=false;
       trigger.setAttribute('aria-expanded','true');
+      positionMenu();
     });
     new MutationObserver(mutations=>{
       if(optionsBuilt && mutations.some(m=>m.type==='childList'||m.target.tagName==='OPTION')) buildOptions();
