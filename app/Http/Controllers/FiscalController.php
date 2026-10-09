@@ -165,7 +165,9 @@ class FiscalController extends Controller
 
         \App\Jobs\ProcessNFCeJob::dispatch($fiscalDocumentJob->id)->onConnection($queueConnection);
 
-        return back()->with('success', 'Emissão colocada na fila fiscal. Acompanhe o resultado neste documento.');
+        return back()->with('success', $fiscalDocumentJob->emission_mode==='offline'
+            ? 'Preparação offline colocada na fila: assinatura e DANFE, sem envio à SEFAZ.'
+            : 'Emissão colocada na fila fiscal. Acompanhe o resultado neste documento.');
     }
 
     public function consultNfce(FiscalDocumentJob $fiscalDocumentJob)
