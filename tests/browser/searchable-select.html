@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../../public/css/erp.css">
+<link rel="stylesheet" href="../../public/css/ui-refinement.css">
+<style>body{margin:0}.app-root{padding:20px}form{width:360px;max-width:90vw;display:grid;gap:12px}</style>
+<script defer src="../../public/js/erp.js"></script>
+</head>
+<body>
+<div class="app-root">
+<form id="selectForm">
+<label class="field"><span>Cliente</span>
+<select id="clientSelect" name="customer_id" required>
+<option value="">Selecione o cliente</option>
+<option value="1" data-subtitle="50829590000138">FERNANDO EZEQUIEL WERNER</option>
+<option value="2">AÇÚCAR CRISTAL EMPRESA</option>
+<option value="3">ADALBERTO</option>
+<option value="4">AGROQUIMA</option>
+</select></label>
+<label class="field"><span>Tipo</span>
+<select id="simpleSelect" name="operation_type">
+<option value="sale">Venda</option><option value="entry">Entrada</option>
+</select></label>
+<div class="bulk-actions"><select id="bulkSelect" name="bulk">
+<option value="">Ações em massa</option>
+<option value="activate">Ativar</option><option value="inactivate">Inativar</option>
+<option value="export">Exportar</option><option value="delete">Excluir</option>
+</select></div>
+<div id="dynamic"></div>
+</form>
+<strong id="result">AGUARDANDO</strong>
+</div>
+<script>
+window.addEventListener('load',()=>{
+ setTimeout(()=>{
+  const result=document.getElementById('result');
+  const assert=(condition,message)=>{if(!condition)throw Error(message)};
+  try {
+   const native=document.getElementById('clientSelect');
+   const trigger=native.nextElementSibling.querySelector('.ui-select-trigger');
+   const menu=native.nextElementSibling.querySelector('.ui-select-menu');
+   assert(trigger.tagName==='INPUT'&&trigger.type==='search','cliente nao usa pesquisa direta');
+   assert(!menu.querySelector('input.ui-select-search'),'pesquisa duplicada dentro da lista');
+   assert(document.getElementById('simpleSelect').nextElementSibling.querySelector('.ui-select-trigger').tagName==='BUTTON','tipo simples virou busca');
+   assert(document.getElementById('bulkSelect').nextElementSibling.querySelector('.ui-select-trigger').tagName==='BUTTON','acao em massa virou busca');
+
+   let changed=0;
+   native.addEventListener('change',()=>changed++);
+   trigger.click();
+   trigger.value='ferna';
+   trigger.dispatchEvent(new Event('input',{bubbles:true}));
+   const visible=[...menu.querySelectorAll('.ui-select-option:not([hidden])')];
+   assert(visible.length===1,'filtro nao separou o nome');
+   assert(visible[0].querySelector('.ui-select-option-subtitle')?.textContent==='50829590000138','subtitulo nao aparece');
+   assert(menu.getBoundingClientRect().right<=document.documentElement.clientWidth-8,'menu fora da tela');
+   visible[0].click();
+   assert(native.value==='1'&&changed===1,'valor nativo/change nao sincronizados');
+   assert(new FormData(document.getElementById('selectForm')).get('customer_id')==='1','POST formulario perdeu id');
+
+   trigger.click();
+   trigger.value='acucar';
+   trigger.dispatchEvent(new Event('input',{bubbles:true}));
+   assert([...menu.querySelectorAll('.ui-select-option:not([hidden])')].length===1,'acentos nao sao ignorados');
+   trigger.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}));
+   assert(native.value==='1' && trigger.value==='FERNANDO EZEQUIEL WERNER','Escape nao restaurou escolha');
+
+   const holder=document.getElementById('dynamic');
+   holder.innerHTML='<select name="payments[0][payment_method]" id="dynamicPayment"><option value="">Escolher</option><option value="cash">Dinheiro</option><option value="pix">PIX</option><option value="card">Cartão</option><option value="transfer">Transferência</option></select>';
+   setTimeout(()=>{
+    try {
+      const select=document.getElementById('dynamicPayment');
+      const field=select.nextElementSibling?.querySelector('.ui-select-trigger');
+      assert(field?.tagName==='INPUT','select criado dinamicamente nao foi aprimorado');
+      field.click();
+      field.value='pix';
+      field.dispatchEvent(new Event('input',{bubbles:true}));
+      const item=[...select.nextElementSibling.querySelectorAll('.ui-select-option:not([hidden])')];
+      assert(item.length===1,'filtro de pagamento nao funciona');
+      item[0].click();
+      assert(select.value==='pix','valor do pagamento nao preservado');
+      document.body.dataset.searchSelectTest='passed';
+      result.textContent='PASS: busca-direta-valores-nativos-dinamicos';
+    }catch(err){document.body.dataset.searchSelectTest='failed';result.textContent='FAIL: '+err.message}
+   },170);
+  }catch(err){document.body.dataset.searchSelectTest='failed';result.textContent='FAIL: '+err.message}
+ },250);
+});
+</script>
+</body>
+</html>
