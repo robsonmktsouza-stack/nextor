@@ -3,8 +3,9 @@
 namespace App\Services\Fiscal;
 
 /**
- * Liberação de produção por cenário previamente homologado.
- * Não altera tributação nem solicita confirmação ao caixa.
+ * Compatibilidade de consultas a perfis fiscais já cadastrados.
+ * A emissão é controlada por FiscalDocumentSettings e cálculo tributário;
+ * esta classe não bloqueia nem autoriza transmissão.
  */
 final class NFCeProductionProfilePolicy
 {
@@ -13,7 +14,7 @@ final class NFCeProductionProfilePolicy
 
     public function __construct(?array $approved = null)
     {
-        $configured = $approved ?? (array) config('services.acbr_nfe.production_approved_profiles', []);
+        $configured = $approved ?? (array) \App\Models\AppSetting::value('nfce','approved_profiles',[]);
         $this->approved = array_values(array_unique(array_map('strtoupper',
             array_map('trim', array_filter($configured, 'is_string')))));
     }
