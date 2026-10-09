@@ -204,7 +204,6 @@
 .app-root .grid-tool:active:not(:disabled){box-shadow:inset 0 2px 4px rgba(21,44,65,.12)}
 .app-root :is(.grid-actionbar,.page-heading-main,.card-header,.table-toolbar,.settings-panel-head){min-width:0}
 .app-root .grid-actions-right{flex-wrap:wrap;justify-content:flex-end}
-.app-root .selection-count{font-variant-numeric:tabular-nums}
 .app-root :is(.table-search-group,.table-search,.table-search input,.table-search-group input){min-width:0}
 .app-root :is(.table-search-group,.table-search,.input-filter){border-color:var(--ui-border)}
 .app-root :is(.table-search-group,.table-search,.input-filter):focus-within{
