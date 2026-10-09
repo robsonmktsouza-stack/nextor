@@ -149,6 +149,32 @@ class FiscalModuleTest extends TestCase
             ->assertSee('nfceCancelDialog');
     }
 
+    public function test_authorized_nfce_detail_uses_compact_utilities_and_modal_cancel(): void
+    {
+        $document=FiscalDocumentJob::query()->create([
+            'document_type'=>'nfce',
+            'status'=>'authorized',
+            'environment'=>'homologation',
+            'series'=>1,
+            'document_number'=>3,
+            'access_key'=>str_repeat('1',44),
+            'protocol'=>str_repeat('2',15),
+            'authorized_at'=>now()->subMinute(),
+            'prepared_at'=>now()->subMinutes(2),
+        ]);
+
+        $this->actingAs($this->admin())
+            ->get(route('fiscal.show',$document))
+            ->assertOk()
+            ->assertSee('fiscal-detail-utilities',false)
+            ->assertSee('data-dialog-open="nfceCancelDialog"',false)
+            ->assertSee('id="nfceCancelDialog"',false)
+            ->assertSee('Cancelamento')
+            ->assertSee('Inutilização')
+            ->assertDontSee('min-width:240px',false)
+            ->assertDontSee('Cancelar NFC-e na SEFAZ');
+    }
+
     public function test_user_without_fiscal_permission_cannot_open_module(): void
     {
         $user=User::query()->create([
