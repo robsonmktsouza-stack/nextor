@@ -104,7 +104,7 @@
         </details>
       </div>
 
-      <form id="fiscal-xml-download" action="{{ route('fiscal.utilities.xml') }}" method="post" hidden>
+      <form id="fiscal-xml-download" action="{{ route('fiscal.utilities.xml') }}" method="post" data-no-loading hidden>
         @csrf
         <input type="hidden" name="document_type" value="{{ $tab }}">
       </form>
