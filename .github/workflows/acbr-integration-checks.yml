@@ -53,6 +53,16 @@ jobs:
             app/Services/Fiscal/NFCeProtocolXmlService.php \
             app/Services/Fiscal/NFCeDanfeService.php \
             app/Services/Fiscal/NFCePdfService.php \
+            app/Services/Fiscal/NFCeCancellationService.php \
+            app/Services/Fiscal/NFCeFiscalEventResponse.php \
+            app/Services/Fiscal/NFCeInutilizationService.php \
+            app/Services/Fiscal/NFCeOfflineService.php \
+            app/Models/NFCeInutilization.php \
+            app/Jobs/CancelNFCeJob.php \
+            app/Jobs/InutilizeNFCeNumbersJob.php \
+            app/Jobs/TransmitOfflineNFCeJob.php \
+            app/Http/Controllers/NFCeFiscalEventsController.php \
+            app/Http/Controllers/NFCeInutilizationController.php \
             app/Jobs/GenerateNFCeDanfePdfJob.php \
             app/Http/Controllers/NFCeDanfeController.php \
             app/Services/Fiscal/NFCeAuthorizedXmlRecoveryService.php \
@@ -81,6 +91,8 @@ jobs:
             tests/Unit/NFCeDanfeServiceTest.php \
             tests/Feature/NFCePrintSettingsTest.php \
             tests/Feature/NFCeManualEditorTest.php \
+            tests/Feature/NFCeFiscalLifecycleTest.php \
+            tests/Unit/NFCeTaxScenarioMatrixTest.php \
             tests/Feature/UiRefinementTest.php \
             tests/Unit/NFCeSefazResponseParserTest.php; do
             php -l "$f"
