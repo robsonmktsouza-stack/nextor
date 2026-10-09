@@ -67,12 +67,12 @@ final class NFCeTaxCalculationService
 
         return [
             'icms' => $icms,
-            'pis' => $this->contribution('pis', $tax, $base),
-            'cofins' => $this->contribution('cofins', $tax, $base),
+            'pis' => $this->contribution('pis', $tax, $base, $qty),
+            'cofins' => $this->contribution('cofins', $tax, $base, $qty),
         ];
     }
 
-    private function contribution(string $type, array $tax, float $base): array
+    private function contribution(string $type, array $tax, float $base, float $qty): array
     {
         $cst = (string) ($tax[$type.'_cst'] ?? '');
         $rateField = $type.'_rate';
@@ -86,19 +86,32 @@ final class NFCeTaxCalculationService
             }
             return ['CST' => $cst];
         }
-        if (!in_array($cst, ['01', '02', '49', '99'], true)) {
+        if (!in_array($cst, ['01', '02', '03', '49', '99'], true)) {
             throw new RuntimeException("CST {$cst} de ".strtoupper($type)." ainda não tem cálculo implementado.");
         }
         if ($mode === 'none' || $mode === '') {
-            if (in_array($cst, ['01', '02'], true) || $this->hasNonzero($tax, $rateField)) {
+            if (in_array($cst, ['01', '02', '03'], true) || $this->hasNonzero($tax, $rateField)
+                || $this->hasNonzero($tax, $type.'_quantity_rate')) {
                 throw new RuntimeException("Configure cálculo percentual e alíquota para ".strtoupper($type)." CST {$cst}.");
             }
             // Compatibilidade estrita com o cadastro anterior: CST 49/99 sem
             // alíquota explícita corresponde à tributação zerada já utilizada.
             return ['CST' => $cst, 'vBC' => '0.00', $namedRate => '0.0000', $namedAmount => '0.00'];
         }
-        if ($mode !== 'percentage') {
-            throw new RuntimeException("Tipo de cálculo de ".strtoupper($type)." não implementado: {$mode}.");
+        if ($mode === 'quantity') {
+            if (!in_array($cst, ['03','49','99'], true)) {
+                throw new RuntimeException("CST {$cst} de ".strtoupper($type)." não admite cálculo por quantidade.");
+            }
+            $unit = $this->rate($tax, $type.'_quantity_rate');
+            return [
+                'CST' => $cst,
+                'qBCProd' => number_format($qty, 3, '.', ''),
+                'vAliqProd' => $unit,
+                $namedAmount => number_format(round($qty * (float)$unit, 2, PHP_ROUND_HALF_UP), 2, '.', ''),
+            ];
+        }
+        if ($mode !== 'percentage' || $cst === '03') {
+            throw new RuntimeException("Tipo de cálculo de ".strtoupper($type)." não implementado para CST {$cst}: {$mode}.");
         }
         $rate = $this->rate($tax, $rateField);
         $amount = round($base * (float) $rate / 100, 2, PHP_ROUND_HALF_UP);
