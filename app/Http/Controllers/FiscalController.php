@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 
 class FiscalController extends Controller
 {
-    private const TABS=[
+    public const TABS=[
         'nfe'=>['label'=>'NF-e','description'=>'Nota Fiscal Eletrônica — modelo 55','party'=>'Destinatário'],
         'nfse'=>['label'=>'NFS-e','description'=>'Nota Fiscal de Serviço Eletrônica','party'=>'Tomador'],
         'cte'=>['label'=>'CT-e','description'=>'Conhecimento de Transporte Eletrônico — modelo 57','party'=>'Tomador'],
