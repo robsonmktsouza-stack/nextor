@@ -108,4 +108,17 @@ final class NFCeTaxGroupTranslatorTest extends TestCase
         $this->expectException(RuntimeException::class);
         (new NFCeTaxGroupTranslator())->translate($this->group(['kind'=>'services']));
     }
+    public function test_normal_regime_group_maps_configured_cst_modality_and_icms_rate(): void
+    {
+        $group = $this->group([
+            'icms_cst'=>'00',
+            'tax_config'=>['mod_bc'=>'3','icms_rate'=>'18.00'],
+        ]);
+        $tax=(new NFCeTaxGroupTranslator())->translate($group,'3');
+        self::assertSame('00',$tax['icms_cst']);
+        self::assertSame('3',$tax['mod_bc']);
+        self::assertSame('18.00',$tax['icms_rate']);
+        self::assertArrayNotHasKey('icms_csosn',$tax);
+    }
+
 }
