@@ -13,7 +13,7 @@
   <div class="card-header">
     <div>
       <h2>Grupos fiscais</h2>
-      <p>Cadastre e organize os grupos de tributação dos produtos e serviços.</p>
+      <p>Modelos iniciais de tributação já cadastrados por regime. Vincule o modelo apropriado no produto; revise casos especiais antes de ativar.</p>
     </div>
   </div>
   <div class="grid-actionbar" style="margin-bottom:12px">
@@ -32,7 +32,7 @@
         <tr>
           <td class="nowrap">{{ $group->id }}</td>
           <td><a class="table-link" href="{{ route('fiscal.tax-groups.edit',$group) }}">{{ $group->name }}</a>
-            <small class="table-subtitle">Revisão {{ $group->revision }} @if($group->is_default) · Padrão para {{ $group->kind==='products' ? 'produtos' : 'serviços' }} @endif</small>
+            <small class="table-subtitle">Revisão {{ $group->revision }} @if($group->preset_key) · Modelo inicial CRT {{ $group->target_crt }} @endif @if($group->is_default) · Padrão para {{ $group->kind==='products' ? 'produtos' : 'serviços' }} @endif</small>
           </td>
           <td><span class="code-tag">{{ $group->kind==='products' ? 'Produtos' : 'Serviços' }}</span></td>
           <td>{{ $group->cfop_pattern ?: '—' }}</td>
