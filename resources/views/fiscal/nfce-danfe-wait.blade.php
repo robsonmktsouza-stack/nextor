@@ -9,6 +9,7 @@
     html,body{height:100%;margin:0}
     body{display:grid;place-items:center;font:14px Arial,sans-serif;background:#f6f8fa;color:#36495a}
     .state{text-align:center;padding:20px;max-width:360px}
+    [hidden]{display:none!important}
     .spinner{width:26px;height:26px;border:3px solid #dce7f0;border-top-color:#2777b8;border-radius:50%;margin:0 auto 18px;animation:rotate .8s linear infinite}
     @keyframes rotate{to{transform:rotate(360deg)}}
     a{display:inline-block;margin-top:14px;color:#286ba7;text-decoration:none;border:1px solid #c5d4e1;padding:9px 16px;border-radius:4px;background:white}
@@ -42,7 +43,7 @@
           if(data.status==='failed') {fail();return;}
         }catch(error){}
         finally{inflight=false;}
-        if(++attempts<60) setTimeout(check,1500);
+        if(++attempts<24) setTimeout(check,650);
         else fail();
       }
       function fail(){
@@ -50,7 +51,7 @@
         document.getElementById('message').textContent='Não foi possível preparar o DANFE.';
         document.getElementById('retry').hidden=false;
       }
-      setTimeout(check,1200);
+      setTimeout(check,500);
     })();
   </script>
   @endunless
