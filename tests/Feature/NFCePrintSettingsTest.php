@@ -140,6 +140,47 @@ final class NFCePrintSettingsTest extends TestCase
         self::assertSame('authorized',$job->fresh()->status);
     }
 
+    public function test_pdf_source_is_the_original_nextor_danfe_with_its_css_and_qr(): void
+    {
+        Storage::fake('local');
+        $job=$this->document();
+        $xml=Storage::disk('local')->get($job->xml_path);
+        $pdf=app(\App\Services\Fiscal\NFCePdfService::class);
+        AppSetting::put('printing','nfce_paper','80');
+
+        $html=$pdf->renderHtml($job,$xml);
+
+        self::assertStringContainsString('data-paper="80"',$html);
+        self::assertStringContainsString('class="danfe-paper"',$html);
+        self::assertStringContainsString('class="danfe-item-head"',$html);
+        self::assertStringContainsString('PRODUTO DE TESTE',$html);
+        self::assertStringContainsString('VALOR A PAGAR',$html);
+        self::assertStringContainsString('id="danfeQr"',$html);
+        self::assertStringContainsString('qr.createSvgTag',$html);
+        self::assertStringContainsString('.danfe-issuer{',$html);
+        self::assertStringNotContainsString('window.print()',$html);
+        self::assertStringNotContainsString('TipoRelatorioBobina',$html);
+        self::assertStringNotContainsString('<link rel="stylesheet"',$html);
+    }
+
+    public function test_original_danfe_can_render_real_pdf_with_local_chrome_when_installed(): void
+    {
+        $paths=['/usr/bin/google-chrome','/usr/bin/chromium','/usr/bin/chromium-browser'];
+        if (!collect($paths)->contains(fn($path)=>is_file($path))) {
+            $this->markTestSkipped('A prova de conversão real em PDF exige Chromium no runner.');
+        }
+
+        Storage::fake('local');
+        $job=$this->document();
+        $xml=Storage::disk('local')->get($job->xml_path);
+        $pdf=app(\App\Services\Fiscal\NFCePdfService::class);
+
+        $bytes=$pdf->render($job,$xml);
+        self::assertStringStartsWith('%PDF-',$bytes);
+        self::assertStringContainsString('%%EOF',substr($bytes,-1024));
+        self::assertGreaterThan(6000,strlen($bytes));
+    }
+
     public function test_previous_receipt_width_remains_fallback_until_paper_is_configured(): void
     {
         Storage::fake('local');
