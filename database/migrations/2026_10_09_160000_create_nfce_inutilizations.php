@@ -24,7 +24,7 @@ return new class extends Migration
             $table->foreignId('requested_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('processed_at')->nullable();
             $table->timestamps();
-            $table->index(['issuer_document','environment','year','series']);
+            $table->index(['issuer_document','environment','year','series'], 'idx_nfce_inut_emit_amb_ano_serie');
         });
     }
     public function down(): void
