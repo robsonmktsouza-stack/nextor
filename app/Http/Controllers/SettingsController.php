@@ -458,9 +458,10 @@ class SettingsController extends Controller
                 'default_nature'=>['nullable','string','max:120'],
                 'default_cfop'=>['nullable','string','max:10'],
                 'auto_from_sale'=>['nullable','boolean'],
+                'production_enabled'=>['nullable','boolean'],
                 'send_email'=>['nullable','boolean'],
                 'print_danfe'=>['nullable','boolean'],
-            ],['enabled','auto_from_sale','send_email','print_danfe'],[]],
+            ],['enabled','auto_from_sale','production_enabled','send_email','print_danfe'],[]],
 
             'nfce'=>[[
                 'enabled'=>['nullable','boolean'],
@@ -471,8 +472,9 @@ class SettingsController extends Controller
                 'csc_id'=>['nullable','string','max:20'],
                 'csc_token'=>['nullable','string','max:255'],
                 'auto_from_pdv'=>['nullable','boolean'],
+                'production_enabled'=>['nullable','boolean'],
                 'print_danfe'=>['nullable','boolean'],
-            ],['enabled','auto_from_pdv','print_danfe'],['csc_token']],
+            ],['enabled','auto_from_pdv','production_enabled','print_danfe'],['csc_token']],
 
             'nfse'=>[[
                 'enabled'=>['nullable','boolean'],
@@ -486,7 +488,8 @@ class SettingsController extends Controller
                 'municipal_password'=>['nullable','string','max:2000'],
                 'auto_from_sale'=>['nullable','boolean'],
                 'withhold_iss_default'=>['nullable','boolean'],
-            ],['enabled','auto_from_sale','withhold_iss_default'],['municipal_password']],
+                'production_enabled'=>['nullable','boolean'],
+            ],['enabled','auto_from_sale','withhold_iss_default','production_enabled'],['municipal_password']],
 
             'cte'=>[[
                 'cte_enabled'=>['nullable','boolean'],
@@ -495,11 +498,13 @@ class SettingsController extends Controller
                 'cte_next_number'=>['required','integer','min:1','max:999999999'],
                 'rntrc'=>['nullable','string','max:30'],
                 'default_cfop'=>['nullable','string','max:10'],
+                'cte_production_enabled'=>['nullable','boolean'],
+                'mdfe_production_enabled'=>['nullable','boolean'],
                 'mdfe_enabled'=>['nullable','boolean'],
                 'mdfe_environment'=>['required',Rule::in(['homologation','production'])],
                 'mdfe_series'=>['required','integer','min:0','max:999'],
                 'mdfe_next_number'=>['required','integer','min:1','max:999999999'],
-            ],['cte_enabled','mdfe_enabled'],[]],
+            ],['cte_enabled','mdfe_enabled','cte_production_enabled','mdfe_production_enabled'],[]],
 
             'accounting'=>[[
                 'office_name'=>['nullable','string','max:190'],
@@ -579,20 +584,20 @@ class SettingsController extends Controller
             ],
             'nfe'=>[
                 'enabled'=>false,'environment'=>'homologation','series'=>1,'next_number'=>1,
-                'default_nature'=>null,'default_cfop'=>null,'auto_from_sale'=>false,'send_email'=>true,'print_danfe'=>true,
+                'default_nature'=>null,'default_cfop'=>null,'auto_from_sale'=>false,'production_enabled'=>false,'send_email'=>true,'print_danfe'=>true,
             ],
             'nfce'=>[
                 'enabled'=>false,'environment'=>'homologation','series'=>1,'next_number'=>1,
-                'default_cfop'=>null,'csc_id'=>null,'csc_token'=>null,'auto_from_pdv'=>false,'print_danfe'=>true,
+                'default_cfop'=>null,'csc_id'=>null,'csc_token'=>null,'auto_from_pdv'=>false,'production_enabled'=>false,'print_danfe'=>true,
             ],
             'nfse'=>[
                 'enabled'=>false,'environment'=>'homologation','provider'=>null,'municipality_code'=>null,
                 'series'=>null,'next_rps'=>1,'default_service_tax_code'=>null,'municipal_login'=>null,
-                'municipal_password'=>null,'auto_from_sale'=>false,'withhold_iss_default'=>false,
+                'municipal_password'=>null,'auto_from_sale'=>false,'withhold_iss_default'=>false,'production_enabled'=>false,
             ],
             'cte'=>[
                 'cte_enabled'=>false,'cte_environment'=>'homologation','cte_series'=>1,'cte_next_number'=>1,
-                'rntrc'=>null,'default_cfop'=>null,'mdfe_enabled'=>false,'mdfe_environment'=>'homologation',
+                'rntrc'=>null,'default_cfop'=>null,'cte_production_enabled'=>false,'mdfe_production_enabled'=>false,'mdfe_enabled'=>false,'mdfe_environment'=>'homologation',
                 'mdfe_series'=>1,'mdfe_next_number'=>1,
             ],
             'accounting'=>[
