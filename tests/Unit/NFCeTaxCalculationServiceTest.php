@@ -114,4 +114,29 @@ final class NFCeTaxCalculationServiceTest extends TestCase
             'pis_cst'=>'06','pis_rate'=>'1.65','pis_calc_type'=>'percentage',
         ]));
     }
+    public function test_calculates_contributions_by_configured_quantity(): void
+    {
+        $result = (new NFCeTaxCalculationService())->calculate($this->item([
+            'pis_cst'=>'03',
+            'pis_calc_type'=>'quantity',
+            'pis_quantity_rate'=>'0.1200',
+            'cofins_cst'=>'03',
+            'cofins_calc_type'=>'quantity',
+            'cofins_quantity_rate'=>'0.5500',
+        ]));
+        self::assertSame('2.000', $result['pis']['qBCProd']);
+        self::assertSame('0.1200', $result['pis']['vAliqProd']);
+        self::assertSame('0.24', $result['pis']['vPIS']);
+        self::assertSame('1.10', $result['cofins']['vCOFINS']);
+    }
+
+    public function test_rejects_quantity_mode_without_per_unit_rate(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('pis_quantity_rate');
+        (new NFCeTaxCalculationService())->calculate($this->item([
+            'pis_cst'=>'03', 'pis_calc_type'=>'quantity',
+        ]));
+    }
+
 }
