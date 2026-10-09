@@ -57,6 +57,11 @@
             @include('partials.icon',['name'=>'tag','size'=>18])
           </a>
         @endif
+        @if($tab==='nfce')
+          <a class="grid-tool grid-tool-wide" href="{{ route('fiscal.nfce.inutilizations') }}" data-tooltip="Inutilizar numeração não usada na SEFAZ">
+            @include('partials.icon',['name'=>'file-minus','size'=>16]) <span>Inutilização</span>
+          </a>
+        @endif
         @if($tab==='nfce' && auth()->user()->canAccess('pdv'))
           <a class="grid-tool" href="{{ route('pdv.index') }}" data-tooltip="Abrir PDV">
             @include('partials.icon',['name'=>'sales','size'=>17])
