@@ -90,6 +90,8 @@ final class NFCeIniBuilder
         $totalDiscount = 0;
         $totalPis = 0;
         $totalCofins = 0;
+        $totalIcmsBase = 0;
+        $totalIcms = 0;
         foreach ($items as $index => $item) {
             $i = sprintf('%03d', $index + 1);
             $tax = $item['tax_defaults'] ?? [];
@@ -108,6 +110,8 @@ final class NFCeIniBuilder
             $calculated = $this->calculator->calculate($item, (string)$company->crt);
             $totalPis += (int) round((float)($calculated['pis']['vPIS'] ?? 0) * 100);
             $totalCofins += (int) round((float)($calculated['cofins']['vCOFINS'] ?? 0) * 100);
+            $totalIcmsBase += (int) round((float)($calculated['icms']['vBC'] ?? 0) * 100);
+            $totalIcms += (int) round((float)($calculated['icms']['vICMS'] ?? 0) * 100);
 
             $add('Produto'.$i, [
                 'cProd' => ($item['sku'] ?? null) ?: 'PROD-'.$item['product_id'],
@@ -139,7 +143,8 @@ final class NFCeIniBuilder
             throw new RuntimeException('Somatório dos itens não corresponde ao total da venda.');
         }
         $add('Total', [
-            'vBC' => '0.00', 'vICMS' => '0.00', 'vBCST' => '0.00', 'vST' => '0.00',
+            'vBC' => $price($totalIcmsBase / 100), 'vICMS' => $price($totalIcms / 100),
+            'vBCST' => '0.00', 'vST' => '0.00',
             'vProd' => $price($totalGross / 100),
             'vDesc' => $price($totalDiscount / 100),
             'vPIS' => $price($totalPis / 100), 'vCOFINS' => $price($totalCofins / 100),
