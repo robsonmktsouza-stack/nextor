@@ -18,6 +18,13 @@ class FiscalPreparationService
 
         $sale->loadMissing(['items.product','items.service','customer','payments']);
 
+        if($sale->source==='nfce') {
+            // Emissão fiscal manual compartilha o preparador do PDV,
+            // mas não movimenta novamente a venda.
+            $this->prepareNfceForSale($sale);
+            return;
+        }
+
         if($sale->source==='pdv') {
             $productOnly=$sale->items->isNotEmpty()
                 && $sale->items->every(fn($item)=>$item->item_type==='product' && $item->product_id);
@@ -52,6 +59,58 @@ class FiscalPreparationService
         ) {
             $this->prepare($sale,'nfse','nfse','next_rps');
         }
+    }
+
+    /**
+     * Usa a venda existente para gerar uma única NFC-e.
+     * Não registra nova venda, estoque ou lançamento financeiro.
+     */
+    public function prepareNfceForSale(Sale $sale): FiscalDocumentJob
+    {
+        return DB::transaction(function () use ($sale): FiscalDocumentJob {
+            $locked=Sale::query()->lockForUpdate()->findOrFail($sale->id);
+            if ($locked->operation_type !== 'sale' || $locked->status !== 'completed') {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'sale_id'=>'Escolha uma venda concluída.',
+                ]);
+            }
+
+            $locked->load(['items.product','items.service','customer','payments']);
+            if ($locked->items->isEmpty()
+                || $locked->items->contains(fn($item)=>$item->item_type !== 'product' || !$item->product_id)
+                || $locked->returns()->where('status','completed')->exists()) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'sale_id'=>'Esta venda não pode ser utilizada para NFC-e.',
+                ]);
+            }
+
+            $existing=FiscalDocumentJob::query()
+                ->where('sale_id',$locked->id)->where('document_type','nfce')->first();
+            if ($existing) {
+                return $existing;
+            }
+
+            // Uma venda não deve originar documentos fiscais de modelos
+            // concorrentes sem tratamento próprio de substituição/cancelamento.
+            if (FiscalDocumentJob::query()->where('sale_id',$locked->id)
+                ->where('document_type','!=','nfce')
+                ->where('status','!=','cancelled')->exists()) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'sale_id'=>'Esta venda já possui outro documento fiscal vinculado.',
+                ]);
+            }
+
+            if (!app(FiscalDocumentSettings::class)->enabled('nfce')) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'sale_id'=>'Ative a NFC-e nas Configurações fiscais.',
+                ]);
+            }
+
+            $this->prepare($locked,'nfce','nfce','next_number');
+
+            return FiscalDocumentJob::query()->where('sale_id',$locked->id)
+                ->where('document_type','nfce')->firstOrFail();
+        },3);
     }
 
     private function prepare(Sale $sale,string $documentType,string $group,string $sequenceKey): void
