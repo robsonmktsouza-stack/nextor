@@ -16,7 +16,7 @@ final class NFCeProtocolXmlServiceTest extends TestCase
         return '<?xml version="1.0" encoding="UTF-8"?>'.
             '<NFe xmlns="http://www.portalfiscal.inf.br/nfe">'.
             '<infNFe Id="NFe'.$key.'" versao="4.00">'.
-            '<ide><mod>65</mod><tpAmb>2</tpAmb><serie>1</serie><nNF>7</nNF></ide>'.
+            '<ide><mod>65</mod><tpAmb>2</tpAmb><tpEmis>1</tpEmis><serie>1</serie><nNF>7</nNF></ide>'.
             '</infNFe>'.
             '<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo/></Signature>'.
             '</NFe>';
