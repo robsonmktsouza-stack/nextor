@@ -125,7 +125,7 @@
     @if(auth()->user()->canAccess('fiscal'))
       <a href="{{ $lastPdvNfceDocument
         ? route('fiscal.show', $lastPdvNfceDocument)
-        : route('pdv.receipt', ['sale' => $lastCompletedPdvSale->id, 'print' => 0]) }}">Conferir NFC-e</a>
+        : route('pdv.receipt', ['sale' => $lastCompletedPdvSale->id, 'print' => 0]) }}">Abrir NFC-e</a>
     @endif
     @if(auth()->user()->canAccess('sales'))
       <a href="{{ route('sales.show',$lastCompletedPdvSale) }}">Abrir venda</a>
