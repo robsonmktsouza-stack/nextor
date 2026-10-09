@@ -17,7 +17,7 @@ use RuntimeException;
  */
 class NFCePdfService
 {
-    private const LAYOUT_VERSION='nextor-original-v1';
+    private const LAYOUT_VERSION='nextor-original-v2-thermal-page';
 
     public function paper(): string
     {
@@ -64,9 +64,23 @@ class NFCePdfService
     public function renderHtml(FiscalDocumentJob $document, string $authorizedXml): string
     {
         $danfe=app(NFCeDanfeService::class)->parse($authorizedXml,$document);
+        $paper=$this->paper();
+        // CSS @page must be available before Chrome starts print-to-pdf.
+        // A4 retains its official page; thermal width is literal 58/80mm.
+        // Height is a conservative fallback, refined by the rendered DOM.
+        $extraItems=0;
+        foreach ($danfe['items'] as $item) {
+            $description=mb_strlen((string)($item['description'] ?? ''));
+            $extraItems+=15 + max(0,(int)ceil(($description-42)/32))*4;
+        }
+        $notesLength=mb_strlen((string)($danfe['fiscal_message'] ?? ''))
+            +mb_strlen((string)($danfe['additional_message'] ?? ''));
+        $estimatedMm=min(1500,max(200,170+$extraItems+(int)ceil($notesLength/50)*5));
+
         return view('fiscal.nfce-danfe',[
             'danfe'=>$danfe,
-            'paper'=>$this->paper(),
+            'paper'=>$paper,
+            'pdfPageHeightMm'=>$estimatedMm,
             'pdfExport'=>true,
         ])->render();
     }
