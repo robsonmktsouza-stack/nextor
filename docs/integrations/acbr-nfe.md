@@ -21,12 +21,12 @@ Variáveis de configuração:
 - `ACBr_NFE_CONFIG_PATH`: INI exclusivo para os comandos de diagnóstico; o processamento da NFC-e cria um INI privado por execução e o descarta ao terminar.
 - `ACBr_NFE_SCHEMAS_PATH`: schemas NFe, se não estiverem nos caminhos padrão.
 - `QUEUE_CONNECTION=database`: fila fiscal persistente.
-- `ACBr_NFE_PRODUCTION_ENABLED=false`: produção bloqueada até validação ponta a ponta.
+- Produção: autorizada nas Configurações do documento no NEXTOR, somente depois de validar os cenários fiscais que serão utilizados.
 
 Após atualizar o projeto, rodar a migração se pendente e iniciar o worker fiscal em um processo separado, configurado para reiniciar automaticamente no ambiente operacional:
 
 ```bat
-php artisan queue:work database --queue=fiscal --tries=1 --timeout=180
+php artisan queue:work --queue=fiscal --tries=1 --timeout=180
 ```
 
 O timeout da fila do banco é de **pelo menos 240 segundos**, evitando a liberação prematura de documentos em processamento. Cada job fiscal permite uma única execução.
