@@ -9,6 +9,8 @@ use RuntimeException;
 
 final class NFCeIniBuilder
 {
+    public function __construct(private readonly NFCeTaxCalculationService $calculator) {}
+
     public function build(FiscalDocumentJob $job, CompanySetting $company): string
     {
         $source = $job->source_snapshot ?? [];
@@ -86,6 +88,8 @@ final class NFCeIniBuilder
 
         $totalGross = 0;
         $totalDiscount = 0;
+        $totalPis = 0;
+        $totalCofins = 0;
         foreach ($items as $index => $item) {
             $i = sprintf('%03d', $index + 1);
             $tax = $item['tax_defaults'] ?? [];
@@ -101,6 +105,9 @@ final class NFCeIniBuilder
             $totalGross += (int) round($gross * 100);
             $totalDiscount += (int) round($discount * 100);
             $cfop = $tax['cfop_outbound_internal'] ?? $tax['nfce_cfop'] ?? $tax['cfop'] ?? AppSetting::value('nfce', 'default_cfop', '');
+            $calculated = $this->calculator->calculate($item);
+            $totalPis += (int) round((float)($calculated['pis']['vPIS'] ?? 0) * 100);
+            $totalCofins += (int) round((float)($calculated['cofins']['vCOFINS'] ?? 0) * 100);
 
             $add('Produto'.$i, [
                 'cProd' => ($item['sku'] ?? null) ?: 'PROD-'.$item['product_id'],
@@ -122,22 +129,9 @@ final class NFCeIniBuilder
                 'vDesc' => $price($discount),
                 'indTot' => '1',
             ]);
-            $add('ICMS'.$i, [
-                'CSOSN' => $tax['icms_csosn'] ?? $tax['csosn'] ?? $tax['icms_csosn_default'] ?? AppSetting::value('tax', 'icms_csosn_default'),
-                'orig' => $item['origin'] ?? $tax['icms_origin_default'] ?? AppSetting::value('tax', 'icms_origin_default', '0'),
-            ]);
-            $add('PIS'.$i, [
-                'CST' => $tax['pis_cst'] ?? $tax['pis_cst_default'] ?? AppSetting::value('tax', 'pis_cst_default'),
-                'vBC' => '0.00',
-                'pPIS' => '0.00',
-                'vPIS' => '0.00',
-            ]);
-            $add('COFINS'.$i, [
-                'CST' => $tax['cofins_cst'] ?? $tax['cofins_cst_default'] ?? AppSetting::value('tax', 'cofins_cst_default'),
-                'vBC' => '0.00',
-                'pCOFINS' => '0.00',
-                'vCOFINS' => '0.00',
-            ]);
+            $add('ICMS'.$i, $calculated['icms']);
+            $add('PIS'.$i, $calculated['pis']);
+            $add('COFINS'.$i, $calculated['cofins']);
         }
 
         $total = $price($source['total'] ?? 0);
@@ -148,7 +142,7 @@ final class NFCeIniBuilder
             'vBC' => '0.00', 'vICMS' => '0.00', 'vBCST' => '0.00', 'vST' => '0.00',
             'vProd' => $price($totalGross / 100),
             'vDesc' => $price($totalDiscount / 100),
-            'vPIS' => '0.00', 'vCOFINS' => '0.00',
+            'vPIS' => $price($totalPis / 100), 'vCOFINS' => $price($totalCofins / 100),
             'vNF' => $total,
         ]);
         $add('Transportador', ['modFrete' => '9']);
