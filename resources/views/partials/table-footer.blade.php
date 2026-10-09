@@ -19,10 +19,6 @@
     </select>
   </form>
 
-  <span class="table-records-count">
-    Exibindo {{ $paginator->firstItem() ?? 0 }}–{{ $paginator->lastItem() ?? 0 }} de {{ $paginator->total() }}
-  </span>
-
   <nav class="table-pager-compact" aria-label="Paginação">
     @if($currentPage>1)
       <a class="table-pager-button" href="{{ $paginator->url(1) }}" aria-label="Primeira página" data-tooltip="Primeira página">
