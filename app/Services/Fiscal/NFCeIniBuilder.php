@@ -105,7 +105,7 @@ final class NFCeIniBuilder
             $totalGross += (int) round($gross * 100);
             $totalDiscount += (int) round($discount * 100);
             $cfop = $tax['cfop_outbound_internal'] ?? $tax['nfce_cfop'] ?? $tax['cfop'] ?? AppSetting::value('nfce', 'default_cfop', '');
-            $calculated = $this->calculator->calculate($item);
+            $calculated = $this->calculator->calculate($item, (string)$company->crt);
             $totalPis += (int) round((float)($calculated['pis']['vPIS'] ?? 0) * 100);
             $totalCofins += (int) round((float)($calculated['cofins']['vCOFINS'] ?? 0) * 100);
 
