@@ -98,3 +98,58 @@ A migração não edita grupos cadastrados anteriormente, não ativa
 produção e não altera produtos nem documentos fiscais emitidos.
 Ao reverter, os modelos inalterados e não vinculados podem ser removidos;
 modelos editados ou vinculados permanecem como grupos normais.
+
+
+## Atualização: modelos de serviços (09/10/2026)
+
+Uma migração adicional instala **24 grupos nacionais de serviços**:
+
+database/migrations/2026_10_09_000002_install_fiscal_service_presets.php
+
+Os códigos do Anexo Nacional de Serviços são publicados pelo Portal NFS-e:
+https://www.gov.br/nfse/pt-br/mei-e-demais-empresas/codigos-de-tributacao-nacional-nbs
+
+| Exemplo | Código de tributação nacional | Item LC 116 |
+|---|---|---|
+| Contabilidade | 171901 | 17.19 |
+| Desenvolvimento de sistemas | 010101 | 01.01 |
+| Programação | 010201 | 01.02 |
+| Suporte técnico em informática | 010701 | 01.07 |
+| Academia e atividades físicas | 060401 | 06.04 |
+| Mecânica e manutenção | 140101 | 14.01 |
+| Construção civil (empreitada) | 070202 | 07.02 |
+| Treinamentos | 080201 | 08.02 |
+| Segurança e monitoramento | 110201 | 11.02 |
+| Consultoria empresarial | 170101 | 17.01 |
+
+A tabela no código inclui outros 14 serviços. Cada grupo de serviços traz
+código nacional de seis dígitos, item da lista de serviços e exigibilidade
+de ISS "1" como situação ordinária (alterar se existir hipótese legal
+específica). A escolha do grupo preenche os códigos automaticamente no
+cadastro de serviço; mudanças posteriores são aplicadas ao preparar o
+snapshot da venda/NFS-e, sem depender do operador do caixa.
+
+O grupo não define alíquota municipal universal. LC 116/2003 art. 8º e 8º-A:
+limites gerais entre 2% e 5% (com exceções). O percentual exigível de
+cada município e o recolhimento no Simples dependem de detalhes que não
+podem ser deduzidos somente do código nacional. O cadastro do grupo
+permite informar a alíquota com código IBGE do município e referência legal.
+A preparação de NFS-e bloqueia a utilização de alíquota configurada para
+outro município ou sem origem legal.
+
+Fonte LC 116: https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp116.htm
+Layout NFS-e produção:
+https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual
+Documentação da Reforma Tributária NFS-e (atualizada 02/10/2026):
+https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/rtc
+
+Nenhum dos grupos constitui apuração de ISS do Simples, classificação
+autônoma por CNAE/NBS, ou autorização NFS-e em produção. **O NEXTOR
+ainda não tem transmissor NFS-e próprio integrado ao ambiente nacional**;
+o que fica pronto é o cadastro padronizado e a classificação consistente
+na preparação da venda. Os códigos de serviços não podem suprir a falta
+de credenciamento, municipalização, integração com provedor ou apuração
+correta do ISS, IBS e CBS.
+
+A tela do grupo apresenta apenas os campos pertinentes ao tipo
+produto/serviço, sem mensagens técnicas no cadastro do usuário.
