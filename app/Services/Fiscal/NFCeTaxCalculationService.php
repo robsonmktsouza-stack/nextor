@@ -24,13 +24,15 @@ final class NFCeTaxCalculationService
         if (!preg_match('/^[0-8]$/', $origin)) {
             throw new RuntimeException('Origem da mercadoria ausente ou inválida.');
         }
-        if (!in_array($crt, ['1', '4'], true)) {
+        if (!in_array($crt, ['1', '2', '3', '4'], true)) {
             throw new RuntimeException("CRT {$crt} não possui emissão NFC-e parametrizada neste serviço.");
         }
         if ($crt === '4' && ($cfop !== '5102' || !in_array($csosn, ['102','300'], true))) {
             throw new RuntimeException('MEI (CRT 4) exige CFOP 5102 e CSOSN 102 ou 300 na NFC-e deste fluxo.');
         }
-        if (in_array($csosn, ['102', '103', '300', '400'], true)) {
+        if (in_array($crt, ['2','3'], true)) {
+            $icms = $this->normalIcMS($tax, $item, $cfop, $origin);
+        } elseif (in_array($csosn, ['102', '103', '300', '400'], true)) {
             if (!in_array($cfop, self::SIMPLE_CFOPS, true)) {
                 throw new RuntimeException("CFOP {$cfop} incompatível com CSOSN {$csosn} na NFC-e.");
             }
@@ -76,6 +78,40 @@ final class NFCeTaxCalculationService
             'pis' => $this->contribution('pis', $tax, $base, $qty),
             'cofins' => $this->contribution('cofins', $tax, $base, $qty),
         ];
+    }
+
+
+    private function normalIcMS(array $tax, array $item, string $cfop, string $origin): array
+    {
+        $cst = (string)($tax['icms_cst'] ?? '');
+        if (!in_array($cst, ['00', '20'], true)) {
+            throw new RuntimeException("CST ICMS {$cst} do regime normal não possui cálculo mapeado.");
+        }
+        if (!in_array($cfop, self::SIMPLE_CFOPS, true)) {
+            throw new RuntimeException("CFOP {$cfop} não contemplado para ICMS CST {$cst} na NFC-e.");
+        }
+        $mod = (string)($tax['mod_bc'] ?? '');
+        if (!in_array($mod, ['0','1','2','3'], true)) {
+            throw new RuntimeException('Informe modalidade de BC do ICMS para regime normal.');
+        }
+        $quantity = $this->decimal($item['quantity'] ?? null, 'Quantidade');
+        $unit = $this->decimal($item['unit_price'] ?? null, 'Preço unitário');
+        $discount = $this->decimal($item['discount'] ?? 0, 'Desconto');
+        $net = round($quantity * $unit, 2, PHP_ROUND_HALF_UP) - $discount;
+        if ($quantity <= 0 || $net < 0) {
+            throw new RuntimeException('Base de cálculo ICMS inválida.');
+        }
+        $rate = $this->rate($tax, 'icms_rate');
+        $fields = ['orig'=>$origin, 'CST'=>$cst, 'modBC'=>$mod];
+        if ($cst === '20') {
+            $reduction = $this->rate($tax, 'base_reduction_rate');
+            $fields['pRedBC'] = $reduction;
+            $net = round($net * (1 - (float)$reduction / 100), 2, PHP_ROUND_HALF_UP);
+        }
+        $fields['vBC'] = number_format($net, 2, '.', '');
+        $fields['pICMS'] = $rate;
+        $fields['vICMS'] = number_format(round($net * (float)$rate / 100, 2, PHP_ROUND_HALF_UP), 2, '.', '');
+        return $fields;
     }
 
     private function contribution(string $type, array $tax, float $base, float $qty): array
