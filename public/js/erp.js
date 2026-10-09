@@ -1258,6 +1258,7 @@
     const apply=card.querySelector('[data-bulk-apply]');
     const fiscalXml=card.querySelector('[data-fiscal-download-xml]');
     const fiscalAuxiliary=card.querySelector('[data-fiscal-download-auxiliary]');
+    const fiscalCancel=card.querySelector('[data-fiscal-cancel]');
     const fiscalUtilities=card.querySelector('[data-fiscal-utilities]');
 
     const update=()=>{
@@ -1273,6 +1274,7 @@
       card.querySelectorAll('[data-requires-single]').forEach(b=>b.disabled=selected.length!==1);
       if(fiscalXml) fiscalXml.disabled=selected.length===0 || selected.some(x=>x.dataset.fiscalXml!=='1');
       if(fiscalAuxiliary) fiscalAuxiliary.disabled=selected.length!==1 || !selected[0]?.dataset.fiscalAuxiliaryUrl;
+      if(fiscalCancel) fiscalCancel.disabled=selected.length!==1 || selected[0]?.dataset.fiscalCancellable!=='1';
       if(menu) menu.disabled=selected.length===0;
       if(apply) apply.disabled=selected.length===0 || !menu?.value;
     };
@@ -1299,6 +1301,20 @@
       if(!url) return;
       fiscalUtilities.open=false;
       window.open(url,'_blank','noopener');
+    });
+    fiscalCancel?.addEventListener('click',()=>{
+      const selected=selectedChecks(card);
+      if(selected.length!==1 || selected[0].dataset.fiscalCancellable!=='1') return;
+      const cancelUrl=selected[0].dataset.fiscalCancelUrl;
+      const dialog=document.getElementById('nfceCancelDialog');
+      const form=dialog?.querySelector('form');
+      if(!cancelUrl || !form || !dialog) return;
+      form.action=cancelUrl;
+      form.reset();
+      const identification=dialog.querySelector('[data-fiscal-cancel-identification]');
+      if(identification) identification.textContent='NFC-e '+(selected[0].dataset.fiscalDocumentLabel || selected[0].value);
+      fiscalUtilities.open=false;
+      dialog.showModal();
     });
     fiscalUtilities?.addEventListener('keydown',event=>{
       if(event.key==='Escape'){
