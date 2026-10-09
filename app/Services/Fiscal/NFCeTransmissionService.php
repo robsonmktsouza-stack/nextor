@@ -280,7 +280,11 @@ final class NFCeTransmissionService
         }
     }
 
-    private function configure(
+    /**
+     * Centraliza certificado, SSL, schemas, ambiente e CSC para operações
+     * fiscais da mesma empresa, inclusive eventos e inutilização.
+     */
+    public function configure(
         ACBrNFeService $service,
         CompanySetting $company,
         FiscalDocumentJob $job,
