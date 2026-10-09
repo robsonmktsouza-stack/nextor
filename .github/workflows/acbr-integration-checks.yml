@@ -24,6 +24,7 @@ jobs:
             app/Services/Fiscal/FiscalDocumentSettings.php \
             app/Services/Fiscal/FiscalDocumentUtilityService.php \
             app/Http/Controllers/FiscalUtilitiesController.php \
+            app/Http/Controllers/NFCeManualController.php \
             app/Services/Fiscal/NFSeTaxRuleApplicationService.php \
             app/Services/Fiscal/NFCePreflightService.php \
             app/Models/FiscalTaxRule.php \
@@ -79,6 +80,7 @@ jobs:
             tests/Feature/FiscalFcpRulePersistenceTest.php \
             tests/Unit/NFCeDanfeServiceTest.php \
             tests/Feature/NFCePrintSettingsTest.php \
+            tests/Feature/NFCeManualEditorTest.php \
             tests/Unit/NFCeSefazResponseParserTest.php; do
             php -l "$f"
           done
@@ -99,6 +101,7 @@ jobs:
           php artisan route:list --path=reference/fiscal-codes
           php artisan route:list --path=fiscal/tax-groups
           php artisan route:list --path=fiscal/utilities
+          php artisan route:list --path=fiscal/nfce
           php artisan route:list --path=danfe
           php artisan route:list --path=fiscal/utilities
           php artisan view:cache
@@ -107,7 +110,7 @@ jobs:
         env:
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
-        run: php vendor/bin/phpunit --filter='NFCe|FiscalTaxRule|FiscalTaxGroup|FiscalFcpRule|FiscalCodeCatalog|FiscalServicePreset|NFSeTaxRuleApplication|FiscalUtilities|NFCePrintSettings'
+        run: php vendor/bin/phpunit --filter='NFCe|FiscalTaxRule|FiscalTaxGroup|FiscalFcpRule|FiscalCodeCatalog|FiscalServicePreset|NFSeTaxRuleApplication|FiscalUtilities|NFCePrintSettings|NFCeManualEditor'
 
       - name: Full Laravel regression suite
         env:
