@@ -7,6 +7,8 @@ use App\Models\FiscalDocumentJob;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Queue;
+use App\Jobs\GenerateNFCeDanfePdfJob;
 use Tests\TestCase;
 
 final class NFCePrintSettingsTest extends TestCase
@@ -83,25 +85,59 @@ final class NFCePrintSettingsTest extends TestCase
             ->assertSessionHasErrors('nfce_paper');
     }
 
-    public function test_nfce_opens_native_chrome_pdf_viewer_not_an_html_print_dialog(): void
+    public function test_cached_nfce_pdf_opens_in_native_chrome_viewer_without_loading_acbr_in_web(): void
     {
         Storage::fake('local');
         $this->actingAs($this->admin());
         $job=$this->document();
-        $renderer=\Mockery::mock(\App\Services\Fiscal\NFCePdfService::class);
-        $renderer->shouldReceive('render')->times(3)->andReturn('%PDF-1.7'."\n".'TEST PDF');
-        $this->app->instance(\App\Services\Fiscal\NFCePdfService::class,$renderer);
+        $pdf=app(\App\Services\Fiscal\NFCePdfService::class);
+        $xml=Storage::disk('local')->get($job->xml_path);
 
         foreach (['58','80','a4'] as $paper) {
             AppSetting::put('printing','nfce_paper',$paper);
+            $path=$pdf->storedPath($job,$xml);
+            Storage::disk('local')->put($path,"%PDF-1.7\nTEST PDF\n%%EOF");
             $this->get(route('fiscal.nfce.danfe',['fiscalDocumentJob'=>$job,'paper'=>'58']))
                 ->assertOk()
                 ->assertHeader('Content-Type','application/pdf')
-                ->assertHeader('Content-Disposition','inline; filename="DANFE-NFCe-1-1.pdf"')
-                ->assertSee('%PDF-1.7',false)
-                ->assertDontSee('window.print()',false)
-                ->assertDontSee('danfe-tools',false);
+                ->assertHeader('Content-Disposition','inline; filename="DANFE-NFCe-1-1.pdf"');
         }
+    }
+
+    public function test_missing_pdf_is_queued_for_worker_without_loading_native_library_in_web(): void
+    {
+        Storage::fake('local');
+        Queue::fake();
+        config()->set('queue.default','database');
+        $this->actingAs($this->admin());
+        $job=$this->document();
+
+        $this->get(route('fiscal.nfce.danfe',$job))
+            ->assertStatus(202)
+            ->assertSee('Preparando DANFE');
+        Queue::assertPushed(GenerateNFCeDanfePdfJob::class,1);
+
+        $this->get(route('fiscal.nfce.danfe',['fiscalDocumentJob'=>$job,'status'=>1]))
+            ->assertOk()
+            ->assertJson(['status'=>'pending']);
+    }
+
+    public function test_pdf_worker_persists_valid_real_pdf_without_retransmitting_nfce(): void
+    {
+        Storage::fake('local');
+        $job=$this->document();
+        $xml=Storage::disk('local')->get($job->xml_path);
+        $renderer=\Mockery::mock(\App\Services\Fiscal\NFCePdfService::class)->makePartial();
+        $renderer->shouldReceive('render')
+            ->once()->andReturn("%PDF-1.7\nPDF GENERATED\n%%EOF");
+        $this->app->instance(\App\Services\Fiscal\NFCePdfService::class,$renderer);
+
+        app(GenerateNFCeDanfePdfJob::class,['fiscalDocumentJobId'=>$job->id])
+            ->handle($renderer,app(\App\Services\Fiscal\NFCeDanfeService::class));
+
+        $path=$renderer->storedPath($job,$xml);
+        Storage::disk('local')->assertExists($path);
+        self::assertSame('authorized',$job->fresh()->status);
     }
 
     public function test_previous_receipt_width_remains_fallback_until_paper_is_configured(): void
