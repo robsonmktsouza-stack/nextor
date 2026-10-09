@@ -1166,6 +1166,9 @@
     const count=card.querySelector('[data-selection-count]');
     const menu=card.querySelector('[data-bulk-menu]');
     const apply=card.querySelector('[data-bulk-apply]');
+    const fiscalXml=card.querySelector('[data-fiscal-download-xml]');
+    const fiscalAuxiliary=card.querySelector('[data-fiscal-download-auxiliary]');
+    const fiscalUtilities=card.querySelector('[data-fiscal-utilities]');
 
     const update=()=>{
       const all=getAll();
@@ -1178,6 +1181,8 @@
       card.querySelectorAll('[data-bulk-submit]').forEach(b=>b.disabled=selected.length===0);
       card.querySelectorAll('[data-requires-selection]').forEach(b=>b.disabled=selected.length===0);
       card.querySelectorAll('[data-requires-single]').forEach(b=>b.disabled=selected.length!==1);
+      if(fiscalXml) fiscalXml.disabled=selected.length===0 || selected.some(x=>x.dataset.fiscalXml!=='1');
+      if(fiscalAuxiliary) fiscalAuxiliary.disabled=selected.length!==1 || !selected[0]?.dataset.fiscalAuxiliaryUrl;
       if(menu) menu.disabled=selected.length===0;
       if(apply) apply.disabled=selected.length===0 || !menu?.value;
       if(count){
@@ -1193,6 +1198,30 @@
         return;
       }
       if(event.target.matches?.('[data-row-select]') || event.target===menu) update();
+    });
+
+    fiscalXml?.addEventListener('click',()=>{
+      const selected=selectedChecks(card);
+      if(!selected.length || selected.some(x=>x.dataset.fiscalXml!=='1')) return;
+      fiscalUtilities.open=false;
+      submitBulkForm('fiscal-xml-download',selected.map(x=>x.value));
+    });
+    fiscalAuxiliary?.addEventListener('click',()=>{
+      const selected=selectedChecks(card);
+      if(selected.length!==1) return;
+      const url=selected[0].dataset.fiscalAuxiliaryUrl;
+      if(!url) return;
+      fiscalUtilities.open=false;
+      window.open(url,'_blank','noopener');
+    });
+    fiscalUtilities?.addEventListener('keydown',event=>{
+      if(event.key==='Escape'){
+        fiscalUtilities.open=false;
+        fiscalUtilities.querySelector('summary')?.focus();
+      }
+    });
+    document.addEventListener('click',event=>{
+      if(fiscalUtilities?.open && !fiscalUtilities.contains(event.target)) fiscalUtilities.open=false;
     });
 
     card.querySelectorAll('[data-bulk-submit]').forEach(button=>button.addEventListener('click',async()=>{
