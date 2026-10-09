@@ -21,7 +21,7 @@ final class NFCeFiscalProfileService
     /**
      * @return array{origin:string,name:string,revision:int,tax:array}
      */
-    public function classify(array $item, ?string $date = null): array
+    public function classify(array $item, ?string $date = null, string $crt = '1'): array
     {
         if (($item['item_type'] ?? '') !== 'product') {
             throw new RuntimeException('Este documento aceita somente produtos cadastrados.');
@@ -74,7 +74,7 @@ final class NFCeFiscalProfileService
             return $this->fromGroup($group, 'Grupo do produto');
         }
 
-        $rule = $this->rules->resolve('nfce', 'BA', 'BA', '1', $item, $day);
+        $rule = $this->rules->resolve('nfce', 'BA', 'BA', $crt, $item, $day);
         if ($rule) {
             if (!in_array($rule->csosn, ['102','103','300','400','500'], true)
                 || !in_array($rule->pis_cst, ['01','02','03','04','06','07','08','09','49','99'], true)
