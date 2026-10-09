@@ -32,7 +32,7 @@
         <tr>
           <td class="nowrap">{{ $group->id }}</td>
           <td><a class="table-link" href="{{ route('fiscal.tax-groups.edit',$group) }}">{{ $group->name }}</a>
-            <small class="table-subtitle">Revisão {{ $group->revision }} @if($group->preset_key) @endif @if($group->is_default) · Padrão para {{ $group->kind==='products' ? 'produtos' : 'serviços' }} @endif</small>
+            <small class="table-subtitle">Revisão {{ $group->revision }} @if($group->is_default) · Padrão para {{ $group->kind==='products' ? 'produtos' : 'serviços' }} @endif</small>
           </td>
           <td><span class="code-tag">{{ $group->kind==='products' ? 'Produtos' : 'Serviços' }}</span></td>
           <td>{{ $group->cfop_pattern ?: '—' }}</td>
