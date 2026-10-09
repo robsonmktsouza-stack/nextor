@@ -629,7 +629,8 @@
           </select>
         </label>
         <label><span>Justificativa *</span><textarea name="reason" id="pdvCancelNfceReason" rows="4" minlength="15" maxlength="255" required></textarea></label>
-        <div class="pdv-operation-note">O Nextor registra a solicitação na fila fiscal. A efetivação depende do motor fiscal transmitir o evento à SEFAZ.</div>
+        <label class="pdv-operation-note"><input type="checkbox" name="no_circulation" value="1" required> Confirmo que a mercadoria não circulou e a operação não foi concluída fisicamente.</label>
+        <div class="pdv-operation-note">Cancelamento normal na BA: até 30 minutos da autorização. A situação só mudará após resposta oficial da SEFAZ.</div>
         <button class="pdv-modal-primary" type="submit">Colocar cancelamento na fila <kbd>Ctrl+Enter</kbd></button>
       @else
         <div class="pdv-operation-empty">Nenhuma NFC-e autorizada disponível para cancelamento.</div>
