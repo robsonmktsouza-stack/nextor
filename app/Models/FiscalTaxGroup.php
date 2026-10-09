@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 final class FiscalTaxGroup extends Model
 {
     protected $fillable = [
-        'name','kind','is_active','is_default','revision','cfop_pattern',
+        'name','kind','is_active','is_default','revision','cfop_pattern','preset_key','target_crt',
         'nfce_csosn','icms_csosn','icms_cst','pis_cst','cofins_cst',
         'ipi_cst','iss_exigibility','tax_config','notes',
     ];
