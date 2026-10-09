@@ -176,16 +176,25 @@ final class NFCeFiscalProfileServiceTest extends TestCase
         app(NFCeFiscalProfileService::class)->classify($item, '2026-10-08');
     }
 
-    public function test_configured_product_tax_rate_never_silently_becomes_zero(): void
+    public function test_product_rate_cannot_silently_become_zero_when_group_does_not_calculate_it(): void
     {
         $group = $this->createGroup();
         $item = $this->item(21, $group->id);
         $item['tax_defaults'] = ['pis_rate' => '1.65'];
 
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('pis_rate');
+        $result = app(NFCeFiscalProfileService::class)->classify($item, '2026-10-08');
+        $configured = array_replace($item['tax_defaults'], $result['tax']);
+        self::assertSame('1.65', $configured['pis_rate']);
 
-        app(NFCeFiscalProfileService::class)->classify($item, '2026-10-08');
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Configure cálculo percentual');
+        app(\App\Services\Fiscal\NFCeTaxCalculationService::class)->calculate([
+            'origin' => '0',
+            'quantity' => '1.000',
+            'unit_price' => '10.00',
+            'discount' => '0.00',
+            'tax_defaults' => $configured,
+        ]);
     }
 
     public function test_missing_ncm_blocks_classification(): void
