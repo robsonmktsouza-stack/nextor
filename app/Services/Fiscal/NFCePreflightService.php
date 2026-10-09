@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Storage;
 
 final class NFCePreflightService
 {
+    public function __construct(private readonly NFCeTaxCalculationService $calculator) {}
+
     public function validate(FiscalDocumentJob $job): array
     {
         $errors = [];
@@ -86,13 +88,12 @@ final class NFCePreflightService
                 if (!preg_match('/^5\d{3}$/', $cfop)) {
                     $errors[] = "Item {$n}: configure CFOP interno válido.";
                 }
-                // Não presumir tributação: até ampliar os grupos, aceitamos
-                // somente as situações implementadas integralmente no gerador.
-                if ($csosn !== '102') {
-                    $errors[] = "Item {$n}: CSOSN {$csosn} ainda não implementado; necessário enquadramento 102 válido para a operação.";
-                }
-                if ($pis !== '49' || $cofins !== '49') {
-                    $errors[] = "Item {$n}: PIS e COFINS exigem CST 49 para o fluxo inicial.";
+                // Compartilha o mesmo validador/cálculo utilizado no INI ACBr.
+                // Nenhum perfil não implementado pode chegar à transmissão.
+                try {
+                    $this->calculator->calculate($item);
+                } catch (\RuntimeException $exception) {
+                    $errors[] = "Item {$n}: ".$exception->getMessage();
                 }
                 if ((float) ($item['quantity'] ?? 0) <= 0 || (float) ($item['unit_price'] ?? -1) < 0) {
                     $errors[] = "Item {$n}: quantidade ou preço inválido.";
