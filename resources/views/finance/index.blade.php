@@ -1,6 +1,5 @@
 @extends('layouts.app')
 @section('title',$type==='payable'?'Pagamentos':($type==='receivable'?'Recebimentos':'Lançamentos financeiros'))
-@section('titleMeta'){{ $entries->total() }} registro(s)@endsection
 @section('content')
 @include('finance._nav')
 
@@ -105,7 +104,6 @@
         </select>
         <button class="bulk-apply" type="button" data-bulk-apply disabled>Aplicar</button>
       </div>
-      <span class="selection-count" data-selection-count hidden></span>
 
       <form id="finance-bulk-cancel" method="post" action="{{ route('finance.entries.bulk-action') }}" hidden>
         @csrf
