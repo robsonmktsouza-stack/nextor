@@ -20,6 +20,7 @@ jobs:
           for f in \
             app/Services/Fiscal/ACBr/ACBrNFeService.php \
             app/Services/Fiscal/NFCeIniBuilder.php \
+            app/Services/Fiscal/NFCeTaxCalculationService.php \
             app/Services/Fiscal/NFCePreflightService.php \
             app/Models/FiscalTaxRule.php \
             app/Models/FiscalTaxGroup.php \
@@ -52,6 +53,7 @@ jobs:
             app/Http/Controllers/FiscalController.php \
             app/Console/Commands/ACBrNFCeStatus.php \
             tests/Feature/NFCeIniBuilderTest.php \
+            tests/Unit/NFCeTaxCalculationServiceTest.php \
             tests/Feature/FiscalTaxRuleResolverTest.php \
             tests/Feature/NFCeFiscalProfileServiceTest.php \
             tests/Feature/NFCeAutomaticFiscalConfigurationTest.php \
