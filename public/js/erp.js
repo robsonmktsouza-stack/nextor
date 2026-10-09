@@ -176,10 +176,14 @@
     });
   });
 
-  // Loading global do Nextor: bloqueia a interface enquanto qualquer operação está em andamento.
+  // Loading global: somente operações que realmente mantêm a página aguardando.
+  // Downloads não geram pagehide e não podem bloquear a interface.
   let loadingCount=0;
+  let loadingGeneration=0;
   let loadingTimer=null;
+  let loadingWatchdogTimer=null;
   let navigationLoadingTimer=null;
+  let navigationDismissTimer=null;
   const loadingOverlay=document.createElement('div');
   loadingOverlay.id='nextorLoading';
   loadingOverlay.className='nextor-loading';
@@ -196,51 +200,65 @@
     document.body.setAttribute('aria-busy',active?'true':'false');
     if(appRoot) appRoot.inert=active;
   };
-
+  const clearNavigationLoading=()=>{
+    if(navigationLoadingTimer){clearTimeout(navigationLoadingTimer);navigationLoadingTimer=null;}
+    if(navigationDismissTimer){clearTimeout(navigationDismissTimer);navigationDismissTimer=null;}
+    if(loadingOverlay.classList.contains('navigation-only')){
+      loadingOverlay.classList.remove('show','navigation-only');
+      loadingOverlay.hidden=true;
+    }
+  };
+  const resetLoading=()=>{
+    // Invalida finalizações tardias de fetch/XHR após o timeout ou navegação.
+    loadingGeneration++;
+    loadingCount=0;
+    if(loadingTimer){clearTimeout(loadingTimer);loadingTimer=null;}
+    if(loadingWatchdogTimer){clearTimeout(loadingWatchdogTimer);loadingWatchdogTimer=null;}
+    clearNavigationLoading();
+    loadingOverlay.classList.remove('show','navigation-only');
+    loadingOverlay.hidden=true;
+    setLoadingState(false);
+  };
   const beginLoading=(message='Carregando...')=>{
+    clearNavigationLoading();
+    if(loadingCount===0){
+      if(loadingWatchdogTimer) clearTimeout(loadingWatchdogTimer);
+      loadingWatchdogTimer=setTimeout(()=>{
+        if(loadingCount<=0) return;
+        resetLoading();
+        nextorNotify('A operação está demorando. Confira o resultado antes de repetir, pois o servidor pode continuar processando.',{
+          type:'warning',title:'Tempo de espera excedido',duration:8000
+        });
+      },30000);
+    }
     loadingCount++;
     const text=loadingOverlay.querySelector('.nextor-loading-text');
     if(text) text.textContent=message;
-
-    // Requisições rápidas não precisam piscar o overlay. A interface só é
-    // bloqueada quando o carregamento realmente ultrapassa este pequeno limiar.
+    loadingOverlay.classList.remove('navigation-only');
     if(!loadingTimer && loadingOverlay.hidden){
       loadingTimer=setTimeout(()=>{
         loadingTimer=null;
         if(loadingCount>0){
           setLoadingState(true);
           loadingOverlay.hidden=false;
-          requestAnimationFrame(()=>loadingOverlay.classList.add('show'));
+          requestAnimationFrame(()=>{if(loadingCount>0)loadingOverlay.classList.add('show');});
         }
       },140);
     }
+    return loadingGeneration;
   };
-
-  const endLoading=()=>{
-    loadingCount=Math.max(0,loadingCount-1);
+  const endLoading=(generation=loadingGeneration)=>{
+    if(generation!==loadingGeneration || loadingCount===0) return;
+    loadingCount--;
     if(loadingCount>0) return;
     if(loadingTimer){clearTimeout(loadingTimer);loadingTimer=null;}
-
-    loadingOverlay.classList.remove('show');
-    setLoadingState(false);
-
-    // Esconde praticamente junto com o fim da resposta, sem segurar a tela.
-    setTimeout(()=>{
-      if(loadingCount===0) loadingOverlay.hidden=true;
-    },40);
-  };
-
-  const resetLoading=()=>{
-    loadingCount=0;
-    if(loadingTimer){clearTimeout(loadingTimer);loadingTimer=null;}
-    if(navigationLoadingTimer){clearTimeout(navigationLoadingTimer);navigationLoadingTimer=null;}
+    if(loadingWatchdogTimer){clearTimeout(loadingWatchdogTimer);loadingWatchdogTimer=null;}
     loadingOverlay.classList.remove('show','navigation-only');
-    loadingOverlay.hidden=true;
     setLoadingState(false);
+    setTimeout(()=>{if(loadingCount===0)loadingOverlay.hidden=true;},40);
   };
-
   const beginNavigationLoading=()=>{
-    if(navigationLoadingTimer) clearTimeout(navigationLoadingTimer);
+    clearNavigationLoading();
     navigationLoadingTimer=setTimeout(()=>{
       navigationLoadingTimer=null;
       if(loadingCount>0) return;
@@ -248,62 +266,75 @@
       if(text) text.textContent='Carregando...';
       loadingOverlay.classList.add('navigation-only');
       loadingOverlay.hidden=false;
-      requestAnimationFrame(()=>loadingOverlay.classList.add('show'));
-    },90);
+      requestAnimationFrame(()=>{
+        if(loadingOverlay.classList.contains('navigation-only'))loadingOverlay.classList.add('show');
+      });
+      // Um link pode gerar download ou ter sua navegação interceptada.
+      // Sem pagehide, a indicação deve desaparecer sozinha.
+      navigationDismissTimer=setTimeout(()=>{navigationDismissTimer=null;clearNavigationLoading();},7000);
+    },120);
   };
+  window.NextorLoading={show:beginLoading,hide:()=>endLoading(),reset:resetLoading};
 
-  window.NextorLoading={show:beginLoading,hide:endLoading,reset:resetLoading};
-
-  // Toda chamada fetch passa automaticamente pelo loading global.
+  // Fetch/XHR têm eventos de conclusão; cada requisição encerra apenas seu token.
   const nativeFetch=window.fetch.bind(window);
   window.NextorFetch=nativeFetch;
   window.fetch=async(...args)=>{
-    beginLoading('Carregando...');
+    const generation=beginLoading('Carregando...');
     try{return await nativeFetch(...args);}
-    finally{endLoading();}
+    finally{endLoading(generation);}
   };
 
-  // Requisições XMLHttpRequest futuras também seguem o mesmo padrão.
   const nativeXhrSend=XMLHttpRequest.prototype.send;
   XMLHttpRequest.prototype.send=function(...args){
-    beginLoading('Carregando...');
-    this.addEventListener('loadend',endLoading,{once:true});
+    const generation=beginLoading('Carregando...');
+    this.addEventListener('loadend',()=>endLoading(generation),{once:true});
     try{return nativeXhrSend.apply(this,args);}
-    catch(error){endLoading();throw error;}
+    catch(error){endLoading(generation);throw error;}
   };
 
-  // Submissões comuns de formulários.
+  const skipsFormLoading=form=>form.hasAttribute('data-no-loading')
+    || (form.target && form.target!=='_self');
+
   document.addEventListener('submit',event=>{
     const form=event.target;
-    if(!(form instanceof HTMLFormElement) || form.hasAttribute('data-no-loading')) return;
-    beginLoading('Salvando...');
-    setTimeout(()=>{if(event.defaultPrevented) endLoading();},0);
+    if(!(form instanceof HTMLFormElement) || skipsFormLoading(form))return;
+    const generation=beginLoading('Salvando...');
+    // Outros componentes podem cancelar o submit para confirmar, validar ou
+    // executar a ação por AJAX. Nesse caso não houve navegação.
+    setTimeout(()=>{if(event.defaultPrevented)endLoading(generation);},0);
   });
 
-  // form.submit() não dispara o evento submit; cobre ações em massa e submits programáticos.
+  // form.submit() não dispara submit: proteger operações programáticas, exceto downloads.
   const nativeFormSubmit=HTMLFormElement.prototype.submit;
   HTMLFormElement.prototype.submit=function(){
-    if(!this.hasAttribute('data-no-loading')) beginLoading('Processando...');
-    return nativeFormSubmit.call(this);
+    if(skipsFormLoading(this))return nativeFormSubmit.call(this);
+    const generation=beginLoading('Processando...');
+    try{return nativeFormSubmit.call(this);}
+    catch(error){endLoading(generation);throw error;}
   };
 
-  // Navegação GET comum mantém apenas a bolinha visual, sem bloquear a interface.
+  // GET normais: apenas indicador não bloqueante. Arquivos não navegam.
   document.addEventListener('click',event=>{
     const link=event.target.closest?.('a[href]');
-    if(!link || link.hasAttribute('data-no-loading') || link.hasAttribute('download')) return;
-    if(link.target && link.target!=='_self') return;
-    if(event.ctrlKey||event.metaKey||event.shiftKey||event.altKey||event.button!==0) return;
+    if(!link || link.hasAttribute('data-no-loading') || link.hasAttribute('download'))return;
+    if(link.target && link.target!=='_self')return;
+    if(event.ctrlKey||event.metaKey||event.shiftKey||event.altKey||event.button!==0)return;
     const raw=link.getAttribute('href')||'';
-    if(!raw || raw.startsWith('#') || raw.startsWith('javascript:') || raw.startsWith('mailto:') || raw.startsWith('tel:')) return;
+    if(!raw || raw.startsWith('#') || /^(?:javascript:|mailto:|tel:)/i.test(raw))return;
     let url;
     try{url=new URL(link.href,window.location.href);}catch(_){return;}
-    if(url.origin!==window.location.origin) return;
-    beginNavigationLoading();
+    if(url.origin!==window.location.origin)return;
+    // Mesmo sem atributo download, alguns endpoints respondem com attachment.
+    if(/\\.(?:xml|pdf|csv|xlsx?|zip)(?:$|[?#])/i.test(url.pathname)
+      || /\\/(?:download|export)(?:\\/|$)/i.test(url.pathname)
+      || /\\/(?:xml|danfe)(?:\\/|$)/i.test(url.pathname))return;
+    setTimeout(()=>{if(!event.defaultPrevented)beginNavigationLoading();},0);
   });
 
-  // Ao voltar pelo histórico/bfcache, nunca mantém a tela bloqueada.
-  window.addEventListener('pageshow',event=>{if(event.persisted) resetLoading();});
-
+  // O navegador pode restaurar páginas ou impedir a navegação (download).
+  window.addEventListener('pageshow',resetLoading);
+  window.addEventListener('pagehide',resetLoading);
   const uiSelectIconSvg={
     product:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 7 9-4 9 4v10l-9 4-9-4V7ZM3 7l9 4 9-4M12 11v10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     service:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6V4h6v2M4 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2ZM2 12h20M9 12v2h6v-2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
