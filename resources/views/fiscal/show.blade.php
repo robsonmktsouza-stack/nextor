@@ -27,6 +27,22 @@
          ? 'Baixar XML autorizado' : 'Baixar XML assinado' }}
     </a>
   @endif
+  @if($tab==='nfce' && $document->emission_mode==='offline'
+      && in_array($document->status,['offline_signed','offline_print_pending','offline_sending','pending'],true)
+      && $document->xml_path && auth()->user()->canAccess('fiscal'))
+    <a class="btn btn-primary" target="_blank" rel="noopener noreferrer" href="{{ route('fiscal.nfce.danfe',$document) }}">
+      @include('partials.icon',['name'=>'print','size'=>16]) DANFE contingência (2 vias)
+    </a>
+  @endif
+  @if($tab==='nfce' && $document->emission_mode==='offline' && $document->status==='offline_signed'
+      && auth()->user()->canAccess('fiscal'))
+    <form method="post" action="{{ route('fiscal.nfce.offline.transmit',$document) }}"
+      data-confirm-submit="A conectividade foi restabelecida? Transmitir a mesma NFC-e assinada à SEFAZ, sem gerar nova chave?"
+      data-confirm-title="Transmitir NFC-e offline" data-confirm-kind="action">
+      @csrf
+      <button type="submit" class="btn btn-success">Transmitir NFC-e pendente</button>
+    </form>
+  @endif
   @if($tab==='nfce' && $document->status==='authorized'
       && (str_ends_with((string)$document->xml_path,'authorized.xml')
           || str_ends_with((string)$document->xml_path,'authorized-recovered.xml'))
