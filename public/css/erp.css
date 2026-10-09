@@ -74,21 +74,21 @@
 .ui-select-trigger:hover:not(:disabled){border-color:#b9c7d5;background:#fcfdff}
 .ui-select-trigger:disabled{background:#f6f8fa;color:#a5afba;cursor:not-allowed}
 .ui-select-value{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ui-select-menu{position:absolute;z-index:500;top:calc(100% + 4px);left:0;min-width:100%;width:max-content;max-width:min(420px,calc(100vw - 28px));max-height:260px;overflow:auto;background:#fff;border:1px solid #cfd7e1;border-radius:4px;box-shadow:0 12px 30px #17283a20;padding:4px}
+.ui-select-menu{position:absolute;z-index:500;top:calc(100% + 4px);left:0;box-sizing:border-box;min-width:100%;width:100%;max-width:min(420px,calc(100vw - 20px));max-height:260px;overflow-y:auto;overflow-x:hidden;background:#fff;border:1px solid #cfd7e1;border-radius:4px;box-shadow:0 12px 30px #17283a20;padding:4px}
 .ui-select-menu[hidden]{display:none}
-.ui-select-option{width:100%;min-height:34px;display:flex;align-items:center;border:0;border-radius:3px;background:#fff;color:#4b5969;padding:7px 10px;font-size:11.5px;text-align:left;white-space:nowrap;cursor:pointer}
+.ui-select-option{width:100%;min-height:34px;display:flex;align-items:center;border:0;border-radius:3px;background:#fff;color:#4b5969;padding:7px 10px;font-size:11.5px;text-align:left;white-space:normal;overflow-wrap:anywhere;line-height:1.35;cursor:pointer}
 .ui-select-option:hover,.ui-select-option.focused{background:#eef5fb;color:#245f91}
 .ui-select-search{position:sticky;top:0;z-index:2;display:block;width:100%;height:35px;margin:0 0 5px;padding:0 10px;background:#fff;border:1px solid #c7d4e2;border-radius:4px;color:#24394e;font:inherit;font-size:12px;outline:none;box-sizing:border-box}
 .ui-select-search:focus{border-color:#2877c7;box-shadow:0 0 0 2px #2877c715}
 .ui-select-option[hidden]{display:none!important}
 .fiscal-cfop-manual{display:block;width:100%;height:38px;margin-top:6px;padding:0 10px;border:1px solid #c7d4e2;border-radius:4px;background:#fff;color:#24394e;box-sizing:border-box}
 .fiscal-cfop-manual[hidden]{display:none!important}
-.ui-select-menu:has(.ui-select-search){min-width:min(380px,calc(100vw - 28px));max-height:min(340px,60vh)}
+.ui-select-menu:has(.ui-select-search){max-height:min(340px,60vh)}
 
 .ui-select-option.selected{background:#2877c7;color:#fff}
 .ui-select-option:disabled{color:#b6bdc6;background:#fff;cursor:not-allowed}
 .ui-select-option.selected:hover{background:#236ab3;color:#fff}
-.input-filter+.ui-select,.toolbar-filters .ui-select{width:auto;min-width:180px}
+.input-filter+.ui-select,.toolbar-filters .ui-select{width:auto;min-width:0;flex:0 1 240px}
 .toolbar-filters .ui-select-trigger{height:34px;font-size:11px}
 .field .ui-select{width:100%}
 .field .ui-select-trigger{height:38px}
@@ -3992,3 +3992,13 @@ body.nfe-modal-open{overflow:hidden}
 /* Inactive panels are completely hidden, not just visually deselected. */
 #nfceEditor [data-nfce-panel][hidden]{display:none!important}
 #nfceEditor [data-nfce-panel]:not([hidden]){display:grid}
+
+/* Menus de filtros não podem ultrapassar o cartão nem deslocar a tabela. */
+.grid-filter-panel .toolbar-filters{min-width:0}
+.grid-filter-panel .toolbar-filters>.table-search-group{flex:1 1 260px;width:min(420px,100%);min-width:150px}
+.grid-filter-panel .toolbar-filters>.ui-select{flex:0 1 240px;width:min(240px,100%);min-width:160px;max-width:100%}
+.ui-select-menu .ui-select-option.has-icon>span:last-child{min-width:0;white-space:normal;overflow-wrap:anywhere}
+@media(max-width:760px){
+  .grid-filter-panel .toolbar-filters>.table-search-group{flex:1 1 100%}
+  .grid-filter-panel .toolbar-filters>.ui-select{flex:1 1 100%;min-width:0}
+}
