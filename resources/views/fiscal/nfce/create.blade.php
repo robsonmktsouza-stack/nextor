@@ -9,7 +9,7 @@
 
 <div class="nextor-modal-layer nfe-modal-layer is-open" id="nfceEditor" aria-hidden="false">
   <div class="erp-dialog nfe-workspace-dialog nextor-modal-window nfe-fixed-shell" role="dialog" aria-modal="true" aria-labelledby="nfceEditorTitle">
-    <form method="post" action="{{ route('fiscal.nfce.store') }}" id="nfceEditorForm" autocomplete="off">
+    <form method="post" action="{{ route('fiscal.nfce.store') }}" id="nfceEditorForm" autocomplete="off" novalidate>
       @csrf
       <div class="dialog-header">
         <div><h2 id="nfceEditorTitle">Nova NFC-e</h2></div>
@@ -22,6 +22,8 @@
             {{ $errors->first() }}
           </div>
         @endif
+
+        <div id="nfceFormError" class="nfce-form-error" role="alert" hidden></div>
 
         <div class="nfe-emitter-summary">
           <div class="nfe-emitter-logo">
