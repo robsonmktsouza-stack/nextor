@@ -5,8 +5,13 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow,noarchive">
   <title>DANFE NFC-e {{ $danfe['series'] }}/{{ $danfe['number'] }}</title>
-  <link rel="stylesheet" href="{{ asset('css/nfce-danfe.css') }}">
-  <script defer src="{{ asset('js/vendor/qrcode-generator.js') }}"></script>
+  @if($pdfExport ?? false)
+    <style>{!! file_get_contents(public_path('css/nfce-danfe.css')) !!}</style>
+    <script>{!! file_get_contents(public_path('js/vendor/qrcode-generator.js')) !!}</script>
+  @else
+    <link rel="stylesheet" href="{{ asset('css/nfce-danfe.css') }}">
+    <script defer src="{{ asset('js/vendor/qrcode-generator.js') }}"></script>
+  @endif
 </head>
 <body data-paper="{{ $paper }}">
 @php
@@ -142,19 +147,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Configuração da impressão vem do NEXTOR. A caixa nativa do Chrome
     // é aberta somente depois do QR Code ter sido renderizado.
-    const printNow=()=>{
+    const preparePaper=()=>{
       const paper=document.body.dataset.paper;
       if(paper==='58'||paper==='80') {
         const sheet=document.createElement('style');
-        const receiptHeight=document.getElementById('danfePaper').getBoundingClientRect().height;
-        const millimeters=Math.ceil(receiptHeight*25.4/96)+8;
+        const height=document.getElementById('danfePaper').getBoundingClientRect().height;
+        const millimeters=Math.ceil(height*25.4/96)+8;
         const pageHeight=Math.max(100,Math.min(millimeters,1500));
         sheet.textContent='@page{size:'+paper+'mm '+pageHeight+'mm;margin:0}';
         document.head.appendChild(sheet);
       }
+      @if($pdfExport ?? false)
+      document.documentElement.dataset.pdfReady='true';
+      @else
       window.print();
+      @endif
     };
-    requestAnimationFrame(()=>requestAnimationFrame(printNow));
+    requestAnimationFrame(()=>requestAnimationFrame(preparePaper));
   } catch(error) {
     document.body.classList.add('print-unavailable');
     qrTarget.textContent='Impressão indisponível: QR Code não gerado.';
