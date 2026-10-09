@@ -225,7 +225,7 @@
   --ui-list-row-height:46px;
   --ui-list-cell-pad-y:6px;
 }
-.app-root.system-comfortable{
+body.system-comfortable .app-root{
   --ui-list-header-height:40px;
   --ui-list-row-height:50px;
   --ui-list-cell-pad-y:7px;
