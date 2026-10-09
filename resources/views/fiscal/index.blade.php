@@ -276,9 +276,7 @@
 
 @if($tab==='nfce')
 <dialog class="erp-dialog small-dialog" id="nfceCancelDialog" aria-labelledby="nfce-cancel-title">
-  <form method="post" data-confirm-submit="Confirma o envio do cancelamento à SEFAZ? O evento autorizado não poderá ser desfeito."
-    data-confirm-title="Confirmar cancelamento fiscal" data-confirm-kind="danger"
-    data-confirm-label="Confirmar cancelamento">
+  <form method="post">
     @csrf
     <div class="dialog-header">
       <div>
