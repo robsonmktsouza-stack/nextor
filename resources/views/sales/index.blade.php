@@ -1,5 +1,4 @@
 @extends('layouts.app')
-@section('titleMeta'){{ $sales->total() }} {{ $sales->total() === 1 ? 'venda' : 'vendas' }}@endsection
 @section('title','Vendas')
 @section('description','Histórico de pedidos e operações comerciais com baixa automática de estoque.')
 @section('content')
@@ -21,7 +20,6 @@
       </select>
       <button class="bulk-apply" type="button" data-bulk-apply disabled>Aplicar</button>
     </div>
-    <span class="selection-count" data-selection-count hidden></span>
   </div>
   <div class="grid-actions-right">
     <a class="period-current" href="{{ route('sales.index', array_merge(request()->except('page','month'), ['month'=>now()->format('Y-m')])) }}">Mês atual</a>
