@@ -97,7 +97,7 @@ jobs:
           if [ -z "$BROWSER" ]; then
             echo "Chromium not available; running static checks only"
           else
-            for case in ui-select-viewport table-row-density; do
+            for case in ui-select-viewport table-row-density searchable-select; do
               "$BROWSER" --headless=new --no-sandbox --disable-gpu --no-first-run \
                 --disable-background-networking --allow-file-access-from-files \
                 --window-size=1100,800 --virtual-time-budget=1800 \
@@ -106,6 +106,7 @@ jobs:
               case "$case" in
                 ui-select-viewport) marker='data-ui-select-test="passed"' ;;
                 table-row-density) marker='data-table-density-test="passed"' ;;
+                searchable-select) marker='data-search-select-test="passed"' ;;
               esac
               grep -q "$marker" "/tmp/nextor-$case.html" || {
                 grep -A2 -B2 'id="testResult"\|id="results"' "/tmp/nextor-$case.html" || true
