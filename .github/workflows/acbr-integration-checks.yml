@@ -90,3 +90,9 @@ jobs:
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
         run: php vendor/bin/phpunit --filter='NFCe|FiscalTaxRule|FiscalTaxGroup|FiscalFcpRule|FiscalCodeCatalog'
+
+      - name: Full Laravel regression suite
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+        run: php vendor/bin/phpunit
