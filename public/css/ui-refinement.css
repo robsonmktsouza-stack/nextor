@@ -348,3 +348,110 @@ body.system-comfortable .app-root{
     transform:none!important;
   }
 }
+
+
+/* Search-select: search happens in the visible field, not in an extra popup.
+ * Only meaningful catalog selectors get this input; short enums stay buttons.
+ * The original native <select> is preserved for Laravel submissions. */
+.ui-select.ui-searchable{
+  position:relative;
+  width:100%;
+  min-width:0;
+}
+.ui-select.ui-searchable .ui-select-trigger{
+  display:block;
+  box-sizing:border-box;
+  width:100%;
+  height:38px;
+  min-height:38px;
+  line-height:normal;
+  padding:0 36px 0 11px;
+  border:1px solid #cbd6df;
+  border-radius:5px;
+  background:#fff;
+  color:#31445b;
+  font-family:inherit;
+  font-size:12px;
+  font-weight:400;
+  text-align:left;
+  text-overflow:ellipsis;
+  cursor:text;
+  appearance:none;
+  -webkit-appearance:none;
+}
+.ui-select.ui-searchable .ui-select-trigger::-webkit-search-cancel-button,
+.ui-select.ui-searchable .ui-select-trigger::-webkit-search-decoration{display:none}
+.ui-select.ui-searchable::after{
+  content:'';
+  position:absolute;
+  top:19px;
+  right:13px;
+  width:7px;
+  height:7px;
+  border-right:1.6px solid #72879a;
+  border-bottom:1.6px solid #72879a;
+  transform:translateY(-65%) rotate(45deg);
+  pointer-events:none;
+  transition:transform .13s;
+}
+.ui-select.ui-searchable.open::after{
+  transform:translateY(-20%) rotate(225deg);
+}
+.ui-select.ui-searchable .ui-select-trigger:hover:not(:disabled){
+  background:#fcfdff;
+  border-color:#9eb6c8;
+}
+.ui-select.ui-searchable .ui-select-trigger:focus{
+  outline:0;
+  border-color:#2f83bf;
+  box-shadow:0 0 0 3px rgba(47,131,191,.14);
+}
+.ui-select.ui-searchable .ui-select-menu{
+  min-width:0;
+  overflow-x:hidden;
+  overflow-y:auto;
+  padding:4px;
+  border-radius:5px;
+}
+.ui-select.ui-searchable .ui-select-option{
+  display:flex;
+  align-items:center;
+  min-height:35px;
+  padding:8px 10px;
+  font-size:12px;
+  line-height:1.35;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+.ui-select.ui-searchable .ui-select-option.has-subtitle:not(.has-icon){
+  flex-direction:column;
+  align-items:flex-start;
+  gap:3px;
+}
+.ui-select .ui-select-option-subtitle{
+  display:block;
+  font-size:10.5px;
+  line-height:1.2;
+  color:#8493a1;
+  font-weight:400;
+  max-width:100%;
+  overflow-wrap:anywhere;
+}
+.ui-select .ui-select-option.selected .ui-select-option-subtitle{
+  color:rgba(255,255,255,.85);
+}
+.ui-select.ui-searchable .ui-select-option:focus-visible{
+  outline:2px solid #438fc6;
+  outline-offset:-2px;
+}
+.toolbar-filters .ui-select.ui-searchable .ui-select-trigger{
+  height:34px;
+  min-height:34px;
+  font-size:11px;
+}
+.toolbar-filters .ui-select.ui-searchable::after{top:17px}
+.table-page-size-form .ui-select.ui-searchable::after{top:18px}
+.sale-items-table .ui-select.ui-searchable .ui-select-trigger{
+  height:37px;
+  min-height:37px;
+}
