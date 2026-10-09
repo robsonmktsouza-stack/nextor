@@ -177,6 +177,12 @@ $origins=[
        <label class="field col-2"><span>Modalidade BC ST</span><input name="tax_defaults[mod_bc_st]" value="{{ data_get($taxDefaults,'mod_bc_st') }}"></label>
        <label class="field col-2"><span>ICMS ST %</span><input type="number" step="0.0001" min="0" name="tax_defaults[icms_st_rate]" value="{{ data_get($taxDefaults,'icms_st_rate') }}"></label>
        <label class="field col-2"><span>MVA %</span><input type="number" step="0.0001" min="0" name="tax_defaults[mva_rate]" value="{{ data_get($taxDefaults,'mva_rate') }}"></label>
+        <label class="field col-3"><span>BC do ICMS-ST retido (R$)</span><input type="number" step="0.01" min="0" name="tax_defaults[icms_st_retained_base]" value="{{ data_get($taxDefaults,'icms_st_retained_base') }}"></label>
+        <label class="field col-3"><span>Valor ICMS-ST retido (R$)</span><input type="number" step="0.01" min="0" name="tax_defaults[icms_st_retained_value]" value="{{ data_get($taxDefaults,'icms_st_retained_value') }}"></label>
+        <label class="field col-2"><span>Alíquota ST retida %</span><input type="number" step="0.0001" min="0" name="tax_defaults[st_retained_rate]" value="{{ data_get($taxDefaults,'st_retained_rate') }}"></label>
+        <label class="field col-2"><span>BC ICMS efetivo (R$)</span><input type="number" step="0.01" min="0" name="tax_defaults[icms_effective_base]" value="{{ data_get($taxDefaults,'icms_effective_base') }}"></label>
+        <label class="field col-2"><span>ICMS efetivo %</span><input type="number" step="0.0001" min="0" name="tax_defaults[icms_effective_rate]" value="{{ data_get($taxDefaults,'icms_effective_rate') }}"></label>
+        <label class="field col-2"><span>Valor ICMS efetivo (R$)</span><input type="number" step="0.01" min="0" name="tax_defaults[icms_effective_value]" value="{{ data_get($taxDefaults,'icms_effective_value') }}"></label>
      </div>
    </div>
 
@@ -185,9 +191,25 @@ $origins=[
      <div class="editor-grid cols-12">
        <label class="field col-2"><span>CST PIS</span><input name="tax_defaults[pis_cst]" value="{{ data_get($taxDefaults,'pis_cst',data_get($taxDefaults,'pis_cst_default')) }}" maxlength="4"></label>
        <label class="field col-2"><span>PIS %</span><input type="number" step="0.0001" min="0" name="tax_defaults[pis_rate]" value="{{ data_get($taxDefaults,'pis_rate') }}"></label>
+        <label class="field col-3"><span>Tipo de cálculo PIS</span>
+          <select name="tax_defaults[pis_calc_type]">
+            <option value="none" @selected(data_get($taxDefaults,'pis_calc_type','none')==='none')>Sem cálculo percentual/quantidade</option>
+            <option value="percentage" @selected(data_get($taxDefaults,'pis_calc_type')==='percentage')>Percentual sobre base</option>
+            <option value="quantity" @selected(data_get($taxDefaults,'pis_calc_type')==='quantity')>Por quantidade</option>
+          </select>
+        </label>
+        <label class="field col-3"><span>Alíquota por unidade PIS (R$)</span><input type="number" step="0.0001" min="0" name="tax_defaults[pis_quantity_rate]" value="{{ data_get($taxDefaults,'pis_quantity_rate') }}"></label>
        <label class="field col-2"><span>CST PIS entrada</span><input name="tax_defaults[pis_cst_inbound]" value="{{ data_get($taxDefaults,'pis_cst_inbound') }}" maxlength="4"></label>
        <label class="field col-2"><span>CST COFINS</span><input name="tax_defaults[cofins_cst]" value="{{ data_get($taxDefaults,'cofins_cst',data_get($taxDefaults,'cofins_cst_default')) }}" maxlength="4"></label>
        <label class="field col-2"><span>COFINS %</span><input type="number" step="0.0001" min="0" name="tax_defaults[cofins_rate]" value="{{ data_get($taxDefaults,'cofins_rate') }}"></label>
+        <label class="field col-3"><span>Tipo de cálculo COFINS</span>
+          <select name="tax_defaults[cofins_calc_type]">
+            <option value="none" @selected(data_get($taxDefaults,'cofins_calc_type','none')==='none')>Sem cálculo percentual/quantidade</option>
+            <option value="percentage" @selected(data_get($taxDefaults,'cofins_calc_type')==='percentage')>Percentual sobre base</option>
+            <option value="quantity" @selected(data_get($taxDefaults,'cofins_calc_type')==='quantity')>Por quantidade</option>
+          </select>
+        </label>
+        <label class="field col-3"><span>Alíquota por unidade COFINS (R$)</span><input type="number" step="0.0001" min="0" name="tax_defaults[cofins_quantity_rate]" value="{{ data_get($taxDefaults,'cofins_quantity_rate') }}"></label>
        <label class="field col-2"><span>CST COFINS entrada</span><input name="tax_defaults[cofins_cst_inbound]" value="{{ data_get($taxDefaults,'cofins_cst_inbound') }}" maxlength="4"></label>
        <label class="field col-2"><span>CST IPI</span><input name="tax_defaults[ipi_cst]" value="{{ data_get($taxDefaults,'ipi_cst',data_get($taxDefaults,'ipi_cst_default')) }}" maxlength="4"></label>
        <label class="field col-2"><span>IPI %</span><input type="number" step="0.0001" min="0" name="tax_defaults[ipi_rate]" value="{{ data_get($taxDefaults,'ipi_rate') }}"></label>
