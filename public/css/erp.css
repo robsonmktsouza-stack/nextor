@@ -3903,9 +3903,9 @@ body.nfe-modal-open{overflow:hidden}
 
 /* NFC-e: ações de detalhe compactas; operações secundárias fora do cabeçalho. */
 .page-heading:has(.fiscal-detail-utilities){position:relative;z-index:30;overflow:visible}
-.page-actions{align-items:center}
-.page-actions>form{display:inline-flex;align-items:center;flex:0 0 auto;margin:0}
-.page-actions>form .btn{width:auto;min-height:38px}
+.page-actions:has(.fiscal-detail-utilities){align-items:center}
+.page-actions:has(.fiscal-detail-utilities)>form{display:inline-flex;align-items:center;flex:0 0 auto;margin:0}
+.page-actions:has(.fiscal-detail-utilities)>form .btn{width:auto;min-height:38px}
 .page-actions .fiscal-detail-utilities{position:relative;display:inline-flex;flex:0 0 auto;z-index:2}
 .page-actions .fiscal-detail-utilities>summary{display:inline-flex;align-items:center;gap:7px;min-height:38px;border-radius:4px;list-style:none;white-space:nowrap}
 .page-actions .fiscal-detail-utilities .fiscal-utilities-dropdown{width:255px;right:0;top:calc(100% + 7px)}
