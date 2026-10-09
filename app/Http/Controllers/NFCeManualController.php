@@ -35,8 +35,7 @@ final class NFCeManualController extends Controller
             ->whereDoesntHave('items',fn($query)=>$query
                 ->where('item_type','!=','product')->orWhereNull('product_id'))
             ->whereNotIn('id',FiscalDocumentJob::query()
-                ->select('sale_id')->whereNotNull('sale_id')
-                ->where('status','!=','cancelled'))
+                ->select('sale_id')->whereNotNull('sale_id'))
             ->latest('id')->limit(100)->get(['id','customer_id','total','operation_date']);
 
         $methods=PaymentMethod::query()->where('is_active',true)
