@@ -5,13 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\FiscalDocumentJob;
 use App\Models\AppSetting;
 use App\Services\Fiscal\NFCeDanfeService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 final class NFCeDanfeController extends Controller
 {
     public function __invoke(
-        Request $request,
         FiscalDocumentJob $fiscalDocumentJob,
         NFCeDanfeService $danfe
     ) {
@@ -36,14 +34,13 @@ final class NFCeDanfeController extends Controller
             abort(409, 'DANFE NFC-e indisponível: '.$e->getMessage());
         }
 
-        $defaultPaper = (string) AppSetting::value('pdv', 'receipt_width', '80');
-        $paper = (string) $request->query('paper', $defaultPaper) === '58' ? '58' : '80';
+        $previousDefault = (string) AppSetting::value('pdv', 'receipt_width', '80');
+        $configured = (string) AppSetting::value('printing', 'nfce_paper', $previousDefault);
+        $paper = in_array($configured, ['58', '80', 'a4'], true) ? $configured : '80';
 
         return response()->view('fiscal.nfce-danfe', [
             'danfe' => $document,
             'paper' => $paper,
-            'printRoute' => $request->routeIs('pdv.nfce.danfe') ? 'pdv.nfce.danfe' : 'fiscal.nfce.danfe',
-            'fiscalDocument' => $fiscalDocumentJob,
         ])->header('Cache-Control', 'private, no-store, no-cache, must-revalidate')
           ->header('X-Content-Type-Options', 'nosniff');
     }
