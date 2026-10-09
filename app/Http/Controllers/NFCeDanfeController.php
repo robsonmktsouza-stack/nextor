@@ -18,17 +18,20 @@ final class NFCeDanfeController extends Controller
         NFCeDanfeService $danfe,
         NFCePdfService $pdf
     ) {
+        $offline=$fiscalDocumentJob->emission_mode==='offline'
+            && in_array($fiscalDocumentJob->status,['offline_signed','offline_print_pending','offline_sending','pending'],true);
         abort_unless($fiscalDocumentJob->document_type === 'nfce'
-            && $fiscalDocumentJob->status === 'authorized', 404);
+            && ($fiscalDocumentJob->status === 'authorized'||$offline), 404);
 
         // Nunca imprimir dados comerciais de uma venda como documento fiscal.
         // Somente um nfeProc autorizado arquivado no diretório privado.
         $directory = 'fiscal/nfce/'.$fiscalDocumentJob->id.'/';
         $path = (string) $fiscalDocumentJob->xml_path;
-        abort_unless(in_array($path, [
-            $directory.'authorized.xml',
-            $directory.'authorized-recovered.xml',
-        ], true), 409, 'O XML autorizado precisa ser recuperado antes de imprimir o DANFE NFC-e.');
+        $allowed=$offline ? [$directory.'signed.xml'] : [
+            $directory.'authorized.xml',$directory.'authorized-recovered.xml',
+        ];
+        abort_unless(in_array($path,$allowed,true), 409,
+            $offline?'XML offline assinado indisponível.':'XML autorizado precisa ser recuperado antes de imprimir.');
 
         $disk = Storage::disk('local');
         abort_unless($disk->exists($path), 409, 'Arquivo autorizado indisponível no armazenamento fiscal.');
