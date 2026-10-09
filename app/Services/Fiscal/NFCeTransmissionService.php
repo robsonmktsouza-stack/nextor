@@ -126,7 +126,7 @@ final class NFCeTransmissionService
                         'access_key' => $signedKey,
                         'protocol' => $status['protocol'],
                         'xml_path' => $xmlPath,
-                        'authorized_at' => now(),
+                        'authorized_at' => \Carbon\Carbon::parse($this->protocolXml->receivedAtIso((string)$status['received_at'])),
                         'processed_at' => now(),
                         'error_message' => $xmlWarning,
                     ]);
@@ -242,7 +242,7 @@ final class NFCeTransmissionService
                         'status' => 'authorized',
                         'protocol' => $data['protocol'],
                         'xml_path' => $xmlPath,
-                        'authorized_at' => now(),
+                        'authorized_at' => \Carbon\Carbon::parse($this->protocolXml->receivedAtIso((string)$data['received_at'])),
                         'processed_at' => now(),
                         'error_message' => $warning,
                     ]);
