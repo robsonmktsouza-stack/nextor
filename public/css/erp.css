@@ -1815,6 +1815,8 @@ form[data-live-search].is-live-searching .table-search-submit svg{animation:next
 .system-comfortable .sidebar-link{min-height:47px}
 body[data-show-tutorials="0"] [data-tutorial]{display:none!important}
 
+/* Responsive settings navigation was missing its media opening brace. */
+@media(max-width:1100px){
   .settings-menu-search{width:100%}
   .settings-group-menu{grid-template-columns:repeat(2,minmax(0,1fr))}
   .settings-group-button{border-top:1px solid #dde4ea}
