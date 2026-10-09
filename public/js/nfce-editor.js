@@ -224,9 +224,9 @@
         const unit=Number(String(row.unit_price).replace(',','.'));
         const disc=Number(String(row.discount).replace(',','.'));
         if(!(qty>0&&qty<=9999999999&&unit>=0&&disc>=0)
-          || Math.round(qty*1000)!==qty*1000
-          || Math.round(unit*100)!==unit*100
-          || Math.round(disc*100)!==disc*100
+          || Math.abs(Math.round(qty*1000)-qty*1000)>0.00001
+          || Math.abs(Math.round(unit*100)-unit*100)>0.00001
+          || Math.abs(Math.round(disc*100)-disc*100)>0.00001
           || cents(row.discount)>Math.round(cents(row.unit_price)*mills(row.quantity)/1000)){
           invalid(event,'Confira as quantidades, preços e descontos dos produtos.','products',el('nfceItems').querySelector('input[type=number]'));
           return;
