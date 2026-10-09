@@ -69,6 +69,27 @@ final class UiRefinementTest extends TestCase
         self::assertStringNotContainsString('@page',$css);
     }
 
+    public function test_list_rows_share_nfce_density_and_keep_editable_tables_excluded(): void
+    {
+        $css=file_get_contents(public_path('css/ui-refinement.css'));
+        self::assertNotFalse($css);
+        foreach ([
+            '--ui-list-header-height:38px',
+            '--ui-list-row-height:46px',
+            '--ui-list-cell-pad-y:6px',
+            'body.system-comfortable .app-root',
+            '.app-root .table-scroll .cms-table thead th',
+            '.app-root .table-scroll .cms-table tbody td:not(.empty-cell)',
+            '.app-root .table-scroll .cms-table tbody .table-title',
+            '.app-root .table-scroll .cms-table tbody .table-subtitle',
+            '.app-root .table-scroll .cms-table tbody td:has(> :is(input,select,textarea,.ui-select,.numeric-input))',
+        ] as $expected) {
+            self::assertStringContainsString($expected,$css);
+        }
+        self::assertStringNotContainsString('.sale-cart-table tbody td{',$css);
+        self::assertStringNotContainsString('.pdv-cart-row{',$css);
+    }
+
     public function test_all_shared_css_files_have_balanced_blocks(): void
     {
         foreach (['erp.css','ui-refinement.css','pdv.css'] as $file) {
