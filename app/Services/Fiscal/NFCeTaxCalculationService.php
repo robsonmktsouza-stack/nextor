@@ -15,7 +15,7 @@ final class NFCeTaxCalculationService
     private const RETAINED_ST_CFOPS = ['5405', '5656', '5667'];
 
     /** @return array{icms:array,pis:array,cofins:array} */
-    public function calculate(array $item): array
+    public function calculate(array $item, string $crt = '1'): array
     {
         $tax = is_array($item['tax_defaults'] ?? null) ? $item['tax_defaults'] : [];
         $cfop = (string) ($tax['cfop_outbound_internal'] ?? $tax['nfce_cfop'] ?? $tax['cfop'] ?? '');
@@ -23,6 +23,12 @@ final class NFCeTaxCalculationService
         $origin = (string) ($item['origin'] ?? $tax['icms_origin_default'] ?? '');
         if (!preg_match('/^[0-8]$/', $origin)) {
             throw new RuntimeException('Origem da mercadoria ausente ou inválida.');
+        }
+        if (!in_array($crt, ['1', '4'], true)) {
+            throw new RuntimeException("CRT {$crt} não possui emissão NFC-e parametrizada neste serviço.");
+        }
+        if ($crt === '4' && ($cfop !== '5102' || !in_array($csosn, ['102','300'], true))) {
+            throw new RuntimeException('MEI (CRT 4) exige CFOP 5102 e CSOSN 102 ou 300 na NFC-e deste fluxo.');
         }
         if (in_array($csosn, ['102', '103', '300', '400'], true)) {
             if (!in_array($cfop, self::SIMPLE_CFOPS, true)) {
