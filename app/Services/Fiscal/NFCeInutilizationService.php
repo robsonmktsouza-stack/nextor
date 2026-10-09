@@ -108,9 +108,12 @@ final class NFCeInutilizationService
                 }
                 $data=app(NFCeFiscalEventResponse::class)->parse($response,'inutilizacao');
                 if (!app(NFCeFiscalEventResponse::class)->inutilizationAccepted($data,$row->environment)) {
+                    $uncertain=$data['cstat']==='102';
                     $row->update([
-                        'status'=>'rejected','response_path'=>$path,'processed_at'=>now(),
-                        'error_message'=>'SEFAZ '.$data['cstat'].' - '.$data['reason'],
+                        'status'=>$uncertain?'uncertain':'rejected',
+                        'response_path'=>$path,'processed_at'=>now(),
+                        'error_message'=>($uncertain?'Inutilização exige conferência do protocolo SEFAZ: ':'Rejeição SEFAZ: ')
+                            .$data['cstat'].' - '.$data['reason'],
                     ]);
                     return;
                 }
