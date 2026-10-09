@@ -7,6 +7,7 @@
 <title>PDV — {{ config('app.name') }}</title>
 <link rel="stylesheet" href="{{ asset('css/erp.css') }}">
 <link rel="stylesheet" href="{{ asset('css/pdv.css') }}">
+<link rel="stylesheet" href="{{ asset('css/ui-refinement.css') }}?v={{ filemtime(public_path('css/ui-refinement.css')) }}">
 <script defer src="{{ asset('js/erp.js') }}"></script>
 </head>
 <body
