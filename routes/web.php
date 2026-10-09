@@ -5,6 +5,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\FiscalController;
+use App\Http\Controllers\FiscalUtilitiesController;
 use App\Http\Controllers\FiscalCodeCatalogController;
 use App\Http\Controllers\FiscalTaxRuleController;
 use App\Http\Controllers\FiscalTaxGroupController;
@@ -97,6 +98,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/sales/{sale}/cancel',[SaleController::class,'cancel'])->name('sales.cancel')->middleware('permission:sales');
 
     Route::get('/fiscal',[FiscalController::class,'index'])->name('fiscal.index')->middleware('permission:fiscal');
+    Route::post('/fiscal/utilities/xml',[FiscalUtilitiesController::class,'xml'])->name('fiscal.utilities.xml')->middleware('permission:fiscal');
+    Route::get('/fiscal/utilities/{fiscalDocumentJob}/auxiliary',[FiscalUtilitiesController::class,'auxiliary'])->name('fiscal.utilities.auxiliary')->middleware('permission:fiscal');
     Route::get('/fiscal/fcp',[FiscalFcpRuleController::class,'index'])->name('fiscal.fcp.index')->middleware('permission:settings');
     Route::post('/fiscal/fcp',[FiscalFcpRuleController::class,'store'])->name('fiscal.fcp.store')->middleware('permission:settings');
     Route::put('/fiscal/fcp/{fiscalFcpRule}',[FiscalFcpRuleController::class,'update'])->name('fiscal.fcp.update')->middleware('permission:settings');
