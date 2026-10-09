@@ -18,7 +18,7 @@ final class FiscalTaxPresetMigrationTest extends TestCase
     {
         self::assertTrue(Schema::hasColumn('fiscal_tax_groups', 'preset_key'));
         self::assertTrue(Schema::hasColumn('fiscal_tax_groups', 'target_crt'));
-        $presets=FiscalTaxGroup::query()->whereNotNull('preset_key')->get();
+        $presets=FiscalTaxGroup::query()->where('kind','products')->whereNotNull('preset_key')->get();
         self::assertCount(count(FiscalTaxPresetCatalog::all()), $presets);
         self::assertSame(13, $presets->count());
         self::assertSame(0, FiscalTaxGroup::query()->where('is_default', true)->count());
