@@ -22,6 +22,7 @@ jobs:
             app/Services/Fiscal/NFCeIniBuilder.php \
             app/Services/Fiscal/NFCeTaxCalculationService.php \
             app/Services/Fiscal/NFCeProductionProfilePolicy.php \
+            app/Services/Fiscal/NFSeTaxRuleApplicationService.php \
             app/Services/Fiscal/NFCePreflightService.php \
             app/Models/FiscalTaxRule.php \
             app/Models/FiscalTaxGroup.php \
@@ -69,6 +70,7 @@ jobs:
             tests/Feature/FiscalTaxGroupPersistenceTest.php \
             tests/Feature/FiscalTaxPresetMigrationTest.php \
             tests/Feature/FiscalServicePresetTest.php \
+            tests/Feature/NFSeTaxRuleApplicationServiceTest.php \
             tests/Feature/FiscalFcpRulePersistenceTest.php \
             tests/Unit/NFCeDanfeServiceTest.php \
             tests/Unit/NFCeSefazResponseParserTest.php; do
@@ -97,7 +99,7 @@ jobs:
         env:
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
-        run: php vendor/bin/phpunit --filter='NFCe|FiscalTaxRule|FiscalTaxGroup|FiscalFcpRule|FiscalCodeCatalog|FiscalServicePreset'
+        run: php vendor/bin/phpunit --filter='NFCe|FiscalTaxRule|FiscalTaxGroup|FiscalFcpRule|FiscalCodeCatalog|FiscalServicePreset|NFSeTaxRuleApplication'
 
       - name: Full Laravel regression suite
         env:
