@@ -7,6 +7,9 @@
   <title>DANFE NFC-e {{ $danfe['series'] }}/{{ $danfe['number'] }}</title>
   @if($pdfExport ?? false)
     <style>{!! file_get_contents(public_path('css/nfce-danfe.css')) !!}</style>
+    {{-- Thermal PDF must declare its page size before Chrome prints it.
+         Javascript refines its length after QR Code layout is complete. --}}
+    <style id="nextorPdfPage">{!! '@page' !!}{size: {{ $paper==='a4' ? 'A4' : ($paper.'mm '.$pdfPageHeightMm.'mm') }};margin:0}</style>
     <script>{!! file_get_contents(public_path('js/vendor/qrcode-generator.js')) !!}</script>
   @else
     <link rel="stylesheet" href="{{ asset('css/nfce-danfe.css') }}">
@@ -150,12 +153,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const preparePaper=()=>{
       const paper=document.body.dataset.paper;
       if(paper==='58'||paper==='80') {
-        const sheet=document.createElement('style');
-        const height=document.getElementById('danfePaper').getBoundingClientRect().height;
+        const receipt=document.getElementById('danfePaper');
+        const height=receipt.getBoundingClientRect().height;
         const millimeters=Math.ceil(height*25.4/96)+8;
         const pageHeight=Math.max(100,Math.min(millimeters,1500));
+        @if($pdfExport ?? false)
+        // Replace the initial thermal @page declaration before printToPDF.
+        document.getElementById('nextorPdfPage').textContent='@page{size:'+paper+'mm '+pageHeight+'mm;margin:0}';
+        @else
+        const sheet=document.createElement('style');
         sheet.textContent='@page{size:'+paper+'mm '+pageHeight+'mm;margin:0}';
         document.head.appendChild(sheet);
+        @endif
       }
       @if($pdfExport ?? false)
       document.documentElement.dataset.pdfReady='true';
@@ -163,7 +172,12 @@ document.addEventListener('DOMContentLoaded', () => {
       window.print();
       @endif
     };
+    @if($pdfExport ?? false)
+    // The CLI may print before the next animation frame; size it synchronously.
+    preparePaper();
+    @else
     requestAnimationFrame(()=>requestAnimationFrame(preparePaper));
+    @endif
   } catch(error) {
     document.body.classList.add('print-unavailable');
     qrTarget.textContent='Impressão indisponível: QR Code não gerado.';
