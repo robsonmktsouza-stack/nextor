@@ -1,5 +1,4 @@
 @extends('layouts.app')
-@section('titleMeta'){{ $documents->total() }} {{ $documents->total() === 1 ? 'documento' : 'documentos' }}@endsection
 @section('title','Fiscal')
 @section('description','Emissão e acompanhamento dos documentos fiscais do NEXTOR.')
 @section('content')
@@ -108,7 +107,6 @@
         </select>
         <button class="bulk-apply" type="button" data-bulk-apply disabled>Aplicar</button>
       </div>
-      <span class="selection-count" data-selection-count hidden></span>
     </div>
 
     <div class="grid-actions-right">
