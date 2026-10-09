@@ -47,7 +47,7 @@ Não é preciso repetir os testes unitários anteriores: estes já foram conclu�
 
 ## Limitações deliberadas
 
-- Só estão implementados e pré-validados, por ora, **CRT 1, CSOSN 102 e PIS/COFINS CST 49**. O sistema bloqueia tributação não mapeada para evitar inventar impostos; isso não significa que esses códigos sejam corretos para todos os produtos.
+- A cobertura evoluiu além do cenário inicial. Consultar **docs/integrations/fiscal-coverage-2026.md** para a matriz por CRT, CSOSN/CST, modalidade de cálculo e respectivo status. Cenários não mapeados continuam bloqueados: códigos disponíveis em cadastro não significam autorização em homologação.
 - O modelo de emissão cobre NFC-e BA em modo normal. Outras UFs, natureza fiscal especial, contingência, tributação completa e novos grupos da reforma tributária requerem suporte específico.
 - A comunicação de status `107` **não equivale a uma NFC-e autorizada**. A autorização real precisa retornar `100` ou `150`, com chave/protocolo da nota enviados e validados.
 - Não executar `NFE_Enviar` novamente para uma nota pendente. Consultar a situação pela chave primeiro.
