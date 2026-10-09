@@ -112,7 +112,7 @@ class NFCePdfService
                 '--no-first-run',
                 '--no-default-browser-check',
                 '--no-pdf-header-footer',
-                '--virtual-time-budget=6500',
+                '--virtual-time-budget=2200',
                 '--user-data-dir='.$profile,
                 '--print-to-pdf='.$output,
                 $this->fileUrl($input),
@@ -146,7 +146,7 @@ class NFCePdfService
                 if (!$status['running']) {
                     break;
                 }
-                if (microtime(true)-$start>35) {
+                if (microtime(true)-$start>18) {
                     $timedOut=true;
                     proc_terminate($process);
                     break;
