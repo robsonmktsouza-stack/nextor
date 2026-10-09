@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AppSetting;
 use App\Models\Service;
+use App\Models\CompanySetting;
 use App\Models\FiscalTaxGroup;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
@@ -47,7 +48,7 @@ class ServiceController extends Controller
                 'is_active'=>(bool)$catalog['new_services_active'],
             ]),
             'editing'=>false,
-            'fiscalTaxGroups'=>FiscalTaxGroup::query()->where('kind','services')->orderByDesc('is_default')->orderBy('name')->get(),
+            'fiscalTaxGroups'=>$this->serviceTaxGroups(),
         ]);
     }
 
@@ -55,8 +56,18 @@ class ServiceController extends Controller
     {
         return view('services.form',compact('service')+[
             'editing'=>true,
-            'fiscalTaxGroups'=>FiscalTaxGroup::query()->where('kind','services')->orderByDesc('is_default')->orderBy('name')->get(),
+            'fiscalTaxGroups'=>$this->serviceTaxGroups(),
         ]);
+    }
+
+
+    private function serviceTaxGroups(): \Illuminate\Database\Eloquent\Collection
+    {
+        $crt=(string)(CompanySetting::current()->crt ?? '');
+        return FiscalTaxGroup::query()
+            ->where('kind','services')
+            ->where(fn($query)=>$query->whereNull('target_crt')->orWhere('target_crt',$crt))
+            ->orderByDesc('is_default')->orderBy('name')->get();
     }
 
     private function rules(): array
@@ -72,7 +83,10 @@ class ServiceController extends Controller
             'national_tax_code'=>['nullable','string','max:40'],
             'nbs'=>['nullable','string','max:20'],
             'tax_group'=>['nullable','string','max:120'],
-            'fiscal_tax_group_id'=>['nullable','integer',Rule::exists('fiscal_tax_groups','id')->where('kind','services')],
+            'fiscal_tax_group_id'=>['nullable','integer',Rule::exists('fiscal_tax_groups','id')
+                ->where('kind','services')
+                ->where(fn($query)=>$query->whereNull('target_crt')
+                    ->orWhere('target_crt',(string)(CompanySetting::current()->crt ?? '')))],
             'is_active'=>['nullable','boolean'],
         ];
     }
@@ -82,12 +96,40 @@ class ServiceController extends Controller
         $data=$request->validate($this->rules());
         $data['is_active']=$request->boolean('is_active',true);
 
+        $groupId=(int)($data['fiscal_tax_group_id'] ?? 0);
+        if ($groupId > 0) {
+            $group=FiscalTaxGroup::query()->where('kind','services')->findOrFail($groupId);
+            if (!$group->is_active) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'fiscal_tax_group_id'=>'Selecione um grupo tributário ativo.',
+                ]);
+            }
+            $config=is_array($group->tax_config) ? $group->tax_config : [];
+            // Serviço selecionado determina seus próprios códigos: nunca
+            // usar valores legados divergentes ou código informado à mão.
+            foreach (['national_tax_code','service_list_item'] as $field) {
+                if (isset($config[$field]) && trim((string)$config[$field]) !== '') {
+                    $data[$field]=(string)$config[$field];
+                }
+            }
+            $taxDefaults=$service?->tax_defaults ?? [];
+            if (!is_array($taxDefaults)) {
+                $taxDefaults=[];
+            }
+            $data['tax_defaults']=array_replace($taxDefaults, $config, [
+                'iss_exigibility'=>(string)($group->iss_exigibility ?? ''),
+                'fiscal_group_id'=>$group->id,
+                'fiscal_group_revision'=>$group->revision,
+            ]);
+        } elseif (!$service) {
+            $data['tax_defaults']=AppSetting::groupValues('tax',[]);
+        }
+
         if($service) {
             $service->update($data);
             return $service->refresh();
         }
 
-        $data['tax_defaults']=AppSetting::groupValues('tax',[]);
         return Service::create($data);
     }
 
