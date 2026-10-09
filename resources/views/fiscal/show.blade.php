@@ -50,6 +50,21 @@
       </button>
     </form>
   @endif
+  @if($tab==='nfce' && $document->status==='authorized'
+      && !$document->cancellation_status && $document->authorized_at
+      && $document->authorized_at->copy()->addMinutes(30)->isFuture()
+      && auth()->user()->canAccess('fiscal'))
+    <form method="post" action="{{ route('fiscal.nfce.cancel',$document) }}"
+      data-confirm-submit="Solicitar cancelamento desta NFC-e à SEFAZ? Não poderá ser revertido após autorizado."
+      data-confirm-title="Cancelamento fiscal" data-confirm-kind="danger">
+      @csrf
+      <input type="hidden" name="no_circulation" value="1">
+      <label class="field"><span>Justificativa de cancelamento</span>
+        <input name="reason" required minlength="15" maxlength="255" placeholder="Motivo (mínimo 15 caracteres)" style="min-width:240px">
+      </label>
+      <button type="submit" class="btn btn-danger">Cancelar NFC-e na SEFAZ</button>
+    </form>
+  @endif
   @if(auth()->user()->canAccess('settings'))
     <a class="btn btn-secondary" href="{{ route('settings.index',['tab'=>$configuration['settings_tab']]) }}">@include('partials.icon',['name'=>'settings','size'=>16]) Configurar</a>
   @endif
