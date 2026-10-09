@@ -57,7 +57,7 @@
       </summary>
       <div class="fiscal-utilities-dropdown">
         @if($document->xml_path)
-          <a href="{{ route('fiscal.nfce.xml',$document) }}">
+          <a href="{{ route('fiscal.nfce.xml',$document) }}" data-no-loading download>
             @include('partials.icon',['name'=>'download','size'=>16])
             <span>{{ $document->status==='authorized'
               && (str_ends_with($document->xml_path,'authorized.xml') || str_ends_with($document->xml_path,'authorized-recovered.xml'))
