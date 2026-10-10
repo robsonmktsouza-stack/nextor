@@ -4,15 +4,15 @@
 set -Eeuo pipefail
 umask 077
 
-ID="" CNPJ="" DOMAIN="" SOURCE="" APPLY=0 PHP_VERSION="8.3" MYSQL_CNF="/root/.my.cnf"
-usage() { echo "Uso: bash deploy/instances/provision.sh --id academia_ba --cnpj 00000000000000 --domain academia.exemplo.com.br --source /opt/lumeron/source [--php-version 8.3] [--mysql-admin-cnf /root/.my.cnf] [--apply]"; }
+ID="" CNPJ="" DOMAIN="" SOURCE="" BASE_DOMAIN="lumeron.com.br" APPLY=0 PHP_VERSION="8.3" MYSQL_CNF="/root/.my.cnf"
+usage() { echo "Uso: bash deploy/instances/provision.sh --id academia_ba --cnpj 00000000000000 --domain academia.exemplo.com.br --source /opt/lumeron/source [--base-domain lumeron.com.br] [--php-version 8.3] [--mysql-admin-cnf /root/.my.cnf] [--apply]"; }
 while (($#)); do
   case "$1" in
-    --id|--cnpj|--domain|--source|--php-version|--mysql-admin-cnf)
+    --id|--cnpj|--domain|--source|--base-domain|--php-version|--mysql-admin-cnf)
       option="$1"; (($# >= 2)) || { usage; exit 2; }
       case "$option" in
         --id) ID="$2";; --cnpj) CNPJ="$2";; --domain) DOMAIN="$2";;
-        --source) SOURCE="$2";; --php-version) PHP_VERSION="$2";;
+        --source) SOURCE="$2";; --base-domain) BASE_DOMAIN="$2";; --php-version) PHP_VERSION="$2";;
         --mysql-admin-cnf) MYSQL_CNF="$2";;
       esac
       shift 2;;
@@ -23,6 +23,11 @@ done
 [[ "$ID" =~ ^[a-z][a-z0-9_]{1,18}$ ]] || { echo "ID inválido." >&2; exit 2; }
 [[ "$CNPJ" =~ ^[0-9]{14}$ ]] || { echo "CNPJ deve ter 14 dígitos." >&2; exit 2; }
 [[ "$DOMAIN" =~ ^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$ && "$DOMAIN" == *.* ]] || { echo "Domínio inválido." >&2; exit 2; }
+[[ "$BASE_DOMAIN" =~ ^[a-z0-9]+([.-][a-z0-9]+)*\.[a-z]{2,}$ ]] || { echo "Domínio base inválido." >&2; exit 2; }
+[[ "$DOMAIN" == *."$BASE_DOMAIN" ]] || { echo "A URL deve ser subdomínio do domínio base configurado." >&2; exit 2; }
+SUBDOMAIN="${DOMAIN%.$BASE_DOMAIN}"
+[[ "$SUBDOMAIN" =~ ^[a-z][a-z0-9-]{1,38}$ && "$SUBDOMAIN" != *--* ]] || { echo "Subdomínio da instalação inválido." >&2; exit 2; }
+[[ "$SUBDOMAIN" != "login" && "$SUBDOMAIN" != "www" && "$SUBDOMAIN" != "admin" && "$SUBDOMAIN" != "api" ]] || { echo "Subdomínio reservado." >&2; exit 2; }
 [[ "$PHP_VERSION" =~ ^8\.[34]$ ]] || { echo "Versão PHP inválida." >&2; exit 2; }
 [[ -f "$SOURCE/composer.json" ]] || { echo "Source não contém Laravel." >&2; exit 2; }
 [[ -f "$SOURCE/composer.lock" ]] || { echo "Falta composer.lock versionado: provisionamento bloqueado para segurança." >&2; exit 2; }
@@ -97,7 +102,11 @@ QUEUE_CONNECTION=database
 DB_QUEUE_RETRY_AFTER=300
 FILESYSTEM_DISK=local
 LUMERON_INSTANCE_ID=$ID
+LUMERON_INSTANCE_SUBDOMAIN=$SUBDOMAIN
 LUMERON_INSTANCE_CNPJ=$CNPJ
+LUMERON_BASE_DOMAIN=$BASE_DOMAIN
+LUMERON_LOGIN_PORTAL_HOST=login.$BASE_DOMAIN
+LUMERON_LOGIN_PORTAL=false
 MAIL_MAILER=log
 ACBr_NFE_LIBRARY_PATH=
 ACBr_NFE_SCHEMAS_PATH=
