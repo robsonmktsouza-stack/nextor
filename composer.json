@@ -1,8 +1,8 @@
 {
   "$schema": "https://getcomposer.org/schema.json",
-  "name": "erp/estoque-vendas",
+  "name": "lumeron/erp",
   "type": "project",
-  "description": "ERP independente em Laravel para estoque e vendas, interface inspirada no Away CMS.",
+  "description": "Lumeron ERP: gestão empresarial, estoque, PDV, financeiro e documentos fiscais.",
   "license": "proprietary",
   "require": {
     "php": "^8.3",
