@@ -4,12 +4,12 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>Recuperar senha · Lumeron</title>
+  <link rel="icon" type="image/png" href="{{ asset('images/lumeron/elephant.png') }}">
   <link rel="stylesheet" href="{{ asset('css/login.css') }}">
 </head>
 <body class="lumeron-login">
   <main class="login-shell">
-    <div class="login-brand"><span class="login-brand-symbol" aria-hidden="true">L</span>
-      <div><strong>Lumeron</strong><small>Gestão empresarial</small></div>
+    <div class="login-brand"><img class="lumeron-login-logo" src="{{ asset('images/lumeron/logo.png') }}" alt="Lumeron" width="236" height="61">
     </div>
     <section class="login-panel">
       <header class="login-panel-header"><h1>Recuperar senha</h1>
