@@ -8,10 +8,11 @@
 <link rel="stylesheet" href="{{ asset('css/erp.css') }}?v={{ filemtime(public_path('css/erp.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/ui-refinement.css') }}?v={{ filemtime(public_path('css/ui-refinement.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/branding.css') }}?v={{ filemtime(public_path('css/branding.css')) }}">
+@stack('styles')
 <script defer src="{{ asset('js/erp.js') }}?v={{ filemtime(public_path('js/erp.js')) }}"></script>
 <script defer src="{{ asset('js/fiscal-codes.js') }}"></script>
 </head><body
-  class="{{ \App\Models\AppSetting::value('system','compact_mode',true) ? 'system-compact' : 'system-comfortable' }}"
+  class="{{ \App\Models\AppSetting::value('system','compact_mode',true) ? 'system-compact' : 'system-comfortable' }} @yield('bodyClass')"
   data-live-search-delay="{{ \App\Models\AppSetting::value('system','search_delay',240) }}"
   data-fiscal-catalog-url="{{ route('reference.fiscal-codes') }}"
   data-confirm-destructive="{{ \App\Models\AppSetting::value('system','confirm_destructive_actions',true) ? '1' : '0' }}"
@@ -132,7 +133,7 @@
       @include('partials.icon',['name'=>'settings'])<span>Configurações</span></a>
     @endif
   </aside>
-  <main class="cms-page-shell" id="pageShell">
+  <main class="cms-page-shell @yield('pageShellClass')" id="pageShell">
     <div class="main-content">
       <div class="page-heading">
         <div class="page-heading-main">
