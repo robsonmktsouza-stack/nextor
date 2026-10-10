@@ -60,7 +60,7 @@
   const mills=x=>Math.round(Math.max(0,Number(String(x||0).replace(',','.'))||0)*1000);
   const text=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const newMode=()=>el('nfceMode').value==='new';
-  // Mesmo ícone de lixeira utilizado no restante do NEXTOR.
+  // Mesmo ícone de lixeira utilizado no restante do Lumeron.
   const trashIcon='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg>';
 
   function activateTab(tab,focus=false) {
