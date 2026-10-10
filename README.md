@@ -82,3 +82,9 @@ vendor/                 Laravel e dependências PHP
 O motor NFC-e próprio desenvolvido experimentalmente foi retirado do runtime antes de uso em produção. O snapshot foi preservado em `archive/nextor-native-nfce-2026-10-02.zip`.
 
 O PDV permanece com comprovante interno sem valor fiscal. A futura integração fiscal será feita por uma camada/adaptador separado.
+
+## Instalacoes independentes por CNPJ (Lumeron / VPS)
+
+Um mesmo cliente pode contratar mais de uma instalacao, mas **cada CNPJ recebe sua propria aplicacao, banco MySQL, arquivos privados, certificado, CSC, fila fiscal, pool PHP-FPM e dominio**. Nao existe seletor multiempresa dentro da instalacao.
+
+As rotinas seguras de provisionamento, atualizacao, inventario central via terminal e os requisitos de implantacao estao em [docs/deployment/one-cnpj-per-instance.md](docs/deployment/one-cnpj-per-instance.md). Os scripts sao para Linux/VPS, nao para o Laragon. Nenhuma implantacao acontece automaticamente apos `git pull`.
