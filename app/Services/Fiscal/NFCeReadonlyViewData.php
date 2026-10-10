@@ -110,6 +110,41 @@ final class NFCeReadonlyViewData
                 $consumerDocument=$get('//n:NFe/n:infNFe/n:dest/n:CPF')
                     ?: $get('//n:NFe/n:infNFe/n:dest/n:CNPJ') ?: $consumerDocument;
                 $consumerName=$get('//n:NFe/n:infNFe/n:dest/n:xNome') ?: $consumerName;
+
+                // Notas antigas podem não ter o snapshot completo. Nesse
+                // caso o XML autorizado é a fonte de verdade para os itens.
+                if (!$items) {
+                    foreach ($xp->query('//n:NFe/n:infNFe/n:det') as $index=>$detail) {
+                        $at=static fn(string $query)=>trim((string)$xp->evaluate('string('.$query.')',$detail));
+                        $id='xml-'.$index;
+                        $products[]=[
+                            'id'=>$id,'name'=>$at('n:prod/n:xProd'),
+                            'sku'=>$at('n:prod/n:cProd'),
+                            'sale_price'=>$at('n:prod/n:vUnCom'),
+                            'ean_gtin'=>$at('n:prod/n:cEAN'),
+                        ];
+                        $items[]=[
+                            'product_id'=>$id,
+                            'quantity'=>$at('n:prod/n:qCom'),
+                            'unit_price'=>$at('n:prod/n:vUnCom'),
+                            'discount'=>$at('n:prod/n:vDesc') ?: '0',
+                        ];
+                    }
+                }
+                if (!$payments) {
+                    $paymentNames=[
+                        '01'=>'Dinheiro','02'=>'Cheque','03'=>'Cartão de crédito',
+                        '04'=>'Cartão de débito','15'=>'Boleto','17'=>'PIX',
+                        '18'=>'Transferência bancária','90'=>'Sem pagamento','99'=>'Outros',
+                    ];
+                    foreach ($xp->query('//n:NFe/n:infNFe/n:pag/n:detPag') as $index=>$row) {
+                        $code=trim((string)$xp->evaluate('string(n:tPag)',$row));
+                        $amount=trim((string)$xp->evaluate('string(n:vPag)',$row));
+                        $id='xml-payment-'.$index;
+                        $methods[$id]=['code'=>$id,'name'=>$paymentNames[$code] ?? 'Pagamento '.$code];
+                        $payments[]=['payment_method'=>$id,'amount'=>$amount ?: '0'];
+                    }
+                }
             }
         }
 
