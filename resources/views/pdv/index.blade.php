@@ -720,5 +720,6 @@
 @endsection
 
 @push('scripts')
-<script defer src="{{ asset('js/pdv.js') }}"></script>
+<script defer src="{{ asset('js/pdv.js') }}?v={{ filemtime(public_path('js/pdv.js')) }}"></script>
+<script defer src="{{ asset('js/pdv-sales.js') }}?v={{ filemtime(public_path('js/pdv-sales.js')) }}"></script>
 @endpush
