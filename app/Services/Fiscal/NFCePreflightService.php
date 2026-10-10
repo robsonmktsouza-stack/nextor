@@ -45,6 +45,9 @@ final class NFCePreflightService
         }
 
         $company = CompanySetting::current();
+        if (!\App\Support\InstanceIdentity::matches($company->document)) {
+            $errors[] = 'CNPJ do emitente não corresponde à instalação contratada.';
+        }
         foreach ([
             'CNPJ' => strlen(preg_replace('/\D/', '', (string) $company->document)) === 14,
             'Inscrição estadual' => trim((string) $company->state_registration) !== '',
