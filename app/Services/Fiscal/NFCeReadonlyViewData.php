@@ -53,7 +53,7 @@ final class NFCeReadonlyViewData
             $code=(string)($row['payment_method'] ?? '');
             if ($code==='') $code='historical-'.$index;
             $kind=(string)($row['payment_kind'] ?? '');
-            $methods[$code]=['code'=>$code,'name'=>$names[$code] ?? ($kindNames[$kind] ?? $code)];
+            $methods[$code]=['code'=>$code,'name'=>$kindNames[$kind] ?? ($names[$code] ?? $code)];
             $payments[]=[
                 'payment_method'=>$code,
                 'amount'=>(string)($row['amount'] ?? '0'),
@@ -62,6 +62,7 @@ final class NFCeReadonlyViewData
 
         $issuedAt=$document->prepared_at ?? $document->created_at;
         $nature='VENDA DE MERCADORIA';
+        $notes='';
         $consumerDocument=(string)($snapshot['consumer_document'] ?? '');
         $consumerName=(string)($snapshot['consumer_name'] ?? '');
         $xmlLoaded=false;
@@ -110,6 +111,7 @@ final class NFCeReadonlyViewData
                 $consumerDocument=$get('//n:NFe/n:infNFe/n:dest/n:CPF')
                     ?: $get('//n:NFe/n:infNFe/n:dest/n:CNPJ') ?: $consumerDocument;
                 $consumerName=$get('//n:NFe/n:infNFe/n:dest/n:xNome') ?: $consumerName;
+                $notes=$get('//n:NFe/n:infNFe/n:infAdic/n:infCpl');
 
                 // Notas antigas podem não ter o snapshot completo. Nesse
                 // caso o XML autorizado é a fonte de verdade para os itens.
@@ -157,7 +159,7 @@ final class NFCeReadonlyViewData
             'frozenItems'=>$items,'frozenPayments'=>$payments,
             'frozenConsumerDocument'=>$consumerDocument,
             'frozenConsumerName'=>$consumerName,
-            'frozenNotes'=>(string)($document->sale?->notes ?? ''),
+            'frozenNotes'=>$notes,
             'frozenIssueDate'=>$issuedAt?->format('d/m/Y H:i') ?? '—',
             'frozenNature'=>$nature,
             'xmlLoaded'=>$xmlLoaded,
