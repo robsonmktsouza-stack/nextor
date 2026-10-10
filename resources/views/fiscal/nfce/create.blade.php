@@ -260,9 +260,13 @@
 </dialog>
 @endif
 
+@php
+  $formItems=$readOnly?$frozenItems:old('items',[]);
+  $formPayments=$readOnly?$frozenPayments:old('payments',[]);
+@endphp
 <script type="application/json" id="nfceProductsJson">@json($products)</script>
 <script type="application/json" id="nfceMethodsJson">@json($methods)</script>
-<script type="application/json" id="nfceOldItems">@json($readOnly?$frozenItems:old('items',[]))</script>
-<script type="application/json" id="nfceOldPayments">@json($readOnly?$frozenPayments:old('payments',[]))</script>
+<script type="application/json" id="nfceOldItems">@json($formItems)</script>
+<script type="application/json" id="nfceOldPayments">@json($formPayments)</script>
 <script defer src="{{ asset('js/nfce-editor.js') }}?v={{ filemtime(public_path('js/nfce-editor.js')) }}"></script>
 @endsection
