@@ -4017,3 +4017,9 @@ body.nfe-modal-open{overflow:hidden}
  .nfce-readonly-fiscal-bar{display:grid;grid-template-columns:1fr;gap:6px}
  .nfce-readonly .nfce-savebar .nfce-save-buttons{justify-content:flex-start}
 }
+
+.nfce-readonly-sale{grid-column:1/-1;margin:0}
+.nfce-readonly #nfceAddProduct,
+.nfce-readonly #nfceAddPayment,
+.nfce-readonly .field:has(>#nfceProductSearch),
+.nfce-readonly #nfceProductResults{display:none!important}
