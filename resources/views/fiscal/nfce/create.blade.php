@@ -108,6 +108,9 @@
                   <option value="presential" selected>Operação presencial</option>
                 </select>
               </label>
+              @if($readOnly && $readOnlyDocument->sale_id)
+                <p class="nfce-muted nfce-readonly-sale">Venda de origem: #{{ $readOnlyDocument->sale_id }} — somente consulta.</p>
+              @endif
             </div>
             <div id="nfceExistingBlock" class="nfce-existing-block" hidden>
               <label class="field"><span>Venda concluída</span>
@@ -134,7 +137,7 @@
             <div class="editor-grid cols-12">
               <label class="field col-6"><span>Cliente cadastrado</span>
                 <select name="customer_id" id="nfceCustomer">
-                  <option value="">Consumidor não identificado</option>
+                  <option value="">{{ $readOnly && $frozenConsumerDocument ? 'Consumidor identificado na NFC-e' : 'Consumidor não identificado' }}</option>
                   @foreach($customers as $customer)
                     <option value="{{ $customer->id }}" data-document="{{ $customer->document }}" data-name="{{ $customer->name }}" @selected((string)old('customer_id')===(string)$customer->id)>
                       {{ $customer->name }}{{ $customer->document ? ' — '.$customer->document : '' }}
