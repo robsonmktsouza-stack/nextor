@@ -3996,3 +3996,24 @@ body.nfe-modal-open{overflow:hidden}
   .grid-filter-panel .toolbar-filters>.table-search-group{flex:1 1 100%}
   .grid-filter-panel .toolbar-filters>.ui-select{flex:1 1 100%;min-width:0}
 }
+
+
+/* NFC-e emitida: mesmo editor de emissão, campos históricos não editáveis. */
+.nfce-readonly-caption{margin:4px 0 0;color:#6e7d8c;font-size:12px;font-weight:500}
+.nfce-readonly-fiscal-bar{display:flex;align-items:center;flex-wrap:wrap;gap:9px 18px;padding:10px 14px;margin:0 0 14px;border:1px solid #dbe6ef;border-radius:5px;background:#f3f7fb;font-size:12px;color:#34495c}
+.nfce-readonly-fiscal-bar>b,.nfce-readonly-fiscal-bar span>b{font-weight:700}
+.nfce-readonly-key{font-family:ui-monospace,Consolas,monospace;overflow-wrap:anywhere;font-size:11px}
+.nfce-readonly .nfce-remove{display:none!important}
+.nfce-readonly .nfe-workspace-body input:disabled,
+.nfce-readonly .nfe-workspace-body select:disabled,
+.nfce-readonly .nfe-workspace-body textarea:disabled{
+  opacity:1!important;color:#263747!important;-webkit-text-fill-color:#263747;
+  background:#f5f8fa!important;border-color:#dbe3eb!important;
+  cursor:default!important;box-shadow:none!important
+}
+.nfce-readonly .nfce-item-table input:disabled{font-variant-numeric:tabular-nums}
+.nfce-readonly .nfce-savebar .nfce-save-buttons{flex-wrap:wrap;justify-content:flex-end}
+@media(max-width:760px){
+ .nfce-readonly-fiscal-bar{display:grid;grid-template-columns:1fr;gap:6px}
+ .nfce-readonly .nfce-savebar .nfce-save-buttons{justify-content:flex-start}
+}
