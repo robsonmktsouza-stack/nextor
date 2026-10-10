@@ -15,14 +15,28 @@
 
 @section('content')
 <section class="editor-panel settings-panel" style="margin-bottom:14px">
-  <div class="settings-panel-head"><div><h2>Nova regra</h2><p>Cadastre as condições e os códigos de tributação.</p></div></div>
+  <div class="settings-panel-head"><div><h2>Nova regra</h2><p>Cadastre condições e códigos por UF. NFC-e deste fluxo: origem e destino na mesma UF.</p></div></div>
   <form method="post" action="{{ route('fiscal.tax-rules.store') }}" class="settings-editor">
     @csrf
     <input type="hidden" name="document_type" value="nfce">
-    <input type="hidden" name="origin_uf" value="BA">
-    <input type="hidden" name="destination_uf" value="BA">
-    <input type="hidden" name="crt" value="1">
     <div class="editor-grid cols-12 settings-grid">
+      <label class="field col-2"><span>UF origem</span>
+        <select name="origin_uf" required>
+          @foreach($ufs as $uf)<option value="{{ $uf }}" @selected(old('origin_uf',$issuerUf)===$uf)>{{ $uf }}</option>@endforeach
+        </select>
+      </label>
+      <label class="field col-2"><span>UF destino</span>
+        <select name="destination_uf" required>
+          @foreach($ufs as $uf)<option value="{{ $uf }}" @selected(old('destination_uf',$issuerUf)===$uf)>{{ $uf }}</option>@endforeach
+        </select>
+      </label>
+      <label class="field col-2"><span>CRT</span>
+        <select name="crt" required>
+          @foreach(['1'=>'Simples Nacional','4'=>'MEI'] as $code=>$label)
+            <option value="{{ $code }}" @selected(old('crt',in_array($issuerCrt,['1','4'],true)?$issuerCrt:'1')===$code)>{{ $code }} — {{ $label }}</option>
+          @endforeach
+        </select>
+      </label>
       <label class="field col-6"><span>Nome</span><input required maxlength="160" name="name" value="{{ old('name') }}" placeholder="Ex.: Perfil revisado — mercadorias do NCM ..."></label>
       <label class="field col-3"><span>Produto (opcional)</span>
         <select name="product_id">
@@ -67,7 +81,7 @@
         <tr>
           <td><strong>{{ $rule->name }}</strong><small class="table-subtitle">Revisão {{ $rule->revision }} · #{{ $rule->id }}</small></td>
           <td>
-            BA → BA · CRT 1
+            {{ $rule->origin_uf }} → {{ $rule->destination_uf }} · CRT {{ $rule->crt }}
             <small class="table-subtitle">
               @if($rule->product_id) Produto #{{ $rule->product_id }} @endif
               @if($rule->ncm_prefix) NCM {{ $rule->ncm_prefix }}* @endif
@@ -89,10 +103,24 @@
                 @csrf
                 @method('PUT')
                 <input type="hidden" name="document_type" value="nfce">
-                <input type="hidden" name="origin_uf" value="BA">
-                <input type="hidden" name="destination_uf" value="BA">
-                <input type="hidden" name="crt" value="1">
                 <div class="editor-grid cols-12 settings-grid">
+                  <label class="field col-2"><span>UF origem</span>
+                    <select name="origin_uf" required>
+                      @foreach($ufs as $uf)<option value="{{ $uf }}" @selected($rule->origin_uf===$uf)>{{ $uf }}</option>@endforeach
+                    </select>
+                  </label>
+                  <label class="field col-2"><span>UF destino</span>
+                    <select name="destination_uf" required>
+                      @foreach($ufs as $uf)<option value="{{ $uf }}" @selected($rule->destination_uf===$uf)>{{ $uf }}</option>@endforeach
+                    </select>
+                  </label>
+                  <label class="field col-2"><span>CRT</span>
+                    <select name="crt" required>
+                      @foreach(['1'=>'Simples Nacional','4'=>'MEI'] as $code=>$label)
+                        <option value="{{ $code }}" @selected((string)$rule->crt===$code)>{{ $code }} — {{ $label }}</option>
+                      @endforeach
+                    </select>
+                  </label>
                   <label class="field col-6"><span>Nome</span><input name="name" required maxlength="160" value="{{ $rule->name }}"></label>
                   <label class="field col-3"><span>Produto</span><select name="product_id">
                     <option value="">Todos os produtos</option>
