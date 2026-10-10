@@ -19,6 +19,8 @@ Cada instalação recebe: URL/subdomínio, usuário Linux `lum_{id}`, pool PHP-F
 
 **Não é um SaaS multiempresa com banco compartilhado.** A empresa cadastrada no ERP deve corresponder a `LUMERON_INSTANCE_CNPJ` do ambiente. A UI recusa CNPJ diferente, e a NFC-e não deve ser transmitida com um emitente que não coincida com a instalação.
 
+Para o login de acesso único com subdomínio, usuário e senha, consulte [login-by-subdomain.md](login-by-subdomain.md). O portal de autenticação ainda não foi implantado.
+
 ## Preparação obrigatória
 
 Esta documentação descreve scripts **entregues ao GitHub**, não uma VPS já configurada. Execute somente após conferência em ambiente de teste e com credenciais e DNS reais.
@@ -41,8 +43,11 @@ sudo bash deploy/instances/provision.sh \
   --id academia_ba \
   --cnpj 00000000000000 \
   --domain academia.seudominio.com.br \
-  --source /opt/lumeron/source
+  --source /opt/lumeron/source \
+  --base-domain seudominio.com.br
 ```
+
+Apenas nomes registrados sob o domínio-base configurado podem ser usados. O provisionamento também define o subdomínio de login da instância, por exemplo `academia`.
 
 O comando acima é uma **simulação**: não modifica a VPS. Após conferir, execute novamente acrescentando `--apply`.
 
