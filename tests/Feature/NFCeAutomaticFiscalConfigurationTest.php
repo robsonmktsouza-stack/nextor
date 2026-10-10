@@ -85,6 +85,22 @@ final class NFCeAutomaticFiscalConfigurationTest extends TestCase
         ]);
     }
 
+    public function test_nfce_default_cfop_can_be_configured_in_the_system(): void
+    {
+        $admin=\App\Models\User::query()->create([
+            'name'=>'Administrador','email'=>'nfce-settings@example.com',
+            'password'=>'senhaSegura123','role'=>'admin','is_active'=>true,
+        ]);
+        $this->actingAs($admin)->post(route('settings.group.update','nfce'),[
+            'environment'=>'homologation',
+            'series'=>1,
+            'next_number'=>5,
+            'default_cfop'=>'5102',
+        ])->assertSessionHasNoErrors();
+
+        self::assertSame('5102',AppSetting::value('nfce','default_cfop'));
+    }
+
     public function test_preparation_uses_assigned_group_without_manual_action_or_duplicate_number(): void
     {
         $this->configureNfce();
