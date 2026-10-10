@@ -35,6 +35,42 @@ final class FiscalTaxRuleResolverTest extends TestCase
             ->resolve('nfce', 'BA', $to, '1', $item, $date);
     }
 
+    public function test_rule_form_accepts_sp_internal_rule_through_system_settings(): void
+    {
+        $user=\App\Models\User::query()->create([
+            'name'=>'Administrador','email'=>'uf-test@example.com',
+            'password'=>'senhaSegura123','role'=>'admin','is_active'=>true,
+        ]);
+        $this->actingAs($user)->get(route('fiscal.tax-rules.index'))
+            ->assertOk()->assertSee('UF origem')->assertSee('UF destino');
+
+        $this->actingAs($user)->post(route('fiscal.tax-rules.store'),[
+            'name'=>'Regra interna SP','document_type'=>'nfce',
+            'origin_uf'=>'SP','destination_uf'=>'SP','crt'=>'1',
+            'cfop'=>'5102','csosn'=>'102','pis_cst'=>'49',
+            'cofins_cst'=>'49','priority'=>0,'is_active'=>'1',
+        ])->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('fiscal_tax_rules',[
+            'name'=>'Regra interna SP','origin_uf'=>'SP',
+            'destination_uf'=>'SP','crt'=>'1',
+        ]);
+    }
+
+    public function test_rule_form_rejects_interstate_nfce_rule(): void
+    {
+        $user=\App\Models\User::query()->create([
+            'name'=>'Administrador','email'=>'uf-test-2@example.com',
+            'password'=>'senhaSegura123','role'=>'admin','is_active'=>true,
+        ]);
+        $this->actingAs($user)->post(route('fiscal.tax-rules.store'),[
+            'name'=>'Regra indevida','document_type'=>'nfce',
+            'origin_uf'=>'BA','destination_uf'=>'SP','crt'=>'1',
+            'cfop'=>'5102','csosn'=>'102','pis_cst'=>'49',
+            'cofins_cst'=>'49','priority'=>0,
+        ])->assertSessionHasErrors('destination_uf');
+        $this->assertDatabaseMissing('fiscal_tax_rules',['name'=>'Regra indevida']);
+    }
+
     public function test_specific_product_rule_takes_precedence_over_generic_rule(): void
     {
         $general = $this->createRule(['name' => 'Geral', 'priority' => 0]);
