@@ -1635,6 +1635,22 @@
       requestAnimationFrame(()=>cancelNfceJob?.focus()||cancelNfceReason?.focus());
     };
 
+    const openCashMovementModal=type=>{
+      if(!cashMovementModal || !cashSessionOpen) return;
+      const kind=type==='withdrawal'?'withdrawal':'supply';
+      if(cashMovementType) cashMovementType.value=kind;
+      if(cashMovementTitle) cashMovementTitle.textContent=kind==='withdrawal'?'Registrar sangria':'Registrar suprimento';
+      if(cashMovementHelp) cashMovementHelp.textContent=kind==='withdrawal'
+        ? 'Retirada de dinheiro do caixa durante o turno.'
+        : 'Entrada manual de dinheiro para reforço de troco.';
+      if(cashMovementSubmit) cashMovementSubmit.textContent=kind==='withdrawal'?'Registrar sangria':'Registrar suprimento';
+      if(cashMovementAmount) cashMovementAmount.value='';
+      if(cashMovementReason) cashMovementReason.value='';
+      operationsModal?.close();
+      if(!cashMovementModal.open) cashMovementModal.showModal();
+      requestAnimationFrame(()=>cashMovementAmount?.focus());
+    };
+
     const runAdvancedOperation=operation=>{
       switch(operation){
         case 'suspend': openSuspendModal(); break;
@@ -1644,14 +1660,8 @@
         case 'cancel-nfce': openCancelNfceModal(); break;
         case 'open-cash': operationsModal?.close(); cashOpenDialog?.showModal(); break;
         case 'close-cash': operationsModal?.close(); cashCloseDialog?.showModal(); break;
-        case 'supply':
-          operationsModal?.close();
-          document.querySelector('[data-pdv-cash-movement="supply"]')?.click();
-          break;
-        case 'withdrawal':
-          operationsModal?.close();
-          document.querySelector('[data-pdv-cash-movement="withdrawal"]')?.click();
-          break;
+        case 'supply': openCashMovementModal('supply'); break;
+        case 'withdrawal': openCashMovementModal('withdrawal'); break;
       }
     };
 
@@ -1696,23 +1706,6 @@
         event.preventDefault();
         cashMovementModal.querySelector('form')?.requestSubmit();
       }
-    });
-
-    document.querySelectorAll('[data-pdv-cash-movement]').forEach(button=>{
-      button.addEventListener('click',()=>{
-        if(!cashMovementModal) return;
-        const type=button.dataset.pdvCashMovement==='withdrawal'?'withdrawal':'supply';
-        if(cashMovementType) cashMovementType.value=type;
-        if(cashMovementTitle) cashMovementTitle.textContent=type==='withdrawal'?'Registrar sangria':'Registrar suprimento';
-        if(cashMovementHelp) cashMovementHelp.textContent=type==='withdrawal'
-          ? 'Retirada de dinheiro do caixa durante o turno.'
-          : 'Entrada manual de dinheiro para reforço de troco.';
-        if(cashMovementSubmit) cashMovementSubmit.textContent=type==='withdrawal'?'Registrar sangria':'Registrar suprimento';
-        if(cashMovementAmount) cashMovementAmount.value='';
-        if(cashMovementReason) cashMovementReason.value='';
-        cashMovementModal.showModal();
-        requestAnimationFrame(()=>cashMovementAmount?.focus());
-      });
     });
 
     const requestFinalize=()=>{
