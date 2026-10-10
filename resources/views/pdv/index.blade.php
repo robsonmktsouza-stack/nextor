@@ -1,6 +1,6 @@
 @extends('layouts.pdv')
 
-@section('pdv-content')
+@section('content')
 @if($pdvSettings['require_cash_opening'])
 <section class="pdv-cash-session-bar {{ $cashSession ? 'open' : 'closed' }}">
   <div>
