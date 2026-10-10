@@ -333,6 +333,7 @@ class SettingsController extends Controller
         $data=$request->validate([
             'name'=>['required','string','max:190'],
             'email'=>['required','email','max:255','unique:users,email'],
+            'username'=>['required','string','min:3','max:50','regex:/^[a-z][a-z0-9._-]*$/','unique:users,username'],
             'password'=>['required','string','min:8','max:255'],
             'role'=>['required',Rule::in(['admin','manager','finance','sales','operator'])],
             'permissions'=>['nullable','array'],
@@ -343,6 +344,7 @@ class SettingsController extends Controller
             throw ValidationException::withMessages(['permissions'=>'Selecione pelo menos uma permissão para este usuário.']);
         }
 
+        $data['username']=strtolower(trim($data['username']));
         $data['is_active']=true;
         $data['permissions']=$data['role']==='admin' ? array_keys(self::PERMISSIONS) : ($data['permissions'] ?? []);
         User::query()->create($data);
@@ -355,6 +357,7 @@ class SettingsController extends Controller
         $data=$request->validate([
             'name'=>['required','string','max:190'],
             'email'=>['required','email','max:255',Rule::unique('users','email')->ignore($user->id)],
+            'username'=>['required','string','min:3','max:50','regex:/^[a-z][a-z0-9._-]*$/',Rule::unique('users','username')->ignore($user->id)],
             'password'=>['nullable','string','min:8','max:255'],
             'role'=>['required',Rule::in(['admin','manager','finance','sales','operator'])],
             'permissions'=>['nullable','array'],
@@ -371,6 +374,7 @@ class SettingsController extends Controller
         }
 
         if(!$data['password']) unset($data['password']);
+        $data['username']=strtolower(trim($data['username']));
         $data['is_active']=$active;
         $data['permissions']=$data['role']==='admin' ? array_keys(self::PERMISSIONS) : ($data['permissions'] ?? []);
         $user->update($data);
