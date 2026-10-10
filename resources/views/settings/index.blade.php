@@ -769,6 +769,7 @@ foreach($primaryTabs as $key=>$item){
         @csrf
         <div class="editor-grid cols-12 settings-grid">
           <label class="field col-3"><span>Nome *</span><input name="name" value="{{ old('name') }}" required autocomplete="off"></label>
+          <label class="field col-3"><span>Usuário de acesso *</span><input name="username" value="{{ old('username') }}" required maxlength="50" minlength="3" pattern="[a-z][a-z0-9._-]{2,49}" autocomplete="off" placeholder="Ex.: autonunes"></label>
           <label class="field col-3"><span>E-mail *</span><input type="email" name="email" value="{{ old('email') }}" required autocomplete="off"></label>
           <label class="field col-3"><span>Senha inicial *</span><input type="password" name="password" minlength="8" required autocomplete="new-password"></label>
           <label class="field col-3"><span>Função</span>
@@ -819,7 +820,7 @@ foreach($primaryTabs as $key=>$item){
                 <span class="settings-user-avatar">{{ strtoupper(mb_substr($user->name,0,1)) }}</span>
                 <span class="settings-user-summary-text">
                   <strong>{{ $user->name }}</strong>
-                  <small>{{ $user->email }} · {{ match($user->role ?? 'admin'){ 'manager'=>'Gerente','finance'=>'Financeiro','sales'=>'Vendas','operator'=>'Operador',default=>'Administrador' } }}</small>
+                  <small>{{ $user->username ? '@'.$user->username.' · ' : '' }}{{ $user->email }} · {{ match($user->role ?? 'admin'){ 'manager'=>'Gerente','finance'=>'Financeiro','sales'=>'Vendas','operator'=>'Operador',default=>'Administrador' } }}</small>
                 </span>
               </div>
               <div class="settings-user-summary-status">
@@ -834,6 +835,7 @@ foreach($primaryTabs as $key=>$item){
 
               <div class="editor-grid cols-12 settings-grid">
                 <label class="field col-3"><span>Nome *</span><input name="name" value="{{ $user->name }}" required autocomplete="off"></label>
+                <label class="field col-3"><span>Usuário de acesso *</span><input name="username" value="{{ $user->username }}" required maxlength="50" minlength="3" pattern="[a-z][a-z0-9._-]{2,49}" autocomplete="off" placeholder="Defina um usuário"></label>
                 <label class="field col-3"><span>E-mail *</span><input type="email" name="email" value="{{ $user->email }}" required autocomplete="off"></label>
                 <label class="field col-3"><span>Nova senha</span><input type="password" name="password" minlength="8" placeholder="Deixe vazio para manter" autocomplete="new-password"></label>
                 <label class="field col-3"><span>Função</span>
