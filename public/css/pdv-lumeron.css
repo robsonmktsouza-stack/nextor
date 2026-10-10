@@ -1,0 +1,508 @@
+/*
+ * Lumeron — PDV no mesmo design system do administrativo.
+ * Carregado depois de erp.css, ui-refinement.css, branding.css e pdv.css.
+ * Preserva os IDs, os atalhos de teclado, modais, formulários e o fluxo fiscal.
+ */
+.pdv-body{
+  min-width:320px;
+  min-height:100vh;
+  height:auto!important;
+  overflow:visible!important;
+  background:#eef0f3;
+  color:#314558;
+  font-family:"Segoe UI",system-ui,-apple-system,BlinkMacSystemFont,Arial,sans-serif;
+  font-size:13px;
+}
+.pdv-body .app-root{min-width:0}
+.lumeron-pdv-page{min-width:0}
+.lumeron-pdv-page .main-content{
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+  overflow:hidden;
+  padding-bottom:14px;
+  background:#eef0f3;
+}
+.lumeron-pdv-page .page-heading{
+  flex:0 0 auto;
+  margin-bottom:10px;
+}
+.lumeron-pdv-page .pdv-screen{
+  width:100%;
+  min-width:0;
+  min-height:0;
+  height:auto;
+  flex:1 1 auto;
+  padding:0;
+  overflow:hidden;
+  gap:0;
+  display:flex;
+  flex-direction:column;
+}
+.lumeron-pdv-page .pdv-screen>form{
+  min-width:0;
+  min-height:0;
+  flex:1 1 auto;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+.lumeron-pdv-page .pdv-screen [hidden]{display:none!important}
+
+/* Barra operacional na linguagem da barra de ações das listagens. */
+.lumeron-pdv-page .pdv-workbar{
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px 16px;
+  min-height:51px;
+  padding:7px 11px;
+  margin-bottom:9px;
+  border:1px solid #d4dde5;
+  border-radius:5px;
+  background:#fff;
+  box-shadow:0 1px 2px #17242d0a;
+}
+.lumeron-pdv-page .pdv-workbar-state{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  min-width:0;
+  gap:9px;
+  color:#738394;
+}
+.lumeron-pdv-page .pdv-topbar-status{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  padding:0;
+  color:#3b7254;
+  font-size:11.5px;
+  font-weight:650;
+}
+.lumeron-pdv-page .pdv-topbar-status.is-closed{color:#9e6d31}
+.lumeron-pdv-page .pdv-online-dot{width:7px;height:7px;flex-basis:7px}
+.lumeron-pdv-page .pdv-workbar-operator{
+  padding-left:9px;
+  border-left:1px solid #dae2e9;
+  font-size:11px;
+}
+.lumeron-pdv-page .pdv-topbar-actions{
+  display:flex;
+  margin-left:auto;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  align-items:center;
+  gap:5px;
+}
+.lumeron-pdv-page .pdv-topbar-button,
+.lumeron-pdv-page .pdv-cash-session-action{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  height:35px;
+  min-height:35px;
+  padding:0 11px;
+  border:1px solid #cbd6df;
+  border-radius:4px;
+  background:linear-gradient(180deg,#fff 0%,#f4f6f8 100%);
+  color:#495e70;
+  font-size:11px;
+  font-weight:650;
+  line-height:1.2;
+  text-decoration:none;
+  white-space:nowrap;
+  box-shadow:inset 0 1px 0 #fff,0 1px 2px #152e4216;
+  transition:background .12s,border-color .12s,color .12s;
+}
+.lumeron-pdv-page .pdv-topbar-button:hover,
+.lumeron-pdv-page .pdv-topbar-button:focus-visible,
+.lumeron-pdv-page .pdv-cash-session-action:hover,
+.lumeron-pdv-page .pdv-cash-session-action:focus-visible{
+  border-color:#99b5c8;
+  background:#edf5fb;
+  color:#236eaa;
+  outline:0;
+}
+.lumeron-pdv-page :is(.pdv-topbar-button,.pdv-cash-session-action) kbd{
+  margin-left:2px;
+  border:1px solid #d4dee6;
+  background:#f6f8fa;
+  color:#8999a7;
+  font:650 9px/1.2 "Segoe UI",sans-serif;
+  padding:2px 4px;
+  opacity:1;
+}
+.lumeron-pdv-page .pdv-topbar-contingency{
+  font-size:10px;
+  padding:5px 8px;
+  min-height:28px;
+  color:#8e6529;
+  background:#fff8e7;
+  border-color:#ead4a7;
+}
+
+/* Abertura/fechamento e última venda são informativos, sem banners espessos. */
+.lumeron-pdv-page .pdv-cash-session-bar{
+  min-height:40px;
+  padding:6px 10px;
+  margin-bottom:7px;
+  border:1px solid #d9e0e6;
+  border-radius:4px;
+  background:#f8fafb;
+  color:#54677a;
+  box-shadow:none;
+}
+.lumeron-pdv-page .pdv-cash-session-bar.open{
+  background:#f6faf7;
+  border-color:#d9e8df;
+}
+.lumeron-pdv-page .pdv-cash-session-bar.closed{
+  background:#fff9ef;
+  border-color:#eadbc2;
+}
+.lumeron-pdv-page .pdv-cash-session-bar>div{gap:9px}
+.lumeron-pdv-page .pdv-cash-session-bar>div span{font-size:11px}
+.lumeron-pdv-page .pdv-cash-session-bar>div small{font-size:10px}
+.lumeron-pdv-page .pdv-cash-session-action{height:30px;min-height:30px;padding:0 9px;font-size:10.5px}
+.lumeron-pdv-page .pdv-cash-session-action.primary{
+  border-color:#299b0b;
+  background:linear-gradient(180deg,#4bcf1b,#31ab0c);
+  color:#fff;
+}
+.lumeron-pdv-page .pdv-cash-session-action.danger{
+  border-color:#e4bec2;
+  background:#fff7f7;
+  color:#a34850;
+}
+.lumeron-pdv-page .pdv-last-sale{
+  min-height:39px;
+  padding:7px 11px;
+  margin-bottom:8px;
+  border-color:#dce7e0;
+  background:#f7faf8;
+  border-radius:4px;
+  color:#417052;
+  box-shadow:none;
+}
+.lumeron-pdv-page .pdv-last-sale a{font-size:11px;color:#287db6}
+.lumeron-pdv-page .pdv-last-sale a:hover{text-decoration:underline}
+
+/* Duas áreas funcionais, mesmas superfícies e bordas do administrativo. */
+.lumeron-pdv-page .pdv-workspace{
+  flex:1 1 auto;
+  min-height:0;
+  grid-template-columns:minmax(0,1.1fr) minmax(560px,.94fr);
+  gap:9px;
+  overflow:hidden;
+}
+.lumeron-pdv-page .pdv-catalog,
+.lumeron-pdv-page .pdv-checkout{
+  min-width:0;
+  min-height:0;
+  border:1px solid #d6dfe7;
+  border-radius:5px;
+  background:#fff;
+  box-shadow:0 1px 2px #17242d0b;
+}
+.lumeron-pdv-page .pdv-catalog{
+  padding:10px;
+  grid-template-rows:auto auto minmax(0,1fr) auto!important;
+  gap:8px;
+}
+.lumeron-pdv-page .pdv-search-panel{
+  min-width:0;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+}
+.lumeron-pdv-page .pdv-search-box{
+  height:51px;
+  border:1px solid #a9bfd2;
+  border-radius:5px;
+  background:#fff;
+  box-shadow:inset 0 1px 2px #152d4309;
+}
+.lumeron-pdv-page .pdv-search-box:focus-within{
+  border-color:#3685bf;
+  box-shadow:0 0 0 2px #2877c718!important;
+}
+.lumeron-pdv-page .pdv-search-icon{
+  width:49px;
+  background:#f5f8fb;
+  border-right:1px solid #e0e6ed;
+  color:#2981c0;
+}
+.lumeron-pdv-page #pdvSearch{
+  min-width:0;
+  font-size:14px;
+  color:#253e53;
+}
+.lumeron-pdv-page .pdv-search-box kbd{
+  margin-right:9px;
+  background:#f5f7f9;
+  color:#647e93;
+  border-color:#d4dfe8;
+}
+.lumeron-pdv-page .pdv-search-tools{
+  margin-top:6px;
+  min-height:27px;
+}
+.lumeron-pdv-page .pdv-product-search-label{
+  min-height:26px;
+  padding:0 7px;
+  background:#f7f9fb;
+  border-color:#dde5ec;
+  font-size:10px;
+  font-weight:600;
+}
+.lumeron-pdv-page .pdv-results-head{
+  min-height:42px;
+  padding:0 2px;
+  gap:7px;
+}
+.lumeron-pdv-page .pdv-results-head h2,
+.lumeron-pdv-page .pdv-checkout-head h2{
+  color:#2c4256;
+  font-size:15px;
+  font-weight:700;
+}
+.lumeron-pdv-page .pdv-results-head p{
+  font-size:10px;
+  color:#8190a0;
+}
+.lumeron-pdv-page .pdv-scan-status{font-size:10px;color:#8093a4}
+.lumeron-pdv-page .pdv-results{
+  border:1px solid #e0e7ed;
+  border-radius:4px;
+  padding:0!important;
+  background:#fff;
+}
+.lumeron-pdv-page .pdv-results>.pdv-result-card{
+  min-height:57px;
+  border-bottom-color:#e7edf1!important;
+  background:#fff;
+}
+.lumeron-pdv-page .pdv-results>.pdv-result-card.keyboard-selected{
+  background:#eef7fd!important;
+  box-shadow:inset 3px 0 0 #2d82bb!important;
+}
+.lumeron-pdv-page .pdv-results>.pdv-empty-state{
+  min-height:200px;
+  background:#fff;
+}
+.lumeron-pdv-page .pdv-command-center{
+  min-width:0;
+  padding:8px 0 0;
+  border:0;
+  border-top:1px solid #e1e7ec;
+  border-radius:0;
+  background:#fff;
+  box-shadow:none;
+}
+.lumeron-pdv-page .pdv-command-grid{
+  width:100%;
+  min-width:0;
+  display:grid;
+  grid-template-columns:repeat(9,minmax(0,1fr));
+  gap:5px;
+}
+.lumeron-pdv-page .pdv-command-button{
+  height:48px;
+  min-width:0;
+  border:1px solid #d8e1e8;
+  border-radius:4px;
+  background:linear-gradient(180deg,#fff 0%,#f7f9fb 100%);
+  color:#437598;
+  box-shadow:0 1px 2px #17242d0d;
+}
+.lumeron-pdv-page .pdv-command-button:hover,
+.lumeron-pdv-page .pdv-command-button:focus-visible{
+  background:#edf5fb;
+  border-color:#98bedc;
+  outline:0;
+}
+.lumeron-pdv-page .pdv-command-icon{
+  width:27px;
+  height:27px;
+}
+.lumeron-pdv-page .pdv-command-icon svg{width:19px;height:19px}
+.lumeron-pdv-page .pdv-command-button kbd{
+  top:3px;
+  right:3px;
+  padding:1px 3px;
+  font-size:8px;
+}
+.lumeron-pdv-page .pdv-command-button.danger{color:#c44a50}
+.lumeron-pdv-page .pdv-command-button.success{color:#289450}
+.lumeron-pdv-page .pdv-command-button.is-set{
+  background:#f1faf4!important;
+  border-color:#a4cfb3!important;
+}
+
+/* Carrinho no padrão das listagens; destaque apenas no total e finalização. */
+.lumeron-pdv-page .pdv-checkout{
+  grid-template-rows:auto minmax(0,1fr) auto auto!important;
+}
+.lumeron-pdv-page .pdv-checkout-head{
+  min-height:54px;
+  padding:9px 13px;
+  border-bottom:1px solid #dce5eb;
+}
+.lumeron-pdv-page .pdv-eyebrow{
+  font-size:9px;
+  color:#8297a7;
+  margin-bottom:2px;
+}
+.lumeron-pdv-page .pdv-cart-head-actions{gap:7px}
+.lumeron-pdv-page .pdv-item-count{
+  border:1px solid #e1e8ee;
+  background:#f7f9fb;
+  color:#63788c;
+}
+.lumeron-pdv-page .pdv-cart{
+  border:0;
+  background:#fff;
+  scrollbar-width:thin;
+}
+.lumeron-pdv-page .pdv-cart-row{
+  border-bottom-color:#e5eaee;
+}
+.lumeron-pdv-page .pdv-cart-row:hover{
+  background:#f5f9fc;
+}
+.lumeron-pdv-page .pdv-cart-empty{color:#8fa2b2}
+.lumeron-pdv-page .pdv-summary{
+  padding:10px 13px;
+  background:#f7f9fb;
+  border-top:1px solid #dfe6ec;
+  border-bottom:1px solid #dfe6ec;
+  gap:5px;
+}
+.lumeron-pdv-page .pdv-summary>div{font-size:11px}
+.lumeron-pdv-page .pdv-grand-total{
+  margin-top:4px;
+  padding-top:8px;
+  border-top:1px solid #d8e1e8;
+}
+.lumeron-pdv-page .pdv-grand-total span{
+  color:#253b4c!important;
+  font-size:13px!important;
+}
+.lumeron-pdv-page .pdv-grand-total strong{
+  color:#153950!important;
+  font-size:29px!important;
+}
+.lumeron-pdv-page .pdv-finish{
+  min-height:48px;
+  margin:9px 13px 11px;
+  border:1px solid #2d9810;
+  border-radius:4px;
+  background:linear-gradient(180deg,#4bcf1b 0%,#32a909 100%);
+  color:#fff;
+  font-size:13px;
+  font-weight:700;
+  box-shadow:inset 0 1px 0 #ffffff45,0 2px 4px #1c642521;
+}
+.lumeron-pdv-page .pdv-finish:hover:not(:disabled){
+  border-color:#258b0b;
+  background:linear-gradient(180deg,#54d923 0%,#2c9a0a 100%);
+}
+.lumeron-pdv-page .pdv-finish:disabled{
+  border-color:#d8e0e7;
+  background:#f0f3f5;
+  color:#a8b3bd;
+  box-shadow:none;
+}
+.lumeron-pdv-page .pdv-finish kbd{
+  color:inherit;
+  border-color:currentColor;
+  opacity:.65;
+}
+
+/* Mesma família de controles nas janelas do PDV. */
+.pdv-body .pdv-quick-modal{
+  border-color:#cfd9e1;
+  border-radius:6px;
+  box-shadow:0 22px 65px #14243735;
+}
+.pdv-body :is(.pdv-modal-primary,.pdv-cash-exact,.pdv-consumer-skip){
+  border-radius:4px;
+}
+.pdv-body :is(.pdv-modal-primary,.pdv-quick-modal button){
+  font-family:inherit;
+}
+.pdv-body :is(.pdv-operation-body,.pdv-electronic-body,.pdv-cash-modal-body,.pdv-notes-modal-body)
+  :is(input:not([type="checkbox"]),textarea,select){
+  border-radius:4px;
+  border-color:#cfd9e1;
+  box-shadow:inset 0 1px 2px #17242d09;
+}
+.pdv-body :is(.pdv-operation-body,.pdv-electronic-body,.pdv-cash-modal-body,.pdv-notes-modal-body)
+  :is(input:not([type="checkbox"]),textarea,select):focus{
+  border-color:#2f83bf;
+  box-shadow:0 0 0 2px #2f83bf22;
+}
+
+@media(max-width:1380px){
+  .lumeron-pdv-page .pdv-workspace{
+    grid-template-columns:minmax(0,1fr) minmax(520px,.95fr);
+  }
+  .lumeron-pdv-page .pdv-topbar-button{padding:0 8px}
+  .lumeron-pdv-page .pdv-topbar-button kbd{display:none}
+  .lumeron-pdv-page .pdv-cart-nav-hint{display:none}
+}
+@media(max-width:1250px){
+  .lumeron-pdv-page .main-content{overflow-y:auto;overflow-x:hidden}
+  .lumeron-pdv-page .pdv-screen{height:auto;min-height:0;overflow:visible}
+  .lumeron-pdv-page .pdv-screen>form{height:auto;min-height:0;overflow:visible}
+  .lumeron-pdv-page .pdv-workspace{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    gap:10px;
+    overflow:visible;
+  }
+  .lumeron-pdv-page .pdv-catalog{
+    min-height:415px;
+    grid-template-rows:auto auto minmax(210px,1fr) auto!important;
+  }
+  .lumeron-pdv-page .pdv-checkout{
+    height:auto;
+    min-height:395px;
+    grid-template-rows:auto minmax(190px,1fr) auto auto!important;
+  }
+  .lumeron-pdv-page .pdv-cart{max-height:380px}
+}
+@media(max-width:760px){
+  .pdv-body{height:auto!important;overflow:hidden!important}
+  .lumeron-pdv-page .main-content{overflow-y:auto;padding-bottom:14px}
+  .lumeron-pdv-page .pdv-workbar{flex-wrap:wrap;align-items:flex-start;padding:9px}
+  .lumeron-pdv-page .pdv-workbar-state{width:100%}
+  .lumeron-pdv-page .pdv-topbar-actions{margin-left:0;justify-content:flex-start;width:100%}
+  .lumeron-pdv-page .pdv-topbar-button{
+    height:32px;min-height:32px;font-size:10px;padding:0 7px;
+  }
+  .lumeron-pdv-page .pdv-cash-session-bar{flex-wrap:wrap}
+  .lumeron-pdv-page .pdv-cash-session-actions{
+    width:100%;justify-content:flex-start;flex-wrap:wrap;
+  }
+  .lumeron-pdv-page .pdv-last-sale{flex-wrap:wrap}
+  .lumeron-pdv-page .pdv-catalog{padding:8px}
+  .lumeron-pdv-page .pdv-search-box{height:49px}
+  .lumeron-pdv-page .pdv-command-grid{
+    min-width:0;
+    grid-template-columns:repeat(9,minmax(43px,1fr));
+    gap:4px;
+  }
+  .lumeron-pdv-page .pdv-command-center{overflow-x:auto}
+  .lumeron-pdv-page .pdv-command-button{height:45px}
+  .lumeron-pdv-page .pdv-cart-row{min-width:0}
+  .lumeron-pdv-page .pdv-grand-total strong{font-size:26px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .lumeron-pdv-page :is(.pdv-topbar-button,.pdv-command-button,.pdv-finish){transition:none}
+}
