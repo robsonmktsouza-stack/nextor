@@ -1,0 +1,41 @@
+name: Lumeron - isolamento por CNPJ
+
+on:
+  push:
+    paths:
+      - 'deploy/instances/**'
+      - 'app/Support/InstanceIdentity.php'
+      - 'app/Console/Commands/LumeronInstanceCheck.php'
+      - 'config/instance.php'
+      - 'tests/Feature/InstanceIsolationTest.php'
+      - '.github/workflows/lumeron-instance-checks.yml'
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Shell scripts - validação e simulação segura
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n deploy/instances/provision.sh
+          bash -n deploy/instances/update.sh
+          bash -n deploy/instances/list.sh
+          testroot="$(mktemp -d)"
+          trap 'rm -rf "$testroot"' EXIT
+          cp composer.json "$testroot/composer.json"
+          touch "$testroot/composer.lock"
+          bash deploy/instances/provision.sh \
+            --id cliente_a_1 --cnpj 00000000000000 \
+            --domain cliente-a-1.example.com --source "$testroot" |
+            grep -q 'Simulação: nada foi alterado'
+      - name: PHP syntax for tenant guard and health command
+        shell: bash
+        run: |
+          php -l app/Support/InstanceIdentity.php
+          php -l config/instance.php
+          php -l app/Console/Commands/LumeronInstanceCheck.php
+          php -l tests/Feature/InstanceIsolationTest.php
