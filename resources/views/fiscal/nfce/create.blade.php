@@ -14,7 +14,7 @@
       || (bool)\App\Models\AppSetting::value('nfce','advanced_operations_production_approved',false));
 @endphp
 @section('title','Fiscal')
-@section('titleMeta',$readOnly?'NFC-e — somente leitura':'Nova NFC-e')
+@section('titleMeta',$readOnly?'NFC-e':'Nova NFC-e')
 @section('content')
 @include('fiscal._nav',['tab'=>'nfce','tabs'=>[
     'nfe'=>['label'=>'NF-e'],'nfse'=>['label'=>'NFS-e'],
@@ -23,11 +23,14 @@
 
 <div class="nextor-modal-layer nfe-modal-layer is-open {{ $readOnly?'nfce-readonly':'' }}" id="nfceEditor" aria-hidden="false">
   <div class="erp-dialog nfe-workspace-dialog nextor-modal-window nfe-fixed-shell" role="dialog" aria-modal="true" aria-labelledby="nfceEditorTitle">
-    <form method="{{ $readOnly?'get':'post' }}" action="{{ $readOnly?'#':route('fiscal.nfce.store') }}" id="nfceEditorForm" data-readonly="{{ $readOnly?'1':'0' }}" autocomplete="off" novalidate>
-      @csrf
+    @if($readOnly)
+      <div id="nfceEditorForm" data-readonly="1" class="nfce-readonly-content">
+    @else
+      <form method="post" action="{{ route('fiscal.nfce.store') }}" id="nfceEditorForm" data-readonly="0" autocomplete="off" novalidate>
+        @csrf
+    @endif
       <div class="dialog-header">
-        <div><h2 id="nfceEditorTitle">{{ $readOnly?'NFC-e '.$readOnlyDocument->series.'/'.$readOnlyDocument->document_number:'Nova NFC-e' }}</h2>
-          @if($readOnly)<p class="nfce-readonly-caption">Documento {{ $readOnlyDocument->status==='cancelled'?'cancelado':'autorizado' }} · campos bloqueados para alteração</p>@endif</div>
+        <div><h2 id="nfceEditorTitle">{{ $readOnly?'NFC-e '.$readOnlyDocument->series.'/'.$readOnlyDocument->document_number:'Nova NFC-e' }}</h2></div>
         <a class="close-dialog" href="{{ route('fiscal.index',['tab'=>'nfce']) }}" aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</a>
       </div>
 
@@ -87,6 +90,9 @@
           <button type="button" role="tab" id="nfceTab-summary" aria-controls="nfcePanel-summary" aria-selected="false" tabindex="-1" class="editor-tab" data-nfce-tab="summary">Resumo</button>
         </div>
 
+        @if($readOnly)
+          @include('fiscal.nfce._readonly_panels')
+        @else
         <section class="editor-tab-panel active" id="nfcePanel-general" role="tabpanel" aria-labelledby="nfceTab-general" data-nfce-panel="general">
           <div class="nfe-general-card">
             <div class="nfe-section-title"><h3>Dados gerais</h3></div>
@@ -206,12 +212,13 @@
             </label>
           </div>
         </section>
+        @endif
       </div>
 
       <div class="editor-savebar settings-savebar nfce-savebar">
         <div class="nfce-save-total">
           <span>Total da NFC-e</span>
-          <strong id="nfceFixedTotal">R$ 0,00</strong>
+          <strong id="nfceFixedTotal">{{ $readOnly?'R$ '.number_format((float)$frozenTotals['total'],2,',','.'):'R$ 0,00' }}</strong>
         </div>
         <div class="nfce-save-buttons">
           <a href="{{ route('fiscal.index',['tab'=>'nfce']) }}" class="btn btn-secondary">{{ $readOnly?'Voltar':'Cancelar' }}</a>
@@ -235,7 +242,11 @@
           @endif
         </div>
       </div>
-    </form>
+    @if($readOnly)
+      </div>
+    @else
+      </form>
+    @endif
   </div>
 </div>
 
@@ -260,13 +271,15 @@
 </dialog>
 @endif
 
-@php
-  $formItems=$readOnly?$frozenItems:old('items',[]);
-  $formPayments=$readOnly?$frozenPayments:old('payments',[]);
-@endphp
-<script type="application/json" id="nfceProductsJson">@json($products)</script>
-<script type="application/json" id="nfceMethodsJson">@json($methods)</script>
-<script type="application/json" id="nfceOldItems">@json($formItems)</script>
-<script type="application/json" id="nfceOldPayments">@json($formPayments)</script>
+@unless($readOnly)
+  @php
+    $formItems=old('items',[]);
+    $formPayments=old('payments',[]);
+  @endphp
+  <script type="application/json" id="nfceProductsJson">@json($products)</script>
+  <script type="application/json" id="nfceMethodsJson">@json($methods)</script>
+  <script type="application/json" id="nfceOldItems">@json($formItems)</script>
+  <script type="application/json" id="nfceOldPayments">@json($formPayments)</script>
+@endunless
 <script defer src="{{ asset('js/nfce-editor.js') }}?v={{ filemtime(public_path('js/nfce-editor.js')) }}"></script>
 @endsection
