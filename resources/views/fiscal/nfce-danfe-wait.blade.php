@@ -4,7 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow,noarchive">
-  <title>Preparando DANFE</title>
+  <title>Preparando DANFE — Lumeron</title>
+  <link rel="icon" type="image/png" href="{{ asset('images/lumeron/elephant.png') }}">
   <style>
     html,body{height:100%;margin:0}
     body{display:grid;place-items:center;font:14px Arial,sans-serif;background:#f6f8fa;color:#36495a}
