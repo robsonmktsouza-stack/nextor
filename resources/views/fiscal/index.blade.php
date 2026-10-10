@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('title','Fiscal')
-@section('description','Emissão e acompanhamento dos documentos fiscais do NEXTOR.')
+@section('description','Emissão e acompanhamento dos documentos fiscais do Lumeron.')
 @section('content')
 @include('fiscal._nav')
 
