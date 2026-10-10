@@ -4,10 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<title>PDV — {{ config('app.name') }}</title>
+<title>PDV — Lumeron</title>
+<link rel="icon" type="image/png" href="{{ asset('images/lumeron/elephant.png') }}">
 <link rel="stylesheet" href="{{ asset('css/erp.css') }}?v={{ filemtime(public_path('css/erp.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/pdv.css') }}">
 <link rel="stylesheet" href="{{ asset('css/ui-refinement.css') }}?v={{ filemtime(public_path('css/ui-refinement.css')) }}">
+<link rel="stylesheet" href="{{ asset('css/branding.css') }}?v={{ filemtime(public_path('css/branding.css')) }}">
 <script defer src="{{ asset('js/erp.js') }}?v={{ filemtime(public_path('js/erp.js')) }}"></script>
 </head>
 <body
@@ -17,9 +19,9 @@
 <div class="pdv-root" id="appRoot">
   <header class="pdv-topbar">
     <div class="pdv-topbar-brand">
-      <span class="pdv-topbar-mark">@include('partials.icon',['name'=>'pdv','size'=>21])</span>
+      <img class="lumeron-pdv-elephant" src="{{ asset('images/lumeron/elephant.png') }}" alt="" width="39" height="39">
       <div>
-        <strong>NEXTOR PDV</strong>
+        <strong>Lumeron PDV</strong>
         <small>Frente de caixa</small>
       </div>
     </div>
