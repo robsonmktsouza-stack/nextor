@@ -3,6 +3,41 @@
   const form=document.getElementById('nfceEditorForm');
   if(!form) return;
   const readOnly=form.dataset.readonly==='1';
+  if(readOnly){
+    // A NFC-e autorizada usa valores HTML vindos do XML: não instanciar o
+    // editor de produtos/pagamentos, buscas, máscaras ou validação de venda.
+    const tabs=[...form.querySelectorAll('[data-nfce-tab]')];
+    const panels=[...form.querySelectorAll('[data-nfce-panel]')];
+    const activate=target=>{
+      const active=tabs.find(tab=>tab.dataset.nfceTab===target);
+      if(!active)return;
+      tabs.forEach(tab=>{
+        const selected=tab===active;
+        tab.classList.toggle('active',selected);
+        tab.setAttribute('aria-selected',selected?'true':'false');
+        tab.tabIndex=selected?0:-1;
+      });
+      panels.forEach(panel=>{
+        const selected=panel.dataset.nfcePanel===target;
+        panel.classList.toggle('active',selected);
+        panel.hidden=!selected;
+      });
+    };
+    tabs.forEach(tab=>{
+      tab.addEventListener('click',()=>activate(tab.dataset.nfceTab));
+      tab.addEventListener('keydown',event=>{
+        if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+        event.preventDefault();
+        const index=tabs.indexOf(tab);
+        const next=event.key==='Home'?0
+          :event.key==='End'?tabs.length-1
+          :(index+(event.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;
+        activate(tabs[next].dataset.nfceTab);
+        tabs[next].focus();
+      });
+    });
+    return;
+  }
   const el=id=>document.getElementById(id);
   const json=id=>{try{return JSON.parse(el(id)?.textContent||'[]')}catch{return []}};
   const products=json('nfceProductsJson');
