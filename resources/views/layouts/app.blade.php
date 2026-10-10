@@ -2,9 +2,12 @@
 <html lang="pt-BR"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<title>@yield('title','Painel') — {{ config('app.name') }}</title>
+<title>@yield('title','Painel') — Lumeron</title>
+<link rel="icon" type="image/png" href="{{ asset('images/lumeron/elephant.png') }}">
+<meta name="theme-color" content="#12335b">
 <link rel="stylesheet" href="{{ asset('css/erp.css') }}?v={{ filemtime(public_path('css/erp.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/ui-refinement.css') }}?v={{ filemtime(public_path('css/ui-refinement.css')) }}">
+<link rel="stylesheet" href="{{ asset('css/branding.css') }}?v={{ filemtime(public_path('css/branding.css')) }}">
 <script defer src="{{ asset('js/erp.js') }}?v={{ filemtime(public_path('js/erp.js')) }}"></script>
 <script defer src="{{ asset('js/fiscal-codes.js') }}"></script>
 </head><body
@@ -18,8 +21,8 @@
     <div class="cms-topbar-brand">
       <button class="cms-topbar-icon" type="button" data-sidebar-toggle aria-label="Alternar menu">@include('partials.icon',['name'=>'menu','size'=>20])</button>
       <a class="brand-home-link" href="{{ route(auth()->user()->canAccess('dashboard') ? 'dashboard' : auth()->user()->homeRouteName()) }}" data-tooltip="Abrir dashboard" aria-label="Abrir dashboard">
-        <span class="cms-logo-mark">@include('partials.icon',['name'=>'shield','size'=>17])</span>
-        <strong class="brand-name">NEXTOR</strong>
+        <img class="lumeron-brand-full" src="{{ asset('images/lumeron/logo.png') }}" alt="Lumeron" width="130" height="34">
+        <img class="lumeron-brand-icon" src="{{ asset('images/lumeron/elephant.png') }}" alt="Lumeron" width="30" height="30">
       </a>
     </div>
     <div class="topbar-content">
@@ -76,7 +79,7 @@
       </summary><div class="user-dropdown">
          <span class="user-dropdown-name">{{ auth()->user()->email }}</span>
          <form method="post" action="{{ route('logout') }}">@csrf
-           <button type="submit">@include('partials.icon',['name'=>'logout','size'=>16]) Sair do ERP</button>
+           <button type="submit">@include('partials.icon',['name'=>'logout','size'=>16]) Sair do Lumeron</button>
          </form>
       </div></details>
     </div>
