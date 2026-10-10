@@ -15,7 +15,7 @@ Exemplo com cinco clientes:
 | E | 2 | cliente_e_1, cliente_e_2 |
 | **Total** | **7** | **7** |
 
-Cada instalação recebe: URL/subdomínio, usuário Linux `lum_{id}`, pool PHP-FPM exclusivo, banco e usuário MySQL `lum_{id}`, `APP_KEY`, cookies, cache, sessões, armazenamento privado, arquivos fiscais, certificado A1 e CSC próprios, além da fila e do worker `lumeron-fiscal-{id}`. O cliente A nunca vê nem altera o banco da segunda empresa pelo primeiro ambiente.
+Cada instalação recebe: URL/subdomínio, usuário Linux `lum_{id}`, pool PHP-FPM exclusivo, banco e usuário MySQL `lum_{id}`, `APP_KEY`, cookies, cache, sessões, armazenamento privado, arquivos fiscais, certificado A1 e CSC próprios, além da fila e do worker `lumeron-fiscal-{id}` e de um agendador `lumeron-schedule-{id}.timer` próprios. O cliente A nunca vê nem altera o banco da segunda empresa pelo primeiro ambiente.
 
 **Não é um SaaS multiempresa com banco compartilhado.** A empresa cadastrada no ERP deve corresponder a `LUMERON_INSTANCE_CNPJ` do ambiente. A UI recusa CNPJ diferente, e a NFC-e não deve ser transmitida com um emitente que não coincida com a instalação.
 
@@ -59,6 +59,7 @@ Em caso de sucesso, são criados:
 /etc/php/8.3/fpm/pool.d/lumeron-academia_ba.conf
 /etc/nginx/sites-available/lumeron-academia_ba.conf
 /etc/systemd/system/lumeron-fiscal-academia_ba.service
+/etc/systemd/system/lumeron-schedule-academia_ba.{service,timer}
 /root/lumeron/academia_ba.mysql.cnf
 ```
 
@@ -93,7 +94,16 @@ sudo systemctl enable --now lumeron-fiscal-academia_ba
 sudo systemctl status lumeron-fiscal-academia_ba
 ```
 
-A fila fiscal é individual e inclui `fiscal,default`, sem depender de um terminal manual. Em caso de nota com estado indeterminado, consulte a SEFAZ pela chave antes de qualquer retransmissão.
+A fila fiscal é individual e inclui `fiscal,default`, sem depender de um terminal manual.
+
+Para habilitar as rotinas agendadas próprias do cliente (financeiro, webhooks e exportação contábil), após conferir as configurações:
+
+```bash
+sudo systemctl enable --now lumeron-schedule-academia_ba.timer
+sudo systemctl status lumeron-schedule-academia_ba.timer
+```
+
+Não configure um cron global adicional para a mesma instalação; isso poderia executar as rotinas em duplicidade. Em caso de nota com estado indeterminado, consulte a SEFAZ pela chave antes de qualquer retransmissão.
 
 ## Atualizar apenas um CNPJ
 
@@ -104,7 +114,7 @@ sudo bash deploy/instances/update.sh --id academia_ba --source /opt/lumeron/sour
 sudo bash deploy/instances/update.sh --id academia_ba --source /opt/lumeron/source --apply
 ```
 
-O script prepara o novo release, instala as dependências do lock, coloca apenas aquela empresa em manutenção, interrompe seu worker se estiver ativo, realiza backup MySQL local, aplica migrações e troca o symlink `current` atomicamente. O código anterior permanece disponível. **Migrações destrutivas exigem janela de manutenção e plano de restauração; trocar só o symlink não reverte o banco.** Se a atualização falhar, consulte os logs antes de tentar novamente.
+O script prepara o novo release, instala as dependências do lock, coloca apenas aquela empresa em manutenção, interrompe o worker e o timer daquela empresa se estiverem ativos, realiza backup MySQL local, aplica migrações e troca o symlink `current` atomicamente. O código anterior permanece disponível. **Migrações destrutivas exigem janela de manutenção e plano de restauração; trocar só o symlink não reverte o banco.** Se a atualização falhar, consulte os logs antes de tentar novamente.
 
 As demais empresas continuam no release anterior até serem atualizadas individualmente. O código-fonte é único, mas as implantações e a programação de atualização são independentes.
 
