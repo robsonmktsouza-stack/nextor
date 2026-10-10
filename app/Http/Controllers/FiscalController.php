@@ -214,7 +214,7 @@ class FiscalController extends Controller
                 'fiscal_document_job_id' => $fiscalDocumentJob->id,
                 'reason' => $e->getMessage(),
             ]);
-            return back()->with('error', 'Não foi possível recuperar o XML. Consulte o log do NEXTOR. Nenhuma nota foi retransmitida.');
+            return back()->with('error', 'Não foi possível recuperar o XML. Consulte o log do Lumeron. Nenhuma nota foi retransmitida.');
         }
 
         return redirect()->route('fiscal.show', $fiscalDocumentJob)
