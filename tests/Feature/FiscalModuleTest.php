@@ -151,6 +151,18 @@ class FiscalModuleTest extends TestCase
             ->assertSee('data-no-loading hidden',false);
     }
 
+    public function test_new_nfce_retains_editable_emission_form(): void
+    {
+        $this->actingAs($this->admin())
+            ->get(route('fiscal.nfce.create'))
+            ->assertOk()
+            ->assertSee('id="nfceEditorForm" data-readonly="0"',false)
+            ->assertSee('name="mode"',false)
+            ->assertSee('Salvar para emissão')
+            ->assertSee('Emitir NFC-e')
+            ->assertSee('nfceProductsJson',false);
+    }
+
     public function test_authorized_nfce_opens_filled_emission_form_in_readonly_mode(): void
     {
         $document=FiscalDocumentJob::query()->create([
