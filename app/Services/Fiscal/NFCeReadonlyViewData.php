@@ -112,7 +112,9 @@ final class NFCeReadonlyViewData
                     'state'=>'emit/n:enderEmit/n:UF',
                 ] as $attribute=>$xmlNode) {
                     $value=$read($root.$xmlNode);
-                    if ($value!=='') $company->setAttribute($attribute,$value);
+                    // Não herdar valores atuais (como nome fantasia) quando
+                    // o campo não existia no XML original.
+                    $company->setAttribute($attribute,$value ?: null);
                 }
 
                 $nature=$read($root.'ide/n:natOp') ?: $nature;
