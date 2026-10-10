@@ -24,6 +24,7 @@ final class NFCeInutilizationService
             AppSetting::query()->where('group','nfce')->where('key','next_number')
                 ->lockForUpdate()->first();
             $company=CompanySetting::current();
+            \App\Support\InstanceIdentity::assertCompanyDocument($company->document);
             $cnpj=preg_replace('/\D/','',(string)$company->document);
             $environment=app(FiscalDocumentSettings::class)->environment('nfce');
             app(NFCeProductionGate::class)->assertAllowed($environment);
