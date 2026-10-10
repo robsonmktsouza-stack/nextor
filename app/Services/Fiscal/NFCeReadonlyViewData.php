@@ -4,164 +4,189 @@ namespace App\Services\Fiscal;
 
 use App\Models\CompanySetting;
 use App\Models\FiscalDocumentJob;
-use App\Models\PaymentMethod;
-use Illuminate\Support\Facades\Storage;
 use DOMDocument;
 use DOMXPath;
+use Illuminate\Support\Facades\Storage;
 
-/** Read-only issuer/commerce data are frozen at issuance, not rebuilt from today's catalog. */
+/**
+ * Dados congelados do documento emitido: XML autorizado prevalece sobre a
+ * venda, preço e cadastro atuais. Nunca reprocessar a nota para visualizá-la.
+ */
 final class NFCeReadonlyViewData
 {
     public function forDocument(FiscalDocumentJob $document): array
     {
-        $snapshot=$document->source_snapshot ?? [];
+        $snapshot=is_array($document->source_snapshot) ? $document->source_snapshot : [];
         $company=clone CompanySetting::current();
-        $items=[];
-        $products=[];
-        foreach (($snapshot['items'] ?? []) as $index=>$item) {
+
+        $rows=[];
+        foreach (($snapshot['items'] ?? []) as $item) {
             if (!is_array($item)) continue;
-            $id='snapshot-'.($index+1);
-            $products[]=[
-                'id'=>$id,
-                'name'=>(string)($item['name'] ?? 'Produto da NFC-e'),
+            $quantity=(float)($item['quantity'] ?? 0);
+            $price=(float)($item['unit_price'] ?? 0);
+            $discount=(float)($item['discount'] ?? 0);
+            $rows[]=[
+                'name'=>(string)($item['name'] ?? 'Produto'),
                 'sku'=>(string)($item['sku'] ?? ''),
-                'sale_price'=>(string)($item['unit_price'] ?? '0'),
-                'ean_gtin'=>(string)($item['gtin'] ?? ''),
-            ];
-            $items[]=[
-                'product_id'=>$id,
-                'quantity'=>(string)($item['quantity'] ?? '0'),
-                'unit_price'=>(string)($item['unit_price'] ?? '0'),
-                'discount'=>(string)($item['discount'] ?? '0'),
+                'quantity'=>$quantity,
+                'unit_price'=>$price,
+                'discount'=>$discount,
+                'total'=>(float)($item['line_total'] ?? max(0,round($price*$quantity-$discount,2))),
             ];
         }
 
-        $paymentRows=array_values(array_filter($snapshot['payments'] ?? [], 'is_array'));
-        $codes=array_values(array_unique(array_filter(array_map(
-            static fn(array $row)=>(string)($row['payment_method'] ?? ''),$paymentRows
-        ))));
-        $names=$codes?PaymentMethod::query()->whereIn('code',$codes)->pluck('name','code')->all():[];
-        $kindNames=[
+        $paymentNames=[
+            '01'=>'Dinheiro','02'=>'Cheque','03'=>'Cartão de crédito',
+            '04'=>'Cartão de débito','05'=>'Crédito loja','10'=>'Vale alimentação',
+            '11'=>'Vale refeição','12'=>'Vale presente','13'=>'Vale combustível',
+            '15'=>'Boleto bancário','16'=>'Depósito bancário','17'=>'PIX',
+            '18'=>'Transferência bancária','19'=>'Programa de fidelidade',
+            '90'=>'Sem pagamento','99'=>'Outros',
             'cash'=>'Dinheiro','money'=>'Dinheiro','pix'=>'PIX',
             'credit_card'=>'Cartão de crédito','debit_card'=>'Cartão de débito',
-            'bank_slip'=>'Boleto','bank_transfer'=>'Transferência bancária',
+            'bank_slip'=>'Boleto bancário','bank_transfer'=>'Transferência bancária',
             'transfer'=>'Transferência bancária',
         ];
-        $methods=[];
         $payments=[];
-        foreach ($paymentRows as $index=>$row) {
-            $code=(string)($row['payment_method'] ?? '');
-            if ($code==='') $code='historical-'.$index;
-            $kind=(string)($row['payment_kind'] ?? '');
-            $methods[$code]=['code'=>$code,'name'=>$kindNames[$kind] ?? ($names[$code] ?? $code)];
+        foreach (($snapshot['payments'] ?? []) as $payment) {
+            if (!is_array($payment)) continue;
+            $code=(string)($payment['payment_kind'] ?? $payment['payment_method'] ?? '');
             $payments[]=[
-                'payment_method'=>$code,
-                'amount'=>(string)($row['amount'] ?? '0'),
+                'name'=>$paymentNames[$code] ?? ($code ?: 'Não informado'),
+                'amount'=>(float)($payment['amount'] ?? 0),
             ];
         }
 
-        $issuedAt=$document->prepared_at ?? $document->created_at;
-        $nature='VENDA DE MERCADORIA';
-        $notes='';
+        $subtotal=array_reduce($rows,static fn($sum,$row)=>$sum+round($row['quantity']*$row['unit_price'],2),0.0);
+        $discount=array_sum(array_column($rows,'discount'));
+        $totals=[
+            'subtotal'=>$subtotal,
+            'discount'=>$discount,
+            'total'=>is_numeric($snapshot['total'] ?? null)
+                ? (float)$snapshot['total'] : max(0,round($subtotal-$discount,2)),
+        ];
+        $issueAt=$document->prepared_at ?? $document->created_at;
+        $nature='Venda de mercadoria';
+        $presence='Operação presencial';
         $consumerDocument=(string)($snapshot['consumer_document'] ?? '');
         $consumerName=(string)($snapshot['consumer_name'] ?? '');
+        $notes='';
         $xmlLoaded=false;
 
-        // Prefer the actual XML archived at authorization, including for cancelled documents.
         $path=(string)$document->xml_path;
-        $safePaths=[
-            'fiscal/nfce/'.$document->id.'/authorized.xml',
-            'fiscal/nfce/'.$document->id.'/authorized-recovered.xml',
-            'fiscal/nfce/'.$document->id.'/signed.xml',
+        $base='fiscal/nfce/'.$document->id.'/';
+        $allowed=[
+            $base.'authorized.xml',
+            $base.'authorized-recovered.xml',
+            $base.'signed.xml',
         ];
-        if (in_array($path,$safePaths,true) && Storage::disk('local')->exists($path)) {
+        if (in_array($path,$allowed,true) && Storage::disk('local')->exists($path)) {
             $xml=Storage::disk('local')->get($path);
             $dom=new DOMDocument('1.0','UTF-8');
-            $old=libxml_use_internal_errors(true);
+            $previous=libxml_use_internal_errors(true);
             try {
-                $xmlLoaded=$dom->loadXML($xml,LIBXML_NONET) && $dom->documentElement?->namespaceURI==='http://www.portalfiscal.inf.br/nfe';
+                $xmlLoaded=$dom->loadXML($xml,LIBXML_NONET)
+                    && $dom->documentElement?->namespaceURI==='http://www.portalfiscal.inf.br/nfe';
             } finally {
                 libxml_clear_errors();
-                libxml_use_internal_errors($old);
+                libxml_use_internal_errors($previous);
             }
+
             if ($xmlLoaded) {
                 $xp=new DOMXPath($dom);
                 $xp->registerNamespace('n','http://www.portalfiscal.inf.br/nfe');
-                $get=static fn(string $query)=>trim((string)$xp->evaluate('string('.$query.')'));
-                $emitter=[
-                    'legal_name'=>$get('//n:NFe/n:infNFe/n:emit/n:xNome'),
-                    'trade_name'=>$get('//n:NFe/n:infNFe/n:emit/n:xFant'),
-                    'document'=>$get('//n:NFe/n:infNFe/n:emit/n:CNPJ'),
-                    'state_registration'=>$get('//n:NFe/n:infNFe/n:emit/n:IE'),
-                    'crt'=>$get('//n:NFe/n:infNFe/n:emit/n:CRT'),
-                    'address'=>$get('//n:NFe/n:infNFe/n:emit/n:enderEmit/n:xLgr'),
-                    'address_number'=>$get('//n:NFe/n:infNFe/n:emit/n:enderEmit/n:nro'),
-                    'district'=>$get('//n:NFe/n:infNFe/n:emit/n:enderEmit/n:xBairro'),
-                    'city'=>$get('//n:NFe/n:infNFe/n:emit/n:enderEmit/n:xMun'),
-                    'state'=>$get('//n:NFe/n:infNFe/n:emit/n:enderEmit/n:UF'),
-                ];
-                foreach ($emitter as $field=>$value) {
-                    if ($value!=='') $company->setAttribute($field,$value);
-                }
-                $nature=$get('//n:NFe/n:infNFe/n:ide/n:natOp') ?: $nature;
-                $date=$get('//n:NFe/n:infNFe/n:ide/n:dhEmi');
-                if ($date!=='') {
-                    try {$issuedAt=\Carbon\Carbon::parse($date);} catch (\Throwable) {}
-                }
-                $consumerDocument=$get('//n:NFe/n:infNFe/n:dest/n:CPF')
-                    ?: $get('//n:NFe/n:infNFe/n:dest/n:CNPJ') ?: $consumerDocument;
-                $consumerName=$get('//n:NFe/n:infNFe/n:dest/n:xNome') ?: $consumerName;
-                $notes=$get('//n:NFe/n:infNFe/n:infAdic/n:infCpl');
+                $read=static fn(string $path,? \DOMNode $context=null): string =>
+                    trim((string)$xp->evaluate('string('.$path.')',$context));
+                $root='//n:NFe/n:infNFe/';
 
-                // Notas antigas podem não ter o snapshot completo. Nesse
-                // caso o XML autorizado é a fonte de verdade para os itens.
-                if (!$items) {
-                    foreach ($xp->query('//n:NFe/n:infNFe/n:det') as $index=>$detail) {
-                        $at=static fn(string $query)=>trim((string)$xp->evaluate('string('.$query.')',$detail));
-                        $id='xml-'.$index;
-                        $products[]=[
-                            'id'=>$id,'name'=>$at('n:prod/n:xProd'),
-                            'sku'=>$at('n:prod/n:cProd'),
-                            'sale_price'=>$at('n:prod/n:vUnCom'),
-                            'ean_gtin'=>$at('n:prod/n:cEAN'),
-                        ];
-                        $items[]=[
-                            'product_id'=>$id,
-                            'quantity'=>$at('n:prod/n:qCom'),
-                            'unit_price'=>$at('n:prod/n:vUnCom'),
-                            'discount'=>$at('n:prod/n:vDesc') ?: '0',
-                        ];
-                    }
+                foreach ([
+                    'legal_name'=>'emit/n:xNome',
+                    'trade_name'=>'emit/n:xFant',
+                    'document'=>'emit/n:CNPJ',
+                    'state_registration'=>'emit/n:IE',
+                    'crt'=>'emit/n:CRT',
+                    'address'=>'emit/n:enderEmit/n:xLgr',
+                    'address_number'=>'emit/n:enderEmit/n:nro',
+                    'district'=>'emit/n:enderEmit/n:xBairro',
+                    'city'=>'emit/n:enderEmit/n:xMun',
+                    'state'=>'emit/n:enderEmit/n:UF',
+                ] as $attribute=>$xmlNode) {
+                    $value=$read($root.$xmlNode);
+                    if ($value!=='') $company->setAttribute($attribute,$value);
                 }
-                if (!$payments) {
-                    $paymentNames=[
-                        '01'=>'Dinheiro','02'=>'Cheque','03'=>'Cartão de crédito',
-                        '04'=>'Cartão de débito','15'=>'Boleto','17'=>'PIX',
-                        '18'=>'Transferência bancária','90'=>'Sem pagamento','99'=>'Outros',
+
+                $nature=$read($root.'ide/n:natOp') ?: $nature;
+                $issued=$read($root.'ide/n:dhEmi');
+                if ($issued!=='') {
+                    try {$issueAt=\Carbon\Carbon::parse($issued);}
+                    catch (\Throwable) {}
+                }
+                $presenceCodes=[
+                    '0'=>'Não se aplica','1'=>'Operação presencial','2'=>'Operação pela Internet',
+                    '3'=>'Operação por teleatendimento','4'=>'Entrega a domicílio',
+                    '5'=>'Operação presencial fora do estabelecimento','9'=>'Operação não presencial',
+                ];
+                $presenceCode=$read($root.'ide/n:indPres');
+                if ($presenceCode!=='') $presence=$presenceCodes[$presenceCode] ?? 'Código '.$presenceCode;
+
+                $consumerDocument=$read($root.'dest/n:CPF')
+                    ?: $read($root.'dest/n:CNPJ') ?: $consumerDocument;
+                $consumerName=$read($root.'dest/n:xNome') ?: $consumerName;
+                $notes=$read($root.'infAdic/n:infCpl');
+
+                // Priorizar produtos efetivamente enviados à SEFAZ.
+                $xmlRows=[];
+                foreach ($xp->query($root.'det') as $detail) {
+                    $at=static fn(string $node): string =>
+                        trim((string)$xp->evaluate('string('.$node.')',$detail));
+                    $quantity=(float)$at('n:prod/n:qCom');
+                    $price=(float)$at('n:prod/n:vUnCom');
+                    $discount=(float)$at('n:prod/n:vDesc');
+                    $xmlRows[]=[
+                        'name'=>$at('n:prod/n:xProd') ?: 'Produto',
+                        'sku'=>$at('n:prod/n:cProd'),
+                        'quantity'=>$quantity,
+                        'unit_price'=>$price,
+                        'discount'=>$discount,
+                        'total'=>max(0,round((float)$at('n:prod/n:vProd')-$discount,2)),
                     ];
-                    foreach ($xp->query('//n:NFe/n:infNFe/n:pag/n:detPag') as $index=>$row) {
-                        $code=trim((string)$xp->evaluate('string(n:tPag)',$row));
-                        $amount=trim((string)$xp->evaluate('string(n:vPag)',$row));
-                        $id='xml-payment-'.$index;
-                        $methods[$id]=['code'=>$id,'name'=>$paymentNames[$code] ?? 'Pagamento '.$code];
-                        $payments[]=['payment_method'=>$id,'amount'=>$amount ?: '0'];
-                    }
                 }
+                if ($xmlRows) $rows=$xmlRows;
+
+                $xmlPayments=[];
+                foreach ($xp->query($root.'pag/n:detPag') as $payment) {
+                    $at=static fn(string $node): string =>
+                        trim((string)$xp->evaluate('string('.$node.')',$payment));
+                    $kind=$at('n:tPag');
+                    $xmlPayments[]=[
+                        'name'=>$paymentNames[$kind] ?? ('Código '.$kind),
+                        'amount'=>(float)$at('n:vPag'),
+                    ];
+                }
+                if ($xmlPayments) $payments=$xmlPayments;
+
+                $xmlSubtotal=$read($root.'total/n:ICMSTot/n:vProd');
+                $xmlDiscount=$read($root.'total/n:ICMSTot/n:vDesc');
+                $xmlTotal=$read($root.'total/n:ICMSTot/n:vNF');
+                if ($xmlSubtotal!=='') $totals['subtotal']=(float)$xmlSubtotal;
+                if ($xmlDiscount!=='') $totals['discount']=(float)$xmlDiscount;
+                if ($xmlTotal!=='') $totals['total']=(float)$xmlTotal;
             }
         }
 
         return [
-            'company'=>$company,
-            'settings'=>app(FiscalDocumentSettings::class),
-            'products'=>$products,'methods'=>array_values($methods),
-            'customers'=>[],'sales'=>[],'canCreateSale'=>true,
             'readOnlyDocument'=>$document,
-            'frozenItems'=>$items,'frozenPayments'=>$payments,
+            'company'=>$company,'settings'=>app(FiscalDocumentSettings::class),
+            'products'=>[],'methods'=>[],'customers'=>[],'sales'=>[],
+            'canCreateSale'=>false,
+            'frozenRows'=>$rows,'frozenPaymentRows'=>$payments,
+            'frozenTotals'=>$totals,
+            'frozenPaymentTotal'=>array_sum(array_column($payments,'amount')),
             'frozenConsumerDocument'=>$consumerDocument,
             'frozenConsumerName'=>$consumerName,
             'frozenNotes'=>$notes,
-            'frozenIssueDate'=>$issuedAt?->format('d/m/Y H:i') ?? '—',
-            'frozenNature'=>$nature,
+            'frozenIssueDate'=>$issueAt?->format('d/m/Y H:i') ?? '—',
+            'frozenNature'=>$nature,'frozenPresence'=>$presence,
             'xmlLoaded'=>$xmlLoaded,
         ];
     }
