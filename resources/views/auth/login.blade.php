@@ -6,14 +6,14 @@
   <meta name="color-scheme" content="light">
   <meta name="robots" content="noindex,nofollow">
   <title>Entrar · Lumeron</title>
+  <link rel="icon" type="image/png" href="{{ asset('images/lumeron/elephant.png') }}">
   <link rel="stylesheet" href="{{ asset('css/login.css') }}">
   <script src="{{ asset('js/login.js') }}" defer></script>
 </head>
 <body class="lumeron-login">
   <main class="login-shell">
     <div class="login-brand" aria-label="Lumeron">
-      <span class="login-brand-symbol" aria-hidden="true">L</span>
-      <div><strong>Lumeron</strong><small>Gestão empresarial</small></div>
+      <img class="lumeron-login-logo" src="{{ asset('images/lumeron/logo.png') }}" alt="Lumeron" width="236" height="61">
     </div>
 
     <section class="login-panel" aria-labelledby="loginTitle">
