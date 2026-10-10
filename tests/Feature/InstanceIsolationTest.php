@@ -82,6 +82,23 @@ final class InstanceIsolationTest extends TestCase
         self::assertContains('CNPJ do emitente não corresponde à instalação contratada.',$errors);
     }
 
+    public function test_acbr_transmission_refuses_foreign_cnpj_before_loading_library(): void
+    {
+        config()->set('instance.cnpj',self::TENANT);
+        $company=CompanySetting::current();
+        $company->update(['document'=>self::FOREIGN]);
+        $job=FiscalDocumentJob::query()->create([
+            'document_type'=>'nfce','status'=>'prepared',
+            'environment'=>'homologation',
+            'series'=>1,'document_number'=>12,
+        ]);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('CNPJ do emitente não corresponde');
+        app(\App\Services\Fiscal\NFCeTransmissionService::class)
+            ->configure(new \App\Services\Fiscal\ACBr\ACBrNFeService(),$company,$job,'','');
+    }
+
     public function test_local_development_remains_compatible_without_tenant_binding(): void
     {
         config()->set('instance.cnpj','');
