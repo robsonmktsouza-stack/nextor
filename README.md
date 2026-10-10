@@ -1,90 +1,66 @@
-# Nextor — ERP de Estoque e Vendas
+# Lumeron ERP
 
-**Repositório do código-fonte Laravel, sem HUB.** A pasta `vendor/`, o arquivo `.env` e dados locais não são versionados. Para instalar a partir do GitHub, execute `composer install` antes dos comandos Artisan descritos abaixo.
+Sistema de gestão empresarial desenvolvido em **Laravel 13**, com PDV, vendas, produtos, serviços, clientes, estoque, financeiro e interfaces fiscais.
 
-# ERP Estoque e Vendas — Laravel (independente, sem HUB)
+O projeto nasceu como **Nextor**. O repositório permanece com o endereço técnico original por compatibilidade com os ambientes e integrações existentes, mas o produto e a identidade visual passam a se chamar **Lumeron**.
 
-Primeira versão funcional de um ERP de estoque e vendas em **Laravel 13**. Interface inspirada no painel administrativo do Away CMS enviado para referência: barra superior azul-escura com linha laranja, menu lateral recolhível, cartões claros, tabelas compactas, formulários e modais.
+## Identidade visual
 
-**Não é uma instalação modificada do Away CMS**: não contém controllers, licenciamento, marketplace, requisições a HUB, plugins ou atualizações remotas daquele software. A interface foi desenvolvida em Blade, CSS e JavaScript puro, sem necessidade de Node.js ou build frontend.
+Os dois arquivos oficiais da marca estão incluídos em:
 
-## Funcionalidades implementadas
+- `public/images/lumeron/logo.png` — elefante e nome Lumeron, fundo transparente.
+- `public/images/lumeron/elephant.png` — mascote isolado, fundo transparente.
 
-- Login via sessão Laravel, CSRF, sem cadastro público. A criação inicial do administrador ocorre pelo Artisan.
-- Dashboard: total de produtos, valor estimado de estoque pelo custo, estoque baixo, total de vendas concluídas e histórico recente.
-- Produtos: cadastro e edição em modais, SKU único, categoria, unidade, preço de custo/venda, estoque mínimo e ativação/desativação.
-- Clientes: cadastro e edição em modais, CPF/CNPJ, contato e observações.
-- Estoque: entrada, saída e ajuste para saldo final, com motivo, data, operador e saldo anterior/novo.
-- Vendas: novo registro com vários itens; preço buscado no banco, cálculo no servidor, bloqueio por estoque insuficiente, histórico, detalhamento e cancelamento com estorno das quantidades.
-- Operações de venda e cancelamento feitas em **transações SQL**. Cada alteração de estoque gera registro em `stock_movements`.
+A logo completa aparece na entrada do sistema e nos espaços amplos. O elefante identifica o sistema no menu compacto, no PDV e no ícone da aba. O estilo está centralizado em `public/css/branding.css`, mantendo as classes legadas para evitar regressões.
 
-## Requisitos
+A marca **Lumeron** não substitui os dados nem a logo fiscal de cada empresa emitente em seus documentos.
 
-- PHP **8.3 ou superior** (recomendamos 8.4 no Laragon) com `pdo_mysql` (ou `pdo_sqlite`), `mbstring`, `openssl`, `xml`, `ctype`, `fileinfo` e demais extensões usuais do Laravel.
-- MySQL/MariaDB ou SQLite. O `.env.example` já está configurado para MySQL no Laragon.
-- O ZIP inclui a pasta `vendor/` do framework Laravel usada na análise para facilitar a primeira execução. **Não há Node/npm obrigatório**. Em projetos mantidos a longo prazo, execute `composer install` depois de configurar seu Composer; como não enviamos `composer.lock`, ele gerará um novo lockfile consistente para o ERP.
+## Funcionalidades
 
-## Instalar no Laragon (Windows)
+- Autenticação por subdomínio, nome de usuário e senha, recuperação de senha e permissões.
+- Cadastros de produtos, serviços, clientes, fornecedores e configurações empresariais.
+- Controle de vendas, PDV, estoque, caixa, financeiros e relatórios.
+- Emissão e acompanhamento fiscal: telas NF-e, NFC-e, NFS-e, CT-e e MDF-e em estágios diferentes de implementação.
+- **NFC-e via ACBrLibNFe**: emissão, cancelamento, inutilização e contingência em desenvolvimento/testes assistidos. Não pressupor aprovação para produção apenas porque homologação foi bem-sucedida.
 
-1. Extraia a pasta `ERP_Away_Estoque_Vendas` para `C:\laragon\www\ERP_Away_Estoque_Vendas`.
-2. Crie o banco MySQL chamado `erp_estoque_vendas` pelo HeidiSQL/phpMyAdmin.
-3. Abra o terminal do Laragon **na pasta do projeto** e execute:
+## Ambiente local: Laragon
 
-```bat
-copy .env.example .env
-php artisan key:generate
+Requisitos principais: PHP 8.3+, extensões Laravel, MySQL ou MariaDB, Composer e, para os fluxos NFC-e, ACBrLibNFe e schemas compatíveis com o sistema operacional.
+
+```bash
+git pull
+composer install
 php artisan migrate
-php artisan erp:make-admin
+php artisan optimize:clear
 php artisan serve
 ```
 
-4. Abra `http://127.0.0.1:8000/login`, informe o e-mail e a senha criados pelo comando e utilize o ERP.
+Abra `http://localhost:8000/login`. Para criar o primeiro administrador da base local, execute `php artisan erp:make-admin`; o nome do comando permanece por compatibilidade.
 
-Caso o MySQL tenha senha ou porta diferente, edite `DB_*` no `.env` antes do comando `migrate`. Para usar SQLite, altere `DB_CONNECTION=sqlite`, crie um arquivo vazio em `database/database.sqlite` e configure `DB_DATABASE` com o caminho absoluto do arquivo (ou remova `DB_DATABASE`, usando o caminho padrão do Laravel), depois execute a migração.
+As configurações locais do banco permanecem no `.env` e não devem ser versionadas. Depois de atualizar, pressione `Ctrl+F5` para garantir o carregamento dos estilos e das imagens oficiais.
 
-O servidor de desenvolvimento (`artisan serve`) **não deve** ser exposto à internet; em produção, utilize Nginx/Apache com a raiz pública apontada para `public/`, APP_ENV=production, APP_DEBUG=false, HTTPS, backup e credenciais seguras.
+### Verificações úteis
 
-## Estrutura
-
-```text
-app/
-  Console/Commands/MakeAdmin.php
-  Http/Controllers/   Auth, Dashboard, Product, Customer, Stock, Sale
-  Models/             User, Product, Customer, StockMovement, Sale, SaleItem
-  Services/           InventoryService, SalesService
-bootstrap/app.php
-config/
-database/migrations/
-public/css/erp.css
-public/js/erp.js
-resources/views/        Blade (layout, login, dashboard, produtos, clientes, estoque, vendas)
-routes/web.php
-vendor/                 Laravel e dependências PHP
+```bash
+php artisan test --filter=LumeronLoginTest
+php artisan test --filter=InstanceIsolationTest
+php artisan test --filter=LumeronBrandingTest
+php artisan test --filter=FiscalModuleTest
 ```
 
-## Regras já adotadas
+## Arquitetura comercial: um CNPJ por instalação
 
-- Saldo dos produtos **não é editado** pelo formulário de produto: apenas pelo registro de movimentações.
-- Venda concluída reduz estoque; cancelamento restaura quantidades e registra estornos. Cancelamento repetido não é permitido.
-- A venda não permite quantidades superiores ao estoque. Itens usam preço cadastrado **no momento da venda**, salvo como histórico imutável.
-- Não há emissão de NF-e/NFC-e, contas a pagar/receber, multiempresa nem permissões por função nesta versão. Esses módulos podem ser adicionados posteriormente.
+Cada CNPJ contratado possui seu próprio banco, arquivos, usuários, certificado, CSC e processos fiscais. Um cliente com duas empresas terá **duas instalações independentes**. As rotinas para futura implantação isolada foram preparadas em `deploy/instances/`, mas **não executam nenhuma implantação na VPS sem autorização expressa**.
 
-## Segurança e notas
+- [Instalações independentes por CNPJ](docs/deployment/one-cnpj-per-instance.md)
+- [Login com subdomínio](docs/deployment/login-by-subdomain.md)
 
-- Nunca inclua `.env` ou a pasta `storage` com sessões/logs no repositório público.
-- Por motivos de segurança, nenhuma conta de usuário ou senha padrão acompanha o pacote.
-- Para produtos em quilo, metro e similares, a quantidade é mantida com três casas decimais.
-- Ao publicar o software, verifique a licença das dependências e de quaisquer arquivos derivados da referência visual.
+A API de leitura utiliza `/api/lumeron/products`, `/api/lumeron/customers` e `/api/lumeron/sales`. O caminho anterior `/api/nextor` continua disponível para compatibilidade.
 
+## Cuidados
 
-## Motor fiscal nativo arquivado
+Não versionar `.env`, certificados digitais, credenciais de CSC, arquivos fiscais, sessões ou bancos. Antes de emissão real, validar por empresa/UF, cenários tributários, fila fiscal, recuperação de falhas, backup e impressão.
 
-O motor NFC-e próprio desenvolvido experimentalmente foi retirado do runtime antes de uso em produção. O snapshot foi preservado em `archive/nextor-native-nfce-2026-10-02.zip`.
+## Histórico
 
-O PDV permanece com comprovante interno sem valor fiscal. A futura integração fiscal será feita por uma camada/adaptador separado.
-
-## Instalacoes independentes por CNPJ (Lumeron / VPS)
-
-Um mesmo cliente pode contratar mais de uma instalacao, mas **cada CNPJ recebe sua propria aplicacao, banco MySQL, arquivos privados, certificado, CSC, fila fiscal, pool PHP-FPM e dominio**. Nao existe seletor multiempresa dentro da instalacao.
-
-As rotinas seguras de provisionamento, atualizacao, inventario central via terminal e os requisitos de implantacao estao em [docs/deployment/one-cnpj-per-instance.md](docs/deployment/one-cnpj-per-instance.md). Os scripts sao para Linux/VPS, nao para o Laragon. Nenhuma implantacao acontece automaticamente apos `git pull`.
+O protótipo antigo de motor NFC-e próprio foi arquivado em `archive/nextor-native-nfce-2026-10-02.zip`; o plano técnico atual usa ACBrLib. O nome dos diretórios históricos não deve ser alterado sem plano de migração.
