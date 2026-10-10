@@ -15,7 +15,7 @@
       <header class="login-panel-header"><h1>Recuperar senha</h1>
         <p>Enviaremos as instruções para o e-mail cadastrado.</p>
       </header>
-      @if(session('status'))<div class="login-feedback" role="status">{{ session('status') }}</div>@endif
+      @if(session('status'))<div class="login-feedback is-success" role="status">{{ session('status') }}</div>@endif
       @if($errors->any())<div class="login-feedback is-error" role="alert">{{ $errors->first() }}</div>@endif
       <form method="post" action="{{ route('password.email') }}">
         @csrf
