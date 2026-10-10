@@ -39,9 +39,15 @@ Route::prefix('api/nextor')->middleware(['nextor.api','throttle:120,1'])->group(
     Route::get('/sales',[ApiController::class,'sales']);
 });
 
+// Central portal gets a session-bound CSRF token from the chosen isolated instance.
+Route::get('/login/bootstrap', [AuthController::class,'loginBootstrap'])
+    ->middleware('throttle:30,1')->name('login.bootstrap');
+Route::options('/login', [AuthController::class,'loginOptions'])->name('login.options');
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class,'loginForm'])->name('login');
-    Route::post('/login', [AuthController::class,'login'])->middleware('throttle:5,1');
+    Route::post('/login', [AuthController::class,'login'])
+        ->middleware('throttle:5,1');
 });
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class,'logout'])->name('logout');
