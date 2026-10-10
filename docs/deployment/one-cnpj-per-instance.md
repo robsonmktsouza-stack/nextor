@@ -80,7 +80,8 @@ Configure somente esta instalação em `shared/.env` com os caminhos reais para 
 ```bash
 cd /srv/lumeron/instances/academia_ba/current
 sudo runuser -u lum_academia_ba -- /usr/bin/php8.3 artisan lumeron:instance-check --fiscal
-sudo runuser -u lum_academia_ba -- /usr/bin/php8.3 artisan acbr:nfe:doctor
+sudo runuser -u lum_academia_ba -- /usr/bin/php8.3 artisan acbr:nfe-doctor
+sudo runuser -u lum_academia_ba -- /usr/bin/php8.3 artisan acbr:nfce-check
 ```
 
 Confirme os nomes exatos dos comandos ACBr com `php artisan list acbr`. Teste autenticação, produtos, venda, impressão, XML, comunicação e autorização da UF em homologação. **A verificação local não autoriza automaticamente emissão em produção**.
@@ -119,7 +120,7 @@ Essa é a primeira camada de administração central **pela VPS**. Um painel web
 ## Limites e próximos passos
 
 1. O código fiscal ainda tem validações específicas de BA em `NFCePreflightService`, `NFCeTransmissionService` e na inutilização. As configurações de grupos e regras já podem contemplar outras UFs, mas isso **não** equivale a homologar NFC-e em SP ou outros estados.
-2. A ACM/ACBr usada na VPS depende da biblioteca Linux e do comando de diagnóstico. O fluxo testado no Laragon/Windows não prova por si só que a chamada FFI Linux vai funcionar.
+2. A ACBr usada na VPS depende da biblioteca Linux e do comando de diagnóstico. O fluxo testado no Laragon/Windows não prova por si só que a chamada FFI Linux vai funcionar.
 3. O cadastro fiscal deve ser aprovado por cenário (roupas, suplementos, ST, descontos e formas de pagamento). O piloto assistido não elimina requisitos tributários.
 4. Ainda são necessários monitoramento externo do worker, backup **automático e externo**, teste de restauração, testes de recuperação após queda e documentação da impressora local para operação contínua.
 5. Para registrar um novo cliente, gere **outra** instância com outro ID, CNPJ e domínio. **Nunca** copie um `.env`, certificado, CSC, storage ou banco de outro contratante.
