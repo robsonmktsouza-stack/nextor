@@ -1,6 +1,7 @@
 <?php
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PasswordRecoveryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FinanceController;
@@ -48,6 +49,13 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class,'loginForm'])->name('login');
     Route::post('/login', [AuthController::class,'login'])
         ->middleware('throttle:5,1');
+    Route::get('/forgot-password', [PasswordRecoveryController::class,'requestForm'])->name('password.request');
+    Route::post('/forgot-password', [PasswordRecoveryController::class,'sendLink'])
+        ->name('password.email')->middleware('throttle:3,1');
+    Route::get('/reset-password/{token}', [PasswordRecoveryController::class,'resetForm'])
+        ->name('password.reset');
+    Route::post('/reset-password', [PasswordRecoveryController::class,'reset'])
+        ->name('password.update')->middleware('throttle:5,1');
 });
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class,'logout'])->name('logout');
