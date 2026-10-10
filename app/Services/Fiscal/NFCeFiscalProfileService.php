@@ -2,6 +2,7 @@
 
 namespace App\Services\Fiscal;
 
+use App\Models\CompanySetting;
 use App\Models\FiscalFcpRule;
 use App\Models\FiscalTaxGroup;
 use Illuminate\Support\Carbon;
@@ -13,6 +14,10 @@ use RuntimeException;
  */
 final class NFCeFiscalProfileService
 {
+    private const BRAZILIAN_UFS = [
+        'AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS',
+        'MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO',
+    ];
     public function __construct(
         private readonly FiscalTaxRuleResolver $rules,
         private readonly NFCeTaxGroupTranslator $groups,
@@ -21,12 +26,16 @@ final class NFCeFiscalProfileService
     /**
      * @return array{origin:string,name:string,revision:int,tax:array}
      */
-    public function classify(array $item, ?string $date = null, string $crt = '1'): array
+    public function classify(array $item, ?string $date = null, string $crt = '1', ?string $uf = null): array
     {
         if (($item['item_type'] ?? '') !== 'product') {
             throw new RuntimeException('Este documento aceita somente produtos cadastrados.');
         }
 
+        $uf = strtoupper(trim($uf ?? (string)CompanySetting::current()->state));
+        if (!in_array($uf, self::BRAZILIAN_UFS, true)) {
+            throw new RuntimeException('Configure uma UF válida nos dados da empresa antes de classificar a NFC-e.');
+        }
         $day = $date ? Carbon::parse($date)->toDateString() : now()->toDateString();
         $ncm = preg_replace('/\D/', '', (string) ($item['ncm'] ?? ''));
         if (!preg_match('/^\d{8}$/', $ncm)) {
@@ -54,7 +63,7 @@ final class NFCeFiscalProfileService
         }
 
         $hasFcp = FiscalFcpRule::query()
-            ->where('uf', 'BA')
+            ->where('uf', $uf)
             ->where('is_active', true)
             ->where('rate', '>', 0)
             ->where(fn ($q) => $q->whereNull('valid_from')->orWhereDate('valid_from', '<=', $day))
@@ -74,12 +83,12 @@ final class NFCeFiscalProfileService
             if (!$group) {
                 throw new RuntimeException('O grupo tributário associado ao produto não foi encontrado.');
             }
-            return $this->fromGroup($group, 'Grupo do produto', $crt);
+            return $this->fromGroup($group, 'Grupo do produto', $crt, $uf);
         }
 
         $rule = in_array($crt, ['2','3'], true)
             ? null // Regras legadas do Simples possuem CSOSN e não CST normal.
-            : $this->rules->resolve('nfce', 'BA', 'BA', $crt, $item, $day);
+            : $this->rules->resolve('nfce', $uf, $uf, $crt, $item, $day);
         if ($rule) {
             if (!in_array($rule->csosn, ['102','103','300','400','500'], true)
                 || !in_array($rule->pis_cst, ['01','02','03','04','06','07','08','09','49','99'], true)
@@ -115,7 +124,7 @@ final class NFCeFiscalProfileService
             throw new RuntimeException('Há mais de um grupo tributário padrão para produtos.');
         }
         if ($defaults->first()) {
-            return $this->fromGroup($defaults->first(), 'Grupo padrão', $crt);
+            return $this->fromGroup($defaults->first(), 'Grupo padrão', $crt, $uf);
         }
 
         // Compatibilidade: produtos já parametrizados antes do cadastro de
@@ -158,13 +167,13 @@ final class NFCeFiscalProfileService
         throw new RuntimeException('Configure o grupo tributário ou os dados fiscais completos do produto.');
     }
 
-    private function fromGroup(FiscalTaxGroup $group, string $origin, string $crt): array
+    private function fromGroup(FiscalTaxGroup $group, string $origin, string $crt, string $uf): array
     {
         return [
             'origin' => $origin,
             'name' => $group->name,
             'revision' => (int) $group->revision,
-            'tax' => $this->groups->translate($group, $crt),
+            'tax' => $this->groups->translate($group, $crt, $uf),
         ];
     }
 }
