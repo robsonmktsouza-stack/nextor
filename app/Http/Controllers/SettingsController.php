@@ -493,8 +493,9 @@ class SettingsController extends Controller
                 'csc_token'=>['nullable','string','max:255'],
                 'auto_from_pdv'=>['nullable','boolean'],
                 'production_enabled'=>['nullable','boolean'],
+                'advanced_operations_production_approved'=>['nullable','boolean'],
                 'print_danfe'=>['nullable','boolean'],
-            ],['enabled','auto_from_pdv','production_enabled','print_danfe'],['csc_token']],
+            ],['enabled','auto_from_pdv','production_enabled','advanced_operations_production_approved','print_danfe'],['csc_token']],
 
             'nfse'=>[[
                 'enabled'=>['nullable','boolean'],
@@ -608,7 +609,7 @@ class SettingsController extends Controller
             ],
             'nfce'=>[
                 'enabled'=>false,'environment'=>'homologation','series'=>1,'next_number'=>1,
-                'default_cfop'=>null,'csc_id'=>null,'csc_token'=>null,'auto_from_pdv'=>false,'production_enabled'=>false,'print_danfe'=>true,
+                'default_cfop'=>null,'csc_id'=>null,'csc_token'=>null,'auto_from_pdv'=>false,'production_enabled'=>false,'advanced_operations_production_approved'=>false,'print_danfe'=>true,
             ],
             'nfse'=>[
                 'enabled'=>false,'environment'=>'homologation','provider'=>null,'municipality_code'=>null,
