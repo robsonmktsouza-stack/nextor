@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('title','Configurações')
-@section('titleMeta','Central do Nextor')
+@section('titleMeta','Central do Lumeron')
 @section('content')
 
 @php
@@ -335,7 +335,7 @@ foreach($primaryTabs as $key=>$item){
   <form method="post" action="{{ route('settings.group.update','operations') }}" class="settings-editor">
     @csrf
     <section class="editor-panel settings-panel">
-      <div class="settings-panel-head"><div><h2>Operações de vendas e estoque</h2><p>Padrões usados no fluxo comercial do Nextor.</p></div></div>
+      <div class="settings-panel-head"><div><h2>Operações de vendas e estoque</h2><p>Padrões usados no fluxo comercial do Lumeron.</p></div></div>
       <div class="editor-grid cols-12 settings-grid">
         <label class="field col-3"><span>Validade padrão do orçamento</span><input type="number" name="quote_valid_days" value="{{ $operations['quote_valid_days'] }}" min="0"><small>Dias</small></label>
         <label class="field col-3"><span>Vencimento padrão</span><input type="number" name="default_due_days" value="{{ $operations['default_due_days'] }}" min="0"><small>Dias após a venda</small></label>
@@ -527,7 +527,7 @@ foreach($primaryTabs as $key=>$item){
 
     <section class="editor-panel settings-panel">
       <div class="settings-panel-head">
-        <div><h2>Fila fiscal preparada</h2><p>Documentos que o Nextor já preparou a partir das operações do sistema.</p></div>
+        <div><h2>Fila fiscal preparada</h2><p>Documentos que o Lumeron já preparou a partir das operações do sistema.</p></div>
       </div>
       <div class="table-scroll">
         <table class="cms-table">
@@ -551,7 +551,7 @@ foreach($primaryTabs as $key=>$item){
           </tbody>
         </table>
       </div>
-      <div class="inline-note">Preparado significa que o Nextor reservou numeração e reuniu os dados da operação. A transmissão à SEFAZ/prefeitura continua dependendo do emissor fiscal conectado.</div>
+      <div class="inline-note">Preparado significa que o Lumeron reservou numeração e reuniu os dados da operação. A transmissão à SEFAZ/prefeitura continua dependendo do emissor fiscal conectado.</div>
     </section>
   </div>
 
@@ -642,7 +642,7 @@ foreach($primaryTabs as $key=>$item){
         <label class="settings-switch"><input type="checkbox" name="auto_from_pdv" value="1" @checked($nfce['auto_from_pdv'])><span><strong>Transmitir NFC-e automaticamente pelo PDV</strong><small>Desative para revisar a nota e emitir manualmente após a venda. A opção de emissão automática também precisa estar desativada nas configurações do PDV.</small></span></label>
         <label class="settings-switch"><input type="checkbox" name="print_danfe" value="1" @checked($nfce['print_danfe'])><span><strong>Imprimir DANFE NFC-e</strong><small>Preferência de impressão do comprovante.</small></span></label>
       </div>
-      <div class="settings-warning">A configuração do CSC é separada do certificado A1. O Nextor guarda o token criptografado.</div>
+      <div class="settings-warning">A configuração do CSC é separada do certificado A1. O Lumeron guarda o token criptografado.</div>
     </section>
   
   <div class="editor-savebar settings-savebar">
@@ -724,7 +724,7 @@ foreach($primaryTabs as $key=>$item){
         <label class="field col-3"><span>E-mail</span><input type="email" name="email" value="{{ $accounting['email'] }}"></label>
         <label class="field col-3"><span>Telefone</span><input name="phone" value="{{ $accounting['phone'] }}"></label>
         <label class="field col-6"><span>Sistema contábil de destino</span><input name="accounting_system" value="{{ $accounting['accounting_system'] }}" placeholder="Ex.: Domínio, Alterdata, outro"><small>Identificação incluída nos metadados da exportação.</small></label>
-        <div class="field col-6"><span>Formato disponível</span><div class="inline-note"><strong>CSV</strong> · formato atualmente gerado pelo Nextor.</div></div>
+        <div class="field col-6"><span>Formato disponível</span><div class="inline-note"><strong>CSV</strong> · formato atualmente gerado pelo Lumeron.</div></div>
         <label class="field col-12"><span>Observações</span><textarea name="notes" rows="4">{{ $accounting['notes'] }}</textarea></label>
       </div>
       <div class="settings-switch-grid">
@@ -762,7 +762,7 @@ foreach($primaryTabs as $key=>$item){
   <div class="settings-users-page">
     <section class="editor-panel settings-panel">
       <div class="settings-panel-head">
-        <div><h2>Novo usuário</h2><p>Cadastre o acesso e defina quais áreas do Nextor estarão disponíveis.</p></div>
+        <div><h2>Novo usuário</h2><p>Cadastre o acesso e defina quais áreas do Lumeron estarão disponíveis.</p></div>
       </div>
 
       <form method="post" action="{{ route('settings.users.store') }}" class="settings-user-form" autocomplete="off">
@@ -886,7 +886,7 @@ foreach($primaryTabs as $key=>$item){
   <form method="post" action="{{ route('settings.group.update','integrations') }}" class="settings-editor">
     @csrf
     <section class="editor-panel settings-panel">
-      <div class="settings-panel-head"><div><h2>E-mail / SMTP</h2><p>Servidor usado para mensagens enviadas pelo Nextor.</p></div></div>
+      <div class="settings-panel-head"><div><h2>E-mail / SMTP</h2><p>Servidor usado para mensagens enviadas pelo Lumeron.</p></div></div>
       <div class="editor-grid cols-12 settings-grid">
         <label class="field col-4"><span>Host SMTP</span><input name="smtp_host" value="{{ $integrations['smtp_host'] }}"></label>
         <label class="field col-2"><span>Porta</span><input type="number" min="1" max="65535" name="smtp_port" value="{{ $integrations['smtp_port'] }}"></label>
@@ -900,7 +900,7 @@ foreach($primaryTabs as $key=>$item){
     </section>
 
     <section class="editor-panel settings-panel">
-      <div class="settings-panel-head"><div><h2>API e webhook</h2><p>Integrações externas que já possuem execução no Nextor.</p></div></div>
+      <div class="settings-panel-head"><div><h2>API e webhook</h2><p>Integrações externas que já possuem execução no Lumeron.</p></div></div>
       <div class="editor-grid cols-12 settings-grid">
         <label class="field col-6"><span>Webhook</span><input type="url" name="webhook_url" value="{{ $integrations['webhook_url'] }}" placeholder="https://..."></label>
         <label class="field col-6"><span>Segredo do webhook</span><input type="password" name="webhook_secret" placeholder="{{ $integrations['webhook_secret'] ? 'Segredo já configurado' : '' }}"></label>
@@ -918,7 +918,7 @@ foreach($primaryTabs as $key=>$item){
 
 <section class="editor-panel settings-panel">
   <div class="settings-panel-head">
-    <div><h2>API do Nextor</h2><p>Endpoints de leitura protegidos por Bearer Token.</p></div>
+    <div><h2>API do Lumeron</h2><p>Endpoints de leitura protegidos por Bearer Token.</p></div>
   </div>
   <div class="settings-api-grid">
     <div>
