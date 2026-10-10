@@ -58,11 +58,34 @@ final class LumeronBrandingTest extends TestCase
         }
     }
 
-    public function test_pdv_layout_references_official_elephant(): void
+    public function test_pdv_inherits_the_same_lumeron_shell_as_sales(): void
     {
         $layout=file_get_contents(resource_path('views/layouts/pdv.blade.php'));
-        self::assertStringContainsString('images/lumeron/elephant.png',$layout);
-        self::assertStringContainsString('Lumeron PDV',$layout);
+        self::assertStringContainsString("@extends('layouts.app')",$layout);
+        self::assertStringContainsString("@section('title','PDV')",$layout);
+        self::assertStringContainsString('css/pdv-lumeron.css',$layout);
+        self::assertStringContainsString('id="pdvOperations"',$layout);
+        self::assertStringContainsString('id="pdvFullscreen"',$layout);
         self::assertStringNotContainsString('NEXTOR PDV',$layout);
+
+        $user=User::query()->create([
+            'name'=>'Operador de caixa',
+            'email'=>'pdv-brand@example.com',
+            'password'=>'SenhaTesteSegura123',
+            'role'=>'admin',
+            'is_active'=>true,
+        ]);
+
+        $this->actingAs($user)->get(route('pdv.index'))->assertOk()
+            ->assertSee('images/lumeron/logo.png',false)
+            ->assertSee('class="cms-topbar"',false)
+            ->assertSee('class="cms-sidebar"',false)
+            ->assertSee('class="pdv-screen"',false)
+            ->assertSee('class="pdv-workbar"',false)
+            ->assertSee('id="pdvApp"',false)
+            ->assertSee('id="pdvCart"',false)
+            ->assertSee('id="pdvSearch"',false)
+            ->assertSee('id="pdvFinish"',false)
+            ->assertSee('css/pdv-lumeron.css',false);
     }
 }
