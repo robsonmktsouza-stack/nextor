@@ -20,7 +20,7 @@
       $receiptWidth === '58' ? 145 : 120,
       min(700, $baseHeight + ($sale->items->count() * $itemHeight) + ($sale->payments->count() * 7) + ($sale->notes ? 16 : 0))
   );
-  $companyName = $company->trade_name ?: $company->legal_name ?: config('app.name','NEXTOR');
+  $companyName = $company->trade_name ?: $company->legal_name ?: config('app.name','Lumeron');
   // Não ocultar ausência de documento fiscal retornando automaticamente ao PDV.
   // Depois de imprimir (ou cancelar), apresentar a pendência nesta mesma venda.
   $receiptAfterPrintUrl = $nfceDocument
