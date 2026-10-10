@@ -96,9 +96,11 @@ final class NFCeAutomaticFiscalConfigurationTest extends TestCase
             'series'=>1,
             'next_number'=>5,
             'default_cfop'=>'5102',
+            'advanced_operations_production_approved'=>'1',
         ])->assertSessionHasNoErrors();
 
         self::assertSame('5102',AppSetting::value('nfce','default_cfop'));
+        self::assertTrue((bool)AppSetting::value('nfce','advanced_operations_production_approved',false));
     }
 
     public function test_preparation_uses_assigned_group_without_manual_action_or_duplicate_number(): void
