@@ -579,3 +579,75 @@
 @media(prefers-reduced-motion:reduce){
   .lumeron-pdv-page :is(.pdv-topbar-button,.pdv-command-button,.pdv-finish){transition:none}
 }
+
+/* Informações de caixa e da última venda aparecem apenas em Operações (Alt+O). */
+.lumeron-pdv-page .pdv-operations-modal{
+  max-height:min(88dvh,840px);
+  overflow-y:auto;
+  overscroll-behavior:contain;
+}
+.lumeron-pdv-page .pdv-operations-overview{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  padding:12px 14px;
+  background:#f7f9fb;
+  border-bottom:1px solid #e0e7ed;
+}
+.lumeron-pdv-page .pdv-operations-overview-card{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  padding:10px 11px;
+  background:#fff;
+  border:1px solid #dee6ed;
+  border-radius:4px;
+}
+.lumeron-pdv-page .pdv-operations-overview-title{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  color:#4b6478;
+  font-size:11px;
+}
+.lumeron-pdv-page .pdv-operations-overview-title svg{color:#3e7da9}
+.lumeron-pdv-page .pdv-operations-overview-values{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:5px 12px;
+  color:#6b7e90;
+  font-size:10.5px;
+  line-height:1.5;
+}
+.lumeron-pdv-page .pdv-operations-overview-values strong{
+  color:#314d61;
+  font-weight:650;
+}
+.lumeron-pdv-page .pdv-operations-overview-links{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px 12px;
+  margin-top:auto;
+}
+.lumeron-pdv-page .pdv-operations-overview-links a{
+  font-size:10.5px;
+  font-weight:650;
+  color:#237ab6;
+  text-decoration:none;
+}
+.lumeron-pdv-page .pdv-operations-overview-links a:hover,
+.lumeron-pdv-page .pdv-operations-overview-links a:focus-visible{
+  text-decoration:underline;
+}
+.lumeron-pdv-page .pdv-operations-overview-note{
+  color:#986d39;
+  font-size:10.5px;
+  margin:0;
+}
+@media(max-width:580px){
+  .lumeron-pdv-page .pdv-operations-overview{
+    grid-template-columns:minmax(0,1fr);
+  }
+}
