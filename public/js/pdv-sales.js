@@ -70,6 +70,7 @@
       anchor.href=url;
       anchor.target='_blank';
       anchor.rel='noopener noreferrer';
+      anchor.setAttribute('data-no-loading','');
       anchor.textContent=label;
       anchor.title=label+' (abre em outra aba)';
       cell.appendChild(anchor);
