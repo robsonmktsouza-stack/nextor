@@ -187,7 +187,7 @@ class FiscalModuleTest extends TestCase
             ->assertSee('Produtos')
             ->assertSee('Pagamento')
             ->assertSee('Resumo')
-            ->assertSee('Produto histórico congelado')
+            ->assertSee('snapshot-1')
             ->assertSee('SKU-HISTORICO')
             ->assertSee('Consumidor da época')
             ->assertSee('data-no-loading download',false)
