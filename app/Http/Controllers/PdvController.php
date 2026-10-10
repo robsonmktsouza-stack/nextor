@@ -679,7 +679,7 @@ class PdvController extends Controller
             ]);
 
             return redirect()->route('pdv.receipt', ['sale' => $sale->id, 'print' => 0])
-                ->with('error', 'Não foi possível preparar a NFC-e desta venda. Consulte o log do NEXTOR.');
+                ->with('error', 'Não foi possível preparar a NFC-e desta venda. Consulte o log do Lumeron.');
         }
 
         $document = FiscalDocumentJob::query()
