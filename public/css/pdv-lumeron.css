@@ -651,3 +651,49 @@
     grid-template-columns:minmax(0,1fr);
   }
 }
+
+/* Lista de vendas do PDV: usa o diálogo do caixa, sem navegar ao administrativo. */
+.lumeron-pdv-page .pdv-sales-modal{display:flex;flex-direction:column;width:min(1180px,calc(100vw - 30px));max-width:1180px;height:min(780px,calc(100dvh - 36px));max-height:calc(100dvh - 36px);overflow:hidden}
+.lumeron-pdv-page .pdv-sales-modal:not([open]){display:none!important}
+.lumeron-pdv-page .pdv-sales-modal>.pdv-modal-head{flex-shrink:0;min-height:66px}
+.lumeron-pdv-page .pdv-sales-modal>.pdv-modal-head h2{font-size:17px}
+.lumeron-pdv-page .pdv-sales-filters{display:grid;grid-template-columns:minmax(150px,2fr) repeat(5,minmax(100px,1fr)) auto;gap:8px;align-items:end;padding:12px;border-bottom:1px solid #dde5ec;background:#fff;flex-shrink:0}
+.lumeron-pdv-page .pdv-sales-filters label{min-width:0;display:grid;gap:5px}
+.lumeron-pdv-page .pdv-sales-filters label>span{font-size:10.5px;color:#60778b;font-weight:650}
+.lumeron-pdv-page .pdv-sales-filters input,.lumeron-pdv-page .pdv-sales-filters select{width:100%;min-width:0;height:35px;border:1px solid #cedae4;border-radius:4px;padding:0 8px;background:#fff;color:#30485e;font-size:11px;font-family:inherit}
+.lumeron-pdv-page .pdv-sales-filters input:focus,.lumeron-pdv-page .pdv-sales-filters select:focus{outline:2px solid #2d8bd22a;border-color:#3986bc}
+.lumeron-pdv-page .pdv-sales-filter-actions{display:flex;flex-direction:column;gap:4px}
+.lumeron-pdv-page .pdv-sales-filter-actions button{height:28px;min-width:72px;border:1px solid #cbd8e2;border-radius:4px;background:#f7f9fb;color:#506b7d;font:600 10px Arial,sans-serif;cursor:pointer}
+.lumeron-pdv-page .pdv-sales-filter-actions button:first-child{color:#fff;background:#2b7cb5;border-color:#2673a5}
+.lumeron-pdv-page .pdv-sales-list-scroll{min-height:0;flex:1 1 auto;overflow:auto;background:#fff;scrollbar-width:thin}
+.lumeron-pdv-page .pdv-sales-table{width:100%;table-layout:fixed;border-collapse:collapse;color:#364f63;font-size:11px}
+.lumeron-pdv-page .pdv-sales-table th{position:sticky;top:0;z-index:1;height:37px;padding:8px;text-align:left;background:#f3f6f8;border-bottom:1px solid #d7e0e9;color:#62798d;font-size:10px;white-space:nowrap}
+.lumeron-pdv-page .pdv-sales-table td{padding:9px 8px;border-bottom:1px solid #e6edf1;overflow-wrap:anywhere;vertical-align:middle}
+.lumeron-pdv-page .pdv-sales-table tbody tr:hover{background:#f5faff}
+.lumeron-pdv-page .pdv-sales-table th:nth-child(1){width:75px}
+.lumeron-pdv-page .pdv-sales-table th:nth-child(2){width:120px}
+.lumeron-pdv-page .pdv-sales-table th:nth-child(4){width:125px}
+.lumeron-pdv-page .pdv-sales-table th:nth-child(5){width:98px}
+.lumeron-pdv-page .pdv-sales-table th:nth-child(6){width:105px}
+.lumeron-pdv-page .pdv-sales-table th:nth-child(7){width:100px}
+.lumeron-pdv-page .pdv-sales-table th:nth-child(8){width:175px}
+.lumeron-pdv-page .pdv-sales-id{font-weight:700;color:#2474a9}
+.lumeron-pdv-page .pdv-sales-date,.lumeron-pdv-page .pdv-sales-amount{white-space:nowrap}
+.lumeron-pdv-page .pdv-sales-amount,.lumeron-pdv-page .pdv-sales-actions-col{text-align:right!important}
+.lumeron-pdv-page .pdv-sales-amount{font-weight:700;font-variant-numeric:tabular-nums}
+.lumeron-pdv-page .pdv-sales-status{display:inline-block;padding:3px 7px;border-radius:3px;background:#edf1f5;color:#708394;font-size:10px;font-weight:700}
+.lumeron-pdv-page .pdv-sales-status.is-completed{background:#e7f6ed;color:#238047}
+.lumeron-pdv-page .pdv-sales-status.is-cancelled{background:#e9edf0;color:#7b8d99}
+.lumeron-pdv-page .pdv-sales-fiscal[data-status="authorized"]{color:#238047}
+.lumeron-pdv-page .pdv-sales-fiscal[data-status="rejected"]{color:#b44f51}
+.lumeron-pdv-page .pdv-sales-row-actions{display:flex;gap:5px;justify-content:flex-end;flex-wrap:wrap}
+.lumeron-pdv-page .pdv-sales-row-actions a{display:inline-flex;align-items:center;min-height:26px;padding:0 7px;border:1px solid #cad9e4;border-radius:4px;background:#fff;color:#267ab1;text-decoration:none;font-size:10px;font-weight:650}
+.lumeron-pdv-page .pdv-sales-row-actions a:hover{background:#ebf6fd;border-color:#99bbd3}
+.lumeron-pdv-page .pdv-sales-message{padding:32px 12px!important;text-align:center;color:#8090a0}
+.lumeron-pdv-page .pdv-sales-message.is-error{color:#b44f51}
+.lumeron-pdv-page .pdv-sales-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px 12px;background:#f7f9fb;border-top:1px solid #dce5ec;color:#60788a;font-size:11px;flex-shrink:0}
+.lumeron-pdv-page .pdv-sales-pages{display:flex;gap:8px;align-items:center}
+.lumeron-pdv-page .pdv-sales-pages button{height:29px;padding:0 10px;border:1px solid #ccd9e5;border-radius:4px;background:#fff;color:#326d97;font-size:10px;cursor:pointer}
+.lumeron-pdv-page .pdv-sales-pages button:disabled{opacity:.4;cursor:default}
+@media(max-width:1160px){.lumeron-pdv-page .pdv-sales-filters{grid-template-columns:repeat(3,minmax(0,1fr))}.lumeron-pdv-page .pdv-sales-filter-wide,.lumeron-pdv-page .pdv-sales-filter-actions{grid-column:1/-1}.lumeron-pdv-page .pdv-sales-filter-actions{flex-direction:row}.lumeron-pdv-page .pdv-sales-table{min-width:880px}}
+@media(max-width:650px){.lumeron-pdv-page .pdv-sales-modal{width:calc(100vw - 12px);height:calc(100dvh - 16px);max-height:calc(100dvh - 16px)}.lumeron-pdv-page .pdv-sales-filters{grid-template-columns:repeat(2,minmax(0,1fr));padding:9px}.lumeron-pdv-page .pdv-sales-filter-wide,.lumeron-pdv-page .pdv-sales-filter-actions{grid-column:1/-1}}
