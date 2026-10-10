@@ -133,6 +133,7 @@ class SettingsController extends Controller
         ]);
 
         $company=CompanySetting::current();
+        \App\Support\InstanceIdentity::assertCompanyDocument($data['document'] ?? $company->document);
         $regime=(string)($data['tax_regime'] ?? $company->tax_regime ?? '');
         $crt=(string)($data['crt'] ?? $company->crt ?? '');
         $validForRegime=match($regime) {
