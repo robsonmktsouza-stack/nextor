@@ -7,8 +7,8 @@
   <meta name="robots" content="noindex,nofollow">
   <title>Entrar · Lumeron</title>
   <link rel="icon" type="image/png" href="{{ asset('images/lumeron/elephant.png') }}">
-  <link rel="stylesheet" href="{{ asset('css/login.css') }}">
-  <script src="{{ asset('js/login.js') }}" defer></script>
+  <link rel="stylesheet" href="{{ asset('css/login.css') }}?v={{ filemtime(public_path('css/login.css')) }}">
+  <script src="{{ asset('js/login.js') }}?v={{ filemtime(public_path('js/login.js')) }}" defer></script>
 </head>
 <body class="lumeron-login">
   <main class="login-shell">
