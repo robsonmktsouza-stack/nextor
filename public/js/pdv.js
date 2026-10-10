@@ -113,6 +113,7 @@
     const finish=document.getElementById('pdvFinish');
     const fullscreenButton=document.getElementById('pdvFullscreen');
     const salesLink=document.getElementById('pdvSalesLink');
+    const salesModal=document.getElementById('pdvSalesModal');
     const adminLink=document.getElementById('pdvAdminLink');
     const itemCount=document.getElementById('pdvItemCount');
     const subtotalOutput=document.getElementById('pdvSubtotal');
@@ -2012,7 +2013,8 @@
         contingencyModal?.open ||
         cancelNfceModal?.open ||
         cashOpenDialog?.open ||
-        cashCloseDialog?.open;
+        cashCloseDialog?.open ||
+        salesModal?.open;
 
       if(modalOpen) return;
 
@@ -2070,7 +2072,7 @@
           event.stopImmediatePropagation?.();
           if(advanced==='operations') openOperationsModal();
           else if(advanced==='fullscreen') fullscreenButton?.click();
-          else if(advanced==='sales' && salesLink?.href) window.location.href=salesLink.href;
+          else if(advanced==='sales') salesLink?.click();
           else if(advanced==='admin' && adminLink?.href) window.location.href=adminLink.href;
           else runAdvancedOperation(advanced);
           return;
