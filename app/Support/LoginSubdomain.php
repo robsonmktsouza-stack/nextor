@@ -14,7 +14,7 @@ final class LoginSubdomain
 
     public static function current(): string
     {
-        $configured=strtolower(trim((string)config('instance.id', '')));
+        $configured=strtolower(trim((string)(config('instance.subdomain') ?: str_replace('_','-',(string)config('instance.id', '')))));
         return self::valid($configured) ? $configured : 'local';
     }
 
@@ -39,7 +39,7 @@ final class LoginSubdomain
 
     public static function fromTrustedPortal(Request $request): bool
     {
-        if (self::isPortal() || !config('instance.id')) return false;
+        if (self::isPortal() || !config('instance.subdomain')) return false;
         if ($request->headers->get('Origin') !== self::portalOrigin()) return false;
         // Require the tenant's real hostname. No wildcard CORS.
         $expectedHost=self::tenantUrl(self::current());
