@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
     svg.setAttribute('role','img');
     svg.setAttribute('aria-label','QR Code de consulta da NFC-e');
 
-    // Configuração da impressão vem do NEXTOR. A caixa nativa do Chrome
+    // Configuração da impressão vem do Lumeron. A caixa nativa do Chrome
     // é aberta somente depois do QR Code ter sido renderizado.
     const preparePaper=()=>{
       const paper=document.body.dataset.paper;
