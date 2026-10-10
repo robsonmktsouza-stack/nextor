@@ -925,9 +925,9 @@ foreach($primaryTabs as $key=>$item){
       <strong>Status</strong>
       <span class="status {{ $integrations['api_enabled']?'status-ok':'status-muted' }}">{{ $integrations['api_enabled']?'Ativa':'Desativada' }}</span>
     </div>
-    <div><strong>Produtos</strong><code>/api/nextor/products</code></div>
-    <div><strong>Clientes</strong><code>/api/nextor/customers</code></div>
-    <div><strong>Vendas</strong><code>/api/nextor/sales</code></div>
+    <div><strong>Produtos</strong><code>/api/lumeron/products</code></div>
+    <div><strong>Clientes</strong><code>/api/lumeron/customers</code></div>
+    <div><strong>Vendas</strong><code>/api/lumeron/sales</code></div>
   </div>
 
   @if(session('api_token_plain'))
