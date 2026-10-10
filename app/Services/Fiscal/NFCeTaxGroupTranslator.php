@@ -11,8 +11,12 @@ use RuntimeException;
  */
 final class NFCeTaxGroupTranslator
 {
-    public function translate(FiscalTaxGroup $group, string $crt = '1'): array
+    public function translate(FiscalTaxGroup $group, string $crt = '1', ?string $uf = null): array
     {
+        $uf = strtoupper(trim($uf ?? (string)\App\Models\CompanySetting::current()->state));
+        if (!preg_match('/^(?:AC|AL|AP|AM|BA|CE|DF|ES|GO|MA|MT|MS|MG|PA|PB|PR|PE|PI|RJ|RN|RS|RO|RR|SC|SP|SE|TO)$/', $uf)) {
+            throw new RuntimeException('Configure uma UF válida para aplicar o grupo tributário na NFC-e.');
+        }
         if (!$group->is_active || $group->kind !== 'products') {
             throw new RuntimeException('Grupo tributário inativo ou não destinado a produtos.');
         }
@@ -98,8 +102,8 @@ final class NFCeTaxGroupTranslator
         // e devem ser verificadas pelo emissor de NF-e quando implementado.
         if (!empty($config['state_variations'])) {
             foreach ($config['state_variations'] as $variation) {
-                if (($variation['uf'] ?? '') === 'BA') {
-                    throw new RuntimeException('Grupo "'.$group->name.'": variação ativa para BA não é suportada pela NFC-e atual.');
+                if (($variation['uf'] ?? '') === $uf) {
+                    throw new RuntimeException('Grupo "'.$group->name.'": variação ativa para a UF '.$uf.' não é suportada pela NFC-e atual.');
                 }
             }
         }
