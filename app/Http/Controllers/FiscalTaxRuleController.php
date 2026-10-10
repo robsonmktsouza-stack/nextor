@@ -10,6 +10,7 @@ use Illuminate\Validation\ValidationException;
 
 final class FiscalTaxRuleController extends Controller
 {
+    private const UFS=['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
     public function index()
     {
         return view('fiscal.rules.index', [
@@ -17,6 +18,9 @@ final class FiscalTaxRuleController extends Controller
                 ->orderByDesc('is_active')->orderByDesc('priority')->orderBy('name')->get(),
             'products' => Product::query()->where('is_active', true)
                 ->orderBy('name')->get(['id', 'name', 'sku']),
+            'ufs' => self::UFS,
+            'issuerUf' => strtoupper((string)\App\Models\CompanySetting::current()->state),
+            'issuerCrt' => (string)\App\Models\CompanySetting::current()->crt,
         ]);
     }
 
@@ -42,9 +46,9 @@ final class FiscalTaxRuleController extends Controller
         $data = $request->validate([
             'name' => ['required','string','max:160'],
             'document_type' => ['required',Rule::in(['nfce'])],
-            'origin_uf' => ['required',Rule::in(['BA'])],
-            'destination_uf' => ['required',Rule::in(['BA'])],
-            'crt' => ['required',Rule::in(['1'])],
+            'origin_uf' => ['required',Rule::in(self::UFS)],
+            'destination_uf' => ['required',Rule::in(self::UFS)],
+            'crt' => ['required',Rule::in(['1','4'])],
             'product_id' => ['nullable','integer','exists:products,id'],
             'ncm_prefix' => ['nullable','regex:/^[0-9]{2,8}$/'],
             'cfop' => ['required','regex:/^5[0-9]{3}$/'],
@@ -56,6 +60,11 @@ final class FiscalTaxRuleController extends Controller
             'valid_until' => ['nullable','date'],
             'notes' => ['nullable','string','max:2000'],
         ]);
+        if ($data['origin_uf'] !== $data['destination_uf']) {
+            throw ValidationException::withMessages([
+                'destination_uf'=>'A NFC-e deste fluxo admite somente operação interna: selecione a mesma UF de origem e destino.',
+            ]);
+        }
         if (!empty($data['valid_from']) && !empty($data['valid_until'])
             && $data['valid_until'] < $data['valid_from']) {
             throw ValidationException::withMessages([
