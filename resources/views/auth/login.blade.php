@@ -21,6 +21,7 @@
         <h1 id="loginTitle">Acesse seu sistema</h1>
         <p>Entre no ambiente da sua empresa.</p>
       </header>
+      @if(session('status'))<div class="login-feedback is-success" role="status">{{ session('status') }}</div>@endif
       @if($errors->any())
         <div class="login-feedback is-error" role="alert">{{ $errors->first() }}</div>
       @endif
