@@ -7,7 +7,8 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<title>Recibo #{{ $receipt->id }}</title>
+<title>Recibo #{{ $receipt->id }} — Lumeron</title>
+<link rel="icon" type="image/png" href="{{ asset('images/lumeron/elephant.png') }}">
 <style>
 body{font-family:Arial,sans-serif;background:#f2f4f6;margin:0;color:#202b34}
 .actions{max-width:800px;margin:20px auto;display:flex;gap:8px}
