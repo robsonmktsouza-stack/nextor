@@ -32,6 +32,8 @@ RELEASE="$BASE/releases/$STAMP"
 POOL="/etc/php/$PHP_VERSION/fpm/pool.d/lumeron-$ID.conf"
 SITE="/etc/nginx/sites-available/lumeron-$ID.conf"
 WORKER="/etc/systemd/system/lumeron-fiscal-$ID.service"
+SCHEDULE="/etc/systemd/system/lumeron-schedule-$ID.service"
+TIMER="/etc/systemd/system/lumeron-schedule-$ID.timer"
 CERT="/etc/letsencrypt/live/$DOMAIN/fullchain.pem"
 CERTKEY="/etc/letsencrypt/live/$DOMAIN/privkey.pem"
 echo "Instalação $ID | CNPJ $CNPJ | https://$DOMAIN | Banco $DB | PHP $PHP_VERSION"
@@ -43,7 +45,7 @@ if ((APPLY==0)); then echo "Simulação: nada foi alterado. Acrescente --apply q
 [[ -r "$MYSQL_CNF" ]] || { echo "Credenciais administrativas MySQL ausentes." >&2; exit 1; }
 [[ -x "/usr/bin/php$PHP_VERSION" && -d "/etc/php/$PHP_VERSION/fpm/pool.d" ]] || { echo "PHP CLI/FPM não instalado." >&2; exit 1; }
 for binary in mysql rsync composer nginx runuser; do command -v "$binary" >/dev/null || { echo "Falta $binary." >&2; exit 1; }; done
-[[ ! -e "$POOL" && ! -e "$SITE" && ! -e "$WORKER" ]] || { echo "Configuração da instância já existe." >&2; exit 1; }
+[[ ! -e "$POOL" && ! -e "$SITE" && ! -e "$WORKER" && ! -e "$SCHEDULE" && ! -e "$TIMER" ]] || { echo "Configuração da instância já existe." >&2; exit 1; }
 mysql --defaults-extra-file="$MYSQL_CNF" -N -e "SELECT 1" >/dev/null
 [[ -z "$(mysql --defaults-extra-file="$MYSQL_CNF" -N -e "SHOW DATABASES LIKE '$DB'")" ]] || { echo "Banco já existe." >&2; exit 1; }
 
@@ -181,6 +183,34 @@ ProtectHome=true
 [Install]
 WantedBy=multi-user.target
 ENV
+cat >"$SCHEDULE" <<ENV
+[Unit]
+Description=Lumeron $ID - Laravel scheduler
+After=network-online.target
+[Service]
+Type=oneshot
+User=$USER
+Group=$USER
+WorkingDirectory=$BASE/current
+ExecStart=/usr/bin/php$PHP_VERSION $BASE/current/artisan schedule:run
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+[Install]
+WantedBy=multi-user.target
+ENV
+cat >"$TIMER" <<ENV
+[Unit]
+Description=Lumeron $ID - scheduler por minuto
+[Timer]
+OnCalendar=*-*-* *:*:00
+AccuracySec=1s
+Persistent=true
+Unit=lumeron-schedule-$ID.service
+[Install]
+WantedBy=timers.target
+ENV
 ln -s "$SITE" "/etc/nginx/sites-enabled/lumeron-$ID.conf"
 systemctl daemon-reload
 "/usr/sbin/php-fpm$PHP_VERSION" -t
@@ -192,4 +222,5 @@ echo "Crie o administrador: cd $BASE/current && runuser -u $USER -- /usr/bin/php
 echo "Cadastre exatamente o CNPJ contratado, configure certificado A1, CSC e a biblioteca ACBr Linux."
 echo "Verifique: cd $BASE/current && runuser -u $USER -- /usr/bin/php$PHP_VERSION artisan lumeron:instance-check --fiscal"
 echo "Após validar: systemctl enable --now lumeron-fiscal-$ID"
-echo "Worker FISCAL deliberadamente desativado até a configuração fiscal ser concluída."
+echo "Depois de conferir recorrências e integrações: systemctl enable --now lumeron-schedule-$ID.timer"
+echo "Worker fiscal e agendador ficam DESLIGADOS até a configuração de cada cliente."
