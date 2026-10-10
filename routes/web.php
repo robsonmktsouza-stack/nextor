@@ -93,6 +93,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/stock',[StockController::class,'store'])->name('stock.store')->middleware('permission:stock');
     Route::get('/pdv',[PdvController::class,'index'])->name('pdv.index')->middleware('permission:pdv');
     Route::get('/pdv/search',[PdvController::class,'search'])->name('pdv.search')->middleware('permission:pdv');
+    Route::get('/pdv/sales/history',[PdvController::class,'salesHistory'])->name('pdv.sales.history')->middleware('permission:pdv');
     Route::post('/pdv/cash/open',[PdvController::class,'openCash'])->name('pdv.cash.open')->middleware('permission:pdv');
     Route::post('/pdv/cash/close',[PdvController::class,'closeCash'])->name('pdv.cash.close')->middleware('permission:pdv');
     Route::post('/pdv/cash/movement',[PdvController::class,'cashMovement'])->name('pdv.cash.movement')->middleware('permission:pdv');
