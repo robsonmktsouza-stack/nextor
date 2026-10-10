@@ -40,17 +40,28 @@ runuser -u "$USER" -- composer install --no-dev --no-interaction --prefer-dist -
 runuser -u "$USER" -- "/usr/bin/php$PHP_VERSION" artisan optimize
 
 WAS_RUNNING=0
+WAS_SCHEDULE=0
 MAINTENANCE=0
 cleanup() {
   if ((MAINTENANCE)); then
     runuser -u "$USER" -- "/usr/bin/php$PHP_VERSION" "$APP/artisan" up || true
   fi
   if ((WAS_RUNNING)); then systemctl start "lumeron-fiscal-$ID" || true; fi
+  if ((WAS_SCHEDULE)); then systemctl start "lumeron-schedule-$ID.timer" || true; fi
 }
 trap cleanup EXIT
 if systemctl is-active --quiet "lumeron-fiscal-$ID"; then
   WAS_RUNNING=1
   systemctl stop "lumeron-fiscal-$ID"
+fi
+if systemctl is-active --quiet "lumeron-schedule-$ID.timer"; then
+  WAS_SCHEDULE=1
+  systemctl stop "lumeron-schedule-$ID.timer"
+fi
+# Do not migrate while a scheduled task is still modifying this database.
+if systemctl is-active --quiet "lumeron-schedule-$ID.service"; then
+  echo "Agendador ainda executando; tente após a finalização da tarefa." >&2
+  exit 1
 fi
 runuser -u "$USER" -- "/usr/bin/php$PHP_VERSION" "$APP/artisan" down --retry=30
 MAINTENANCE=1
@@ -69,6 +80,7 @@ systemctl reload "php$PHP_VERSION-fpm"
 runuser -u "$USER" -- "/usr/bin/php$PHP_VERSION" "$APP/artisan" up
 MAINTENANCE=0
 if ((WAS_RUNNING)); then systemctl start "lumeron-fiscal-$ID"; WAS_RUNNING=0; fi
+if ((WAS_SCHEDULE)); then systemctl start "lumeron-schedule-$ID.timer"; WAS_SCHEDULE=0; fi
 trap - EXIT
 echo "Atualizado $ID. Release anterior preservado para reversão de CÓDIGO; restauração do banco exige plano próprio."
 echo "Não reutilize o backup em outra empresa; configure cópia externa cifrada e política de retenção."
