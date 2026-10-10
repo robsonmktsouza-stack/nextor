@@ -27,8 +27,12 @@ final class NFCeTaxRuleApplicationService
                 throw new RuntimeException('Regras só podem ser aplicadas antes de assinar ou transmitir a NFC-e.');
             }
             $company = CompanySetting::current();
-            if (!in_array((string) $company->crt, ['1', '2', '3', '4'], true) || strtoupper((string) $company->state) !== 'BA') {
-                throw new RuntimeException('Esta primeira versão suporta somente NFC-e de operações internas na Bahia com CRT suportado.');
+            $uf = strtoupper(trim((string)$company->state));
+            if (!in_array((string)$company->crt, ['1','2','3','4'], true)) {
+                throw new RuntimeException('Configure um CRT suportado nos dados tributários da empresa.');
+            }
+            if (!preg_match('/^(?:AC|AL|AP|AM|BA|CE|DF|ES|GO|MA|MT|MS|MG|PA|PB|PR|PE|PI|RJ|RN|RS|RO|RR|SC|SP|SE|TO)$/', $uf)) {
+                throw new RuntimeException('Configure uma UF válida nos dados da empresa.');
             }
 
             $source = $job->source_snapshot ?? [];
@@ -40,7 +44,7 @@ final class NFCeTaxRuleApplicationService
             $date = ($source['operation_date'] ?? null) ?: $job->created_at?->toDateString();
             foreach ($items as $index => &$item) {
                 try {
-                    $result = $this->profiles->classify($item, $date, (string)$company->crt);
+                    $result = $this->profiles->classify($item, $date, (string)$company->crt, $uf);
                 } catch (RuntimeException $exception) {
                     throw new RuntimeException(
                         'Item '.($index + 1).': '.$exception->getMessage(),
