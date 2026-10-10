@@ -2,6 +2,7 @@
   'use strict';
   const form=document.getElementById('nfceEditorForm');
   if(!form) return;
+  const readOnly=form.dataset.readonly==='1';
   const el=id=>document.getElementById(id);
   const json=id=>{try{return JSON.parse(el(id)?.textContent||'[]')}catch{return []}};
   const products=json('nfceProductsJson');
@@ -185,6 +186,11 @@
   });
 
   function setMode(){
+    if(readOnly){
+      el('nfceExistingBlock').hidden=true;
+      refreshTotals();
+      return;
+    }
     const existing=!newMode();
     el('nfceExistingBlock').hidden=!existing;
     for(const panel of ['consumer','products','payment']) {
@@ -225,6 +231,7 @@
   }
 
   form.addEventListener('submit',event=>{
+    if(readOnly){event.preventDefault();return;}
     if(submitting) {event.preventDefault();return;}
     el('nfceFormError').hidden=true;
     if(!newMode()){
@@ -277,7 +284,16 @@
   });
 
   renderItems();renderPayments();
-  if(el('nfceMode').selectedOptions[0]?.disabled) el('nfceMode').value='existing';
+  if(!readOnly && el('nfceMode').selectedOptions[0]?.disabled) el('nfceMode').value='existing';
   setMode();
   activateTab('general');
+  if(readOnly){
+    // Keep tabs interactive, but no field can be edited, deleted or submitted.
+    form.querySelectorAll('input,select,textarea').forEach(control=>{
+      control.disabled=true;
+      control.setAttribute('aria-readonly','true');
+    });
+    form.querySelectorAll('button:not([data-nfce-tab]):not([data-dialog-open])')
+      .forEach(button=>button.disabled=true);
+  }
 })();
