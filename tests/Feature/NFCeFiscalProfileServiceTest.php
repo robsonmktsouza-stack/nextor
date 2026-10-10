@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\CompanySetting;
 use App\Models\FiscalFcpRule;
 use App\Models\FiscalTaxGroup;
 use App\Models\FiscalTaxRule;
@@ -13,6 +14,12 @@ use Tests\TestCase;
 final class NFCeFiscalProfileServiceTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        CompanySetting::current()->update(['state'=>'BA','crt'=>'1']);
+    }
 
     private function item(int $productId = 21, ?int $groupId = null): array
     {
@@ -56,6 +63,36 @@ final class NFCeFiscalProfileServiceTest extends TestCase
             'priority' => 0,
             'is_active' => true,
         ], $override));
+    }
+
+    public function test_fiscal_rules_are_matched_using_the_company_uf(): void
+    {
+        $this->createRule(['name'=>'Regra Bahia']);
+        $this->createRule([
+            'name'=>'Regra São Paulo',
+            'origin_uf'=>'SP',
+            'destination_uf'=>'SP',
+        ]);
+        CompanySetting::current()->update(['state'=>'SP']);
+
+        $profile=app(NFCeFiscalProfileService::class)->classify($this->item(),'2026-10-08');
+        self::assertSame('Regra São Paulo',$profile['name']);
+
+        CompanySetting::current()->update(['state'=>'BA']);
+        $profile=app(NFCeFiscalProfileService::class)->classify($this->item(),'2026-10-08');
+        self::assertSame('Regra Bahia',$profile['name']);
+    }
+
+    public function test_fcp_of_a_different_uf_does_not_block_the_company(): void
+    {
+        $this->createGroup();
+        FiscalFcpRule::query()->create([
+            'uf'=>'BA','ncm_prefix'=>'6913','rate'=>'2.0000','is_active'=>true,
+        ]);
+        CompanySetting::current()->update(['state'=>'SP']);
+
+        self::assertSame('Grupo padrão',
+            app(NFCeFiscalProfileService::class)->classify($this->item(),'2026-10-08')['origin']);
     }
 
     public function test_specific_rule_precedes_default_group(): void
