@@ -97,7 +97,7 @@ final class NFCeReadonlyViewData
                 $xp->registerNamespace('n','http://www.portalfiscal.inf.br/nfe');
                 $read=static fn(string $path,? \DOMNode $context=null): string =>
                     trim((string)$xp->evaluate('string('.$path.')',$context));
-                $root='//n:NFe/n:infNFe/';
+                $root='//n:NFe/n:infNFe/n:';
 
                 foreach ([
                     'legal_name'=>'emit/n:xNome',
