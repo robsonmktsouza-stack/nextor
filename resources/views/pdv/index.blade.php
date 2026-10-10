@@ -2,29 +2,6 @@
 
 @section('content')
 @if($pdvSettings['require_cash_opening'])
-<section class="pdv-cash-session-bar {{ $cashSession ? 'open' : 'closed' }}">
-  <div>
-    @include('partials.icon',['name'=>'money','size'=>17])
-    @if($cashSession)
-      <span>Caixa aberto às <strong>{{ $cashSession->opened_at->format('H:i') }}</strong> · Abertura <strong>R$ {{ number_format((float)$cashSession->opening_amount,2,',','.') }}</strong></span>
-      @if($cashExpected!==null)<small>Saldo esperado em dinheiro: R$ {{ number_format((float)$cashExpected,2,',','.') }}</small>@endif
-    @else
-      <span><strong>Caixa fechado.</strong> Abra o caixa para poder finalizar vendas.</span>
-    @endif
-  </div>
-  <div class="pdv-cash-session-actions">
-    @if($cashSession && $pdvSettings['allow_cash_movements'])
-      <button type="button" class="pdv-cash-session-action" data-pdv-cash-movement="supply">Suprimento <kbd>Alt+P</kbd></button>
-      <button type="button" class="pdv-cash-session-action danger" data-pdv-cash-movement="withdrawal">Sangria <kbd>Alt+S</kbd></button>
-    @endif
-    @if($cashSession)
-      <button type="button" class="pdv-cash-session-action" id="pdvCashCloseButton" onclick="document.getElementById('pdvCashCloseDialog').showModal()">Fechar caixa <kbd>Alt+K</kbd></button>
-    @else
-      <button type="button" class="pdv-cash-session-action primary" id="pdvCashOpenButton" onclick="document.getElementById('pdvCashOpenDialog').showModal()">Abrir caixa <kbd>Alt+A</kbd></button>
-    @endif
-  </div>
-</section>
-
 @if(!$cashSession)
 <dialog class="pdv-quick-modal" id="pdvCashOpenDialog">
   <form method="post" action="{{ route('pdv.cash.open') }}">
@@ -101,38 +78,6 @@
 <form id="pdvForm" method="post" action="{{ route('pdv.store') }}">
 @csrf
 
-@if($lastCompletedPdvSale)
-<div class="pdv-last-sale">
-  <div>
-    @include('partials.icon',['name'=>'check','size'=>18])
-    <span>Última venda: <strong>#{{ str_pad((string)$lastCompletedPdvSale->id,5,'0',STR_PAD_LEFT) }}</strong></span>
-    <span>R$ {{ number_format((float)$lastCompletedPdvSale->total,2,',','.') }}</span>
-    <span>{{ ($lastCompletedPdvSale->completed_at ?? $lastCompletedPdvSale->created_at)?->format('d/m H:i') }}</span>
-    @if($lastPdvNfceDocument)
-      <span class="pdv-last-sale-fiscal-status">NFC-e: {{ $lastPdvNfceStatusLabel }}</span>
-    @else
-      <span class="pdv-last-sale-fiscal-status">NFC-e ainda não preparada</span>
-    @endif
-  </div>
-  <div class="pdv-last-sale-actions">
-    @if($lastPdvNfceDocument?->status==='authorized'
-        && (str_ends_with((string)$lastPdvNfceDocument->xml_path,'authorized.xml')
-            || str_ends_with((string)$lastPdvNfceDocument->xml_path,'authorized-recovered.xml')))
-      <a href="{{ route('pdv.nfce.danfe',$lastPdvNfceDocument) }}" target="_blank" rel="noopener noreferrer">
-        Imprimir DANFE NFC-e
-      </a>
-    @endif
-    @if(auth()->user()->canAccess('fiscal'))
-      <a href="{{ $lastPdvNfceDocument
-        ? route('fiscal.show', $lastPdvNfceDocument)
-        : route('pdv.receipt', ['sale' => $lastCompletedPdvSale->id, 'print' => 0]) }}">Abrir NFC-e</a>
-    @endif
-    @if(auth()->user()->canAccess('sales'))
-      <a href="{{ route('sales.show',$lastCompletedPdvSale) }}">Abrir venda</a>
-    @endif
-  </div>
-</div>
-@endif
 
 <div class="pdv-workspace" id="pdvApp"
      data-search-url="{{ route('pdv.search') }}"
@@ -504,6 +449,53 @@
     </div>
     <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
   </div>
+  @if($pdvSettings['require_cash_opening'] || $lastCompletedPdvSale)
+    <div class="pdv-operations-overview" aria-label="Informações do caixa e da última venda">
+      @if($pdvSettings['require_cash_opening'])
+        <section class="pdv-operations-overview-card">
+          <div class="pdv-operations-overview-title">@include('partials.icon',['name'=>'money','size'=>16]) <strong>Caixa atual</strong></div>
+          @if($cashSession)
+            <div class="pdv-operations-overview-values">
+              <span>Aberto às <strong>{{ $cashSession->opened_at->format('H:i') }}</strong></span>
+              <span>Abertura <strong>R$ {{ number_format((float)$cashSession->opening_amount,2,',','.') }}</strong></span>
+              @if($cashExpected!==null)
+                <span>Saldo esperado <strong>R$ {{ number_format((float)$cashExpected,2,',','.') }}</strong></span>
+              @endif
+            </div>
+          @else
+            <p class="pdv-operations-overview-note">Caixa fechado. Abra o caixa para finalizar vendas.</p>
+          @endif
+        </section>
+      @endif
+
+      @if($lastCompletedPdvSale)
+        <section class="pdv-operations-overview-card">
+          <div class="pdv-operations-overview-title">@include('partials.icon',['name'=>'receipt','size'=>16]) <strong>Última venda</strong></div>
+          <div class="pdv-operations-overview-values">
+            <span><strong>#{{ str_pad((string)$lastCompletedPdvSale->id,5,'0',STR_PAD_LEFT) }}</strong></span>
+            <span><strong>R$ {{ number_format((float)$lastCompletedPdvSale->total,2,',','.') }}</strong></span>
+            <span>{{ ($lastCompletedPdvSale->completed_at ?? $lastCompletedPdvSale->created_at)?->format('d/m H:i') }}</span>
+            <span>NFC-e: {{ $lastPdvNfceDocument ? $lastPdvNfceStatusLabel : 'ainda não preparada' }}</span>
+          </div>
+          <div class="pdv-operations-overview-links">
+            @if($lastPdvNfceDocument?->status==='authorized'
+                && (str_ends_with((string)$lastPdvNfceDocument->xml_path,'authorized.xml')
+                    || str_ends_with((string)$lastPdvNfceDocument->xml_path,'authorized-recovered.xml')))
+              <a href="{{ route('pdv.nfce.danfe',$lastPdvNfceDocument) }}" target="_blank" rel="noopener noreferrer">Imprimir DANFE</a>
+            @endif
+            @if(auth()->user()->canAccess('fiscal'))
+              <a href="{{ $lastPdvNfceDocument
+                ? route('fiscal.show',$lastPdvNfceDocument)
+                : route('pdv.receipt',['sale'=>$lastCompletedPdvSale->id,'print'=>0]) }}">Abrir NFC-e</a>
+            @endif
+            @if(auth()->user()->canAccess('sales'))
+              <a href="{{ route('sales.show',$lastCompletedPdvSale) }}">Abrir venda</a>
+            @endif
+          </div>
+        </section>
+      @endif
+    </div>
+  @endif
   <div class="pdv-operations-list">
     <button type="button" data-pdv-operation="suspend"><span><strong>Suspender venda</strong><small>Guarda o carrinho para atender depois.</small></span><kbd>Alt+0</kbd></button>
     <button type="button" data-pdv-operation="resume"><span><strong>Recuperar venda</strong><small>Retoma uma venda suspensa sem movimentar estoque antes da conclusão.</small></span><kbd>Alt+R</kbd></button>
