@@ -488,7 +488,7 @@ class SettingsController extends Controller
                 'environment'=>['required',Rule::in(['homologation','production'])],
                 'series'=>['required','integer','min:0','max:999'],
                 'next_number'=>['required','integer','min:1','max:999999999'],
-                'default_cfop'=>['nullable','string','regex:/^5\\d{3}$/'],
+                'default_cfop'=>['nullable','string','regex:/^5\d{3}$/'],
                 'csc_id'=>['nullable','string','max:20'],
                 'csc_token'=>['nullable','string','max:255'],
                 'auto_from_pdv'=>['nullable','boolean'],
