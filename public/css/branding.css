@@ -1,0 +1,43 @@
+/* Identidade visual Lumeron — imagens fornecidas pelo proprietário.
+   Classes técnicas antigas do NEXTOR permanecem por compatibilidade. */
+.cms-topbar-brand .brand-home-link{
+  min-width:0;
+  flex:1;
+  max-width:137px;
+  height:40px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:3px 6px;
+  background:#f7fafc;
+  border:1px solid #ffffff32;
+  border-radius:6px;
+  overflow:hidden;
+}
+.cms-topbar-brand .brand-home-link:hover{background:#fff}
+.lumeron-brand-full{display:block;width:100%;max-width:125px;height:auto;max-height:36px;object-fit:contain}
+.lumeron-brand-icon{display:none;width:29px;height:29px;object-fit:contain}
+.app-root.sidebar-collapsed .cms-topbar-brand .brand-home-link{
+  width:37px;max-width:37px;flex:0 0 37px;height:38px;padding:3px
+}
+.app-root.sidebar-collapsed .lumeron-brand-full{display:none}
+.app-root.sidebar-collapsed .lumeron-brand-icon{display:block}
+.lumeron-pdv-elephant{
+  width:42px;height:42px;flex:0 0 42px;display:block;object-fit:contain;
+  padding:3px;background:#f7fafc;border:1px solid #ffffff21;border-radius:6px
+}
+.pdv-topbar-brand strong{font-weight:700;letter-spacing:0}
+@media(max-width:760px){
+  .cms-topbar-brand,.app-root.sidebar-collapsed .cms-topbar-brand{
+    width:76px;flex:0 0 76px;padding:0 5px;gap:3px
+  }
+  .cms-topbar-brand .brand-home-link,.app-root.sidebar-collapsed .cms-topbar-brand .brand-home-link{
+    width:30px;max-width:30px;min-width:30px;flex:0 0 30px;
+    height:34px;padding:1px;border-radius:5px
+  }
+  .cms-topbar-brand .lumeron-brand-full{display:none}
+  .cms-topbar-brand .lumeron-brand-icon{display:block;width:27px;height:27px}
+  .cms-topbar-brand .cms-topbar-icon{width:34px;flex-basis:34px}
+  .lumeron-pdv-elephant{width:34px;height:34px;flex-basis:34px}
+}
+@media print{.lumeron-brand-full,.lumeron-brand-icon{display:none!important}}
