@@ -29,6 +29,31 @@ final class LumeronLoginTest extends TestCase
         ]);
     }
 
+    public function test_admin_can_register_separate_usernames_inside_the_installation(): void
+    {
+        $this->actingAs($this->user())
+            ->post(route('settings.users.store'),[
+                'name'=>'Operador de caixa',
+                'username'=>'operador01',
+                'email'=>'operador@exemplo.com.br',
+                'password'=>'SenhaOperador123',
+                'role'=>'admin',
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('users',[
+            'username'=>'operador01','email'=>'operador@exemplo.com.br',
+        ]);
+
+        $this->post(route('settings.users.store'),[
+            'name'=>'Operador duplicado',
+            'username'=>'operador01',
+            'email'=>'outro@exemplo.com.br',
+            'password'=>'SenhaOperador123',
+            'role'=>'admin',
+        ])->assertSessionHasErrors('username');
+    }
+
     public function test_login_page_shows_subdomain_username_and_password(): void
     {
         $this->get('/login')->assertOk()
