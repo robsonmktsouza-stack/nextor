@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\FiscalDocumentJob;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class FiscalModuleTest extends TestCase
@@ -187,13 +188,63 @@ class FiscalModuleTest extends TestCase
             ->assertSee('Produtos')
             ->assertSee('Pagamento')
             ->assertSee('Resumo')
-            ->assertSee('snapshot-1')
+            ->assertSee('Produto histórico congelado')
             ->assertSee('SKU-HISTORICO')
+            ->assertSee('R$ 25,80')
+            ->assertSee('Dinheiro')
+            ->assertDontSee('campos bloqueados para alteração')
+            ->assertDontSee('nfceProductsJson',false)
+            ->assertDontSee('name="submit_mode"',false)
             ->assertSee('Consumidor da época')
             ->assertSee('data-no-loading download',false)
             ->assertSee('data-dialog-open="nfceCancelDialog"',false)
             ->assertDontSee('Salvar para emissão')
             ->assertDontSee('Emitir NFC-e');
+    }
+
+    public function test_archived_xml_is_authoritative_for_readonly_products_payments_and_amounts(): void
+    {
+        Storage::fake('local');
+        $document=FiscalDocumentJob::query()->create([
+            'document_type'=>'nfce','status'=>'authorized',
+            'environment'=>'homologation','series'=>1,'document_number'=>5,
+            'access_key'=>str_repeat('5',44),'protocol'=>str_repeat('8',15),
+            'authorized_at'=>now()->subHour(),'prepared_at'=>now()->subHours(2),
+            'source_snapshot'=>[
+                'items'=>[['name'=>'Produto do cadastro antigo','sku'=>'OLD',
+                    'quantity'=>'1','unit_price'=>'99.99','discount'=>'0']],
+                'payments'=>[['payment_method'=>'cash','payment_kind'=>'cash','amount'=>'99.99']],
+                'consumer_name'=>'Nome alterado depois','total'=>'99.99',
+            ],
+        ]);
+        $path='fiscal/nfce/'.$document->id.'/authorized.xml';
+        Storage::disk('local')->put($path, <<<'XML'
+<nfeProc xmlns="http://www.portalfiscal.inf.br/nfe" versao="4.00">
+  <NFe><infNFe><ide><natOp>VENDA</natOp><dhEmi>2026-10-09T20:25:38-03:00</dhEmi><indPres>1</indPres></ide>
+  <emit><CNPJ>39323356000100</CNPJ><xNome>EMPRESA ORIGINAL</xNome></emit>
+  <dest><CPF>12345678901</CPF><xNome>CONSUMIDOR ORIGINAL</xNome></dest>
+  <det><prod><cProd>PROD-X</cProd><xProd>Produto fiscal original</xProd><qCom>2.0000</qCom><vUnCom>6.4500</vUnCom><vProd>12.90</vProd></prod></det>
+  <total><ICMSTot><vProd>12.90</vProd><vDesc>0.00</vDesc><vNF>12.90</vNF></ICMSTot></total>
+  <pag><detPag><tPag>03</tPag><vPag>12.90</vPag></detPag></pag>
+  <infAdic><infCpl>Observação original</infCpl></infAdic>
+  </infNFe></NFe>
+</nfeProc>
+XML);
+        $document->update(['xml_path'=>$path]);
+
+        $this->actingAs($this->admin())
+            ->get(route('fiscal.show',$document))
+            ->assertOk()
+            ->assertSee('EMPRESA ORIGINAL')
+            ->assertSee('CONSUMIDOR ORIGINAL')
+            ->assertSee('Produto fiscal original')
+            ->assertSee('PROD-X')
+            ->assertSee('Cartão de crédito')
+            ->assertSee('R$ 12,90')
+            ->assertSee('Observação original')
+            ->assertDontSee('Produto do cadastro antigo')
+            ->assertDontSee('Nome alterado depois')
+            ->assertDontSee('R$ 99,99');
     }
 
     public function test_cancelled_nfce_uses_same_readonly_form_without_cancellation_action(): void
