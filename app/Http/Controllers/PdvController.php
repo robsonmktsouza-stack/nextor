@@ -140,6 +140,122 @@ class PdvController extends Controller
         ]);
     }
 
+    /**
+     * Consulta de vendas do próprio PDV, sem abandonar a frente de caixa.
+     * Por padrão o período é o dia atual; histórico limitado a 90 dias
+     * por consulta para proteger o desempenho do caixa.
+     */
+    public function salesHistory(Request $request)
+    {
+        $data=$request->validate([
+            'from'=>['nullable','date_format:Y-m-d'],
+            'to'=>['nullable','date_format:Y-m-d'],
+            'status'=>['nullable',Rule::in(['all','completed','cancelled'])],
+            'operator'=>['nullable',Rule::in(['all','mine'])],
+            'q'=>['nullable','string','max:100'],
+            'page'=>['nullable','integer','min:1','max:10000'],
+        ]);
+
+        $today=now()->startOfDay();
+        $from=\Carbon\Carbon::createFromFormat('!Y-m-d',$data['from'] ?? $today->toDateString());
+        $to=\Carbon\Carbon::createFromFormat('!Y-m-d',$data['to'] ?? $today->toDateString());
+        if ($to->lt($from) || $from->diffInDays($to)>89) {
+            throw ValidationException::withMessages([
+                'from'=>'Selecione um período válido de até 90 dias.',
+            ]);
+        }
+
+        $start=$from->startOfDay()->toDateTimeString();
+        $endExclusive=$to->copy()->addDay()->startOfDay()->toDateTimeString();
+        $status=$data['status'] ?? 'all';
+        $operator=$data['operator'] ?? 'all';
+        $term=trim((string)($data['q'] ?? ''));
+
+        $query=Sale::query()
+            ->with(['customer:id,name','user:id,name'])
+            ->where('source','pdv')
+            ->where('operation_type','sale')
+            ->where(function($q) use($from,$to,$start,$endExclusive){
+                $q->whereBetween('operation_date',[$from->toDateString(),$to->toDateString()])
+                  ->orWhere(function($legacy) use($start,$endExclusive){
+                      $legacy->whereNull('operation_date')
+                          ->where('created_at','>=',$start)
+                          ->where('created_at','<',$endExclusive);
+                  });
+            })
+            ->when($status!=='all',fn($q)=>$q->where('status',$status))
+            ->when($operator==='mine',fn($q)=>$q->where('user_id',$request->user()->id))
+            ->when($term!=='',function($q) use($term){
+                $q->where(function($search) use($term){
+                    if(preg_match('/^#?\\d+$/',$term)){
+                        $search->orWhere('id',(int)ltrim($term,'#'));
+                    }
+                    $escaped=str_replace(['\\','%','_'],['\\\\','\\%','\\_'],$term);
+                    $like='%'.$escaped.'%';
+                    $search->orWhere('consumer_name','like',$like)
+                        ->orWhere('consumer_document','like',$like)
+                        ->orWhereHas('customer',fn($customer)=>$customer->where('name','like',$like))
+                        ->orWhereHas('user',fn($user)=>$user->where('name','like',$like));
+                });
+            })
+            ->orderByDesc('operation_date')
+            ->orderByDesc('id');
+
+        $page=$query->paginate(20,['id','customer_id','consumer_name','user_id','total','status','operation_date','completed_at','created_at']);
+        $documents=FiscalDocumentJob::query()
+            ->where('document_type','nfce')
+            ->whereIn('sale_id',$page->getCollection()->pluck('id')->all())
+            ->orderByDesc('id')
+            ->get(['id','sale_id','status','xml_path'])
+            ->unique('sale_id')
+            ->keyBy('sale_id');
+
+        $items=$page->getCollection()->map(function(Sale $sale) use($documents){
+            $document=$documents->get($sale->id);
+            $fiscalStatus=$document ? match($document->status) {
+                'authorized'=>'Autorizada',
+                'cancelled'=>'Cancelada',
+                'rejected'=>'Rejeitada',
+                'processing'=>'Processando',
+                'pending'=>'Pendente',
+                'offline_signed'=>'Contingência',
+                'prepared'=>'Preparada',
+                default=>'A verificar',
+            } : 'Não preparada';
+
+            return [
+                'id'=>$sale->id,
+                'number'=>str_pad((string)$sale->id,5,'0',STR_PAD_LEFT),
+                'date'=>($sale->completed_at ?? $sale->created_at)?->format('d/m/Y H:i') ?? '—',
+                'customer'=>$sale->customer?->name ?: ($sale->consumer_name ?: 'Consumidor não identificado'),
+                'operator'=>$sale->user?->name ?: '—',
+                'total'=>(float)$sale->total,
+                'status'=>$sale->status,
+                'status_label'=>match($sale->status) {
+                    'completed'=>'Concluída','cancelled'=>'Cancelada',default=>'Pendente',
+                },
+                'fiscal_status'=>$fiscalStatus,
+                'fiscal_code'=>$document?->status ?: 'none',
+                'receipt_url'=>route('pdv.receipt',['sale'=>$sale->id,'print'=>0]),
+                'danfe_url'=>$document && $document->status==='authorized'
+                    && in_array(basename((string)$document->xml_path),['authorized.xml','authorized-recovered.xml'],true)
+                    ? route('pdv.nfce.danfe',$document) : null,
+            ];
+        })->values();
+
+        return response()->json([
+            'items'=>$items,
+            'pagination'=>[
+                'page'=>$page->currentPage(),
+                'pages'=>$page->lastPage(),
+                'per_page'=>$page->perPage(),
+                'total'=>$page->total(),
+                'from'=>$page->firstItem(),
+                'to'=>$page->lastItem(),
+            ],
+        ])->header('Cache-Control','no-store, private');
+    }
+
     public function search(Request $request)
     {
         $term=trim((string)$request->query('q',''));
