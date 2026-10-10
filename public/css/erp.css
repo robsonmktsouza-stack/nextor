@@ -3999,7 +3999,6 @@ body.nfe-modal-open{overflow:hidden}
 
 
 /* NFC-e emitida: mesmo editor de emissão, campos históricos não editáveis. */
-.nfce-readonly-caption{margin:4px 0 0;color:#6e7d8c;font-size:12px;font-weight:500}
 .nfce-readonly-fiscal-bar{display:flex;align-items:center;flex-wrap:wrap;gap:9px 18px;padding:10px 14px;margin:0 0 14px;border:1px solid #dbe6ef;border-radius:5px;background:#f3f7fb;font-size:12px;color:#34495c}
 .nfce-readonly-fiscal-bar>b,.nfce-readonly-fiscal-bar span>b{font-weight:700}
 .nfce-readonly-key{font-family:ui-monospace,Consolas,monospace;overflow-wrap:anywhere;font-size:11px}
@@ -4023,3 +4022,32 @@ body.nfe-modal-open{overflow:hidden}
 .nfce-readonly #nfceAddPayment,
 .nfce-readonly .field:has(>#nfceProductSearch),
 .nfce-readonly #nfceProductResults{display:none!important}
+
+/* Nota emitida: leitura limpa, sem controles interativos falsos. */
+.nfce-readonly .nfe-workspace-body input[readonly],
+.nfce-readonly .nfe-workspace-body textarea[readonly]{
+  background:#f7f9fb!important;border:1px solid #dce5ed!important;
+  color:#24374a!important;opacity:1!important;cursor:default;
+  -webkit-text-fill-color:#24374a;box-shadow:none!important
+}
+.nfce-readonly .nfe-workspace-body input[readonly]:focus,
+.nfce-readonly .nfe-workspace-body textarea[readonly]:focus{
+  outline:none;box-shadow:none!important;border-color:#dce5ed!important
+}
+.nfce-readonly .nfce-readonly-items,
+.nfce-readonly .nfce-readonly-payments{width:100%;table-layout:auto}
+.nfce-readonly .nfce-readonly-items th:not(:first-child),
+.nfce-readonly .nfce-readonly-items td:not(:first-child),
+.nfce-readonly .nfce-readonly-payments th:last-child,
+.nfce-readonly .nfce-readonly-payments td:last-child{
+  text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums
+}
+.nfce-readonly .nfce-readonly-items td:first-child{
+  min-width:180px;overflow-wrap:anywhere
+}
+.nfce-readonly .nfce-readonly-items td strong{font-weight:650}
+.nfce-readonly .nfce-readonly-items td small{
+  display:block;margin-top:3px;color:#798b9e;font-size:11px
+}
+.nfce-readonly .nfce-readonly-number{font-size:12px}
+.nfce-readonly .nfce-item-table-wrap{max-width:100%;overflow-x:auto}
