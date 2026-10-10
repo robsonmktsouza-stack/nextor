@@ -4,7 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow,noarchive">
-  <title>DANFE NFC-e {{ $danfe['series'] }}/{{ $danfe['number'] }}</title>
+  <title>DANFE NFC-e {{ $danfe['series'] }}/{{ $danfe['number'] }} — Lumeron</title>
+  @unless($pdfExport ?? false)<link rel="icon" type="image/png" href="{{ asset('images/lumeron/elephant.png') }}">@endunless
   @if($pdfExport ?? false)
     <style>{!! file_get_contents(public_path('css/nfce-danfe.css')) !!}</style>
     {{-- Thermal PDF must declare its page size before Chrome prints it.
