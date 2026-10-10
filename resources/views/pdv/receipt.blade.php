@@ -45,7 +45,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Comprovante de venda #{{ $sale->id }}</title>
+<title>Comprovante de venda #{{ $sale->id }} — Lumeron</title>
+<link rel="icon" type="image/png" href="{{ asset('images/lumeron/elephant.png') }}">
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;background:#eef1f4;color:#111;font-family:Arial,Helvetica,sans-serif}
