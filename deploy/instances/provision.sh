@@ -48,16 +48,17 @@ mysql --defaults-extra-file="$MYSQL_CNF" -N -e "SELECT 1" >/dev/null
 [[ -z "$(mysql --defaults-extra-file="$MYSQL_CNF" -N -e "SHOW DATABASES LIKE '$DB'")" ]] || { echo "Banco já existe." >&2; exit 1; }
 
 install -d -m 755 /srv/lumeron /srv/lumeron/instances "$BASE" "$BASE/releases"
-install -d -m 700 "$BASE/shared" "$BASE/shared/storage" "$BASE/shared/uploads"
+install -d -m 700 "$BASE/shared" "$BASE/shared/storage"
+install -d -m 755 "$BASE/uploads"
 install -d -m 700 "$BASE/shared/storage/app/private"
 install -d -m 700 "$BASE/shared/storage/framework/cache/data" "$BASE/shared/storage/framework/sessions"
 install -d -m 700 "$BASE/shared/storage/framework/views" "$BASE/shared/storage/logs" "$BASE/shared/acbr"
 useradd --system --user-group --home-dir "$BASE/shared" --shell /usr/sbin/nologin "$USER"
-chown -R "$USER:$USER" "$BASE/shared"
+chown -R "$USER:$USER" "$BASE/shared" "$BASE/uploads"
 install -d -m 755 "$RELEASE" "$RELEASE/public" "$RELEASE/bootstrap/cache"
 rsync -a --delete --exclude='/.env' --exclude='/.git/' --exclude='/storage/' --exclude='/vendor/' --exclude='/public/uploads/' "$SOURCE/" "$RELEASE/"
 ln -s "$BASE/shared/storage" "$RELEASE/storage"
-ln -s "$BASE/shared/uploads" "$RELEASE/public/uploads"
+ln -s "$BASE/uploads" "$RELEASE/public/uploads"
 chown -R "$USER:$USER" "$RELEASE"
 
 DB_PASSWORD="$(openssl rand -hex 32)"
