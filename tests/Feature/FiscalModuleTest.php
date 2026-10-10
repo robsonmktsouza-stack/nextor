@@ -160,7 +160,7 @@ class FiscalModuleTest extends TestCase
             'document_number'=>3,
             'access_key'=>str_repeat('1',44),
             'protocol'=>str_repeat('2',15),
-            'xml_path'=>'fiscal/nfce/1/authorized.xml',
+            'xml_path'=>'fiscal/nfce/no-test-artifact/authorized.xml',
             'authorized_at'=>now()->subMinute(),
             'prepared_at'=>now()->subMinutes(2),
             'source_snapshot'=>[
