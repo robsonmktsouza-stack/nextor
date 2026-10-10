@@ -34,11 +34,15 @@ Route::get('/', function () {
     if(!auth()->check()) return redirect()->route('login');
     return redirect()->route(auth()->user()->homeRouteName());
 });
-Route::prefix('api/nextor')->middleware(['nextor.api','throttle:120,1'])->group(function () {
-    Route::get('/products',[ApiController::class,'products']);
-    Route::get('/customers',[ApiController::class,'customers']);
-    Route::get('/sales',[ApiController::class,'sales']);
-});
+// Novo endereço público Lumeron; a rota Nextor continua como alias
+// compatível com integrações e clientes existentes.
+foreach (['api/lumeron','api/nextor'] as $apiPrefix) {
+    Route::prefix($apiPrefix)->middleware(['nextor.api','throttle:120,1'])->group(function () {
+        Route::get('/products',[ApiController::class,'products']);
+        Route::get('/customers',[ApiController::class,'customers']);
+        Route::get('/sales',[ApiController::class,'sales']);
+    });
+}
 
 // Central portal gets a session-bound CSRF token from the chosen isolated instance.
 Route::get('/login/bootstrap', [AuthController::class,'loginBootstrap'])
