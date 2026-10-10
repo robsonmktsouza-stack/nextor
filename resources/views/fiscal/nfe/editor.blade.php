@@ -668,7 +668,7 @@ $origins=[
 
     <section class="editor-tab-panel" data-nfe-item-panel="item-ibscbs" hidden>
       <div class="editor-panel">
-        <h3>IBS / CBS — estrutura NEXTOR</h3>
+        <h3>IBS / CBS — estrutura Lumeron</h3>
 
         <div class="editor-grid cols-12">
           <label class="field col-3"><span>CST IBS</span><input id="nfeTaxIbsCst"></label>
