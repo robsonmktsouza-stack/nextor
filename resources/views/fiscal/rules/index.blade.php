@@ -22,18 +22,20 @@
     <div class="editor-grid cols-12 settings-grid">
       <label class="field col-2"><span>UF origem</span>
         <select name="origin_uf" required>
+          <option value="" @selected(!old('origin_uf',$issuerUf))>Selecione a UF</option>
           @foreach($ufs as $uf)<option value="{{ $uf }}" @selected(old('origin_uf',$issuerUf)===$uf)>{{ $uf }}</option>@endforeach
         </select>
       </label>
       <label class="field col-2"><span>UF destino</span>
         <select name="destination_uf" required>
+          <option value="" @selected(!old('destination_uf',$issuerUf))>Selecione a UF</option>
           @foreach($ufs as $uf)<option value="{{ $uf }}" @selected(old('destination_uf',$issuerUf)===$uf)>{{ $uf }}</option>@endforeach
         </select>
       </label>
       <label class="field col-2"><span>CRT</span>
         <select name="crt" required>
           @foreach(['1'=>'Simples Nacional','4'=>'MEI'] as $code=>$label)
-            <option value="{{ $code }}" @selected(old('crt',in_array($issuerCrt,['1','4'],true)?$issuerCrt:'1')===$code)>{{ $code }} — {{ $label }}</option>
+            <option value="{{ $code }}" @selected((string)old('crt',in_array($issuerCrt,['1','4'],true)?$issuerCrt:'1')===(string)$code)>{{ $code }} — {{ $label }}</option>
           @endforeach
         </select>
       </label>
@@ -117,7 +119,7 @@
                   <label class="field col-2"><span>CRT</span>
                     <select name="crt" required>
                       @foreach(['1'=>'Simples Nacional','4'=>'MEI'] as $code=>$label)
-                        <option value="{{ $code }}" @selected((string)$rule->crt===$code)>{{ $code }} — {{ $label }}</option>
+                        <option value="{{ $code }}" @selected((string)$rule->crt===(string)$code)>{{ $code }} — {{ $label }}</option>
                       @endforeach
                     </select>
                   </label>
