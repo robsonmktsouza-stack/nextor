@@ -298,6 +298,9 @@ final class NFCeTransmissionService
         string $password,
         string $csc
     ): void {
+        if (!\App\Support\InstanceIdentity::matches($company->document)) {
+            throw new RuntimeException('CNPJ do emitente não corresponde à instalação contratada.');
+        }
         $issue = app(FiscalDocumentSettings::class)->transmissionIssue('nfce', (string)$job->environment);
         if ($issue !== null) {
             throw new RuntimeException($issue);
