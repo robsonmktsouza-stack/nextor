@@ -440,6 +440,92 @@
 </dialog>
 </form>
 
+<dialog class="pdv-quick-modal pdv-sales-modal" id="pdvSalesModal" aria-labelledby="pdvSalesTitle" data-sales-url="{{ route('pdv.sales.history') }}">
+  <div class="pdv-modal-head">
+    <div>
+      <span>Alt+V</span>
+      <h2 id="pdvSalesTitle">Vendas do PDV</h2>
+      <p>Consulte as vendas sem sair da frente de caixa.</p>
+    </div>
+    <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar vendas">
+      @include('partials.icon',['name'=>'x','size'=>18])
+    </button>
+  </div>
+
+  <form class="pdv-sales-filters" id="pdvSalesFilters" autocomplete="off">
+    <label class="pdv-sales-filter-wide">
+      <span>Pesquisar venda</span>
+      <input type="search" name="q" id="pdvSalesSearch" placeholder="Número, cliente, CPF/CNPJ ou operador" maxlength="100">
+    </label>
+    <label>
+      <span>Período</span>
+      <select id="pdvSalesPeriod" aria-label="Período das vendas">
+        <option value="today" selected>Hoje</option>
+        <option value="yesterday">Ontem</option>
+        <option value="seven">Últimos 7 dias</option>
+        <option value="month">Este mês</option>
+        <option value="custom">Personalizado</option>
+      </select>
+    </label>
+    <label>
+      <span>De</span>
+      <input type="date" id="pdvSalesFrom" name="from" value="{{ now()->toDateString() }}" required>
+    </label>
+    <label>
+      <span>Até</span>
+      <input type="date" id="pdvSalesTo" name="to" value="{{ now()->toDateString() }}" required>
+    </label>
+    <label>
+      <span>Situação</span>
+      <select id="pdvSalesStatus" name="status">
+        <option value="all">Todas</option>
+        <option value="completed">Concluídas</option>
+        <option value="cancelled">Canceladas</option>
+      </select>
+    </label>
+    <label>
+      <span>Operador</span>
+      <select id="pdvSalesOperator" name="operator">
+        <option value="all">Todos</option>
+        <option value="mine">Minhas vendas</option>
+      </select>
+    </label>
+    <div class="pdv-sales-filter-actions">
+      <button type="submit" id="pdvSalesApply">Filtrar</button>
+      <button type="button" id="pdvSalesToday">Hoje</button>
+    </div>
+  </form>
+
+  <div class="pdv-sales-list-scroll">
+    <table class="pdv-sales-table" aria-label="Vendas do período">
+      <thead>
+        <tr>
+          <th>Nº</th>
+          <th>Data</th>
+          <th>Cliente</th>
+          <th>Operador</th>
+          <th class="pdv-sales-amount">Total</th>
+          <th>Situação</th>
+          <th>NFC-e</th>
+          <th class="pdv-sales-actions-col">Ações</th>
+        </tr>
+      </thead>
+      <tbody id="pdvSalesRows">
+        <tr><td colspan="8" class="pdv-sales-message">Abra esta janela para consultar as vendas de hoje.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pdv-sales-footer">
+    <span id="pdvSalesCount" aria-live="polite">Vendas de hoje</span>
+    <div class="pdv-sales-pages">
+      <button type="button" id="pdvSalesPrevious" disabled aria-label="Página anterior">Anterior</button>
+      <span id="pdvSalesPage">1 / 1</span>
+      <button type="button" id="pdvSalesNext" disabled aria-label="Próxima página">Próxima</button>
+    </div>
+  </div>
+</dialog>
+
 <dialog class="pdv-quick-modal pdv-operations-modal" id="pdvOperationsModal">
   <div class="pdv-modal-head">
     <div>
