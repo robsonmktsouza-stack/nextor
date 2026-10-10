@@ -6,6 +6,8 @@ button{cursor:pointer}
 .lumeron-login{min-height:100svh;display:grid;place-items:center;padding:28px 16px;background:radial-gradient(circle at 50% -30%,#e8eff8 0%,#f7f8fb 60%,#f3f5f9 100%)}
 .login-shell{width:min(100%,490px)}
 .login-brand{display:flex;align-items:center;justify-content:center;gap:12px;margin:0 0 30px}
+.lumeron-login-logo{display:block;width:min(236px,70vw);height:auto;max-height:75px;object-fit:contain}
+.login-brand{margin-bottom:28px}
 .login-brand-symbol{width:44px;height:44px;border-radius:12px;background:#245e91;display:grid;place-items:center;color:#fff;font-size:25px;font-weight:800;box-shadow:0 4px 12px #18456c1c}
 .login-brand strong{display:block;color:#203951;font-size:23px;letter-spacing:-.055em;line-height:1.15}
 .login-brand small{display:block;font-size:11px;letter-spacing:.025em;color:#8190a2;margin-top:3px}
