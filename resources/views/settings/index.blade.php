@@ -637,7 +637,8 @@ foreach($primaryTabs as $key=>$item){
       </div>
       <div class="settings-switch-grid">
         <label class="settings-switch"><input type="checkbox" name="enabled" value="1" @checked($nfce['enabled'])><span><strong>NFC-e habilitada</strong><small>Disponibiliza esta configuração ao emissor.</small></span></label>
-        <label class="settings-switch"><input type="checkbox" name="production_enabled" value="1" @checked($nfce['production_enabled'])><span><strong>Permitir emissão em produção</strong></span></label>
+        <label class="settings-switch"><input type="checkbox" name="production_enabled" value="1" @checked($nfce['production_enabled'])><span><strong>Permitir emissão em produção</strong><small>Libera emissão normal, após conferir o credenciamento e o CSC de produção.</small></span></label>
+        <label class="settings-switch"><input type="checkbox" name="advanced_operations_production_approved" value="1" @checked($nfce['advanced_operations_production_approved'] ?? false)><span><strong>Permitir eventos e contingência em produção</strong><small>Habilita cancelamento, inutilização e contingência offline somente após validar os procedimentos para esta instalação e UF. É independente da emissão normal.</small></span></label>
         <label class="settings-switch"><input type="checkbox" name="auto_from_pdv" value="1" @checked($nfce['auto_from_pdv'])><span><strong>Transmitir NFC-e automaticamente pelo PDV</strong><small>Desative para revisar a nota e emitir manualmente após a venda. A opção de emissão automática também precisa estar desativada nas configurações do PDV.</small></span></label>
         <label class="settings-switch"><input type="checkbox" name="print_danfe" value="1" @checked($nfce['print_danfe'])><span><strong>Imprimir DANFE NFC-e</strong><small>Preferência de impressão do comprovante.</small></span></label>
       </div>
