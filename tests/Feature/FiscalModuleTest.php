@@ -150,7 +150,7 @@ class FiscalModuleTest extends TestCase
             ->assertSee('data-no-loading hidden',false);
     }
 
-    public function test_authorized_nfce_detail_uses_compact_utilities_and_modal_cancel(): void
+    public function test_authorized_nfce_opens_filled_emission_form_in_readonly_mode(): void
     {
         $document=FiscalDocumentJob::query()->create([
             'document_type'=>'nfce',
@@ -163,19 +163,60 @@ class FiscalModuleTest extends TestCase
             'xml_path'=>'fiscal/nfce/1/authorized.xml',
             'authorized_at'=>now()->subMinute(),
             'prepared_at'=>now()->subMinutes(2),
+            'source_snapshot'=>[
+                'consumer_document'=>'12345678901','consumer_name'=>'Consumidor da época',
+                'items'=>[[
+                    'product_id'=>991,'sku'=>'SKU-HISTORICO',
+                    'name'=>'Produto histórico congelado',
+                    'quantity'=>'2','unit_price'=>'12.90','discount'=>'0',
+                ]],
+                'payments'=>[[
+                    'payment_method'=>'cash','payment_kind'=>'cash','amount'=>'25.80',
+                ]],
+            ],
         ]);
 
         $this->actingAs($this->admin())
             ->get(route('fiscal.show',$document))
             ->assertOk()
-            ->assertSee('fiscal-detail-utilities',false)
-            ->assertSee('data-dialog-open="nfceCancelDialog"',false)
-            ->assertSee('id="nfceCancelDialog"',false)
+            ->assertSee('nfceEditorForm',false)
+            ->assertSee('data-readonly="1"',false)
+            ->assertSee('NFC-e 1/3')
+            ->assertSee('Dados gerais')
+            ->assertSee('Consumidor')
+            ->assertSee('Produtos')
+            ->assertSee('Pagamento')
+            ->assertSee('Resumo')
+            ->assertSee('Produto histórico congelado')
+            ->assertSee('SKU-HISTORICO')
+            ->assertSee('Consumidor da época')
             ->assertSee('data-no-loading download',false)
-            ->assertSee('Cancelamento')
-            ->assertSee('Inutilização')
-            ->assertDontSee('min-width:240px',false)
-            ->assertDontSee('Cancelar NFC-e na SEFAZ');
+            ->assertSee('data-dialog-open="nfceCancelDialog"',false)
+            ->assertDontSee('Salvar para emissão')
+            ->assertDontSee('Emitir NFC-e');
+    }
+
+    public function test_cancelled_nfce_uses_same_readonly_form_without_cancellation_action(): void
+    {
+        $document=FiscalDocumentJob::query()->create([
+            'document_type'=>'nfce','status'=>'cancelled',
+            'environment'=>'homologation','series'=>1,'document_number'=>8,
+            'access_key'=>str_repeat('7',44),
+            'protocol'=>str_repeat('8',15),
+            'authorized_at'=>now()->subHour(),'cancelled_at'=>now(),
+            'source_snapshot'=>[
+                'items'=>[['product_id'=>45,'name'=>'Produto preservado','sku'=>'SKU45',
+                    'quantity'=>'1','unit_price'=>'10.00','discount'=>'0.00']],
+                'payments'=>[['payment_method'=>'cash','payment_kind'=>'cash','amount'=>'10.00']],
+            ],
+        ]);
+        $this->actingAs($this->admin())
+            ->get(route('fiscal.show',$document))
+            ->assertOk()
+            ->assertSee('data-readonly="1"',false)
+            ->assertSee('Cancelada')
+            ->assertSee('Produto preservado')
+            ->assertDontSee('data-dialog-open="nfceCancelDialog"',false);
     }
 
     public function test_cancellation_modals_do_not_trigger_stacked_confirmation(): void
