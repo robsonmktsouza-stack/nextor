@@ -58,15 +58,18 @@ final class LumeronBrandingTest extends TestCase
         }
     }
 
-    public function test_pdv_inherits_the_same_lumeron_shell_as_sales(): void
+    public function test_pdv_has_its_own_fullscreen_cashier_layout_without_admin_sidebar(): void
     {
         $layout=file_get_contents(resource_path('views/layouts/pdv.blade.php'));
-        self::assertStringContainsString("@extends('layouts.app')",$layout);
-        self::assertStringContainsString("@section('title','PDV')",$layout);
+        self::assertStringNotContainsString("@extends('layouts.app')",$layout);
+        self::assertStringContainsString('class="pdv-root lumeron-pdv-page"',$layout);
+        self::assertStringContainsString('class="pdv-topbar"',$layout);
+        self::assertStringContainsString('class="pdv-screen"',$layout);
+        self::assertStringContainsString('images/lumeron/logo.png',$layout);
         self::assertStringContainsString('css/pdv-lumeron.css',$layout);
         self::assertStringContainsString('id="pdvOperations"',$layout);
         self::assertStringContainsString('id="pdvFullscreen"',$layout);
-        self::assertStringNotContainsString('NEXTOR PDV',$layout);
+        self::assertStringNotContainsString('cms-sidebar',$layout);
 
         $user=User::query()->create([
             'name'=>'Operador de caixa',
@@ -75,13 +78,16 @@ final class LumeronBrandingTest extends TestCase
             'role'=>'admin',
             'is_active'=>true,
         ]);
-
         $this->actingAs($user)->get(route('pdv.index'))->assertOk()
             ->assertSee('images/lumeron/logo.png',false)
-            ->assertSee('class="cms-topbar"',false)
-            ->assertSee('class="cms-sidebar"',false)
+            ->assertSee('class="pdv-root lumeron-pdv-page"',false)
+            ->assertSee('class="pdv-topbar"',false)
             ->assertSee('class="pdv-screen"',false)
-            ->assertSee('class="pdv-workbar"',false)
+            ->assertDontSee('class="cms-topbar"',false)
+            ->assertDontSee('class="cms-sidebar"',false)
+            ->assertDontSee('class="page-heading"',false)
+            ->assertSee('id="pdvOperations"',false)
+            ->assertSee('id="pdvFullscreen"',false)
             ->assertSee('id="pdvApp"',false)
             ->assertSee('id="pdvCart"',false)
             ->assertSee('id="pdvSearch"',false)
