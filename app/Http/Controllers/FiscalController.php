@@ -111,6 +111,14 @@ class FiscalController extends Controller
             ? $fiscalDocumentJob->document_type
             : 'nfe';
 
+        // NFC-e emitidas/canceladas são abertas no próprio formulário de emissão,
+        // com os dados originais congelados e controles de edição desabilitados.
+        if ($tab==='nfce' && in_array($fiscalDocumentJob->status,['authorized','cancelled'],true)) {
+            return view('fiscal.nfce.create',
+                app(\App\Services\Fiscal\NFCeReadonlyViewData::class)->forDocument($fiscalDocumentJob)
+            );
+        }
+
         return view('fiscal.show',[
             'document'=>$fiscalDocumentJob,
             'tab'=>$tab,
