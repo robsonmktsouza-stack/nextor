@@ -15,6 +15,7 @@ use Tests\TestCase;
 class NfeEditorTest extends TestCase
 {
     use RefreshDatabase;
+    use \Tests\Concerns\WithConfiguredCompany;
 
     private function admin(): User
     {
