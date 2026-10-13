@@ -127,11 +127,11 @@ class FiscalController extends Controller
             'configuration'=>$this->configurationFor($tab),
             'fiscalEnabled'=>(bool)AppSetting::value('fiscal','enabled',false),
             'dateFormat'=>AppSetting::dateFormat(),
-            'renumberHistories'=>$fiscalDocumentJob->document_type==='nfce'
-                ? \App\Models\NFCeRenumberHistory::query()
-                    ->where('fiscal_document_job_id',$fiscalDocumentJob->id)
-                    ->latest('id')->get()
-                : collect(),
+            'originalNfce'=>$fiscalDocumentJob->duplicated_from_id
+                ? FiscalDocumentJob::query()->find($fiscalDocumentJob->duplicated_from_id)
+                : null,
+            'duplicateNfce'=>FiscalDocumentJob::query()
+                ->where('duplicated_from_id', $fiscalDocumentJob->id)->first(),
             'nfcePreflightErrors'=>$fiscalDocumentJob->document_type==='nfce'
                 && $fiscalDocumentJob->status==='prepared'
                     ? app(\App\Services\Fiscal\NFCePreflightService::class)->validate($fiscalDocumentJob)
@@ -185,23 +185,23 @@ class FiscalController extends Controller
 
 
     /**
-     * Explicitly correct the number after an archived, definitive SEFAZ 539.
-     * Does not send to SEFAZ, create a new sale or change stock/finance.
+     * Create a separate fiscal document after definitive 539 rejection.
+     * Original signed XML remains unchanged; no sale/stock/finance writes.
      */
-    public function renumberNfce(
+    public function duplicateNfce(
         FiscalDocumentJob $fiscalDocumentJob,
-        \App\Services\Fiscal\NFCeRenumberService $renumber
+        \App\Services\Fiscal\NFCeDuplicationService $duplicator
     ) {
         abort_unless($fiscalDocumentJob->document_type === 'nfce', 404);
 
         try {
-            $document = $renumber->prepareWithNextNumber($fiscalDocumentJob->id);
+            $copy = $duplicator->duplicate($fiscalDocumentJob->id);
         } catch (\Illuminate\Validation\ValidationException $exception) {
             return back()->with('error', collect($exception->errors())->flatten()->implode(' '));
         }
 
-        return redirect()->route('fiscal.show', $document)
-            ->with('success', 'Numeração corrigida. O XML e o retorno da tentativa anterior foram preservados. Confira e emita a nova NFC-e quando desejar.');
+        return redirect()->route('fiscal.show', $copy)
+            ->with('success', 'NFC-e duplicada a partir do documento rejeitado. A venda original não foi alterada. Confira os dados antes de emitir.');
     }
 
     public function consultNfce(FiscalDocumentJob $fiscalDocumentJob)
