@@ -11,6 +11,7 @@ use Tests\TestCase;
 class InventorySalesTest extends TestCase
 {
     use RefreshDatabase;
+    use \Tests\Concerns\WithConfiguredCompany;
 
     private function user(): User
     {
