@@ -9,6 +9,7 @@ use Tests\TestCase;
 final class UiRefinementTest extends TestCase
 {
     use RefreshDatabase;
+    use \Tests\Concerns\WithConfiguredCompany;
 
     private function admin(): User
     {
