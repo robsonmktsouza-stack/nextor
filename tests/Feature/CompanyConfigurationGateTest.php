@@ -72,6 +72,30 @@ final class CompanyConfigurationGateTest extends TestCase
             ->assertRedirect(route('settings.index',['tab'=>'general']));
     }
 
+    public function test_navigation_shows_warning_in_place_without_a_new_setup_page(): void
+    {
+        $this->actingAs($this->admin())
+            ->get(route('dashboard'))->assertOk()
+            ->assertSee('data-company-ready="0"',false)
+            ->assertSee('data-company-required href="'.route('pdv.index').'"',false)
+            ->assertSee('data-company-required href="'.route('sales.index').'"',false)
+            ->assertSee('data-company-settings-url="'.route('settings.index',['tab'=>'general']).'"',false);
+
+        $script=file_get_contents(public_path('js/erp.js'));
+        self::assertIsString($script);
+        self::assertStringContainsString('Configure a empresa primeiro',$script);
+        self::assertStringContainsString('Configurar empresa',$script);
+
+        CompanySetting::current()->update([
+            'document'=>'12345678000199',
+            'legal_name'=>'Empresa Configurada LTDA',
+            'state'=>'BA',
+            'city'=>'Salvador',
+        ]);
+        $this->get(route('dashboard'))->assertOk()
+            ->assertSee('data-company-ready="1"',false);
+    }
+
     public function test_registered_company_can_open_transaction_modules_without_a_wizard(): void
     {
         CompanySetting::current()->update([
