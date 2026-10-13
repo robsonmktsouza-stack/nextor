@@ -3,6 +3,7 @@
 @section('titleMeta','Documento fiscal')
 @php
   $nfceFiscalUser=$tab==='nfce' && auth()->user()->canAccess('fiscal');
+  $canRenumberNfce=$nfceFiscalUser && app(\App\Services\Fiscal\NFCeRenumberService::class)->eligible($document);
   $canCancelNfce=$nfceFiscalUser
     && $document->status==='authorized'
     && !$document->cancellation_status
@@ -38,6 +39,17 @@
     <form method="post" action="{{ route('fiscal.nfce.consult',$document) }}">
       @csrf
       <button type="submit" class="btn btn-secondary">@include('partials.icon',['name'=>'refresh','size'=>16]) Consultar SEFAZ</button>
+    </form>
+  @endif
+  @if($canRenumberNfce)
+    <form method="post" action="{{ route('fiscal.nfce.renumber',$document) }}"
+      data-confirm-submit="A SEFAZ rejeitou a NFC-e {{ $document->series }}/{{ $document->document_number }} por duplicidade (539). Preparar uma nova tentativa com o próximo número configurado, sem criar outra venda? O XML e os retornos anteriores serão preservados. Esta ação NÃO transmite a nova NFC-e."
+      data-confirm-kind="action" data-confirm-title="Corrigir numeração da NFC-e"
+      data-confirm-label="Corrigir numeração">
+      @csrf
+      <button type="submit" class="btn btn-secondary">
+        @include('partials.icon',['name'=>'refresh-cw','size'=>16]) Corrigir numeração
+      </button>
     </form>
   @endif
   @if($nfceFiscalUser && $document->emission_mode==='offline' && $document->status==='offline_signed')
@@ -228,6 +240,23 @@
   <section class="fiscal-error-card">
     @include('partials.icon',['name'=>'alert','size'=>20])
     <div><strong>Retorno com problema</strong><p>{{ $document->error_message }}</p></div>
+  </section>
+@endif
+
+@if($tab==='nfce' && ($renumberHistories ?? collect())->isNotEmpty())
+  <section class="cms-card fiscal-detail-card">
+    <div class="card-header">
+      <div><h2>Histórico de correção de numeração</h2><p>As tentativas anteriores e seus arquivos fiscais foram preservados de forma privada.</p></div>
+    </div>
+    <dl class="fiscal-data-list">
+      @foreach($renumberHistories as $attempt)
+        <div>
+          <dt>Rejeição 539 — {{ $attempt->old_series }}/{{ $attempt->old_number }}</dt>
+          <dd>Nova numeração {{ $attempt->old_series }}/{{ $attempt->new_number }} · {{ $attempt->created_at?->format($dateFormat.' H:i') }}</dd>
+        </div>
+        <div><dt>Chave anterior</dt><dd class="fiscal-key">{{ $attempt->old_access_key }}</dd></div>
+      @endforeach
+    </dl>
   </section>
 @endif
 
