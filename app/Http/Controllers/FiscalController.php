@@ -127,6 +127,11 @@ class FiscalController extends Controller
             'configuration'=>$this->configurationFor($tab),
             'fiscalEnabled'=>(bool)AppSetting::value('fiscal','enabled',false),
             'dateFormat'=>AppSetting::dateFormat(),
+            'renumberHistories'=>$fiscalDocumentJob->document_type==='nfce'
+                ? \App\Models\NFCeRenumberHistory::query()
+                    ->where('fiscal_document_job_id',$fiscalDocumentJob->id)
+                    ->latest('id')->get()
+                : collect(),
             'nfcePreflightErrors'=>$fiscalDocumentJob->document_type==='nfce'
                 && $fiscalDocumentJob->status==='prepared'
                     ? app(\App\Services\Fiscal\NFCePreflightService::class)->validate($fiscalDocumentJob)
@@ -176,6 +181,27 @@ class FiscalController extends Controller
         return back()->with('success', $fiscalDocumentJob->emission_mode==='offline'
             ? 'Preparação offline colocada na fila: assinatura e DANFE, sem envio à SEFAZ.'
             : 'Emissão colocada na fila fiscal. Acompanhe o resultado neste documento.');
+    }
+
+
+    /**
+     * Explicitly correct the number after an archived, definitive SEFAZ 539.
+     * Does not send to SEFAZ, create a new sale or change stock/finance.
+     */
+    public function renumberNfce(
+        FiscalDocumentJob $fiscalDocumentJob,
+        \App\Services\Fiscal\NFCeRenumberService $renumber
+    ) {
+        abort_unless($fiscalDocumentJob->document_type === 'nfce', 404);
+
+        try {
+            $document = $renumber->prepareWithNextNumber($fiscalDocumentJob->id);
+        } catch (\Illuminate\Validation\ValidationException $exception) {
+            return back()->with('error', collect($exception->errors())->flatten()->implode(' '));
+        }
+
+        return redirect()->route('fiscal.show', $document)
+            ->with('success', 'Numeração corrigida. O XML e o retorno da tentativa anterior foram preservados. Confira e emita a nova NFC-e quando desejar.');
     }
 
     public function consultNfce(FiscalDocumentJob $fiscalDocumentJob)
