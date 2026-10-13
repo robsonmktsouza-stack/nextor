@@ -11,6 +11,7 @@ use Tests\TestCase;
 final class LumeronBrandingTest extends TestCase
 {
     use RefreshDatabase;
+    use \Tests\Concerns\WithConfiguredCompany;
 
     public function test_official_logo_and_elephant_assets_exist(): void
     {
