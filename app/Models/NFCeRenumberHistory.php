@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 final class NFCeRenumberHistory extends Model
 {
+    protected $table = 'nfce_renumber_histories';
+
     protected $fillable = [
         'fiscal_document_job_id', 'old_series', 'old_number',
         'old_access_key', 'old_signed_xml_path', 'old_sefaz_response_path',
