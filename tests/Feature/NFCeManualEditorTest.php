@@ -34,7 +34,7 @@ final class NFCeManualEditorTest extends TestCase
         AppSetting::put('nfce','series',1);
         AppSetting::put('nfce','next_number',5);
         AppSetting::put('operations','auto_finance_sale',true);
-        CompanySetting::query()->create(['state'=>'BA','crt'=>'1']);
+        CompanySetting::query()->create(['document'=>'12345678000199','legal_name'=>'Emitente de Teste LTDA','state'=>'BA','city'=>'Salvador','crt'=>'1']);
 
         PaymentMethod::query()->updateOrCreate(['code'=>'cash'],[
             'name'=>'Dinheiro','kind'=>'cash',
