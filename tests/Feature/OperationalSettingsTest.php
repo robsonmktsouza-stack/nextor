@@ -22,6 +22,7 @@ use Tests\TestCase;
 class OperationalSettingsTest extends TestCase
 {
     use RefreshDatabase;
+    use \Tests\Concerns\WithConfiguredCompany;
 
     private function user(): User
     {
