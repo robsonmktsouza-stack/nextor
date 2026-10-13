@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class FiscalDocumentJob extends Model
 {
     protected $fillable=[
-        'document_type','sale_id','status','emission_mode','contingency_reason','contingency_started_at',
+        'document_type','sale_id','duplicated_from_id','status','emission_mode','contingency_reason','contingency_started_at',
         'environment','series','document_number','access_key','protocol','authorized_at',
         'cancellation_status','cancellation_reason','cancellation_requested_at','cancelled_at',
         'settings_snapshot','source_snapshot','error_message','prepared_at','processed_at',
