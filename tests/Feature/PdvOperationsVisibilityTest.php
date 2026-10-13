@@ -12,6 +12,7 @@ use Tests\TestCase;
 final class PdvOperationsVisibilityTest extends TestCase
 {
     use RefreshDatabase;
+    use \Tests\Concerns\WithConfiguredCompany;
 
     public function test_cash_and_last_sale_are_visible_only_in_operations_modal(): void
     {
