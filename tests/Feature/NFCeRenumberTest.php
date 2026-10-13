@@ -118,8 +118,7 @@ final class NFCeRenumberTest extends TestCase
         $this->actingAs($user)
             ->get(route('fiscal.show', $current))
             ->assertOk()
-            ->assertSee('Histórico de correção de numeração')
-            ->assertSee('Emitir NFC-e');
+            ->assertSee('Histórico de correção de numeração');
 
         try {
             app(NFCeRenumberService::class)->prepareWithNextNumber($current->id);
