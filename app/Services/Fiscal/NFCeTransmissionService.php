@@ -143,7 +143,17 @@ final class NFCeTransmissionService
                     }
                 } else {
                     $code = (string) ($status['cstat'] ?? '');
-                    $indeterminate = !$status['individual'] || in_array($code, ['103', '104', '105', '204', '539', '656'], true);
+                    // Uma 539 com chave da NFC-e conflitante indicada pela SEFAZ
+                    // é rejeição definitiva desta tentativa, não autorização.
+                    // Sem essa prova, manter pendente para conciliação.
+                    $reason = (string) ($status['reason'] ?? '');
+                    $identifiedConflict = $code === '539'
+                        && stripos($reason, 'Duplicidade') !== false
+                        && preg_match('/chNFe:\s*(\d{44})/i', $reason, $conflict) === 1
+                        && !hash_equals($signedKey, $conflict[1]);
+                    $indeterminate = (!$status['individual'] && !$identifiedConflict)
+                        || in_array($code, ['103', '104', '105', '204', '656'], true)
+                        || ($code === '539' && !$identifiedConflict);
                     $job->update([
                         'status' => !$indeterminate && ctype_digit($code) && (int) $code >= 200 && (int) $code < 1000
                             ? 'rejected'
