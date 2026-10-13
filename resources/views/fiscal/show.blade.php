@@ -95,6 +95,20 @@
             @include('partials.icon',['name'=>'x','size'=>16]) <span>Cancelamento</span>
           </button>
         @endif
+        @if($document->status==='prepared'
+            && !$document->access_key && !$document->protocol
+            && !$document->xml_path && !$document->response_path
+            && !$document->authorized_at)
+          <form method="post" action="{{ route('fiscal.nfce.refresh-data', $document) }}"
+            data-confirm-submit="Atualizar no documento os dados fiscais dos produtos cadastrados? Esta ação não altera venda, estoque, pagamento ou valor."
+            data-confirm-kind="action" data-confirm-title="Atualizar dados fiscais"
+            data-confirm-label="Atualizar dados">
+            @csrf
+            <button type="submit">
+              @include('partials.icon',['name'=>'refresh','size'=>16]) <span>Atualizar dados fiscais</span>
+            </button>
+          </form>
+        @endif
         @if($canDuplicateNfce)
           <form method="post" action="{{ route('fiscal.nfce.duplicate', $document) }}"
             data-confirm-submit="Duplicar a NFC-e {{ $document->series }}/{{ $document->document_number }} rejeitada pela SEFAZ (539)? Uma nova NFC-e será preparada com o próximo número configurado, vinculada à mesma venda. A nota original será preservada. Não haverá transmissão automática."
