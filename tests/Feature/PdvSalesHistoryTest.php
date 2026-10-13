@@ -11,6 +11,7 @@ use Tests\TestCase;
 final class PdvSalesHistoryTest extends TestCase
 {
     use RefreshDatabase;
+    use \Tests\Concerns\WithConfiguredCompany;
 
     private function operator(string $email='cashier@example.com'): User
     {
