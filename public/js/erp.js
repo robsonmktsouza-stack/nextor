@@ -94,6 +94,30 @@
     if(duration>0) notifyTimer=setTimeout(()=>{box.classList.remove('show');setTimeout(()=>{box.hidden=true;},160);},duration);
   };
   window.NextorNotify=nextorNotify;
+
+  // Configuração contextual: não tirar o usuário da tela ao clicar em um
+  // módulo operacional antes de identificar a empresa.
+  if(document.body.dataset.companyReady==='0'){
+    document.addEventListener('click',event=>{
+      const link=event.target.closest?.('a[data-company-required]');
+      if(!link) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      const settingsUrl=document.body.dataset.companySettingsUrl||'';
+      nextorNotify(
+        settingsUrl
+          ? 'Antes de utilizar este módulo, configure o CNPJ, a razão social, a UF e o município da empresa.'
+          : 'A empresa ainda não foi configurada. Solicite ao administrador o cadastro dos dados da empresa.',
+        {
+          type:'warning',
+          title:'Configure a empresa primeiro',
+          duration:8000,
+          actionLabel:settingsUrl?'Configurar empresa':'',
+          onAction:settingsUrl?()=>{window.location.href=settingsUrl;}:null,
+        }
+      );
+    },true);
+  }
   window.alert=(message)=>nextorNotify(String(message),{type:'info',title:'Aviso'});
 
   // Confirmações próprias do Nextor
