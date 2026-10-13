@@ -3,7 +3,7 @@
 @section('titleMeta','Documento fiscal')
 @php
   $nfceFiscalUser=$tab==='nfce' && auth()->user()->canAccess('fiscal');
-  $canRenumberNfce=$nfceFiscalUser && app(\App\Services\Fiscal\NFCeRenumberService::class)->eligible($document);
+  $canDuplicateNfce=$nfceFiscalUser && app(\App\Services\Fiscal\NFCeDuplicationService::class)->eligible($document);
   $canCancelNfce=$nfceFiscalUser
     && $document->status==='authorized'
     && !$document->cancellation_status
@@ -39,17 +39,6 @@
     <form method="post" action="{{ route('fiscal.nfce.consult',$document) }}">
       @csrf
       <button type="submit" class="btn btn-secondary">@include('partials.icon',['name'=>'refresh','size'=>16]) Consultar SEFAZ</button>
-    </form>
-  @endif
-  @if($canRenumberNfce)
-    <form method="post" action="{{ route('fiscal.nfce.renumber',$document) }}"
-      data-confirm-submit="A SEFAZ rejeitou a NFC-e {{ $document->series }}/{{ $document->document_number }} por duplicidade (539). Preparar uma nova tentativa com o próximo número configurado, sem criar outra venda? O XML e os retornos anteriores serão preservados. Esta ação NÃO transmite a nova NFC-e."
-      data-confirm-kind="action" data-confirm-title="Corrigir numeração da NFC-e"
-      data-confirm-label="Corrigir numeração">
-      @csrf
-      <button type="submit" class="btn btn-secondary">
-        @include('partials.icon',['name'=>'refresh-cw','size'=>16]) Corrigir numeração
-      </button>
     </form>
   @endif
   @if($nfceFiscalUser && $document->emission_mode==='offline' && $document->status==='offline_signed')
@@ -105,6 +94,17 @@
           <button type="button" data-dialog-open="nfceCancelDialog">
             @include('partials.icon',['name'=>'x','size'=>16]) <span>Cancelamento</span>
           </button>
+        @endif
+        @if($canDuplicateNfce)
+          <form method="post" action="{{ route('fiscal.nfce.duplicate', $document) }}"
+            data-confirm-submit="Duplicar a NFC-e {{ $document->series }}/{{ $document->document_number }} rejeitada pela SEFAZ (539)? Uma nova NFC-e será preparada com o próximo número configurado, vinculada à mesma venda. A nota original será preservada. Não haverá transmissão automática."
+            data-confirm-kind="action" data-confirm-title="Duplicar NFC-e"
+            data-confirm-label="Duplicar NFC-e">
+            @csrf
+            <button type="submit">
+              @include('partials.icon',['name'=>'copy','size'=>16]) <span>Duplicar NFC-e</span>
+            </button>
+          </form>
         @endif
         <a href="{{ route('fiscal.nfce.inutilizations') }}">
           @include('partials.icon',['name'=>'file-minus','size'=>16]) <span>Inutilização</span>
@@ -243,20 +243,26 @@
   </section>
 @endif
 
-@if($tab==='nfce' && ($renumberHistories ?? collect())->isNotEmpty())
-  <section class="cms-card fiscal-detail-card">
-    <div class="card-header">
-      <div><h2>Histórico de correção de numeração</h2><p>As tentativas anteriores e seus arquivos fiscais foram preservados de forma privada.</p></div>
-    </div>
-    <dl class="fiscal-data-list">
-      @foreach($renumberHistories as $attempt)
-        <div>
-          <dt>Rejeição 539 — {{ $attempt->old_series }}/{{ $attempt->old_number }}</dt>
-          <dd>Nova numeração {{ $attempt->old_series }}/{{ $attempt->new_number }} · {{ $attempt->created_at?->format($dateFormat.' H:i') }}</dd>
-        </div>
-        <div><dt>Chave anterior</dt><dd class="fiscal-key">{{ $attempt->old_access_key }}</dd></div>
-      @endforeach
-    </dl>
+@if($tab==='nfce' && $originalNfce)
+  <section class="fiscal-info-card">
+    <strong>Documento duplicado</strong>
+    <p>Esta NFC-e foi criada a partir da rejeição da
+      <a class="table-link" href="{{ route('fiscal.show', $originalNfce) }}">
+        NFC-e {{ $originalNfce->series }}/{{ $originalNfce->document_number }}
+      </a>.
+      A venda original é a mesma e não foi movimentada novamente.
+    </p>
+  </section>
+@endif
+@if($tab==='nfce' && $duplicateNfce)
+  <section class="fiscal-info-card">
+    <strong>Documento gerado por duplicação</strong>
+    <p>Esta tentativa foi preservada. A nova
+      <a class="table-link" href="{{ route('fiscal.show', $duplicateNfce) }}">
+        NFC-e {{ $duplicateNfce->series }}/{{ $duplicateNfce->document_number }}
+      </a>
+      está vinculada à mesma venda.
+    </p>
   </section>
 @endif
 
