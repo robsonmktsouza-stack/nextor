@@ -145,6 +145,20 @@ final class NFCeDuplicationTest extends TestCase
         self::assertSame(7, (int) AppSetting::value('nfce', 'next_number'));
     }
 
+    public function test_duplicate_accepts_explicit_539_from_batch_return_without_individual_section(): void
+    {
+        $source = $this->source();
+        Storage::disk('local')->put(
+            'fiscal/nfce/'.$source->id.'/sefaz-response.ini',
+            "[RETORNO]\nCStat=539\nXMotivo=Rejeicao: Duplicidade de NF-e, com diferenca na Chave de Acesso [chNFe:"
+            .str_repeat('6', 44)."]\n"
+        );
+        self::assertTrue(app(NFCeDuplicationService::class)->eligible($source));
+        $copy = app(NFCeDuplicationService::class)->duplicate($source->id);
+        self::assertSame(7, (int) $copy->document_number);
+        self::assertSame(2, FiscalDocumentJob::query()->count());
+    }
+
     public function test_same_access_key_or_local_number_collision_is_blocked(): void
     {
         $source = $this->source('539', false);
