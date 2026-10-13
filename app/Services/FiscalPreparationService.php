@@ -85,7 +85,7 @@ class FiscalPreparationService
             }
 
             $existing=FiscalDocumentJob::query()
-                ->where('sale_id',$locked->id)->where('document_type','nfce')->first();
+                ->where('sale_id',$locked->id)->where('document_type','nfce')->orderByDesc('id')->first();
             if ($existing) {
                 if ($existing->status==='cancelled') {
                     throw \Illuminate\Validation\ValidationException::withMessages([
@@ -114,7 +114,7 @@ class FiscalPreparationService
             $this->prepare($locked,'nfce','nfce','next_number');
 
             return FiscalDocumentJob::query()->where('sale_id',$locked->id)
-                ->where('document_type','nfce')->firstOrFail();
+                ->where('document_type','nfce')->orderByDesc('id')->firstOrFail();
         },3);
     }
 
