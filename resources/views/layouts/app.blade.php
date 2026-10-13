@@ -16,7 +16,9 @@
   data-live-search-delay="{{ \App\Models\AppSetting::value('system','search_delay',240) }}"
   data-fiscal-catalog-url="{{ route('reference.fiscal-codes') }}"
   data-confirm-destructive="{{ \App\Models\AppSetting::value('system','confirm_destructive_actions',true) ? '1' : '0' }}"
-  data-show-tutorials="{{ \App\Models\AppSetting::value('system','show_tutorials',true) ? '1' : '0' }}">
+  data-show-tutorials="{{ \App\Models\AppSetting::value('system','show_tutorials',true) ? '1' : '0' }}"
+  data-company-ready="{{ \App\Support\CompanyReadiness::configured() ? '1' : '0' }}"
+  data-company-settings-url="{{ auth()->user()->canAccess('settings') ? route('settings.index',['tab'=>'general']) : '' }}">
 <div class="app-root" id="appRoot">
   <header class="cms-topbar">
     <div class="cms-topbar-brand">
@@ -37,36 +39,36 @@
           @if(auth()->user()->canAccess('services'))<a href="{{ route('services.index') }}">Serviços</a>@endif
           @if(auth()->user()->canAccess('stock'))<a href="{{ route('stock.index') }}">Movimentações de estoque</a>@endif
           @if(auth()->user()->canAccess('customers'))<a href="{{ route('customers.index') }}">Clientes</a>@endif
-          @if(auth()->user()->canAccess('pdv'))<a href="{{ route('pdv.index') }}">PDV</a>@endif
+          @if(auth()->user()->canAccess('pdv'))<a data-company-required href="{{ route('pdv.index') }}">PDV</a>@endif
           @if(auth()->user()->canAccess('sales'))
-            <a href="{{ route('sales.index') }}">Vendas</a>
-            <a href="{{ route('sales.create') }}">Nova venda</a>
+            <a data-company-required href="{{ route('sales.index') }}">Vendas</a>
+            <a data-company-required href="{{ route('sales.create') }}">Nova venda</a>
           @endif
           @if(auth()->user()->canAccess('fiscal'))
-            <a href="{{ route('fiscal.index') }}">Fiscal</a>
-            <a href="{{ route('fiscal.index',['tab'=>'nfe']) }}">NF-e</a>
-            <a href="{{ route('fiscal.index',['tab'=>'nfce']) }}">NFC-e</a>
-            <a href="{{ route('fiscal.index',['tab'=>'nfse']) }}">NFS-e</a>
-            <a href="{{ route('fiscal.index',['tab'=>'cte']) }}">CT-e</a>
+            <a data-company-required href="{{ route('fiscal.index') }}">Fiscal</a>
+            <a data-company-required href="{{ route('fiscal.index',['tab'=>'nfe']) }}">NF-e</a>
+            <a data-company-required href="{{ route('fiscal.index',['tab'=>'nfce']) }}">NFC-e</a>
+            <a data-company-required href="{{ route('fiscal.index',['tab'=>'nfse']) }}">NFS-e</a>
+            <a data-company-required href="{{ route('fiscal.index',['tab'=>'cte']) }}">CT-e</a>
           @endif
           @if(auth()->user()->canAccess('returns'))
-            <a href="{{ route('sales.returns.index') }}">Devoluções</a>
-            <a href="{{ route('sales.returns.create') }}">Nova devolução</a>
+            <a data-company-required href="{{ route('sales.returns.index') }}">Devoluções</a>
+            <a data-company-required href="{{ route('sales.returns.create') }}">Nova devolução</a>
           @endif
           @if(auth()->user()->canAccess('finance'))
-            <a href="{{ route('finance.dashboard') }}">Financeiro</a>
-            <a href="{{ route('finance.entries',['type'=>'receivable']) }}">Contas a receber</a>
-            <a href="{{ route('finance.entries',['type'=>'payable']) }}">Contas a pagar</a>
-            <a href="{{ route('finance.transfers.index') }}">Transferências financeiras</a>
-            <a href="{{ route('finance.recurrences.index') }}">Recorrências financeiras</a>
-            <a href="{{ route('finance.receipts.index') }}">Recibos</a>
-            <a href="{{ route('finance.reconciliation.index') }}">Conciliação bancária</a>
+            <a data-company-required href="{{ route('finance.dashboard') }}">Financeiro</a>
+            <a data-company-required href="{{ route('finance.entries',['type'=>'receivable']) }}">Contas a receber</a>
+            <a data-company-required href="{{ route('finance.entries',['type'=>'payable']) }}">Contas a pagar</a>
+            <a data-company-required href="{{ route('finance.transfers.index') }}">Transferências financeiras</a>
+            <a data-company-required href="{{ route('finance.recurrences.index') }}">Recorrências financeiras</a>
+            <a data-company-required href="{{ route('finance.receipts.index') }}">Recibos</a>
+            <a data-company-required href="{{ route('finance.reconciliation.index') }}">Conciliação bancária</a>
           @endif
           @if(auth()->user()->canAccess('settings'))<a href="{{ route('settings.index') }}">Configurações</a>@endif
         </div>
       </div>
       @if(auth()->user()->canAccess('pdv'))
-      <a class="topbar-pdv-shortcut {{ request()->routeIs('pdv.*') ? 'active' : '' }}" href="{{ route('pdv.index') }}" data-tooltip="Abrir PDV">
+      <a class="topbar-pdv-shortcut {{ request()->routeIs('pdv.*') ? 'active' : '' }}" data-company-required href="{{ route('pdv.index') }}" data-tooltip="Abrir PDV">
         @include('partials.icon',['name'=>'pdv','size'=>18])
         <span>PDV</span>
       </a>
@@ -89,7 +91,7 @@
   <aside class="cms-sidebar" id="sidebar">
     <div class="sidebar-section-label">PRINCIPAL</div>
     @if(auth()->user()->canAccess('finance'))
-    <a href="{{ route('finance.dashboard') }}" class="sidebar-link {{ request()->routeIs('finance.*') ? 'active' : '' }}">
+    <a data-company-required href="{{ route('finance.dashboard') }}" class="sidebar-link {{ request()->routeIs('finance.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'money'])<span>Financeiro</span></a>
     @endif
 
@@ -109,11 +111,11 @@
 
     <div class="sidebar-section-label">OPERAÇÕES</div>
     @if(auth()->user()->canAccess('sales'))
-    <a href="{{ route('sales.index') }}" class="sidebar-link {{ request()->routeIs('sales.*') ? 'active' : '' }}">
+    <a data-company-required href="{{ route('sales.index') }}" class="sidebar-link {{ request()->routeIs('sales.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'sales'])<span>Vendas</span></a>
     @endif
     @if(auth()->user()->canAccess('pdv'))
-    <a href="{{ route('pdv.index') }}" class="sidebar-link {{ request()->routeIs('pdv.*') ? 'active' : '' }}">
+    <a data-company-required href="{{ route('pdv.index') }}" class="sidebar-link {{ request()->routeIs('pdv.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'pdv'])<span>PDV</span></a>
     @endif
     @if(auth()->user()->canAccess('stock'))
@@ -123,7 +125,7 @@
 
     @if(auth()->user()->canAccess('fiscal'))
     <div class="sidebar-section-label">FISCAL</div>
-    <a href="{{ route('fiscal.index') }}" class="sidebar-link {{ request()->routeIs('fiscal.*') ? 'active' : '' }}">
+    <a data-company-required href="{{ route('fiscal.index') }}" class="sidebar-link {{ request()->routeIs('fiscal.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'shield'])<span>Fiscal</span></a>
     @endif
 
