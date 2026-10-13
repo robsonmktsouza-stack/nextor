@@ -13,6 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'permission'=>\App\Http\Middleware\RequirePermission::class,
+            'company.configured'=>\App\Http\Middleware\RequireCompanyConfigured::class,
             'nextor.api'=>\App\Http\Middleware\RequireApiToken::class,
         ]);
     })
