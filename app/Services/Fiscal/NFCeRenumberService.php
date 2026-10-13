@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use RuntimeException;
+use Throwable;
 
 final class NFCeRenumberService
 {
@@ -44,7 +45,11 @@ final class NFCeRenumberService
             return false;
         }
 
-        $result = $this->responses->parse($disk->get($originalResponse));
+        try {
+            $result = $this->responses->parse($disk->get($originalResponse));
+        } catch (Throwable) {
+            return false;
+        }
 
         return $result['individual'] === true
             && (string) $result['cstat'] === '539'
@@ -136,10 +141,14 @@ final class NFCeRenumberService
                 $responseArchive = $archive.'/sefaz-response.ini';
                 $consultArchive = $disk->exists($consult) ? $archive.'/consult-response.ini' : null;
 
-                if (!$disk->copy($signed, $signedArchive)
-                    || !$disk->copy($originalResponse, $responseArchive)
-                    || ($consultArchive && !$disk->copy($consult, $consultArchive))
-                ) {
+                try {
+                    $copied = $disk->copy($signed, $signedArchive)
+                        && $disk->copy($originalResponse, $responseArchive)
+                        && (!$consultArchive || $disk->copy($consult, $consultArchive));
+                } catch (Throwable) {
+                    $copied = false;
+                }
+                if (!$copied) {
                     $this->fail('Não foi possível preservar os arquivos da tentativa anterior.');
                 }
 
