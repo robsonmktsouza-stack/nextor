@@ -2,8 +2,6 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\CompanySetting;
-use App\Support\InstanceIdentity;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -12,19 +10,7 @@ class RequireCompanyConfigured
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // Nenhuma página extra: o cadastro continua nas Configurações existentes.
-        // A identificação básica basta para abrir os módulos. Pré-requisitos
-        // fiscais específicos continuam sob responsabilidade do motor fiscal.
-        $company=CompanySetting::query()->first([
-            'document','legal_name','state','city',
-        ]);
-
-        $document=preg_replace('/\D/','',(string)($company?->document ?? ''));
-        $ready=strlen($document)===14
-            && filled(trim((string)($company?->legal_name ?? '')))
-            && filled(trim((string)($company?->state ?? '')))
-            && filled(trim((string)($company?->city ?? '')))
-            && InstanceIdentity::matches($company?->document);
+        $ready=\App\Support\CompanyReadiness::configured();
 
         if($ready) return $next($request);
 
