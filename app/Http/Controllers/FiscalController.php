@@ -127,6 +127,14 @@ class FiscalController extends Controller
             'configuration'=>$this->configurationFor($tab),
             'fiscalEnabled'=>(bool)AppSetting::value('fiscal','enabled',false),
             'dateFormat'=>AppSetting::dateFormat(),
+            'canCorrectNfce'=>$fiscalDocumentJob->document_type==='nfce'
+                && app(\App\Services\Fiscal\NFCeRejectionCorrectionService::class)
+                    ->rejection($fiscalDocumentJob) !== null,
+            'correctedFromNfce'=>$fiscalDocumentJob->corrected_from_id
+                ? FiscalDocumentJob::query()->find($fiscalDocumentJob->corrected_from_id)
+                : null,
+            'correctedNextNfce'=>FiscalDocumentJob::query()
+                ->where('corrected_from_id',$fiscalDocumentJob->id)->first(),
             'originalNfce'=>$fiscalDocumentJob->duplicated_from_id
                 ? FiscalDocumentJob::query()->find($fiscalDocumentJob->duplicated_from_id)
                 : null,
