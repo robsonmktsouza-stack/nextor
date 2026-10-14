@@ -23,6 +23,12 @@ final class NFCeFiscalDataRefreshService
                 ->lockForUpdate()
                 ->findOrFail($document->getKey());
 
+            if ($job->corrected_from_id) {
+                throw ValidationException::withMessages([
+                    'nfce' => 'Esta NFC-e é uma versão fiscal corrigida. Atualizar os produtos invalidaria o histórico da correção.',
+                ]);
+            }
+
             if ($job->document_type !== 'nfce'
                 || $job->status !== 'prepared'
                 || $job->access_key
