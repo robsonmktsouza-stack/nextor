@@ -130,6 +130,8 @@ class FiscalController extends Controller
             'canCorrectNfce'=>$fiscalDocumentJob->document_type==='nfce'
                 && app(\App\Services\Fiscal\NFCeRejectionCorrectionService::class)
                     ->rejection($fiscalDocumentJob) !== null,
+            'correctionRevision'=>\Illuminate\Support\Facades\DB::table('nfce_correction_revisions')
+                ->where('corrected_document_id',$fiscalDocumentJob->id)->first(),
             'correctedFromNfce'=>$fiscalDocumentJob->corrected_from_id
                 ? FiscalDocumentJob::query()->find($fiscalDocumentJob->corrected_from_id)
                 : null,
