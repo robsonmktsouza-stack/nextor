@@ -206,10 +206,13 @@ final class NFCeRejectionCorrectionTest extends TestCase
     public function test_gtin_883_rejection_is_editable_and_shown_in_red(): void
     {
         $old=$this->rejected('883');
+        Storage::disk('local')->put($old->response_path,
+            "[NFE7]\nCStat=883\nchNFe={$old->access_key}\n"
+            ."XMotivo=Rejeicao: GTIN (cEAN) sem informacao [nItem:1]\n");
         $response=$this->actingAs($this->admin())->get(route('fiscal.show',$old));
         $response->assertOk()
             ->assertSee('data-nfce-rejection',false)
-            ->assertSee('883 —')
+            ->assertSee('883 — Rejeição: GTIN (cEAN) sem informacao')
             ->assertSee('Salvar e transmitir')
             ->assertSee('name="items[0][gtin]"',false);
     }
