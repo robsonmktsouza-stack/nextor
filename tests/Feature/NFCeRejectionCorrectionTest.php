@@ -192,6 +192,36 @@ final class NFCeRejectionCorrectionTest extends TestCase
         }
     }
 
+    public function test_saving_unmodified_tax_codes_does_not_generate_fake_new_revision(): void
+    {
+        $old=$this->rejected('778');
+        $this->expectException(ValidationException::class);
+        try {
+            app(NFCeRejectionCorrectionService::class)->prepare(
+                $old->id,$this->itemPayload(['ncm'=>'61091000']),$this->admin()->id
+            );
+        } finally {
+            self::assertSame(1,FiscalDocumentJob::query()->count());
+            self::assertSame(0,DB::table('nfce_correction_revisions')->count());
+        }
+    }
+
+    public function test_preflight_blocks_second_nfce_if_sibling_was_authorized(): void
+    {
+        $old=$this->rejected('778');
+        $copy=app(NFCeRejectionCorrectionService::class)->prepare(
+            $old->id,$this->itemPayload(),$this->admin()->id
+        );
+        FiscalDocumentJob::query()->create([
+            'document_type'=>'nfce','sale_id'=>$old->sale_id,
+            'status'=>'authorized','environment'=>'homologation',
+            'series'=>1,'document_number'=>99,
+            'protocol'=>'329260000174730','authorized_at'=>now(),
+        ]);
+        $errors=app(\App\Services\Fiscal\NFCePreflightService::class)->validate($copy);
+        self::assertContains('A venda já possui outra NFC-e autorizada ou em processamento.',$errors);
+    }
+
     public function test_gtin_and_tax_codes_remain_subject_to_validation(): void
     {
         $old=$this->rejected('611');
