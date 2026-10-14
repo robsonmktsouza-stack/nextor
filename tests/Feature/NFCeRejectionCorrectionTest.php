@@ -192,6 +192,27 @@ final class NFCeRejectionCorrectionTest extends TestCase
         self::assertSame(2,substr_count($response->getContent(),'data-nfce-item-select="'));
     }
 
+    public function test_rejected_nfce_shows_red_sefaz_banner_without_repeating_introductory_text(): void
+    {
+        $old=$this->rejected('778');
+        $response=$this->actingAs($this->admin())->get(route('fiscal.show',$old));
+        $response->assertOk()
+            ->assertSee('class="nfce-sefaz-rejection"',false)
+            ->assertSee('data-nfce-rejection',false)
+            ->assertSee('778 —')
+            ->assertDontSee('Confira os dados abaixo e faça a correção.');
+    }
+
+    public function test_uncorrectable_rejection_still_shows_red_banner_but_remains_readonly(): void
+    {
+        $old=$this->rejected('883');
+        $response=$this->actingAs($this->admin())->get(route('fiscal.show',$old));
+        $response->assertOk()
+            ->assertSee('data-nfce-rejection',false)
+            ->assertSee('883 - erro')
+            ->assertDontSee('Salvar e transmitir');
+    }
+
     public function test_778_rejection_allows_changes_in_other_tabs_and_tracks_each_fiscal_field(): void
     {
         $old=$this->rejected('778');
