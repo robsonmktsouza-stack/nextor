@@ -666,3 +666,24 @@ body.system-comfortable .app-root{
   max-width:100%;
   overflow-wrap:anywhere;
 }
+
+/* Shared twelve-column form layout: column spans must match the active
+   breakpoint. A one-column grid with .col-3 still spanning three tracks
+   creates invisible implicit columns and breaks product, fiscal and forms. */
+@media(max-width:980px) and (min-width:761px){
+  .app-root .editor-grid.cols-12{grid-template-columns:repeat(12,minmax(0,1fr))}
+  .app-root .editor-grid.cols-12>:is(.col-2,.col-3,.col-4,.col-5,.col-6){
+    grid-column:span 6;
+  }
+  .app-root .editor-grid.cols-12>:is(.col-7,.col-8,.col-9,.col-10,.col-12){
+    grid-column:1 / -1;
+  }
+}
+@media(max-width:760px){
+  .app-root .editor-grid.cols-12{
+    grid-template-columns:minmax(0,1fr);
+  }
+  .app-root .editor-grid.cols-12>*{
+    grid-column:1 / -1;
+  }
+}
