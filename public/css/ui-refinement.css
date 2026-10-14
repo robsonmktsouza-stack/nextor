@@ -460,7 +460,7 @@ body.system-comfortable .app-root{
 /* NFC-e editor keeps one stable viewport-based frame across all tabs.
    Only the inner body scrolls; changing a tab never resizes the window. */
 #nfceEditor{
-  padding:16px;
+  padding:14px;
   overflow-y:auto;
   overflow-x:hidden;
   overscroll-behavior:contain;
@@ -475,9 +475,9 @@ body.system-comfortable .app-root{
   transform:none!important;
   width:min(1420px,100%)!important;
   max-width:100%!important;
-  height:calc(100dvh - 32px)!important;
+  height:calc(100dvh - 28px)!important;
   min-height:0!important;
-  max-height:calc(100dvh - 32px)!important;
+  max-height:calc(100dvh - 28px)!important;
   margin:auto;
   display:block!important;
   overflow:hidden!important;
@@ -606,6 +606,13 @@ body.system-comfortable .app-root{
 #nfceEditor .alert{min-width:0;overflow-wrap:anywhere}
 #nfceEditor .nfce-item-table-wrap{max-width:100%;overflow-x:auto}
 
+@media(min-width:761px) and (max-width:1100px){
+  #nfceEditor{padding:9px}
+  #nfceEditor .nfe-fixed-shell{
+    height:calc(100dvh - 18px)!important;
+    max-height:calc(100dvh - 18px)!important;
+  }
+}
 @media(min-width:761px) and (max-width:900px){
   #nfceEditor .editor-grid.cols-12>:is(.col-2,.col-3,.col-4,.col-5){grid-column:span 6}
   #nfceEditor .editor-grid.cols-12>:is(.col-7,.col-8,.col-9,.col-10){grid-column:1 / -1}
