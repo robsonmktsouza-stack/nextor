@@ -114,10 +114,10 @@ final class NFCeRejectionCorrectionTest extends TestCase
             ->assertOk()
             ->assertSee('id="nfceEditorForm" data-readonly="0" data-correction="1"',false)
             ->assertSee('data-nfce-tab="products"',false)
-            ->assertSee('Salvar nova versão fiscal')
+            ->assertSee('Salvar e transmitir')
             ->assertDontSee('fiscal-detail-grid',false);
         $this->get(route('fiscal.nfce.correct',$old))
-            ->assertOk()->assertSee('Salvar nova versão fiscal');
+            ->assertOk()->assertSee('Salvar e transmitir');
 
         $this->post(route('fiscal.nfce.correct.store',$old),$this->itemPayload())
             ->assertRedirect();
@@ -273,8 +273,13 @@ final class NFCeRejectionCorrectionTest extends TestCase
         self::assertNull(app(NFCeRejectionCorrectionService::class)->rejection($old->fresh()));
         $this->actingAs($this->admin());
 
+        // Somente a nota autorizada fica na lista; a antiga continua
+        // acessivel dentro do historico do proprio editor.
         $this->get(route('fiscal.index',['tab'=>'nfce']))
-            ->assertOk()->assertSee('Substituída')->assertSee('Autorizada');
+            ->assertOk()->assertSee('Autorizada')
+            ->assertDontSee('Substituída')
+            ->assertSee(route('fiscal.show',$authorized),false)
+            ->assertDontSee(route('fiscal.show',$old),false);
 
         $this->get(route('fiscal.show',$old))
             ->assertOk()
@@ -283,7 +288,7 @@ final class NFCeRejectionCorrectionTest extends TestCase
             ->assertSee('Substituída')
             ->assertSee('613')
             ->assertSee(route('fiscal.show',$authorized),false)
-            ->assertDontSee('Salvar nova versão fiscal')
+            ->assertDontSee('Salvar e transmitir')
             ->assertDontSee('Consultar SEFAZ')
             ->assertDontSee('fiscal-detail-grid',false);
 
@@ -305,7 +310,32 @@ final class NFCeRejectionCorrectionTest extends TestCase
 
         $this->actingAs($this->admin())->get(route('fiscal.show',$old))
             ->assertOk()->assertSee('Substituída')->assertSee('data-readonly="1"',false)
-            ->assertDontSee('Salvar nova versão fiscal');
+            ->assertDontSee('Salvar e transmitir');
+    }
+
+    public function test_list_prefers_latest_attempt_without_authorization_and_preserves_audit_history(): void
+    {
+        $old=$this->rejected('778','rejected');
+        $second=FiscalDocumentJob::query()->create([
+            'document_type'=>'nfce','sale_id'=>$old->sale_id,
+            'status'=>'prepared','environment'=>'homologation',
+            'series'=>1,'document_number'=>8,'prepared_at'=>now(),
+            'source_snapshot'=>$old->source_snapshot,
+        ]);
+
+        $this->actingAs($this->admin());
+        $this->get(route('fiscal.index',['tab'=>'nfce']))
+            ->assertOk()
+            ->assertSee(route('fiscal.show',$second),false)
+            ->assertDontSee(route('fiscal.show',$old),false);
+
+        $this->get(route('fiscal.show',$second))
+            ->assertOk()
+            ->assertSee('Histórico fiscal (2 tentativas)')
+            ->assertSee(route('fiscal.show',$old),false)
+            ->assertSee('data-readonly="1"',false);
+        self::assertSame(2,FiscalDocumentJob::query()->count());
+        self::assertSame(1,Sale::query()->count());
     }
 
     public function test_failed_consultation_without_authorized_sibling_remains_unconfirmed(): void
@@ -319,7 +349,7 @@ final class NFCeRejectionCorrectionTest extends TestCase
         $this->get(route('fiscal.show',$old))
             ->assertOk()->assertSee('Pendente de confirmação')
             ->assertSee('Consultar SEFAZ')
-            ->assertDontSee('Salvar nova versão fiscal');
+            ->assertDontSee('Salvar e transmitir');
     }
 
     public function test_payment_revision_requires_exact_cent_total(): void
