@@ -90,7 +90,7 @@ final class FiscalTaxGroupController extends Controller
         });
 
         return redirect()->route('fiscal.tax-groups.index')
-            ->with('success','Grupo de tributação criado. Enquadre os produtos e revise os tributos antes de habilitar emissão.');
+            ->with('success','Grupo de tributação criado.');
     }
 
     public function update(Request $request,FiscalTaxGroup $fiscalTaxGroup)
@@ -121,7 +121,7 @@ final class FiscalTaxGroupController extends Controller
         });
 
         return redirect()->route('fiscal.tax-groups.index')
-            ->with('success','Grupo de tributação atualizado. Documentos já assinados não são alterados.');
+            ->with('success','Grupo de tributação atualizado.');
     }
 
     private function validated(Request $request): array
