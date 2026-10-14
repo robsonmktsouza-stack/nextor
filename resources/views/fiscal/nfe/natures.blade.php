@@ -70,7 +70,7 @@
   <form method="post" action="{{ route('fiscal.nfe.natures.store') }}">
     @csrf
     <div class="dialog-header">
-      <div><h2>Nova natureza de operação</h2><p>CFOPs e comportamento padrão usados pela NF-e.</p></div>
+      <div><h2>Nova natureza de operação</h2></div>
       <button type="button" data-dialog-close class="close-dialog" aria-label="Fechar">@include('partials.icon',['name'=>'x'])</button>
     </div>
     <div class="dialog-body">@include('fiscal.nfe._nature_form')</div>
