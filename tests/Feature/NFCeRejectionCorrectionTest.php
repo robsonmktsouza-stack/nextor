@@ -544,6 +544,10 @@ final class NFCeRejectionCorrectionTest extends TestCase
     public function test_failed_consultation_without_authorized_sibling_remains_unconfirmed(): void
     {
         $old=$this->rejected('778','pending');
+        // A consulta 613 não pode ter como resposta original uma rejeição
+        // 778 comprovada; nesse caso a conciliação automática seria correta.
+        Storage::disk('local')->put('fiscal/nfce/'.$old->id.'/sefaz-response.ini',
+            "[Envio]\nCStat=613\nXMotivo=Rejeicao: Chave divergente\n");
         $old->update(['error_message'=>'Consulta SEFAZ: 613 - Chave divergente.']);
         $this->actingAs($this->admin());
         $this->get(route('fiscal.index',['tab'=>'nfce']))
