@@ -11,7 +11,6 @@
               <div class="field col-3"><span>Venda vinculada</span><strong>#{{ $document->sale_id }}</strong></div>
               <div class="field col-3"><span>Chave de acesso</span><strong class="fiscal-key">{{ $document->access_key }}</strong></div>
             </div>
-            <p class="nfce-muted">Número, série, quantidade, preço, desconto e operação comercial permanecem inalterados.</p>
           </div>
         </section>
         <section class="editor-tab-panel {{ $startTab==='consumer'?'active':'' }}" id="nfcePanel-consumer"
@@ -43,9 +42,7 @@
           @if($startTab!=='products') hidden @endif>
           @if($rejection['group']==='items')
       <div class="editor-panel">
-        <h3>Classificação fiscal dos produtos</h3>
-        <p class="editor-help">Somente NCM, GTIN, origem, CFOP e códigos tributários podem ser alterados nesta revisão.
-          Os cálculos continuam sujeitos às regras fiscais existentes do Lumeron.</p>
+        <h3>Produtos</h3>
         @foreach(($snapshot['items'] ?? []) as $index => $item)
           @php
             $tax = is_array($item['tax_defaults'] ?? null) ? $item['tax_defaults'] : [];
@@ -54,7 +51,7 @@
           @endphp
           <div class="editor-panel">
             <h3>Item {{ $index+1 }} — {{ $item['name'] ?? 'Produto' }}</h3>
-            <p class="editor-help">Quantidade {{ $item['quantity'] ?? '—' }} · R$ {{ $item['unit_price'] ?? '—' }} por unidade (somente leitura)</p>
+            <p class="editor-help">Quantidade {{ $item['quantity'] ?? '—' }} · R$ {{ $item['unit_price'] ?? '—' }} por unidade</p>
             <div class="editor-grid cols-12">
               <label class="field col-3">
                 <span>NCM (8 dígitos) *</span>
@@ -159,13 +156,8 @@
           @if($startTab!=='payment') hidden @endif>
           @if($rejection['group']==='payments')
       <div class="editor-panel">
-        <h3>Informações fiscais de pagamento</h3>
-        <p class="editor-help">
-          Corrija apenas os meios e valores informados à SEFAZ. A soma deve ser igual
-          a R$ {{ number_format((float)($snapshot['total'] ?? 0),2,',','.') }}.
-          <strong>Esta correção não muda as parcelas nem os lançamentos financeiros da venda.</strong>
-          Se houver divergência comercial, reconcilie a venda antes de transmitir.
-        </p>
+        <h3>Pagamento</h3>
+        <p class="editor-help">Total dos pagamentos: R$ {{ number_format((float)($snapshot['total'] ?? 0),2,',','.') }}.</p>
         @foreach(($snapshot['payments'] ?? []) as $index=>$payment)
           @php
             $field='payments.'.$index.'.';
@@ -208,6 +200,5 @@
               <div><span>Desconto</span><strong>R$ {{ number_format((float)($snapshot['discount_total'] ?? 0),2,',','.') }}</strong></div>
               <div><span>Total original</span><strong>R$ {{ number_format($total,2,',','.') }}</strong></div>
             </div>
-            <p class="nfce-muted">Os valores comerciais e financeiros são preservados e não são reprocessados.</p>
           </div>
         </section>
