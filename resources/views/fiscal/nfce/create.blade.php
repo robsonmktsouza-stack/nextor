@@ -1,6 +1,12 @@
 @extends('layouts.app')
 @php
   $readOnly=isset($readOnlyDocument);
+  $correctionMode=isset($correctionDocument);
+  $editorDocument=$correctionDocument ?? $readOnlyDocument ?? null;
+  $startTab=$correctionMode ? match($rejection['group']) {
+    'items'=>'products','consumer'=>'consumer','payments'=>'payment',default=>'general',
+  } : 'general';
+  $total=$correctionMode ? (float)($snapshot['total'] ?? 0) : null;
   $canCancelArchived=$readOnly
     && $readOnlyDocument->status==='authorized'
     && !$readOnlyDocument->cancellation_status
@@ -14,7 +20,7 @@
       || (bool)\App\Models\AppSetting::value('nfce','advanced_operations_production_approved',false));
 @endphp
 @section('title','Fiscal')
-@section('titleMeta',$readOnly?'NFC-e':'Nova NFC-e')
+@section('titleMeta',($readOnly||$correctionMode)?'NFC-e':'Nova NFC-e')
 @section('content')
 @include('fiscal._nav',['tab'=>'nfce','tabs'=>[
     'nfe'=>['label'=>'NF-e'],'nfse'=>['label'=>'NFS-e'],
@@ -26,11 +32,11 @@
     @if($readOnly)
       <div id="nfceEditorForm" data-readonly="1" class="nfce-readonly-content">
     @else
-      <form method="post" action="{{ route('fiscal.nfce.store') }}" id="nfceEditorForm" data-readonly="0" autocomplete="off" novalidate>
+      <form method="post" action="{{ $correctionMode ? route('fiscal.nfce.correct.store',$correctionDocument) : route('fiscal.nfce.store') }}" id="nfceEditorForm" data-readonly="0" data-correction="{{ $correctionMode?'1':'0' }}" autocomplete="off" novalidate>
         @csrf
     @endif
       <div class="dialog-header">
-        <div><h2 id="nfceEditorTitle">{{ $readOnly?'NFC-e '.$readOnlyDocument->series.'/'.$readOnlyDocument->document_number:'Nova NFC-e' }}</h2></div>
+        <div><h2 id="nfceEditorTitle">{{ $editorDocument ? 'NFC-e '.$editorDocument->series.'/'.$editorDocument->document_number : 'Nova NFC-e' }}</h2></div>
         <a class="close-dialog" href="{{ route('fiscal.index',['tab'=>'nfce']) }}" aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</a>
       </div>
 
@@ -63,14 +69,40 @@
           </div>
           <div class="nfe-document-summary">
             <span>Número da NFC-e</span>
-            <strong>{{ $readOnly?str_pad((string)$readOnlyDocument->document_number,9,'0',STR_PAD_LEFT):'Automático' }}</strong>
+            <strong>{{ $editorDocument ? str_pad((string)$editorDocument->document_number,9,'0',STR_PAD_LEFT) : 'Automático' }}</strong>
             <div>
-              <span>Série <b>{{ str_pad((string)($readOnly?$readOnlyDocument->series:\App\Models\AppSetting::value('nfce','series',1)),3,'0',STR_PAD_LEFT) }}</b></span>
-              <span>Ambiente <b>{{ ($readOnly?$readOnlyDocument->environment:$settings->environment('nfce'))==='production' ? 'Produção' : 'Homologação' }}</b></span>
+              <span>Série <b>{{ str_pad((string)($editorDocument?$editorDocument->series:\App\Models\AppSetting::value('nfce','series',1)),3,'0',STR_PAD_LEFT) }}</b></span>
+              <span>Ambiente <b>{{ ($editorDocument?$editorDocument->environment:$settings->environment('nfce'))==='production' ? 'Produção' : 'Homologação' }}</b></span>
             </div>
           </div>
         </div>
 
+        @if($correctionMode)
+          <div class="alert alert-danger" role="alert">
+            <strong>Rejeição {{ $rejection['code'] }} — {{ $rejection['reason'] }}</strong>
+            <p>Ajuste os campos destacados nesta nota. Os dados comerciais permanecem preservados.</p>
+          </div>
+        @endif
+        @if($editorDocument && isset($nfceHistory) && $nfceHistory->count()>1)
+          <details class="fiscal-info-card">
+            <summary>Histórico fiscal ({{ $nfceHistory->count() }} tentativas)</summary>
+            <div class="nfce-attempt-history">
+              @foreach($nfceHistory as $attempt)
+                <div>
+                  <a class="table-link" href="{{ route('fiscal.show',$attempt) }}">
+                    NFC-e {{ $attempt->series }}/{{ $attempt->document_number }}
+                  </a>
+                  — {{ match($attempt->status) {
+                    'authorized'=>'Autorizada','rejected'=>'Rejeitada','pending'=>'Pendente',
+                    'prepared'=>'Preparada','cancelled'=>'Cancelada',
+                    'processing'=>'Processando',default=>'Registrada',
+                  } }}
+                  @if($attempt->id===$editorDocument->id)(atual)@endif
+                </div>
+              @endforeach
+            </div>
+          </details>
+        @endif
         @if($readOnly && $readOnlyDocument->corrected_from_id)
           @php
             $oldVersion = \App\Models\FiscalDocumentJob::query()->find($readOnlyDocument->corrected_from_id);
@@ -145,14 +177,20 @@
           </div>
         @endif
         <div class="editor-tabs nfe-editor-tabs" role="tablist" aria-label="Seções da NFC-e" data-nfce-tabs>
-          <button type="button" role="tab" id="nfceTab-general" aria-controls="nfcePanel-general" aria-selected="true" tabindex="0" class="editor-tab active" data-nfce-tab="general">Dados gerais</button>
-          <button type="button" role="tab" id="nfceTab-consumer" aria-controls="nfcePanel-consumer" aria-selected="false" tabindex="-1" class="editor-tab" data-nfce-tab="consumer">Consumidor</button>
-          <button type="button" role="tab" id="nfceTab-products" aria-controls="nfcePanel-products" aria-selected="false" tabindex="-1" class="editor-tab" data-nfce-tab="products">Produtos</button>
-          <button type="button" role="tab" id="nfceTab-payment" aria-controls="nfcePanel-payment" aria-selected="false" tabindex="-1" class="editor-tab" data-nfce-tab="payment">Pagamento</button>
-          <button type="button" role="tab" id="nfceTab-summary" aria-controls="nfcePanel-summary" aria-selected="false" tabindex="-1" class="editor-tab" data-nfce-tab="summary">Resumo</button>
+          @foreach(['general'=>'Dados gerais','consumer'=>'Consumidor','products'=>'Produtos',
+                    'payment'=>'Pagamento','summary'=>'Resumo'] as $key=>$label)
+            <button type="button" role="tab" id="nfceTab-{{ $key }}"
+              aria-controls="nfcePanel-{{ $key }}"
+              aria-selected="{{ $startTab===$key?'true':'false' }}"
+              tabindex="{{ $startTab===$key?'0':'-1' }}"
+              class="editor-tab {{ $startTab===$key?'active':'' }}"
+              data-nfce-tab="{{ $key }}">{{ $label }}</button>
+          @endforeach
         </div>
 
-        @if($readOnly)
+        @if($correctionMode)
+          @include('fiscal.nfce.correct-rejection')
+        @elseif($readOnly)
           @include('fiscal.nfce._readonly_panels')
         @else
         <section class="editor-tab-panel active" id="nfcePanel-general" role="tabpanel" aria-labelledby="nfceTab-general" data-nfce-panel="general">
@@ -280,7 +318,7 @@
       <div class="editor-savebar settings-savebar nfce-savebar">
         <div class="nfce-save-total">
           <span>Total da NFC-e</span>
-          <strong id="nfceFixedTotal">{{ $readOnly?'R$ '.number_format((float)$frozenTotals['total'],2,',','.'):'R$ 0,00' }}</strong>
+          <strong id="nfceFixedTotal">{{ $correctionMode ? 'R$ '.number_format($total,2,',','.') : ($readOnly?'R$ '.number_format((float)$frozenTotals['total'],2,',','.'):'R$ 0,00') }}</strong>
         </div>
         <div class="nfce-save-buttons">
           <a href="{{ route('fiscal.index',['tab'=>'nfce']) }}" class="btn btn-secondary">{{ $readOnly?'Voltar':'Cancelar' }}</a>
@@ -329,6 +367,10 @@
             @if($canCancelArchived)
               <button type="button" class="btn btn-danger" data-dialog-open="nfceCancelDialog">Cancelar NFC-e</button>
             @endif
+          @elseif($correctionMode)
+            <button type="submit" class="btn btn-success" data-confirm-submit="Salvar os dados fiscais corrigidos e colocar a NFC-e na fila de transmissão da SEFAZ?" data-confirm-kind="action">
+              @include('partials.icon',['name'=>'check','size'=>16]) Salvar e transmitir
+            </button>
           @else
             <button type="submit" name="submit_mode" value="save" class="btn btn-secondary">Salvar para emissão</button>
             <button type="submit" name="submit_mode" value="issue" class="btn btn-success" id="nfceIssue">@include('partials.icon',['name'=>'check','size'=>16]) Emitir NFC-e</button>
@@ -364,7 +406,7 @@
 </dialog>
 @endif
 
-@unless($readOnly)
+@if(!$readOnly && !$correctionMode)
   @php
     $formItems=old('items',[]);
     $formPayments=old('payments',[]);
@@ -373,6 +415,6 @@
   <script type="application/json" id="nfceMethodsJson">@json($methods)</script>
   <script type="application/json" id="nfceOldItems">@json($formItems)</script>
   <script type="application/json" id="nfceOldPayments">@json($formPayments)</script>
-@endunless
+@endif
 <script defer src="{{ asset('js/nfce-editor.js') }}?v={{ filemtime(public_path('js/nfce-editor.js')) }}"></script>
 @endsection
