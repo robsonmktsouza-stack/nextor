@@ -263,7 +263,6 @@
 @endif
 
 @if($tab==='nfce' && $correctedFromNfce)
-  <section class="fiscal-info-card">
   @if($correctionRevision)
     @php($revisionFields = (array)(json_decode($correctionRevision->changed_fields ?? '{}', true)['fields'] ?? []))
     <section class="fiscal-info-card">
@@ -274,7 +273,7 @@
       </p>
     </section>
   @endif
-
+  <section class="fiscal-info-card">
     <strong>Versão fiscal corrigida</strong>
     <p>Esta NFC-e foi preparada após a rejeição da
       <a class="table-link" href="{{ route('fiscal.show',$correctedFromNfce) }}">
