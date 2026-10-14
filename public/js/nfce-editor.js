@@ -39,7 +39,7 @@
       });
     });
     // Keep markup, selection and visible panel synchronized on first paint.
-    // A rejected NCM must open Products, not an empty general-information tab.
+    // Invoices open in General and keep the active tab synchronized.
     const initial=form.querySelector('[data-nfce-tabs]')?.dataset.initialTab
       || document.getElementById('nfceEditor')?.dataset.initialTab
       || tabs.find(tab=>tab.getAttribute('aria-selected')==='true')?.dataset.nfceTab
@@ -79,7 +79,7 @@
       const input=event.target.closest('[data-nfce-item-editor] [name]');
       if(!input)return;
       const editor=input.closest('[data-nfce-item-editor]');
-      const field=/\\[(ncm|cfop)\\]$/.exec(input.name)?.[1];
+      const field=/\[(ncm|cfop)\]$/.exec(input.name)?.[1];
       if(!field)return;
       const cell=Array.from(form.querySelectorAll('[data-nfce-item-cell]'))
         .find(node=>node.dataset.nfceItemCell===editor.dataset.nfceItemEditor+'-'+field);
