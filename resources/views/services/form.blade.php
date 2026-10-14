@@ -69,7 +69,7 @@
         </div>
       </div>
       
-      @if($service->tax_group)<p class="editor-help">Referência legada anterior: {{ $service->tax_group }}</p>@endif
+      
     </div>
 
     <div class="editor-panel">
