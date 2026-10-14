@@ -105,13 +105,17 @@ window.addEventListener('load',()=>{
     if(selected().length!==1||selected()[0].dataset.nfceTab!=='products')throw Error('rejeição não abriu Produtos');
     if(panels.filter(p=>!p.hidden).length!==1||panels.find(p=>!p.hidden)?.id!=='products')throw Error('abas e conteúdo fora de sincronia');
     if(rect.right>viewport+2||rect.left< -2)throw Error('modal ultrapassou a largura do navegador');
-    if(!mobile && rect.height>innerHeight-65)throw Error('modal deixou espaço vazio desnecessário');
+    if(!mobile && rect.height>innerHeight-30)throw Error('modal ultrapassou a altura útil da tela: '+Math.round(rect.height));
     const footerRect=footer.getBoundingClientRect();
     if(footerRect.bottom>innerHeight+2||footerRect.right>viewport+2)throw Error('rodapé cortado');
     if(body.getBoundingClientRect().bottom>footerRect.top+2)throw Error('conteúdo cobre botões');
     if(document.documentElement.scrollWidth>viewport+2)throw Error('scroll horizontal na tela');
     tabs[0].click();
     if(!panels[0].hidden===false)throw Error('aba geral não abriu');
+    const generalCard=document.querySelector('#general .nfe-general-card');
+    const blank=Math.round(body.getBoundingClientRect().bottom-generalCard.getBoundingClientRect().bottom);
+    if(!mobile && blank>90 && body.scrollHeight<=body.clientHeight+2)
+      throw Error('espaço vazio abaixo dos dados: '+blank+'px');
     const key=document.querySelector('.fiscal-key');
     if(key.scrollWidth>key.clientWidth+3)throw Error('chave não quebrou linha');
     const keyField=key.closest('.field').getBoundingClientRect();
