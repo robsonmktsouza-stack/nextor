@@ -109,7 +109,7 @@ final class NFCeRejectionCorrectionService
                 }
                 $rejection = $this->rejection($source);
                 if (!$rejection) {
-                    $this->fail('Este documento não possui uma rejeição definitiva corrigível; consulte a SEFAZ.');
+                    $this->fail('Esta nota ainda não pode ser corrigida. Consulte a situação na SEFAZ.');
                 }
                 if (!$source->sale || $source->sale->status !== 'completed') {
                     $this->fail('A venda vinculada precisa estar concluída.');
@@ -128,7 +128,7 @@ final class NFCeRejectionCorrectionService
                     || $this->settings->environment('nfce') !== $source->environment
                     || (int) AppSetting::value('nfce', 'series', -1) !== (int) $source->series
                 ) {
-                    $this->fail('A empresa, o ambiente ou a série atual não correspondem à NFC-e rejeitada.');
+                    $this->fail('Os dados da empresa não correspondem aos da nota. Confira as configurações fiscais.');
                 }
 
                 $disk = Storage::disk('local');
@@ -137,7 +137,7 @@ final class NFCeRejectionCorrectionService
                 $responsePath = $base.'/sefaz-response.ini';
                 if ($source->xml_path !== $signedPath
                     || !$disk->exists($signedPath) || !$disk->exists($responsePath)) {
-                    $this->fail('XML assinado ou retorno original indisponível. Correção bloqueada.');
+                    $this->fail('Não foi possível acessar os arquivos da nota. Entre em contato com o suporte.');
                 }
 
                 $signed = $disk->get($signedPath);
@@ -145,10 +145,10 @@ final class NFCeRejectionCorrectionService
                 try {
                     $signedKey = $this->xml->verifySigned($signed, $source);
                 } catch (RuntimeException) {
-                    $this->fail('XML assinado original não passou na conferência de integridade.');
+                    $this->fail('Não foi possível conferir o arquivo da nota. Entre em contato com o suporte.');
                 }
                 if (!hash_equals((string) $source->access_key, $signedKey)) {
-                    $this->fail('A chave do documento não corresponde ao XML assinado.');
+                    $this->fail('Os dados da nota não conferem. Entre em contato com o suporte.');
                 }
 
                 $before = $source->source_snapshot ?? [];
@@ -231,11 +231,11 @@ final class NFCeRejectionCorrectionService
         ])->validate();
 
         if (array_keys($data['items']) !== array_keys($items)) {
-            $this->fail('A sequência de itens fiscais não pode ser alterada.');
+            $this->fail('Não é possível alterar a ordem dos produtos nesta correção.');
         }
         foreach ($items as $i => &$item) {
             if (($item['item_type'] ?? '') !== 'product' || empty($item['product_id'])) {
-                $this->fail('A correção fiscal aceita somente produtos vinculados à venda original.');
+                $this->fail('Não é possível incluir outros produtos nesta correção.');
             }
 
             $form = $data['items'][$i];
@@ -270,7 +270,7 @@ final class NFCeRejectionCorrectionService
                 $tax['icms_cst'] = $form['icms_cst'];
                 unset($tax['icms_csosn']);
             } else {
-                $this->fail('CRT não suportado pela emissão NFC-e.');
+                $this->fail('O regime tributário informado não permite emitir esta NFC-e.');
             }
 
             $item['ncm'] = $ncm;
@@ -320,7 +320,7 @@ final class NFCeRejectionCorrectionService
         ])->validate();
 
         if (array_keys($data['payments']) !== array_keys($payments)) {
-            $this->fail('A sequência das parcelas não pode ser alterada.');
+            $this->fail('Não é possível alterar a quantidade de pagamentos nesta correção.');
         }
         $paidCents = 0;
         foreach ($payments as $i => &$payment) {
@@ -334,7 +334,7 @@ final class NFCeRejectionCorrectionService
                     ? 'credit_card' : '');
             }
             if (!in_array($kind, ['cash', 'money', 'pix', 'credit_card', 'debit_card', 'bank_slip', 'bank_transfer', 'transfer'], true)) {
-                $this->fail('Forma de pagamento sem mapeamento NFC-e: '.$code);
+                $this->fail('Forma de pagamento não disponível para NFC-e: '.$code);
             }
 
             $payment['payment_method'] = $code;
@@ -354,7 +354,7 @@ final class NFCeRejectionCorrectionService
         unset($payment);
 
         if ($paidCents !== (int) round((float) ($snapshot['total'] ?? 0) * 100)) {
-            $this->fail('O total dos pagamentos deve permanecer igual ao total da venda. Não é permitido alterar o financeiro por esta correção.');
+            $this->fail('A soma dos pagamentos deve ser igual ao valor da venda.');
         }
         if ((float) ($snapshot['change_amount'] ?? 0) > 0
             && !collect($payments)->contains(fn ($p) => in_array($p['payment_kind'], ['cash','money'], true))) {
