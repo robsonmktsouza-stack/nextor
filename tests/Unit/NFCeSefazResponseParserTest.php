@@ -86,6 +86,15 @@ final class NFCeSefazResponseParserTest extends TestCase
         self::assertFalse($this->parser->authorized($parsed));
     }
 
+    public function test_official_gtin_883_is_definitive_when_envio_says_rejection(): void
+    {
+        $response="[Envio]\nCStat=883\nXMotivo=Rejeicao: GTIN (cEAN) sem informacao [nItem:1]\n";
+        $parsed=$this->parser->parse($response);
+        self::assertSame('883',$parsed['cstat']);
+        self::assertTrue($this->parser->definitiveCorrectionRejection($parsed));
+        self::assertFalse($this->parser->authorized($parsed));
+    }
+
     public function test_ambiguous_envio_or_batch_response_is_not_correctable(): void
     {
         foreach([
