@@ -1,41 +1,124 @@
 @extends('layouts.app')
-@section('title', 'Corrigir rejeição — NFC-e '.$document->series.'/'.$document->document_number)
-@section('titleMeta', 'Correção fiscal')
+@section('title', 'NFC-e '.$document->series.'/'.$document->document_number)
+@section('titleMeta','Documento fiscal')
 @section('content')
-@include('fiscal._nav', ['tab'=>'nfce','tabs'=>[
+@include('fiscal._nav',['tab'=>'nfce','tabs'=>[
     'nfe'=>['label'=>'NF-e'],'nfse'=>['label'=>'NFS-e'],
     'cte'=>['label'=>'CT-e'],'mdfe'=>['label'=>'MDF-e'],'nfce'=>['label'=>'NFC-e'],
 ]])
+@php
+  // Correção usa o editor de NFC-e, mas SEM recriar venda, estoque ou financeiro.
+  // Somente o grupo de dados da rejeição comprovada admite edição.
+  $startTab=match($rejection['group']) {
+    'items'=>'products','consumer'=>'consumer','payments'=>'payment',default=>'general'
+  };
+  $total=(float)($snapshot['total'] ?? 0);
+@endphp
+<div class="nextor-modal-layer nfe-modal-layer is-open" id="nfceEditor" aria-hidden="false">
+  <div class="erp-dialog nfe-workspace-dialog nextor-modal-window nfe-fixed-shell"
+    role="dialog" aria-modal="true" aria-labelledby="nfceEditorTitle">
+    <form method="post" action="{{ route('fiscal.nfce.correct.store',$document) }}"
+      id="nfceEditorForm" data-readonly="0" data-correction="1" autocomplete="off" novalidate>
+      @csrf
+      <div class="dialog-header">
+        <div><h2 id="nfceEditorTitle">NFC-e {{ $document->series }}/{{ $document->document_number }}</h2></div>
+        <a class="close-dialog" href="{{ route('fiscal.index',['tab'=>'nfce']) }}"
+          aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</a>
+      </div>
+      <div class="dialog-body nfe-workspace-body">
+        <div class="nfe-emitter-summary">
+          <div class="nfe-emitter-logo">
+            @if($company->logo_path)<img src="{{ route('company.logo') }}" alt="">@endif
+          </div>
+          <div class="nfe-emitter-identity">
+            <div class="nfe-emitter-name">
+              <strong>{{ $company->legal_name ?: 'Empresa não configurada' }}</strong>
+              @if($company->trade_name)<span>{{ $company->trade_name }}</span>@endif
+            </div>
+            <div class="nfe-emitter-address">
+              {{ collect([$company->address,$company->address_number,$company->district,$company->city,$company->state])->filter()->implode(' · ') }}
+            </div>
+            <div class="nfe-emitter-docs">
+              <span><b>CNPJ:</b> {{ $company->document ?: '—' }}</span>
+              <span><b>IE:</b> {{ $company->state_registration ?: '—' }}</span>
+              <span><b>CRT:</b> {{ $company->crt ?: '—' }}</span>
+            </div>
+          </div>
+          <div class="nfe-document-summary">
+            <span>Número da NFC-e</span>
+            <strong>{{ str_pad((string)$document->document_number,9,'0',STR_PAD_LEFT) }}</strong>
+            <div>
+              <span>Série <b>{{ str_pad((string)$document->series,3,'0',STR_PAD_LEFT) }}</b></span>
+              <span>Ambiente <b>{{ $document->environment==='production'?'Produção':'Homologação' }}</b></span>
+            </div>
+          </div>
+        </div>
 
-<section class="cms-card" style="max-width:1100px;margin:0 auto">
-  <div class="card-header">
-    <div>
-      <h2>Corrigir rejeição da NFC-e {{ $document->series }}/{{ $document->document_number }}</h2>
-      <p>SEFAZ {{ $rejection['code'] }} — {{ $rejection['reason'] }}</p>
-    </div>
-    <a class="btn btn-secondary" href="{{ route('fiscal.show', $document) }}">Voltar</a>
-  </div>
+        <div class="alert alert-danger" role="alert">
+          <strong>Rejeitada pela SEFAZ — {{ $rejection['code'] }}:</strong> {{ $rejection['reason'] }}
+          <p>Corrija os campos permitidos nesta NFC-e. Ao salvar, será criada uma versão fiscal
+            auditada vinculada à mesma venda; a tentativa original, o XML e a resposta da
+            SEFAZ ficam preservados. <strong>A nova versão não será enviada automaticamente.</strong></p>
+        </div>
+        @if($errors->any())
+          <div class="alert alert-danger" role="alert">
+            <strong>Não foi possível salvar a correção.</strong>
+            <ul>@foreach($errors->all() as $message)<li>{{ $message }}</li>@endforeach</ul>
+          </div>
+        @endif
 
-  <div class="editor-panel">
-    <p class="editor-help">
-      A tentativa rejeitada, o XML assinado e o retorno da SEFAZ continuarão preservados.
-      Ao salvar, o Lumeron cria uma NOVA versão preparada, com a mesma venda e numeração.
-      A nova versão não será transmitida automaticamente.
-    </p>
-    <p class="editor-help"><strong>Estoque, valores comerciais, lançamentos financeiros e venda original não serão alterados.</strong>
-      Para duplicidade de numeração (539), use Utilitários → Duplicar NFC-e, não esta tela.</p>
-  </div>
-
-  @if($errors->any())
-    <section class="fiscal-error-card">
-      <strong>Não foi possível preparar a correção</strong>
-      <ul>@foreach($errors->all() as $message)<li>{{ $message }}</li>@endforeach</ul>
-    </section>
-  @endif
-
-  <form method="post" action="{{ route('fiscal.nfce.correct.store', $document) }}" autocomplete="off">
-    @csrf
-    @if($rejection['group']==='items')
+        <div class="editor-tabs nfe-editor-tabs" role="tablist" aria-label="Seções da NFC-e" data-nfce-tabs>
+          @foreach(['general'=>'Dados gerais','consumer'=>'Consumidor','products'=>'Produtos',
+              'payment'=>'Pagamento','summary'=>'Resumo'] as $key=>$label)
+            <button type="button" role="tab" id="nfceTab-{{ $key }}" aria-controls="nfcePanel-{{ $key }}"
+              aria-selected="{{ $startTab===$key?'true':'false' }}"
+              tabindex="{{ $startTab===$key?'0':'-1' }}"
+              class="editor-tab {{ $startTab===$key?'active':'' }}"
+              data-nfce-tab="{{ $key }}">{{ $label }}</button>
+          @endforeach
+        </div>
+        <section class="editor-tab-panel {{ $startTab==='general'?'active':'' }}" id="nfcePanel-general"
+          role="tabpanel" aria-labelledby="nfceTab-general" data-nfce-panel="general"
+          @if($startTab!=='general') hidden @endif>
+          <div class="nfe-general-card">
+            <div class="nfe-section-title"><h3>Dados gerais</h3></div>
+            <div class="editor-grid cols-12">
+              <div class="field col-3"><span>Situação</span><strong>Rejeitada</strong></div>
+              <div class="field col-3"><span>Emissão</span><strong>{{ $document->environment==='production'?'Produção':'Homologação' }}</strong></div>
+              <div class="field col-3"><span>Venda vinculada</span><strong>#{{ $document->sale_id }}</strong></div>
+              <div class="field col-3"><span>Chave de acesso</span><strong class="fiscal-key">{{ $document->access_key }}</strong></div>
+            </div>
+            <p class="nfce-muted">Número, série, quantidade, preço, desconto e operação comercial permanecem inalterados.</p>
+          </div>
+        </section>
+        <section class="editor-tab-panel {{ $startTab==='consumer'?'active':'' }}" id="nfcePanel-consumer"
+          role="tabpanel" aria-labelledby="nfceTab-consumer" data-nfce-panel="consumer"
+          @if($startTab!=='consumer') hidden @endif>
+          @if($rejection['group']==='consumer')
+      <div class="editor-panel">
+        <h3>Identificação do consumidor</h3>
+        <p class="editor-help">Preencha um CPF/CNPJ válido ou mantenha o consumidor não identificado, quando permitido.</p>
+        <div class="editor-grid cols-12">
+          <label class="field col-4"><span>CPF / CNPJ</span>
+            <input name="consumer_document" maxlength="20" inputmode="numeric"
+              value="{{ old('consumer_document',$snapshot['consumer_document'] ?? '') }}"></label>
+          <label class="field col-8"><span>Nome do consumidor</span>
+            <input name="consumer_name" maxlength="190"
+              value="{{ old('consumer_name',$snapshot['consumer_name'] ?? '') }}"></label>
+        </div>
+      </div>
+          @else
+          <div class="nfe-general-card">
+            <div class="nfe-section-title"><h3>Consumidor</h3></div>
+            <p>CPF/CNPJ: {{ $snapshot['consumer_document'] ?: 'Não identificado' }}</p>
+            <p>Nome: {{ $snapshot['consumer_name'] ?: 'Consumidor não identificado' }}</p>
+          </div>
+          @endif
+        </section>
+        <section class="editor-tab-panel {{ $startTab==='products'?'active':'' }}" id="nfcePanel-products"
+          role="tabpanel" aria-labelledby="nfceTab-products" data-nfce-panel="products"
+          @if($startTab!=='products') hidden @endif>
+          @if($rejection['group']==='items')
       <div class="editor-panel">
         <h3>Classificação fiscal dos produtos</h3>
         <p class="editor-help">Somente NCM, GTIN, origem, CFOP e códigos tributários podem ser alterados nesta revisão.
@@ -127,20 +210,31 @@
           </div>
         @endforeach
       </div>
-    @elseif($rejection['group']==='consumer')
-      <div class="editor-panel">
-        <h3>Identificação do consumidor</h3>
-        <p class="editor-help">Preencha um CPF/CNPJ válido ou mantenha o consumidor não identificado, quando permitido.</p>
-        <div class="editor-grid cols-12">
-          <label class="field col-4"><span>CPF / CNPJ</span>
-            <input name="consumer_document" maxlength="20" inputmode="numeric"
-              value="{{ old('consumer_document',$snapshot['consumer_document'] ?? '') }}"></label>
-          <label class="field col-8"><span>Nome do consumidor</span>
-            <input name="consumer_name" maxlength="190"
-              value="{{ old('consumer_name',$snapshot['consumer_name'] ?? '') }}"></label>
-        </div>
-      </div>
-    @elseif($rejection['group']==='payments')
+          @else
+          <div class="nfe-general-card">
+            <div class="nfe-section-title"><h3>Produtos</h3></div>
+            <div class="nfce-item-table-wrap">
+              <table class="nfce-item-table">
+                <thead><tr><th>Produto</th><th>Quantidade</th><th>Preço</th><th>Total</th></tr></thead>
+                <tbody>
+                  @foreach(($snapshot['items'] ?? []) as $item)
+                    <tr>
+                      <td>{{ $item['name'] ?? 'Produto' }}</td>
+                      <td>{{ $item['quantity'] ?? '—' }}</td>
+                      <td>R$ {{ number_format((float)($item['unit_price'] ?? 0),2,',','.') }}</td>
+                      <td>R$ {{ number_format((float)($item['line_total'] ?? 0),2,',','.') }}</td>
+                    </tr>
+                  @endforeach
+                </tbody>
+              </table>
+            </div>
+          </div>
+          @endif
+        </section>
+        <section class="editor-tab-panel {{ $startTab==='payment'?'active':'' }}" id="nfcePanel-payment"
+          role="tabpanel" aria-labelledby="nfceTab-payment" data-nfce-panel="payment"
+          @if($startTab!=='payment') hidden @endif>
+          @if($rejection['group']==='payments')
       <div class="editor-panel">
         <h3>Informações fiscais de pagamento</h3>
         <p class="editor-help">
@@ -150,7 +244,9 @@
           Se houver divergência comercial, reconcilie a venda antes de transmitir.
         </p>
         @foreach(($snapshot['payments'] ?? []) as $index=>$payment)
-          @php($field='payments.'.$index.'.')
+          @php
+            $field='payments.'.$index.'.';
+          @endphp
           <div class="editor-grid cols-12">
             <label class="field col-7"><span>Forma de pagamento {{ $index+1 }}</span>
               <select name="payments[{{ $index }}][payment_method]" required>
@@ -169,16 +265,46 @@
           </div>
         @endforeach
       </div>
-    @endif
-
-    <div class="editor-savebar settings-savebar">
-      <div>
-        <a class="btn btn-secondary" href="{{ route('fiscal.show', $document) }}">Cancelar</a>
-        <button class="btn btn-success" type="submit">
-          @include('partials.icon',['name'=>'check','size'=>16]) Salvar nova versão fiscal
-        </button>
+          @else
+          <div class="nfe-general-card">
+            <div class="nfe-section-title"><h3>Pagamento</h3></div>
+            @foreach(($snapshot['payments'] ?? []) as $payment)
+              <p>{{ $payment['payment_method'] ?? 'Não informado' }} —
+                R$ {{ number_format((float)($payment['amount'] ?? 0),2,',','.') }}</p>
+            @endforeach
+          </div>
+          @endif
+        </section>
+        <section class="editor-tab-panel {{ $startTab==='summary'?'active':'' }}" id="nfcePanel-summary"
+          role="tabpanel" aria-labelledby="nfceTab-summary" data-nfce-panel="summary"
+          @if($startTab!=='summary') hidden @endif>
+          <div class="nfe-general-card">
+            <div class="nfe-section-title"><h3>Resumo da NFC-e</h3></div>
+            <div class="nfce-summary-grid">
+              <div><span>Subtotal</span><strong>R$ {{ number_format((float)($snapshot['subtotal'] ?? $total),2,',','.') }}</strong></div>
+              <div><span>Desconto</span><strong>R$ {{ number_format((float)($snapshot['discount_total'] ?? 0),2,',','.') }}</strong></div>
+              <div><span>Total original</span><strong>R$ {{ number_format($total,2,',','.') }}</strong></div>
+            </div>
+            <p class="nfce-muted">Os valores comerciais e financeiros são preservados e não são reprocessados.</p>
+          </div>
+        </section>
       </div>
-    </div>
-  </form>
-</section>
+
+      <div class="editor-savebar settings-savebar nfce-savebar">
+        <div class="nfce-save-total">
+          <span>Total da NFC-e</span>
+          <strong>R$ {{ number_format($total,2,',','.') }}</strong>
+        </div>
+        <div class="nfce-save-buttons">
+          <a href="{{ route('fiscal.index',['tab'=>'nfce']) }}" class="btn btn-secondary">Cancelar</a>
+          <button type="submit" class="btn btn-success">
+            @include('partials.icon',['name'=>'check','size'=>16])
+            Salvar nova versão fiscal
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<script defer src="{{ asset('js/nfce-editor.js') }}?v={{ filemtime(public_path('js/nfce-editor.js')) }}"></script>
 @endsection
