@@ -486,7 +486,7 @@ foreach($primaryTabs as $key=>$item){
           <label class="field col-4"><span>Perfil tributário</span><input name="tax_profile" value="{{ $fiscal['tax_profile'] }}" placeholder="Ex.: padrão Simples Nacional"></label>
         </div>
         <div class="settings-switch-grid">
-          <label class="settings-switch"><input type="checkbox" name="enabled" value="1" @checked($fiscal['enabled'])><span><strong>Habilitar recursos fiscais</strong><small>Libera o uso das configurações fiscais pelos emissores integrados.</small></span></label>
+          <label class="settings-switch"><input type="checkbox" name="enabled" value="1" @checked($fiscal['enabled'])><span><strong>Habilitar recursos fiscais</strong></span></label>
           <label class="settings-switch"><input type="checkbox" name="send_xml_email" value="1" @checked($fiscal['send_xml_email'])><span><strong>Enviar XML por e-mail</strong><small>Preferência padrão para documentos autorizados.</small></span></label>
           <label class="settings-switch"><input type="checkbox" name="keep_xml_copy" value="1" @checked($fiscal['keep_xml_copy'])><span><strong>Guardar cópia dos XMLs</strong><small>Preserva documentos autorizados no armazenamento do sistema.</small></span></label>
         </div>
@@ -527,7 +527,7 @@ foreach($primaryTabs as $key=>$item){
 
     <section class="editor-panel settings-panel">
       <div class="settings-panel-head">
-        <div><h2>Fila fiscal preparada</h2><p>Documentos que o Lumeron já preparou a partir das operações do sistema.</p></div>
+        <div><h2>Notas recentes</h2></div>
       </div>
       <div class="table-scroll">
         <table class="cms-table">
@@ -560,7 +560,7 @@ foreach($primaryTabs as $key=>$item){
     @csrf
     <section class="editor-panel settings-panel">
       <div class="settings-panel-head">
-        <div><h2>Dados tributários</h2><p>Padrões de preenchimento para produtos, serviços e documentos. Estes valores não substituem a análise da operação.</p></div>
+        <div><h2>Dados tributários</h2></div>
         <div class="row" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
           <a class="btn btn-secondary" href="{{ route('fiscal.tax-groups.index') }}">
             @include('partials.icon',['name'=>'layers','size'=>15]) Grupos de tributação
@@ -600,7 +600,7 @@ foreach($primaryTabs as $key=>$item){
   <form method="post" action="{{ route('settings.group.update','nfe') }}" class="settings-editor">
     @csrf
     <section class="editor-panel settings-panel">
-      <div class="settings-panel-head"><div><h2>NF-e — modelo 55</h2><p>Numeração e preferências do emissor de mercadorias.</p></div></div>
+      <div class="settings-panel-head"><div><h2>NF-e — modelo 55</h2></div></div>
       <div class="editor-grid cols-12 settings-grid">
         <label class="field col-3"><span>Ambiente</span><select name="environment"><option value="homologation" @selected($nfe['environment']==='homologation')>Homologação</option><option value="production" @selected($nfe['environment']==='production')>Produção</option></select></label>
         <label class="field col-2"><span>Série</span><input type="number" min="0" max="999" name="series" value="{{ $nfe['series'] }}"></label>
@@ -626,7 +626,7 @@ foreach($primaryTabs as $key=>$item){
   <form method="post" action="{{ route('settings.group.update','nfce') }}" class="settings-editor">
     @csrf
     <section class="editor-panel settings-panel">
-      <div class="settings-panel-head"><div><h2>NFC-e — modelo 65</h2><p>Configuração do documento consumidor integrado ao PDV.</p></div></div>
+      <div class="settings-panel-head"><div><h2>NFC-e — modelo 65</h2></div></div>
       <div class="editor-grid cols-12 settings-grid">
         <label class="field col-3"><span>Ambiente</span><select name="environment"><option value="homologation" @selected($nfce['environment']==='homologation')>Homologação</option><option value="production" @selected($nfce['environment']==='production')>Produção</option></select></label>
         <label class="field col-2"><span>Série</span><input type="number" min="0" max="999" name="series" value="{{ $nfce['series'] }}"></label>
@@ -654,7 +654,7 @@ foreach($primaryTabs as $key=>$item){
   <form method="post" action="{{ route('settings.group.update','nfse') }}" class="settings-editor">
     @csrf
     <section class="editor-panel settings-panel">
-      <div class="settings-panel-head"><div><h2>NFS-e</h2><p>Parâmetros para padrão nacional ou integração municipal.</p></div></div>
+      <div class="settings-panel-head"><div><h2>NFS-e</h2></div></div>
       <div class="editor-grid cols-12 settings-grid">
         <label class="field col-3"><span>Ambiente</span><select name="environment"><option value="homologation" @selected($nfse['environment']==='homologation')>Homologação</option><option value="production" @selected($nfse['environment']==='production')>Produção</option></select></label>
         <label class="field col-4"><span>Provedor / padrão</span><input name="provider" value="{{ $nfse['provider'] }}" placeholder="Ex.: Nacional / prefeitura / provedor"></label>
@@ -723,7 +723,7 @@ foreach($primaryTabs as $key=>$item){
         <label class="field col-3"><span>CRC</span><input name="crc" value="{{ $accounting['crc'] }}"></label>
         <label class="field col-3"><span>E-mail</span><input type="email" name="email" value="{{ $accounting['email'] }}"></label>
         <label class="field col-3"><span>Telefone</span><input name="phone" value="{{ $accounting['phone'] }}"></label>
-        <label class="field col-6"><span>Sistema contábil de destino</span><input name="accounting_system" value="{{ $accounting['accounting_system'] }}" placeholder="Ex.: Domínio, Alterdata, outro"><small>Identificação incluída nos metadados da exportação.</small></label>
+        <label class="field col-6"><span>Sistema contábil de destino</span><input name="accounting_system" value="{{ $accounting['accounting_system'] }}" placeholder="Ex.: Domínio, Alterdata, outro"></label>
         <div class="field col-6"><span>Formato disponível</span><div class="inline-note"><strong>CSV</strong> · formato atualmente gerado pelo Lumeron.</div></div>
         <label class="field col-12"><span>Observações</span><textarea name="notes" rows="4">{{ $accounting['notes'] }}</textarea></label>
       </div>
@@ -896,18 +896,18 @@ foreach($primaryTabs as $key=>$item){
         <label class="field col-4"><span>E-mail remetente</span><input type="email" name="smtp_from_address" value="{{ $integrations['smtp_from_address'] }}"></label>
         <label class="field col-4"><span>Nome remetente</span><input name="smtp_from_name" value="{{ $integrations['smtp_from_name'] }}"></label>
       </div>
-      <label class="settings-switch settings-switch-single"><input type="checkbox" name="smtp_enabled" value="1" @checked($integrations['smtp_enabled'])><span><strong>Usar SMTP configurado</strong><small>Credenciais ficam armazenadas de forma criptografada.</small></span></label>
+      <label class="settings-switch settings-switch-single"><input type="checkbox" name="smtp_enabled" value="1" @checked($integrations['smtp_enabled'])><span><strong>Usar SMTP configurado</strong></span></label>
     </section>
 
     <section class="editor-panel settings-panel">
-      <div class="settings-panel-head"><div><h2>API e webhook</h2><p>Integrações externas que já possuem execução no Lumeron.</p></div></div>
+      <div class="settings-panel-head"><div><h2>API e webhook</h2></div></div>
       <div class="editor-grid cols-12 settings-grid">
         <label class="field col-6"><span>Webhook</span><input type="url" name="webhook_url" value="{{ $integrations['webhook_url'] }}" placeholder="https://..."></label>
         <label class="field col-6"><span>Segredo do webhook</span><input type="password" name="webhook_secret" placeholder="{{ $integrations['webhook_secret'] ? 'Segredo já configurado' : '' }}"></label>
       </div>
       <div class="settings-switch-grid">
-        <label class="settings-switch"><input type="checkbox" name="api_enabled" value="1" @checked($integrations['api_enabled'])><span><strong>API habilitada</strong><small>Libera os endpoints protegidos por Bearer Token.</small></span></label>
-        <label class="settings-switch"><input type="checkbox" name="webhook_enabled" value="1" @checked($integrations['webhook_enabled'])><span><strong>Webhook habilitado</strong><small>Enfileira eventos de vendas, devoluções e baixas financeiras para a URL configurada.</small></span></label>
+        <label class="settings-switch"><input type="checkbox" name="api_enabled" value="1" @checked($integrations['api_enabled'])><span><strong>API habilitada</strong></span></label>
+        <label class="settings-switch"><input type="checkbox" name="webhook_enabled" value="1" @checked($integrations['webhook_enabled'])><span><strong>Webhook habilitado</strong></span></label>
       </div>
     </section>
   
@@ -918,7 +918,7 @@ foreach($primaryTabs as $key=>$item){
 
 <section class="editor-panel settings-panel">
   <div class="settings-panel-head">
-    <div><h2>API do Lumeron</h2><p>Endpoints de leitura protegidos por Bearer Token.</p></div>
+    <div><h2>API do Lumeron</h2></div>
   </div>
   <div class="settings-api-grid">
     <div>
