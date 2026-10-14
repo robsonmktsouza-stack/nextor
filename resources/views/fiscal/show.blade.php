@@ -101,6 +101,7 @@
           </button>
         @endif
         @if($document->status==='prepared'
+            && !$document->corrected_from_id
             && !$document->access_key && !$document->protocol
             && !$document->xml_path && !$document->response_path
             && !$document->authorized_at)
