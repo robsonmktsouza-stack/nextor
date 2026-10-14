@@ -119,13 +119,10 @@ final class LumeronLoginTest extends TestCase
 
     public function test_bootstrap_requires_correct_portal_origin_and_tenant_host(): void
     {
-        $this->withServerVariables([
-            'HTTP_HOST'=>'autonunes.lumeron.com.br',
-            'SERVER_NAME'=>'autonunes.lumeron.com.br',
-            'SERVER_PORT'=>'443',
-            'HTTPS'=>'on',
-        ])->withHeaders(['Origin'=>'https://login.lumeron.com.br'])
-            ->get('/login/bootstrap')
+        // A URL absoluta define o host e o esquema efetivos vistos por
+        // Request::getSchemeAndHttpHost(), sem afrouxar a checagem de origem.
+        $this->withHeaders(['Origin'=>'https://login.lumeron.com.br'])
+            ->get('https://autonunes.lumeron.com.br/login/bootstrap')
             ->assertOk()
             ->assertJsonStructure(['csrf_token'])
             ->assertHeader('Access-Control-Allow-Origin','https://login.lumeron.com.br');
