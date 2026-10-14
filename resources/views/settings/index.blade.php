@@ -161,7 +161,7 @@ foreach($primaryTabs as $key=>$item){
     </section>
 
     <section class="editor-panel settings-panel">
-      <div class="settings-panel-head"><div><h2>Dados tributários da empresa</h2><p>Cadastro-base para os módulos fiscais e de serviços.</p></div></div>
+      <div class="settings-panel-head"><div><h2>Dados tributários da empresa</h2></div></div>
       <div class="editor-grid cols-12 settings-grid">
         <label class="field col-4"><span>Regime tributário</span>
           <select name="tax_regime">
@@ -479,7 +479,7 @@ foreach($primaryTabs as $key=>$item){
     <form method="post" action="{{ route('settings.group.update','fiscal') }}" class="settings-editor">
       @csrf
       <section class="editor-panel settings-panel">
-        <div class="settings-panel-head"><div><h2>Configuração fiscal geral</h2><p>Base compartilhada por NF-e, NFC-e, NFS-e, CT-e e MDF-e.</p></div></div>
+        <div class="settings-panel-head"><div><h2>Configuração fiscal geral</h2></div></div>
         <div class="editor-grid cols-12 settings-grid">
           <label class="field col-4"><span>Ambiente padrão</span><select name="default_environment"><option value="homologation" @selected($fiscal['default_environment']==='homologation')>Homologação</option><option value="production" @selected($fiscal['default_environment']==='production')>Produção</option></select></label>
           <label class="field col-4"><span>E-mail do contador</span><input type="email" name="accountant_email" value="{{ $fiscal['accountant_email'] }}"></label>
@@ -498,7 +498,7 @@ foreach($primaryTabs as $key=>$item){
 </form>
 
     <section class="editor-panel settings-panel">
-      <div class="settings-panel-head"><div><h2>Certificado digital A1</h2><p>Arquivo privado usado pelos emissores fiscais quando necessário.</p></div></div>
+      <div class="settings-panel-head"><div><h2>Certificado digital A1</h2></div></div>
       @if($company->certificate_path)
         <div class="certificate-status ok">
           @include('partials.icon',['name'=>'shield','size'=>24])
@@ -551,7 +551,7 @@ foreach($primaryTabs as $key=>$item){
           </tbody>
         </table>
       </div>
-      <div class="inline-note">Preparado significa que o Lumeron reservou numeração e reuniu os dados da operação. A transmissão à SEFAZ/prefeitura continua dependendo do emissor fiscal conectado.</div>
+      
     </section>
   </div>
 
@@ -588,7 +588,7 @@ foreach($primaryTabs as $key=>$item){
         <label class="field col-3"><span>CST CBS padrão</span><input name="cbs_cst_default" value="{{ $tax['cbs_cst_default'] }}"></label>
         <label class="field col-12"><span>Observações tributárias internas</span><textarea name="notes" rows="4">{{ $tax['notes'] }}</textarea></label>
       </div>
-      <div class="settings-warning">Os campos desta aba são apenas padrões de cadastro. CFOP, CST/CSOSN, IBS/CBS, retenções e demais tratamentos devem ser definidos conforme cada operação e legislação aplicável.</div>
+      
     </section>
   
   <div class="editor-savebar settings-savebar">
@@ -642,7 +642,7 @@ foreach($primaryTabs as $key=>$item){
         <label class="settings-switch"><input type="checkbox" name="auto_from_pdv" value="1" @checked($nfce['auto_from_pdv'])><span><strong>Transmitir NFC-e automaticamente pelo PDV</strong><small>Desative para revisar a nota e emitir manualmente após a venda. A opção de emissão automática também precisa estar desativada nas configurações do PDV.</small></span></label>
         <label class="settings-switch"><input type="checkbox" name="print_danfe" value="1" @checked($nfce['print_danfe'])><span><strong>Imprimir DANFE NFC-e</strong><small>Preferência de impressão do comprovante.</small></span></label>
       </div>
-      <div class="settings-warning">A configuração do CSC é separada do certificado A1. O Lumeron guarda o token criptografado.</div>
+      
     </section>
   
   <div class="editor-savebar settings-savebar">
