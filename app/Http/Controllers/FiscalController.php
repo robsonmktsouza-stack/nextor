@@ -33,6 +33,26 @@ class FiscalController extends Controller
         $period=Carbon::createFromFormat('Y-m-d',$month.'-01')->startOfMonth();
         $periodEnd=$period->copy()->endOfMonth();
 
+        if($tab==='nfce') {
+            // Recover archival rejections from older queue workers without
+            // asking the user to run Artisan or retransmitting an NFC-e.
+            $reconciler=app(\App\Services\Fiscal\NFCePendingRejectionReconciler::class);
+            FiscalDocumentJob::query()
+                ->where('document_type','nfce')
+                ->where('status','pending')
+                ->where(function($dates) use($period,$periodEnd) {
+                    $dates->whereBetween('prepared_at',[$period,$periodEnd])
+                        ->orWhere(function($missing) use($period,$periodEnd) {
+                            $missing->whereNull('prepared_at')
+                                ->whereBetween('created_at',[$period,$periodEnd]);
+                        });
+                })
+                ->latest('id')
+                ->limit(50)
+                ->get()
+                ->each(fn($document)=>$reconciler->reconcile($document));
+        }
+
         $query=FiscalDocumentJob::query()
             ->with(['sale.customer'])
             ->where('document_type',$tab);
@@ -134,6 +154,12 @@ class FiscalController extends Controller
 
     public function show(FiscalDocumentJob $fiscalDocumentJob)
     {
+        if ($fiscalDocumentJob->document_type === 'nfce'
+            && $fiscalDocumentJob->status === 'pending') {
+            app(\App\Services\Fiscal\NFCePendingRejectionReconciler::class)
+                ->reconcile($fiscalDocumentJob);
+            $fiscalDocumentJob->refresh();
+        }
         $fiscalDocumentJob->load(['sale.customer','sale.user','sale.payments']);
 
         $tab=array_key_exists($fiscalDocumentJob->document_type,self::TABS)
