@@ -771,3 +771,29 @@ body.system-comfortable .app-root{
   #nfceEditor .nfce-correction-product-list .cms-table td{padding:8px}
   #nfceEditor .nfce-item-editor-heading{align-items:flex-start}
 }
+
+/* SEFAZ rejection is the one operational error that must stand out. */
+#nfceEditor .nfce-sefaz-rejection{
+  display:flex;
+  align-items:center;
+  width:100%;
+  box-sizing:border-box;
+  min-height:58px;
+  margin:0 0 14px;
+  padding:15px 18px;
+  border:1px solid #ef9898;
+  border-left:4px solid #d92735;
+  border-radius:5px;
+  background:#fff0f1;
+  color:#741922;
+  overflow-wrap:anywhere;
+}
+#nfceEditor .nfce-sefaz-rejection strong{
+  display:block;
+  font-size:13px;
+  line-height:1.5;
+  font-weight:700;
+}
+@media(max-width:760px){
+  #nfceEditor .nfce-sefaz-rejection{padding:12px;margin-bottom:12px}
+}
