@@ -132,20 +132,29 @@ window.addEventListener('load',()=>{
         document.body.dataset.nfceLayoutMobile='passed';
         result.textContent='PASS mobile';
       }else{
-        const iframe=document.createElement('iframe');
-        iframe.width='390';iframe.height='700';
-        iframe.style.cssText='position:absolute;left:0;top:950px;border:0';
-        iframe.src=location.href.split('?')[0]+'?mobile=1';
-        iframe.addEventListener('load',()=>{
-          setTimeout(()=>{
-            try{
-              if(iframe.contentDocument.body.dataset.nfceLayoutMobile!=='passed')throw Error('layout mobile: '+iframe.contentDocument.getElementById('result').textContent);
-              document.body.dataset.nfceLayoutTest='passed';
-              result.textContent='PASS desktop + mobile';
-            }catch(e){document.body.dataset.nfceLayoutTest='failed';result.textContent='FAIL '+e.message;}
-          },450);
+        const widths=[390,640];
+        let completed=0;
+        widths.forEach((width,index)=>{
+          const iframe=document.createElement('iframe');
+          iframe.width=String(width);iframe.height='700';
+          iframe.style.cssText='position:absolute;left:0;top:'+(950+index*730)+'px;border:0';
+          iframe.src=location.href.split('?')[0]+'?mobile=1';
+          iframe.addEventListener('load',()=>{
+            setTimeout(()=>{
+              if(document.body.dataset.nfceLayoutTest==='failed')return;
+              try{
+                if(iframe.contentDocument.body.dataset.nfceLayoutMobile!=='passed')
+                  throw Error('layout '+width+'px: '+iframe.contentDocument.getElementById('result').textContent);
+                completed++;
+                if(completed===widths.length){
+                  document.body.dataset.nfceLayoutTest='passed';
+                  result.textContent='PASS desktop + 390px + 640px';
+                }
+              }catch(e){document.body.dataset.nfceLayoutTest='failed';result.textContent='FAIL '+e.message;}
+            },450);
+          });
+          document.body.appendChild(iframe);
         });
-        document.body.appendChild(iframe);
       }
     }catch(e){
       if(new URLSearchParams(location.search).has('mobile'))document.body.dataset.nfceLayoutMobile='failed';
