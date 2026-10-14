@@ -81,6 +81,19 @@ class FiscalController extends Controller
             ->paginate(AppSetting::tablePerPage($request))
             ->withQueryString();
 
+        // Uma tentativa antiga não é "pendente" operacionalmente quando
+        // outra NFC-e da mesma venda já foi autorizada. Preserva-se seu
+        // status armazenado e a íntegra do histórico, alterando apenas
+        // a apresentação da listagem.
+        $nfceAuthorizedSaleIds = $tab === 'nfce'
+            ? FiscalDocumentJob::query()
+                ->where('document_type','nfce')
+                ->where('status','authorized')
+                ->whereIn('sale_id',$documents->getCollection()->pluck('sale_id')->filter()->all())
+                ->pluck('sale_id')
+                ->flip()
+            : collect();
+
         $monthNames=[
             1=>'Janeiro',2=>'Fevereiro',3=>'Março',4=>'Abril',5=>'Maio',6=>'Junho',
             7=>'Julho',8=>'Agosto',9=>'Setembro',10=>'Outubro',11=>'Novembro',12=>'Dezembro',
@@ -91,6 +104,7 @@ class FiscalController extends Controller
             'tabs'=>self::TABS,
             'tabMeta'=>self::TABS[$tab],
             'documents'=>$documents,
+            'nfceAuthorizedSaleIds'=>$nfceAuthorizedSaleIds,
             'term'=>$term,
             'status'=>$status,
             'environment'=>$environment,
