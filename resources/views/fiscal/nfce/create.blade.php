@@ -127,9 +127,18 @@
             </a>.
           </div>
         @endif
+        @if($readOnly && ($nfceDuplicateOriginal ?? null))
+          <div class="fiscal-info-card">
+            <strong>Documento duplicado</strong>
+            Esta tentativa foi criada a partir da
+            <a class="table-link" href="{{ route('fiscal.show',$nfceDuplicateOriginal) }}">
+              NFC-e {{ $nfceDuplicateOriginal->series }}/{{ $nfceDuplicateOriginal->document_number }}
+            </a>. A venda original foi preservada.
+          </div>
+        @endif
         @if($readOnly && ($nfceDuplicateNext ?? null))
           <div class="fiscal-info-card">
-            <strong>Documento substituto</strong>
+            <strong>Documento gerado por duplicação</strong>
             <a class="table-link" href="{{ route('fiscal.show',$nfceDuplicateNext) }}">
               Abrir NFC-e {{ $nfceDuplicateNext->series }}/{{ $nfceDuplicateNext->document_number }}
             </a> vinculada à mesma venda.
