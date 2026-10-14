@@ -76,9 +76,8 @@
         </div>
 
         @if($correctionMode)
-          <div class="alert alert-danger" role="alert">
-            <strong>Rejeição {{ $rejection['code'] }} — {{ $rejection['reason'] }}</strong>
-            <p>Confira os dados abaixo e faça a correção.</p>
+          <div class="nfce-sefaz-rejection" role="alert" data-nfce-rejection>
+            <strong>{{ $rejection['code'] }} — {{ preg_replace('/^(?:\\d+\\s*[-—:]\\s*)?Rejei(?:c|ç)(?:a|ã)o\\s*:\\s*/iu', 'Rejeição: ', (string)$rejection['reason']) }}</strong>
           </div>
         @endif
         @if($editorDocument && isset($nfceHistory) && $nfceHistory->count()>1)
@@ -137,9 +136,15 @@
           </div>
         @endif
         @if($readOnly && $readOnlyDocument->error_message)
-          <div class="alert alert-danger" role="alert">
-            <strong>Retorno fiscal:</strong> {{ $readOnlyDocument->error_message }}
-          </div>
+          @if($readOnlyDocument->status==='rejected')
+            <div class="nfce-sefaz-rejection" role="alert" data-nfce-rejection>
+              <strong>{{ preg_replace('/^Retorno SEFAZ:\\s*/iu', '', (string)$readOnlyDocument->error_message) }}</strong>
+            </div>
+          @else
+            <div class="alert alert-danger" role="alert">
+              <strong>Retorno fiscal:</strong> {{ $readOnlyDocument->error_message }}
+            </div>
+          @endif
         @endif
         @if($readOnly && count($nfcePreflightErrors ?? []))
           <div class="alert alert-danger" role="alert">
