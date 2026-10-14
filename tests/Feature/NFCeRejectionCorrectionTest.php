@@ -181,14 +181,15 @@ final class NFCeRejectionCorrectionTest extends TestCase
         );
         $signed=Storage::disk('local')->get($old->xml_path);
 
-        $this->artisan('nfce:reconcile-rejection',[
+        self::assertSame(0,\Illuminate\Support\Facades\Artisan::call('nfce:reconcile-rejection',[
             'number'=>'7','--series'=>'1',
-        ])->assertExitCode(0);
+        ]));
         self::assertSame('pending',$old->fresh()->status);
 
-        $this->artisan('nfce:reconcile-rejection',[
+        $exit=\Illuminate\Support\Facades\Artisan::call('nfce:reconcile-rejection',[
             'number'=>'7','--series'=>'1','--apply'=>true,
-        ])->assertExitCode(0);
+        ]);
+        self::assertSame(0,$exit);
         self::assertSame('rejected',$old->fresh()->status,
             'Conciliação: '.\Illuminate\Support\Facades\Artisan::output());
         self::assertSame($signed,Storage::disk('local')->get($old->xml_path));
