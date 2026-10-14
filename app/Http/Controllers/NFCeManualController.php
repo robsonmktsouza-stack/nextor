@@ -183,7 +183,7 @@ final class NFCeManualController extends Controller
     {
         if ($mode!=='issue') {
             return redirect()->route('fiscal.show',$job)
-                ->with('success','NFC-e preparada. Confira e emita quando desejar.');
+                ->with('success','NFC-e salva. Pronta para emitir.');
         }
 
         $problems=$preflight->validate($job);
@@ -195,7 +195,7 @@ final class NFCeManualController extends Controller
         $queue=(string)config('queue.default','sync');
         if (in_array($queue,['','sync','null'],true)) {
             return redirect()->route('fiscal.show',$job)
-                ->with('error','NFC-e salva. Configure a fila fiscal para autorizar a nota.');
+                ->with('error','NFC-e salva, mas a emissão não pôde ser iniciada. Verifique a configuração fiscal.');
         }
 
         try {
@@ -203,7 +203,7 @@ final class NFCeManualController extends Controller
             return redirect()->route('fiscal.show',$job)
                 ->with('success',$job->emission_mode==='offline'
                     ? 'NFC-e na fila de preparação offline: assinatura do XML e geração do DANFE, sem envio à SEFAZ.'
-                    : 'NFC-e enviada para emissão. Acompanhe a autorização nesta tela.');
+                    : 'Emissão iniciada. Acompanhe a situação da nota.');
         } catch (\Throwable $error) {
             \Illuminate\Support\Facades\Log::error('Falha ao enfileirar NFC-e manual',[
                 'fiscal_document_job_id'=>$job->id,'message'=>$error->getMessage(),
