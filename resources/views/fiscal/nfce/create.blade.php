@@ -80,7 +80,7 @@
         @if($correctionMode)
           <div class="alert alert-danger" role="alert">
             <strong>Rejeição {{ $rejection['code'] }} — {{ $rejection['reason'] }}</strong>
-            <p>Ajuste os campos destacados nesta nota. Os dados comerciais permanecem preservados.</p>
+            <p>Confira os dados abaixo e faça a correção.</p>
           </div>
         @endif
         @if($editorDocument && isset($nfceHistory) && $nfceHistory->count()>1)
