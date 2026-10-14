@@ -27,6 +27,11 @@ final class NFCeRejectionCorrectionService
     private const REJECTION_GROUPS = [
         // Item classification, tax and CFOP (restricted to supported calculator scenarios).
         '777' => 'items', '778' => 'items', '611' => 'items',
+        '612' => 'items', '882' => 'items', '883' => 'items',
+        '884' => 'items', '885' => 'items', '886' => 'items',
+        '888' => 'items', '890' => 'items', '891' => 'items',
+        '892' => 'items', '893' => 'items', '894' => 'items',
+        '895' => 'items', '896' => 'items',
         '383' => 'items', '386' => 'items', '382' => 'items',
         '766' => 'items', '725' => 'items',
         // Consumer identification.
