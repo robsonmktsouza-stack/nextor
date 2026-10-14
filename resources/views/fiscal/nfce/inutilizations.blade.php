@@ -21,7 +21,7 @@
       <label class="field"><span>Número final</span><input type="number" name="last_number" value="{{ old('last_number') }}" min="1" max="{{ max(1,$nextNumber-1) }}" required></label>
       <label class="field wide"><span>Justificativa</span><input type="text" name="reason" minlength="15" maxlength="255" required value="{{ old('reason') }}" placeholder="Explique a quebra de sequência da numeração"></label>
     </div>
-    <p class="nfce-muted">Próximo número disponível: {{ $nextNumber }}. A faixa informada deve ser anterior a esse número e comprovadamente não utilizada.</p>
+    <p class="nfce-muted">Próximo número disponível: {{ $nextNumber }}.</p>
     <button class="btn btn-primary" type="submit">Solicitar inutilização à SEFAZ</button>
   </form>
 </section>
