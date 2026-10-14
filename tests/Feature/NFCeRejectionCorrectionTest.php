@@ -147,6 +147,64 @@ final class NFCeRejectionCorrectionTest extends TestCase
         self::assertSame(2,FiscalDocumentJob::query()->count());
     }
 
+    public function test_rejected_note_opens_in_general_tab_with_all_fiscal_sections_editable(): void
+    {
+        $old=$this->rejected('778');
+        $html=$this->actingAs($this->admin())->get(route('fiscal.show',$old));
+        $html->assertOk()
+            ->assertSee('data-initial-tab="general"',false)
+            ->assertSee('name="nature"',false)
+            ->assertSee('name="notes"',false)
+            ->assertSee('name="consumer_document"',false)
+            ->assertSee('name="consumer_name"',false)
+            ->assertSee('name="items[0][ncm]"',false)
+            ->assertSee('name="payments[0][amount]"',false);
+        $html->assertDontSee('data-initial-tab="products"',false);
+    }
+
+    public function test_778_rejection_allows_changes_in_other_tabs_and_tracks_each_fiscal_field(): void
+    {
+        $old=$this->rejected('778');
+        $before=$old->source_snapshot;
+        $input=$this->itemPayload(['ncm'=>'61091000']);
+        $input['consumer_document']='39323356000100';
+        $input['consumer_name']='Cliente de teste';
+        $input['payments']=[['payment_method'=>'pix','amount'=>'29.90']];
+        $input['nature']='VENDA DE PRODUTOS';
+        $input['notes']='Teste de correção fiscal';
+
+        $copy=app(NFCeRejectionCorrectionService::class)
+            ->prepare($old->id,$input,$this->admin()->id);
+        $after=$copy->source_snapshot;
+        self::assertSame('61091000',$after['items'][0]['ncm']);
+        self::assertSame('39323356000100',$after['consumer_document']);
+        self::assertSame('pix',$after['payments'][0]['payment_method']);
+        self::assertSame('VENDA DE PRODUTOS',$after['nature']);
+        self::assertSame('Teste de correção fiscal',$after['notes']);
+        self::assertSame($before,$old->fresh()->source_snapshot);
+        self::assertSame(1,Sale::query()->count());
+        self::assertSame('29.90',(string)$old->sale->total);
+        $fields=json_decode(DB::table('nfce_correction_revisions')->sole()->changed_fields,true)['fields'];
+        foreach(['consumer_document','consumer_name','payments.0.payment_method','nature','notes'] as $field) {
+            self::assertContains($field,$fields);
+        }
+
+        $ini=app(\App\Services\Fiscal\NFCeIniBuilder::class)
+            ->build($copy,CompanySetting::current());
+        self::assertStringContainsString('natOp=VENDA DE PRODUTOS',$ini);
+        self::assertStringContainsString('[DadosAdicionais]',$ini);
+        self::assertStringContainsString('infCpl=Teste de correção fiscal',$ini);
+    }
+
+    public function test_changes_to_unrelated_tax_codes_are_allowed_when_rejection_is_for_consumer(): void
+    {
+        $old=$this->rejected('237');
+        $copy=app(NFCeRejectionCorrectionService::class)
+            ->prepare($old->id,$this->itemPayload(),$this->admin()->id);
+        self::assertSame('61091001',$copy->source_snapshot['items'][0]['ncm']);
+        self::assertSame(1,Sale::query()->count());
+    }
+
     public function test_consumer_rejection_accepts_valid_document_without_modifying_sale(): void
     {
         $old=$this->rejected('237');
