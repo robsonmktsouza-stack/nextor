@@ -11,6 +11,7 @@ use RuntimeException;
 final class NFCeTaxGroupTranslatorTest extends TestCase
 {
     use RefreshDatabase;
+    use \Tests\Concerns\WithConfiguredCompany;
 
     private function group(array $override = []): FiscalTaxGroup
     {
