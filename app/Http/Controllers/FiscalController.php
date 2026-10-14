@@ -243,7 +243,7 @@ class FiscalController extends Controller
         }
 
         return redirect()->route('fiscal.show', $fiscalDocumentJob)
-            ->with('success', 'Dados fiscais atualizados conforme as configurações da empresa.');
+            ->with('success', 'Dados fiscais atualizados.');
     }
 
     public function issueNfce(FiscalDocumentJob $fiscalDocumentJob, \App\Services\Fiscal\NFCePreflightService $preflight)
@@ -252,7 +252,7 @@ class FiscalController extends Controller
 
         $queueConnection=(string)config('queue.default','sync');
         if (in_array($queueConnection,['sync','null',''],true)) {
-            return back()->with('error','Configure o processamento em segundo plano antes de emitir.');
+            return back()->with('error','Não foi possível iniciar a emissão. Verifique a configuração fiscal.');
         }
 
         $problems = $preflight->validate($fiscalDocumentJob);
@@ -263,8 +263,8 @@ class FiscalController extends Controller
         \App\Jobs\ProcessNFCeJob::dispatch($fiscalDocumentJob->id)->onConnection($queueConnection);
 
         return back()->with('success', $fiscalDocumentJob->emission_mode==='offline'
-            ? 'Preparação offline colocada na fila: assinatura e DANFE, sem envio à SEFAZ.'
-            : 'Emissão colocada na fila fiscal. Acompanhe o resultado neste documento.');
+            ? 'Preparando a NFC-e em contingência.'
+            : 'Emissão iniciada. Acompanhe a situação da nota.');
     }
 
 
@@ -285,7 +285,7 @@ class FiscalController extends Controller
         }
 
         return redirect()->route('fiscal.show', $copy)
-            ->with('success', 'NFC-e duplicada a partir do documento rejeitado. A venda original não foi alterada. Confira os dados antes de emitir.');
+            ->with('success', 'Nova NFC-e preparada. Confira antes de emitir.');
     }
 
     public function editRejectedNfce(
@@ -296,7 +296,7 @@ class FiscalController extends Controller
         $rejection = $correction->rejection($fiscalDocumentJob);
         if (!$rejection) {
             return redirect()->route('fiscal.show', $fiscalDocumentJob)
-                ->with('error', 'Esta NFC-e não possui rejeição definitiva editável. Consulte a SEFAZ.');
+                ->with('error', 'Esta NFC-e ainda não pode ser corrigida. Consulte a situação da nota.');
         }
 
         $paymentMethods = \App\Models\PaymentMethod::query()
@@ -333,18 +333,18 @@ class FiscalController extends Controller
         // preflight e pela trava da venda no processador fiscal.
         if ($copy->status !== 'prepared') {
             return redirect()->route('fiscal.show',$copy)
-                ->with('success','Essa correcao ja foi registrada. Acompanhe o documento atual.');
+                ->with('success','Correção já salva. Abra a nota atual.');
         }
 
         $problems=app(\App\Services\Fiscal\NFCePreflightService::class)->validate($copy);
         if ($problems) {
             return redirect()->route('fiscal.show',$copy)
-                ->with('error','Correcao salva, mas a emissao foi bloqueada: '.implode(' | ',$problems));
+                ->with('error','Correção salva. Verifique as pendências: '.implode(' | ',$problems));
         }
         $queue=(string) config('queue.default','sync');
         if (in_array($queue,['','sync','null'],true)) {
             return redirect()->route('fiscal.show',$copy)
-                ->with('error','Correcao salva. Configure a fila fiscal antes da transmissao.');
+                ->with('error','Correção salva, mas não foi possível iniciar a emissão. Verifique a configuração fiscal.');
         }
 
         try {
@@ -355,11 +355,11 @@ class FiscalController extends Controller
                 'message'=>$error->getMessage(),
             ]);
             return redirect()->route('fiscal.show',$copy)
-                ->with('error','Correcao salva. Nao foi possivel colocar a NFC-e na fila fiscal.');
+                ->with('error','Correção salva, mas não foi possível iniciar a emissão.');
         }
 
         return redirect()->route('fiscal.show',$copy)
-            ->with('success','Correcao salva. A NFC-e foi colocada na fila para validacao e transmissao.');
+            ->with('success','Correção salva. Emissão iniciada.');
     }
 
     private function nfceHistory(FiscalDocumentJob $document)
@@ -383,11 +383,11 @@ class FiscalController extends Controller
         }
         $queueConnection=(string)config('queue.default','sync');
         if (in_array($queueConnection,['sync','null',''],true)) {
-            return back()->with('error','Configure o processamento em segundo plano para consultar a nota.');
+            return back()->with('error','Não foi possível iniciar a consulta. Tente novamente.');
         }
         \App\Jobs\ConsultNFCeJob::dispatch($fiscalDocumentJob->id)->onConnection($queueConnection);
 
-        return back()->with('success', 'Consulta da NFC-e enviada à fila. A nota não será retransmitida.');
+        return back()->with('success', 'Consulta iniciada. Aguarde o resultado.');
     }
 
     /**
@@ -410,11 +410,11 @@ class FiscalController extends Controller
                 'fiscal_document_job_id' => $fiscalDocumentJob->id,
                 'reason' => $e->getMessage(),
             ]);
-            return back()->with('error', 'Não foi possível recuperar o XML. Consulte o log do Lumeron. Nenhuma nota foi retransmitida.');
+            return back()->with('error', 'Não foi possível recuperar o XML. Tente novamente ou contate o suporte.');
         }
 
         return redirect()->route('fiscal.show', $fiscalDocumentJob)
-            ->with('success', 'XML autorizado recuperado a partir dos arquivos originais. A NFC-e não foi retransmitida.');
+            ->with('success', 'XML recuperado com sucesso.');
     }
 
     public function downloadNfceXml(FiscalDocumentJob $fiscalDocumentJob)
