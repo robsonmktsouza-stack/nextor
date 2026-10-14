@@ -4,11 +4,14 @@ namespace Tests\Unit;
 
 use App\Models\FiscalTaxGroup;
 use App\Services\Fiscal\NFCeTaxGroupTranslator;
-use PHPUnit\Framework\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 use RuntimeException;
 
 final class NFCeTaxGroupTranslatorTest extends TestCase
 {
+    use RefreshDatabase;
+
     private function group(array $override = []): FiscalTaxGroup
     {
         return new FiscalTaxGroup(array_replace([
