@@ -38,7 +38,7 @@ final class NFCeIniBuilder
         $add('Identificacao', [
             'cUF' => '29',
             'cNF' => $cNF,
-            'natOp' => 'VENDA DE MERCADORIA',
+            'natOp' => $source['nature'] ?? 'VENDA DE MERCADORIA',
             'Modelo' => '65',
             'serie' => (string) $job->series,
             'nNF' => (string) $job->document_number,
@@ -204,6 +204,10 @@ final class NFCeIniBuilder
 
         if ((float) ($source['change_amount'] ?? 0) > 0 && !$cashChangeAssigned) {
             throw new RuntimeException('Troco em dinheiro não corresponde a nenhum pagamento em espécie.');
+        }
+
+        if (trim((string)($source['notes'] ?? '')) !== '') {
+            $add('DadosAdicionais', ['infCpl' => $source['notes']]);
         }
 
         return implode("\r\n\r\n", $sections)."\r\n";
