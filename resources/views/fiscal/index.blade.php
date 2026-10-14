@@ -196,13 +196,7 @@
               'cancelled'=>['Cancelada','status-muted'],
               default=>['Preparada','status-blue'],
             };
-            $replacedByAuthorized=$tab==='nfce'
-              && $document->status!=='authorized'
-              && $document->sale_id
-              && $nfceAuthorizedSaleIds->has($document->sale_id);
-            if($replacedByAuthorized) {
-              $statusInfo=['Substituída','status-muted'];
-            } elseif($tab==='nfce' && $document->status==='pending'
+            if($tab==='nfce' && $document->status==='pending'
               && str_starts_with((string)$document->error_message,'Consulta SEFAZ:')) {
               $statusInfo=['Consulta inconclusiva','status-danger'];
             }
