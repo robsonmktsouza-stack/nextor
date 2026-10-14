@@ -212,6 +212,48 @@ class FiscalController extends Controller
             ->with('success', 'NFC-e duplicada a partir do documento rejeitado. A venda original não foi alterada. Confira os dados antes de emitir.');
     }
 
+    public function editRejectedNfce(
+        FiscalDocumentJob $fiscalDocumentJob,
+        \App\Services\Fiscal\NFCeRejectionCorrectionService $correction
+    ) {
+        abort_unless($fiscalDocumentJob->document_type === 'nfce', 404);
+        $rejection = $correction->rejection($fiscalDocumentJob);
+        if (!$rejection) {
+            return redirect()->route('fiscal.show', $fiscalDocumentJob)
+                ->with('error', 'Esta NFC-e não possui rejeição definitiva editável. Consulte a SEFAZ.');
+        }
+
+        $paymentMethods = \App\Models\PaymentMethod::query()
+            ->where('is_active', true)
+            ->whereIn('kind', ['cash','money','pix','card','credit_card','debit_card',
+                'bank_slip','bank_transfer','transfer'])
+            ->orderBy('sort_order')->orderBy('name')->get(['code','name','kind']);
+
+        return view('fiscal.nfce.correct-rejection', [
+            'document'=>$fiscalDocumentJob,
+            'rejection'=>$rejection,
+            'company'=>\App\Models\CompanySetting::current(),
+            'snapshot'=>$fiscalDocumentJob->source_snapshot ?? [],
+            'paymentMethods'=>$paymentMethods,
+        ]);
+    }
+
+    public function saveRejectedNfce(
+        \Illuminate\Http\Request $request,
+        FiscalDocumentJob $fiscalDocumentJob,
+        \App\Services\Fiscal\NFCeRejectionCorrectionService $correction
+    ) {
+        abort_unless($fiscalDocumentJob->document_type === 'nfce', 404);
+        try {
+            $copy = $correction->prepare($fiscalDocumentJob->id, $request->all(), (int)$request->user()->id);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withInput()->withErrors($e->errors());
+        }
+
+        return redirect()->route('fiscal.show', $copy)
+            ->with('success', 'Nova versão fiscal preparada. A tentativa rejeitada foi preservada. Confira a validação antes de emitir.');
+    }
+
     public function consultNfce(FiscalDocumentJob $fiscalDocumentJob)
     {
         abort_unless($fiscalDocumentJob->document_type === 'nfce', 404);
