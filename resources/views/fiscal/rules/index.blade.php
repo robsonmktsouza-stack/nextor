@@ -15,7 +15,7 @@
 
 @section('content')
 <section class="editor-panel settings-panel" style="margin-bottom:14px">
-  <div class="settings-panel-head"><div><h2>Nova regra</h2><p>Cadastre condições e códigos por UF. NFC-e deste fluxo: origem e destino na mesma UF.</p></div></div>
+  <div class="settings-panel-head"><div><h2>Nova regra</h2></div></div>
   <form method="post" action="{{ route('fiscal.tax-rules.store') }}" class="settings-editor">
     @csrf
     <input type="hidden" name="document_type" value="nfce">
@@ -39,7 +39,7 @@
           @endforeach
         </select>
       </label>
-      <label class="field col-6"><span>Nome</span><input required maxlength="160" name="name" value="{{ old('name') }}" placeholder="Ex.: Perfil revisado — mercadorias do NCM ..."></label>
+      <label class="field col-6"><span>Nome</span><input required maxlength="160" name="name" value="{{ old('name') }}" placeholder="Ex.: Mercadorias para revenda"></label>
       <label class="field col-3"><span>Produto (opcional)</span>
         <select name="product_id">
           <option value="">Todos os produtos</option>
@@ -58,7 +58,7 @@
       <label class="field col-3"><span>Fim da vigência</span><input type="date" name="valid_until" value="{{ old('valid_until') }}"></label>
       <div class="field col-6"><span>Situação</span>
         <label class="settings-switch"><input type="checkbox" name="is_active" value="1" @checked(old('is_active'))>
-          <span><strong>Regra ativa</strong><small>Regra utilizada nas operações configuradas.</small></span>
+          <span><strong>Regra ativa</strong></span>
         </label>
       </div>
       <label class="field col-12"><span>Observações / fundamento para conferência</span>
