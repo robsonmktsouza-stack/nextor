@@ -176,8 +176,8 @@ final class NFCeRejectionCorrectionTest extends TestCase
         $old=$this->rejected('778','pending');
         $base='fiscal/nfce/'.$old->id;
         Storage::disk('local')->put($base.'/sefaz-response.ini',
-            "[ENVIO]\\nCStat=103\\nXMotivo=Lote recebido\\n"
-            ."[RETORNO]\\nCStat=778\\nXMotivo=Rejeicao: Informado NCM inexistente [nItem:1]\\n"
+            "[ENVIO]\nCStat=103\nXMotivo=Lote recebido\n"
+            ."[RETORNO]\nCStat=778\nXMotivo=Rejeicao: Informado NCM inexistente [nItem:1]\n"
         );
         $signed=Storage::disk('local')->get($old->xml_path);
         $parsed=app(\App\Services\Fiscal\NFCeSefazResponseParser::class)
@@ -211,7 +211,7 @@ final class NFCeRejectionCorrectionTest extends TestCase
     {
         $old=$this->rejected('778','pending');
         Storage::disk('local')->put('fiscal/nfce/'.$old->id.'/sefaz-response.ini',
-            "[RETORNO]\\nCStat=613\\nXMotivo=Rejeicao: Chave divergente\\n"
+            "[RETORNO]\nCStat=613\nXMotivo=Rejeicao: Chave divergente\n"
         );
 
         $this->artisan('nfce:reconcile-rejection',[
@@ -220,7 +220,7 @@ final class NFCeRejectionCorrectionTest extends TestCase
         self::assertSame('pending',$old->fresh()->status);
 
         Storage::disk('local')->put('fiscal/nfce/'.$old->id.'/sefaz-response.ini',
-            "[RETORNO]\\nCStat=778\\nXMotivo=Rejeicao: Informado NCM inexistente [nItem:1]\\n"
+            "[RETORNO]\nCStat=778\nXMotivo=Rejeicao: Informado NCM inexistente [nItem:1]\n"
         );
         FiscalDocumentJob::query()->create([
             'document_type'=>'nfce','sale_id'=>$old->sale_id,
