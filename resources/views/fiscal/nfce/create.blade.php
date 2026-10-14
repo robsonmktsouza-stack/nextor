@@ -110,11 +110,10 @@
           @if($oldVersion)
             <div class="fiscal-info-card">
               <strong>Versão fiscal corrigida</strong>
-              <p>Este documento foi autorizado após a correção da rejeição da
+              <p>Correção da
                 <a href="{{ route('fiscal.show',$oldVersion) }}" class="table-link">
                   NFC-e {{ $oldVersion->series }}/{{ $oldVersion->document_number }}
                 </a>.
-                Os arquivos e os dados da tentativa anterior estão preservados.
               </p>
             </div>
           @endif
@@ -153,9 +152,9 @@
         @endif
         @if($readOnly && ($nfceCorrectedNext ?? null))
           <div class="fiscal-info-card">
-            <strong>Revisão fiscal já preparada</strong>
+            <strong>Correção já salva</strong>
             <a class="table-link" href="{{ route('fiscal.show',$nfceCorrectedNext) }}">
-              Abrir versão corrigida {{ $nfceCorrectedNext->series }}/{{ $nfceCorrectedNext->document_number }}
+              Abrir NFC-e {{ $nfceCorrectedNext->series }}/{{ $nfceCorrectedNext->document_number }}
             </a>.
           </div>
         @endif
@@ -232,7 +231,7 @@
                   @endforeach
                 </select>
               </label>
-              <p class="nfce-muted">A nota será vinculada à venda já concluída, sem registrar novamente estoque ou financeiro.</p>
+  
             </div>
           </div>
         </section>
@@ -368,7 +367,7 @@
               <button type="button" class="btn btn-danger" data-dialog-open="nfceCancelDialog">Cancelar NFC-e</button>
             @endif
           @elseif($correctionMode)
-            <button type="submit" class="btn btn-success" data-confirm-submit="Salvar os dados fiscais corrigidos e colocar a NFC-e na fila de transmissão da SEFAZ?" data-confirm-kind="action">
+            <button type="submit" class="btn btn-success" data-confirm-submit="Salvar a correção e iniciar a emissão?" data-confirm-kind="action">
               @include('partials.icon',['name'=>'check','size'=>16]) Salvar e transmitir
             </button>
           @else
