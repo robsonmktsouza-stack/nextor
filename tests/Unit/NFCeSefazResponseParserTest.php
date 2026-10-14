@@ -74,10 +74,24 @@ final class NFCeSefazResponseParserTest extends TestCase
         self::assertFalse($this->parser->authorized($parsed));
     }
 
-    public function test_778_from_envio_or_ambiguous_response_is_not_correctable(): void
+    public function test_exact_acbr_envio_778_return_from_homologation_is_definitive(): void
+    {
+        $parsed=$this->parser->parse(
+            "[Envio]\nCStat=778\nXMotivo=Rejeicao: Informado NCM inexistente [nItem:1]\n"
+        );
+        self::assertSame('778',$parsed['cstat']);
+        self::assertSame('ENVIO',$parsed['source']);
+        self::assertFalse($parsed['individual']);
+        self::assertTrue($this->parser->definitiveCorrectionRejection($parsed));
+        self::assertFalse($this->parser->authorized($parsed));
+    }
+
+    public function test_ambiguous_envio_or_batch_response_is_not_correctable(): void
     {
         foreach([
-            "[ENVIO]\nCStat=778\nXMotivo=Rejeicao: NCM\n",
+            "[ENVIO]\nCStat=778\nXMotivo=Retorno sem confirmacao\n",
+            "[ENVIO]\nCStat=103\nXMotivo=Lote recebido com sucesso\n",
+            "[ENVIO]\nCStat=613\nXMotivo=Rejeicao: Chave divergente\n",
             "[RETORNO]\nCStat=778\nXMotivo=Processamento de lote\n",
             "[RETORNO]\nCStat=104\nXMotivo=Lote processado\n",
             "[RETORNO]\nCStat=204\nXMotivo=Rejeicao: Duplicidade\n",
