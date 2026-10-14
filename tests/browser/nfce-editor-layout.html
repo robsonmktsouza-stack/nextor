@@ -70,6 +70,7 @@ html,body{margin:0;width:100%;height:100%}
                   <label class="field col-3"><span>GTIN</span><input></label>
                   <label class="field col-4"><span>CSOSN</span><input value="102"></label>
                 </div>
+                <div style="height:850px;padding-top:12px;box-sizing:border-box" aria-label="Muitos produtos na NFC-e">Lista longa de produtos para testar a rolagem</div>
               </div>
             </div>
           </section>
@@ -97,6 +98,12 @@ window.addEventListener('load',()=>{
     const viewport=document.documentElement.clientWidth;
     const dialog=document.querySelector('#nfceEditor .nfe-fixed-shell');
     const rect=dialog.getBoundingClientRect();
+    const assertStable=tab=>{
+      const now=dialog.getBoundingClientRect();
+      if(Math.abs(now.width-rect.width)>2 || Math.abs(now.height-rect.height)>2
+        || Math.abs(now.top-rect.top)>2 || Math.abs(now.left-rect.left)>2)
+        throw Error('janela mudou de tamanho ou posição na aba '+tab);
+    };
     const body=document.querySelector('#nfceEditor .nfe-workspace-body');
     const footer=document.querySelector('#nfceEditor .nfce-savebar');
     const tabs=[...document.querySelectorAll('[data-nfce-tab]')];
@@ -106,22 +113,35 @@ window.addEventListener('load',()=>{
     if(panels.filter(p=>!p.hidden).length!==1||panels.find(p=>!p.hidden)?.id!=='products')throw Error('abas e conteúdo fora de sincronia');
     if(rect.right>viewport+2||rect.left< -2)throw Error('modal ultrapassou a largura do navegador');
     if(!mobile && rect.height>innerHeight-30)throw Error('modal ultrapassou a altura útil da tela: '+Math.round(rect.height));
+    if(body.scrollHeight<=body.clientHeight+20)throw Error('conteúdo longo não ficou rolável dentro da janela');
     const footerRect=footer.getBoundingClientRect();
     if(footerRect.bottom>innerHeight+2||footerRect.right>viewport+2)throw Error('rodapé cortado');
     if(body.getBoundingClientRect().bottom>footerRect.top+2)throw Error('conteúdo cobre botões');
     if(document.documentElement.scrollWidth>viewport+2)throw Error('scroll horizontal na tela');
     tabs[0].click();
-    if(!panels[0].hidden===false)throw Error('aba geral não abriu');
-    const generalCard=document.querySelector('#general .nfe-general-card');
-    const blank=Math.round(body.getBoundingClientRect().bottom-generalCard.getBoundingClientRect().bottom);
-    if(!mobile && blank>90 && body.scrollHeight<=body.clientHeight+2)
-      throw Error('espaço vazio abaixo dos dados: '+blank+'px');
+    if(panels[0].hidden)throw Error('aba geral não abriu');
+    assertStable('Dados gerais');
     const key=document.querySelector('.fiscal-key');
     if(key.scrollWidth>key.clientWidth+3)throw Error('chave não quebrou linha');
     const keyField=key.closest('.field').getBoundingClientRect();
     if(keyField.right>rect.right+2)throw Error('chave deslocou a coluna');
     tabs[2].click();
     if(panels[2].hidden)throw Error('não voltou para Produtos');
+    assertStable('Produtos');
+    tabs[3].click();
+    assertStable('Pagamento');
+    tabs[4].click();
+    assertStable('Resumo');
+    tabs[1].click();
+    assertStable('Consumidor');
+    tabs[2].click();
+    assertStable('Produtos novamente');
+    body.scrollTop=body.scrollHeight;
+    if(body.scrollTop<40)throw Error('rolagem interna do editor não funciona');
+    assertStable('Rolagem');
+    const footerAfter=footer.getBoundingClientRect();
+    if(Math.abs(footerAfter.bottom-footerRect.bottom)>2)
+      throw Error('rodapé se moveu durante navegação');
     return mobile?'mobile':'desktop';
   };
   setTimeout(()=>{
