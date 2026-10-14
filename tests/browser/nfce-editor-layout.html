@@ -16,7 +16,7 @@ html,body{margin:0;width:100%;height:100%}
 <body>
 <div class="app-root">
   <div id="nfceEditor" class="nextor-modal-layer nfe-modal-layer is-open"
-    data-initial-tab="products" aria-hidden="false">
+    data-initial-tab="general" aria-hidden="false">
     <div class="erp-dialog nfe-workspace-dialog nextor-modal-window nfe-fixed-shell" role="dialog" aria-modal="true">
       <form id="nfceEditorForm" data-readonly="0" data-correction="1">
         <div class="dialog-header">
@@ -36,7 +36,7 @@ html,body{margin:0;width:100%;height:100%}
             </div>
           </div>
           <div class="alert alert-danger">Rejeição 778 — Informado NCM inexistente</div>
-          <div class="editor-tabs nfe-editor-tabs" role="tablist" data-nfce-tabs data-initial-tab="products">
+          <div class="editor-tabs nfe-editor-tabs" role="tablist" data-nfce-tabs data-initial-tab="general">
             <button type="button" class="editor-tab active" data-nfce-tab="general" aria-selected="true">Dados gerais</button>
             <button type="button" class="editor-tab" data-nfce-tab="consumer" aria-selected="false">Consumidor</button>
             <button type="button" class="editor-tab" data-nfce-tab="products" aria-selected="false">Produtos</button>
@@ -60,17 +60,33 @@ html,body{margin:0;width:100%;height:100%}
             <div class="nfe-general-card"><h3>Consumidor</h3></div>
           </section>
           <section class="editor-tab-panel" data-nfce-panel="products" id="products" hidden>
-            <div class="editor-panel">
-              <h3>Produtos</h3>
-              <div class="editor-panel"><h3>Item 1 — PRODUTO TESTE</h3>
+            <div class="cms-card nfce-correction-product-list">
+              <div class="grid-actionbar"><strong>Produtos da NFC-e</strong><span class="nfce-list-count">2 produtos</span></div>
+              <div class="table-scroll nfce-item-table-wrap">
+                <table class="cms-table nfce-item-table">
+                  <thead><tr><th>Produto</th><th>CFOP</th><th>NCM</th><th>Qtd.</th><th>Unitário</th><th>Total</th><th>Editar</th></tr></thead>
+                  <tbody>
+                    <tr data-nfce-item-row="0"><td>PRODUTO TESTE</td><td><span data-nfce-item-cell="0-cfop">5102</span></td><td><span data-nfce-item-cell="0-ncm">00000001</span></td><td>1</td><td>1,00</td><td>1,00</td><td><button type="button" data-nfce-item-select="0" aria-expanded="false">Editar</button></td></tr>
+                    <tr data-nfce-item-row="1"><td>PRODUTO TESTE 2</td><td><span data-nfce-item-cell="1-cfop">5102</span></td><td><span data-nfce-item-cell="1-ncm">22021000</span></td><td>2</td><td>1,00</td><td>2,00</td><td><button type="button" data-nfce-item-select="1" aria-expanded="false">Editar</button></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="nfce-correction-item-details">
+              <div class="editor-panel nfce-correction-item-editor" id="nfceItemEdit0" data-nfce-item-editor="0" hidden>
+                <div class="nfce-item-editor-heading"><h3>Editar: PRODUTO TESTE</h3><button type="button" data-nfce-item-close>Fechar</button></div>
                 <div class="editor-grid cols-12">
-                  <label class="field col-3"><span>NCM</span><input value="00000001"></label>
-                  <label class="field col-3"><span>CFOP</span><input value="5102"></label>
-                  <label class="field col-3"><span>Origem</span><input value="0"></label>
-                  <label class="field col-3"><span>GTIN</span><input></label>
-                  <label class="field col-4"><span>CSOSN</span><input value="102"></label>
+                  <label class="field col-3"><span>NCM</span><input name="items[0][ncm]" value="00000001"></label>
+                  <label class="field col-3"><span>CFOP</span><input name="items[0][cfop]" value="5102"></label>
                 </div>
-                <div style="height:850px;padding-top:12px;box-sizing:border-box" aria-label="Muitos produtos na NFC-e">Lista longa de produtos para testar a rolagem</div>
+                <div style="height:850px;padding-top:12px;box-sizing:border-box" aria-label="Edição longa">Campos adicionais para testar a rolagem</div>
+              </div>
+              <div class="editor-panel nfce-correction-item-editor" id="nfceItemEdit1" data-nfce-item-editor="1" hidden>
+                <div class="nfce-item-editor-heading"><h3>Editar: PRODUTO TESTE 2</h3><button type="button" data-nfce-item-close>Fechar</button></div>
+                <div class="editor-grid cols-12">
+                  <label class="field col-3"><span>NCM</span><input name="items[1][ncm]" value="22021000"></label>
+                  <label class="field col-3"><span>CFOP</span><input name="items[1][cfop]" value="5102"></label>
+                </div>
               </div>
             </div>
           </section>
@@ -109,11 +125,12 @@ window.addEventListener('load',()=>{
     const tabs=[...document.querySelectorAll('[data-nfce-tab]')];
     const panels=[...document.querySelectorAll('[data-nfce-panel]')];
     const selected=()=>tabs.filter(t=>t.getAttribute('aria-selected')==='true');
-    if(selected().length!==1||selected()[0].dataset.nfceTab!=='products')throw Error('rejeição não abriu Produtos');
-    if(panels.filter(p=>!p.hidden).length!==1||panels.find(p=>!p.hidden)?.id!=='products')throw Error('abas e conteúdo fora de sincronia');
+    if(selected().length!==1||selected()[0].dataset.nfceTab!=='general')throw Error('rejeição não abriu Dados gerais');
+    if(panels.filter(p=>!p.hidden).length!==1||panels.find(p=>!p.hidden)?.id!=='general')throw Error('abas e conteúdo fora de sincronia');
     if(rect.right>viewport+2||rect.left< -2)throw Error('modal ultrapassou a largura do navegador');
+    if(!mobile && viewport>1150 && Math.abs(rect.width-Math.min(1420,viewport-32))>8)
+      throw Error('NFC-e está mais estreita que o padrão de NF-e');
     if(!mobile && rect.height>innerHeight-30)throw Error('modal ultrapassou a altura útil da tela: '+Math.round(rect.height));
-    if(body.scrollHeight<=body.clientHeight+20)throw Error('conteúdo longo não ficou rolável dentro da janela');
     const footerRect=footer.getBoundingClientRect();
     if(footerRect.bottom>innerHeight+2||footerRect.right>viewport+2)throw Error('rodapé cortado');
     if(body.getBoundingClientRect().bottom>footerRect.top+2)throw Error('conteúdo cobre botões');
@@ -128,6 +145,27 @@ window.addEventListener('load',()=>{
     tabs[2].click();
     if(panels[2].hidden)throw Error('não voltou para Produtos');
     assertStable('Produtos');
+    const buttons=[...document.querySelectorAll('[data-nfce-item-select]')];
+    const rows=[...document.querySelectorAll('[data-nfce-item-row]')];
+    const editors=[...document.querySelectorAll('[data-nfce-item-editor]')];
+    if(buttons.length!==2||rows.length!==2)throw Error('lista de produtos incompleta');
+    if(editors.some(editor=>!editor.hidden))throw Error('deveria abrir apenas a lista de produtos');
+    buttons[0].click();
+    if(editors[0].hidden||!editors[1].hidden)throw Error('edição do primeiro item incorreta');
+    if(rows.some(row=>row.getBoundingClientRect().height<15))throw Error('lista desapareceu ao editar produto');
+    if(body.scrollHeight<=body.clientHeight+20)throw Error('detalhes longos não ativaram rolagem interna');
+    assertStable('Editar primeiro produto');
+    const ncm=editors[0].querySelector('[name="items[0][ncm]"]');
+    ncm.value='22029900';
+    ncm.dispatchEvent(new Event('input',{bubbles:true}));
+    if(document.querySelector('[data-nfce-item-cell="0-ncm"]').textContent!=='22029900')
+      throw Error('a lista não atualizou os dados editados');
+    buttons[1].click();
+    if(!editors[0].hidden||editors[1].hidden)throw Error('a edição não trocou de produto');
+    if(rows.some(row=>row.getBoundingClientRect().height<15))throw Error('lista desapareceu ao trocar produto');
+    assertStable('Editar segundo produto');
+    buttons[0].click();
+    assertStable('Voltar ao primeiro produto');
     tabs[3].click();
     assertStable('Pagamento');
     tabs[4].click();
