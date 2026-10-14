@@ -14,7 +14,7 @@ final class NFCeSefazResponseParser
             'cstat' => null, 'reason' => 'Retorno SEFAZ não identificado',
             'key' => null, 'protocol' => null, 'received_at' => null,
             'digest' => null, 'environment' => null, 'application' => null,
-            'individual' => false,
+            'individual' => false, 'source' => null,
         ];
 
         $sections = @parse_ini_string($raw, true, INI_SCANNER_RAW);
@@ -40,16 +40,18 @@ final class NFCeSefazResponseParser
                     'digest' => (string) ($section['digval'] ?? ''),
                     'environment' => (string) ($section['tpamb'] ?? ''),
                     'application' => (string) ($section['veraplic'] ?? ''),
-                    'individual' => true,
+                    'individual' => true, 'source' => 'NFE',
                 ];
             }
 
             if (strtoupper((string) $sectionName) === 'RETORNO') {
                 $result['cstat'] = (string) ($section['cstat'] ?? '');
                 $result['reason'] = (string) ($section['xmotivo'] ?? '');
+                $result['source'] = 'RETORNO';
             } elseif (strtoupper((string) $sectionName) === 'ENVIO' && $result['cstat'] === null) {
                 $result['cstat'] = (string) ($section['cstat'] ?? '');
                 $result['reason'] = (string) ($section['xmotivo'] ?? '');
+                $result['source'] = 'ENVIO';
             }
         }
 
@@ -84,6 +86,34 @@ final class NFCeSefazResponseParser
             ];
         }
         return $result;
+    }
+
+    /**
+     * A single NFC-e is sent synchronously by this integration. Some ACBr
+     * responses carry an explicit item-level rejection only in [RETORNO],
+     * without a [NFE{number}] section. Never equate a batch status, network
+     * error, consultation, duplicate 204/539 or authorization with rejection.
+     *
+     * Only the known, individually correctable codes below are accepted from
+     * [RETORNO], and only when xMotivo explicitly identifies a rejection.
+     * A caller must still check the original archived response and signed XML.
+     */
+    public function definitiveCorrectionRejection(array $response): bool
+    {
+        $code = (string) ($response['cstat'] ?? '');
+        if (!in_array($code, [
+            '777', '778', '611', '383', '386', '382', '766', '725',
+            '237', '220', '769', '767', '865', '866', '869',
+        ], true)) {
+            return false;
+        }
+
+        if (($response['individual'] ?? false) === true) {
+            return true;
+        }
+
+        return ($response['source'] ?? null) === 'RETORNO'
+            && preg_match('/^\\s*Rejei(?:c|ç)(?:a|ã)o\\b/iu', (string) ($response['reason'] ?? '')) === 1;
     }
 
     public function authorized(array $response): bool
