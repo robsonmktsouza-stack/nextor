@@ -38,6 +38,13 @@
         tabs[next].focus();
       });
     });
+    // Keep markup, selection and visible panel synchronized on first paint.
+    // A rejected NCM must open Products, not an empty general-information tab.
+    const initial=form.querySelector('[data-nfce-tabs]')?.dataset.initialTab
+      || document.getElementById('nfceEditor')?.dataset.initialTab
+      || tabs.find(tab=>tab.getAttribute('aria-selected')==='true')?.dataset.nfceTab
+      || 'general';
+    activate(initial);
     return;
   }
   const el=id=>document.getElementById(id);
