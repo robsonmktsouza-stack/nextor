@@ -229,7 +229,7 @@
 
 <div class="fiscal-detail-grid">
   <section class="cms-card fiscal-detail-card">
-    <div class="card-header"><div><h2>Documento</h2><p>Identificação e retorno fiscal registrado.</p></div></div>
+    <div class="card-header"><div><h2>Documento</h2></div></div>
     <dl class="fiscal-data-list">
       <div><dt>Modelo</dt><dd>{{ $tabMeta['label'] }}</dd></div>
       <div><dt>Série / número</dt><dd>{{ $document->series ?? '—' }} / {{ $document->document_number ?? '—' }}</dd></div>
@@ -241,7 +241,7 @@
   </section>
 
   <section class="cms-card fiscal-detail-card">
-    <div class="card-header"><div><h2>Origem</h2><p>Operação comercial relacionada ao documento.</p></div></div>
+    <div class="card-header"><div><h2>Origem</h2></div></div>
     <dl class="fiscal-data-list">
       <div><dt>Venda</dt><dd>
         @if($document->sale)
