@@ -171,13 +171,12 @@ final class NFCeRejectionCorrectionTest extends TestCase
         self::assertSame(1,Sale::query()->count());
     }
 
-    public function test_archived_retorno_778_is_reconciled_without_reissuing_or_touching_sale(): void
+    public function test_real_acbr_envio_778_is_reconciled_without_reissuing_or_touching_sale(): void
     {
         $old=$this->rejected('778','pending');
         $base='fiscal/nfce/'.$old->id;
         Storage::disk('local')->put($base.'/sefaz-response.ini',
-            "[ENVIO]\nCStat=103\nXMotivo=Lote recebido\n"
-            ."[RETORNO]\nCStat=778\nXMotivo=Rejeicao: Informado NCM inexistente [nItem:1]\n"
+            "[Envio]\nCStat=778\nXMotivo=Rejeicao: Informado NCM inexistente [nItem:1]\n"
         );
         $signed=Storage::disk('local')->get($old->xml_path);
         $parsed=app(\App\Services\Fiscal\NFCeSefazResponseParser::class)
