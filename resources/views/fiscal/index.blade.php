@@ -196,6 +196,16 @@
               'cancelled'=>['Cancelada','status-muted'],
               default=>['Preparada','status-blue'],
             };
+            $replacedByAuthorized=$tab==='nfce'
+              && $document->status!=='authorized'
+              && $document->sale_id
+              && $nfceAuthorizedSaleIds->has($document->sale_id);
+            if($replacedByAuthorized) {
+              $statusInfo=['Substituída','status-muted'];
+            } elseif($tab==='nfce' && $document->status==='pending'
+              && str_starts_with((string)$document->error_message,'Consulta SEFAZ:')) {
+              $statusInfo=['Consulta inconclusiva','status-danger'];
+            }
             $firstItem=data_get($document->source_snapshot,'items.0',[]);
             $operationCode=match($tab){
               'nfe','nfce'=>data_get($firstItem,'tax_defaults.cfop')
@@ -226,7 +236,8 @@
               && !$document->authorized_at->isFuture()
               && $document->authorized_at->copy()->addMinutes(30)->isFuture();
           @endphp
-          <tr>
+          <tr @if($tab==='nfce') data-fiscal-open-url="{{ route('fiscal.show',$document) }}"
+              tabindex="0" aria-label="Abrir NFC-e {{ $document->series }}/{{ $document->document_number }}" @endif>
             <td class="select-cell">
               <input type="checkbox" data-row-select value="{{ $document->id }}"
                 data-fiscal-xml="{{ $xmlAvailable ? '1' : '0' }}"
