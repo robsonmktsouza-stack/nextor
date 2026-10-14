@@ -68,6 +68,35 @@ class FiscalController extends Controller
                 });
         });
 
+        // Mostrar uma NFC-e por venda: a autorizada prevalece, caso
+        // exista; senão, a tentativa mais recente. Não apagar tentativas
+        // antigas: elas continuam acessíveis no histórico do editor.
+        // A seleção acontece ANTES dos filtros, evitando que uma tentativa
+        // rejeitada reapareça quando a venda já possui nota autorizada.
+        if ($tab==='nfce') {
+            $query->where(function($visible) {
+                $visible->whereNull('fiscal_document_jobs.sale_id')
+                    ->orWhereNotExists(function($others) {
+                        $others->selectRaw('1')
+                            ->from('fiscal_document_jobs as other_nfce')
+                            ->where('other_nfce.document_type','nfce')
+                            ->whereColumn('other_nfce.sale_id','fiscal_document_jobs.sale_id')
+                            ->where(function($higher) {
+                                $higher->where(function($authorized) {
+                                    $authorized->where('other_nfce.status','authorized')
+                                        ->where('fiscal_document_jobs.status','!=','authorized');
+                                })->orWhere(function($later) {
+                                    $later->whereColumn('other_nfce.id','>','fiscal_document_jobs.id')
+                                        ->where(function($priority) {
+                                            $priority->where('fiscal_document_jobs.status','!=','authorized')
+                                                ->orWhere('other_nfce.status','authorized');
+                                        });
+                                });
+                            });
+                    });
+            });
+        }
+
         if($status!=='') $query->where('status',$status);
         if(in_array($environment,['homologation','production'],true)) {
             $query->where('environment',$environment);
@@ -81,19 +110,6 @@ class FiscalController extends Controller
             ->paginate(AppSetting::tablePerPage($request))
             ->withQueryString();
 
-        // Uma tentativa antiga não é "pendente" operacionalmente quando
-        // outra NFC-e da mesma venda já foi autorizada. Preserva-se seu
-        // status armazenado e a íntegra do histórico, alterando apenas
-        // a apresentação da listagem.
-        $nfceAuthorizedSaleIds = $tab === 'nfce'
-            ? FiscalDocumentJob::query()
-                ->where('document_type','nfce')
-                ->where('status','authorized')
-                ->whereIn('sale_id',$documents->getCollection()->pluck('sale_id')->filter()->all())
-                ->pluck('sale_id')
-                ->flip()
-            : collect();
-
         $monthNames=[
             1=>'Janeiro',2=>'Fevereiro',3=>'Março',4=>'Abril',5=>'Maio',6=>'Junho',
             7=>'Julho',8=>'Agosto',9=>'Setembro',10=>'Outubro',11=>'Novembro',12=>'Dezembro',
@@ -104,7 +120,6 @@ class FiscalController extends Controller
             'tabs'=>self::TABS,
             'tabMeta'=>self::TABS[$tab],
             'documents'=>$documents,
-            'nfceAuthorizedSaleIds'=>$nfceAuthorizedSaleIds,
             'term'=>$term,
             'status'=>$status,
             'environment'=>$environment,
