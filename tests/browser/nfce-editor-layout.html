@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NFC-e viewport smoke test</title>
+<link rel="stylesheet" href="../../public/css/erp.css">
+<link rel="stylesheet" href="../../public/css/ui-refinement.css">
+<style>
+html,body{margin:0;width:100%;height:100%}
+.app-root{width:100%;min-height:100%;box-sizing:border-box}
+#result{position:fixed;z-index:9999;top:0;right:0;max-width:300px;padding:4px;background:#fff;font:12px monospace}
+</style>
+<script defer src="../../public/js/nfce-editor.js"></script>
+</head>
+<body>
+<div class="app-root">
+  <div id="nfceEditor" class="nextor-modal-layer nfe-modal-layer is-open"
+    data-initial-tab="products" aria-hidden="false">
+    <div class="erp-dialog nfe-workspace-dialog nextor-modal-window nfe-fixed-shell" role="dialog" aria-modal="true">
+      <form id="nfceEditorForm" data-readonly="0" data-correction="1">
+        <div class="dialog-header">
+          <h2>NFC-e 1/8</h2>
+          <a href="#" class="close-dialog">Fechar</a>
+        </div>
+        <div class="dialog-body nfe-workspace-body">
+          <div class="nfe-emitter-summary">
+            <div class="nfe-emitter-logo"></div>
+            <div class="nfe-emitter-identity">
+              <div class="nfe-emitter-name"><strong>EMPRESA TESTE E MERCADINHO LTDA</strong></div>
+              <div class="nfe-emitter-address">Rua Teste, sem número, Centro, Cidade</div>
+              <div class="nfe-emitter-docs"><span>CNPJ: 12.345.678/0001-00</span><span>CRT: 1</span></div>
+            </div>
+            <div class="nfe-document-summary"><span>Número da NFC-e</span><strong>000000008</strong>
+              <div><span>Série 001</span><span>Homologação</span></div>
+            </div>
+          </div>
+          <div class="alert alert-danger">Rejeição 778 — Informado NCM inexistente</div>
+          <div class="editor-tabs nfe-editor-tabs" role="tablist" data-nfce-tabs data-initial-tab="products">
+            <button type="button" class="editor-tab active" data-nfce-tab="general" aria-selected="true">Dados gerais</button>
+            <button type="button" class="editor-tab" data-nfce-tab="consumer" aria-selected="false">Consumidor</button>
+            <button type="button" class="editor-tab" data-nfce-tab="products" aria-selected="false">Produtos</button>
+            <button type="button" class="editor-tab" data-nfce-tab="payment" aria-selected="false">Pagamento</button>
+            <button type="button" class="editor-tab" data-nfce-tab="summary" aria-selected="false">Resumo</button>
+          </div>
+          <section class="editor-tab-panel active" data-nfce-panel="general" id="general">
+            <div class="nfe-general-card">
+              <div class="nfe-section-title"><h3>Dados gerais</h3></div>
+              <div class="editor-grid cols-12">
+                <div class="field col-3"><span>Situação</span><strong>Rejeitada</strong></div>
+                <div class="field col-3"><span>Ambiente</span><strong>Homologação</strong></div>
+                <div class="field col-3"><span>Venda</span><strong>#3</strong></div>
+                <div class="field col-3"><span>Chave de acesso</span>
+                  <strong class="fiscal-key">292610393233560001006500100000000812713000000000</strong>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section class="editor-tab-panel" data-nfce-panel="consumer" id="consumer" hidden>
+            <div class="nfe-general-card"><h3>Consumidor</h3></div>
+          </section>
+          <section class="editor-tab-panel" data-nfce-panel="products" id="products" hidden>
+            <div class="editor-panel">
+              <h3>Produtos</h3>
+              <div class="editor-panel"><h3>Item 1 — PRODUTO TESTE</h3>
+                <div class="editor-grid cols-12">
+                  <label class="field col-3"><span>NCM</span><input value="00000001"></label>
+                  <label class="field col-3"><span>CFOP</span><input value="5102"></label>
+                  <label class="field col-3"><span>Origem</span><input value="0"></label>
+                  <label class="field col-3"><span>GTIN</span><input></label>
+                  <label class="field col-4"><span>CSOSN</span><input value="102"></label>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section class="editor-tab-panel" data-nfce-panel="payment" hidden>
+            <div class="nfe-general-card"><h3>Pagamento</h3></div>
+          </section>
+          <section class="editor-tab-panel" data-nfce-panel="summary" hidden>
+            <div class="nfe-general-card"><h3>Resumo</h3></div>
+          </section>
+        </div>
+        <div class="editor-savebar settings-savebar nfce-savebar">
+          <div class="nfce-save-total"><span>Total da NFC-e</span><strong>R$ 1,00</strong></div>
+          <div class="nfce-save-buttons"><button class="btn btn-secondary" type="button">Cancelar</button>
+            <button class="btn btn-success" type="button">Salvar e transmitir</button></div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div id="result">Aguardando teste...</div>
+<script>
+window.addEventListener('load',()=>{
+  const run=()=>{
+    const mobile=new URLSearchParams(location.search).has('mobile');
+    const viewport=document.documentElement.clientWidth;
+    const dialog=document.querySelector('#nfceEditor .nfe-fixed-shell');
+    const rect=dialog.getBoundingClientRect();
+    const body=document.querySelector('#nfceEditor .nfe-workspace-body');
+    const footer=document.querySelector('#nfceEditor .nfce-savebar');
+    const tabs=[...document.querySelectorAll('[data-nfce-tab]')];
+    const panels=[...document.querySelectorAll('[data-nfce-panel]')];
+    const selected=()=>tabs.filter(t=>t.getAttribute('aria-selected')==='true');
+    if(selected().length!==1||selected()[0].dataset.nfceTab!=='products')throw Error('rejeição não abriu Produtos');
+    if(panels.filter(p=>!p.hidden).length!==1||panels.find(p=>!p.hidden)?.id!=='products')throw Error('abas e conteúdo fora de sincronia');
+    if(rect.right>viewport+2||rect.left< -2)throw Error('modal ultrapassou a largura do navegador');
+    if(!mobile && rect.height>innerHeight-65)throw Error('modal deixou espaço vazio desnecessário');
+    const footerRect=footer.getBoundingClientRect();
+    if(footerRect.bottom>innerHeight+2||footerRect.right>viewport+2)throw Error('rodapé cortado');
+    if(body.getBoundingClientRect().bottom>footerRect.top+2)throw Error('conteúdo cobre botões');
+    if(document.documentElement.scrollWidth>viewport+2)throw Error('scroll horizontal na tela');
+    tabs[0].click();
+    if(!panels[0].hidden===false)throw Error('aba geral não abriu');
+    const key=document.querySelector('.fiscal-key');
+    if(key.scrollWidth>key.clientWidth+3)throw Error('chave não quebrou linha');
+    const keyField=key.closest('.field').getBoundingClientRect();
+    if(keyField.right>rect.right+2)throw Error('chave deslocou a coluna');
+    tabs[2].click();
+    if(panels[2].hidden)throw Error('não voltou para Produtos');
+    return mobile?'mobile':'desktop';
+  };
+  setTimeout(()=>{
+    const result=document.getElementById('result');
+    try{
+      const type=run();
+      if(type==='mobile'){
+        document.body.dataset.nfceLayoutMobile='passed';
+        result.textContent='PASS mobile';
+      }else{
+        const iframe=document.createElement('iframe');
+        iframe.width='390';iframe.height='700';
+        iframe.style.cssText='position:absolute;left:0;top:950px;border:0';
+        iframe.src=location.href.split('?')[0]+'?mobile=1';
+        iframe.addEventListener('load',()=>{
+          setTimeout(()=>{
+            try{
+              if(iframe.contentDocument.body.dataset.nfceLayoutMobile!=='passed')throw Error('layout mobile: '+iframe.contentDocument.getElementById('result').textContent);
+              document.body.dataset.nfceLayoutTest='passed';
+              result.textContent='PASS desktop + mobile';
+            }catch(e){document.body.dataset.nfceLayoutTest='failed';result.textContent='FAIL '+e.message;}
+          },450);
+        });
+        document.body.appendChild(iframe);
+      }
+    }catch(e){
+      if(new URLSearchParams(location.search).has('mobile'))document.body.dataset.nfceLayoutMobile='failed';
+      else document.body.dataset.nfceLayoutTest='failed';
+      result.textContent='FAIL '+e.message;
+    }
+  },300);
+});
+</script>
+</body>
+</html>
