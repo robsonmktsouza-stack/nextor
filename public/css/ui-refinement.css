@@ -606,7 +606,7 @@ body.system-comfortable .app-root{
 #nfceEditor .alert{min-width:0;overflow-wrap:anywhere}
 #nfceEditor .nfce-item-table-wrap{max-width:100%;overflow-x:auto}
 
-@media(max-width:900px){
+@media(min-width:761px) and (max-width:900px){
   #nfceEditor .editor-grid.cols-12>:is(.col-2,.col-3,.col-4,.col-5){grid-column:span 6}
   #nfceEditor .editor-grid.cols-12>:is(.col-7,.col-8,.col-9,.col-10){grid-column:1 / -1}
 }
@@ -641,6 +641,7 @@ body.system-comfortable .app-root{
   }
   #nfceEditor .nfe-emitter-summary .nfe-document-summary{grid-column:1 / -1;min-height:0}
   #nfceEditor .nfe-document-summary>div{gap:6px}
+  #nfceEditor .editor-grid.cols-12>*{grid-column:1 / -1!important}
   #nfceEditor .editor-tabs{grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;padding:3px}
   #nfceEditor .editor-tab{font-size:10px;min-height:40px;height:auto;padding:5px 1px}
   #nfceEditor .editor-tab-panel>.nfe-general-card,
