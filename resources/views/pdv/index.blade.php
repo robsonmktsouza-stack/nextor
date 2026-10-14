@@ -531,7 +531,7 @@
     <div>
       <span>Alt+O</span>
       <h2>Operações do caixa</h2>
-      <p data-tutorial>Todas as rotinas operacionais também possuem atalho direto.</p>
+      
     </div>
     <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
   </div>
