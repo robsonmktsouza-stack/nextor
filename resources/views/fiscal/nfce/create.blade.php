@@ -71,6 +71,20 @@
           </div>
         </div>
 
+        @if($readOnly && $readOnlyDocument->corrected_from_id)
+          @php($oldVersion = \App\Models\FiscalDocumentJob::query()->find($readOnlyDocument->corrected_from_id))
+          @if($oldVersion)
+            <div class="fiscal-info-card">
+              <strong>Histórico de versões fiscais</strong>
+              <p>Este documento foi autorizado após a correção da rejeição da
+                <a href="{{ route('fiscal.show',$oldVersion) }}" class="table-link">
+                  NFC-e {{ $oldVersion->series }}/{{ $oldVersion->document_number }}
+                </a>.
+                Os arquivos e os dados da tentativa anterior estão preservados.
+              </p>
+            </div>
+          @endif
+        @endif
         @if($readOnly)
           <div class="nfce-readonly-fiscal-bar">
             <span class="status {{ $readOnlyDocument->status==='authorized'?'status-ok':'status-muted' }}">{{ $readOnlyDocument->status==='authorized'?'Autorizada':'Cancelada' }}</span>
