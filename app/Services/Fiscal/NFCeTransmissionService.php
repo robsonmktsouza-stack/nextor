@@ -37,6 +37,13 @@ final class NFCeTransmissionService
 
         try {
             $job = DB::transaction(function () use ($id) {
+                // Serializar tentativas da mesma venda: duas versoes fiscais
+                // nunca podem passar no preflight simultaneamente.
+                $document = FiscalDocumentJob::query()->findOrFail($id);
+                if ($document->sale_id) {
+                    \App\Models\Sale::query()->whereKey($document->sale_id)
+                        ->lockForUpdate()->firstOrFail();
+                }
                 $job = FiscalDocumentJob::query()->lockForUpdate()->findOrFail($id);
                 if ($job->status !== 'prepared') {
                     return null;
