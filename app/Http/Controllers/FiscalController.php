@@ -189,6 +189,7 @@ class FiscalController extends Controller
             $data['nfceDuplicateOriginal'] = $fiscalDocumentJob->duplicated_from_id
                 ? FiscalDocumentJob::query()->find($fiscalDocumentJob->duplicated_from_id)
                 : null;
+            $data['nfceHistory'] = $this->nfceHistory($fiscalDocumentJob);
             return view('fiscal.nfce.create', $data);
         }
 
@@ -304,12 +305,14 @@ class FiscalController extends Controller
                 'bank_slip','bank_transfer','transfer'])
             ->orderBy('sort_order')->orderBy('name')->get(['code','name','kind']);
 
-        return view('fiscal.nfce.correct-rejection', [
+        return view('fiscal.nfce.create', [
+            'correctionDocument'=>$fiscalDocumentJob,
             'document'=>$fiscalDocumentJob,
             'rejection'=>$rejection,
             'company'=>\App\Models\CompanySetting::current(),
             'snapshot'=>$fiscalDocumentJob->source_snapshot ?? [],
             'paymentMethods'=>$paymentMethods,
+            'nfceHistory'=>$this->nfceHistory($fiscalDocumentJob),
         ]);
     }
 
@@ -325,8 +328,50 @@ class FiscalController extends Controller
             return back()->withInput()->withErrors($e->errors());
         }
 
-        return redirect()->route('fiscal.show', $copy)
-            ->with('success', 'Nova versão fiscal preparada. A tentativa rejeitada foi preservada. Confira a validação antes de emitir.');
+        // A pessoa usa um unico comando "Salvar e transmitir". A revisao
+        // e salva uma unica vez e a transmissao permanece protegida pelo
+        // preflight e pela trava da venda no processador fiscal.
+        if ($copy->status !== 'prepared') {
+            return redirect()->route('fiscal.show',$copy)
+                ->with('success','Essa correcao ja foi registrada. Acompanhe o documento atual.');
+        }
+
+        $problems=app(\App\Services\Fiscal\NFCePreflightService::class)->validate($copy);
+        if ($problems) {
+            return redirect()->route('fiscal.show',$copy)
+                ->with('error','Correcao salva, mas a emissao foi bloqueada: '.implode(' | ',$problems));
+        }
+        $queue=(string) config('queue.default','sync');
+        if (in_array($queue,['','sync','null'],true)) {
+            return redirect()->route('fiscal.show',$copy)
+                ->with('error','Correcao salva. Configure a fila fiscal antes da transmissao.');
+        }
+
+        try {
+            \App\Jobs\ProcessNFCeJob::dispatch($copy->id)->onConnection($queue);
+        } catch (\Throwable $error) {
+            \Illuminate\Support\Facades\Log::error('Erro ao enfileirar NFC-e corrigida',[
+                'fiscal_document_job_id'=>$copy->id,
+                'message'=>$error->getMessage(),
+            ]);
+            return redirect()->route('fiscal.show',$copy)
+                ->with('error','Correcao salva. Nao foi possivel colocar a NFC-e na fila fiscal.');
+        }
+
+        return redirect()->route('fiscal.show',$copy)
+            ->with('success','Correcao salva. A NFC-e foi colocada na fila para validacao e transmissao.');
+    }
+
+    private function nfceHistory(FiscalDocumentJob $document)
+    {
+        if (!$document->sale_id) {
+            return collect([$document]);
+        }
+        return FiscalDocumentJob::query()
+            ->where('document_type','nfce')
+            ->where('sale_id',$document->sale_id)
+            ->orderByDesc('id')
+            ->get();
     }
 
     public function consultNfce(FiscalDocumentJob $fiscalDocumentJob)
