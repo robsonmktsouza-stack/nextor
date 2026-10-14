@@ -145,6 +145,18 @@ jobs:
           php artisan route:list --path=fiscal/utilities
           php artisan view:cache
           find storage/framework/views -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: Check rejection correction PHP syntax
+        run: |
+          php -l app/Services/Fiscal/NFCeRejectionCorrectionService.php
+          php -l tests/Feature/NFCeRejectionCorrectionTest.php
+          php -l database/migrations/2026_10_14_000001_create_nfce_correction_revisions.php
+
+      - name: Targeted rejection correction tests
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+        run: php vendor/bin/phpunit --filter=NFCeRejectionCorrectionTest
+
       - name: Check NFC-e emission and SEFAZ response handling
         env:
           DB_CONNECTION: sqlite
