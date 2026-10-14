@@ -171,6 +171,9 @@ class FiscalController extends Controller
                 ->where('corrected_from_id',$fiscalDocumentJob->id)->first();
             $data['nfceDuplicateNext'] = FiscalDocumentJob::query()
                 ->where('duplicated_from_id',$fiscalDocumentJob->id)->first();
+            $data['nfceDuplicateOriginal'] = $fiscalDocumentJob->duplicated_from_id
+                ? FiscalDocumentJob::query()->find($fiscalDocumentJob->duplicated_from_id)
+                : null;
             return view('fiscal.nfce.create', $data);
         }
 
