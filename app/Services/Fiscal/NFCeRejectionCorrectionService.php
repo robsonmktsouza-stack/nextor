@@ -153,16 +153,22 @@ final class NFCeRejectionCorrectionService
 
                 $before = $source->source_snapshot ?? [];
                 $after = $before;
+                // O código da rejeição explica o erro original, mas não
+                // limita quais dados fiscais desta versão podem ser revisados.
+                // Somente os grupos enviados são aplicados; chamadas antigas
+                // com um único grupo continuam compatíveis.
                 $group = $rejection['group'];
-                if ($group === 'items') {
+                if (array_key_exists('items', $input)) {
                     $after = $this->correctItems($after, $input, (string) $company->crt);
-                } elseif ($group === 'consumer') {
+                }
+                if (array_key_exists('consumer_document', $input) || array_key_exists('consumer_name', $input)) {
                     $after = $this->correctConsumer($after, $input);
-                } else {
+                }
+                if (array_key_exists('payments', $input)) {
                     $after = $this->correctPayments($after, $input);
                 }
 
-                $changed = $this->changedFields($before, $after, $group);
+                $changed = $this->changedFields($before, $after);
                 if ($changed === []) {
                     $this->fail('Faça uma alteração nos dados fiscais antes de salvar a correção.');
                 }
@@ -364,47 +370,44 @@ final class NFCeRejectionCorrectionService
         return $snapshot;
     }
 
-    /** List changed fiscal fields, ignoring internal tax aliases and unchanged commercial data. */
-    private function changedFields(array $before, array $after, string $group): array
+    /** List only actual changes, including edits in other form tabs. */
+    private function changedFields(array $before, array $after): array
     {
         $fields = [];
-        if ($group === 'items') {
-            foreach (($before['items'] ?? []) as $i => $original) {
-                $updated = $after['items'][$i] ?? [];
-                $originalTax = is_array($original['tax_defaults'] ?? null) ? $original['tax_defaults'] : [];
-                $updatedTax = is_array($updated['tax_defaults'] ?? null) ? $updated['tax_defaults'] : [];
-                foreach (['ncm', 'gtin', 'origin'] as $field) {
-                    if ((string)($original[$field] ?? '') !== (string)($updated[$field] ?? '')) {
-                        $fields[] = 'items.'.$i.'.'.$field;
-                    }
-                }
-                $oldCfop = (string)($originalTax['cfop_outbound_internal']
-                    ?? $originalTax['nfce_cfop'] ?? $originalTax['cfop'] ?? '');
-                $newCfop = (string)($updatedTax['cfop_outbound_internal'] ?? '');
-                if ($oldCfop !== $newCfop) $fields[] = 'items.'.$i.'.cfop';
-                foreach (['icms_csosn','icms_cst','pis_cst','cofins_cst'] as $field) {
-                    if ((string)($originalTax[$field] ?? '') !== (string)($updatedTax[$field] ?? '')) {
-                        $fields[] = 'items.'.$i.'.'.$field;
-                    }
+        foreach (($before['items'] ?? []) as $i => $original) {
+            $updated = $after['items'][$i] ?? [];
+            $originalTax = is_array($original['tax_defaults'] ?? null) ? $original['tax_defaults'] : [];
+            $updatedTax = is_array($updated['tax_defaults'] ?? null) ? $updated['tax_defaults'] : [];
+            foreach (['ncm', 'gtin', 'origin'] as $field) {
+                if ((string)($original[$field] ?? '') !== (string)($updated[$field] ?? '')) {
+                    $fields[] = 'items.'.$i.'.'.$field;
                 }
             }
-        } elseif ($group === 'consumer') {
-            foreach (['consumer_document','consumer_name'] as $field) {
-                if ((string)($before[$field] ?? '') !== (string)($after[$field] ?? '')) {
-                    $fields[] = $field;
+            $oldCfop = (string)($originalTax['cfop_outbound_internal']
+                ?? $originalTax['nfce_cfop'] ?? $originalTax['cfop'] ?? '');
+            $newCfop = (string)($updatedTax['cfop_outbound_internal']
+                ?? $updatedTax['nfce_cfop'] ?? $updatedTax['cfop'] ?? '');
+            if ($oldCfop !== $newCfop) $fields[] = 'items.'.$i.'.cfop';
+            foreach (['icms_csosn','icms_cst','pis_cst','cofins_cst'] as $field) {
+                if ((string)($originalTax[$field] ?? '') !== (string)($updatedTax[$field] ?? '')) {
+                    $fields[] = 'items.'.$i.'.'.$field;
                 }
             }
-        } elseif ($group === 'payments') {
-            foreach (($before['payments'] ?? []) as $i => $original) {
-                $updated = $after['payments'][$i] ?? [];
-                foreach (['payment_method','amount'] as $field) {
-                    $first = (string)($original[$field] ?? '');
-                    $second = (string)($updated[$field] ?? '');
-                    if ($field === 'amount' && is_numeric($first) && is_numeric($second)) {
-                        if ((int)round((float)$first*100) === (int)round((float)$second*100)) continue;
-                    }
-                    if ($first !== $second) $fields[] = 'payments.'.$i.'.'.$field;
+        }
+        foreach (['consumer_document','consumer_name'] as $field) {
+            if ((string)($before[$field] ?? '') !== (string)($after[$field] ?? '')) {
+                $fields[] = $field;
+            }
+        }
+        foreach (($before['payments'] ?? []) as $i => $original) {
+            $updated = $after['payments'][$i] ?? [];
+            foreach (['payment_method','amount'] as $field) {
+                $first = (string)($original[$field] ?? '');
+                $second = (string)($updated[$field] ?? '');
+                if ($field === 'amount' && is_numeric($first) && is_numeric($second)) {
+                    if ((int)round((float)$first*100) === (int)round((float)$second*100)) continue;
                 }
+                if ($first !== $second) $fields[] = 'payments.'.$i.'.'.$field;
             }
         }
         return $fields;
