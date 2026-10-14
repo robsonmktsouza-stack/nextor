@@ -688,3 +688,79 @@ body.system-comfortable .app-root{
     grid-column:1 / -1;
   }
 }
+
+/* NFC-e and NF-e share the same wide document workspace. Invoice items
+   follow one table + selected details, rather than one large card per item. */
+#nfceEditor .nfce-correction-product-list{
+  width:100%;
+  min-width:0;
+  margin-bottom:14px;
+  overflow:hidden;
+}
+#nfceEditor .nfce-correction-product-list .grid-actionbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:10px;
+  padding:10px 14px;
+}
+#nfceEditor .nfce-correction-product-list .grid-actions-left strong{
+  color:#28455d;
+  font-size:13px;
+}
+#nfceEditor .nfce-list-count{font-size:12px;color:#64788c}
+#nfceEditor .nfce-correction-product-list .table-scroll{
+  width:100%;
+  min-width:0;
+  overflow-x:auto;
+}
+#nfceEditor .nfce-correction-product-list .cms-table{
+  min-width:780px;
+  width:100%;
+  table-layout:auto;
+}
+#nfceEditor .nfce-correction-product-list .cms-table th,
+#nfceEditor .nfce-correction-product-list .cms-table td{
+  padding:9px 12px;
+  vertical-align:middle;
+  white-space:nowrap;
+}
+#nfceEditor .nfce-correction-product-list .cms-table td:first-child{
+  min-width:170px;
+  white-space:normal;
+}
+#nfceEditor .nfce-correction-product-list .cms-table small{
+  display:block;
+  margin-top:3px;
+  color:#728596;
+}
+#nfceEditor .nfce-correction-product-list tr.is-selected td{
+  background:#e9f4fc;
+}
+#nfceEditor .nfce-item-edit-button{
+  min-width:65px;
+  min-height:30px;
+  padding:5px 10px;
+}
+#nfceEditor [data-nfce-item-editor][hidden]{display:none!important}
+#nfceEditor .nfce-correction-item-details{min-width:0}
+#nfceEditor .nfce-correction-item-editor{
+  border-color:#cbdbe8;
+  margin:0 0 16px;
+}
+#nfceEditor .nfce-item-editor-heading{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-bottom:10px;
+}
+#nfceEditor .nfce-item-editor-heading h3{margin:0}
+@media(max-width:760px){
+  #nfceEditor .nfce-correction-product-list .grid-actionbar{padding:9px 12px}
+  #nfceEditor .nfce-correction-product-list .cms-table th,
+  #nfceEditor .nfce-correction-product-list .cms-table td{padding:8px}
+  #nfceEditor .nfce-item-editor-heading{align-items:flex-start}
+}
