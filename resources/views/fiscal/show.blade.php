@@ -264,6 +264,17 @@
 
 @if($tab==='nfce' && $correctedFromNfce)
   <section class="fiscal-info-card">
+  @if($correctionRevision)
+    @php($revisionFields = (array)(json_decode($correctionRevision->changed_fields ?? '{}', true)['fields'] ?? []))
+    <section class="fiscal-info-card">
+      <strong>Registro da revisão fiscal</strong>
+      <p>Rejeição original {{ $correctionRevision->rejection_code }} ·
+         Revisado em {{ \Carbon\Carbon::parse($correctionRevision->created_at)->format('d/m/Y H:i') }} ·
+         Campos: {{ count($revisionFields) ? implode(', ', $revisionFields) : 'conforme histórico arquivado' }}.
+      </p>
+    </section>
+  @endif
+
     <strong>Versão fiscal corrigida</strong>
     <p>Esta NFC-e foi preparada após a rejeição da
       <a class="table-link" href="{{ route('fiscal.show',$correctedFromNfce) }}">
