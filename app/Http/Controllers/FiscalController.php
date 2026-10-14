@@ -111,12 +111,53 @@ class FiscalController extends Controller
             ? $fiscalDocumentJob->document_type
             : 'nfe';
 
-        // NFC-e emitidas/canceladas são abertas no próprio formulário de emissão,
-        // com os dados originais congelados e controles de edição desabilitados.
-        if ($tab==='nfce' && in_array($fiscalDocumentJob->status,['authorized','cancelled'],true)) {
-            return view('fiscal.nfce.create',
-                app(\App\Services\Fiscal\NFCeReadonlyViewData::class)->forDocument($fiscalDocumentJob)
-            );
+        // Toda NFC-e abre diretamente no mesmo editor de documentos.
+        // Somente uma rejeição individual e comprovada permite corrigir os
+        // dados fiscais: consulta inconclusiva (613), nota autorizada e
+        // tentativa substituída não podem ser reenviadas/editadas.
+        if ($tab==='nfce') {
+            $authorizedSibling = $fiscalDocumentJob->sale_id
+                && $fiscalDocumentJob->status !== 'authorized'
+                ? FiscalDocumentJob::query()
+                    ->where('document_type','nfce')
+                    ->where('sale_id',$fiscalDocumentJob->sale_id)
+                    ->where('id','!=',$fiscalDocumentJob->id)
+                    ->where('status','authorized')
+                    ->first()
+                : null;
+
+            if (!$authorizedSibling && app(\App\Services\Fiscal\NFCeRejectionCorrectionService::class)
+                ->rejection($fiscalDocumentJob) !== null) {
+                return $this->editRejectedNfce(
+                    $fiscalDocumentJob,
+                    app(\App\Services\Fiscal\NFCeRejectionCorrectionService::class)
+                );
+            }
+
+            $data = app(\App\Services\Fiscal\NFCeReadonlyViewData::class)->forDocument($fiscalDocumentJob);
+            $data['nfceAuthorizedSibling'] = $authorizedSibling;
+            $data['nfceViewStatus'] = $authorizedSibling
+                ? 'Substituída'
+                : match($fiscalDocumentJob->status) {
+                    'authorized'=>'Autorizada', 'cancelled'=>'Cancelada',
+                    'rejected'=>'Rejeitada', 'pending'=>'Pendente de confirmação',
+                    'prepared'=>'Preparada', 'processing'=>'Processando',
+                    'offline_signed'=>'Contingência assinada',
+                    'offline_print_pending'=>'DANFE pendente',
+                    'offline_sending'=>'Transmitindo contingência',
+                    'failed'=>'Falha', 'error'=>'Erro',
+                    default=>'A verificar',
+                };
+            $data['nfcePreflightErrors'] = $fiscalDocumentJob->status === 'prepared'
+                ? app(\App\Services\Fiscal\NFCePreflightService::class)->validate($fiscalDocumentJob)
+                : [];
+            $data['nfceDuplicateAvailable'] = app(\App\Services\Fiscal\NFCeDuplicationService::class)
+                ->eligible($fiscalDocumentJob);
+            $data['nfceCorrectedNext'] = FiscalDocumentJob::query()
+                ->where('corrected_from_id',$fiscalDocumentJob->id)->first();
+            $data['nfceDuplicateNext'] = FiscalDocumentJob::query()
+                ->where('duplicated_from_id',$fiscalDocumentJob->id)->first();
+            return view('fiscal.nfce.create', $data);
         }
 
         return view('fiscal.show',[
