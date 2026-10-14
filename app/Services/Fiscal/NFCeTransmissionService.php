@@ -158,7 +158,13 @@ final class NFCeTransmissionService
                         && stripos($reason, 'Duplicidade') !== false
                         && preg_match('/chNFe:\s*(\d{44})/i', $reason, $conflict) === 1
                         && !hash_equals($signedKey, $conflict[1]);
-                    $indeterminate = (!$status['individual'] && !$identifiedConflict)
+                    // ACBr pode devolver uma rejeição do item apenas em
+                    // [RETORNO] no envio síncrono de uma única NFC-e.
+                    // Respostas de lote e consultas não são rejeições definitivas.
+                    $definitiveCorrection=$this->responses->definitiveCorrectionRejection($status)
+                        && (($status['key'] ?? null) === null
+                            || hash_equals($signedKey, (string)$status['key']));
+                    $indeterminate = (!$status['individual'] && !$identifiedConflict && !$definitiveCorrection)
                         || in_array($code, ['103', '104', '105', '204', '656'], true)
                         || ($code === '539' && !$identifiedConflict);
                     $job->update([
