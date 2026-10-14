@@ -233,7 +233,8 @@ final class NFCeRejectionCorrectionService
 
             $form = $data['items'][$i];
             $ncm = preg_replace('/\D/', '', (string) $form['ncm']);
-            if (!preg_match('/^\d{8}$/', $ncm)) {
+            if (preg_match('/^[0-9.\s-]+$/', (string) $form['ncm']) !== 1
+                || !preg_match('/^\d{8}$/', $ncm)) {
                 $this->fail('Item '.($i+1).': NCM deve conter oito dígitos.');
             }
             $gtin = (string) ($form['gtin'] ?? '');
@@ -345,7 +346,7 @@ final class NFCeRejectionCorrectionService
         }
         unset($payment);
 
-        if (abs($paidCents - (int) round((float) ($snapshot['total'] ?? 0) * 100)) > 1) {
+        if ($paidCents !== (int) round((float) ($snapshot['total'] ?? 0) * 100)) {
             $this->fail('O total dos pagamentos deve permanecer igual ao total da venda. Não é permitido alterar o financeiro por esta correção.');
         }
         if ((float) ($snapshot['change_amount'] ?? 0) > 0
