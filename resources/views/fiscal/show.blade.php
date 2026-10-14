@@ -35,6 +35,11 @@
       </button>
     </form>
   @endif
+  @if($nfceFiscalUser && $canCorrectNfce)
+    <a class="btn btn-secondary" href="{{ route('fiscal.nfce.correct',$document) }}">
+      @include('partials.icon',['name'=>'file-pen-line','size'=>16]) Corrigir rejeição
+    </a>
+  @endif
   @if($nfceFiscalUser && $document->status==='pending' && $document->access_key)
     <form method="post" action="{{ route('fiscal.nfce.consult',$document) }}">
       @csrf
@@ -254,6 +259,28 @@
   <section class="fiscal-error-card">
     @include('partials.icon',['name'=>'alert','size'=>20])
     <div><strong>Retorno com problema</strong><p>{{ $document->error_message }}</p></div>
+  </section>
+@endif
+
+@if($tab==='nfce' && $correctedFromNfce)
+  <section class="fiscal-info-card">
+    <strong>Versão fiscal corrigida</strong>
+    <p>Esta NFC-e foi preparada após a rejeição da
+      <a class="table-link" href="{{ route('fiscal.show',$correctedFromNfce) }}">
+        NFC-e {{ $correctedFromNfce->series }}/{{ $correctedFromNfce->document_number }}
+      </a>. A nota rejeitada, seu XML e retorno foram preservados.
+      Nenhuma venda ou movimentação financeira adicional foi criada.
+    </p>
+  </section>
+@endif
+@if($tab==='nfce' && $correctedNextNfce)
+  <section class="fiscal-info-card">
+    <strong>Histórico fiscal</strong>
+    <p>A tentativa rejeitada foi preservada.
+      <a class="table-link" href="{{ route('fiscal.show',$correctedNextNfce) }}">
+        Abrir nova versão {{ $correctedNextNfce->series }}/{{ $correctedNextNfce->document_number }}
+      </a>.
+    </p>
   </section>
 @endif
 
