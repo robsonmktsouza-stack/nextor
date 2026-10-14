@@ -53,6 +53,12 @@ final class NFCeRejectionCorrectionService
             || $document->cancelled_at || $document->cancellation_status
             || preg_match('/^\d{44}$/', (string) $document->access_key) !== 1
             || FiscalDocumentJob::query()->where('corrected_from_id', $document->id)->exists()
+            || FiscalDocumentJob::query()
+                ->where('document_type', 'nfce')
+                ->where('sale_id', $document->sale_id)
+                ->where('id', '!=', $document->id)
+                ->whereIn('status', ['authorized', 'processing', 'offline_signed', 'offline_sending'])
+                ->exists()
         ) {
             return null;
         }
