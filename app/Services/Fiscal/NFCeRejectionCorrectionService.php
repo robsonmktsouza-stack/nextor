@@ -167,6 +167,21 @@ final class NFCeRejectionCorrectionService
                 if (array_key_exists('payments', $input)) {
                     $after = $this->correctPayments($after, $input);
                 }
+                if (array_key_exists('nature', $input) || array_key_exists('notes', $input)) {
+                    $validated = Validator::make($input, [
+                        'nature' => ['sometimes', 'required', 'string', 'min:1', 'max:60'],
+                        'notes' => ['nullable', 'string', 'max:2000'],
+                    ])->validate();
+                    if (array_key_exists('nature', $validated)) {
+                        $after['nature'] = trim($validated['nature']);
+                        if ($after['nature'] === '') {
+                            $this->fail('Informe a natureza da operação.');
+                        }
+                    }
+                    if (array_key_exists('notes', $input)) {
+                        $after['notes'] = trim((string)($validated['notes'] ?? '')) ?: null;
+                    }
+                }
 
                 $changed = $this->changedFields($before, $after);
                 if ($changed === []) {
@@ -393,6 +408,13 @@ final class NFCeRejectionCorrectionService
                     $fields[] = 'items.'.$i.'.'.$field;
                 }
             }
+        }
+        if (trim((string)($before['nature'] ?? 'VENDA DE MERCADORIA'))
+            !== trim((string)($after['nature'] ?? 'VENDA DE MERCADORIA'))) {
+            $fields[] = 'nature';
+        }
+        if (trim((string)($before['notes'] ?? '')) !== trim((string)($after['notes'] ?? ''))) {
+            $fields[] = 'notes';
         }
         foreach (['consumer_document','consumer_name'] as $field) {
             if ((string)($before[$field] ?? '') !== (string)($after[$field] ?? '')) {
