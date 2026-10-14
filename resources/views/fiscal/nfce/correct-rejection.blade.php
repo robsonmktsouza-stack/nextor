@@ -9,6 +9,13 @@
               <div class="field col-3"><span>Emissão</span><strong>{{ $document->environment==='production'?'Produção':'Homologação' }}</strong></div>
               <div class="field col-3"><span>Venda vinculada</span><strong>#{{ $document->sale_id }}</strong></div>
               <div class="field col-3"><span>Chave de acesso</span><strong class="fiscal-key">{{ $document->access_key }}</strong></div>
+              <label class="field col-6"><span>Natureza da operação</span>
+                <input name="nature" maxlength="60" required
+                  value="{{ old('nature',$snapshot['nature'] ?? 'VENDA DE MERCADORIA') }}">
+              </label>
+              <label class="field col-12"><span>Informações adicionais</span>
+                <textarea name="notes" rows="3" maxlength="2000">{{ old('notes',$snapshot['notes'] ?? '') }}</textarea>
+              </label>
             </div>
           </div>
         </section>
@@ -17,8 +24,7 @@
           @if($startTab!=='consumer') hidden @endif>
           
       <div class="editor-panel">
-        <h3>Identificação do consumidor</h3>
-        <p class="editor-help">Preencha um CPF/CNPJ válido ou mantenha o consumidor não identificado, quando permitido.</p>
+        <h3>Consumidor</h3>
         <div class="editor-grid cols-12">
           <label class="field col-4"><span>CPF / CNPJ</span>
             <input name="consumer_document" maxlength="20" inputmode="numeric"
