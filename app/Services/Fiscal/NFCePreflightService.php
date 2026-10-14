@@ -23,6 +23,16 @@ final class NFCePreflightService
         if (!$job->sale || $job->sale->status !== 'completed') {
             $errors[] = 'Venda vinculada não está concluída.';
         }
+        // Correction/duplication can create multiple fiscal attempts for one
+        // commercial sale, but never a second authorized or active NFC-e.
+        if ($job->sale_id && FiscalDocumentJob::query()
+            ->where('id', '!=', $job->id)
+            ->where('sale_id', $job->sale_id)
+            ->where('document_type', 'nfce')
+            ->whereIn('status', ['authorized','processing','offline_signed','offline_sending'])
+            ->exists()) {
+            $errors[] = 'A venda já possui outra NFC-e autorizada ou em processamento.';
+        }
         if (!in_array($job->environment, ['homologation', 'production'], true)) {
             $errors[] = 'Ambiente fiscal inválido.';
         }
