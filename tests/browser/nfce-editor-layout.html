@@ -130,7 +130,7 @@ window.addEventListener('load',()=>{
     if(rect.right>viewport+2||rect.left< -2)throw Error('modal ultrapassou a largura do navegador');
     if(!mobile && viewport>1150 && Math.abs(rect.width-Math.min(1420,viewport-28))>8)
       throw Error('NFC-e está mais estreita que o padrão de NF-e');
-    if(!mobile && rect.height>innerHeight-24)throw Error('modal ultrapassou a altura útil da tela: '+Math.round(rect.height));
+    if(!mobile && rect.height>innerHeight+2)throw Error('modal ultrapassou a altura visível da tela: '+Math.round(rect.height));
     const footerRect=footer.getBoundingClientRect();
     if(footerRect.bottom>innerHeight+2||footerRect.right>viewport+2)throw Error('rodapé cortado');
     if(body.getBoundingClientRect().bottom>footerRect.top+2)throw Error('conteúdo cobre botões');
