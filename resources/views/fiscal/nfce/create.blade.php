@@ -27,7 +27,7 @@
     'cte'=>['label'=>'CT-e'],'mdfe'=>['label'=>'MDF-e'],'nfce'=>['label'=>'NFC-e'],
 ]])
 
-<div class="nextor-modal-layer nfe-modal-layer is-open {{ $readOnly?'nfce-readonly':'' }}" id="nfceEditor" aria-hidden="false">
+<div class="nextor-modal-layer nfe-modal-layer is-open {{ $readOnly?'nfce-readonly':'' }}" id="nfceEditor" data-initial-tab="{{ $startTab }}" aria-hidden="false">
   <div class="erp-dialog nfe-workspace-dialog nextor-modal-window nfe-fixed-shell" role="dialog" aria-modal="true" aria-labelledby="nfceEditorTitle">
     @if($readOnly)
       <div id="nfceEditorForm" data-readonly="1" class="nfce-readonly-content">
@@ -174,7 +174,7 @@
             </a>.
           </div>
         @endif
-        <div class="editor-tabs nfe-editor-tabs" role="tablist" aria-label="Seções da NFC-e" data-nfce-tabs>
+        <div class="editor-tabs nfe-editor-tabs" role="tablist" aria-label="Seções da NFC-e" data-nfce-tabs data-initial-tab="{{ $startTab }}">
           @foreach(['general'=>'Dados gerais','consumer'=>'Consumidor','products'=>'Produtos',
                     'payment'=>'Pagamento','summary'=>'Resumo'] as $key=>$label)
             <button type="button" role="tab" id="nfceTab-{{ $key }}"
