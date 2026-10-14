@@ -63,8 +63,8 @@ final class NFCeSefazResponseParserTest extends TestCase
 
     public function test_specific_778_rejection_in_retorno_is_definitive_even_without_nfe_section(): void
     {
-        $response="[ENVIO]\\nCStat=103\\nXMotivo=Lote recebido\\n"
-            ."[RETORNO]\\nCStat=778\\nXMotivo=Rejeicao: Informado NCM inexistente [nItem:1]\\n";
+        $response="[ENVIO]\nCStat=103\nXMotivo=Lote recebido\n"
+            ."[RETORNO]\nCStat=778\nXMotivo=Rejeicao: Informado NCM inexistente [nItem:1]\n";
         $parsed=$this->parser->parse($response);
 
         self::assertSame('778',$parsed['cstat']);
@@ -77,12 +77,12 @@ final class NFCeSefazResponseParserTest extends TestCase
     public function test_778_from_envio_or_ambiguous_response_is_not_correctable(): void
     {
         foreach([
-            "[ENVIO]\\nCStat=778\\nXMotivo=Rejeicao: NCM\\n",
-            "[RETORNO]\\nCStat=778\\nXMotivo=Processamento de lote\\n",
-            "[RETORNO]\\nCStat=104\\nXMotivo=Lote processado\\n",
-            "[RETORNO]\\nCStat=204\\nXMotivo=Rejeicao: Duplicidade\\n",
-            "[RETORNO]\\nCStat=539\\nXMotivo=Rejeicao: Duplicidade\\n",
-            "[RETORNO]\\nCStat=778\\nXMotivo=\\n",
+            "[ENVIO]\nCStat=778\nXMotivo=Rejeicao: NCM\n",
+            "[RETORNO]\nCStat=778\nXMotivo=Processamento de lote\n",
+            "[RETORNO]\nCStat=104\nXMotivo=Lote processado\n",
+            "[RETORNO]\nCStat=204\nXMotivo=Rejeicao: Duplicidade\n",
+            "[RETORNO]\nCStat=539\nXMotivo=Rejeicao: Duplicidade\n",
+            "[RETORNO]\nCStat=778\nXMotivo=\n",
         ] as $response) {
             self::assertFalse($this->parser->definitiveCorrectionRejection($this->parser->parse($response)));
         }
