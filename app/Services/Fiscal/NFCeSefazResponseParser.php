@@ -90,12 +90,13 @@ final class NFCeSefazResponseParser
 
     /**
      * A single NFC-e is sent synchronously by this integration. Some ACBr
-     * responses carry an explicit item-level rejection only in [RETORNO],
-     * without a [NFE{number}] section. Never equate a batch status, network
-     * error, consultation, duplicate 204/539 or authorization with rejection.
+     * responses carry an explicit item-level rejection directly in [Envio]
+     * or [Retorno], without a [NFE{number}] section. Never equate a batch
+     * status, network error, consultation, duplicate 204/539 or authorization
+     * with rejection.
      *
-     * Only the known, individually correctable codes below are accepted from
-     * [RETORNO], and only when xMotivo explicitly identifies a rejection.
+     * Only individually correctable codes are accepted from [Envio] or
+     * [Retorno], and only when xMotivo explicitly identifies a rejection.
      * A caller must still check the original archived response and signed XML.
      */
     public function definitiveCorrectionRejection(array $response): bool
@@ -112,7 +113,7 @@ final class NFCeSefazResponseParser
             return true;
         }
 
-        return ($response['source'] ?? null) === 'RETORNO'
+        return in_array(($response['source'] ?? null), ['ENVIO', 'RETORNO'], true)
             && preg_match('/^\\s*Rejei(?:c|ç)(?:a|ã)o\\b/iu', (string) ($response['reason'] ?? '')) === 1;
     }
 
