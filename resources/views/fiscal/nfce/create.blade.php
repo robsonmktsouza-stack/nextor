@@ -77,7 +77,7 @@
           @endphp
           @if($oldVersion)
             <div class="fiscal-info-card">
-              <strong>Histórico de versões fiscais</strong>
+              <strong>Versão fiscal corrigida</strong>
               <p>Este documento foi autorizado após a correção da rejeição da
                 <a href="{{ route('fiscal.show',$oldVersion) }}" class="table-link">
                   NFC-e {{ $oldVersion->series }}/{{ $oldVersion->document_number }}
