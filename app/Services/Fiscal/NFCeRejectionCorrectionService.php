@@ -155,7 +155,8 @@ final class NFCeRejectionCorrectionService
                     $after = $this->correctPayments($after, $input);
                 }
 
-                if ($before === $after) {
+                $changed = $this->changedFields($before, $after, $group);
+                if ($changed === []) {
                     $this->fail('Faça uma alteração nos dados fiscais antes de salvar a correção.');
                 }
 
@@ -192,7 +193,8 @@ final class NFCeRejectionCorrectionService
                     'original_response_sha256' => hash('sha256', $response),
                     'previous_snapshot' => json_encode($before, JSON_THROW_ON_ERROR),
                     'corrected_snapshot' => json_encode($after, JSON_THROW_ON_ERROR),
-                    'changed_fields' => json_encode(['group' => $group, 'code' => $rejection['code']], JSON_THROW_ON_ERROR),
+                    'changed_fields' => json_encode(['group' => $group, 'code' => $rejection['code'],
+                        'fields' => $changed], JSON_THROW_ON_ERROR),
                     'created_at' => now(), 'updated_at' => now(),
                 ]);
 
@@ -221,6 +223,9 @@ final class NFCeRejectionCorrectionService
             'items.*.gtin' => ['nullable', 'regex:/^\d{8}(\d{4,6})?$/'],
         ])->validate();
 
+        if (array_keys($data['items']) !== array_keys($items)) {
+            $this->fail('A sequência de itens fiscais não pode ser alterada.');
+        }
         foreach ($items as $i => &$item) {
             if (($item['item_type'] ?? '') !== 'product' || empty($item['product_id'])) {
                 $this->fail('A correção fiscal aceita somente produtos vinculados à venda original.');
@@ -306,6 +311,9 @@ final class NFCeRejectionCorrectionService
             'payments.*.amount' => ['required', 'numeric', 'gt:0', 'decimal:0,2', 'max:9999999999.99'],
         ])->validate();
 
+        if (array_keys($data['payments']) !== array_keys($payments)) {
+            $this->fail('A sequência das parcelas não pode ser alterada.');
+        }
         $paidCents = 0;
         foreach ($payments as $i => &$payment) {
             $form = $data['payments'][$i];
@@ -346,6 +354,52 @@ final class NFCeRejectionCorrectionService
         }
         $snapshot['payments'] = $payments;
         return $snapshot;
+    }
+
+    /** List changed fiscal fields, ignoring internal tax aliases and unchanged commercial data. */
+    private function changedFields(array $before, array $after, string $group): array
+    {
+        $fields = [];
+        if ($group === 'items') {
+            foreach (($before['items'] ?? []) as $i => $original) {
+                $updated = $after['items'][$i] ?? [];
+                $originalTax = is_array($original['tax_defaults'] ?? null) ? $original['tax_defaults'] : [];
+                $updatedTax = is_array($updated['tax_defaults'] ?? null) ? $updated['tax_defaults'] : [];
+                foreach (['ncm', 'gtin', 'origin'] as $field) {
+                    if ((string)($original[$field] ?? '') !== (string)($updated[$field] ?? '')) {
+                        $fields[] = 'items.'.$i.'.'.$field;
+                    }
+                }
+                $oldCfop = (string)($originalTax['cfop_outbound_internal']
+                    ?? $originalTax['nfce_cfop'] ?? $originalTax['cfop'] ?? '');
+                $newCfop = (string)($updatedTax['cfop_outbound_internal'] ?? '');
+                if ($oldCfop !== $newCfop) $fields[] = 'items.'.$i.'.cfop';
+                foreach (['icms_csosn','icms_cst','pis_cst','cofins_cst'] as $field) {
+                    if ((string)($originalTax[$field] ?? '') !== (string)($updatedTax[$field] ?? '')) {
+                        $fields[] = 'items.'.$i.'.'.$field;
+                    }
+                }
+            }
+        } elseif ($group === 'consumer') {
+            foreach (['consumer_document','consumer_name'] as $field) {
+                if ((string)($before[$field] ?? '') !== (string)($after[$field] ?? '')) {
+                    $fields[] = $field;
+                }
+            }
+        } elseif ($group === 'payments') {
+            foreach (($before['payments'] ?? []) as $i => $original) {
+                $updated = $after['payments'][$i] ?? [];
+                foreach (['payment_method','amount'] as $field) {
+                    $first = (string)($original[$field] ?? '');
+                    $second = (string)($updated[$field] ?? '');
+                    if ($field === 'amount' && is_numeric($first) && is_numeric($second)) {
+                        if ((int)round((float)$first*100) === (int)round((float)$second*100)) continue;
+                    }
+                    if ($first !== $second) $fields[] = 'payments.'.$i.'.'.$field;
+                }
+            }
+        }
+        return $fields;
     }
 
     private function gtinValid(string $digits): bool
