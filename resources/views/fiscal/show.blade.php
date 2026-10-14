@@ -37,7 +37,7 @@
   @endif
   @if($nfceFiscalUser && $canCorrectNfce)
     <a class="btn btn-secondary" href="{{ route('fiscal.nfce.correct',$document) }}">
-      @include('partials.icon',['name'=>'file-pen-line','size'=>16]) Corrigir rejeição
+      @include('partials.icon',['name'=>'edit','size'=>16]) Corrigir rejeição
     </a>
   @endif
   @if($nfceFiscalUser && $document->status==='pending' && $document->access_key)
