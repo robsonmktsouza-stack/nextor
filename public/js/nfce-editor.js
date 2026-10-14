@@ -45,6 +45,48 @@
       || tabs.find(tab=>tab.getAttribute('aria-selected')==='true')?.dataset.nfceTab
       || 'general';
     activate(initial);
+
+    // A correção apresenta sempre a lista completa de produtos. Selecionar
+    // uma linha abre somente os campos do item escolhido, abaixo da tabela.
+    const itemEditors=[...form.querySelectorAll('[data-nfce-item-editor]')];
+    const itemRows=[...form.querySelectorAll('[data-nfce-item-row]')];
+    const itemButtons=[...form.querySelectorAll('[data-nfce-item-select]')];
+    const selectItem=index=>{
+      const selected=itemEditors.find(panel=>panel.dataset.nfceItemEditor===index);
+      itemEditors.forEach(panel=>panel.hidden=panel!==selected);
+      itemRows.forEach(row=>row.classList.toggle('is-selected',row.dataset.nfceItemRow===index));
+      itemButtons.forEach(button=>button.setAttribute('aria-expanded',
+        button.dataset.nfceItemSelect===index?'true':'false'));
+      if(selected){
+        const body=form.querySelector('.nfe-workspace-body');
+        if(body){
+          const position=selected.getBoundingClientRect().top-body.getBoundingClientRect().top;
+          if(position>body.clientHeight-120)body.scrollTop+=position-70;
+        }
+      }
+    };
+    form.addEventListener('click',event=>{
+      const button=event.target.closest('[data-nfce-item-select]');
+      if(button&&form.contains(button)){
+        selectItem(button.dataset.nfceItemSelect);
+        return;
+      }
+      if(event.target.closest('[data-nfce-item-close]')){
+        selectItem(null);
+      }
+    });
+    const updateItemSummary=event=>{
+      const input=event.target.closest('[data-nfce-item-editor] [name]');
+      if(!input)return;
+      const editor=input.closest('[data-nfce-item-editor]');
+      const field=/\\[(ncm|cfop)\\]$/.exec(input.name)?.[1];
+      if(!field)return;
+      const cell=Array.from(form.querySelectorAll('[data-nfce-item-cell]'))
+        .find(node=>node.dataset.nfceItemCell===editor.dataset.nfceItemEditor+'-'+field);
+      if(cell)cell.textContent=input.value||'—';
+    };
+    form.addEventListener('input',updateItemSummary);
+    form.addEventListener('change',updateItemSummary);
     return;
   }
   const el=id=>document.getElementById(id);
