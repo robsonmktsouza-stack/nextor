@@ -203,13 +203,24 @@ final class NFCeRejectionCorrectionTest extends TestCase
             ->assertDontSee('Confira os dados abaixo e faça a correção.');
     }
 
-    public function test_uncorrectable_rejection_still_shows_red_banner_but_remains_readonly(): void
+    public function test_gtin_883_rejection_is_editable_and_shown_in_red(): void
     {
         $old=$this->rejected('883');
         $response=$this->actingAs($this->admin())->get(route('fiscal.show',$old));
         $response->assertOk()
             ->assertSee('data-nfce-rejection',false)
-            ->assertSee('883 - erro')
+            ->assertSee('883 —')
+            ->assertSee('Salvar e transmitir')
+            ->assertSee('name="items[0][gtin]"',false);
+    }
+
+    public function test_uncorrectable_rejection_still_shows_red_banner_but_remains_readonly(): void
+    {
+        $old=$this->rejected('613');
+        $response=$this->actingAs($this->admin())->get(route('fiscal.show',$old));
+        $response->assertOk()
+            ->assertSee('data-nfce-rejection',false)
+            ->assertSee('613 - erro')
             ->assertDontSee('Salvar e transmitir');
     }
 
