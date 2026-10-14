@@ -21,6 +21,9 @@ final class NFCeTaxRuleApplicationService
     {
         DB::transaction(function () use ($id) {
             $job = FiscalDocumentJob::query()->lockForUpdate()->findOrFail($id);
+            if ($job->corrected_from_id) {
+                throw new RuntimeException('Versão fiscal corrigida: não é permitido substituir as regras tributárias auditadas.');
+            }
             if ($job->document_type !== 'nfce' || $job->status !== 'prepared'
                 || $job->access_key || $job->protocol || $job->xml_path
                 || $job->response_path || $job->authorized_at) {
