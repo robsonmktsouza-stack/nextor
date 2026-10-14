@@ -110,7 +110,12 @@ final class NFCeRejectionCorrectionTest extends TestCase
         $this->actingAs($this->admin());
         $path=$old->xml_path;
         $oldXml=Storage::disk('local')->get($path);
-        $this->get(route('fiscal.show',$old))->assertOk()->assertSee('Corrigir rejeição');
+        $this->get(route('fiscal.show',$old))
+            ->assertOk()
+            ->assertSee('id="nfceEditorForm" data-readonly="0" data-correction="1"',false)
+            ->assertSee('data-nfce-tab="products"',false)
+            ->assertSee('Salvar nova versão fiscal')
+            ->assertDontSee('fiscal-detail-grid',false);
         $this->get(route('fiscal.nfce.correct',$old))
             ->assertOk()->assertSee('Salvar nova versão fiscal');
 
@@ -250,6 +255,71 @@ final class NFCeRejectionCorrectionTest extends TestCase
 
         $this->expectException(\RuntimeException::class);
         app(\App\Services\Fiscal\NFCeTaxRuleApplicationService::class)->apply($copy->id);
+    }
+
+    public function test_pending_consultation_613_with_authorized_sibling_is_locked_and_shown_as_superseded(): void
+    {
+        $old=$this->rejected('778','pending');
+        $old->update(['error_message'=>'Consulta SEFAZ: 613 - Chave de acesso diverge da base da SEFAZ.']);
+        $authorized=FiscalDocumentJob::query()->create([
+            'document_type'=>'nfce','sale_id'=>$old->sale_id,
+            'status'=>'authorized','environment'=>'homologation',
+            'series'=>1,'document_number'=>8,
+            'access_key'=>str_repeat('8',44),
+            'protocol'=>'329260000174730','authorized_at'=>now(),
+            'prepared_at'=>now(),
+        ]);
+
+        self::assertNull(app(NFCeRejectionCorrectionService::class)->rejection($old->fresh()));
+        $this->actingAs($this->admin());
+
+        $this->get(route('fiscal.index',['tab'=>'nfce']))
+            ->assertOk()->assertSee('Substituída')->assertSee('Autorizada');
+
+        $this->get(route('fiscal.show',$old))
+            ->assertOk()
+            ->assertSee('data-readonly="1"',false)
+            ->assertSee('Tentativa anterior')
+            ->assertSee('Substituída')
+            ->assertSee('613')
+            ->assertSee(route('fiscal.show',$authorized),false)
+            ->assertDontSee('Salvar nova versão fiscal')
+            ->assertDontSee('Consultar SEFAZ')
+            ->assertDontSee('fiscal-detail-grid',false);
+
+        // Um GET direto à rota de edição também não pode contornar o bloqueio.
+        $this->get(route('fiscal.nfce.correct',$old))
+            ->assertRedirect(route('fiscal.show',$old));
+    }
+
+    public function test_individual_rejection_is_not_editable_after_sibling_authorization(): void
+    {
+        $old=$this->rejected('778');
+        FiscalDocumentJob::query()->create([
+            'document_type'=>'nfce','sale_id'=>$old->sale_id,
+            'status'=>'authorized','environment'=>'homologation',
+            'series'=>1,'document_number'=>8,
+            'protocol'=>'329260000174730','authorized_at'=>now(),
+        ]);
+        self::assertNull(app(NFCeRejectionCorrectionService::class)->rejection($old));
+
+        $this->actingAs($this->admin())->get(route('fiscal.show',$old))
+            ->assertOk()->assertSee('Substituída')->assertSee('data-readonly="1"',false)
+            ->assertDontSee('Salvar nova versão fiscal');
+    }
+
+    public function test_failed_consultation_without_authorized_sibling_remains_unconfirmed(): void
+    {
+        $old=$this->rejected('778','pending');
+        $old->update(['error_message'=>'Consulta SEFAZ: 613 - Chave divergente.']);
+        $this->actingAs($this->admin());
+        $this->get(route('fiscal.index',['tab'=>'nfce']))
+            ->assertOk()->assertSee('Consulta inconclusiva')
+            ->assertDontSee('Substituída');
+        $this->get(route('fiscal.show',$old))
+            ->assertOk()->assertSee('Pendente de confirmação')
+            ->assertSee('Consultar SEFAZ')
+            ->assertDontSee('Salvar nova versão fiscal');
     }
 
     public function test_payment_revision_requires_exact_cent_total(): void
