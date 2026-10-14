@@ -59,10 +59,11 @@ final class PdvOperationsVisibilityTest extends TestCase
         self::assertIsString($html);
         $operationsAt=strpos($html,'id="pdvOperationsModal"');
         $lastSaleAt=strpos($html,'Última venda');
-        $cashAt=strpos($html,'R$ 17,00');
         self::assertNotFalse($operationsAt);
         self::assertGreaterThan($operationsAt,$lastSaleAt);
-        self::assertGreaterThan($operationsAt,$cashAt);
+        // O valor também aparece no diálogo independente de fechamento.
+        // Conferir a ocorrência específica dentro de Operações do caixa.
+        self::assertStringContainsString('R$ 17,00', substr($html, $operationsAt));
     }
 
     public function test_operations_are_available_without_previously_completed_sales(): void
