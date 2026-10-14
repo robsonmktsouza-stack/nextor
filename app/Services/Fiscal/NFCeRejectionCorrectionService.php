@@ -74,9 +74,10 @@ final class NFCeRejectionCorrectionService
         }
 
         $code = (string) ($result['cstat'] ?? '');
-        // Only a *definitive individual* rejection qualifies. A 204/539
-        // duplicate, missing/ambiguous response or failed consult NEVER does.
-        if (($result['individual'] ?? false) !== true
+        // Rejeição individual NFE* ou rejeição específica confirmada em
+        // [RETORNO] do envio síncrono. Consultas e retornos de lote não
+        // habilitam edição. O XML assinado é conferido em prepare().
+        if (!$this->responses->definitiveCorrectionRejection($result)
             || !array_key_exists($code, self::REJECTION_GROUPS)
             || ($result['protocol'] ?? null)
             || (($result['key'] ?? null) !== null
