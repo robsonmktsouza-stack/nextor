@@ -3,9 +3,7 @@
   $readOnly=isset($readOnlyDocument);
   $correctionMode=isset($correctionDocument);
   $editorDocument=$correctionDocument ?? $readOnlyDocument ?? null;
-  $startTab=$correctionMode ? match($rejection['group']) {
-    'items'=>'products','consumer'=>'consumer','payments'=>'payment',default=>'general',
-  } : 'general';
+  $startTab='general';
   $total=$correctionMode ? (float)($snapshot['total'] ?? 0) : null;
   $canCancelArchived=$readOnly
     && $readOnlyDocument->status==='authorized'
