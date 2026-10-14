@@ -139,7 +139,7 @@ final class NFCeRejectionCorrectionTest extends TestCase
         self::assertSame('778',$revision->rejection_code);
         self::assertSame(hash('sha256',$oldXml),$revision->original_xml_sha256);
         self::assertSame($copy->id,$revision->corrected_document_id);
-        $this->get(route('fiscal.show',$copy))->assertOk()->assertSee('Versão fiscal corrigida');
+        $this->get(route('fiscal.show',$copy))->assertOk()->assertSee('Nota corrigida');
 
         // Repeat click is idempotent: no duplicate fiscal version or sale.
         $this->post(route('fiscal.nfce.correct.store',$old),$this->itemPayload())
@@ -347,7 +347,7 @@ final class NFCeRejectionCorrectionTest extends TestCase
         $this->get(route('fiscal.show',$old))
             ->assertOk()
             ->assertSee('data-readonly="1"',false)
-            ->assertSee('Tentativa anterior')
+            ->assertSee('Esta nota não pode ser reenviada.')
             ->assertSee('Substituída')
             ->assertSee('613')
             ->assertSee(route('fiscal.show',$authorized),false)
