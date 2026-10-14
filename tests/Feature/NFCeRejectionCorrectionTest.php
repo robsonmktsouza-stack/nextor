@@ -162,6 +162,36 @@ final class NFCeRejectionCorrectionTest extends TestCase
         $html->assertDontSee('data-initial-tab="products"',false);
     }
 
+    public function test_rejected_invoice_lists_every_product_before_opening_item_details(): void
+    {
+        $old=$this->rejected('778');
+        $snapshot=$old->source_snapshot;
+        $second=$snapshot['items'][0];
+        $second['name']='Segundo produto teste';
+        $second['sku']='TESTE-002';
+        $second['ncm']='22021000';
+        $second['product_id']=25;
+        $snapshot['items'][]=$second;
+        $old->update(['source_snapshot'=>$snapshot]);
+
+        $response=$this->actingAs($this->admin())->get(route('fiscal.show',$old));
+        $response->assertOk()
+            ->assertSee('data-initial-tab="general"',false)
+            ->assertSee('nfce-correction-product-list',false)
+            ->assertSee('Produtos da NFC-e')
+            ->assertSee('Camiseta teste')
+            ->assertSee('Segundo produto teste')
+            ->assertSee('data-nfce-item-row="0"',false)
+            ->assertSee('data-nfce-item-row="1"',false)
+            ->assertSee('data-nfce-item-select="0"',false)
+            ->assertSee('data-nfce-item-select="1"',false)
+            ->assertSee('data-nfce-item-editor="0" hidden',false)
+            ->assertSee('data-nfce-item-editor="1" hidden',false)
+            ->assertSee('name="items[0][ncm]"',false)
+            ->assertSee('name="items[1][ncm]"',false);
+        self::assertSame(2,substr_count($response->getContent(),'data-nfce-item-select="'));
+    }
+
     public function test_778_rejection_allows_changes_in_other_tabs_and_tracks_each_fiscal_field(): void
     {
         $old=$this->rejected('778');
