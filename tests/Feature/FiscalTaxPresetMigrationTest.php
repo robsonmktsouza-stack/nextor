@@ -13,6 +13,7 @@ use Tests\TestCase;
 final class FiscalTaxPresetMigrationTest extends TestCase
 {
     use RefreshDatabase;
+    use \Tests\Concerns\WithConfiguredCompany;
 
     public function test_migration_creates_all_official_code_based_preset_groups_without_auto_default(): void
     {
