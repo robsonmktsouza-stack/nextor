@@ -36,10 +36,10 @@ final class NFCeTransmissionService
         }
 
         try {
-            $job = DB::transaction(function () use ($id) {
-                // Serializar tentativas da mesma venda: duas versoes fiscais
-                // nunca podem passar no preflight simultaneamente.
-                $document = FiscalDocumentJob::query()->findOrFail($id);
+            $job = DB::transaction(function () use ($id, $document) {
+                // O identificador da venda foi lido ANTES da transacao.
+                // Bloquear a venda antes do primeiro SELECT dentro dela evita
+                // snapshots desatualizados (MySQL REPEATABLE READ) no preflight.
                 if ($document->sale_id) {
                     \App\Models\Sale::query()->whereKey($document->sale_id)
                         ->lockForUpdate()->firstOrFail();
