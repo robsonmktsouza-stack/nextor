@@ -29,7 +29,7 @@ final class FiscalTaxRuleController extends Controller
         $data = $this->validated($request);
         FiscalTaxRule::query()->create($data);
 
-        return back()->with('success', 'Regra fiscal cadastrada. Confira os critérios antes de ativar sua utilização.');
+        return back()->with('success', 'Regra fiscal cadastrada.');
     }
 
     public function update(Request $request, FiscalTaxRule $fiscalTaxRule)
@@ -38,7 +38,7 @@ final class FiscalTaxRuleController extends Controller
         $data['revision'] = $fiscalTaxRule->revision + 1;
         $fiscalTaxRule->update($data);
 
-        return back()->with('success', 'Regra fiscal atualizada. Documentos já preparados mantêm o snapshot anterior até a aplicação explícita.');
+        return back()->with('success', 'Regra fiscal atualizada.');
     }
 
     private function validated(Request $request): array
