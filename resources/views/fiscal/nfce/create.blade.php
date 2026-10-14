@@ -89,13 +89,50 @@
         @endif
         @if($readOnly)
           <div class="nfce-readonly-fiscal-bar">
-            <span class="status {{ $readOnlyDocument->status==='authorized'?'status-ok':'status-muted' }}">{{ $readOnlyDocument->status==='authorized'?'Autorizada':'Cancelada' }}</span>
+            <span class="status {{ $readOnlyDocument->status==='authorized'?'status-ok':(in_array($readOnlyDocument->status,['rejected','error','failed','offline_print_pending'],true)?'status-danger':'status-muted') }}">{{ $nfceViewStatus ?? ($readOnlyDocument->status==='authorized'?'Autorizada':'Cancelada') }}</span>
             <span><b>Chave:</b> <span class="nfce-readonly-key">{{ $readOnlyDocument->access_key ?: '—' }}</span></span>
             <span><b>Protocolo:</b> {{ $readOnlyDocument->protocol ?: '—' }}</span>
             @if($readOnlyDocument->authorized_at)<span><b>Autorizada em:</b> {{ $readOnlyDocument->authorized_at->format('d/m/Y H:i:s') }}</span>@endif
             @if($readOnlyDocument->emission_mode==='offline')<span><b>Emissão:</b> Contingência offline</span>@endif
             @if($readOnlyDocument->cancelled_at)<span><b>Cancelada em:</b> {{ $readOnlyDocument->cancelled_at->format('d/m/Y H:i:s') }}</span>@endif
-            @if(!$xmlLoaded)<span>XML arquivado indisponível: informações comerciais do registro original.</span>@endif
+            @if(in_array($readOnlyDocument->status,['authorized','cancelled'],true) && !$xmlLoaded)<span>XML arquivado indisponível: informações comerciais do registro original.</span>@endif
+          </div>
+        @endif
+        @if($readOnly && ($nfceAuthorizedSibling ?? null))
+          <div class="alert alert-warning" role="alert">
+            <strong>Tentativa anterior — não retransmitir.</strong>
+            Esta venda já possui a NFC-e
+            <a class="table-link" href="{{ route('fiscal.show',$nfceAuthorizedSibling) }}">
+              {{ $nfceAuthorizedSibling->series }}/{{ $nfceAuthorizedSibling->document_number }}
+            </a> autorizada. O retorno da consulta desta tentativa não comprova que ela
+            tenha sido rejeitada para fins de correção. O documento original foi preservado.
+          </div>
+        @endif
+        @if($readOnly && $readOnlyDocument->error_message)
+          <div class="alert alert-danger" role="alert">
+            <strong>Retorno fiscal:</strong> {{ $readOnlyDocument->error_message }}
+          </div>
+        @endif
+        @if($readOnly && count($nfcePreflightErrors ?? []))
+          <div class="alert alert-danger" role="alert">
+            <strong>Corrija as pendências antes de transmitir:</strong>
+            <ul>@foreach($nfcePreflightErrors as $problem)<li>{{ $problem }}</li>@endforeach</ul>
+          </div>
+        @endif
+        @if($readOnly && ($nfceCorrectedNext ?? null))
+          <div class="fiscal-info-card">
+            <strong>Revisão fiscal já preparada</strong>
+            <a class="table-link" href="{{ route('fiscal.show',$nfceCorrectedNext) }}">
+              Abrir versão corrigida {{ $nfceCorrectedNext->series }}/{{ $nfceCorrectedNext->document_number }}
+            </a>.
+          </div>
+        @endif
+        @if($readOnly && ($nfceDuplicateNext ?? null))
+          <div class="fiscal-info-card">
+            <strong>Documento substituto</strong>
+            <a class="table-link" href="{{ route('fiscal.show',$nfceDuplicateNext) }}">
+              Abrir NFC-e {{ $nfceDuplicateNext->series }}/{{ $nfceDuplicateNext->document_number }}
+            </a> vinculada à mesma venda.
           </div>
         @endif
         <div class="editor-tabs nfe-editor-tabs" role="tablist" aria-label="Seções da NFC-e" data-nfce-tabs>
@@ -248,6 +285,37 @@
               <a href="{{ route('fiscal.nfce.danfe',$readOnlyDocument) }}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">
                 @include('partials.icon',['name'=>'print','size'=>16]) Imprimir DANFE
               </a>
+            @endif
+            @if($readOnlyDocument->status==='prepared' && empty($nfcePreflightErrors))
+              <form method="post" action="{{ route('fiscal.nfce.emit',$readOnlyDocument) }}"
+                data-confirm-submit="Transmitir a NFC-e {{ $readOnlyDocument->series }}/{{ $readOnlyDocument->document_number }} para a SEFAZ? A emissão não será duplicada."
+                data-confirm-kind="action">
+                @csrf
+                <button type="submit" class="btn btn-success">Emitir NFC-e</button>
+              </form>
+            @endif
+            @if($readOnlyDocument->status==='pending' && !($nfceAuthorizedSibling ?? null)
+              && preg_match('/^\\d{44}$/',(string)$readOnlyDocument->access_key))
+              <form method="post" action="{{ route('fiscal.nfce.consult',$readOnlyDocument) }}">
+                @csrf
+                <button type="submit" class="btn btn-secondary">Consultar SEFAZ</button>
+              </form>
+            @endif
+            @if(($nfceDuplicateAvailable ?? false) && !($nfceAuthorizedSibling ?? null))
+              <form method="post" action="{{ route('fiscal.nfce.duplicate',$readOnlyDocument) }}"
+                data-confirm-submit="Duplicar a rejeição 539 comprovada, com novo número fiscal e sem nova venda?"
+                data-confirm-kind="action">
+                @csrf
+                <button type="submit" class="btn btn-secondary">Duplicar NFC-e (539)</button>
+              </form>
+            @endif
+            @if($readOnlyDocument->emission_mode==='offline' && $readOnlyDocument->status==='offline_signed')
+              <form method="post" action="{{ route('fiscal.nfce.offline.transmit',$readOnlyDocument) }}"
+                data-confirm-submit="Transmitir à SEFAZ a mesma NFC-e assinada em contingência?"
+                data-confirm-kind="action">
+                @csrf
+                <button type="submit" class="btn btn-success">Transmitir contingência</button>
+              </form>
             @endif
             @if($canCancelArchived)
               <button type="button" class="btn btn-danger" data-dialog-open="nfceCancelDialog">Cancelar NFC-e</button>
