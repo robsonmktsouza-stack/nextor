@@ -2221,3 +2221,27 @@
   });
 
 })();
+
+
+// Uma linha fiscal abre a NFC-e diretamente no editor. Controles internos
+// (seleção em massa, links para vendas, botões) mantêm suas próprias ações.
+(() => {
+  'use strict';
+  const interactive='a, button, input, select, textarea, label, form, summary';
+  const openRow=row=>{
+    const url=row?.dataset.fiscalOpenUrl;
+    if(url) window.location.assign(url);
+  };
+  document.addEventListener('click',event=>{
+    const row=event.target.closest?.('tr[data-fiscal-open-url]');
+    if(row && !event.target.closest(interactive)) openRow(row);
+  });
+  document.addEventListener('keydown',event=>{
+    if(!['Enter',' '].includes(event.key)) return;
+    const row=event.target.closest?.('tr[data-fiscal-open-url]');
+    if(row && event.target===row){
+      event.preventDefault();
+      openRow(row);
+    }
+  });
+})();
