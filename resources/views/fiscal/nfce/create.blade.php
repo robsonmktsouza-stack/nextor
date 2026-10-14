@@ -72,7 +72,9 @@
         </div>
 
         @if($readOnly && $readOnlyDocument->corrected_from_id)
-          @php($oldVersion = \App\Models\FiscalDocumentJob::query()->find($readOnlyDocument->corrected_from_id))
+          @php
+            $oldVersion = \App\Models\FiscalDocumentJob::query()->find($readOnlyDocument->corrected_from_id);
+          @endphp
           @if($oldVersion)
             <div class="fiscal-info-card">
               <strong>Histórico de versões fiscais</strong>
