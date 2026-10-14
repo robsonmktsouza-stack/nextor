@@ -122,7 +122,7 @@ jobs:
                 nfce-editor-layout) marker='data-nfce-layout-test="passed"' ;;
               esac
               grep -q "$marker" "/tmp/nextor-$case.html" || {
-                grep -A2 -B2 'id="testResult"\|id="results"' "/tmp/nextor-$case.html" || true
+                grep -A2 -B2 'id="testResult"\|id="results"\|id="result"' "/tmp/nextor-$case.html" || true
                 tail -n 20 "/tmp/nextor-$case-chrome.log" || true
                 exit 1
               }
