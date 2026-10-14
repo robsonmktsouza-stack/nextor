@@ -222,6 +222,56 @@ final class NFCeRejectionCorrectionTest extends TestCase
         self::assertContains('A venda já possui outra NFC-e autorizada ou em processamento.',$errors);
     }
 
+    public function test_correction_snapshot_cannot_be_replaced_by_product_refresh(): void
+    {
+        $old = $this->rejected('778');
+        $copy = app(NFCeRejectionCorrectionService::class)->prepare(
+            $old->id, $this->itemPayload(), $this->admin()->id
+        );
+        $snapshot = $copy->source_snapshot;
+
+        try {
+            app(\App\Services\Fiscal\NFCeFiscalDataRefreshService::class)->refresh($copy);
+            self::fail('Uma revisão fiscal auditada não pode ser atualizada a partir do produto.');
+        } catch (ValidationException) {
+            self::assertSame($snapshot, $copy->fresh()->source_snapshot);
+            self::assertSame(1, DB::table('nfce_correction_revisions')->count());
+        }
+        $this->actingAs(User::query()->first());
+        $this->get(route('fiscal.show', $copy))->assertOk()->assertDontSee('Atualizar dados fiscais');
+    }
+
+    public function test_correction_snapshot_cannot_have_rules_reapplied(): void
+    {
+        $old = $this->rejected('778');
+        $copy = app(NFCeRejectionCorrectionService::class)->prepare(
+            $old->id, $this->itemPayload(), $this->admin()->id
+        );
+
+        $this->expectException(\RuntimeException::class);
+        app(\App\Services\Fiscal\NFCeTaxRuleApplicationService::class)->apply($copy->id);
+    }
+
+    public function test_payment_revision_requires_exact_cent_total(): void
+    {
+        $old = $this->rejected('769');
+        $this->expectException(ValidationException::class);
+        app(NFCeRejectionCorrectionService::class)->prepare(
+            $old->id, ['payments'=>[['payment_method'=>'pix','amount'=>'29.89']]],
+            $this->admin()->id
+        );
+    }
+
+    public function test_ncm_with_letters_is_not_silently_sanitized(): void
+    {
+        $old = $this->rejected('778');
+        $this->expectException(ValidationException::class);
+        app(NFCeRejectionCorrectionService::class)->prepare(
+            $old->id, $this->itemPayload(['ncm'=>'invalido61091001']),
+            $this->admin()->id
+        );
+    }
+
     public function test_gtin_and_tax_codes_remain_subject_to_validation(): void
     {
         $old=$this->rejected('611');
