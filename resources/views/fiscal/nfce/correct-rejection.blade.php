@@ -1,5 +1,4 @@
-{{-- Partes do editor unico de NFC-e. Recebe dados fiscais congelados e libera
-     somente os campos associados à rejeição individual confirmada pela SEFAZ. --}}
+{{-- Editor de NFC-e rejeitada: revisão dos campos fiscais sem alterar a venda original. --}}
         <section class="editor-tab-panel {{ $startTab==='general'?'active':'' }}" id="nfcePanel-general"
           role="tabpanel" aria-labelledby="nfceTab-general" data-nfce-panel="general"
           @if($startTab!=='general') hidden @endif>
@@ -16,7 +15,7 @@
         <section class="editor-tab-panel {{ $startTab==='consumer'?'active':'' }}" id="nfcePanel-consumer"
           role="tabpanel" aria-labelledby="nfceTab-consumer" data-nfce-panel="consumer"
           @if($startTab!=='consumer') hidden @endif>
-          @if($rejection['group']==='consumer')
+          
       <div class="editor-panel">
         <h3>Identificação do consumidor</h3>
         <p class="editor-help">Preencha um CPF/CNPJ válido ou mantenha o consumidor não identificado, quando permitido.</p>
@@ -28,19 +27,11 @@
             <input name="consumer_name" maxlength="190"
               value="{{ old('consumer_name',$snapshot['consumer_name'] ?? '') }}"></label>
         </div>
-      </div>
-          @else
-          <div class="nfe-general-card">
-            <div class="nfe-section-title"><h3>Consumidor</h3></div>
-            <p>CPF/CNPJ: {{ $snapshot['consumer_document'] ?: 'Não identificado' }}</p>
-            <p>Nome: {{ $snapshot['consumer_name'] ?: 'Consumidor não identificado' }}</p>
-          </div>
-          @endif
-        </section>
+      </div>        </section>
         <section class="editor-tab-panel {{ $startTab==='products'?'active':'' }}" id="nfcePanel-products"
           role="tabpanel" aria-labelledby="nfceTab-products" data-nfce-panel="products"
           @if($startTab!=='products') hidden @endif>
-          @if($rejection['group']==='items')
+          
       <div class="editor-panel">
         <h3>Produtos</h3>
         @foreach(($snapshot['items'] ?? []) as $index => $item)
@@ -129,32 +120,11 @@
             </div>
           </div>
         @endforeach
-      </div>
-          @else
-          <div class="nfe-general-card">
-            <div class="nfe-section-title"><h3>Produtos</h3></div>
-            <div class="nfce-item-table-wrap">
-              <table class="nfce-item-table">
-                <thead><tr><th>Produto</th><th>Quantidade</th><th>Preço</th><th>Total</th></tr></thead>
-                <tbody>
-                  @foreach(($snapshot['items'] ?? []) as $item)
-                    <tr>
-                      <td>{{ $item['name'] ?? 'Produto' }}</td>
-                      <td>{{ $item['quantity'] ?? '—' }}</td>
-                      <td>R$ {{ number_format((float)($item['unit_price'] ?? 0),2,',','.') }}</td>
-                      <td>R$ {{ number_format((float)($item['line_total'] ?? 0),2,',','.') }}</td>
-                    </tr>
-                  @endforeach
-                </tbody>
-              </table>
-            </div>
-          </div>
-          @endif
-        </section>
+      </div>        </section>
         <section class="editor-tab-panel {{ $startTab==='payment'?'active':'' }}" id="nfcePanel-payment"
           role="tabpanel" aria-labelledby="nfceTab-payment" data-nfce-panel="payment"
           @if($startTab!=='payment') hidden @endif>
-          @if($rejection['group']==='payments')
+          
       <div class="editor-panel">
         <h3>Pagamento</h3>
         <p class="editor-help">Total dos pagamentos: R$ {{ number_format((float)($snapshot['total'] ?? 0),2,',','.') }}.</p>
@@ -179,17 +149,7 @@
             </label>
           </div>
         @endforeach
-      </div>
-          @else
-          <div class="nfe-general-card">
-            <div class="nfe-section-title"><h3>Pagamento</h3></div>
-            @foreach(($snapshot['payments'] ?? []) as $payment)
-              <p>{{ $payment['payment_method'] ?? 'Não informado' }} —
-                R$ {{ number_format((float)($payment['amount'] ?? 0),2,',','.') }}</p>
-            @endforeach
-          </div>
-          @endif
-        </section>
+      </div>        </section>
         <section class="editor-tab-panel {{ $startTab==='summary'?'active':'' }}" id="nfcePanel-summary"
           role="tabpanel" aria-labelledby="nfceTab-summary" data-nfce-panel="summary"
           @if($startTab!=='summary') hidden @endif>
