@@ -171,6 +171,62 @@ final class NFCeRejectionCorrectionTest extends TestCase
         self::assertSame(1,Sale::query()->count());
     }
 
+    public function test_archived_retorno_778_is_reconciled_without_reissuing_or_touching_sale(): void
+    {
+        $old=$this->rejected('778','pending');
+        $base='fiscal/nfce/'.$old->id;
+        Storage::disk('local')->put($base.'/sefaz-response.ini',
+            "[ENVIO]\\nCStat=103\\nXMotivo=Lote recebido\\n"
+            ."[RETORNO]\\nCStat=778\\nXMotivo=Rejeicao: Informado NCM inexistente [nItem:1]\\n"
+        );
+        $signed=Storage::disk('local')->get($old->xml_path);
+
+        $this->artisan('nfce:reconcile-rejection',[
+            'number'=>'7','--series'=>'1',
+        ])->assertExitCode(0);
+        self::assertSame('pending',$old->fresh()->status);
+
+        $this->artisan('nfce:reconcile-rejection',[
+            'number'=>'7','--series'=>'1','--apply'=>true,
+        ])->assertExitCode(0);
+        self::assertSame('rejected',$old->fresh()->status);
+        self::assertSame($signed,Storage::disk('local')->get($old->xml_path));
+        self::assertSame(1,Sale::query()->count());
+        self::assertSame(1,FiscalDocumentJob::query()->count());
+
+        $this->actingAs($this->admin())->get(route('fiscal.show',$old))
+            ->assertOk()->assertSee('Salvar e transmitir')
+            ->assertSee('data-nfce-tab="products"',false);
+    }
+
+    public function test_reconciliation_rejects_unconfirmed_613_and_authorized_sibling(): void
+    {
+        $old=$this->rejected('778','pending');
+        Storage::disk('local')->put('fiscal/nfce/'.$old->id.'/sefaz-response.ini',
+            "[RETORNO]\\nCStat=613\\nXMotivo=Rejeicao: Chave divergente\\n"
+        );
+
+        $this->artisan('nfce:reconcile-rejection',[
+            'number'=>'7','--series'=>'1','--apply'=>true,
+        ])->assertExitCode(0);
+        self::assertSame('pending',$old->fresh()->status);
+
+        Storage::disk('local')->put('fiscal/nfce/'.$old->id.'/sefaz-response.ini',
+            "[RETORNO]\\nCStat=778\\nXMotivo=Rejeicao: Informado NCM inexistente [nItem:1]\\n"
+        );
+        FiscalDocumentJob::query()->create([
+            'document_type'=>'nfce','sale_id'=>$old->sale_id,
+            'status'=>'authorized','environment'=>'homologation',
+            'series'=>1,'document_number'=>8,
+            'protocol'=>'329260000174730','authorized_at'=>now(),
+        ]);
+
+        $this->artisan('nfce:reconcile-rejection',[
+            'number'=>'7','--series'=>'1','--apply'=>true,
+        ])->assertExitCode(0);
+        self::assertSame('pending',$old->fresh()->status);
+    }
+
     public function test_pending_authorized_and_duplicate_539_documents_cannot_be_corrected(): void
     {
         $old=$this->rejected('539');
