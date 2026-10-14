@@ -99,13 +99,13 @@ final class NFCeDuplicationService
 
                 $company = CompanySetting::current();
                 if (!InstanceIdentity::matches($company->document)) {
-                    $this->fail('A instalação não corresponde ao CNPJ do emitente.');
+                    $this->fail('O CNPJ da empresa não corresponde ao da nota.');
                 }
                 if ($this->settings->transmissionIssue('nfce', (string) $source->environment)
                     || $this->settings->environment('nfce') !== $source->environment
                     || (int) AppSetting::value('nfce', 'series', -1) !== (int) $source->series
                 ) {
-                    $this->fail('O ambiente, a série e a habilitação fiscal precisam corresponder à NFC-e original.');
+                    $this->fail('Confira a série e o ambiente fiscal nas configurações.');
                 }
 
                 $disk = Storage::disk('local');
@@ -117,10 +117,10 @@ final class NFCeDuplicationService
                 try {
                     $key = $this->xml->verifySigned($disk->get($signedPath), $source);
                 } catch (RuntimeException) {
-                    $this->fail('Falha na validação do XML assinado original.');
+                    $this->fail('Não foi possível conferir o arquivo da nota.');
                 }
                 if (!hash_equals((string) $source->access_key, $key)) {
-                    $this->fail('A chave armazenada não corresponde ao XML assinado original.');
+                    $this->fail('Os dados da nota não conferem. Entre em contato com o suporte.');
                 }
 
                 $expected = (int) AppSetting::value('nfce', 'next_number', 1);
