@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="../../public/css/erp.css">
+<link rel="stylesheet" href="../../public/css/ui-refinement.css">
+<style>
+html,body{width:100%;margin:0;box-sizing:border-box}
+.app-root{box-sizing:border-box;min-height:100vh;padding:18px;width:100%}
+#result{position:relative;margin-top:12px;font:12px monospace;color:#142d43}
+</style>
+</head>
+<body>
+<div class="app-root">
+  <section class="cms-card product-editor">
+    <div class="editor-tabs"><button class="editor-tab active">Dados gerais</button><button class="editor-tab">Fiscal</button><button class="editor-tab">Estoque</button></div>
+    <div class="editor-tab-panel">
+      <div class="editor-panel">
+        <h3>Dados do produto</h3>
+        <div class="editor-grid cols-12" id="productFormGrid">
+          <label class="field col-3"><span>Código do produto</span><input value="000001"></label>
+          <label class="field col-6"><span>Descrição</span><input value="Produto de demonstração"></label>
+          <label class="field col-3"><span>Categoria</span><select><option>Mercearia</option></select></label>
+          <label class="field col-2"><span>Unidade</span><input value="UN"></label>
+          <label class="field col-2"><span>Preço</span><input value="29,90"></label>
+          <label class="field col-2"><span>NCM</span><input value="61091000"></label>
+          <label class="field col-2"><span>CFOP</span><input value="5102"></label>
+          <label class="field col-4"><span>Observação</span><input value="Texto de exemplo"></label>
+          <label class="field col-8"><span>Complemento</span><textarea>Observações sobre o cadastro</textarea></label>
+          <label class="field col-4"><span>Data</span><input value="14/10/2026"></label>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="cms-card" style="margin-top:12px">
+    <div class="table-scroll"><table class="cms-table"><thead><tr><th>Produto</th><th>Quantidade</th><th>Preço</th><th>Opções</th></tr></thead><tbody>
+      <tr><td>Produto demonstrativo com uma descrição longa</td><td>3,000</td><td>R$ 29,90</td><td>Editar</td></tr>
+    </tbody></table></div>
+  </section>
+  <div id="result">AGUARDANDO</div>
+</div>
+<script>
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    try{
+      const viewport=document.documentElement.clientWidth;
+      const grid=document.getElementById('productFormGrid');
+      const gr=grid.getBoundingClientRect();
+      const fields=[...grid.children];
+      for(const field of fields){
+        const r=field.getBoundingClientRect();
+        if(r.left<gr.left-2||r.right>gr.right+2)throw Error('campo extrapolou formulário: '+field.textContent.trim());
+        const input=field.querySelector('input,select,textarea');
+        const ir=input.getBoundingClientRect();
+        if(ir.right>gr.right+2)throw Error('campo de entrada extrapolou formulário');
+      }
+      if(document.documentElement.scrollWidth>viewport+2)throw Error('página gerou rolagem horizontal');
+      if(viewport<=760){
+        for(const field of fields){
+          const r=field.getBoundingClientRect();
+          if(Math.abs(r.width-gr.width)>3)throw Error('cadastro não ocupa coluna inteira em tela pequena');
+        }
+      }
+      document.body.dataset.formGridTest='passed';
+      document.getElementById('result').textContent='PASS: grid '+viewport+'px';
+    }catch(e){
+      document.body.dataset.formGridTest='failed';
+      document.getElementById('result').textContent='FAIL: '+e.message;
+    }
+  },350);
+});
+</script>
+</body>
+</html>
