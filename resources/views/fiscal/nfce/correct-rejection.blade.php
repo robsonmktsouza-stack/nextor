@@ -38,16 +38,55 @@
           role="tabpanel" aria-labelledby="nfceTab-products" data-nfce-panel="products"
           @if($startTab!=='products') hidden @endif>
           
-      <div class="editor-panel">
-        <h3>Produtos</h3>
+      <div class="cms-card nfce-correction-product-list">
+        <div class="grid-actionbar">
+          <div class="grid-actions-left"><strong>Produtos da NFC-e</strong></div>
+          <span class="nfce-list-count">{{ count($snapshot['items'] ?? []) }} {{ count($snapshot['items'] ?? [])===1?'produto':'produtos' }}</span>
+        </div>
+        <div class="table-scroll nfce-item-table-wrap">
+          <table class="cms-table nfce-item-table">
+            <thead>
+              <tr><th>Produto</th><th>CFOP</th><th>NCM</th><th>Qtd.</th><th>Unitário</th><th>Total</th><th class="action-cell">Editar</th></tr>
+            </thead>
+            <tbody>
+            @foreach(($snapshot['items'] ?? []) as $index => $item)
+              @php
+                $rowTax=is_array($item['tax_defaults'] ?? null)?$item['tax_defaults']:[];
+              @endphp
+              <tr data-nfce-item-row="{{ $index }}">
+                <td><strong>{{ $item['name'] ?? 'Produto' }}</strong>
+                  @if($item['sku'] ?? null)<small>{{ $item['sku'] }}</small>@endif
+                </td>
+                <td><span data-nfce-item-cell="{{ $index }}-cfop">{{ $rowTax['cfop_outbound_internal'] ?? $rowTax['nfce_cfop'] ?? $rowTax['cfop'] ?? '—' }}</span></td>
+                <td><span data-nfce-item-cell="{{ $index }}-ncm">{{ $item['ncm'] ?? '—' }}</span></td>
+                <td>{{ number_format((float)($item['quantity'] ?? 0),3,',','.') }}</td>
+                <td>R$ {{ number_format((float)($item['unit_price'] ?? 0),2,',','.') }}</td>
+                <td>R$ {{ number_format((float)($item['line_total'] ?? 0),2,',','.') }}</td>
+                <td class="action-cell">
+                  <button type="button" class="btn btn-secondary nfce-item-edit-button"
+                    data-nfce-item-select="{{ $index }}" aria-controls="nfceItemEdit{{ $index }}" aria-expanded="false">
+                    Editar
+                  </button>
+                </td>
+              </tr>
+            @endforeach
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="nfce-correction-item-details">
         @foreach(($snapshot['items'] ?? []) as $index => $item)
           @php
             $tax = is_array($item['tax_defaults'] ?? null) ? $item['tax_defaults'] : [];
             $field = 'items.'.$index.'.';
             $simple = in_array((string)$company->crt, ['1','4'], true);
           @endphp
-          <div class="editor-panel">
-            <h3>Item {{ $index+1 }} — {{ $item['name'] ?? 'Produto' }}</h3>
+          <div class="editor-panel nfce-correction-item-editor" id="nfceItemEdit{{ $index }}"
+            data-nfce-item-editor="{{ $index }}" hidden>
+            <div class="nfce-item-editor-heading">
+              <h3>Editar: {{ $item['name'] ?? 'Produto' }}</h3>
+              <button type="button" class="btn btn-secondary" data-nfce-item-close aria-label="Fechar edição do produto">Fechar</button>
+            </div>
             <p class="editor-help">Quantidade {{ $item['quantity'] ?? '—' }} · R$ {{ $item['unit_price'] ?? '—' }} por unidade</p>
             <div class="editor-grid cols-12">
               <label class="field col-3">
@@ -126,7 +165,8 @@
             </div>
           </div>
         @endforeach
-      </div>        </section>
+      </div>
+        </section>
         <section class="editor-tab-panel {{ $startTab==='payment'?'active':'' }}" id="nfcePanel-payment"
           role="tabpanel" aria-labelledby="nfceTab-payment" data-nfce-panel="payment"
           @if($startTab!=='payment') hidden @endif>
