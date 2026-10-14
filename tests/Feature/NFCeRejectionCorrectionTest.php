@@ -180,6 +180,12 @@ final class NFCeRejectionCorrectionTest extends TestCase
             ."[RETORNO]\\nCStat=778\\nXMotivo=Rejeicao: Informado NCM inexistente [nItem:1]\\n"
         );
         $signed=Storage::disk('local')->get($old->xml_path);
+        $parsed=app(\App\Services\Fiscal\NFCeSefazResponseParser::class)
+            ->parse(Storage::disk('local')->get($base.'/sefaz-response.ini'));
+        self::assertTrue(
+            app(\App\Services\Fiscal\NFCeSefazResponseParser::class)->definitiveCorrectionRejection($parsed),
+            'Resposta ACBr: '.var_export($parsed,true)
+        );
 
         self::assertSame(0,\Illuminate\Support\Facades\Artisan::call('nfce:reconcile-rejection',[
             'number'=>'7','--series'=>'1',
