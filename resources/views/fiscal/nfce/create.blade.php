@@ -109,7 +109,7 @@
           @endphp
           @if($oldVersion)
             <div class="fiscal-info-card">
-              <strong>Versão fiscal corrigida</strong>
+              <strong>Nota corrigida</strong>
               <p>Correção da
                 <a href="{{ route('fiscal.show',$oldVersion) }}" class="table-link">
                   NFC-e {{ $oldVersion->series }}/{{ $oldVersion->document_number }}
@@ -126,17 +126,16 @@
             @if($readOnlyDocument->authorized_at)<span><b>Autorizada em:</b> {{ $readOnlyDocument->authorized_at->format('d/m/Y H:i:s') }}</span>@endif
             @if($readOnlyDocument->emission_mode==='offline')<span><b>Emissão:</b> Contingência offline</span>@endif
             @if($readOnlyDocument->cancelled_at)<span><b>Cancelada em:</b> {{ $readOnlyDocument->cancelled_at->format('d/m/Y H:i:s') }}</span>@endif
-            @if(in_array($readOnlyDocument->status,['authorized','cancelled'],true) && !$xmlLoaded)<span>XML arquivado indisponível: informações comerciais do registro original.</span>@endif
+            @if(in_array($readOnlyDocument->status,['authorized','cancelled'],true) && !$xmlLoaded)<span>XML não disponível para esta nota.</span>@endif
           </div>
         @endif
         @if($readOnly && ($nfceAuthorizedSibling ?? null))
           <div class="alert alert-warning" role="alert">
-            <strong>Tentativa anterior — não retransmitir.</strong>
+            <strong>Esta nota não pode ser reenviada.</strong>
             Esta venda já possui a NFC-e
             <a class="table-link" href="{{ route('fiscal.show',$nfceAuthorizedSibling) }}">
               {{ $nfceAuthorizedSibling->series }}/{{ $nfceAuthorizedSibling->document_number }}
-            </a> autorizada. O retorno da consulta desta tentativa não comprova que ela
-            tenha sido rejeitada para fins de correção. O documento original foi preservado.
+            </a> autorizada.
           </div>
         @endif
         @if($readOnly && $readOnlyDocument->error_message)
@@ -164,7 +163,7 @@
             Esta tentativa foi criada a partir da
             <a class="table-link" href="{{ route('fiscal.show',$nfceDuplicateOriginal) }}">
               NFC-e {{ $nfceDuplicateOriginal->series }}/{{ $nfceDuplicateOriginal->document_number }}
-            </a>. A venda original foi preservada.
+            </a>.
           </div>
         @endif
         @if($readOnly && ($nfceDuplicateNext ?? null))
@@ -172,7 +171,7 @@
             <strong>Documento gerado por duplicação</strong>
             <a class="table-link" href="{{ route('fiscal.show',$nfceDuplicateNext) }}">
               Abrir NFC-e {{ $nfceDuplicateNext->series }}/{{ $nfceDuplicateNext->document_number }}
-            </a> vinculada à mesma venda.
+            </a>.
           </div>
         @endif
         <div class="editor-tabs nfe-editor-tabs" role="tablist" aria-label="Seções da NFC-e" data-nfce-tabs>
