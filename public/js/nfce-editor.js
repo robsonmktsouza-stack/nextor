@@ -2,8 +2,10 @@
   'use strict';
   const form=document.getElementById('nfceEditorForm');
   if(!form) return;
-  const readOnly=form.dataset.readonly==='1';
-  if(readOnly){
+  const tabsOnly=form.dataset.readonly==='1'||form.dataset.correction==='1';
+  if(tabsOnly){
+    // Documentos históricos e correções auditadas usam HTML do servidor,
+    // sem inicializar o editor de nova venda/estoque/pagamento.
     // A NFC-e autorizada usa valores HTML vindos do XML: não instanciar o
     // editor de produtos/pagamentos, buscas, máscaras ou validação de venda.
     const tabs=[...form.querySelectorAll('[data-nfce-tab]')];
