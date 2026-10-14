@@ -176,7 +176,11 @@ class PdvController extends Controller
             ->where('source','pdv')
             ->where('operation_type','sale')
             ->where(function($q) use($from,$to,$start,$endExclusive){
-                $q->whereBetween('operation_date',[$from->toDateString(),$to->toDateString()])
+                // Intervalo semiaberto funciona para DATE (MySQL) e para
+                // os snapshots DATE serializados como DATETIME (SQLite).
+                // A comparação direta preserva o uso do índice da coluna.
+                $q->where('operation_date','>=',$from->toDateString())
+                  ->where('operation_date','<',$to->copy()->addDay()->toDateString())
                   ->orWhere(function($legacy) use($start,$endExclusive){
                       $legacy->whereNull('operation_date')
                           ->where('created_at','>=',$start)
