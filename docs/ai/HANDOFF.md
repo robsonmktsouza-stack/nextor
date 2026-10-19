@@ -15,6 +15,9 @@ Este documento registra o último trabalho concluído. Verifique sempre o códig
 - `resources/views/fiscal/tax-groups/form.blade.php`: avisos tributários extensos saem da leitura principal e ficam em `details` opcionais (ICMS-ST/FCP e IBS/CBS). Nada alterado em submissão de campos/regras.
 - Vendas, Financeiro, Dashboard, Estoque e PDV: remoção seletiva de textos que só repetiam os rótulos, preservando ajudas contextuais realmente operacionais, como confirmação de cancelamento, contingência e ajuste do estoque.
 - `public/css/desktop-polish.css`: remove estilo do banner NFC-e, cria `nfe-section-title--actions` compacto e detalhes fiscais discretos `erp-help-details`. Não altera desenho da Ribbon, paleta ou regras de seleção/modal.
+- `public/js/nfce-editor.js`: retira textos didáticos permanentes para TEF/PIX na tabela de pagamentos eletrônicos; mantém os campos, a seleção de integração e todas as validações fiscais.
+- `AGENTS.md`: fixa a regra de UX editorial para todas as alterações futuras e atualiza comando de testes PHPUnit válido no Laravel do projeto.
+- `tests/Feature/NFCeRejectionCorrectionTest.php`: atualiza a verificação da seção Produtos para a contagem real, já que o título duplicado não existe mais.
 - `tests/Feature/NFCeManualEditorTest.php`: mantém verificações fiscais, passa a exigir interface sem banner e sem segunda seção "Dados gerais". Novo `tests/Feature/FiscalConciseLayoutTest.php` cobre os três modos da NFC-e, NF-e e Configurações. Executar PHPUnit e verificar CI.
 
 **Criterio visual:** telas densas e limpas no padrão ERP desktop clássico, sem grandes callouts instrucionais ou repetição de título em abas. Não remover rótulos, indicadores de ambiente, botões, erros de validação nem alertas fiscais acionáveis. Se editor sofrer regressão, restaurar funcionalidade, não os textos redundantes.
