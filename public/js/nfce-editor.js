@@ -346,6 +346,13 @@
       // Nunca transportar metadados de cartão/PIX a pagamentos em dinheiro.
       if(!isElectronic(payments[index])){
         paymentFields.forEach(key=>payments[index][key]='');
+        // Limpar também os controles reais: um retorno a cartão/PIX não
+        // pode recuperar dados antigos invisíveis no formulário.
+        const detail=el('nfcePayments').querySelector('[data-payment-detail="'+index+'"]');
+        detail?.querySelectorAll('input,select').forEach(control=>{
+          control.value='';
+          control.dispatchEvent(new Event('change',{bubbles:true}));
+        });
       }
       updatePaymentDetails();
     }
