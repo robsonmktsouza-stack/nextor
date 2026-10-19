@@ -10,12 +10,12 @@
  <a class="stat-card" href="{{ route('sales.index') }}"><span class="stat-icon green">@include('partials.icon',['name'=>'money','size'=>21])</span><span class="stat-label">Vendas concluídas</span><strong>R$ {{ number_format((float)$salesTotal,2,',','.') }}</strong><small>{{ $salesCount }} venda(s) ativa(s)</small></a>
 </div>
 <div class="dashboard-grid">
- <section class="cms-card"><div class="card-header"><div><h2>Últimas vendas</h2><p>Histórico recente das operações</p></div><a class="minor-link" href="{{ route('sales.index') }}">Ver todas →</a></div>
+ <section class="cms-card"><div class="card-header"><div><h2>Últimas vendas</h2></div><a class="minor-link" href="{{ route('sales.index') }}">Ver todas →</a></div>
  <div class="table-scroll"><table class="cms-table"><thead><tr><th>Venda</th><th>Cliente</th><th>Valor</th><th>Status</th></tr></thead><tbody>
  @forelse($recentSales as $sale)<tr><td><a class="table-link" href="{{ route('sales.show',$sale) }}">#{{ str_pad($sale->id,5,'0',STR_PAD_LEFT) }}</a></td><td>{{ $sale->customer?->name ?? 'Consumidor não identificado' }}</td><td class="nowrap">R$ {{ number_format((float)$sale->total,2,',','.') }}</td><td><span class="status {{ $sale->status==='completed'?'status-ok':'status-muted' }}">{{ $sale->status==='completed'?'Concluída':'Cancelada' }}</span></td></tr>
  @empty<tr><td colspan="4" class="empty-cell">Nenhuma venda registrada ainda.</td></tr>@endforelse
  </tbody></table></div></section>
- <section class="cms-card"><div class="card-header"><div><h2>Atenção ao estoque</h2><p>Itens no limite mínimo</p></div><a class="minor-link" href="{{ route('stock.index') }}">Movimentar →</a></div>
+ <section class="cms-card"><div class="card-header"><div><h2>Atenção ao estoque</h2></div><a class="minor-link" href="{{ route('stock.index') }}">Movimentar →</a></div>
  <div class="table-scroll"><table class="cms-table"><thead><tr><th>Produto</th><th>Disponível</th></tr></thead><tbody>
  @forelse($lowProducts as $product)<tr><td><strong class="table-title">{{ $product->name }}</strong><small class="table-subtitle">{{ $product->sku }}</small></td><td><span class="stock-low">{{ number_format((float)$product->stock_quantity,3,',','.') }} {{ $product->unit }}</span></td></tr>
  @empty<tr><td colspan="2" class="empty-cell">Nenhum produto abaixo do mínimo.</td></tr>@endforelse
