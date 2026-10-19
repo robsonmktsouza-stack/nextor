@@ -93,11 +93,11 @@ final class NFCeRtcIniTest extends TestCase
             self::assertStringContainsString($section,$ini);
         }
         self::assertStringContainsString("cClassTrib=000001",$ini);
-        self::assertStringContainsString("vBCIBSCBS=200.00",$ini);
-        self::assertStringContainsString("vIBSUF=0.20",$ini);
+        self::assertStringContainsString("vBCIBSCBS=164.00",$ini);
+        self::assertStringContainsString("vIBSUF=0.16",$ini);
         self::assertStringContainsString("vIBSMun=0.00",$ini);
-        self::assertStringContainsString("vCBS=1.80",$ini);
-        self::assertStringContainsString("vIBS=0.20",$ini);
+        self::assertStringContainsString("vCBS=1.48",$ini);
+        self::assertStringContainsString("vIBS=0.16",$ini);
         self::assertStringContainsString("vNF=200.00",$ini);
         self::assertStringNotContainsString("[IS001]",$ini);
     }
