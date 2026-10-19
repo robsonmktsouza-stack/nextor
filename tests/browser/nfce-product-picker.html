@@ -81,7 +81,7 @@ body{margin:0}.app-root{width:100%;min-height:100vh}
 <div id="testResult">Aguardando teste</div>
 <script>
 window.addEventListener('load',()=>{
-  setTimeout(()=>{
+  setTimeout(async ()=>{
     const $=sel=>document.querySelector(sel);
     const $$=sel=>[...document.querySelectorAll(sel)];
     const input=$('#nfceProductSearch'),list=$('#nfceProductResults');
@@ -134,6 +134,9 @@ window.addEventListener('load',()=>{
       input.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}));
       expect($$('#nfceItems tr').length===2,'Enter não inseriu o segundo produto');
       expect($('#nfceFixedTotal').textContent.includes('72,50'),'total com segundo produto incorreto');
+      // O ERP envolve os inputs em MutationObserver; aguardar a
+      // microtask antes de conferir o acabamento do campo numérico.
+      await new Promise(resolve=>setTimeout(resolve,35));
       const quantityIcon=$('#nfceItems .numeric-number .numeric-input-prefix');
       expect(quantityIcon && getComputedStyle(quantityIcon).display==='none',
         'quantidade deve ficar sem o ícone decorativo de lista');
