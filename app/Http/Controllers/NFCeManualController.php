@@ -168,8 +168,9 @@ final class NFCeManualController extends Controller
             throw ValidationException::withMessages($paymentErrors);
         }
 
-        $consumerDocument=preg_replace('/\D/','',(string)($data['consumer_document'] ?? ''));
-        if ($consumerDocument!=='' && !BrazilianTaxId::valid($consumerDocument)) {
+        $consumerRaw=trim((string)($data['consumer_document'] ?? ''));
+        $consumerDocument=preg_replace('/\D/','',$consumerRaw);
+        if ($consumerRaw!=='' && !BrazilianTaxId::valid($consumerRaw)) {
             throw ValidationException::withMessages([
                 'consumer_document'=>'Informe um CPF ou CNPJ válido.',
             ]);
@@ -177,10 +178,12 @@ final class NFCeManualController extends Controller
         $customer=isset($data['customer_id'])
             ? Customer::query()->find($data['customer_id']) : null;
 
+        $customerRaw='';
         if ($customer && $consumerDocument==='') {
-            $consumerDocument=preg_replace('/\D/','',(string)$customer->document);
+            $customerRaw=trim((string)$customer->document);
+            $consumerDocument=preg_replace('/\D/','',$customerRaw);
         }
-        if ($consumerDocument!=='' && !BrazilianTaxId::valid($consumerDocument)) {
+        if ($customerRaw!=='' && !BrazilianTaxId::valid($customerRaw)) {
             throw ValidationException::withMessages([
                 'consumer_document'=>'O cliente selecionado não possui CPF ou CNPJ válido.',
             ]);
