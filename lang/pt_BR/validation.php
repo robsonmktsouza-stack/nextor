@@ -159,8 +159,22 @@ return [
     'ulid' => 'O campo :attribute deve conter um ULID válido.',
     'uuid' => 'O campo :attribute deve conter um UUID válido.',
 
-    // Mensagens particulares de um campo devem ser incluídas aqui, se necessário.
-    'custom' => [],
+    // Mensagens de uso diário do caixa, sem chaves técnicas nem nomes de arrays.
+    'custom' => [
+        'items.*.quantity' => [
+            'gt' => 'A quantidade do produto deve ser maior que zero.',
+            'required' => 'Informe a quantidade do produto.',
+            'numeric' => 'Informe uma quantidade válida para o produto.',
+        ],
+        'payments.*.amount' => [
+            'gt' => 'O valor do pagamento deve ser maior que zero.',
+            'numeric' => 'Informe um valor válido para o pagamento.',
+            'required_with' => 'Informe o valor da forma de pagamento escolhida.',
+        ],
+        'amount' => [
+            'gt' => 'Informe um valor maior que zero.',
+        ],
+    ],
 
     // Estes nomes também são usados quando a validação ocorre dentro de uma lista.
     'attributes' => [
