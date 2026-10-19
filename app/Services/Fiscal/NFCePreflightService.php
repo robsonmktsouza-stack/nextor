@@ -159,7 +159,11 @@ final class NFCePreflightService
                     if ($transactionDocument !== '' && preg_match('/^\\d{14}$/', $transactionDocument) !== 1) {
                         $errors[] = 'Pagamento '.($index + 1).': CNPJ da transação inválido.';
                     }
-                    if ($transactionState !== '' && preg_match('/^[A-Z]{2}$/', $transactionState) !== 1) {
+                    $states = [
+                        'AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG',
+                        'PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO',
+                    ];
+                    if ($transactionState !== '' && !in_array($transactionState, $states, true)) {
                         $errors[] = 'Pagamento '.($index + 1).': UF da transação inválida.';
                     }
                     $brand = trim((string) ($payment['card_brand'] ?? ''));
