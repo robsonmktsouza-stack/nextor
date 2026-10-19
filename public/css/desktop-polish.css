@@ -457,6 +457,61 @@
   }
 }
 
+/*
+ * Correção global dos seletores Lumeron.
+ * O menu é o MESMO elemento da lista original, mas sobe à camada
+ * superior do navegador (Popover API) para não ser recortado por:
+ * cards, tabelas, campos, containers com overflow e modais.
+ * Nunca tornar todas as janelas overflow:visible.
+ */
+@media screen {
+  .ui-select .ui-select-menu[popover] {
+    position:fixed;
+    inset:auto;
+    margin:0;
+    box-sizing:border-box;
+    min-width:0;
+    max-width:none;
+    overflow-x:hidden;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    border:1px solid #b9cad8;
+    border-radius:4px;
+    background:#fff;
+    box-shadow:0 14px 32px rgba(20,39,55,.18);
+    z-index:2147483647;
+  }
+  .ui-select.drop-up .ui-select-menu[popover] {
+    top:auto;
+    bottom:auto;
+  }
+  .ui-select .ui-select-menu[popover]:popover-open {
+    display:block;
+  }
+  .ui-select .ui-select-menu[popover][hidden] {
+    display:none;
+  }
+  .ui-select .ui-select-menu[popover] .ui-select-option {
+    box-sizing:border-box;
+    font-size:13px;
+    line-height:1.4;
+    min-height:36px;
+    scroll-margin:6px;
+  }
+  .ui-select .ui-select-menu[popover] .ui-select-option:focus-visible {
+    outline:2px solid #2877c7;
+    outline-offset:-2px;
+  }
+  .ui-select .ui-select-menu[popover] .ui-select-option.selected {
+    background:#2877c7;
+    color:#fff;
+  }
+  .ui-select .ui-select-trigger:focus-visible {
+    outline:2px solid #3386bd;
+    outline-offset:1px;
+  }
+}
+
 /* PDV mantém layout próprio e área de comandos utilizável em resoluções menores. */
 @media screen and (max-width:1200px) {
   .lumeron-pdv-page .pdv-topbar {min-width:0;gap:9px}
