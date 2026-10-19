@@ -101,6 +101,7 @@ class PdvController extends Controller
             'rejected'=>'rejeitada',
             'offline_signed'=>'em contingência (sem autorização)',
             'offline_sending'=>'aguardando autorização após contingência',
+            'offline_print_pending'=>'DANFE de contingência pendente',
             'cancelled'=>'cancelada',
             default=>'verificar',
         } : 'ainda não preparada';
@@ -212,7 +213,7 @@ class PdvController extends Controller
             ->where('document_type','nfce')
             ->whereIn('sale_id',$page->getCollection()->pluck('id')->all())
             ->orderByDesc('id')
-            ->get(['id','sale_id','status','xml_path'])
+            ->get(['id','sale_id','status','emission_mode','xml_path'])
             ->unique('sale_id')
             ->keyBy('sale_id');
 
@@ -243,9 +244,16 @@ class PdvController extends Controller
                 'fiscal_status'=>$fiscalStatus,
                 'fiscal_code'=>$document?->status ?: 'none',
                 'receipt_url'=>route('pdv.receipt',['sale'=>$sale->id,'print'=>0]),
-                'danfe_url'=>$document && $document->status==='authorized'
-                    && in_array(basename((string)$document->xml_path),['authorized.xml','authorized-recovered.xml'],true)
-                    ? route('pdv.nfce.danfe',$document) : null,
+                'danfe_url'=>$document && (
+                    ($document->status==='authorized'
+                        && in_array((string)$document->xml_path,[
+                            'fiscal/nfce/'.$document->id.'/authorized.xml',
+                            'fiscal/nfce/'.$document->id.'/authorized-recovered.xml',
+                        ],true))
+                    || ($document->emission_mode==='offline'
+                        && in_array($document->status,['offline_signed','offline_sending','pending'],true)
+                        && (string)$document->xml_path==='fiscal/nfce/'.$document->id.'/signed.xml')
+                ) ? route('pdv.nfce.danfe',$document) : null,
             ];
         })->values();
 
