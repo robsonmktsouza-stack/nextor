@@ -126,4 +126,45 @@ final class PdvFiscalCheckoutFlowTest extends TestCase
         self::assertStringContainsString("validUFs.includes(data.transaction_state)", $js);
     }
 
+
+    public function test_acbr_ini_maps_payment_cnpj_to_the_correct_fields(): void
+    {
+        $builder = file_get_contents(app_path('Services/Fiscal/NFCeIniBuilder.php'));
+        self::assertNotFalse($builder);
+
+        foreach ([
+            "'CNPJPag' =>",
+            "'UFPag' =>",
+            "'CNPJReceb' =>",
+            "'idTermPag' =>",
+            "'CNPJ' =>",
+            "'tPag' =>",
+            "'cAut' =>",
+            "'tpIntegra' =>",
+        ] as $field) {
+            self::assertStringContainsString($field, $builder);
+        }
+        self::assertStringContainsString('transaction_document', $builder);
+        self::assertStringContainsString('transaction_state', $builder);
+        self::assertStringContainsString('institution_document', $builder);
+        self::assertStringContainsString('beneficiary_document', $builder);
+        self::assertStringContainsString('terminal_id', $builder);
+        self::assertStringNotContainsString("'CNPJ' => \$digits(\$payment['transaction_document']", $builder);
+    }
+
+    public function test_integrated_cards_need_acquirer_and_authorization_in_cashier_and_preflight(): void
+    {
+        $preflight = file_get_contents(app_path('Services/Fiscal/NFCePreflightService.php'));
+        $js = file_get_contents(public_path('js/pdv.js'));
+        $view = file_get_contents(resource_path('views/pdv/index.blade.php'));
+        self::assertNotFalse($preflight);
+        self::assertNotFalse($js);
+        self::assertNotFalse($view);
+
+        self::assertStringContainsString('cartão integrado exige CNPJ da adquirente e código de autorização.', $preflight);
+        self::assertStringContainsString('Cartão integrado: informe o CNPJ da adquirente', $js);
+        self::assertStringContainsString('Dados de cartão e PIX', $view);
+        self::assertStringContainsString("['card','pix'].includes(paymentKind(payment.value))", $js);
+    }
+
 }
