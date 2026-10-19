@@ -104,12 +104,15 @@ final class NFCeRtcTaxService
         // Reaproveitar exclusivamente os valores já calculados para o XML
         // pelo motor ICMS/PIS/COFINS, evitando duas bases divergentes.
         $legacyDeduction = 0.0;
-        foreach (['icms'=>'vICMS', 'pis'=>'vPIS', 'cofins'=>'vCOFINS'] as $taxType=>$field) {
-            if (!array_key_exists($taxType, $legacyTaxes)) {
-                continue;
+        $day = $issueDate !== null ? substr($issueDate, 0, 10) : null;
+        if ($day === null || ($day >= '2026-01-01' && $day <= '2032-12-31')) {
+            foreach (['icms'=>'vICMS', 'pis'=>'vPIS', 'cofins'=>'vCOFINS'] as $taxType=>$field) {
+                if (!array_key_exists($taxType, $legacyTaxes)) {
+                    continue;
+                }
+                $value = $this->number($legacyTaxes[$taxType][$field] ?? 0, 'tributo '.$field);
+                $legacyDeduction += $value;
             }
-            $value = $this->number($legacyTaxes[$taxType][$field] ?? 0, 'tributo '.$field);
-            $legacyDeduction += $value;
         }
         $base = round($gross - $discount - $legacyDeduction, 2, PHP_ROUND_HALF_UP);
         if ($base < 0) {
