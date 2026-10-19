@@ -24,6 +24,28 @@ class PaymentMethod extends Model
         ];
     }
 
+    /**
+     * Card payments created by the initial migration had kind=card even
+     * though their codes identify debit/credit. Preserve old sales and
+     * snapshots without guessing the type of an ambiguous custom card.
+     */
+    public static function resolveFiscalKind(?string $kind, ?string $code): string
+    {
+        $kind=strtolower(trim((string)$kind));
+        if($kind!=='card') return $kind;
+        $code=strtolower(trim((string)$code));
+        return match($code){
+            'credit_card','credit-card','cartao_credito','cartao-credito'=>'credit_card',
+            'debit_card','debit-card','cartao_debito','cartao-debito'=>'debit_card',
+            default=>'card',
+        };
+    }
+
+    public function fiscalKind(): string
+    {
+        return self::resolveFiscalKind($this->kind,$this->code);
+    }
+
     public function financialAccount(): BelongsTo
     {
         return $this->belongsTo(FinancialAccount::class);
