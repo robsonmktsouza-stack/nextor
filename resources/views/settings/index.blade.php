@@ -323,7 +323,7 @@ foreach($primaryTabs as $key=>$item){
       </div>
       <div class="settings-switch-grid">
         <label class="settings-switch"><input type="checkbox" name="default_final_consumer" value="1" @checked($operations['default_final_consumer'])><span><strong>Consumidor final por padrão</strong><small>Novas vendas iniciam marcadas como consumidor final.</small></span></label>
-        <label class="settings-switch"><input type="checkbox" name="auto_finance_sale" value="1" @checked($operations['auto_finance_sale'])><span><strong>Criar contas a receber ao vender</strong><small>Integra vendas e parcelas ao financeiro.</small></span></label>
+        <label class="settings-switch"><input type="checkbox" name="auto_finance_sale" value="1" @checked($operations['auto_finance_sale'])><span><strong>Registrar valores das vendas no financeiro</strong><small>Registra automaticamente os valores e parcelas da venda no financeiro.</small></span></label>
         <label class="settings-switch"><input type="checkbox" name="allow_partial_return" value="1" @checked($operations['allow_partial_return'])><span><strong>Permitir devolução parcial</strong><small>Permite devolver parte da quantidade vendida.</small></span></label>
       </div>
     </section>
@@ -464,7 +464,7 @@ foreach($primaryTabs as $key=>$item){
           <label class="field col-4"><span>Perfil tributário</span><input name="tax_profile" value="{{ $fiscal['tax_profile'] }}" placeholder="Ex.: padrão Simples Nacional"></label>
         </div>
         <div class="settings-switch-grid">
-          <label class="settings-switch"><input type="checkbox" name="enabled" value="1" @checked($fiscal['enabled'])><span><strong>Ativar emissão de documentos fiscais</strong></span></label>
+          <label class="settings-switch"><input type="checkbox" name="enabled" value="1" @checked($fiscal['enabled'])><span><strong>Mostrar opções de notas fiscais</strong></span></label>
           <label class="settings-switch"><input type="checkbox" name="send_xml_email" value="1" @checked($fiscal['send_xml_email'])><span><strong>Enviar XML por e-mail</strong><small>Preferência padrão para documentos autorizados.</small></span></label>
           <label class="settings-switch"><input type="checkbox" name="keep_xml_copy" value="1" @checked($fiscal['keep_xml_copy'])><span><strong>Guardar cópia dos XMLs</strong><small>Preserva documentos autorizados no armazenamento do sistema.</small></span></label>
         </div>
@@ -724,7 +724,7 @@ foreach($primaryTabs as $key=>$item){
     @csrf
     <label class="field"><span>Mês de referência</span><input type="month" name="month" value="{{ now()->subMonthNoOverflow()->format('Y-m') }}" required></label>
     <div></div>
-    <button class="btn btn-success" type="submit">@include('partials.icon',['name'=>'download','size'=>15]) Gerar CSV</button>
+    <button class="btn btn-success" type="submit">@include('partials.icon',['name'=>'download','size'=>15]) Gerar arquivo contábil</button>
   </form>
   @if(count($accountingExports))
     <div class="settings-export-history">
@@ -944,9 +944,9 @@ foreach($primaryTabs as $key=>$item){
         <label class="field col-3"><span>Formato de data</span><select name="date_format"><option value="d/m/Y" @selected($system['date_format']==='d/m/Y')>DD/MM/AAAA</option><option value="Y-m-d" @selected($system['date_format']==='Y-m-d')>AAAA-MM-DD</option></select></label>
       </div>
       <div class="settings-switch-grid">
-        <label class="settings-switch"><input type="checkbox" name="compact_mode" value="1" @checked($system['compact_mode'])><span><strong>Exibir mais informações na tela</strong><small>Mantém tabelas e controles com densidade de ERP desktop.</small></span></label>
-        <label class="settings-switch"><input type="checkbox" name="show_tutorials" value="1" @checked($system['show_tutorials'])><span><strong>Mostrar dicas e atalhos</strong><small>Mostra atalhos e ajuda contextual.</small></span></label>
-        <label class="settings-switch"><input type="checkbox" name="confirm_destructive_actions" value="1" @checked($system['confirm_destructive_actions'])><span><strong>Pedir confirmação antes de excluir ou cancelar</strong><small>Exige confirmação antes de cancelar ou excluir.</small></span></label>
+        <label class="settings-switch"><input type="checkbox" name="compact_mode" value="1" @checked($system['compact_mode'])><span><strong>Exibir mais informações na tela</strong><small>Exibe linhas e controles mais próximos, para caber mais informação.</small></span></label>
+        <label class="settings-switch"><input type="checkbox" name="show_tutorials" value="1" @checked($system['show_tutorials'])><span><strong>Mostrar dicas e atalhos</strong><small>Exibe dicas e atalhos durante o uso.</small></span></label>
+        <label class="settings-switch"><input type="checkbox" name="confirm_destructive_actions" value="1" @checked($system['confirm_destructive_actions'])><span><strong>Pedir confirmação antes de excluir ou cancelar</strong><small>Ajuda a evitar exclusões ou cancelamentos por engano.</small></span></label>
       </div>
     </section>
   
