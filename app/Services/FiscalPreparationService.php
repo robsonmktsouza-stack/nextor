@@ -130,9 +130,22 @@ class FiscalPreparationService
             }
 
             $settings=AppSetting::groupValues($group,[]);
-            $number=AppSetting::reserveInteger($group,$sequenceKey,1);
             $environment=app(FiscalDocumentSettings::class)->environment($documentType);
+            $numberKey=$sequenceKey;
             $series=isset($settings['series']) ? (int)$settings['series'] : null;
+            if ($documentType==='nfce') {
+                // Nunca avançar a sequência homologada ao preparar NFC-e real.
+                $parameters=app(\App\Services\Fiscal\NFCeEnvironmentParameters::class);
+                $issues=$parameters->issues($environment);
+                if ($issues) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'nfce'=>implode(' ', $issues),
+                    ]);
+                }
+                $numberKey=$parameters->numberKey($environment);
+                $series=$parameters->series($environment);
+            }
+            $number=AppSetting::reserveInteger($group,$numberKey,1);
 
             $offline=$documentType==='nfce'
                 && (bool)AppSetting::value('nfce','offline_contingency_active',false);
