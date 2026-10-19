@@ -96,6 +96,9 @@ final class NFCeIniBuilder
         $totalCofins = 0;
         $totalIcmsBase = 0;
         $totalIcms = 0;
+        $rtc = new NFCeRtcTaxService();
+        $totalRtc = ['base'=>0, 'ibsuf'=>0, 'ibsmun'=>0, 'cbs'=>0];
+        $hasRtc = false;
         foreach ($items as $index => $item) {
             $i = sprintf('%03d', $index + 1);
             $tax = $item['tax_defaults'] ?? [];
@@ -112,6 +115,14 @@ final class NFCeIniBuilder
             $totalDiscount += (int) round($discount * 100);
             $cfop = $tax['cfop_outbound_internal'] ?? $tax['nfce_cfop'] ?? $tax['cfop'] ?? AppSetting::value('nfce', 'default_cfop', '');
             $calculated = $this->calculator->calculate($item, (string)$company->crt);
+            $rtcItem = $rtc->calculate($item, (string)$company->crt, $source['operation_date'] ?? null);
+            if ($rtcItem !== null) {
+                $hasRtc = true;
+                $totalRtc['base'] += (int) round((float)$rtcItem['gibscbs']['vBC'] * 100);
+                $totalRtc['ibsuf'] += (int) round((float)$rtcItem['gibsuf']['vIBSUF'] * 100);
+                $totalRtc['ibsmun'] += (int) round((float)$rtcItem['gibsmun']['vIBSMun'] * 100);
+                $totalRtc['cbs'] += (int) round((float)$rtcItem['gcbs']['vCBS'] * 100);
+            }
             $totalPis += (int) round((float)($calculated['pis']['vPIS'] ?? 0) * 100);
             $totalCofins += (int) round((float)($calculated['cofins']['vCOFINS'] ?? 0) * 100);
             $totalIcmsBase += (int) round((float)($calculated['icms']['vBC'] ?? 0) * 100);
@@ -143,6 +154,14 @@ final class NFCeIniBuilder
             $add('ICMS'.$i, $calculated['icms']);
             $add('PIS'.$i, $calculated['pis']);
             $add('COFINS'.$i, $calculated['cofins']);
+            if ($rtcItem !== null) {
+                // Nomes de seções conforme modelo NFC-e RTC da ACBrLib.
+                $add('IBSCBS'.$i, $rtcItem['ibscbs']);
+                $add('gIBSCBS'.$i, $rtcItem['gibscbs']);
+                $add('gIBSUF'.$i, $rtcItem['gibsuf']);
+                $add('gIBSMun'.$i, $rtcItem['gibsmun']);
+                $add('gCBS'.$i, $rtcItem['gcbs']);
+            }
         }
 
         $total = $price($source['total'] ?? 0);
@@ -157,6 +176,14 @@ final class NFCeIniBuilder
             'vPIS' => $price($totalPis / 100), 'vCOFINS' => $price($totalCofins / 100),
             'vNF' => $total,
         ]);
+        if ($hasRtc) {
+            $currency = fn (int $cents): string => number_format($cents / 100, 2, '.', '');
+            $add('IBSCBSTot', ['vBCIBSCBS'=>$currency($totalRtc['base'])]);
+            $add('gIBS', ['vIBS'=>$currency($totalRtc['ibsuf'] + $totalRtc['ibsmun'])]);
+            $add('gIBSUFTot', ['vIBSUF'=>$currency($totalRtc['ibsuf'])]);
+            $add('gIBSMunTot', ['vIBSMun'=>$currency($totalRtc['ibsmun'])]);
+            $add('gCBSTot', ['vCBS'=>$currency($totalRtc['cbs'])]);
+        }
         $add('Transportador', ['modFrete' => '9']);
 
         $methods = [
