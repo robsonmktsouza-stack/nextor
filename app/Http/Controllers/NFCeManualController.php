@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\Sale;
 use App\Services\Fiscal\FiscalDocumentSettings;
 use App\Services\Fiscal\NFCePreflightService;
+use App\Services\Fiscal\NFCeManualTaxPreviewService;
 use App\Services\FiscalPreparationService;
 use App\Services\SalesService;
 use App\Support\BrazilianTaxId;
@@ -62,6 +63,7 @@ final class NFCeManualController extends Controller
         SalesService $salesService,
         FiscalPreparationService $fiscalPreparation,
         NFCePreflightService $preflight,
+        NFCeManualTaxPreviewService $taxPreview,
         FiscalDocumentSettings $settings
     ) {
         if (!$settings->enabled('nfce')) {
@@ -205,6 +207,12 @@ final class NFCeManualController extends Controller
                 'discount'=>$item['discount'] ?? 0,
             ];
         }
+        // Erros fiscais antes da baixa de estoque e de qualquer lançamento
+        // financeiro. A conferência será repetida sobre a NFC-e preparada.
+        if ($base['submit_mode']==='issue') {
+            $taxPreview->verify($rows);
+        }
+
         $payments=[];
         foreach ($data['payments'] as $payment) {
             $payments[]=[
