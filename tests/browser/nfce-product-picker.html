@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Regressão de seleção de produtos NFC-e</title>
+<link rel="stylesheet" href="../../public/css/erp.css">
+<link rel="stylesheet" href="../../public/css/ui-refinement.css">
+<link rel="stylesheet" href="../../public/css/desktop-polish.css">
+<style>
+body{margin:0}.app-root{width:100%;min-height:100vh}
+#nfceEditor{position:relative;padding:18px;width:100%;box-sizing:border-box}
+#nfceEditor .nfe-general-card{max-width:980px}
+#testResult{position:fixed;z-index:9999;right:0;top:0;background:white;padding:4px}
+</style>
+<script defer src="../../public/js/nfce-editor.js"></script>
+</head>
+<body>
+<div class="app-root">
+<div id="nfceEditor">
+<form id="nfceEditorForm" data-readonly="0" data-correction="0" autocomplete="off">
+  <div id="nfceFormError" hidden></div>
+  <div class="editor-tabs" role="tablist">
+    <button type="button" class="editor-tab active" data-nfce-tab="general">Dados gerais</button>
+    <button type="button" class="editor-tab" data-nfce-tab="consumer">Consumidor</button>
+    <button type="button" class="editor-tab" data-nfce-tab="products">Produtos</button>
+    <button type="button" class="editor-tab" data-nfce-tab="payment">Pagamento</button>
+    <button type="button" class="editor-tab" data-nfce-tab="summary">Resumo</button>
+  </div>
+  <section class="editor-tab-panel" data-nfce-panel="general">
+    <select id="nfceMode"><option value="new" selected>Nova venda</option><option value="existing">Existente</option></select>
+    <div id="nfceExistingBlock"><select id="nfceSale"><option value="">Selecione</option></select><input id="nfceSaleSearch"></div>
+  </section>
+  <section class="editor-tab-panel" data-nfce-panel="consumer" hidden>
+    <select id="nfceCustomer"><option value="">Consumidor não identificado</option></select>
+    <input id="nfceConsumerDocument"><input id="nfceConsumerName">
+  </section>
+  <section class="editor-tab-panel" data-nfce-panel="products" hidden>
+    <div class="nfe-general-card">
+      <div class="nfce-product-toolbar" id="nfceProductPicker">
+        <div class="field nfce-product-search-field">
+          <label for="nfceProductSearch">Buscar produto</label>
+          <div class="nfce-product-search-anchor">
+            <input type="search" id="nfceProductSearch" role="combobox"
+              aria-controls="nfceProductResults" aria-expanded="false" autocomplete="off">
+            <div class="nfce-search-results" id="nfceProductResults" role="listbox" hidden></div>
+          </div>
+        </div>
+        <button type="button" id="nfceAddProduct" class="btn btn-secondary">Localizar</button>
+      </div>
+      <div class="nfce-item-table-wrap">
+        <table class="nfce-item-table">
+          <thead><tr><th>Produto</th><th>Quantidade</th><th>Preço</th><th>Desconto</th><th>Total</th><th></th></tr></thead>
+          <tbody id="nfceItems"></tbody>
+        </table>
+      </div>
+      <p id="nfceNoItems"></p>
+    </div>
+  </section>
+  <section class="editor-tab-panel" data-nfce-panel="payment" hidden>
+    <button type="button" id="nfceAddPayment">Adicionar pagamento</button>
+    <table><tbody id="nfcePayments"></tbody></table>
+    <strong id="nfcePaymentTotal"></strong>
+  </section>
+  <section class="editor-tab-panel" data-nfce-panel="summary" hidden>
+    <span id="nfceSubtotal"></span><span id="nfceDiscountTotal"></span><span id="nfceGrandTotal"></span>
+  </section>
+  <strong id="nfceFixedTotal"></strong>
+  <button type="submit" value="save">Salvar</button>
+</form>
+</div>
+</div>
+<script type="application/json" id="nfceProductsJson">[
+ {"id":1,"name":"CAMISETA BASICA","sku":"TESTE-001","ean_gtin":"7891234567895","sale_price":29.90,"ncm":"61091000"},
+ {"id":2,"name":"FILTRO DE OLEO","sku":"FILTRO-02","ean_gtin":"","sale_price":12.50,"ncm":"84212300"}
+]</script>
+<script type="application/json" id="nfceMethodsJson">[{"code":"cash","name":"Dinheiro","kind":"cash"}]</script>
+<script type="application/json" id="nfceOldItems">[]</script>
+<script type="application/json" id="nfceOldPayments">[]</script>
+<div id="testResult">Aguardando teste</div>
+<script>
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    const $=sel=>document.querySelector(sel);
+    const $$=sel=>[...document.querySelectorAll(sel)];
+    const input=$('#nfceProductSearch'),list=$('#nfceProductResults');
+    const clickResult=id=>{
+      const node=$('[data-pick-product="'+id+'"]');
+      if(!node)throw Error('produto '+id+' não aparece nos resultados');
+      node.click();
+    };
+    const query=q=>{
+      input.focus();
+      input.value=q;
+      input.dispatchEvent(new Event('input',{bubbles:true}));
+      if(list.hidden)throw Error('lista não abriu');
+    };
+    const qty=()=>Number($('#nfceItems [data-item-field="quantity"]').value);
+    const expect=(condition,msg)=>{if(!condition)throw Error(msg);};
+    try{
+      $('[data-nfce-tab="products"]').click();
+      const button=$('#nfceAddProduct');
+      const rect=input.getBoundingClientRect(),btn=button.getBoundingClientRect();
+      expect(Math.abs(rect.bottom-btn.bottom)<3,'busca e botão desalinhados');
+      query('CAMISETA');
+      clickResult('1');
+      expect($$('#nfceItems tr').length===1,'primeiro produto não criou uma linha');
+      expect(qty()===1,'primeira quantidade não é 1');
+      expect(input.value===''&&document.activeElement===input,'foco não voltou à busca');
+      expect(list.hidden&&input.getAttribute('aria-expanded')==='false','lista não fechou depois da escolha');
+
+      query('CAMISETA');
+      expect(list.textContent.includes('Na nota: 1'),'item existente desapareceu da busca');
+      clickResult('1');
+      expect($$('#nfceItems tr').length===1,'item repetido criou segunda linha');
+      expect(qty()===2,'item repetido não somou quantidade');
+      expect($('#nfceFixedTotal').textContent.includes('59,80'),'total da NFC-e não foi recalculado');
+
+      const price=$('#nfceItems [data-item-field="unit_price"]');
+      price.value='20';
+      price.dispatchEvent(new Event('input',{bubbles:true}));
+      button.click();
+      expect(!list.hidden,'clique em Localizar fechou a própria lista');
+      expect(list.querySelectorAll('[data-pick-product]').length===2,'Localizar não exibiu catálogo');
+      clickResult('1');
+      expect($$('#nfceItems tr').length===1 && qty()===3,'botão Localizar duplicou linha');
+      expect(Number($('#nfceItems [data-item-field="unit_price"]').value)===20,
+        'incremento sobrescreveu preço editado');
+      expect($('#nfceFixedTotal').textContent.includes('60,00'),'total após edição do preço incorreto');
+
+      query('FILTRO');
+      input.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}));
+      expect($$('#nfceItems tr').length===2,'Enter não inseriu o segundo produto');
+      expect($('#nfceFixedTotal').textContent.includes('72,50'),'total com segundo produto incorreto');
+      expect(document.documentElement.scrollWidth<=innerWidth+3,'a barra criou rolagem horizontal na tela');
+      document.body.dataset.nfcePickerTest='passed';
+      $('#testResult').textContent='PASS repetição + foco + botão + Enter + valores';
+    }catch(error){
+      document.body.dataset.nfcePickerTest='failed';
+      $('#testResult').textContent='FAIL '+error.message;
+    }
+  },160);
+});
+</script>
+</body>
+</html>
