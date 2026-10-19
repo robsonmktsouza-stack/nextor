@@ -367,7 +367,7 @@ foreach($primaryTabs as $key=>$item){
       @csrf
       <label class="field"><span>Código</span><input name="code" required placeholder="ex.: voucher"></label>
       <label class="field"><span>Nome</span><input name="name" required placeholder="Vale / voucher"></label>
-      <label class="field"><span>Tipo</span><select name="kind"><option value="cash">Dinheiro</option><option value="pix">PIX</option><option value="card">Cartão</option><option value="bank_slip">Boleto</option><option value="transfer">Transferência</option><option value="other">Outro</option></select></label>
+      <label class="field"><span>Tipo</span><select name="kind"><option value="cash">Dinheiro</option><option value="pix">PIX</option><option value="credit_card">Cartão de crédito</option><option value="debit_card">Cartão de débito</option><option value="bank_slip">Boleto</option><option value="transfer">Transferência</option><option value="other">Outro</option></select></label>
       <label class="field"><span>Conta padrão</span><select name="financial_account_id"><option value="">Nenhuma</option>@foreach($accounts as $a)<option value="{{ $a->id }}">{{ $a->name }}</option>@endforeach</select></label>
       <label class="field"><span>Taxa percentual (%)</span><input type="number" step="0.0001" min="0" name="fee_percent" value="0"></label>
       <label class="field"><span>Taxa fixa (R$)</span><input type="number" step="0.01" min="0" name="fee_fixed" value="0"></label>
@@ -389,7 +389,7 @@ foreach($primaryTabs as $key=>$item){
             @csrf @method('PUT')
             <label class="field"><span>Código</span><input name="code" value="{{ $method->code }}" required></label>
             <label class="field"><span>Nome</span><input name="name" value="{{ $method->name }}" required></label>
-            <label class="field"><span>Tipo</span><select name="kind">@foreach(['cash'=>'Dinheiro','pix'=>'PIX','card'=>'Cartão','bank_slip'=>'Boleto','transfer'=>'Transferência','other'=>'Outro'] as $k=>$v)<option value="{{ $k }}" @selected($method->kind===$k)>{{ $v }}</option>@endforeach</select></label>
+            <label class="field"><span>Tipo</span><select name="kind">@foreach(['cash'=>'Dinheiro','pix'=>'PIX','credit_card'=>'Cartão de crédito','debit_card'=>'Cartão de débito','card'=>'Cartão (antigo — classificar)','bank_slip'=>'Boleto','transfer'=>'Transferência','other'=>'Outro'] as $k=>$v)<option value="{{ $k }}" @selected($method->kind===$k)>{{ $v }}</option>@endforeach</select></label>
             <label class="field"><span>Conta padrão</span><select name="financial_account_id"><option value="">Nenhuma</option>@foreach($accounts as $a)<option value="{{ $a->id }}" @selected($method->financial_account_id===$a->id)>{{ $a->name }}</option>@endforeach</select></label>
             <label class="field"><span>Taxa percentual (%)</span><input type="number" step="0.0001" min="0" name="fee_percent" value="{{ $method->fee_percent }}"></label>
             <label class="field"><span>Taxa fixa (R$)</span><input type="number" step="0.01" min="0" name="fee_fixed" value="{{ $method->fee_fixed }}"></label>
