@@ -134,6 +134,9 @@ final class NFCeManualController extends Controller
             }
             $card=in_array($kind,['credit_card','debit_card'],true);
             $electronic=$card || $kind==='pix';
+            if($kind==='pix' && trim((string)($payment['card_brand'] ?? ''))!==''){
+                $paymentErrors[$prefix.'card_brand']='Bandeira de cartão não deve ser informada para PIX.';
+            }
             $integration=(string)($payment['integration_type'] ?? '');
             if ($card && !in_array($integration,['1','2'],true)) {
                 $paymentErrors[$prefix.'integration_type']='Informe se o cartão foi recebido por TEF integrado ou máquina não integrada.';
