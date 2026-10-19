@@ -16,6 +16,7 @@ final class NFCeCatalogAuditService
         private readonly NFCeFiscalProfileService $profiles,
         private readonly NFCeTaxCalculationService $calculator,
         private readonly NFCeRtcTaxService $rtc,
+        private readonly NFCeItemValueGuard $valueGuard,
     ) {}
 
     /**
@@ -47,6 +48,7 @@ final class NFCeCatalogAuditService
                         'name' => $product->name,
                         'ncm' => $product->ncm,
                         'cest' => $product->cest,
+                        'gtin' => $product->ean_gtin,
                         'origin' => $product->origin,
                         'quantity' => '1.000',
                         'unit_price' => (string) ($product->sale_price ?? '0.00'),
@@ -55,6 +57,8 @@ final class NFCeCatalogAuditService
                         'fiscal_tax_group_id' => $product->fiscal_tax_group_id,
                     ];
                     try {
+                        $this->valueGuard->verify($item);
+                        $this->valueGuard->verifyGtin($item['gtin']);
                         $profile = $this->profiles->classify($item, now()->toDateString(), $crt, $uf);
                         $item['tax_defaults'] = array_replace($item['tax_defaults'], $profile['tax']);
                         $taxes = $this->calculator->calculate($item, $crt);
