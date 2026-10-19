@@ -478,6 +478,19 @@ final class NFCeManualEditorTest extends TestCase
         self::assertSame('20.00',(string)$job->source_snapshot['total']);
     }
 
+    public function test_pix_cannot_carry_card_brand_into_the_fiscal_sale(): void
+    {
+        $product=$this->configure();
+        $this->actingAs($this->admin());
+        $payload=$this->postData($product);
+        $payload['payments']=[[
+            'payment_method'=>'pix','amount'=>'20.00','card_brand'=>'01',
+        ]];
+        $this->post(route('fiscal.nfce.store'),$payload)
+            ->assertSessionHasErrors('payments.0.card_brand');
+        self::assertSame(0,Sale::query()->count());
+    }
+
     public function test_ambiguous_generic_card_cannot_create_a_manual_nfce_sale(): void
     {
         $product=$this->configure();
