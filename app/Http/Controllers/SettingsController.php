@@ -430,7 +430,10 @@ class SettingsController extends Controller
         return $request->validate([
             'code'=>['required','string','max:40','alpha_dash',Rule::unique('payment_methods','code')->ignore($method?->id)],
             'name'=>['required','string','max:120'],
-            'kind'=>['required',Rule::in(['cash','pix','credit_card','debit_card','card','bank_slip','transfer','other'])],
+            'kind'=>['required',Rule::in(array_merge(
+                ['cash','pix','credit_card','debit_card','bank_slip','transfer','other'],
+                $method?->kind==='card' ? ['card'] : []
+            ))],
             'financial_account_id'=>['nullable','integer','exists:financial_accounts,id'],
             'fee_percent'=>['required','numeric','min:0','max:100','decimal:0,4'],
             'fee_fixed'=>['required','numeric','min:0','max:9999999999.99','decimal:0,2'],
