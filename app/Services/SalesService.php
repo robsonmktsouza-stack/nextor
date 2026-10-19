@@ -265,10 +265,10 @@ class SalesService
             ]);
         }
 
-        // Emissão fiscal em fila, após efetivar a venda.
-        // Evitar FFI em requisição HTTP com queue sync.
+        // A venda foi efetivada: o processamento fiscal usa SEMPRE a fila
+        // database (worker fiscal separado), mesmo que a fila padrão seja sync.
+        // Nunca executar ACBr/FFI na requisição nem criar outra venda ao falhar.
         if ($sale->source === 'pdv'
-            && config('queue.default') === 'database'
             && ((bool) AppSetting::value('pdv', 'auto_nfce', false)
                 || (bool) AppSetting::value('nfce', 'auto_from_pdv', false))) {
             $fiscalJob = \App\Models\FiscalDocumentJob::query()
