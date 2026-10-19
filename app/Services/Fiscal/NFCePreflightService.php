@@ -54,6 +54,11 @@ final class NFCePreflightService
             $errors[] = 'Documento já contém dados de autorização; não reenviar.';
         }
 
+        $params=app(NFCeEnvironmentParameters::class);
+        foreach ($params->issues((string)$job->environment) as $issue) {
+            $errors[]=$issue;
+        }
+
         $company = CompanySetting::current();
         if (!\App\Support\InstanceIdentity::matches($company->document)) {
             $errors[] = 'CNPJ do emitente não corresponde à instalação contratada.';
@@ -69,8 +74,6 @@ final class NFCePreflightService
             'UF BA' => $company->state === 'BA',
             'Certificado A1' => $company->certificate_path && Storage::disk('local')->exists($company->certificate_path),
             'Senha do certificado' => !empty($company->certificate_password),
-            'CSC' => (string) AppSetting::value('nfce', 'csc_token', '') !== '',
-            'ID CSC' => (string) AppSetting::value('nfce', 'csc_id', '') !== '',
         ] as $label => $ok) {
             if (!$ok) {
                 $errors[] = $label.' ausente ou inválido.';
