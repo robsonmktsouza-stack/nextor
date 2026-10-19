@@ -128,9 +128,8 @@ $origins=[
       </div>
 
       <div class="nfe-general-card">
-        <div class="nfe-section-title">
-          <h3>Dados gerais</h3>
-          <button type="button" class="nfe-section-toggle" data-nfe-general-toggle>ocultar</button>
+        <div class="nfe-section-title nfe-section-title--actions">
+          <button type="button" class="nfe-section-toggle" data-nfe-general-toggle>Ocultar campos</button>
         </div>
 
         <div class="nfe-general-layout" id="nfeGeneralFields">
@@ -398,7 +397,6 @@ $origins=[
 
     <section class="editor-tab-panel" data-tab-panel="nfe-payment" hidden>
       <div class="editor-panel">
-        <h3>Pagamento</h3>
         <div class="editor-grid cols-12">
           <label class="field col-4"><span>Tipo de pagamento *</span>
             <select name="payment_type" id="nfePaymentType">
@@ -516,7 +514,6 @@ $origins=[
 
     <section class="editor-tab-panel active" data-nfe-item-panel="item-general">
       <div class="editor-panel">
-        <h3>Dados comerciais</h3>
         <div class="editor-grid cols-12">
           <div class="field col-8">
             <span>Buscar produto cadastrado</span>
@@ -582,7 +579,6 @@ $origins=[
 
     <section class="editor-tab-panel" data-nfe-item-panel="item-icms" hidden>
       <div class="editor-panel">
-        <h3>ICMS</h3>
         <div class="editor-grid cols-12">
           <label class="field col-3"><span>CSOSN</span><input id="nfeTaxCsosn" maxlength="4"></label>
           <label class="field col-3"><span>CST ICMS</span><input id="nfeTaxIcmsCst" maxlength="4"></label>
@@ -604,7 +600,6 @@ $origins=[
 
     <section class="editor-tab-panel" data-nfe-item-panel="item-federal" hidden>
       <div class="editor-panel">
-        <h3>PIS / COFINS / IPI</h3>
         <div class="editor-grid cols-12">
           <label class="field col-2"><span>CST PIS *</span><input id="nfeTaxPisCst" maxlength="4"></label>
           <label class="field col-2"><span>PIS %</span><input id="nfeTaxPisRate" type="number" step="0.0001"></label>
@@ -668,7 +663,6 @@ $origins=[
 
     <section class="editor-tab-panel" data-nfe-item-panel="item-ibscbs" hidden>
       <div class="editor-panel">
-        <h3>IBS / CBS — estrutura Lumeron</h3>
 
         <div class="editor-grid cols-12">
           <label class="field col-3"><span>CST IBS</span><input id="nfeTaxIbsCst"></label>
@@ -689,7 +683,7 @@ $origins=[
 <div class="nextor-modal-layer nfe-modal-layer" id="nfeReferenceDialog" data-nfe-modal aria-hidden="true" hidden>
   <div class="erp-dialog small-dialog nextor-modal-window nfe-small-modal-window" role="dialog" aria-modal="true" aria-labelledby="nfeReferenceTitle">
   <div class="dialog-header">
-    <div><h2 id="nfeReferenceTitle">Referenciar NF-e</h2><p>Informe a chave de acesso do documento referenciado.</p></div>
+    <div><h2 id="nfeReferenceTitle">Referenciar NF-e</h2></div>
     <button type="button" data-nfe-modal-close class="close-dialog">@include('partials.icon',['name'=>'x'])</button>
   </div>
   <div class="dialog-body">
@@ -705,7 +699,7 @@ $origins=[
 <div class="nextor-modal-layer nfe-modal-layer" id="nfeDuplicateDialog" data-nfe-modal aria-hidden="true" hidden>
   <div class="erp-dialog small-dialog nextor-modal-window nfe-small-modal-window" role="dialog" aria-modal="true" aria-labelledby="nfeDuplicateTitle">
   <div class="dialog-header">
-    <div><h2 id="nfeDuplicateTitle">Adicionar duplicata</h2><p>Parcela usada na cobrança da NF-e.</p></div>
+    <div><h2 id="nfeDuplicateTitle">Adicionar duplicata</h2></div>
     <button type="button" data-nfe-modal-close class="close-dialog">@include('partials.icon',['name'=>'x'])</button>
   </div>
   <div class="dialog-body">
