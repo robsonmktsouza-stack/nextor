@@ -134,7 +134,8 @@ window.addEventListener('load',()=>{
       input.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}));
       expect($$('#nfceItems tr').length===2,'Enter não inseriu o segundo produto');
       expect($('#nfceFixedTotal').textContent.includes('72,50'),'total com segundo produto incorreto');
-      expect($('#nfceItems .numeric-number .numeric-input-prefix')===null,
+      const quantityIcon=$('#nfceItems .numeric-number .numeric-input-prefix');
+      expect(quantityIcon && getComputedStyle(quantityIcon).display==='none',
         'quantidade deve ficar sem o ícone decorativo de lista');
       expect(document.documentElement.scrollWidth<=innerWidth+3,'a barra criou rolagem horizontal na tela');
       document.body.dataset.nfcePickerTest='passed';
