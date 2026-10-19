@@ -198,9 +198,7 @@ final class NFCePreflightService
                 }
 
                 $brand = trim((string) ($payment['card_brand'] ?? ''));
-                if ($isCard && $brand !== '' && !in_array($brand, [
-                    '01','02','03','04','05','06','07','08','09','99'
-                ], true)) {
+                if ($isCard && $brand !== '' && !in_array($brand,\App\Support\NFCeCardBrands::codes(),true)) {
                     $errors[] = "Pagamento {$number}: bandeira do cartão inválida.";
                 }
                 if (!in_array($kind,['credit_card','debit_card','pix'],true)
