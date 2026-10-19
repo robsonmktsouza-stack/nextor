@@ -140,7 +140,7 @@ final class NFCeTransmissionService
                     if ($xmlPath !== $signedPath) {
                         try {
                             \App\Jobs\GenerateNFCeDanfePdfJob::dispatch($job->id)
-                                ->onConnection((string)config('queue.default','database'));
+                                ->onConnection('database')->onQueue('fiscal');
                         } catch (Throwable $exception) {
                             \Illuminate\Support\Facades\Log::warning('NFC-e autorizada sem DANFE PDF pré-gerado',[
                                 'fiscal_document_job_id'=>$job->id,
@@ -272,7 +272,7 @@ final class NFCeTransmissionService
                     if ($xmlPath !== $signedPath) {
                         try {
                             \App\Jobs\GenerateNFCeDanfePdfJob::dispatch($job->id)
-                                ->onConnection((string)config('queue.default','database'));
+                                ->onConnection('database')->onQueue('fiscal');
                         } catch (Throwable $exception) {
                             \Illuminate\Support\Facades\Log::warning('NFC-e autorizada sem DANFE PDF pré-gerado',[
                                 'fiscal_document_job_id'=>$job->id,
