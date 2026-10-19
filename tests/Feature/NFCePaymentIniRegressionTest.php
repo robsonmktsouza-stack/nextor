@@ -77,6 +77,8 @@ final class NFCePaymentIniRegressionTest extends TestCase
 
     public function test_original_generic_card_code_is_mapped_but_ambiguous_legacy_card_is_refused(): void
     {
+        self::assertContains('27',\App\Support\NFCeCardBrands::codes());
+        self::assertContains('99',\App\Support\NFCeCardBrands::codes());
         self::assertSame('credit_card',PaymentMethod::resolveFiscalKind('card','credit_card'));
         self::assertSame('debit_card',PaymentMethod::resolveFiscalKind('card','debit_card'));
         self::assertSame('card',PaymentMethod::resolveFiscalKind('card','my-card'));
