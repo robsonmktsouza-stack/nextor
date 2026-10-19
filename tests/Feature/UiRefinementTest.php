@@ -219,4 +219,32 @@ final class UiRefinementTest extends TestCase
         $cte->assertDontSee('Criar nova NFC-e');
     }
 
+
+    public function test_active_module_tab_enhancement_preserves_navigation_and_accessibility(): void
+    {
+        $this->actingAs($this->admin());
+        $html = $this->get(route('settings.index', ['tab' => 'users']))->assertOk()->getContent();
+        self::assertIsString($html);
+        self::assertStringContainsString('js/desktop-polish.js', $html);
+        self::assertLessThan(
+            strpos($html, 'js/desktop-polish.js'),
+            strpos($html, 'js/erp.js'),
+            'O ajuste de navegação deve ser carregado após as interações principais.'
+        );
+
+        $js = file_get_contents(public_path('js/desktop-polish.js'));
+        self::assertNotFalse($js);
+        foreach ([
+            '.sales-module-tabs',
+            '.finance-module-tabs',
+            '.settings-main-tabs',
+            'a.active',
+            "setAttribute('aria-current', 'page')",
+            'tabs.scrollLeft',
+            'DOMContentLoaded',
+        ] as $expected) {
+            self::assertStringContainsString($expected, $js);
+        }
+    }
+
 }
