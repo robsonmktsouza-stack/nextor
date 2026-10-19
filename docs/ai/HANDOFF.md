@@ -2,6 +2,17 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
+## Continuidade — 19/10/2026 — prioridade de SKU/código de barras na pesquisa NFC-e
+
+**Motivo:** a inclusão repetida de produtos já foi corrigida, mas o filtro antigo devolvia os 14 primeiros por ordem do catálogo, sem distinguir um SKU/código de barras exato de um prefixo semelhante. Enter poderia inserir um produto diferente quando o catálogo tem códigos parecidos.
+
+**Mudanças publicadas na branch `feature/acbr-nfe-bootstrap`:**
+- `public/js/nfce-editor.js`: pesquisa normalizada (inclusive acentos), índice de nomes/SKU/GTIN criado na abertura do editor e ranking determinístico (SKU/GTIN exato, nome exato, prefixo de código, prefixo de nome, ocorrência parcial em código e em nome). Os 14 primeiros são mantidos durante a iteração sem ordenar todo o catálogo a cada tecla. A inclusão por clique/Enter ainda soma +1 por ID, preserva preço/desconto, atualiza total e devolve foco ao campo.
+- `tests/browser/nfce-product-picker.html`: adiciona SKU prefixo concorrente antes do SKU exato, testa seleção pelo Enter, busca de CAFÉ digitado como "cafe" e releitura exata de código de barras sem nova linha.
+- Não houve alteração do banco, parâmetros fiscais, emissão, estoque nem serviços do backend.
+
+**Conferência:** validar a execução do workflow `ACBr integration checks` no HEAD após estes commits. QA no Laragon: digitar um SKU exato que compartilhe prefixo com outro código; Enter deve selecionar o exato; testar busca sem acento e repetição de código de barras com quantidade/total corretos. A CI não substitui o teste com leitores físicos de códigos de barras.
+
 ## Entrega mais recente — 19/10/2026 — busca e inclusão repetida de produtos na NFC-e
 
 **Relato do usuário:** na aba Produtos de Nova NFC-e, após escolher uma mercadoria no dropdown, a busca repetida do mesmo produto não tinha um fluxo confiável; botão "Adicionar produto" separado acima da busca e colunas numéricas desalinhadas em relação ao desktop do ERP. Print de `/fiscal/nfce/create` com duas mercadorias.
