@@ -2,6 +2,18 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
+## Continuidade — 19/10/2026 — lista de produtos cortada na Nova NFC-e
+
+**Problema observado no Chrome/Laragon:** o dropdown da busca em `/fiscal/nfce/create` era recortado logo abaixo do campo, dentro do modal da NFC-e. A lista absoluta era filha da área rolável `.nfe-workspace-body`, que deliberadamente tem `overflow-y:auto!important` e `overflow-x:hidden!important`. Aumentar `z-index` ou liberar `overflow` do modal não resolveria com segurança.
+
+**Correção na branch `feature/acbr-nfe-bootstrap`:**
+- `public/js/nfce-editor.js`: a própria lista `#nfceProductResults` usa Popover API `manual` em navegadores compatíveis, sem mudar IDs/HTML do formulário. Quando aberta, calcula posição fixa pela busca, largura disponível, espaço acima/abaixo e limite do rodapé de emissão. Fecha ao escolher produto, sair da aba, clicar fora ou deslocar o campo para fora da área visível; reposiciona em scroll/resize; fallback mantém a lista antiga onde não houver Popover API.
+- `public/css/desktop-polish.css`: regra restrita à lista de resultados de produto com `[popover]`, camada superior e posicionamento controlado por JS, sem afetar dropdowns globais, outras abas nem a rolagem da janela.
+- `tests/browser/nfce-product-picker.html`: reproduz uma área rolável menor com `overflow` e rodapé fixo; exige que a lista esteja na top layer, extrapole a borda de recorte, respeite o rodapé e feche na troca de aba, preservando os testes anteriores de clique, Enter, SKU, GTIN, preço e quantidade.
+- Nenhuma alteração fiscal, de banco, estoque, pagamentos ou regras de emissão.
+
+**Verificações:** os testes reais do Chromium no workflow `ACBr integration checks` passaram no commit de implementação `6cbb11d` (conferir a suíte completa e a execução do HEAD no GitHub). O ambiente local do proprietário ainda deve confirmar visualmente a correção com Ctrl+F5 após `git pull origin feature/acbr-nfe-bootstrap`.
+
 ## Continuidade — 19/10/2026 — prioridade de SKU/código de barras na pesquisa NFC-e
 
 **Motivo:** a inclusão repetida de produtos já foi corrigida, mas o filtro antigo devolvia os 14 primeiros por ordem do catálogo, sem distinguir um SKU/código de barras exato de um prefixo semelhante. Enter poderia inserir um produto diferente quando o catálogo tem códigos parecidos.
