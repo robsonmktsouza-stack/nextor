@@ -456,7 +456,7 @@ class PdvController extends Controller
         }
 
         $paymentCents=$submittedPayments->sum(fn($payment)=>(int)round((float)$payment['amount']*100));
-        if(abs($paymentCents-$totalCents)>1) {
+        if($paymentCents!==$totalCents) {
             throw ValidationException::withMessages([
                 'payments'=>'A soma das formas de pagamento deve ser igual ao total da venda.',
             ]);
