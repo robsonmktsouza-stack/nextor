@@ -138,11 +138,11 @@ final class NFCeFiscalProfileService
         $cofins = (string) ($tax['cofins_cst'] ?? $tax['cofins_cst_default'] ?? '');
 
         if ($cfop !== '' || ($normal ? $icmsCst !== '' : $csosn !== '') || $pis !== '' || $cofins !== '') {
-            if (($normal && !in_array($icmsCst, ['00','20','40','41'], true))
+            if (($normal && !in_array($icmsCst, ['00','20','40','41','51','60'], true))
                 || (!$normal && !in_array($csosn, ['102','103','300','400','500'], true))
                 || !in_array($pis, ['01','02','03','04','06','07','08','09','49','99'], true)
                 || !in_array($cofins, ['01','02','03','04','06','07','08','09','49','99'], true)
-                || !in_array($cfop, (!$normal && $csosn === '500')
+                || !in_array($cfop, (($normal && $icmsCst === '60') || (!$normal && $csosn === '500'))
                     ? ['5405','5656','5667'] : ['5101','5102','5103','5104','5115'], true)) {
                 throw new RuntimeException(
                     'Os dados fiscais do produto estão incompletos ou não são suportados nesta NFC-e. Atualize a tributação configurada.'
