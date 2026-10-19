@@ -143,35 +143,49 @@ final class NFCePreflightService
                 if (!in_array($kind, ['cash', 'money', 'pix', 'credit_card', 'debit_card', 'bank_slip', 'bank_transfer', 'transfer'], true)) {
                     $errors[] = 'Forma de pagamento sem mapeamento fiscal: '.$kind;
                 }
-                if (in_array($kind, ['credit_card','debit_card'], true)) {
-                    // A integração precisa ser declarada no caixa. Não presumir
-                    // que um pagamento sem dados seja POS não integrado.
-                    $integration = (string) ($payment['integration_type'] ?? '');
-                    if (!in_array($integration, ['1','2'], true)) {
-                        $errors[] = 'Pagamento '.($index + 1).': informe se o cartão é integrado (TEF) ou não integrado (POS).';
-                    }
+                $number = $index + 1;
+                $integration = (string) ($payment['integration_type'] ?? '');
+                $isCard = in_array($kind, ['credit_card','debit_card'], true);
+                if ($isCard && !in_array($integration, ['1','2'], true)) {
+                    $errors[] = "Pagamento {$number}: informe se o cartão é integrado (TEF) ou não integrado (POS).";
+                }
+                if ($kind === 'pix' && $integration !== '' && !in_array($integration, ['1','2'], true)) {
+                    $errors[] = "Pagamento {$number}: integração PIX inválida.";
+                }
 
-                    $transactionDocument = preg_replace('/\\D/', '', (string) ($payment['transaction_document'] ?? ''));
-                    $transactionState = strtoupper(trim((string) ($payment['transaction_state'] ?? '')));
-                    if (($transactionDocument !== '') xor ($transactionState !== '')) {
-                        $errors[] = 'Pagamento '.($index + 1).': CNPJ e UF da transação devem ser informados juntos.';
+                $transactionDocument = preg_replace('/\\D/', '', (string) ($payment['transaction_document'] ?? ''));
+                $transactionState = strtoupper(trim((string) ($payment['transaction_state'] ?? '')));
+                if (($transactionDocument !== '') xor ($transactionState !== '')) {
+                    $errors[] = "Pagamento {$number}: CNPJ e UF da transação devem ser informados juntos.";
+                }
+                if ($transactionDocument !== '' && preg_match('/^[0-9]{14}$/', $transactionDocument) !== 1) {
+                    $errors[] = "Pagamento {$number}: CNPJ da transação inválido.";
+                }
+                $states = [
+                    'AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG',
+                    'PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO',
+                ];
+                if ($transactionState !== '' && !in_array($transactionState, $states, true)) {
+                    $errors[] = "Pagamento {$number}: UF da transação inválida.";
+                }
+
+                $acquirer = preg_replace('/\\D/', '', (string) ($payment['institution_document'] ?? ''));
+                $beneficiary = preg_replace('/\\D/', '', (string) ($payment['beneficiary_document'] ?? ''));
+                foreach (['adquirente'=>$acquirer,'beneficiário'=>$beneficiary] as $label=>$document) {
+                    if ($document !== '' && preg_match('/^[0-9]{14}$/', $document) !== 1) {
+                        $errors[] = "Pagamento {$number}: CNPJ do {$label} inválido.";
                     }
-                    if ($transactionDocument !== '' && preg_match('/^\\d{14}$/', $transactionDocument) !== 1) {
-                        $errors[] = 'Pagamento '.($index + 1).': CNPJ da transação inválido.';
-                    }
-                    $states = [
-                        'AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG',
-                        'PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO',
-                    ];
-                    if ($transactionState !== '' && !in_array($transactionState, $states, true)) {
-                        $errors[] = 'Pagamento '.($index + 1).': UF da transação inválida.';
-                    }
-                    $brand = trim((string) ($payment['card_brand'] ?? ''));
-                    if ($brand !== '' && !in_array($brand, [
-                        '01','02','03','04','05','06','07','08','09','99'
-                    ], true)) {
-                        $errors[] = 'Pagamento '.($index + 1).': bandeira do cartão inválida.';
-                    }
+                }
+                if ($isCard && $integration === '1'
+                    && ($acquirer === '' || trim((string) ($payment['authorization_code'] ?? '')) === '')) {
+                    $errors[] = "Pagamento {$number}: cartão integrado exige CNPJ da adquirente e código de autorização.";
+                }
+
+                $brand = trim((string) ($payment['card_brand'] ?? ''));
+                if ($isCard && $brand !== '' && !in_array($brand, [
+                    '01','02','03','04','05','06','07','08','09','99'
+                ], true)) {
+                    $errors[] = "Pagamento {$number}: bandeira do cartão inválida.";
                 }
                 $sum += (int) round((float) ($payment['amount'] ?? 0) * 100);
             }
