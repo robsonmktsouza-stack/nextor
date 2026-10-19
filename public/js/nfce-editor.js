@@ -91,6 +91,7 @@
   }
   const el=id=>document.getElementById(id);
   const json=id=>{try{return JSON.parse(el(id)?.textContent||'[]')}catch{return []}};
+  const readOnly=form.dataset.readonly==='1';
   const products=json('nfceProductsJson');
   const methods=json('nfceMethodsJson');
   const oldItems=json('nfceOldItems');
@@ -100,16 +101,47 @@
     product_id:String(x.product_id),quantity:String(x.quantity||1),
     unit_price:String(x.unit_price??0),discount:String(x.discount??0)
   }));
-  const payments=oldPayments.length?oldPayments.map(x=>({
-    payment_method:String(x.payment_method||methods[0]?.code||''),
-    amount:String(x.amount??'')
-  })):[{payment_method:methods[0]?.code||'',amount:''}];
+  const paymentFields=['integration_type','card_brand','authorization_code',
+    'institution_document','transaction_document','transaction_state',
+    'beneficiary_document','terminal_id'];
+  const makePayment=source=>({
+    payment_method:String(source?.payment_method||methods[0]?.code||''),
+    amount:String(source?.amount??''),
+    ...Object.fromEntries(paymentFields.map(field=>[field,String(source?.[field]??'')]))
+  });
+  const payments=oldPayments.length?oldPayments.map(makePayment):[makePayment({})];
+  const paymentKind=payment=>methods.find(m=>m.code===payment.payment_method)?.kind||'';
+  const isCard=payment=>['credit_card','debit_card'].includes(paymentKind(payment));
+  const isElectronic=payment=>isCard(payment)||paymentKind(payment)==='pix';
   const tabs=[...form.querySelectorAll('[data-nfce-tab]')];
   const panels=[...form.querySelectorAll('[data-nfce-panel]')];
   const fmt=cents=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(cents/100);
   const cents=x=>Math.round(Math.max(0,Number(String(x||0).replace(',','.'))||0)*100);
   const mills=x=>Math.round(Math.max(0,Number(String(x||0).replace(',','.'))||0)*1000);
   const text=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  // Mensagem imediata; o servidor repete os dígitos verificadores antes
+  // de criar a venda, inclusive quando o cliente vem do cadastro.
+  const validTaxId=value=>{
+    const digits=String(value||'').replace(/\D/g,'');
+    if(![11,14].includes(digits.length)||/^(\d)\1+$/.test(digits))return false;
+    if(digits.length===11){
+      for(let i=9;i<11;i++){
+        let sum=0;
+        for(let j=0;j<i;j++)sum+=Number(digits[j])*(i+1-j);
+        let digit=sum*10%11;
+        if(digit===10)digit=0;
+        if(Number(digits[i])!==digit)return false;
+      }
+      return true;
+    }
+    const weights=[[5,4,3,2,9,8,7,6,5,4,3,2],
+      [6,5,4,3,2,9,8,7,6,5,4,3,2]];
+    return weights.every((weight,i)=>{
+      const sum=weight.reduce((n,w,j)=>n+Number(digits[j])*w,0);
+      const check=sum%11<2?0:11-sum%11;
+      return Number(digits[12+i])===check;
+    });
+  };
   const newMode=()=>el('nfceMode').value==='new';
   // Mesmo ícone de lixeira utilizado no restante do Lumeron.
   const trashIcon='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg>';
@@ -239,34 +271,91 @@
     activateTab('products');search.focus();renderResults();
   });
 
+  function paymentInput(index,payment,field,label,placeholder='',length=40){
+    return '<label class="field"><span>'+text(label)+'</span><input type="text" '+
+      'name="payments['+index+']['+field+']" data-payment-field="'+field+'" '+
+      'maxlength="'+length+'" placeholder="'+text(placeholder)+'" value="'+text(payment[field])+'"></label>';
+  }
+  function updatePaymentDetails(){
+    el('nfcePayments').querySelectorAll('[data-payment]').forEach(row=>{
+      const idx=Number(row.dataset.payment);
+      const payment=payments[idx];
+      const detail=el('nfcePayments').querySelector('[data-payment-detail="'+idx+'"]');
+      if(!detail)return;
+      const electronic=isElectronic(payment);
+      const card=isCard(payment);
+      detail.hidden=!electronic;
+      detail.querySelectorAll('input,select').forEach(field=>{
+        field.disabled=!electronic ||
+          (field.name.endsWith('[card_brand]') && !card);
+      });
+      const hint=detail.querySelector('[data-payment-hint]');
+      if(hint)hint.textContent=card
+        ?'Informe TEF/POS. Se for integrado, preencha CNPJ da adquirente e autorização.'
+        :'No PIX, informe os dados da transação disponíveis. Não invente autorização.';
+    });
+  }
   function renderPayments(){
-    el('nfcePayments').innerHTML=payments.map((payment,index)=>
-      '<tr data-payment="'+index+'"><td><select name="payments['+index+'][payment_method]" data-payment-field="payment_method" required>'+
-      methods.map(method=>'<option value="'+text(method.code)+'" '+(payment.payment_method===method.code?'selected':'')+'>'+text(method.name)+'</option>').join('')+
-      '</select></td><td><input type="number" name="payments['+index+'][amount]" data-payment-field="amount" step="0.01" min="0.01" max="9999999999.99" value="'+text(payment.amount)+'" required></td>'+
-      '<td><button class="nfce-remove" type="button" data-remove-payment="'+index+'" title="Remover pagamento" aria-label="Remover pagamento">'+trashIcon+'</button></td></tr>'
-    ).join('');
+    el('nfcePayments').innerHTML=payments.map((payment,index)=>{
+      const menu='<tr data-payment="'+index+'"><td><select name="payments['+index+'][payment_method]" data-payment-field="payment_method" required>'+
+        methods.map(method=>'<option value="'+text(method.code)+'" '+(payment.payment_method===method.code?'selected':'')+'>'+text(method.name)+'</option>').join('')+
+        '</select></td><td><input type="number" name="payments['+index+'][amount]" data-payment-field="amount" step="0.01" min="0.01" max="9999999999.99" value="'+text(payment.amount)+'" required></td>'+
+        '<td><button class="nfce-remove" type="button" data-remove-payment="'+index+'" title="Remover pagamento" aria-label="Remover pagamento">'+trashIcon+'</button></td></tr>';
+      const detail='<tr class="nfce-payment-detail" data-payment-detail="'+index+'" hidden><td colspan="3">'+
+        '<div class="nfce-payment-detail-head"><strong>Dados do pagamento eletrônico</strong><small data-payment-hint></small></div>'+
+        '<div class="nfce-payment-detail-grid">'+
+        '<label class="field"><span>Integração com o sistema</span><select name="payments['+index+'][integration_type]" data-payment-field="integration_type">'+
+        '<option value="">Selecione quando aplicável</option>'+
+        '<option value="1" '+(payment.integration_type==='1'?'selected':'')+'>1 — Integrado (TEF/automação)</option>'+
+        '<option value="2" '+(payment.integration_type==='2'?'selected':'')+'>2 — Não integrado (maquininha)</option>'+
+        '</select></label>'+
+        '<label class="field"><span>Bandeira (cartão)</span><select name="payments['+index+'][card_brand]" data-payment-field="card_brand">'+
+        '<option value="">Selecione</option>'+
+        [['01','Visa'],['02','Mastercard'],['03','American Express'],['04','Sorocred'],['05','Diners Club'],['06','Elo'],['07','Hipercard'],['08','Aura'],['09','Cabal'],['99','Outros']].map(([code,name])=>
+          '<option value="'+code+'" '+(payment.card_brand===code?'selected':'')+'>'+name+'</option>').join('')+
+        '</select></label>'+
+        paymentInput(index,payment,'institution_document','CNPJ da adquirente','Somente números',18)+
+        paymentInput(index,payment,'authorization_code','Autorização da transação','Código fornecido pela adquirente',128)+
+        paymentInput(index,payment,'transaction_document','CNPJ do local da transação','Quando aplicável',18)+
+        paymentInput(index,payment,'transaction_state','UF da transação','Ex.: BA',2)+
+        paymentInput(index,payment,'beneficiary_document','CNPJ de quem recebe','Quando aplicável',18)+
+        paymentInput(index,payment,'terminal_id','Identificação do terminal','Quando aplicável',40)+
+        '</div></td></tr>';
+      return menu+detail;
+    }).join('');
+    updatePaymentDetails();
     refreshTotals();
   }
   el('nfcePayments').addEventListener('input',event=>{
     const field=event.target.dataset.paymentField;
     if(!field)return;
-    payments[Number(event.target.closest('[data-payment]').dataset.payment)][field]=event.target.value;
-    refreshTotals();
+    const row=event.target.closest('[data-payment],[data-payment-detail]');
+    const index=Number(row.dataset.payment??row.dataset.paymentDetail);
+    payments[index][field]=event.target.value;
+    if(field==='amount')refreshTotals();
   });
   el('nfcePayments').addEventListener('change',event=>{
-    if(event.target.dataset.paymentField==='payment_method') {
-      payments[Number(event.target.closest('[data-payment]').dataset.payment)].payment_method=event.target.value;
+    const field=event.target.dataset.paymentField;
+    if(!field)return;
+    const row=event.target.closest('[data-payment],[data-payment-detail]');
+    const index=Number(row.dataset.payment??row.dataset.paymentDetail);
+    payments[index][field]=event.target.value;
+    if(field==='payment_method'){
+      // Nunca transportar metadados de cartão/PIX a pagamentos em dinheiro.
+      if(!isElectronic(payments[index])){
+        paymentFields.forEach(key=>payments[index][key]='');
+      }
+      updatePaymentDetails();
     }
   });
   el('nfcePayments').addEventListener('click',event=>{
     const btn=event.target.closest('[data-remove-payment]');
-    if(!btn) return;
+    if(!btn)return;
     payments.splice(Number(btn.dataset.removePayment),1);
     renderPayments();
   });
   el('nfceAddPayment').addEventListener('click',()=>{
-    payments.push({payment_method:methods[0]?.code||'',amount:''});
+    payments.push(makePayment({}));
     renderPayments();
     el('nfcePayments').querySelector('tr:last-child input')?.focus();
   });
@@ -327,7 +416,7 @@
       }
     } else {
       const documentValue=el('nfceConsumerDocument').value.replace(/\D/g,'');
-      if(documentValue && ![11,14].includes(documentValue.length)){
+      if(documentValue && !validTaxId(documentValue)){
         invalid(event,'Informe CPF ou CNPJ válido, ou deixe em branco.','consumer',el('nfceConsumerDocument'));
         return;
       }
@@ -351,6 +440,40 @@
       if(!payments.length || payments.some(p=>!p.payment_method||cents(p.amount)<=0)){
         invalid(event,'Informe uma forma de pagamento e um valor válido.','payment',el('nfcePayments').querySelector('input'));
         return;
+      }
+      const validCnpj=value=>{
+        const cleaned=String(value||'').replace(/\D/g,'');
+        return cleaned===''||cleaned.length===14&&validTaxId(cleaned);
+      };
+      const states=['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
+      for(let index=0;index<payments.length;index++){
+        const payment=payments[index];
+        if(!isElectronic(payment))continue;
+        const number=index+1;
+        if(isCard(payment)&&!['1','2'].includes(payment.integration_type)){
+          invalid(event,'Pagamento '+number+': informe se o cartão é integrado (TEF) ou não integrado (POS).','payment',
+            el('nfcePayments').querySelector('[name="payments['+index+'][integration_type]"]'));
+          return;
+        }
+        if(paymentKind(payment)==='pix' && payment.integration_type && !['1','2'].includes(payment.integration_type)){
+          invalid(event,'Pagamento '+number+': tipo de integração PIX inválido.','payment');
+          return;
+        }
+        if(!validCnpj(payment.institution_document)||!validCnpj(payment.beneficiary_document)
+          ||!validCnpj(payment.transaction_document)){
+          invalid(event,'Pagamento '+number+': confira os dígitos do CNPJ informado.','payment');
+          return;
+        }
+        if(Boolean(payment.transaction_document)!==Boolean(payment.transaction_state)
+          ||payment.transaction_state && !states.includes(payment.transaction_state.toUpperCase())){
+          invalid(event,'Pagamento '+number+': informe CNPJ e UF válidos do local da transação.','payment');
+          return;
+        }
+        if(isCard(payment)&&payment.integration_type==='1'
+          &&(!payment.institution_document||!payment.authorization_code.trim())){
+          invalid(event,'Pagamento '+number+': cartão integrado exige CNPJ da adquirente e autorização.','payment');
+          return;
+        }
       }
       const line=sum();
       if(payments.reduce((n,p)=>n+cents(p.amount),0)!==line.total){
