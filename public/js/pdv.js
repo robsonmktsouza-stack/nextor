@@ -1302,20 +1302,20 @@
 
     const electronicSource=()=>{
       if(electronicTarget==='single'){
-        if(paymentKind(payment.value)!=='card') return null;
+        if(!['card','pix'].includes(paymentKind(payment.value))) return null;
         return {row:singleElectronicData,label:paymentName(payment.value)};
       }
 
       const index=Number(electronicTarget);
       const row=splitPayments[index];
-      if(!row || row.kind!=='card') return null;
+      if(!row || !['card','pix'].includes(row.kind)) return null;
       return {row,label:row.label};
     };
 
     const openElectronicPaymentModal=(target=null,returnToPayment=false)=>{
       if(target===null){
         if(splitApplied || splitMode){
-          const index=splitPayments.findIndex(row=>row.kind==='card');
+          const index=splitPayments.findIndex(row=>['card','pix'].includes(row.kind));
           target=index>=0 ? index : 'single';
         }else{
           target='single';
@@ -1327,7 +1327,7 @@
       const source=electronicSource();
 
       if(!source){
-        notify('Selecione uma forma de pagamento com cartão primeiro.','info');
+        notify('Selecione cartão ou PIX antes de informar os dados eletrônicos.','info');
         return;
       }
 
@@ -1367,8 +1367,20 @@
       }
 
       if(!['1','2'].includes(data.integration_type)){
-        notify('Informe se o cartão foi pago em TEF/POS integrado ou POS não integrado.','warning');
+        notify('Informe se o pagamento eletrônico é integrado ao sistema ou não integrado.','warning');
         electronicIntegration?.focus();
+        return;
+      }
+
+      const electronicSourceInfo=electronicSource();
+      const isIntegratedCard=electronicSourceInfo
+        && (electronicTarget==='single'
+          ? paymentKind(payment.value)==='card'
+          : splitPayments[Number(electronicTarget)]?.kind==='card')
+        && data.integration_type==='1';
+      if(isIntegratedCard && (!data.institution_document || !data.authorization_code)){
+        notify('Cartão integrado: informe o CNPJ da adquirente e a autorização da transação.','warning');
+        electronicInstitution?.focus();
         return;
       }
 
