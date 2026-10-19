@@ -401,4 +401,20 @@ final class NFCeManualEditorTest extends TestCase
         self::assertSame('10.000',(string)$product->fresh()->stock_quantity);
     }
 
+    public function test_issue_with_invalid_product_tax_data_does_not_commit_sale_or_stock(): void
+    {
+        $product=$this->configure();
+        $product->update(['ncm'=>null]);
+        $payload=$this->postData($product);
+        $payload['submit_mode']='issue';
+
+        $this->actingAs($this->admin())
+            ->post(route('fiscal.nfce.store'),$payload)
+            ->assertSessionHasErrors('items.0.product_id');
+
+        self::assertSame(0,Sale::query()->count());
+        self::assertSame('10.000',(string)$product->fresh()->stock_quantity);
+    }
+
+
 }
