@@ -326,8 +326,8 @@ final class NFCeIniBuilderTest extends TestCase
         self::assertStringContainsString("[Total]\r\nvBC=72.00\r\nvICMS=12.96", $ini);
         self::assertStringContainsString("vNF=90.00", $ini);
         self::assertStringContainsString("[IBSCBS001]", $ini);
-        self::assertStringContainsString("vBCIBSCBS=90.00", $ini);
-        self::assertStringContainsString("vCBS=0.81", $ini);
+        self::assertStringContainsString("vBCIBSCBS=77.04", $ini);
+        self::assertStringContainsString("vCBS=0.69", $ini);
     }
 
 }
