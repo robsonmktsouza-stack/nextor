@@ -80,7 +80,12 @@
 @if($lastCompletedPdvSale && (int)session('pdv_last_sale')===(int)$lastCompletedPdvSale->id)
   @php
     $lastFiscalStatus = $lastPdvNfceDocument?->status;
-    $fiscalAuthorized = $lastFiscalStatus==='authorized' && (bool)$lastPdvNfceDocument?->protocol;
+    $fiscalAuthorized = $lastFiscalStatus==='authorized'
+      && preg_match('/^\\d{15}$/', (string)$lastPdvNfceDocument?->protocol)===1
+      && in_array((string)$lastPdvNfceDocument?->xml_path,[
+        'fiscal/nfce/'.$lastPdvNfceDocument->id.'/authorized.xml',
+        'fiscal/nfce/'.$lastPdvNfceDocument->id.'/authorized-recovered.xml',
+      ],true);
     $fiscalMessage = match($lastFiscalStatus) {
       'authorized' => $fiscalAuthorized
         ? 'NFC-e autorizada pela SEFAZ. O DANFE pode ser impresso em Operações > Última venda.'
