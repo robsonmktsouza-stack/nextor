@@ -191,6 +191,49 @@ class SettingsController extends Controller
         [$rules,$booleanKeys,$secretKeys]=$this->groupRules($group);
         $data=$request->validate($rules);
 
+        if ($group==='nfce') {
+            // Produção é um conjunto independente de parâmetros. Jamais
+            // usar o CSC ou a numeração do ambiente de homologação.
+            if ($request->boolean('production_enabled')
+                || ($data['environment'] ?? '')==='production') {
+                $missing=[];
+                foreach ([
+                    'production_series'=>'Série de produção',
+                    'production_next_number'=>'Próximo número em produção',
+                    'production_csc_id'=>'ID do CSC de produção',
+                ] as $field=>$label) {
+                    if (($data[$field] ?? null)===null || (string)$data[$field]==='') {
+                        $missing[$field]="Informe {$label} antes de liberar produção.";
+                    }
+                }
+                $csc=(string)($data['production_csc_token']
+                    ?? AppSetting::value('nfce','production_csc_token',''));
+                if (trim($csc)==='') {
+                    $missing['production_csc_token']='Cadastre o CSC obtido no ambiente de produção da SEFAZ-BA.';
+                }
+                if ($missing) {
+                    throw ValidationException::withMessages($missing);
+                }
+            }
+
+            // Bloquear reaproveitamento de número já reservado no Lumeron.
+            foreach ([
+                'homologation'=>['series','next_number'],
+                'production'=>['production_series','production_next_number'],
+            ] as $environment=>[$seriesField,$numberField]) {
+                if (!isset($data[$seriesField],$data[$numberField])) continue;
+                $highest=FiscalDocumentJob::query()->where('document_type','nfce')
+                    ->where('environment',$environment)
+                    ->where('series',(int)$data[$seriesField])
+                    ->max('document_number');
+                if ($highest!==null && (int)$data[$numberField]<=(int)$highest) {
+                    throw ValidationException::withMessages([
+                        $numberField=>'O próximo número deve ser maior que o último já reservado nesta série e ambiente ('.$highest.').',
+                    ]);
+                }
+            }
+        }
+
         foreach($booleanKeys as $key) {
             $data[$key]=$request->boolean($key);
         }
@@ -493,14 +536,18 @@ class SettingsController extends Controller
                 'environment'=>['required',Rule::in(['homologation','production'])],
                 'series'=>['required','integer','min:0','max:999'],
                 'next_number'=>['required','integer','min:1','max:999999999'],
+                'production_series'=>['nullable','integer','min:0','max:999'],
+                'production_next_number'=>['nullable','integer','min:1','max:999999999'],
                 'default_cfop'=>['nullable','string','regex:/^5\d{3}$/'],
-                'csc_id'=>['nullable','string','max:20'],
+                'csc_id'=>['nullable','string','regex:/^[0-9]{1,6}$/'],
                 'csc_token'=>['nullable','string','max:255'],
+                'production_csc_id'=>['nullable','string','regex:/^[0-9]{1,6}$/'],
+                'production_csc_token'=>['nullable','string','max:255'],
                 'auto_from_pdv'=>['nullable','boolean'],
                 'production_enabled'=>['nullable','boolean'],
                 'advanced_operations_production_approved'=>['nullable','boolean'],
                 'print_danfe'=>['nullable','boolean'],
-            ],['enabled','auto_from_pdv','production_enabled','advanced_operations_production_approved','print_danfe'],['csc_token']],
+            ],['enabled','auto_from_pdv','production_enabled','advanced_operations_production_approved','print_danfe'],['csc_token','production_csc_token']],
 
             'nfse'=>[[
                 'enabled'=>['nullable','boolean'],
@@ -614,7 +661,9 @@ class SettingsController extends Controller
             ],
             'nfce'=>[
                 'enabled'=>false,'environment'=>'homologation','series'=>1,'next_number'=>1,
-                'default_cfop'=>null,'csc_id'=>null,'csc_token'=>null,'auto_from_pdv'=>false,'production_enabled'=>false,'advanced_operations_production_approved'=>false,'print_danfe'=>true,
+                'production_series'=>null,'production_next_number'=>null,
+                'default_cfop'=>null,'csc_id'=>null,'csc_token'=>null,
+                'production_csc_id'=>null,'production_csc_token'=>null,'auto_from_pdv'=>false,'production_enabled'=>false,'advanced_operations_production_approved'=>false,'print_danfe'=>true,
             ],
             'nfse'=>[
                 'enabled'=>false,'environment'=>'homologation','provider'=>null,'municipality_code'=>null,
