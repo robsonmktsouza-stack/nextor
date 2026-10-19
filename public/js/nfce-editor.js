@@ -2,6 +2,20 @@
   'use strict';
   const form=document.getElementById('nfceEditorForm');
   if(!form) return;
+
+  // Abas já nomeiam as seções. Não repetir títulos dentro do painel,
+  // inclusive em visualizações antigas ou em fragmentos de correção.
+  // Preservar barras com botões, erros fiscais e conteúdo editável.
+  const labels=new Map([...form.querySelectorAll('[data-nfce-tab]')]
+    .map(tab=>[tab.dataset.nfceTab,tab.textContent.trim().toLocaleLowerCase('pt-BR')]));
+  form.querySelectorAll('[data-nfce-panel]').forEach(panel=>{
+    const label=labels.get(panel.dataset.nfcePanel);
+    if(!label)return;
+    panel.querySelectorAll('.nfe-section-title,.editor-panel-title,.nfe-panel-heading').forEach(heading=>{
+      if(heading.querySelector('button,a,input,select,textarea,[role="button"]'))return;
+      if(heading.textContent.trim().toLocaleLowerCase('pt-BR')===label)heading.remove();
+    });
+  });
   const tabsOnly=form.dataset.readonly==='1'||form.dataset.correction==='1';
   if(tabsOnly){
     // Documentos históricos e correções auditadas usam HTML do servidor,
