@@ -357,4 +357,48 @@ final class NFCeManualEditorTest extends TestCase
     }
 
 
+
+    public function test_pix_metadata_is_saved_without_inventing_a_card_authorization(): void
+    {
+        $product=$this->configure();
+        PaymentMethod::query()->updateOrCreate(['code'=>'pix'],[
+            'name'=>'PIX','kind'=>'pix','is_active'=>true,
+            'pdv_enabled'=>true,'sort_order'=>3,
+        ]);
+        $payload=$this->postData($product);
+        $payload['payments']=[[
+            'payment_method'=>'pix',
+            'amount'=>'20.00',
+            'transaction_document'=>'11.222.333/0001-81',
+            'transaction_state'=>'BA',
+            'beneficiary_document'=>'11.222.333/0001-81',
+        ]];
+
+        $this->actingAs($this->admin())
+            ->post(route('fiscal.nfce.store'),$payload)->assertRedirect();
+
+        $sale=Sale::query()->sole();
+        self::assertSame(1,$sale->payments()->count());
+        self::assertNull($sale->payments->first()->authorization_code);
+        $doc=FiscalDocumentJob::query()->where('sale_id',$sale->id)->sole();
+        self::assertSame('pix',$doc->source_snapshot['payments'][0]['payment_kind']);
+        self::assertSame('11222333000181',$doc->source_snapshot['payments'][0]['beneficiary_document']);
+        self::assertSame('BA',$doc->source_snapshot['payments'][0]['transaction_state']);
+    }
+
+    public function test_cash_payment_cannot_carry_card_fields_into_xml_snapshot(): void
+    {
+        $product=$this->configure();
+        $payload=$this->postData($product);
+        $payload['payments'][0]['integration_type']='1';
+        $payload['payments'][0]['authorization_code']='AUT123';
+
+        $this->actingAs($this->admin())
+            ->post(route('fiscal.nfce.store'),$payload)
+            ->assertSessionHasErrors('payments.0.payment_method');
+
+        self::assertSame(0,Sale::query()->count());
+        self::assertSame('10.000',(string)$product->fresh()->stock_quantity);
+    }
+
 }
