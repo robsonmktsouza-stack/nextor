@@ -2,7 +2,29 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
-## Entrega mais recente — 19/10/2026 — PDV, retorno da venda e NFC-e SEFAZ-BA
+## Entrega mais recente — 19/10/2026 — mensagens de validação totalmente em português
+
+**Problema visual identificado no PDV:** notificação "Verifique os campos" exibindo `validation.gt.numeric` em vez de uma mensagem compreensível. O Laravel tinha locale/fallback `pt_BR` em `config/app.php` e `.env.example`, porém faltavam os arquivos `lang/pt_BR/...`. A mensagem era uma chave de tradução literal.
+
+**Implementado em `feature/acbr-nfe-bootstrap`:**
+- `lang/pt_BR/validation.php` (novo): regras gerais de validação Laravel traduzidas para pt-BR, incluindo `gt.numeric`, `gte.numeric`, `min/max`, `required`, `numeric`, `decimal`, `exists`, `regex` e regras para arrays. `attributes` fornece nomes visíveis de campos usados por PDV e outros módulos; mensagens específicas para quantidade/valor de pagamento zero.
+- `lang/pt_BR/auth.php`, `passwords.php`, `pagination.php` (novos): traduzem mensagens padrões de acesso, recuperação de senha e paginação.
+- `tests/Feature/PortugueseValidationTest.php` (novo): regressão que testa tradução efetiva do Laravel, erro de quantidade e pagamento zerados, erro de POST real da venda no PDV, nomes dos campos, regras decimais, autenticação e paginação.
+
+**Não foi alterado:** `gt:0`, regras de negócio, controller do PDV, payload, formulário ou JS de notificação. A causa estava na ausência do catálogo de traduções, não no toast. Portanto, traduções passam a funcionar globalmente.
+
+**Verificação até agora:** arquivos gravados e lidos diretamente do GitHub. Testes PHPUnit ainda precisam ser executados no Laravel local; não afirmar que passaram sem execução. Confirme `APP_LOCALE=pt_BR` e `APP_FALLBACK_LOCALE=pt_BR` no `.env` real (o `.env.example` já contém esses valores).
+
+```powershell
+git switch feature/acbr-nfe-bootstrap
+git pull origin feature/acbr-nfe-bootstrap
+php artisan optimize:clear
+php artisan test --filter=PortugueseValidationTest
+```
+
+No PDV, digitar quantidade 0 ou pagamento 0 em uma tentativa de venda deve exibir "A quantidade do produto deve ser maior que zero." ou "O valor do pagamento deve ser maior que zero.", e **jamais** a chave `validation.gt.numeric`.
+
+## Entrega anterior — 19/10/2026 — PDV, retorno da venda e NFC-e SEFAZ-BA
 
 **Pedido:** impedir que o fechamento de venda no PDV abra o módulo Fiscal/NFC-e; revisar os campos e controles da frente de caixa frente às exigências da SEFAZ-BA e modelo 65.
 
