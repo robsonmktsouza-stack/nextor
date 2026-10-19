@@ -33,6 +33,13 @@ final class NFCeRtcTaxService
             array_key_exists($name, $tax) && $tax[$name] !== null && trim((string)$tax[$name]) !== ''
         );
         if (!$present) {
+            // O adiamento de rejeição automática em 2026 NÃO suspendeu a
+            // obrigação de destaque para o regime regular. O emissor não
+            // pode transmitir uma NFC-e regular omitindo o bloco fiscal.
+            if (in_array($crt, ['2','3'], true) && $issueDate !== null
+                && substr($issueDate, 0, 10) >= '2026-08-03') {
+                throw new RuntimeException('RTC: o regime normal exige classificação e alíquotas IBS/CBS por item. Configure o grupo tributário antes da emissão.');
+            }
             // O Simples Nacional permanece no regime de 2026 sem IBS/CBS.
             // A partir de 2027 as regras serão distintas, inclusive opção
             // de recolhimento regular, e não podem ser presumidas aqui.
