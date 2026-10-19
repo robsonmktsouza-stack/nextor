@@ -79,6 +79,9 @@ final class NFCeSimplesProductionTest extends TestCase
                 'icms_st_retained_base'=>'8.00',
                 'icms_st_retained_value'=>'1.44',
                 'st_retained_rate'=>'18.00',
+                'fcp_st_retained_base'=>'8.00',
+                'fcp_st_retained_rate'=>'2.0000',
+                'fcp_st_retained_value'=>'0.16',
             ]),
         ];
         $ini = app(NFCeIniBuilder::class)->build($this->job($items,'40.00'),$this->company());
@@ -90,6 +93,9 @@ final class NFCeSimplesProductionTest extends TestCase
         self::assertStringContainsString("CFOP=5405",$ini);
         self::assertStringContainsString("vBCSTRet=16.00",$ini);
         self::assertStringContainsString("vICMSSTRet=2.88",$ini);
+        self::assertStringContainsString("vBCFCPSTRet=16.00",$ini);
+        self::assertStringContainsString("vFCPSTRet=0.32",$ini);
+        self::assertStringContainsString("pFCPSTRet=2.0000",$ini);
         self::assertStringContainsString("vPIS=0.00",$ini);
         self::assertStringContainsString("vCOFINS=0.00",$ini);
         self::assertStringContainsString("vNF=40.00",$ini);
