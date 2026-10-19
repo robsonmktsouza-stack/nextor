@@ -37,10 +37,10 @@ class SettingsModuleTest extends TestCase
         $this->actingAs($admin)
             ->get(route('settings.index'))
             ->assertOk()
-            ->assertSee('Plano de contas')
-            ->assertSee('Fiscal')
-            ->assertSee('Tributação')
-            ->assertSee('Contábil');
+            ->assertSee('Minha empresa')
+            ->assertSee('Vendas e estoque')
+            ->assertSee('Notas fiscais')
+            ->assertSee('Equipe e acessos');
 
         $this->actingAs($admin)
             ->get(route('settings.index',['tab'=>'fiscal']))
@@ -115,7 +115,7 @@ class SettingsModuleTest extends TestCase
         $this->actingAs($admin)
             ->get(route('settings.index',['tab'=>'accounting']))
             ->assertOk()
-            ->assertSee('Formato disponível')
+            ->assertSee('Gerar arquivo contábil')
             ->assertDontSee('name="export_format"',false);
 
         $this->actingAs($admin)
