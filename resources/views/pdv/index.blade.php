@@ -690,7 +690,7 @@
     <div class="pdv-electronic-target" id="pdvElectronicTarget">Selecione uma forma de pagamento com cartão ou PIX.</div>
     <div class="pdv-electronic-grid">
       <label><span>Integração</span><select id="pdvElectronicIntegration"><option value="">Não informado</option><option value="1">1 — Integrado ao sistema (TEF / pagamento integrado)</option><option value="2">2 — Não integrado (quando permitido)</option></select></label>
-      <label><span>Bandeira (apenas cartão)</span><select id="pdvElectronicBrand"><option value="">Não informada</option><option value="01">01 — Visa</option><option value="02">02 — Mastercard</option><option value="03">03 — American Express</option><option value="04">04 — Sorocred</option><option value="05">05 — Diners Club</option><option value="06">06 — Elo</option><option value="07">07 — Hipercard</option><option value="08">08 — Aura</option><option value="09">09 — Cabal</option><option value="99">99 — Outros</option></select></label>
+      <label><span>Bandeira (apenas cartão)</span><select id="pdvElectronicBrand"><option value="">Não informada</option>@foreach(\App\Support\NFCeCardBrands::LABELS as $code=>$label)<option value="{{ $code }}">{{ $code }} — {{ $label }}</option>@endforeach</select></label>
       <label><span>CNPJ da instituição de pagamento / adquirente</span><input id="pdvElectronicInstitution" maxlength="18" placeholder="Somente números ou formatado"></label>
       <label><span>Código da transação</span><input id="pdvElectronicAuthorization" maxlength="128" placeholder="Autorização do cartão ou identificação do PIX"></label>
       <label><span>CNPJ de quem recebe</span><input id="pdvElectronicBeneficiary" maxlength="18" placeholder="CNPJ beneficiário"></label>
