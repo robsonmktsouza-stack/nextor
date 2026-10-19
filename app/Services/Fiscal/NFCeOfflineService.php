@@ -47,7 +47,7 @@ final class NFCeOfflineService
                 $service=new ACBrNFeService(null,$iniPath);
                 app(NFCeTransmissionService::class)->configure(
                     $service,$company,$job,(string)$company->certificate_password,
-                    (string)AppSetting::value('nfce','csc_token','')
+                    app(NFCeEnvironmentParameters::class)->cscToken((string)$job->environment)
                 );
                 $service->loadIni(app(NFCeIniBuilder::class)->build($job,$company));
                 $service->sign();
@@ -113,7 +113,7 @@ final class NFCeOfflineService
                 $service=new ACBrNFeService(null,$iniPath);
                 app(NFCeTransmissionService::class)->configure(
                     $service,$company,$job,(string)$company->certificate_password,
-                    (string)AppSetting::value('nfce','csc_token','')
+                    app(NFCeEnvironmentParameters::class)->cscToken((string)$job->environment)
                 );
                 $service->loadXml($xml);
                 $service->validateXml();
