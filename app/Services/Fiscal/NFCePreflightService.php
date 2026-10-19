@@ -114,8 +114,8 @@ final class NFCePreflightService
                 // Compartilha o mesmo validador/cálculo utilizado no INI ACBr.
                 // Nenhum perfil não implementado pode chegar à transmissão.
                 try {
-                    $this->calculator->calculate($item, (string)$company->crt);
-                    if ($rtc->calculate($item, (string)$company->crt, now()->toDateString()) !== null) {
+                    $calculated = $this->calculator->calculate($item, (string)$company->crt);
+                    if ($rtc->calculate($item, (string)$company->crt, now()->toDateString(), $calculated) !== null) {
                         $rtcItemCount++;
                     }
                 } catch (\RuntimeException $exception) {
