@@ -46,18 +46,6 @@
         @endif
 
         <div id="nfceFormError" class="nfce-form-error" role="alert" hidden></div>
-        @unless($readOnly || $correctionMode)
-          <div class="nfce-compliance-note" role="note">
-            @include('partials.icon',['name'=>'shield','size'=>18])
-            <div>
-              <strong>NFC-e modelo 65 — {{ $settings->environment('nfce')==='production' ? 'Produção' : 'Homologação (testes)' }}</strong>
-              <p>Emitente e tributação vêm do cadastro e das regras fiscais dos produtos.
-              Somente uma resposta autorizada da SEFAZ confirma a nota.
-              Confira certificado A1, numeração, CSC/QR Code e o regime da empresa nas Configurações.</p>
-            </div>
-          </div>
-        @endunless
-
         <div class="nfe-emitter-summary">
           <div class="nfe-emitter-logo">
             @if($company->logo_path)<img src="{{ route('company.logo') }}" alt="">@endif
@@ -207,7 +195,6 @@
         @else
         <section class="editor-tab-panel active" id="nfcePanel-general" role="tabpanel" aria-labelledby="nfceTab-general" data-nfce-panel="general">
           <div class="nfe-general-card">
-            <div class="nfe-section-title"><h3>Dados gerais</h3></div>
             <div class="editor-grid cols-12">
               <label class="field col-6"><span>Origem da NFC-e</span>
                 <select name="mode" id="nfceMode">
@@ -238,7 +225,6 @@
               <label class="field col-3"><span>Emissão fiscal</span>
                 <input value="{{ \App\Models\AppSetting::value('nfce','offline_contingency_active',false) ? 'Contingência offline' : 'Normal' }}" readonly>
               </label>
-              <p class="nfce-field-help col-12">Série, ambiente e modalidade são controlados pelas Configurações fiscais. O número definitivo será reservado ao preparar a NFC-e; não altere esses dados para tentar corrigir uma rejeição.</p>
               @if($readOnly && $readOnlyDocument->sale_id)
                 <p class="nfce-muted nfce-readonly-sale">Venda de origem: #{{ $readOnlyDocument->sale_id }} — somente consulta.</p>
               @endif
@@ -264,7 +250,6 @@
 
         <section class="editor-tab-panel" id="nfcePanel-consumer" role="tabpanel" aria-labelledby="nfceTab-consumer" data-nfce-panel="consumer" hidden>
           <div class="nfe-general-card">
-            <div class="nfe-section-title"><h3>Consumidor</h3></div>
             <div class="editor-grid cols-12">
               <label class="field col-6"><span>Cliente cadastrado</span>
                 <select name="customer_id" id="nfceCustomer">
@@ -283,14 +268,12 @@
                 <input name="consumer_name" id="nfceConsumerName" maxlength="190" value="{{ $readOnly?$frozenConsumerName:old('consumer_name') }}" placeholder="Opcional">
               </label>
             </div>
-            <p class="nfce-field-help">Quando o consumidor for identificado, informe um CPF ou CNPJ com dígitos verificadores válidos. Sem documento, a NFC-e será emitida para consumidor não identificado.</p>
           </div>
         </section>
 
         <section class="editor-tab-panel" id="nfcePanel-products" role="tabpanel" aria-labelledby="nfceTab-products" data-nfce-panel="products" hidden>
           <div class="nfe-general-card">
-            <div class="nfe-section-title">
-              <h3>Produtos</h3>
+            <div class="nfe-section-title nfe-section-title--actions">
               <button type="button" id="nfceAddProduct" class="btn btn-secondary">@include('partials.icon',['name'=>'plus','size'=>15]) Adicionar produto</button>
             </div>
             <label class="field"><span>Buscar produto</span>
@@ -304,14 +287,12 @@
               </table>
             </div>
             <p class="nfce-muted" id="nfceNoItems">Nenhum produto adicionado.</p>
-            <p class="nfce-field-help">NCM, CFOP, ICMS, PIS, COFINS e demais dados tributários são obtidos das regras fiscais dos produtos. Não preencha códigos aleatórios: configure o cadastro antes da emissão.</p>
           </div>
         </section>
 
         <section class="editor-tab-panel" id="nfcePanel-payment" role="tabpanel" aria-labelledby="nfceTab-payment" data-nfce-panel="payment" hidden>
           <div class="nfe-general-card">
-            <div class="nfe-section-title">
-              <h3>Pagamento</h3>
+            <div class="nfe-section-title nfe-section-title--actions">
               <button type="button" id="nfceAddPayment" class="btn btn-secondary">@include('partials.icon',['name'=>'plus','size'=>15]) Adicionar pagamento</button>
             </div>
             <div class="nfce-item-table-wrap">
@@ -323,13 +304,11 @@
             <div class="nfce-payment-subtotal">
               <span>Total informado</span><strong id="nfcePaymentTotal">R$ 0,00</strong>
             </div>
-            <p class="nfce-field-help">A soma dos pagamentos deve corresponder ao valor da NFC-e. Para cartões, identifique TEF/POS. Se o cartão for integrado, informe CNPJ da adquirente e autorização. Os dados adicionais de PIX devem refletir a transação real.</p>
           </div>
         </section>
 
         <section class="editor-tab-panel" id="nfcePanel-summary" role="tabpanel" aria-labelledby="nfceTab-summary" data-nfce-panel="summary" hidden>
           <div class="nfe-general-card">
-            <div class="nfe-section-title"><h3>Resumo da NFC-e</h3></div>
             <div class="nfce-summary-grid">
               <div><span>Subtotal</span><strong id="nfceSubtotal">R$ 0,00</strong></div>
               <div><span>Desconto</span><strong id="nfceDiscountTotal">R$ 0,00</strong></div>
