@@ -2,7 +2,32 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
-## Entrega mais recente — 19/10/2026 — mensagens de validação totalmente em português
+## Entrega mais recente — 19/10/2026 — correção global de dropdowns em telas e modais
+
+**Pedido:** resolver o menu do seletor CRT que ultrapassava o rodapé de Configurações e outros campos que eram cortados dentro dos modais do Lumeron.
+
+**Causa encontrada no código:** o componente próprio `.ui-select` em `public/js/erp.js` criava a lista como filho absoluto do controle, ficando sujeito aos containers com `overflow`, empilhamento de modais/rodapés e rolagem. Para campo pesquisável, `trigger.select()` selecionava todo o texto automaticamente, provocando o destaque azul do print.
+
+**Implementado em `feature/acbr-nfe-bootstrap`:**
+- `public/js/erp.js`: usa `popover="manual"` com `showPopover()/hidePopover()` na **top layer** do navegador; mantém o menu filho do wrapper, `<select>` original, `change`, teclado, callbacks e valores. Calcula posição horizontal/vertical, aplica `drop-up` antes do rodapé fixo de Configurações/modais, ajusta em scroll/resize/visualViewport e fecha no evento de fechamento do diálogo. Segundo clique fecha o popover sem deixá-lo órfão. No campo pesquisável, não destaca todo o texto; digitação iniciada quando fechado começa nova pesquisa. Fallback preserva implementação anterior em browsers sem suporte.
+- `public/css/desktop-polish.css`: estilo do menu flutuante restrito a `.ui-select .ui-select-menu[popover]`, sem alterar `overflow` de cards e modais indiscriminadamente; estilos de foco e seleção preservados.
+- `tests/Feature/SelectOverlayTest.php` (novo): verifica CRT como `select` nativo, importação do JS/CSS, top layer, fechamento, rodapé/rolagem/zoom, regras CSS e regressões de sintaxe estrutural.
+- `docs/ai/ARCHITECTURE_AND_DECISIONS.md`: decisão D02-C para outras IAs não voltarem a criar dropdowns diferentes.
+
+**Verificações realizadas:** conferência remota dos arquivos da branch, análise estrutural de CSS balanceado, `new Function(js)` com sintaxe **PASS**, e 11 verificações estáticas das regras de popup, campos, posicionamento, fechamento e navegação **PASS**. Tentativa de navegador Chromium isolado no contêiner encerrou por timeout, sem evidência de resultado visual. **Não houve execução de Laravel/PHPUnit no Laragon nem captura da interface real com a correção**, portanto não dizer que está visualmente homologado.
+
+**Validação recomendada no Windows/Laragon:**
+```powershell
+git switch feature/acbr-nfe-bootstrap
+git pull origin feature/acbr-nfe-bootstrap
+php artisan optimize:clear
+php artisan test --filter=SelectOverlayTest
+php artisan test --filter=UiRefinementTest
+```
+
+Abrir Configurações → Minha empresa → CRT próximo à barra Salvar; inspecionar os campos de Produtos, Financeiro e Fiscal, e seletores em modais com bastante conteúdo, zoom 100/125%; validar abrir para cima, seleção por teclado, pesquisa, fechamento fora e Escape. `Ctrl+F5` para invalidar CSS/JS em cache (assets carregados com `filemtime`).
+
+## Entrega anterior — 19/10/2026 — mensagens de validação totalmente em português
 
 **Problema visual identificado no PDV:** notificação "Verifique os campos" exibindo `validation.gt.numeric` em vez de uma mensagem compreensível. O Laravel tinha locale/fallback `pt_BR` em `config/app.php` e `.env.example`, porém faltavam os arquivos `lang/pt_BR/...`. A mensagem era uma chave de tradução literal.
 
