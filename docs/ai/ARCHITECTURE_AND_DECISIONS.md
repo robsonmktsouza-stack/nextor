@@ -64,6 +64,12 @@ Prioridade prática atual: **NFC-e modelo 65**, com foco de validação na **Bah
 
 **Impressão:** comprovante interno de venda (SEM VALOR FISCAL) e DANFE são coisas diferentes. O PDV somente fornece DANFE autorizado quando há XML válido arquivado; contingência offline assinada recebe DANFE marcado como pendente de autorização e **duas vias** (consumidor e estabelecimento). Nenhuma impressão interna substitui o DANFE. A regulamentação e checklist ficam em `docs/fiscal/pdv-nfce-bahia.md`; regressão em `tests/Feature/PdvFiscalCheckoutFlowTest.php`.
 
+## D06-A.1 — Cartões separados e tipos fiscais de pagamento (19/10/2026)
+
+Formas de pagamento possuem um `code` estável e um `kind` que determina seu enquadramento fiscal. **Cartão de crédito (`credit_card`, tPag=03) e cartão de débito (`debit_card`, tPag=04) são tipos distintos** no cadastro, na NFC-e, no PDV e no snapshot fiscal. A migração antiga gravava ambos como `card`; a reconciliação idempotente posterior corrige os códigos originais sem sobrescrever preferências do cliente. Histórico de `card` com código reconhecível continua compatível; tipo `card` ambíguo precisa ser classificado antes da emissão (não presumir 03/04).
+
+Para cartão exigir `tpIntegra` 1/2 explícito; integrado exige adquirente/autorizaçao reais. Para PIX, não inventar integração, adquirente, bandeira nem autorização. Bandeiras `tBand` vêm do catálogo único `App\\Support\\NFCeCardBrands`. Validar soma exata de parcelas em centavos contra a venda, dinheiro/troco, restrições dos dados eletrônicos e campos XML `tPag`, `vPag`, `tpIntegra`, `tBand`, `cAut`, `CNPJPag`, `UFPag`, `CNPJ`, `CNPJReceb` e `idTermPag` antes de transmitir. Matriz de suportes/bloqueios em [docs/fiscal/nfce-payment-methods-2026.md](../fiscal/nfce-payment-methods-2026.md). Não afirmar que todos os `tPag` previstos nas tabelas são suportados ou homologados.
+
 ## D06-B — Formulário manual NFC-e e exigências SEFAZ-BA (19/10/2026)
 
 **Referência atualizada:** `docs/fiscal/nfce-formulario-conformidade-2026.md`; manuais do Portal Nacional NF-e, notas técnicas vigentes, Receita Federal e ACBr.
