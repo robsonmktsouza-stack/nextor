@@ -115,7 +115,11 @@ final class ACBrNFCeStatus extends Command
             return (string) $status === '107' ? self::SUCCESS : self::FAILURE;
         } catch (Throwable $e) {
             $message = str_replace(
-                array_filter([$password, $pfxPath, $relative, (string) AppSetting::value('nfce', 'csc_token', '')]),
+                array_filter([
+                    $password, $pfxPath, $relative,
+                    (string) AppSetting::value('nfce', 'csc_token', ''),
+                    (string) AppSetting::value('nfce', 'production_csc_token', ''),
+                ]),
                 '[protegido]',
                 $e->getMessage()
             );
