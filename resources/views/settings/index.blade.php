@@ -614,7 +614,7 @@ foreach($primaryTabs as $key=>$item){
         <label class="field col-2"><span>Série de homologação</span><input type="number" min="0" max="999" name="series" value="{{ $nfce['series'] }}"></label>
         <label class="field col-3"><span>Próximo número de homologação</span><input type="number" min="1" max="999999999" name="next_number" value="{{ $nfce['next_number'] }}"></label>
         <label class="field col-2"><span>ID CSC de homologação</span><input name="csc_id" maxlength="6" value="{{ $nfce['csc_id'] }}"></label>
-        <label class="field col-5"><span>CSC de homologação</span><input type="password" autocomplete="new-password" name="csc_token" placeholder="{{ $nfce['csc_token'] ? 'CSC de homologação configurado' : 'Informe o CSC de homologação' }}"></label>
+        <label class="field col-5"><span>Código de segurança (CSC) de homologação</span><input type="password" autocomplete="new-password" name="csc_token" placeholder="{{ $nfce['csc_token'] ? 'CSC de homologação configurado' : 'Informe o CSC de homologação' }}"></label>
       </div>
       <div class="settings-panel-head"><div><h3>Parâmetros de produção</h3>
         <p>Use somente série, próximo número e ID/CSC consultados no ambiente de produção da SEFAZ-BA. A sequência de homologação é independente.</p></div></div>
