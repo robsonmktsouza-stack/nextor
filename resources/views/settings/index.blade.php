@@ -606,13 +606,25 @@ foreach($primaryTabs as $key=>$item){
     <section class="editor-panel settings-panel">
       <div class="settings-panel-head"><div><h2>Nota fiscal do consumidor (NFC-e)</h2><p>Configurações do cupom fiscal eletrônico.</p></div></div>
       <div class="editor-grid cols-12 settings-grid">
-        <label class="field col-3"><span>Ambiente</span><select name="environment"><option value="homologation" @selected($nfce['environment']==='homologation')>Homologação</option><option value="production" @selected($nfce['environment']==='production')>Produção</option></select></label>
-        <label class="field col-2"><span>Série</span><input type="number" min="0" max="999" name="series" value="{{ $nfce['series'] }}"></label>
-        <label class="field col-3"><span>Próximo número</span><input type="number" min="1" name="next_number" value="{{ $nfce['next_number'] }}"></label>
-        <label class="field col-2"><span>CFOP padrão</span><input name="default_cfop" value="{{ $nfce['default_cfop'] ?? '' }}" maxlength="4" placeholder="Ex.: 5102"></label>
-        <label class="field col-2"><span>Identificador do CSC</span><input name="csc_id" value="{{ $nfce['csc_id'] }}"></label>
-        <label class="field col-6"><span>Código de segurança (CSC)</span><input type="password" name="csc_token" placeholder="{{ $nfce['csc_token'] ? 'CSC já configurado' : 'Informe o CSC' }}"></label>
+        <label class="field col-3"><span>Ambiente para novas emissões</span><select name="environment"><option value="homologation" @selected($nfce['environment']==='homologation')>Homologação</option><option value="production" @selected($nfce['environment']==='production')>Produção</option></select></label>
+        <label class="field col-3"><span>CFOP padrão</span><input name="default_cfop" value="{{ $nfce['default_cfop'] ?? '' }}" maxlength="4" placeholder="Ex.: 5102"></label>
       </div>
+      <div class="settings-panel-head"><div><h3>Parâmetros de homologação</h3><p>Preservados das NFC-e que você já emitiu em testes. Não altere a numeração sem conferir os documentos existentes.</p></div></div>
+      <div class="editor-grid cols-12 settings-grid">
+        <label class="field col-2"><span>Série de homologação</span><input type="number" min="0" max="999" name="series" value="{{ $nfce['series'] }}"></label>
+        <label class="field col-3"><span>Próximo número de homologação</span><input type="number" min="1" max="999999999" name="next_number" value="{{ $nfce['next_number'] }}"></label>
+        <label class="field col-2"><span>ID CSC de homologação</span><input name="csc_id" maxlength="6" value="{{ $nfce['csc_id'] }}"></label>
+        <label class="field col-5"><span>CSC de homologação</span><input type="password" autocomplete="new-password" name="csc_token" placeholder="{{ $nfce['csc_token'] ? 'CSC de homologação configurado' : 'Informe o CSC de homologação' }}"></label>
+      </div>
+      <div class="settings-panel-head"><div><h3>Parâmetros de produção</h3>
+        <p>Use somente série, próximo número e ID/CSC consultados no ambiente de produção da SEFAZ-BA. A sequência de homologação é independente.</p></div></div>
+      <div class="editor-grid cols-12 settings-grid">
+        <label class="field col-2"><span>Série de produção</span><input type="number" min="0" max="999" name="production_series" value="{{ $nfce['production_series'] ?? '' }}" placeholder="Ex.: 1"></label>
+        <label class="field col-3"><span>Próximo número em produção</span><input type="number" min="1" max="999999999" name="production_next_number" value="{{ $nfce['production_next_number'] ?? '' }}" placeholder="Conforme histórico de produção"></label>
+        <label class="field col-2"><span>ID CSC de produção</span><input name="production_csc_id" maxlength="6" value="{{ $nfce['production_csc_id'] ?? '' }}" placeholder="ID fornecido pela SEFAZ"></label>
+        <label class="field col-5"><span>CSC de produção</span><input type="password" autocomplete="new-password" name="production_csc_token" placeholder="{{ !empty($nfce['production_csc_token']) ? 'CSC de produção configurado' : 'Informe o CSC de produção' }}"></label>
+      </div>
+      <p class="nfce-field-help">Os códigos CSC permanecem protegidos e não aparecem na tela após salvar. Selecionar Produção não transmite nenhuma nota automaticamente; a transmissão depende da operação fiscal.</p>
       <div class="settings-switch-grid">
         <label class="settings-switch"><input type="checkbox" name="enabled" value="1" @checked($nfce['enabled'])><span><strong>NFC-e habilitada</strong><small>Disponibiliza esta configuração ao emissor.</small></span></label>
         <label class="settings-switch"><input type="checkbox" name="production_enabled" value="1" @checked($nfce['production_enabled'])><span><strong>Permitir emissão em produção</strong><small>Libera emissão normal, após conferir o credenciamento e o CSC de produção.</small></span></label>
