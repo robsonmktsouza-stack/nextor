@@ -164,7 +164,7 @@ class FiscalPreparationService
             }
 
             $safeSettings=$settings;
-            foreach(['csc_token','municipal_password','api_key','api_secret'] as $secretKey) {
+            foreach(['csc_token','production_csc_token','municipal_password','api_key','api_secret'] as $secretKey) {
                 unset($safeSettings[$secretKey]);
             }
 
