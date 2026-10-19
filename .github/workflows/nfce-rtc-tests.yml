@@ -40,6 +40,6 @@ jobs:
           php -l tests/Feature/NFCeRtcIniTest.php
       - name: RTC unit and INI tests
         run: |
-          php artisan test --filter=NFCeRtcTaxServiceTest
-          php artisan test --filter=NFCeRtcIniTest
-          php artisan test --filter=NFCeIniBuilderTest
+          vendor/bin/phpunit --filter=NFCeRtcTaxServiceTest
+          vendor/bin/phpunit --filter=NFCeRtcIniTest
+          vendor/bin/phpunit --filter=NFCeIniBuilderTest
