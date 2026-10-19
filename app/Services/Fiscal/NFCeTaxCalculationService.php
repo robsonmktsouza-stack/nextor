@@ -303,7 +303,7 @@ final class NFCeTaxCalculationService
     private function moneyField(array $tax, string $key): string
     {
         if (!array_key_exists($key, $tax) || $tax[$key] === '') {
-            throw new RuntimeException("Informe {$key} para CSOSN 500; o NEXTOR não presume ST retido.");
+            throw new RuntimeException("Informe {$key} para CSOSN 500; o Lumeron não presume valores de ICMS-ST.");
         }
         return number_format($this->decimal($tax[$key], $key), 2, '.', '');
     }
