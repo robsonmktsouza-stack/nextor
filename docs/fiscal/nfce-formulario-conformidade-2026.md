@@ -48,6 +48,20 @@
 
 **Demais situações tributárias e cClassTrib:** redução, diferimento, alíquota zero com grupos específicos, transferência de créditos, crédito presumido, monofásicos, IS e benefícios estaduais ainda **não são tratados integralmente**. Recusar emissão desses perfis, sem inventar valores, é intencional.
 
+## Implementações fiscais adicionais — 19/10/2026
+
+Esta seção registra código entregue e verificações independentes da autorização da SEFAZ:
+
+- `NFCeRtcTaxService` passou a deduzir **ICMS, PIS e COFINS calculados para o próprio item** da base IBS/CBS entre 2026 e 2032, conforme **art. 12, § 2º, V da LC 214/2025**; se a base ficar negativa, a emissão é recusada. Fonte primária: https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm . Conferência independente com a calculadora pública Receita Federal (inclui exclusões de ICMS, PIS, COFINS, FCP e monofásico): https://piloto-cbs.tributos.gov.br/servico/calculadora-consumo/calculadora/bases-de-calculo . Os itens sem cálculo FCP/monofásico ainda ficam bloqueados por suas validações específicas.
+- `NFCeTaxCalculationService` agora calcula **ICMS CST 51** com `vICMSOp`, `pDif`, `vICMSDif`, `vICMS` líquido e exige fundamento legal; e **ICMS CST 60** com CFOP compatível, `vBCSTRet`, `pST`, `vICMSSTRet` e, se houver, `vICMSSubstituto`. Base e retenção históricas exigem valores documentados e escopo por unidade/item; a calculadora nunca reconstrói base retida por estimativa. Padrões ACBr: https://acbr.sourceforge.io/ACBrLib/Modelo2-NFCeINI.html.
+- Cadastro tributário: formulário e servidor suportam `icms_deferral_rate`, `icms_deferral_legal_basis`, `st_retained_amount_scope`, `icms_st_retained_base`, `icms_st_retained_value`, `st_retained_rate` e `icms_substitutor_value`. Grupos padrão ST podem existir sem valores históricos; o bloqueio ocorre na emissão se os valores de entrada não forem fornecidos.
+- Reduções RTC: além da classe integral **000/000001**, agora há mapeamento explícito **200/200003**, reservado a operações com produtos alimentícios comprovadamente contemplados no Anexo I da LC 214/2025 e classificados corretamente pelo responsável fiscal. Exige `ibs_uf_reduction_rate`, `ibs_municipal_reduction_rate`, `cbs_reduction_rate` todos em **100%**; gera `pRedAliq=100.0000`, `pAliqEfet=0.0000` e valores IBS/CBS zerados, mas mantém `vBCIBSCBS`. Não habilita automaticamente essa classificação para todo produto alimentício. Catálogo oficial para consulta: https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=%2FNJarYc9nus%3D .
+- Corrigido formulário de grupos tributários que enviava `ibs_reduction_rate` (campo não persistido pelo servidor); agora envia separadamente redução de IBS estadual e municipal, como exige o leiaute.
+- Testes: `tests/Unit/NFCeRtcTaxServiceTest.php`, `tests/Unit/NFCeTaxCalculationServiceTest.php` e `tests/Feature/NFCeRtcIniTest.php` cobrem cálculos dos CST 51/60, redução 200003, preservação da base, cálculos de IBS/CBS e INI ACBr. Rodam no GitHub Actions. Os testes do **INI** não equivalem a validação real do **XML assinado** gerado pela versão de ACBr instalada no Laragon.
+- Não permitir envio em produção sem certificado correspondente ao emitente, credenciamento SEFAZ-BA, versão atual de schemas ACBr e teste de **autorização 100** em homologação. Não há certificado ou conexão ao Laragon do usuário neste ambiente; não existe autorização real obtida pelo assistente.
+
+**Continuam fora desses mapeamentos:** classes de redução com percentuais diferentes de 100%, diferimento/redução RTC que exigem grupos adicionais, monofásico, Imposto Seletivo (vigência futura) e itens com condições tributárias especiais. A existência do formulário não substitui a análise de enquadramento jurídico de cada produto.
+
 ## Contrato entre formulário, controller e emissão
 
 - `resources/views/fiscal/nfce/create.blade.php`: orientações, emitente e configurações de leitura; cinco abas de trabalho.
