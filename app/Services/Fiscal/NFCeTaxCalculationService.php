@@ -89,8 +89,36 @@ final class NFCeTaxCalculationService
     private function normalIcMS(array $tax, array $item, string $cfop, string $origin): array
     {
         $cst = (string)($tax['icms_cst'] ?? '');
-        if (!in_array($cst, ['00', '20', '40', '41'], true)) {
+        if (!in_array($cst, ['00', '20', '40', '41', '51', '60'], true)) {
             throw new RuntimeException("CST ICMS {$cst} do regime normal não possui cálculo mapeado.");
+        }
+        if ($cst === '60') {
+            if (!in_array($cfop, self::RETAINED_ST_CFOPS, true)) {
+                throw new RuntimeException('CST 60 exige CFOP de mercadoria com ICMS-ST retido anteriormente.');
+            }
+            $scope=(string)($tax['st_retained_amount_scope'] ?? '');
+            if (!in_array($scope, ['unit','line'], true)) {
+                throw new RuntimeException('CST 60: informe se a retenção de ICMS-ST é por unidade ou por item.');
+            }
+            $factor=$scope==='unit' ? $this->decimal($item['quantity'] ?? null, 'Quantidade') : 1.0;
+            if ($factor <= 0) {
+                throw new RuntimeException('CST 60: quantidade inválida para a retenção anterior.');
+            }
+            $base=$this->moneyField($tax,'icms_st_retained_base');
+            $value=$this->moneyField($tax,'icms_st_retained_value');
+            $rate=$this->rate($tax,'st_retained_rate');
+            $fields=[
+                'orig'=>$origin, 'CST'=>'60',
+                'vBCSTRet'=>number_format(round((float)$base*$factor,2,PHP_ROUND_HALF_UP),2,'.',''),
+                'pST'=>$rate,
+                'vICMSSTRet'=>number_format(round((float)$value*$factor,2,PHP_ROUND_HALF_UP),2,'.',''),
+            ];
+            if (isset($tax['icms_substitutor_value']) && $tax['icms_substitutor_value']!=='') {
+                $fields['vICMSSubstituto']=number_format(
+                    round((float)$this->moneyField($tax,'icms_substitutor_value')*$factor,2,PHP_ROUND_HALF_UP),2,'.',''
+                );
+            }
+            return $fields;
         }
         if (!in_array($cfop, self::SIMPLE_CFOPS, true)) {
             throw new RuntimeException("CFOP {$cfop} não contemplado para ICMS CST {$cst} na NFC-e.");
@@ -117,6 +145,10 @@ final class NFCeTaxCalculationService
         }
         $rate = $this->rate($tax, 'icms_rate');
         $fields = ['orig'=>$origin, 'CST'=>$cst, 'modBC'=>$mod];
+        if ($cst === '51' && isset($tax['base_reduction_rate'])
+            && (float)$tax['base_reduction_rate'] > 0) {
+            throw new RuntimeException('CST 51: redução de base simultânea exige parametrização específica.');
+        }
         if ($cst === '00' && isset($tax['base_reduction_rate'])
             && (float)$tax['base_reduction_rate'] > 0) {
             throw new RuntimeException('ICMS CST 00 não utiliza redução da base de cálculo.');
@@ -128,7 +160,21 @@ final class NFCeTaxCalculationService
         }
         $fields['vBC'] = number_format($net, 2, '.', '');
         $fields['pICMS'] = $rate;
-        $fields['vICMS'] = number_format(round($net * (float)$rate / 100, 2, PHP_ROUND_HALF_UP), 2, '.', '');
+        $operationAmount=round($net*(float)$rate/100,2,PHP_ROUND_HALF_UP);
+        if ($cst === '51') {
+            $basis=trim((string)($tax['icms_deferral_legal_basis'] ?? ''));
+            if ($basis==='') {
+                throw new RuntimeException('CST 51: informe o fundamento legal do diferimento do ICMS.');
+            }
+            $diferimento=$this->rate($tax,'icms_deferral_rate');
+            $deferred=round($operationAmount*(float)$diferimento/100,2,PHP_ROUND_HALF_UP);
+            $fields['vICMSOp']=number_format($operationAmount,2,'.','');
+            $fields['pDif']=$diferimento;
+            $fields['vICMSDif']=number_format($deferred,2,'.','');
+            $fields['vICMS']=number_format($operationAmount-$deferred,2,'.','');
+        } else {
+            $fields['vICMS']=number_format($operationAmount,2,'.','');
+        }
         return $fields;
     }
 
