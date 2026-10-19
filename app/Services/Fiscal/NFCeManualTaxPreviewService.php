@@ -19,6 +19,7 @@ final class NFCeManualTaxPreviewService
         private readonly NFCeFiscalProfileService $profiles,
         private readonly NFCeTaxCalculationService $calculator,
         private readonly NFCeRtcTaxService $rtc,
+        private readonly NFCeItemValueGuard $valueGuard,
     ) {}
 
     /** @param list<array<string,mixed>> $rows */
@@ -52,10 +53,13 @@ final class NFCeManualTaxPreviewService
                 'origin'=>$product->origin,
                 'ncm'=>$product->ncm,
                 'cest'=>$product->cest,
+                'gtin'=>$product->ean_gtin,
                 'tax_defaults'=>$taxDefaults,
                 'fiscal_tax_group_id'=>$product->fiscal_tax_group_id,
             ];
             try {
+                $this->valueGuard->verify($item);
+                $this->valueGuard->verifyGtin($item['gtin']);
                 $profile=$this->profiles->classify(
                     $item,now()->toDateString(),(string)$company->crt,(string)$company->state
                 );
