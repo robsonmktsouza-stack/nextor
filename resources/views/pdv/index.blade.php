@@ -582,6 +582,14 @@
       @endif
 
       @if($lastCompletedPdvSale)
+        @php
+          $lastDanfeAuthorized = $lastPdvNfceDocument?->status==='authorized'
+              && (str_ends_with((string)$lastPdvNfceDocument->xml_path,'authorized.xml')
+                  || str_ends_with((string)$lastPdvNfceDocument->xml_path,'authorized-recovered.xml'));
+          $lastDanfeOffline = $lastPdvNfceDocument?->emission_mode==='offline'
+              && in_array($lastPdvNfceDocument?->status,['offline_signed','offline_sending','pending'],true)
+              && (string)$lastPdvNfceDocument?->xml_path==='fiscal/nfce/'.$lastPdvNfceDocument->id.'/signed.xml';
+        @endphp
         <section class="pdv-operations-overview-card">
           <div class="pdv-operations-overview-title">@include('partials.icon',['name'=>'receipt','size'=>16]) <strong>Última venda</strong></div>
           <div class="pdv-operations-overview-values">
@@ -591,10 +599,10 @@
             <span>NFC-e: {{ $lastPdvNfceDocument ? $lastPdvNfceStatusLabel : 'ainda não preparada' }}</span>
           </div>
           <div class="pdv-operations-overview-links">
-            @if($lastPdvNfceDocument?->status==='authorized'
-                && (str_ends_with((string)$lastPdvNfceDocument->xml_path,'authorized.xml')
-                    || str_ends_with((string)$lastPdvNfceDocument->xml_path,'authorized-recovered.xml')))
-              <a href="{{ route('pdv.nfce.danfe',$lastPdvNfceDocument) }}" target="_blank" rel="noopener noreferrer">Imprimir DANFE</a>
+            @if($lastDanfeAuthorized || $lastDanfeOffline)
+              <a href="{{ route('pdv.nfce.danfe',$lastPdvNfceDocument) }}" target="_blank" rel="noopener noreferrer">
+                {{ $lastDanfeOffline ? 'DANFE contingência (2 vias)' : 'Imprimir DANFE NFC-e' }}
+              </a>
             @endif
             @if(auth()->user()->canAccess('fiscal'))
               <a href="{{ $lastPdvNfceDocument
