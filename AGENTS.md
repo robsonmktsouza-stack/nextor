@@ -26,6 +26,7 @@ Este é o contrato de trabalho para agentes de IA que leem o repositório. **Apl
 7. Nunca versionar ou revelar segredos: `.env`, senhas, APP_KEY, A1/PFX, CSC, certificados, XMLs privados, bancos e registros de clientes. Nunca logar dados secretos.
 8. Não acessar ou alterar VPS/produção, executar emissão em ambiente real, publicar deploy, rodar migrations destrutivas ou migrar branch sem autorização expressa.
 9. Preferir mudanças pequenas e testáveis com a stack atual. Não alterar desenho, biblioteca, arquitetura ou escopo para 'melhorar' sem pedido.
+10. **UX editorial obrigatória:** a aba ativa já nomeia seu conteúdo. Nunca repetir o mesmo título em uma segunda faixa dentro do painel/modal. Remover subtítulos e parágrafos genéricos que apenas explicam o óbvio; priorizar campos compactos, tabelas e ações no estilo ERP Windows empresarial. Orientações tributárias longas ficam em ajuda sob demanda (`details`, tooltip ou documentação), enquanto erros, riscos operacionais reais, alertas de rejeição da SEFAZ e requisitos legais acionáveis continuam visíveis. Ao criar novo módulo, não adicionar banners introdutórios permanentes sem necessidade. Referência: `tests/Feature/FiscalConciseLayoutTest.php`.
 
 ## 3. Procedimento por tarefa
 
@@ -33,7 +34,7 @@ Este é o contrato de trabalho para agentes de IA que leem o repositório. **Apl
 
 **Durante:** codificar no fluxo existente, respeitar validações server-side, permissões, transações e dados fiscais. Criar/alterar testes próximos ao código. Evitar regressões de interface, banco e impressão.
 
-**Depois:** executar testes pertinentes quando o ambiente permitir. Exemplos: `php artisan test --filter=NFCeManualEditorTest`, `php artisan test --filter=NFCeFiscalLifecycleTest`, `php artisan test --filter=InstanceIsolationTest`, `php artisan test --filter=UiRefinementTest`. Informar falhas e o que ficou sem teste; **não alegar sucesso de testes não executados**. Atualizar `docs/ai/HANDOFF.md` com branch/commit, arquivos e resultados; atualizar `PROJECT_STATE.md` e decisões quando necessário.
+**Depois:** executar testes pertinentes quando o ambiente permitir. Exemplos: `vendor/bin/phpunit --filter=NFCeManualEditorTest`, `vendor/bin/phpunit --filter=NFCeFiscalLifecycleTest`, `vendor/bin/phpunit --filter=InstanceIsolationTest`, `vendor/bin/phpunit --filter=FiscalConciseLayoutTest`. Informar falhas e o que ficou sem teste; **não alegar sucesso de testes não executados**. Atualizar `docs/ai/HANDOFF.md` com branch/commit, arquivos e resultados; atualizar `PROJECT_STATE.md` e decisões quando necessário.
 
 ## 4. Referências de código
 
