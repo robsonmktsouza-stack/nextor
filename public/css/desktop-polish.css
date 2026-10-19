@@ -512,6 +512,49 @@
   }
 }
 
+/*
+ * NFC-e 65: dados complementares de pagamento eletrônico do ACBr.
+ * O editor permanece compacto, mas não oculta campos necessários à SEFAZ.
+ */
+@media screen {
+  .app-root .nfce-compliance-note{
+    display:flex;align-items:flex-start;gap:11px;margin-bottom:12px;
+    padding:11px 14px;border:1px solid #c7d9e6;border-left:3px solid #4189b7;
+    border-radius:3px;background:#eff6fa;color:#405b70;font-size:13px;
+  }
+  .app-root .nfce-compliance-note svg{flex:0 0 auto;margin-top:2px;color:#376f98}
+  .app-root .nfce-compliance-note strong{display:block;font-size:13.5px}
+  .app-root .nfce-compliance-note p{margin:4px 0 0;font-size:12.5px;line-height:1.5}
+  .app-root .nfce-field-help{
+    margin:10px 1px 0;color:#566f83;font-size:12.5px;line-height:1.45;
+  }
+  .app-root .nfce-item-table-wrap{max-width:100%;min-width:0;overflow-x:auto}
+  .app-root .nfce-payment-detail[hidden]{display:none!important}
+  .app-root .nfce-payment-detail>td{
+    padding:12px!important;background:#f5f9fc;border-bottom:1px solid #ccdae5;
+  }
+  .app-root .nfce-payment-detail-head{
+    display:flex;flex-wrap:wrap;align-items:center;gap:5px 13px;
+    margin-bottom:10px;font-size:13px;color:#38566d;
+  }
+  .app-root .nfce-payment-detail-head small{font-size:12px;color:#667b8c}
+  .app-root .nfce-payment-detail-grid{
+    display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:10px;align-items:end;
+  }
+  .app-root .nfce-payment-detail-grid .field{min-width:0}
+  .app-root .nfce-payment-detail-grid :is(input,select,.ui-select-trigger){
+    box-sizing:border-box;width:100%;max-width:100%;min-width:0;
+    min-height:36px;font-size:13px;
+  }
+  @media(max-width:1190px){
+    .app-root .nfce-payment-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  }
+  @media(max-width:640px){
+    .app-root .nfce-payment-detail-grid{grid-template-columns:minmax(0,1fr)}
+  }
+}
+
 /* PDV mantém layout próprio e área de comandos utilizável em resoluções menores. */
 @media screen and (max-width:1200px) {
   .lumeron-pdv-page .pdv-topbar {min-width:0;gap:9px}
