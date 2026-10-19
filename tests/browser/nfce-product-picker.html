@@ -138,21 +138,21 @@ window.addEventListener('load',()=>{
       expect(list.querySelector('[data-pick-product]')?.dataset.pickProduct==='2',
         'busca não priorizou SKU exato');
       input.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}));
-      expect($('#nfceItems tr').length===2,'Enter não inseriu o segundo produto');
+      expect($$('#nfceItems tr').length===2,'Enter não inseriu o segundo produto');
       expect($('#nfceFixedTotal').textContent.includes('72,50'),'total com segundo produto incorreto');
 
       query('cafe');
       expect(list.querySelector('[data-pick-product]')?.dataset.pickProduct==='4',
         'busca sem acento não encontrou CAFÉ');
       clickResult('4');
-      expect($('#nfceItems tr').length===3,'busca sem acento não adicionou produto');
+      expect($$('#nfceItems tr').length===3,'busca sem acento não adicionou produto');
       expect($('#nfceFixedTotal').textContent.includes('82,50'),'total com terceiro produto incorreto');
 
       query('7891234567895');
       expect(list.querySelector('[data-pick-product]')?.dataset.pickProduct==='1',
         'código de barras exato não ficou na primeira posição');
       input.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}));
-      expect($('#nfceItems tr').length===3 && qty()===4,
+      expect($$('#nfceItems tr').length===3 && qty()===4,
         'leitura repetida de código de barras duplicou linha em vez de incrementar quantidade');
       expect($('#nfceFixedTotal').textContent.includes('102,50'),'total após código de barras incorreto');
       // O ERP envolve os inputs em MutationObserver; aguardar a
