@@ -136,7 +136,7 @@ final class NFCeManualController extends Controller
             if (($transaction==='') !== ($state==='')) {
                 $paymentErrors[$prefix.'transaction_document']='O CNPJ e a UF da transação devem ser informados juntos.';
             }
-            if ($transaction!=='' && !BrazilianTaxId::valid($transaction)) {
+            if ($transaction!=='' && (strlen($transaction)!==14 || !BrazilianTaxId::valid($transaction))) {
                 $paymentErrors[$prefix.'transaction_document']='Informe um CNPJ válido para o local da transação.';
             }
             if ($state!=='' && !in_array($state,[
@@ -147,10 +147,10 @@ final class NFCeManualController extends Controller
             }
             $acquirer=preg_replace('/\\D/','',(string)($payment['institution_document'] ?? ''));
             $beneficiary=preg_replace('/\\D/','',(string)($payment['beneficiary_document'] ?? ''));
-            if ($acquirer!=='' && !BrazilianTaxId::valid($acquirer)) {
+            if ($acquirer!=='' && (strlen($acquirer)!==14 || !BrazilianTaxId::valid($acquirer))) {
                 $paymentErrors[$prefix.'institution_document']='Informe um CNPJ válido para a adquirente.';
             }
-            if ($beneficiary!=='' && !BrazilianTaxId::valid($beneficiary)) {
+            if ($beneficiary!=='' && (strlen($beneficiary)!==14 || !BrazilianTaxId::valid($beneficiary))) {
                 $paymentErrors[$prefix.'beneficiary_document']='Informe um CNPJ válido para o beneficiário.';
             }
             if ($card && $integration==='1' && ($acquirer==='' || trim((string)($payment['authorization_code'] ?? ''))==='')) {
