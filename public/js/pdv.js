@@ -1335,7 +1335,10 @@
       const row=electronicFieldsFrom(source.row);
       if(electronicTargetLabel) electronicTargetLabel.textContent=source.label;
       electronicIntegration.value=row.integration_type;
-      electronicBrand.value=row.card_brand;
+      const kind=electronicTarget==='single'
+        ?paymentKind(payment.value):splitPayments[Number(electronicTarget)]?.kind;
+      electronicBrand.disabled=!isCardKind(kind);
+      electronicBrand.value=isCardKind(kind)?row.card_brand:'';
       electronicInstitution.value=row.institution_document;
       electronicAuthorization.value=row.authorization_code;
       electronicBeneficiary.value=row.beneficiary_document;
@@ -1351,7 +1354,7 @@
     const applyElectronicPayment=()=>{
       const data={
         integration_type:electronicIntegration.value||'',
-        card_brand:electronicBrand.value||'',
+        card_brand:electronicBrand.disabled?'':(electronicBrand.value||''),
         institution_document:normalizeTaxId(electronicInstitution.value),
         authorization_code:electronicAuthorization.value.trim(),
         beneficiary_document:normalizeTaxId(electronicBeneficiary.value),
