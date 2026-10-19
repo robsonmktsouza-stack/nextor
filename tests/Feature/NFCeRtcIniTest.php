@@ -148,4 +148,22 @@ final class NFCeRtcIniTest extends TestCase
         self::assertStringContainsString('vNF=100.00',$ini);
     }
 
+    public function test_zero_rate_food_class_emits_acbr_reductions_without_deleting_base(): void
+    {
+        $item=$this->item(1);
+        $item['tax_defaults']=array_replace($item['tax_defaults'],[
+            'ibs_cbs_cst'=>'200','ibs_cbs_class'=>'200003',
+            'ibs_uf_reduction_rate'=>'100','ibs_municipal_reduction_rate'=>'100',
+            'cbs_reduction_rate'=>'100',
+        ]);
+        $ini=app(NFCeIniBuilder::class)->build($this->job([$item]),$this->company());
+        self::assertStringContainsString("[IBSCBS001]\r\nCST=200\r\ncClassTrib=200003",$ini);
+        self::assertSame(3,substr_count($ini,'pRedAliq=100.0000'));
+        self::assertSame(3,substr_count($ini,'pAliqEfet=0.0000'));
+        self::assertStringContainsString('vBCIBSCBS=82.00',$ini);
+        self::assertStringContainsString('vCBS=0.00',$ini);
+        self::assertStringContainsString('vIBS=0.00',$ini);
+        self::assertStringContainsString('vNF=100.00',$ini);
+    }
+
 }
