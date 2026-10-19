@@ -2,7 +2,39 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
-## Entrega mais recente — 19/10/2026 — transição de homologação já existente para produção
+## Entrega mais recente — 19/10/2026 — hardening de produção NFC-e para Simples Nacional (BA)
+
+**Pedido:** concluir o fechamento operacional do Lumeron para empresas do Simples Nacional, que já haviam emitido NFC-e em homologação, sem alterar dados reais ou reinventar a integração ACBr. O usuário quer código em produção, não um plano.
+
+**Implementado no branch `feature/acbr-nfe-bootstrap`:**
+- `app/Services/Fiscal/NFCeCatalogAuditService.php` (novo): audita todas as mercadorias ativas usando os mesmos serviços `NFCeFiscalProfileService`, `NFCeTaxCalculationService`, `NFCeRtcTaxService` e `NFCeItemValueGuard` do emissor, gerando contagem de itens válidos/inválidos com exemplos; **não cria venda, movimenta estoque, reserva sequência ou transmite NFC-e**.
+- `app/Console/Commands/ACBrNFeReadiness.php`: comando `php artisan acbr:nfce-check --environment=production --catalog` valida CRT de Simples (1, 2 e 4), dados do emitente BA, parâmetros por ambiente, CSC sem expor segredo, certificado A1 PKCS#12 e validade X509, DLL/FFI, schemas e habilitação fiscal. Usa os mesmos caminhos padrão de schemas do ACBr local. `--limit=20` controla erros do catálogo.
+- `app/Services/Fiscal/NFCeItemValueGuard.php` (novo): verifica precisão XML de quantidade (3 casas), preço (4), desconto e total (2), concilia linha comercial antes do INI, e GTIN GS1 (8/12/13/14 dígitos + módulo 10). Conectado ao preflight, INI builder, auditoria do catálogo e checagem anterior à emissão manual. Nenhum dado silenciosamente arredondado ou sanitizado para ocultar erro.
+- `app/Services/Fiscal/NFCeTaxCalculationService.php`: CSOSN 500 e CST 60 agora suportam **FCP-ST anteriormente retido** conforme evidência real da entrada (`fcp_st_retained_base/rate/value`), produzindo `vBCFCPSTRet/pFCPSTRet/vFCPSTRet`, com parametrização por item ou unidade e bloqueio de campos incompletos ou no CSOSN errado. Não presume FCP próprio nem o retido. Mensagem legada NEXTOR substituída por Lumeron.
+- `app/Services/Fiscal/NFCeTaxGroupTranslator.php`, `FiscalTaxGroupController.php`, `resources/views/fiscal/tax-groups/form.blade.php`: propagação/validação/editabilidade desses três campos, sem alterar o modelo de dados (usa JSON `tax_config`).
+- `app/Services/Fiscal/NFCeTransmissionService.php`: geração assíncrona de DANFE após autorização via fila `database/fiscal`, nunca `sync` dentro de requisição FFI/ACBr. `app/Console/Commands/ACBrNFCeStatus.php`: inclui CSC de produção nos segredos protegidos ao reportar falha.
+- Testes `tests/Feature/NFCeSimplesProductionTest.php` (novo): snapshots de INI ACBr em ambiente de produção com CSOSN 102, 400, 500, CST PIS/COFINS 04/06, ST histórico, FCP-ST anterior e ausência de IBS/CBS fictícios em CRT 1, ano 2026.
+- Testes `tests/Feature/NFCeProductionAuditTest.php` (novo): relatório de produtos ativos, zero criação de vendas/notas/movimentos, relatório não divulga CSC. `tests/Unit/NFCeItemValueGuardTest.php` (novo): GS1, linha monetária e precisão. `NFCeTaxCalculationServiceTest.php` ampliado com FCP-ST.
+- Documento `docs/fiscal/nfce-simples-producao.md`: aceitação de instalação individual, comandos, comportamento operacional, fontes (Portal NF-e e ACBr).
+
+**Testes:** workflow GitHub Actions `ACBr integration checks` foi observado verde com os novos guardas e testes em commits intermediários. Confirmar **run verde no HEAD** antes de declarar passagem da branch. A CI não tem acesso ao Laragon/ACBr Windows/certificado real; homologações anteriores foram relatadas pelo usuário.
+
+**Instrução operacional sem alterar produção:**
+```powershell
+git switch feature/acbr-nfe-bootstrap
+git pull origin feature/acbr-nfe-bootstrap
+php artisan optimize:clear
+vendor/bin/phpunit --filter=NFCeSimplesProductionTest
+vendor/bin/phpunit --filter=NFCeProductionAuditTest
+vendor/bin/phpunit --filter=NFCeItemValueGuardTest
+php artisan acbr:nfce-check --environment=production --catalog
+php artisan acbr:nfe-doctor
+```
+Após isso, `php artisan acbr:nfce-status` (usa ambiente NFC-e atualmente escolhido) faz uma consulta sem transmitir. O fechamento de conformidade por instalação depende de verificar GTIN e regras do catálogo reais, XML assinado com schemas atuais e cStat 100 em teste de regressão dos cenários alterados. Não alterar CSC nem confirmar uma emissão de produção sem autorização expressa.
+
+**Escopo deliberadamente não presumido:** monofasia ICMS sobre combustível (diversa de PIS/COFINS CST 04), CSOSN 201/202/203/900, FCP próprio conforme operação e casos estaduais especiais. Auditoria deve identificar produtos nessa situação e não aplicar regra genérica para forçar autorização.
+
+## Entrega anterior — 19/10/2026 — transição de homologação já existente para produção
 
 **Contexto confirmado pelo usuário:** Lumeron **já emitiu várias NFC-e em homologação** anteriormente. O trabalho atual NÃO é construir uma integração SEFAZ-BA do zero, mas padronizar parâmetros fiscais/tributários e preparar uma ativação controlada em produção. Evitar pedir nova homologação integral sem motivo: validar especificamente regressões de XML introduzidas pelos novos mapeamentos, e consultar serviço no ambiente real antes da primeira emissão.
 
