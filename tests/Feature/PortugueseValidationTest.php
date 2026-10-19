@@ -11,11 +11,14 @@ use Tests\TestCase;
 final class PortugueseValidationTest extends TestCase
 {
     use RefreshDatabase;
-    use WithConfiguredCompany;
+    use WithConfiguredCompany { setUp as private setUpConfiguredCompany; }
 
     protected function setUp(): void
     {
-        parent::setUp();
+        // Preservar o fixture de empresa que a configuração do próprio
+        // teste sobrescrevia: sem emitente, o middleware redireciona para
+        // Configurações antes de o PDV validar os campos.
+        $this->setUpConfiguredCompany();
         $this->app->setLocale('pt_BR');
     }
 
