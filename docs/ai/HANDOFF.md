@@ -1,37 +1,32 @@
 # Handoff entre chats e agentes — Lumeron ERP
 
-Este documento deve ficar **curto, verificável e atualizado a cada tarefa**. É a primeira parada ao retomar o projeto depois dos arquivos de entrada. Quando desatualizado, conferir o código e corrigir, não repetir o texto como fato.
+Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
-## Registro ativo — 19/10/2026
+## Entrega mais recente — 19/10/2026 — acabamento visual desktop
 
-**Tarefa:** registrar orientação persistente para continuidade do desenvolvimento com IAs.
-**Repositório:** `robsonmktsouza-stack/nextor`.
-**Branch de trabalho usada para a documentação:** `feature/acbr-nfe-bootstrap`.
-**Alterações desta tarefa:** `AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md`, `docs/ai/README.md`, `docs/ai/PROJECT_STATE.md`, `docs/ai/ARCHITECTURE_AND_DECISIONS.md`, este arquivo e link no `README.md`.
-**Verificação feita:** arquivos e rotas relevantes inspecionados no GitHub, incluindo `composer.json`, código ACBr/NFC-e, testes de login, identidade, ciclo fiscal e implantação por CNPJ.
-**Testes executados nesta tarefa:** nenhum teste PHP, banco de dados, interface ou SEFAZ; alteração documental.
-**Estado:** documentação inicial registrada. O próprio código e os testes continuam sendo a fonte de verdade.
-**Próximo foco técnico sugerido (não é ordem de execução):** revisar e validar de ponta a ponta NFC-e BA via ACBr, especialmente rejeição/correção/consulta, eventos, integridade comercial, contingência e impressão. Confirmar prioridade com solicitação atual.
-**Pendência conhecida:** `composer.lock` não estava versionado em 19/10/2026; implantação comercial exige validações adicionais, não é tratada como concluída.
+**Pedido:** aprimorar diretamente o visual do Lumeron sem trocar identidade, corrigindo inconsistências de barras de ação, tabelas, campos, responsividade e tela Fiscal.
 
-## Checklist de conclusão obrigatório para próximas tarefas
+**Branch:** `feature/acbr-nfe-bootstrap` no repositório `robsonmktsouza-stack/nextor`.
 
-Preencha ou substitua o registro ativo a cada entrega que altera código, infraestrutura, regras de negócio ou design:
+**Implementado e gravado no GitHub:**
+- `public/css/desktop-polish.css` (novo): acabamento compartilhado só para tela, tamanhos/alinhamento de comandos, comportamento das barras quando falta largura, abas com rolagem horizontal, bordas e densidade de grades, seleção e foco, estados vazios, paginação, formulários/diálogos e adaptações em 1260/900/620/385 px. Preserva alturas existentes de linhas e tabelas editáveis.
+- `resources/views/layouts/app.blade.php`: importa o novo CSS após `branding.css`.
+- `resources/views/layouts/pdv.blade.php`: importa o CSS após `pdv-lumeron.css`, mantendo layout/teclado independentes do PDV.
+- `resources/views/fiscal/index.blade.php`: estado vazio sem texto solto; ação verdadeira somente nas abas NF-e e NFC-e com rota existente.
+- `tests/Feature/UiRefinementTest.php`: verifica cascata dos estilos em módulos, preservação de impressão fiscal, tokens de responsividade e ações contextualizadas do vazio.
 
-- **Data e branch/commit:** data real, referência do commit, eventual PR.
-- **Pedido/objetivo:** uma frase.
-- **O que foi alterado:** arquivos, rotas, tabelas, serviços e impactos em outros módulos.
-- **Decisões tomadas:** registrar em `ARCHITECTURE_AND_DECISIONS.md` se for nova política; não inventar aprovação.
-- **Testes executados e resultado:** comando e PASS/FAIL, com evidência. Se não executados, dizer por quê.
-- **Pendências e riscos:** comportamentos não verificados, dependências externas, migrações ou bloqueios.
-- **Próximo passo recomendado:** uma ação precisa, sem expandir escopo por conta própria.
+**Verificações realizadas:** busca de classes/rotas no código-fonte e conferência remota dos arquivos. Checagem estática de chaves do novo CSS: 106 aberturas e 106 fechamentos, sem profundidade negativa; carregamento e ordem nas duas views; presença do estado vazio e dos métodos de teste. **Não foram executados testes PHPUnit, migrações, serviço Laravel, browser com o sistema aberto nem verificação visual completa das resoluções** neste ambiente remoto. O CI retornou sem execuções PR associadas ao commit consultado; não equivale a sucesso da suíte.
 
-## Como iniciar o próximo atendimento
+**Próxima ação para validação:** atualizar esta branch no Laragon, executar `php artisan test --filter=UiRefinementTest` e observar o painel nas resoluções 1366×768, 1280×720, 1024×768 e zoom 125%, com e sem sidebar. Registrar qualquer overflow real; corrigir na camada CSS e acrescentar teste antes de declarar aprovado.
 
-1. Confirmar a branch e se há mudanças locais; não descartar trabalho em andamento.
-2. Ler `AGENTS.md`, `docs/ai/README.md`, `PROJECT_STATE.md` e este registro.
-3. Conferir as últimas alterações com `git log -5 --oneline` e os arquivos do módulo solicitado.
-4. Trabalhar somente no escopo da solicitação atual, mantendo compatibilidade e testes.
-5. Registrar a entrega neste arquivo e corrigir as seções desatualizadas dos outros documentos.
+**Não alterado:** banco, rotas, lógica comercial/fiscal, ACBr, autorização SEFAZ, impressões DANFE e configurações de VPS. **Não publicar em produção sem aprovação.**
 
-**Nunca** preencher um teste como aprovado sem executá-lo; nunca chamar um protótipo fiscal de pronto para produção.
+## Pendências anteriores
+
+- `composer.lock` não estava versionado na inspeção de 19/10/2026, prejudicando instalação reprodutível.
+- NFC-e via ACBr para BA permanece em desenvolvimento/testes assistidos; não afirmar produção homologada nem transmitir dados reais sem autorização.
+- Revisar continuamente `docs/ai/PROJECT_STATE.md`, `docs/ai/ARCHITECTURE_AND_DECISIONS.md`, `docs/deployment/` e `AGENTS.md`.
+
+## Procedimento permanente de passagem de bastão
+
+Ao concluir uma alteração futura, atualizar este registro com data/branch/commit, objetivo, arquivos alterados, decisões, testes realmente executados (com resultado), pendências e próximo passo. Não apagar contexto ainda importante sem substituí-lo.
