@@ -81,7 +81,7 @@
   @php
     $lastFiscalStatus = $lastPdvNfceDocument?->status;
     $fiscalAuthorized = $lastFiscalStatus==='authorized'
-      && preg_match('/^\\d{15}$/', (string)$lastPdvNfceDocument?->protocol)===1
+      && preg_match('/^[0-9]{15}$/', (string)$lastPdvNfceDocument?->protocol)===1
       && in_array((string)$lastPdvNfceDocument?->xml_path,[
         'fiscal/nfce/'.$lastPdvNfceDocument->id.'/authorized.xml',
         'fiscal/nfce/'.$lastPdvNfceDocument->id.'/authorized-recovered.xml',
@@ -95,6 +95,7 @@
       'prepared' => 'NFC-e preparada, mas ainda não autorizada. Revise e emita a partir da última venda.',
       'rejected' => 'NFC-e rejeitada. Corrija o documento da venda; não registre outra venda.',
       'offline_signed', 'offline_sending' => 'NFC-e em contingência: autorização da SEFAZ ainda pendente.',
+      'offline_print_pending' => 'XML da contingência assinado, mas o DANFE ainda não está pronto. Não refaça a venda.',
       'cancelled' => 'NFC-e cancelada. Consulte o histórico fiscal da venda.',
       default => 'NFC-e ainda não preparada. Consulte a última venda antes de emitir.',
     };
