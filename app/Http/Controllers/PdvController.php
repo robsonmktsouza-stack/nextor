@@ -326,7 +326,7 @@ class PdvController extends Controller
                 'PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'
             ])],
             'payments.*.institution_document'=>['nullable','string','max:20'],
-            'payments.*.card_brand'=>['nullable',Rule::in(['01','02','03','04','05','06','07','08','09','99'])],
+            'payments.*.card_brand'=>['nullable',Rule::in(\App\Support\NFCeCardBrands::codes())],
             'payments.*.authorization_code'=>['nullable','string','max:128'],
             'payments.*.beneficiary_document'=>['nullable','string','max:20'],
             'payments.*.terminal_id'=>['nullable','string','max:40'],
