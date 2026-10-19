@@ -341,7 +341,7 @@ final class NFCeManualEditorTest extends TestCase
             ->assertSee('NFC-e modelo 65')
             ->assertSee('Homologação')
             ->assertSee('dígitos verificadores')
-            ->assertSee('TEF/POS')
+            ->assertSee('TEF/POS');
 
         $js=file_get_contents(public_path('js/nfce-editor.js'));
         self::assertNotFalse($js);
