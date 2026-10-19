@@ -249,4 +249,112 @@ final class NFCeManualEditorTest extends TestCase
 
         self::assertSame(0,Sale::query()->count());
     }
+
+    public function test_invalid_consumer_digits_do_not_create_sale_or_move_stock(): void
+    {
+        $product=$this->configure();
+        $payload=$this->postData($product);
+        $payload['consumer_document']='529.982.247-26'; // tamanho correto, dígito inválido
+
+        $this->actingAs($this->admin())
+            ->post(route('fiscal.nfce.store'),$payload)
+            ->assertSessionHasErrors('consumer_document');
+
+        self::assertSame(0,Sale::query()->count());
+        self::assertSame('10.000',(string)$product->fresh()->stock_quantity);
+    }
+
+    public function test_integrated_card_with_incomplete_or_invalid_metadata_does_not_commit_sale(): void
+    {
+        $product=$this->configure();
+        PaymentMethod::query()->updateOrCreate(['code'=>'credit-card'],[
+            'name'=>'Cartão de crédito','kind'=>'credit_card',
+            'is_active'=>true,'pdv_enabled'=>true,'sort_order'=>2,
+        ]);
+        $payload=$this->postData($product);
+        $payload['payments']=[[
+            'payment_method'=>'credit-card','amount'=>'20.00',
+            'integration_type'=>'1',
+        ]];
+
+        $this->actingAs($this->admin())
+            ->post(route('fiscal.nfce.store'),$payload)
+            ->assertSessionHasErrors('payments.0.institution_document');
+
+        $payload['payments'][0]['institution_document']='11.222.333/0001-82';
+        $payload['payments'][0]['authorization_code']='AUT-0001';
+        $this->post(route('fiscal.nfce.store'),$payload)
+            ->assertSessionHasErrors('payments.0.institution_document');
+
+        self::assertSame(0,Sale::query()->count());
+        self::assertSame('10.000',(string)$product->fresh()->stock_quantity);
+    }
+
+    public function test_valid_manual_card_payment_metadata_reaches_sale_and_fiscal_snapshot(): void
+    {
+        $product=$this->configure();
+        PaymentMethod::query()->updateOrCreate(['code'=>'credit-card'],[
+            'name'=>'Cartão de crédito','kind'=>'credit_card',
+            'is_active'=>true,'pdv_enabled'=>true,'sort_order'=>2,
+        ]);
+        $payload=$this->postData($product);
+        $payload['consumer_document']='529.982.247-25';
+        $payload['consumer_name']='Consumidor teste';
+        $payload['payments']=[[
+            'payment_method'=>'credit-card','amount'=>'20.00',
+            'integration_type'=>'1',
+            'institution_document'=>'11.222.333/0001-81',
+            'transaction_document'=>'11.222.333/0001-81',
+            'transaction_state'=>'BA',
+            'beneficiary_document'=>'11.222.333/0001-81',
+            'authorization_code'=>'AUT-1234',
+            'card_brand'=>'01',
+            'terminal_id'=>'CAIXA-01',
+        ]];
+
+        $this->actingAs($this->admin())
+            ->post(route('fiscal.nfce.store'),$payload)->assertRedirect();
+
+        $sale=Sale::query()->sole();
+        self::assertSame('52998224725',$sale->consumer_document);
+        self::assertSame(1,$sale->payments()->count());
+        self::assertSame('11222333000181',$sale->payments->first()->institution_document);
+        self::assertSame('AUT-1234',$sale->payments->first()->authorization_code);
+        self::assertSame('8.000',(string)$product->fresh()->stock_quantity);
+
+        $job=FiscalDocumentJob::query()->where('sale_id',$sale->id)->sole();
+        $payment=$job->source_snapshot['payments'][0];
+        self::assertSame('1',$payment['integration_type']);
+        self::assertSame('11222333000181',$payment['transaction_document']);
+        self::assertSame('BA',$payment['transaction_state']);
+        self::assertSame('11222333000181',$payment['institution_document']);
+        self::assertSame('11222333000181',$payment['beneficiary_document']);
+        self::assertSame('AUT-1234',$payment['authorization_code']);
+        self::assertSame('CAIXA-01',$payment['terminal_id']);
+    }
+
+    public function test_sefaz_payment_fields_and_readonly_guard_are_present_in_editor(): void
+    {
+        $this->configure();
+        $this->actingAs($this->admin())
+            ->get(route('fiscal.nfce.create'))->assertOk()
+            ->assertSee('NFC-e modelo 65')
+            ->assertSee('Homologação')
+            ->assertSee('dígitos verificadores')
+            ->assertSee('TEF/POS')
+
+        $js=file_get_contents(public_path('js/nfce-editor.js'));
+        self::assertNotFalse($js);
+        self::assertStringContainsString("const readOnly=form.dataset.readonly==='1';",$js);
+        foreach ([
+            'transaction_document','transaction_state','institution_document',
+            'beneficiary_document','terminal_id','authorization_code',
+            'card_brand','integration_type',
+        ] as $field) {
+            self::assertStringContainsString("'"+$field+"'",$js);
+        }
+        self::assertStringContainsString('data-payment-detail',$js);
+    }
+
+
 }
