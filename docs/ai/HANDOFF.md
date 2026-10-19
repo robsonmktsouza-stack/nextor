@@ -19,7 +19,11 @@ Este documento registra o último trabalho concluído. Verifique sempre o códig
 - `tests/Feature/NFCeManualEditorTest.php`, `NFCePaymentIniRegressionTest.php` (novo), `SettingsModuleTest.php`, `PdvFiscalCheckoutFlowTest.php`: regressões dos dois cartões, venda única com dinheiro+PIX+débito, migração idempotente, bloqueio do legado ambíguo, dados TEF/POS e tPag/vPag/tBand/cAut/CNPJ e troco.
 - Matriz de cobertura e limites em `docs/fiscal/nfce-payment-methods-2026.md`.
 
-**Importante:** nenhum documento foi transmitido, não houve acesso ao banco Laragon/VPS do proprietário. O GitHub Actions executa PHP/SQLite/Chromium e valida INI, **não XML assinado/autorizado em ACBr Windows/SEFAZ-BA**. Conferir run verde no HEAD antes de alegar regressão completa. Para aplicar no Laragon: `git pull origin feature/acbr-nfe-bootstrap`, `php artisan migrate` (nova migração necessária), `php artisan optimize:clear`; recarregar com Ctrl+F5. Não rodar em produção sem aprovação.
+**Ajustes finais:** o PDV agora exige soma exata em centavos antes de fechar a venda; a tela e o servidor impedem bandeira de cartão no PIX e permitem PIX sem integração fictícia; `NFCeCardBrands::codes()` normaliza chaves numéricas de dois dígitos para comparações estritas. Testes de PIX com bandeira indevida também foram incluídos. A regra permanente de separação crédito/débito está documentada em `ARCHITECTURE_AND_DECISIONS.md`.
+
+**Evidência de CI:** GitHub Actions no commit `32da968c` finalizou `ACBr integration checks` verde: **385 testes, 2.424 assertions**, com as verificações do Chromium e dos testes fiscais direcionados aprovadas. Confirmar a execução no HEAD se houver commit posterior só de documentação.
+
+**Importante:** nenhum documento foi transmitido, não houve acesso ao banco Laragon/VPS do proprietário. O GitHub Actions executa PHP/SQLite/Chromium e valida INI, **não XML assinado/autorizado em ACBr Windows/SEFAZ-BA**. Para aplicar no Laragon: `git pull origin feature/acbr-nfe-bootstrap`, `php artisan migrate` (nova migração necessária), `php artisan optimize:clear`; recarregar com Ctrl+F5. Não rodar em produção sem aprovação.
 
 ## Continuidade — 19/10/2026 — lista de produtos cortada na Nova NFC-e
 
