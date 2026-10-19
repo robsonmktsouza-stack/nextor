@@ -259,14 +259,10 @@ final class NFCeManualController extends Controller
                 ->with('error','NFC-e salva. '.implode(' | ',$problems));
         }
 
-        $queue=(string)config('queue.default','sync');
-        if (in_array($queue,['','sync','null'],true)) {
-            return redirect()->route('fiscal.show',$job)
-                ->with('error','NFC-e salva, mas a emissão não pôde ser iniciada. Verifique a configuração fiscal.');
-        }
-
+        // A requisição de emissão nunca deve executar ACBr/FFI com queue=sync.
+        // O worker fiscal processa a fila database separada do fechamento da venda.
         try {
-            ProcessNFCeJob::dispatch($job->id)->onConnection($queue);
+            ProcessNFCeJob::dispatch($job->id)->onConnection('database')->onQueue('fiscal');
             return redirect()->route('fiscal.show',$job)
                 ->with('success',$job->emission_mode==='offline'
                     ? 'NFC-e na fila de preparação offline: assinatura do XML e geração do DANFE, sem envio à SEFAZ.'
