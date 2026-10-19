@@ -338,10 +338,14 @@ final class NFCeManualEditorTest extends TestCase
         $this->configure();
         $this->actingAs($this->admin())
             ->get(route('fiscal.nfce.create'))->assertOk()
-            ->assertSee('NFC-e modelo 65')
+            ->assertSee('Modelo fiscal')
+            ->assertSee('65 — NFC-e')
             ->assertSee('Homologação')
-            ->assertSee('dígitos verificadores')
-            ->assertSee('TEF/POS');
+            ->assertSee('CPF / CNPJ (opcional)')
+            ->assertSee('Pagamento')
+            ->assertDontSee('nfce-compliance-note',false)
+            ->assertDontSee('<h3>Dados gerais</h3>',false)
+            ->assertDontSee('não altere esses dados para tentar corrigir uma rejeição');
 
         $js=file_get_contents(public_path('js/nfce-editor.js'));
         self::assertNotFalse($js);
