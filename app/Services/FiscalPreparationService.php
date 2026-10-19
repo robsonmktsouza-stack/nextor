@@ -222,7 +222,10 @@ class FiscalPreparationService
                     ])->values()->all(),
                     'payments'=>$sale->payments->map(fn($payment)=>[
                         'payment_method'=>$payment->payment_method,
-                        'payment_kind'=>\App\Models\PaymentMethod::query()->where('code',$payment->payment_method)->value('kind'),
+                        'payment_kind'=>\App\Models\PaymentMethod::resolveFiscalKind(
+                            \App\Models\PaymentMethod::query()->where('code',$payment->payment_method)->value('kind'),
+                            $payment->payment_method
+                        ),
                         'amount'=>(string)$payment->amount,
                         'due_date'=>optional($payment->due_date)->toDateString(),
                         'integration_type'=>$payment->integration_type,
