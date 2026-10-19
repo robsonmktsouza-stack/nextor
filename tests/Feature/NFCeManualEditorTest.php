@@ -338,8 +338,8 @@ final class NFCeManualEditorTest extends TestCase
         $this->configure();
         $this->actingAs($this->admin())
             ->get(route('fiscal.nfce.create'))->assertOk()
-            ->assertSee('Modelo fiscal')
-            ->assertSee('65 — NFC-e')
+            ->assertDontSee('<span>Modelo fiscal</span>',false)
+            ->assertDontSee('<span>Série configurada</span>',false)
             ->assertSee('Homologação')
             ->assertSee('CPF / CNPJ (opcional)')
             ->assertSee('Pagamento')
