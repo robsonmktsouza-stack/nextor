@@ -73,7 +73,9 @@ body{margin:0}.app-root{width:100%;min-height:100vh}
 </div>
 <script type="application/json" id="nfceProductsJson">[
  {"id":1,"name":"CAMISETA BASICA","sku":"TESTE-001","ean_gtin":"7891234567895","sale_price":29.90,"ncm":"61091000"},
- {"id":2,"name":"FILTRO DE OLEO","sku":"FILTRO-02","ean_gtin":"","sale_price":12.50,"ncm":"84212300"}
+ {"id":3,"name":"PEÇA DE TESTE","sku":"FILTRO-02-EXTRA","ean_gtin":"","sale_price":7.00,"ncm":"84212300"},
+ {"id":2,"name":"FILTRO DE OLEO","sku":"FILTRO-02","ean_gtin":"","sale_price":12.50,"ncm":"84212300"},
+ {"id":4,"name":"CAFÉ TORRADO","sku":"CAFE-04","ean_gtin":"","sale_price":10.00,"ncm":"09012100"}
 ]</script>
 <script type="application/json" id="nfceMethodsJson">[{"code":"cash","name":"Dinheiro","kind":"cash"}]</script>
 <script type="application/json" id="nfceOldItems">[]</script>
@@ -130,10 +132,29 @@ window.addEventListener('load',()=>{
       expect(Number(actualUnit)===20,'incremento sobrescreveu preço editado');
       expect($('#nfceFixedTotal').textContent.includes('60,00'),'total após edição do preço incorreto');
 
-      query('FILTRO');
+      query('FILTRO-02');
+      // O SKU "FILTRO-02-EXTRA" aparece antes no catálogo: o código exato
+      // deve vencer o prefixo para um leitor de barras/operador com Enter.
+      expect(list.querySelector('[data-pick-product]')?.dataset.pickProduct==='2',
+        'busca não priorizou SKU exato');
       input.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}));
-      expect($$('#nfceItems tr').length===2,'Enter não inseriu o segundo produto');
+      expect($('#nfceItems tr').length===2,'Enter não inseriu o segundo produto');
       expect($('#nfceFixedTotal').textContent.includes('72,50'),'total com segundo produto incorreto');
+
+      query('cafe');
+      expect(list.querySelector('[data-pick-product]')?.dataset.pickProduct==='4',
+        'busca sem acento não encontrou CAFÉ');
+      clickResult('4');
+      expect($('#nfceItems tr').length===3,'busca sem acento não adicionou produto');
+      expect($('#nfceFixedTotal').textContent.includes('82,50'),'total com terceiro produto incorreto');
+
+      query('7891234567895');
+      expect(list.querySelector('[data-pick-product]')?.dataset.pickProduct==='1',
+        'código de barras exato não ficou na primeira posição');
+      input.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}));
+      expect($('#nfceItems tr').length===3 && qty()===4,
+        'leitura repetida de código de barras duplicou linha em vez de incrementar quantidade');
+      expect($('#nfceFixedTotal').textContent.includes('102,50'),'total após código de barras incorreto');
       // O ERP envolve os inputs em MutationObserver; aguardar a
       // microtask antes de conferir o acabamento do campo numérico.
       await new Promise(resolve=>setTimeout(resolve,35));
@@ -142,7 +163,7 @@ window.addEventListener('load',()=>{
         'quantidade deve ficar sem o ícone decorativo de lista');
       expect(document.documentElement.scrollWidth<=innerWidth+3,'a barra criou rolagem horizontal na tela');
       document.body.dataset.nfcePickerTest='passed';
-      $('#testResult').textContent='PASS repetição + foco + botão + Enter + valores';
+      $('#testResult').textContent='PASS repetição + foco + SKU/código exato + acentos + valores';
     }catch(error){
       document.body.dataset.nfcePickerTest='failed';
       $('#testResult').textContent='FAIL '+error.message;
