@@ -325,6 +325,7 @@
     const paymentOption=value=>paymentOptions?.querySelector('[data-payment-value="'+CSS.escape(String(value||''))+'"]');
     const paymentName=value=>paymentOption(value)?.dataset.paymentLabel||'Não selecionado';
     const paymentKind=value=>paymentOption(value)?.dataset.paymentKind||'other';
+    const isCardKind=kind=>['card','credit_card','debit_card'].includes(kind);
     const paymentInfo=value=>{
       const option=paymentOption(value);
       return {
@@ -344,11 +345,11 @@
 
     const incompleteCardTarget=()=>{
       if(splitApplied){
-        const index=splitPayments.findIndex(row=>row.kind==='card' && !row.integration_type);
+        const index=splitPayments.findIndex(row=>isCardKind(row.kind) && !row.integration_type);
         return index>=0 ? index : null;
       }
 
-      if(paymentKind(payment.value)==='card' && !singleElectronicData.integration_type) return 'single';
+      if(isCardKind(paymentKind(payment.value)) && !singleElectronicData.integration_type) return 'single';
       return null;
     };
 
@@ -936,7 +937,7 @@
       if(splitMode && allowSplitPayment){
         addSplitPayment(option);
         const index=splitPayments.findIndex(row=>row.method===info.method);
-        if(info.kind==='card' && index>=0){
+        if(isCardKind(info.kind) && index>=0){
           paymentModal.close();
           setTimeout(()=>openElectronicPaymentModal(index,true),0);
         }
@@ -951,7 +952,7 @@
       payment.dispatchEvent(new Event('change',{bubbles:true}));
       paymentModal.close();
 
-      if(info.kind==='card'){
+      if(isCardKind(info.kind)){
         setTimeout(()=>openElectronicPaymentModal('single',false),0);
         return;
       }
@@ -1302,20 +1303,20 @@
 
     const electronicSource=()=>{
       if(electronicTarget==='single'){
-        if(!['card','pix'].includes(paymentKind(payment.value))) return null;
+        if(!(isCardKind(paymentKind(payment.value))||paymentKind(payment.value)==='pix')) return null;
         return {row:singleElectronicData,label:paymentName(payment.value)};
       }
 
       const index=Number(electronicTarget);
       const row=splitPayments[index];
-      if(!row || !['card','pix'].includes(row.kind)) return null;
+      if(!row || !(isCardKind(row.kind)||row.kind==='pix')) return null;
       return {row,label:row.label};
     };
 
     const openElectronicPaymentModal=(target=null,returnToPayment=false)=>{
       if(target===null){
         if(splitApplied || splitMode){
-          const index=splitPayments.findIndex(row=>['card','pix'].includes(row.kind));
+          const index=splitPayments.findIndex(row=>(isCardKind(row.kind)||row.kind==='pix'));
           target=index>=0 ? index : 'single';
         }else{
           target='single';
@@ -1375,8 +1376,8 @@
       const electronicSourceInfo=electronicSource();
       const isIntegratedCard=electronicSourceInfo
         && (electronicTarget==='single'
-          ? paymentKind(payment.value)==='card'
-          : splitPayments[Number(electronicTarget)]?.kind==='card')
+          ? isCardKind(paymentKind(payment.value))
+          : isCardKind(splitPayments[Number(electronicTarget)]?.kind))
         && data.integration_type==='1';
       if(isIntegratedCard && (!data.institution_document || !data.authorization_code)){
         notify('Cartão integrado: informe o CNPJ da adquirente e a autorização da transação.','warning');
