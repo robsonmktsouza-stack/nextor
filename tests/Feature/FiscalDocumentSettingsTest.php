@@ -69,7 +69,13 @@ final class FiscalDocumentSettingsTest extends TestCase
 
         foreach ([
             'nfe'=>['environment'=>'production','series'=>1,'next_number'=>1,'production_enabled'=>'1'],
-            'nfce'=>['environment'=>'production','series'=>1,'next_number'=>1,'production_enabled'=>'1'],
+            'nfce'=>[
+                'environment'=>'production','series'=>1,'next_number'=>1,
+                'csc_id'=>'1','csc_token'=>'CSC-HOMOLOGACAO-TESTE',
+                'production_series'=>1,'production_next_number'=>1,
+                'production_csc_id'=>'2','production_csc_token'=>'CSC-PRODUCAO-TESTE',
+                'production_enabled'=>'1',
+            ],
             'nfse'=>['environment'=>'production','next_rps'=>1,'production_enabled'=>'1'],
             'cte'=>[
                 'cte_environment'=>'production','cte_series'=>1,'cte_next_number'=>1,
