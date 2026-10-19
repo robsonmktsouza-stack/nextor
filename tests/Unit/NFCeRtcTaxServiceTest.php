@@ -87,6 +87,49 @@ final class NFCeRtcTaxServiceTest extends TestCase
         (new NFCeRtcTaxService())->calculate($this->item([]),'3','2026-10-19');
     }
 
+    public function test_reduced_cst_200003_generates_all_three_100_percent_zero_rates(): void
+    {
+        $item=$this->regular([
+            'ibs_cbs_cst'=>'200','ibs_cbs_class'=>'200003',
+            'ibs_uf_reduction_rate'=>'100',
+            'ibs_municipal_reduction_rate'=>'100',
+            'cbs_reduction_rate'=>'100',
+        ]);
+        $result=(new NFCeRtcTaxService())->calculate($item,'3','2026-10-19');
+        self::assertSame('200',$result['ibscbs']['CST']);
+        self::assertSame('200003',$result['ibscbs']['cClassTrib']);
+        foreach (['gibsuf','gibsmun','gcbs'] as $part) {
+            self::assertSame('100.0000',$result[$part]['pRedAliq']);
+            self::assertSame('0.0000',$result[$part]['pAliqEfet']);
+        }
+        self::assertSame('90.00',$result['gibscbs']['vBC']);
+        self::assertSame('0.00',$result['gibscbs']['vIBS']);
+        self::assertSame('0.00',$result['gcbs']['vCBS']);
+    }
+
+    public function test_reduction_without_authorized_rate_or_with_wrong_class_fails(): void
+    {
+        $item=$this->regular([
+            'ibs_cbs_cst'=>'200','ibs_cbs_class'=>'200003',
+            'ibs_uf_reduction_rate'=>'60',
+            'ibs_municipal_reduction_rate'=>'100',
+            'cbs_reduction_rate'=>'100',
+        ]);
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('ibs_uf_reduction_rate');
+        (new NFCeRtcTaxService())->calculate($item,'3','2026-10-19');
+    }
+
+    public function test_unmapped_reduced_class_is_not_treated_as_food(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('sem mapeamento específico');
+        (new NFCeRtcTaxService())->calculate($this->regular([
+            'ibs_cbs_cst'=>'200','ibs_cbs_class'=>'200001',
+            'ibs_uf_reduction_rate'=>'100','ibs_municipal_reduction_rate'=>'100','cbs_reduction_rate'=>'100',
+        ]),'3','2026-10-19');
+    }
+
     public function test_partial_rate_configuration_is_rejected(): void
     {
         $this->expectException(RuntimeException::class);
