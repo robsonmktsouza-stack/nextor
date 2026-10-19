@@ -7,7 +7,10 @@
   <meta name="robots" content="noindex,nofollow">
   <title>Entrar · Lumeron</title>
   <link rel="icon" type="image/png" href="{{ asset('images/lumeron/elephant.png') }}">
-  <link rel="stylesheet" href="{{ asset('css/login.css') }}?v={{ filemtime(public_path('css/login.css')) }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="{{ asset('css/login.css') }}?v={{ filemtime(public_path('css/login.css')) }}">
   <script src="{{ asset('js/login.js') }}?v={{ filemtime(public_path('js/login.js')) }}" defer></script>
 </head>
 <body class="lumeron-login">
