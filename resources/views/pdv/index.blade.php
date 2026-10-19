@@ -7,7 +7,7 @@
   <form method="post" action="{{ route('pdv.cash.open') }}">
     @csrf
     <div class="pdv-modal-head">
-      <div><h2>Abrir caixa</h2><p>Informe o fundo inicial disponível em dinheiro.</p></div>
+      <div><h2>Abrir caixa</h2></div>
       <button type="button" class="pdv-modal-close" onclick="this.closest('dialog').close()" aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
     </div>
     <div class="pdv-cash-modal-body">
@@ -22,7 +22,7 @@
   <form method="post" action="{{ route('pdv.cash.close') }}">
     @csrf
     <div class="pdv-modal-head">
-      <div><h2>Fechar caixa</h2><p>Conferência do saldo físico em dinheiro.</p></div>
+      <div><h2>Fechar caixa</h2></div>
       <button type="button" class="pdv-modal-close" onclick="this.closest('dialog').close()" aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
     </div>
     <div class="pdv-cash-modal-body">
@@ -272,7 +272,7 @@
     <div>
       <span>F4</span>
       <h2>Selecionar cliente</h2>
-      <p>Pesquise por nome ou documento.</p>
+      
     </div>
     <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
   </div>
@@ -311,7 +311,7 @@
     <div>
       <span>F6</span>
       <h2>Forma de pagamento</h2>
-      <p>Use o número da opção ou as setas e Enter.</p>
+      
     </div>
     <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
   </div>
@@ -413,7 +413,7 @@
     <div>
       <span>F7</span>
       <h2>Valor recebido</h2>
-      <p>Informe quanto o cliente entregou em dinheiro.</p>
+      
     </div>
     <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
   </div>
@@ -454,7 +454,7 @@
     <div>
       <span>F10</span>
       <h2>Observação da venda</h2>
-      <p>Anotação opcional vinculada à operação atual.</p>
+      
     </div>
     <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
   </div>
@@ -478,7 +478,7 @@
     <div>
       <span>Alt+V</span>
       <h2 id="pdvSalesTitle">Vendas do PDV</h2>
-      <p>Consulte as vendas sem sair da frente de caixa.</p>
+      
     </div>
     <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar vendas">
       @include('partials.icon',['name'=>'x','size'=>18])
@@ -658,7 +658,7 @@
 
 <dialog class="pdv-quick-modal pdv-recover-modal" id="pdvRecoverModal">
   <div class="pdv-modal-head">
-    <div><span>Alt+R</span><h2>Recuperar venda suspensa</h2><p>Selecione a venda que deseja devolver ao carrinho.</p></div>
+    <div><span>Alt+R</span><h2>Recuperar venda suspensa</h2></div>
     <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
   </div>
   <div class="pdv-suspended-list" id="pdvSuspendedList">
@@ -683,7 +683,7 @@
 
 <dialog class="pdv-quick-modal pdv-electronic-modal" id="pdvElectronicPaymentModal">
   <div class="pdv-modal-head">
-    <div><span>Alt+T</span><h2>Dados de cartão e PIX</h2><p>Informe os dados da transação que precisam acompanhar a NFC-e.</p></div>
+    <div><span>Alt+T</span><h2>Dados de cartão e PIX</h2></div>
     <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
   </div>
   <div class="pdv-electronic-body">
@@ -708,7 +708,7 @@
     @csrf
     <input type="hidden" name="action" value="{{ $nfceContingencyActive ? 'stop' : 'start' }}">
     <div class="pdv-modal-head">
-      <div><span>Alt+C</span><h2>Contingência NFC-e</h2><p>Controle operacional da emissão offline.</p></div>
+      <div><span>Alt+C</span><h2>Contingência NFC-e</h2></div>
       <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
     </div>
     <div class="pdv-operation-body">
