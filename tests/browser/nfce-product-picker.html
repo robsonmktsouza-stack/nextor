@@ -11,6 +11,16 @@
 body{margin:0}.app-root{width:100%;min-height:100vh}
 #nfceEditor{position:relative;padding:18px;width:100%;box-sizing:border-box}
 #nfceEditor .nfe-general-card{max-width:980px}
+/* Reproduz a área rolável real do modal: o popup não pode ser recortado
+   pelo limite inferior do formulário. */
+#nfceEditor .nfe-workspace-body{
+  height:260px;overflow-y:auto;overflow-x:hidden;
+  border:1px solid #d8e2eb;box-sizing:border-box;
+}
+#nfceEditor .nfce-savebar{
+  position:fixed;bottom:12px;left:18px;right:18px;
+  height:52px;background:#f8fafc;border-top:1px solid #d8e2eb;
+}
 #testResult{position:fixed;z-index:9999;right:0;top:0;background:white;padding:4px}
 </style>
 <script defer src="../../public/js/erp.js"></script>
@@ -20,6 +30,7 @@ body{margin:0}.app-root{width:100%;min-height:100vh}
 <div class="app-root">
 <div id="nfceEditor">
 <form id="nfceEditorForm" data-readonly="0" data-correction="0" autocomplete="off">
+  <div class="nfe-workspace-body" id="nfceTestScrollBody">
   <div id="nfceFormError" hidden></div>
   <div class="editor-tabs" role="tablist">
     <button type="button" class="editor-tab active" data-nfce-tab="general">Dados gerais</button>
@@ -66,8 +77,9 @@ body{margin:0}.app-root{width:100%;min-height:100vh}
   <section class="editor-tab-panel" data-nfce-panel="summary" hidden>
     <span id="nfceSubtotal"></span><span id="nfceDiscountTotal"></span><span id="nfceGrandTotal"></span>
   </section>
+  </div>
   <strong id="nfceFixedTotal"></strong>
-  <button type="submit" value="save">Salvar</button>
+  <div class="nfce-savebar"><button type="submit" value="save">Salvar</button></div>
 </form>
 </div>
 </div>
@@ -106,6 +118,15 @@ window.addEventListener('load',()=>{
       const rect=input.getBoundingClientRect(),btn=button.getBoundingClientRect();
       expect(Math.abs(rect.bottom-btn.bottom)<3,'busca e botão desalinhados');
       query('CAMISETA');
+      expect(list.matches(':popover-open'),'lista de produtos não abriu na camada superior');
+      const clipping=$('#nfceTestScrollBody').getBoundingClientRect();
+      const popup=list.getBoundingClientRect();
+      expect(popup.top>=input.getBoundingClientRect().bottom-1,
+        'lista não ficou ancorada abaixo da busca');
+      expect(popup.bottom>clipping.bottom+8,
+        'lista ficou recortada pela rolagem do modal');
+      expect(popup.bottom<=$('.nfce-savebar').getBoundingClientRect().top-4,
+        'lista avançou sobre o rodapé do modal');
       clickResult('1');
       expect($$('#nfceItems tr').length===1,'primeiro produto não criou uma linha');
       expect(qty()===1,'primeira quantidade não é 1');
@@ -162,6 +183,11 @@ window.addEventListener('load',()=>{
       expect(quantityIcon && getComputedStyle(quantityIcon).display==='none',
         'quantidade deve ficar sem o ícone decorativo de lista');
       expect(document.documentElement.scrollWidth<=innerWidth+3,'a barra criou rolagem horizontal na tela');
+      query('FILTRO');
+      $('[data-nfce-tab="payment"]').click();
+      expect(list.hidden&&!list.matches(':popover-open')
+        &&input.getAttribute('aria-expanded')==='false',
+        'lista permaneceu aberta após trocar de aba');
       document.body.dataset.nfcePickerTest='passed';
       $('#testResult').textContent='PASS repetição + foco + SKU/código exato + acentos + valores';
     }catch(error){
