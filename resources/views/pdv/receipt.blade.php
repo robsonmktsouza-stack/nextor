@@ -21,13 +21,10 @@
       min(700, $baseHeight + ($sale->items->count() * $itemHeight) + ($sale->payments->count() * 7) + ($sale->notes ? 16 : 0))
   );
   $companyName = $company->trade_name ?: $company->legal_name ?: config('app.name','Lumeron');
-  // Não ocultar ausência de documento fiscal retornando automaticamente ao PDV.
-  // Depois de imprimir (ou cancelar), apresentar a pendência nesta mesma venda.
-  $receiptAfterPrintUrl = $nfceDocument
-      ? ($nfceAuto
-          ? route('pdv.index')
-          : (auth()->user()->canAccess('fiscal') ? route('fiscal.show', $nfceDocument) : null))
-      : null;
+  // A finalização da venda pertence ao caixa: nunca mudar automaticamente
+  // para o módulo Fiscal após imprimir ou cancelar a impressão.
+  // A situação da NFC-e é exibida no próprio PDV, sem supor autorização.
+  $receiptAfterPrintUrl = route('pdv.index');
   $canPrepareNfce = auth()->user()->canAccess('fiscal')
       && $sale->status === 'completed'
       && $sale->operation_type === 'sale'
@@ -251,9 +248,8 @@ body{font-size:9px}
   window.addEventListener('afterprint',()=>{
     if(!automatic) return;
     automatic=false;
-    // Se a nota não foi preparada, manter o resumo da venda visível,
-    // mesmo quando o operador cancelar o diálogo de impressão.
-    if(afterPrintUrl) window.setTimeout(()=>window.location.assign(afterPrintUrl),150);
+    // Retornar sempre à frente de caixa: abrir a NFC-e é escolha explícita.
+    window.setTimeout(()=>window.location.assign(afterPrintUrl),150);
   });
   printButton?.addEventListener('click',()=>{automatic=false;window.print();});
 })();
