@@ -41,9 +41,12 @@ final class NFCeManualController extends Controller
             ->latest('id')->limit(100)->get(['id','customer_id','total','operation_date']);
 
         $methods=PaymentMethod::query()->where('is_active',true)
-            ->whereIn('kind',self::PAYMENT_KINDS)
             ->orderBy('sort_order')->orderBy('name')
-            ->get(['code','name','kind']);
+            ->get(['code','name','kind'])
+            ->filter(fn(PaymentMethod $method)=>in_array($method->fiscalKind(),self::PAYMENT_KINDS,true))
+            ->map(fn(PaymentMethod $method)=>[
+                'code'=>$method->code,'name'=>$method->name,'kind'=>$method->fiscalKind()
+            ])->values();
 
         return view('fiscal.nfce.create',[
             'company'=>CompanySetting::current(),
@@ -100,8 +103,7 @@ final class NFCeManualController extends Controller
             'payments'=>['required','array','min:1','max:10'],
             'payments.*.payment_method'=>[
                 'required','string',
-                Rule::exists('payment_methods','code')->where(fn($q)=>$q
-                    ->where('is_active',true)->whereIn('kind',self::PAYMENT_KINDS)),
+                Rule::exists('payment_methods','code')->where(fn($q)=>$q->where('is_active',true)),
             ],
             'payments.*.amount'=>['required','numeric','gt:0','max:9999999999.99','decimal:0,2'],
             'payments.*.integration_type'=>['nullable',Rule::in(['1','2'])],
@@ -122,7 +124,14 @@ final class NFCeManualController extends Controller
         $paymentErrors=[];
         foreach ($data['payments'] as $index=>$payment) {
             $prefix='payments.'.$index.'.';
-            $kind=(string)($methodKinds[$payment['payment_method']] ?? '');
+            $kind=PaymentMethod::resolveFiscalKind(
+                (string)($methodKinds[$payment['payment_method']] ?? ''),
+                (string)$payment['payment_method']
+            );
+            if(!in_array($kind,self::PAYMENT_KINDS,true)){
+                $paymentErrors[$prefix.'payment_method']='Forma de pagamento sem classificação fiscal para NFC-e. Configure crédito ou débito separadamente.';
+                continue;
+            }
             $card=in_array($kind,['credit_card','debit_card'],true);
             $electronic=$card || $kind==='pix';
             $integration=(string)($payment['integration_type'] ?? '');
