@@ -13,6 +13,7 @@ use App\Services\Fiscal\FiscalDocumentSettings;
 use App\Services\Fiscal\NFCePreflightService;
 use App\Services\FiscalPreparationService;
 use App\Services\SalesService;
+use App\Support\BrazilianTaxId;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -104,10 +105,71 @@ final class NFCeManualController extends Controller
             'payments.*.integration_type'=>['nullable',Rule::in(['1','2'])],
             'payments.*.card_brand'=>['nullable',Rule::in(['01','02','03','04','05','06','07','08','09','99'])],
             'payments.*.authorization_code'=>['nullable','string','max:128'],
+            'payments.*.transaction_document'=>['nullable','string','max:18'],
+            'payments.*.transaction_state'=>['nullable','string','size:2'],
+            'payments.*.institution_document'=>['nullable','string','max:18'],
+            'payments.*.beneficiary_document'=>['nullable','string','max:18'],
+            'payments.*.terminal_id'=>['nullable','string','max:40'],
         ]);
 
+        // Antes de salvar a venda (estoque/financeiro), conferir os dados
+        // necessários ao XML. Nunca gerar outra venda para corrigir um cartão.
+        $methodKinds=PaymentMethod::query()
+            ->whereIn('code',array_column($data['payments'],'payment_method'))
+            ->pluck('kind','code');
+        $paymentErrors=[];
+        foreach ($data['payments'] as $index=>$payment) {
+            $prefix='payments.'.$index.'.';
+            $kind=(string)($methodKinds[$payment['payment_method']] ?? '');
+            $card=in_array($kind,['credit_card','debit_card'],true);
+            $electronic=$card || $kind==='pix';
+            $integration=(string)($payment['integration_type'] ?? '');
+            if ($card && !in_array($integration,['1','2'],true)) {
+                $paymentErrors[$prefix.'integration_type']='Informe se o cartão foi recebido por TEF integrado ou máquina não integrada.';
+            }
+            if ($kind==='pix' && $integration!=='' && !in_array($integration,['1','2'],true)) {
+                $paymentErrors[$prefix.'integration_type']='Escolha um tipo válido de integração do PIX.';
+            }
+
+            $transaction=preg_replace('/\\D/','',(string)($payment['transaction_document'] ?? ''));
+            $state=strtoupper(trim((string)($payment['transaction_state'] ?? '')));
+            if (($transaction==='') !== ($state==='')) {
+                $paymentErrors[$prefix.'transaction_document']='O CNPJ e a UF da transação devem ser informados juntos.';
+            }
+            if ($transaction!=='' && !BrazilianTaxId::valid($transaction)) {
+                $paymentErrors[$prefix.'transaction_document']='Informe um CNPJ válido para o local da transação.';
+            }
+            if ($state!=='' && !in_array($state,[
+                'AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG',
+                'PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO',
+            ],true)) {
+                $paymentErrors[$prefix.'transaction_state']='A UF da transação é inválida.';
+            }
+            $acquirer=preg_replace('/\\D/','',(string)($payment['institution_document'] ?? ''));
+            $beneficiary=preg_replace('/\\D/','',(string)($payment['beneficiary_document'] ?? ''));
+            if ($acquirer!=='' && !BrazilianTaxId::valid($acquirer)) {
+                $paymentErrors[$prefix.'institution_document']='Informe um CNPJ válido para a adquirente.';
+            }
+            if ($beneficiary!=='' && !BrazilianTaxId::valid($beneficiary)) {
+                $paymentErrors[$prefix.'beneficiary_document']='Informe um CNPJ válido para o beneficiário.';
+            }
+            if ($card && $integration==='1' && ($acquirer==='' || trim((string)($payment['authorization_code'] ?? ''))==='')) {
+                $paymentErrors[$prefix.'institution_document']='Cartão integrado exige CNPJ da adquirente e código de autorização.';
+            }
+            if (!$electronic && (
+                $integration!=='' || $acquirer!=='' || $transaction!=='' || $state!==''
+                || $beneficiary!=='' || trim((string)($payment['authorization_code'] ?? ''))!==''
+                || trim((string)($payment['terminal_id'] ?? ''))!=='' || trim((string)($payment['card_brand'] ?? ''))!==''
+            )) {
+                $paymentErrors[$prefix.'payment_method']='Informações de cartão/PIX não devem acompanhar outra forma de pagamento.';
+            }
+        }
+        if ($paymentErrors) {
+            throw ValidationException::withMessages($paymentErrors);
+        }
+
         $consumerDocument=preg_replace('/\D/','',(string)($data['consumer_document'] ?? ''));
-        if ($consumerDocument!=='' && !in_array(strlen($consumerDocument),[11,14],true)) {
+        if ($consumerDocument!=='' && !BrazilianTaxId::valid($consumerDocument)) {
             throw ValidationException::withMessages([
                 'consumer_document'=>'Informe um CPF ou CNPJ válido.',
             ]);
@@ -147,6 +209,11 @@ final class NFCeManualController extends Controller
                 'integration_type'=>$payment['integration_type'] ?? null,
                 'card_brand'=>$payment['card_brand'] ?? null,
                 'authorization_code'=>$payment['authorization_code'] ?? null,
+                'transaction_document'=>preg_replace('/\\D/','',(string)($payment['transaction_document'] ?? '')) ?: null,
+                'transaction_state'=>strtoupper(trim((string)($payment['transaction_state'] ?? ''))) ?: null,
+                'institution_document'=>preg_replace('/\\D/','',(string)($payment['institution_document'] ?? '')) ?: null,
+                'beneficiary_document'=>preg_replace('/\\D/','',(string)($payment['beneficiary_document'] ?? '')) ?: null,
+                'terminal_id'=>$payment['terminal_id'] ?? null,
             ];
         }
 
