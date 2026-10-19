@@ -102,7 +102,7 @@ final class NFCeInutilizationService
                     'document_type'=>'nfce','environment'=>$row->environment,
                 ]);
                 app(NFCeTransmissionService::class)->configure($service,$company,$context,
-                    (string)$company->certificate_password,(string)AppSetting::value('nfce','csc_token',''));
+                    (string)$company->certificate_password,app(NFCeEnvironmentParameters::class)->cscToken((string)$row->environment));
                 $response=$service->inutilize($row->issuer_document,$row->reason,$row->year,
                     $row->series,$row->first_number,$row->last_number);
                 $path='fiscal/nfce/inutilization/'.$id.'/sefaz-response.ini';
