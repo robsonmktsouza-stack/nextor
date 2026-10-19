@@ -10,6 +10,7 @@ on:
       - "app/Services/Fiscal/NFCePreflightService.php"
       - "tests/Unit/NFCeRtcTaxServiceTest.php"
       - "tests/Feature/NFCeRtcIniTest.php"
+      - "tests/Feature/NFCeIniBuilderTest.php"
       - ".github/workflows/nfce-rtc-tests.yml"
   pull_request:
     paths:
