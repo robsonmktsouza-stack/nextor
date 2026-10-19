@@ -77,7 +77,7 @@ final class NFCeTransmissionService
             try {
                 $company = CompanySetting::current();
                 $password = (string) $company->certificate_password;
-                $csc = (string) AppSetting::value('nfce', 'csc_token', '');
+                $csc = app(NFCeEnvironmentParameters::class)->cscToken((string)$job->environment);
                 $this->configure($service, $company, $job, $password, $csc);
                 $ini = $this->builder->build($job, $company);
                 $service->loadIni($ini);
@@ -233,7 +233,7 @@ final class NFCeTransmissionService
             $service = new ACBrNFeService(null, $runtimeIni);
             $company = CompanySetting::current();
             $password = (string) $company->certificate_password;
-            $csc = (string) AppSetting::value('nfce', 'csc_token', '');
+            $csc = app(NFCeEnvironmentParameters::class)->cscToken((string)$job->environment);
 
             try {
                 $this->configure($service, $company, $job, $password, $csc);
@@ -363,7 +363,7 @@ final class NFCeTransmissionService
             ['NFe', 'ModeloDF', '1'],
             ['NFe', 'Ambiente', $job->environment === 'homologation' ? '1' : '0'],
             ['NFe', 'VersaoDF', '3'],
-            ['NFe', 'IdCSC', (string) AppSetting::value('nfce', 'csc_id', '')],
+            ['NFe', 'IdCSC', app(NFCeEnvironmentParameters::class)->cscId((string)$job->environment)],
             ['NFe', 'CSC', $csc],
         ] as [$section, $key, $value]) {
             $service->setConfig($section, $key, $value);
