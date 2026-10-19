@@ -2,7 +2,23 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
-## Entrega mais recente — 19/10/2026 — ampliação real do emissor NFC-e BA
+## Entrega mais recente — 19/10/2026 — transição de homologação já existente para produção
+
+**Contexto confirmado pelo usuário:** Lumeron **já emitiu várias NFC-e em homologação** anteriormente. O trabalho atual NÃO é construir uma integração SEFAZ-BA do zero, mas padronizar parâmetros fiscais/tributários e preparar uma ativação controlada em produção. Evitar pedir nova homologação integral sem motivo: validar especificamente regressões de XML introduzidas pelos novos mapeamentos, e consultar serviço no ambiente real antes da primeira emissão.
+
+**Correção importante no repositório `feature/acbr-nfe-bootstrap`:**
+- `app/Services/Fiscal/NFCeEnvironmentParameters.php`: mantém os campos legados `series`, `next_number`, `csc_id`, `csc_token` como **homologação**, preservando o legado; adiciona `production_series`, `production_next_number`, `production_csc_id`, `production_csc_token` para produção. CSC por ambiente é obrigatório; nenhum fallback entre ambientes.
+- `SettingsController`/tela Configurações → NFC-e: dois conjuntos explícitos, CSC de produção criptografado, ativação de produção exige seus dados e não aceita numeração igual/inferior ao máximo já reservado no mesmo ambiente+série.
+- `FiscalPreparationService`: no ambiente produção reserva `production_next_number`; em homologação segue a sequência anterior (inclusive preparação de notas pendentes de parâmetros fiscais). Retira **ambos CSCs** do snapshot fiscal.
+- `NFCePreflightService`: confere CSC, série e próximo número no ambiente efetivo do documento. `NFCeTransmissionService`, `NFCeOfflineService`, `NFCeInutilizationService`: usam ID/CSC do ambiente do evento e verificam lacunas na sequência correspondente.
+- `tests/Feature/NFCeProductionParametersTest.php`: valida isolamento entre ambientes, criptografia do CSC, impedimento de liberação sem parâmetros, sequência separada, recusa de números usados e interface sem expor segredo.
+- **Não foi alterado o banco de dados do usuário; não foi ativada produção; não foram importados ou solicitados CSC/credenciais ao usuário pelo chat.** A instalação Laragon irá ler os novos campos do seu próprio banco assim que forem preenchidos nas Configurações.
+
+**Operação após atualizar:** Configurações → Notas fiscais → NFC-e: conferir os valores de homologação existentes e preencher série/numeração **reais de produção** consultadas na SEFAZ/arquivos anteriores, além de **ID CSC/CSC de produção**. Selecionar ambiente produção e marcar permissão de produção somente após conferência. Não presumir número 1 para emissão real se houver histórico anterior. Verificar certificado A1, fila `database/fiscal`, schemas atuais e `php artisan acbr:nfce-status` no novo ambiente antes de faturar. Evitar emitir notas desnecessárias em produção para “testar”.
+
+**Evidência e limite:** o CI verifica regressões Laravel/INI, mas não possui acesso ao certificado ou à ACBr Windows da instalação. As emissões anteriores em homologação são fato relatado pelo usuário, não arquivos/protocolos vistos pelo assistente.
+
+## Entrega anterior — 19/10/2026 — ampliação real do emissor NFC-e BA
 
 Usuário exigiu continuar desenvolvimento até ser viável operar de verdade, sem encerrar com plano. Alterações nesta branch:
 
