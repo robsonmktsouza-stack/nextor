@@ -605,32 +605,32 @@
     overflow-y:auto;overscroll-behavior:contain;
     box-shadow:0 10px 24px rgba(24,44,63,.16);
   }
-  #nfceEditor .nfce-item-table{min-width:765px}
-  #nfceEditor .nfce-item-table th:nth-child(1),
-  #nfceEditor .nfce-item-table td:nth-child(1){width:34%}
-  #nfceEditor .nfce-item-table th:is(:nth-child(2),:nth-child(3),:nth-child(4)),
-  #nfceEditor .nfce-item-table td:is(:nth-child(2),:nth-child(3),:nth-child(4)){width:16%}
-  #nfceEditor .nfce-item-table th:nth-child(5),
-  #nfceEditor .nfce-item-table td:nth-child(5){width:13%;white-space:nowrap}
-  #nfceEditor .nfce-item-table th:last-child,
-  #nfceEditor .nfce-item-table td:last-child{width:36px;text-align:center}
-  #nfceEditor .nfce-item-table td .numeric-input{
+  #nfceEditor #nfcePanel-products .nfce-item-table{min-width:765px}
+  #nfceEditor #nfcePanel-products .nfce-item-table th:nth-child(1),
+  #nfceEditor #nfcePanel-products .nfce-item-table td:nth-child(1){width:34%}
+  #nfceEditor #nfcePanel-products .nfce-item-table th:is(:nth-child(2),:nth-child(3),:nth-child(4)),
+  #nfceEditor #nfcePanel-products .nfce-item-table td:is(:nth-child(2),:nth-child(3),:nth-child(4)){width:16%}
+  #nfceEditor #nfcePanel-products .nfce-item-table th:nth-child(5),
+  #nfceEditor #nfcePanel-products .nfce-item-table td:nth-child(5){width:13%;white-space:nowrap}
+  #nfceEditor #nfcePanel-products .nfce-item-table th:last-child,
+  #nfceEditor #nfcePanel-products .nfce-item-table td:last-child{width:36px;text-align:center}
+  #nfceEditor #nfcePanel-products .nfce-item-table td .numeric-input{
     min-width:0;width:100%;max-width:210px;height:35px;
   }
-  #nfceEditor .nfce-item-table td .numeric-input-prefix{
+  #nfceEditor #nfcePanel-products .nfce-item-table td .numeric-input-prefix{
     width:34px;min-width:34px;height:35px;
   }
-  #nfceEditor .nfce-item-table td .numeric-input>input[type=number],
-  #nfceEditor .nfce-item-table td .numeric-input>input[data-money-ready="1"]{
+  #nfceEditor #nfcePanel-products .nfce-item-table td .numeric-input>input[type=number],
+  #nfceEditor #nfcePanel-products .nfce-item-table td .numeric-input>input[data-money-ready="1"]{
     height:35px;width:100%;min-width:0;max-width:none;
     box-sizing:border-box;padding:5px 7px;
   }
   /* Quantidade não precisa do ícone de lista ao lado do número. */
-  #nfceEditor .nfce-item-table td .numeric-number .numeric-input-prefix{display:none}
-  #nfceEditor .nfce-item-table td .numeric-number>input[type=number]{
+  #nfceEditor #nfcePanel-products .nfce-item-table td .numeric-number .numeric-input-prefix{display:none}
+  #nfceEditor #nfcePanel-products .nfce-item-table td .numeric-number>input[type=number]{
     border-radius:4px!important;
   }
-  #nfceEditor .nfce-item-table tr.nfce-item-added>td{background:#eef6fc}
+  #nfceEditor #nfcePanel-products .nfce-item-table tr.nfce-item-added>td{background:#eef6fc}
   @media(max-width:620px){
     #nfceEditor .nfce-product-toolbar{grid-template-columns:minmax(0,1fr)}
     #nfceEditor .nfce-product-toolbar>#nfceAddProduct{justify-self:end}
