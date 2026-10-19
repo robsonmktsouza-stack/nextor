@@ -26,6 +26,16 @@ Em `resources/views/settings/index.blade.php`, manter os seis grupos principais 
 
 **Padrão para botões:** verbo + objeto quando houver ambiguidade (ex.: “Adicionar categoria”, “Adicionar conta”, “Adicionar forma de pagamento”, “Gerar arquivo contábil”). “Salvar” e “Cancelar” continuam adequados quando o contexto já está claro. Não prometer emissão, envio, baixa ou download quando o fluxo de código não faz isso. Atalhos e atributos `data-*` não devem ser alterados por mudanças de texto. Seções com opções fiscais de risco devem distinguir homologação/teste de produção real. O arquivo `tests/Feature/SettingsClarityTest.php` cobre navegação e compatibilidade.
 
+## D02-C — Seletores sem recorte em formulários e modais (19/10/2026)
+
+**Decisão visual:** todo `<select>` convencional deve continuar usando o componente global do Lumeron em `public/js/erp.js`. O `<select>` original continua no formulário, enviando os valores e acionando `change`. A lista personalizada é criada e controlada pelo componente; não instalar Select2/Choices/Tom Select por iniciativa da IA nem substituir dezenas de campos por bibliotecas distintas.
+
+**Corrigido:** o menu da lista é exibido na **top layer** pelo Popover API (`popover="manual"`) sem mudar sua estrutura DOM. O posicionamento é calculado a partir do campo e do viewport; a lista abre para cima quando necessário, considera o rodapé fixo das Configurações e dos modais, e se reposiciona com zoom/rolagem. O popup deixa de ser cortado por cartões, `overflow`, `z-index` e containers roláveis. Ao selecionar ou fechar, deve executar `hidePopover`; nunca deixar menus órfãos no alto da tela. O campo pesquisável não deve selecionar automaticamente todo seu texto no foco (evita o destaque azul observado em Configurações → CRT).
+
+**CSS:** `public/css/desktop-polish.css` possui regras restritas a `.ui-select .ui-select-menu[popover]`. **Não** corrigir esse problema globalmente com `overflow:visible!important` em todos os modais: isso quebraria rolagem, barras fixas e clipping legítimo do ERP. Para browser sem Popover API, o componente ainda utiliza seu modo anterior de posicionamento.
+
+**Qualidade:** `tests/Feature/SelectOverlayTest.php` protege a integração, mas somente testes reais no Chrome do Laragon, inclusive campos CRT, tabelas, rodapés, modais e zoom 125%, confirmam a correção visual. Não declarar essa QA concluída sem observá-la.
+
 ## D03 — Isolamento contratual
 
 **Um CNPJ = uma instalação Laravel independente = um banco e ambiente próprios**, mesmo se uma pessoa tiver várias empresas. Cada instalação possui usuários, sessões, APP_KEY, storage, certificados A1, CSC, fila/worker e configurações próprios. Não criar seletor multiempresa compartilhado nem banco único com tenant_id. `config/instance.php` define `LUMERON_INSTANCE_CNPJ` e identidade de instância; preflight/transmissão devem rejeitar emitente CNPJ divergente. Desenvolvimento local pode operar sem vínculo de CNPJ; VPS gerenciada não pode. Documentos: `docs/deployment/one-cnpj-per-instance.md`, `docs/deployment/login-by-subdomain.md`.
