@@ -206,7 +206,9 @@
     el('nfceItems').innerHTML=rowItems.map((row,index)=>{
       const p=productMap.get(row.product_id);
       return '<tr data-idx="'+index+'">'+
-        '<td><strong>'+text(p.name)+'</strong><small>'+text(p.sku||'')+'</small><input type="hidden" name="items['+index+'][product_id]" value="'+row.product_id+'"></td>'+
+        '<td><strong>'+text(p.name)+'</strong><small>'+text(p.sku||'')+'</small>'+
+        '<small>NCM: '+text(p.ncm||'Não cadastrado')+'</small>'+
+        '<input type="hidden" name="items['+index+'][product_id]" value="'+row.product_id+'"></td>'+
         '<td><input type="number" min="0.001" max="9999999999" step="0.001" name="items['+index+'][quantity]" data-item-field="quantity" value="'+text(row.quantity)+'" required></td>'+
         '<td><input type="number" min="0" max="9999999999.99" step="0.01" name="items['+index+'][unit_price]" data-item-field="unit_price" value="'+text(row.unit_price)+'" required></td>'+
         '<td><input type="number" min="0" max="9999999999.99" step="0.01" name="items['+index+'][discount]" data-item-field="discount" value="'+text(row.discount)+'"></td>'+
@@ -357,7 +359,7 @@
   el('nfceAddPayment').addEventListener('click',()=>{
     payments.push(makePayment({}));
     renderPayments();
-    el('nfcePayments').querySelector('tr:last-child input')?.focus();
+    el('nfcePayments').querySelector('[data-payment="'+(payments.length-1)+'"] [data-payment-field="amount"]')?.focus();
   });
 
   function setMode(){
@@ -376,6 +378,7 @@
       .forEach(control=>control.disabled=existing);
     el('nfceSale').disabled=!existing;
     el('nfceSaleSearch').disabled=!existing;
+    if(!existing)updatePaymentDetails();
     if(existing&&['consumer','products','payment'].includes(form.querySelector('.editor-tab.active')?.dataset.nfceTab)){
       activateTab('general');
     }
