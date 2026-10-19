@@ -79,6 +79,8 @@ final class NFCePreflightService
 
         $source = $job->source_snapshot ?? [];
         $items = $source['items'] ?? [];
+        $rtc = new NFCeRtcTaxService();
+        $rtcItemCount = 0;
         if (!is_array($items) || count($items) === 0) {
             $errors[] = 'Venda sem itens fiscais.';
         } else {
@@ -113,6 +115,9 @@ final class NFCePreflightService
                 // Nenhum perfil não implementado pode chegar à transmissão.
                 try {
                     $this->calculator->calculate($item, (string)$company->crt);
+                    if ($rtc->calculate($item, (string)$company->crt, $source['operation_date'] ?? null) !== null) {
+                        $rtcItemCount++;
+                    }
                 } catch (\RuntimeException $exception) {
                     $errors[] = "Item {$n}: ".$exception->getMessage();
                 }
@@ -122,6 +127,9 @@ final class NFCePreflightService
             }
         }
 
+        if (is_array($items) && $rtcItemCount > 0 && $rtcItemCount !== count($items)) {
+            $errors[] = 'RTC: a nota mistura produtos com e sem IBS/CBS. Configure a classificação em todos os itens do documento.';
+        }
         if ((float) ($source['total'] ?? -1) < 0) {
             $errors[] = 'Total da venda inválido.';
         }
