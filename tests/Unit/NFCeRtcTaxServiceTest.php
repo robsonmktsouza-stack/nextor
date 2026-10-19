@@ -39,6 +39,40 @@ final class NFCeRtcTaxServiceTest extends TestCase
         self::assertSame(['pCBS'=>'0.9000','vCBS'=>'0.81'],$actual['gcbs']);
     }
 
+    public function test_rtc_base_excludes_icms_pis_cofins_during_the_transition(): void
+    {
+        $legacy=[
+            'icms'=>['vICMS'=>'16.20'],
+            'pis'=>['vPIS'=>'1.49'],
+            'cofins'=>['vCOFINS'=>'6.84'],
+        ];
+        $result=(new NFCeRtcTaxService())->calculate(
+            $this->regular(),'3','2026-10-19',$legacy
+        );
+        self::assertSame('65.47',$result['gibscbs']['vBC']);
+        self::assertSame('0.07',$result['gibsuf']['vIBSUF']);
+        self::assertSame('0.59',$result['gcbs']['vCBS']);
+    }
+
+    public function test_rtc_base_does_not_exclude_legacy_taxes_after_2032(): void
+    {
+        $legacy=['icms'=>['vICMS'=>'16.20']];
+        $result=(new NFCeRtcTaxService())->calculate(
+            $this->regular(),'3','2033-01-01',$legacy
+        );
+        self::assertSame('90.00',$result['gibscbs']['vBC']);
+    }
+
+    public function test_rtc_refuses_negative_base_when_legacy_taxes_exceed_sale(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('excedem o valor líquido');
+        (new NFCeRtcTaxService())->calculate(
+            $this->regular(),'3','2026-10-19',
+            ['icms'=>['vICMS'=>'91.00']]
+        );
+    }
+
     public function test_rates_are_not_presumed_for_blank_configuration(): void
     {
         self::assertNull((new NFCeRtcTaxService())->calculate(
