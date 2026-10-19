@@ -3,7 +3,6 @@
           role="tabpanel" aria-labelledby="nfceTab-general" data-nfce-panel="general"
           @if($startTab!=='general') hidden @endif>
           <div class="nfe-general-card">
-            <div class="nfe-section-title"><h3>Dados gerais</h3></div>
             <div class="editor-grid cols-12">
               <div class="field col-3"><span>Situação</span><strong>Rejeitada</strong></div>
               <div class="field col-3"><span>Emissão</span><strong>{{ $document->environment==='production'?'Produção':'Homologação' }}</strong></div>
@@ -24,7 +23,6 @@
           @if($startTab!=='consumer') hidden @endif>
           
       <div class="editor-panel">
-        <h3>Consumidor</h3>
         <div class="editor-grid cols-12">
           <label class="field col-4"><span>CPF / CNPJ</span>
             <input name="consumer_document" maxlength="20" inputmode="numeric"
@@ -40,8 +38,7 @@
           
       <div class="cms-card nfce-correction-product-list">
         <div class="grid-actionbar">
-          <div class="grid-actions-left"><strong>Produtos da NFC-e</strong></div>
-          <span class="nfce-list-count">{{ count($snapshot['items'] ?? []) }} {{ count($snapshot['items'] ?? [])===1?'produto':'produtos' }}</span>
+          <div class="grid-actions-left"><span class="nfce-list-count">{{ count($snapshot['items'] ?? []) }} {{ count($snapshot['items'] ?? [])===1?'produto':'produtos' }}</span></div>
         </div>
         <div class="table-scroll nfce-item-table-wrap">
           <table class="cms-table nfce-item-table">
@@ -172,8 +169,6 @@
           @if($startTab!=='payment') hidden @endif>
           
       <div class="editor-panel">
-        <h3>Pagamento</h3>
-        <p class="editor-help">Total dos pagamentos: R$ {{ number_format((float)($snapshot['total'] ?? 0),2,',','.') }}.</p>
         @foreach(($snapshot['payments'] ?? []) as $index=>$payment)
           @php
             $field='payments.'.$index.'.';
@@ -200,7 +195,6 @@
           role="tabpanel" aria-labelledby="nfceTab-summary" data-nfce-panel="summary"
           @if($startTab!=='summary') hidden @endif>
           <div class="nfe-general-card">
-            <div class="nfe-section-title"><h3>Resumo da NFC-e</h3></div>
             <div class="nfce-summary-grid">
               <div><span>Subtotal</span><strong>R$ {{ number_format((float)($snapshot['subtotal'] ?? $total),2,',','.') }}</strong></div>
               <div><span>Desconto</span><strong>R$ {{ number_format((float)($snapshot['discount_total'] ?? 0),2,',','.') }}</strong></div>
