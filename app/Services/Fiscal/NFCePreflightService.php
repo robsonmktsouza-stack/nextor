@@ -149,15 +149,17 @@ final class NFCePreflightService
                     $errors[] = 'Pagamento '.($index + 1).': dados inválidos.';
                     continue;
                 }
-                $kind = strtolower((string) ($payment['payment_kind'] ?? $payment['payment_method'] ?? ''));
-                if ($kind === 'card') {
-                    $code = strtolower((string) ($payment['payment_method'] ?? ''));
-                    $kind = str_contains($code, 'debit') || str_contains($code, 'debito') ? 'debit_card' : (str_contains($code, 'credit') || str_contains($code, 'credito') ? 'credit_card' : 'card');
-                }
+                $kind = \App\Models\PaymentMethod::resolveFiscalKind(
+                    (string) ($payment['payment_kind'] ?? $payment['payment_method'] ?? ''),
+                    (string) ($payment['payment_method'] ?? '')
+                );
                 if (!in_array($kind, ['cash', 'money', 'pix', 'credit_card', 'debit_card', 'bank_slip', 'bank_transfer', 'transfer'], true)) {
                     $errors[] = 'Forma de pagamento sem mapeamento fiscal: '.$kind;
                 }
                 $number = $index + 1;
+                if (!is_numeric($payment['amount'] ?? null) || (float)$payment['amount']<=0) {
+                    $errors[] = "Pagamento {$number}: informe um valor maior que zero.";
+                }
                 $integration = (string) ($payment['integration_type'] ?? '');
                 $isCard = in_array($kind, ['credit_card','debit_card'], true);
                 if ($isCard && !in_array($integration, ['1','2'], true)) {
@@ -201,9 +203,16 @@ final class NFCePreflightService
                 ], true)) {
                     $errors[] = "Pagamento {$number}: bandeira do cartão inválida.";
                 }
+                if (!in_array($kind,['credit_card','debit_card','pix'],true)
+                    && ($integration!=='' || $brand!=='' || $acquirer!==''
+                        || $beneficiary!=='' || $transactionDocument!==''
+                        || trim((string)($payment['authorization_code'] ?? ''))!==''
+                        || trim((string)($payment['terminal_id'] ?? ''))!=='')) {
+                    $errors[] = "Pagamento {$number}: dados eletrônicos incompatíveis com a forma selecionada.";
+                }
                 $sum += (int) round((float) ($payment['amount'] ?? 0) * 100);
             }
-            if (abs($sum - (int) round((float) ($source['total'] ?? 0) * 100)) > 1) {
+            if ($sum !== (int) round((float) ($source['total'] ?? 0) * 100)) {
                 $errors[] = 'Pagamentos não conciliam com o total.';
             }
         }
