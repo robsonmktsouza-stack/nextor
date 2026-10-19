@@ -136,14 +136,20 @@ class FiscalPreparationService
             if ($documentType==='nfce') {
                 // Nunca avançar a sequência homologada ao preparar NFC-e real.
                 $parameters=app(\App\Services\Fiscal\NFCeEnvironmentParameters::class);
-                $issues=$parameters->issues($environment);
-                if ($issues) {
-                    throw \Illuminate\Validation\ValidationException::withMessages([
-                        'nfce'=>implode(' ', $issues),
-                    ]);
+                if ($environment==='production') {
+                    // Só a produção exige configuração explícita antes de
+                    // reservar numeração; preserva o fluxo histórico em
+                    // homologação, que pode preparar documentos incompletos
+                    // para posterior correção fiscal no preflight.
+                    $issues=$parameters->issues($environment);
+                    if ($issues) {
+                        throw \Illuminate\Validation\ValidationException::withMessages([
+                            'nfce'=>implode(' ', $issues),
+                        ]);
+                    }
+                    $numberKey=$parameters->numberKey($environment);
+                    $series=$parameters->series($environment);
                 }
-                $numberKey=$parameters->numberKey($environment);
-                $series=$parameters->series($environment);
             }
             $number=AppSetting::reserveInteger($group,$numberKey,1);
 
