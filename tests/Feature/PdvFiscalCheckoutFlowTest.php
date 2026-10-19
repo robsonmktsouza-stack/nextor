@@ -86,4 +86,44 @@ final class PdvFiscalCheckoutFlowTest extends TestCase
         self::assertStringContainsString("\$lastFiscalStatus==='authorized'", $pdv);
         self::assertStringContainsString("\$lastPdvNfceDocument?->protocol", $pdv);
     }
+
+    public function test_offline_danfe_is_distinct_from_internal_receipt_and_has_two_copies(): void
+    {
+        $receipt = file_get_contents(resource_path('views/pdv/receipt.blade.php'));
+        $cashier = file_get_contents(resource_path('views/pdv/index.blade.php'));
+        $danfe = file_get_contents(resource_path('views/fiscal/nfce-danfe.blade.php'));
+        self::assertNotFalse($receipt);
+        self::assertNotFalse($cashier);
+        self::assertNotFalse($danfe);
+
+        self::assertStringContainsString('DANFE contingência (2 vias)', $receipt);
+        self::assertStringContainsString('DANFE contingência (2 vias)', $cashier);
+        self::assertStringContainsString('offline_signed', $receipt);
+        self::assertStringContainsString("'/signed.xml'", $receipt);
+        self::assertStringContainsString("(!empty(\$danfe['offline'])?2:1)", $danfe);
+        self::assertStringContainsString('PENDENTE DE AUTORIZAÇÃO', $danfe);
+    }
+
+    public function test_automatic_nfce_is_always_enqueued_on_database_after_sale_commit(): void
+    {
+        $service = file_get_contents(app_path('Services/SalesService.php'));
+        $controller = file_get_contents(app_path('Http/Controllers/PdvController.php'));
+        self::assertNotFalse($service);
+        self::assertNotFalse($controller);
+
+        self::assertStringContainsString("ProcessNFCeJob::dispatch(\$fiscalJob->id)->onConnection('database')", $service);
+        self::assertStringNotContainsString("config('queue.default') === 'database'", $service);
+        self::assertStringContainsString("->route('pdv.receipt',\$sale)", $controller);
+    }
+
+    public function test_pdv_card_editor_checks_integration_and_transaction_uf_before_submit(): void
+    {
+        $js = file_get_contents(public_path('js/pdv.js'));
+        self::assertNotFalse($js);
+
+        self::assertStringContainsString("['1','2'].includes(data.integration_type)", $js);
+        self::assertStringContainsString('!!data.transaction_document !== !!data.transaction_state', $js);
+        self::assertStringContainsString("validUFs.includes(data.transaction_state)", $js);
+    }
+
 }
