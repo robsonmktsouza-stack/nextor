@@ -30,7 +30,8 @@ final class FiscalConciseLayoutTest extends TestCase
     public function test_nfce_create_keeps_actions_without_generic_tutorials(): void
     {
         $source=file_get_contents(resource_path('views/fiscal/nfce/create.blade.php'));
-        self::assertStringContainsString('data-nfce-tab="general"',$source);
+        self::assertStringContainsString('data-nfce-tab="{{ $key }}"',$source);
+        self::assertStringContainsString("'general'=>'Dados gerais'",$source);
         self::assertStringContainsString('id="nfceAddProduct"',$source);
         self::assertStringContainsString('id="nfceAddPayment"',$source);
         self::assertStringContainsString('id="nfceIssue"',$source);
