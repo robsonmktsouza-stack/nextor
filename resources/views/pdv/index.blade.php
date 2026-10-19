@@ -626,7 +626,7 @@
   <div class="pdv-operations-list">
     <button type="button" data-pdv-operation="suspend"><span><strong>Suspender venda</strong><small>Guarda o carrinho para atender depois.</small></span><kbd>Alt+0</kbd></button>
     <button type="button" data-pdv-operation="resume"><span><strong>Recuperar venda</strong><small>Retoma uma venda suspensa sem movimentar estoque antes da conclusão.</small></span><kbd>Alt+R</kbd></button>
-    <button type="button" data-pdv-operation="electronic"><span><strong>Cartão / TEF / POS</strong><small>Dados da integração, adquirente, bandeira, autorização e terminal.</small></span><kbd>Alt+T</kbd></button>
+    <button type="button" data-pdv-operation="electronic"><span><strong>Dados de cartão e PIX</strong><small>Integração, autorização e dados da instituição de pagamento.</small></span><kbd>Alt+T</kbd></button>
     <button type="button" data-pdv-operation="contingency"><span><strong>Contingência NFC-e</strong><small>Ativa ou encerra a preparação offline de novas NFC-e.</small></span><kbd>Alt+C</kbd></button>
     <button type="button" data-pdv-operation="cancel-nfce"><span><strong>Cancelamento NFC-e</strong><small>Coloca uma NFC-e autorizada na fila de cancelamento fiscal.</small></span><kbd>Alt+X</kbd></button>
     @if($pdvSettings['require_cash_opening'])
@@ -683,22 +683,22 @@
 
 <dialog class="pdv-quick-modal pdv-electronic-modal" id="pdvElectronicPaymentModal">
   <div class="pdv-modal-head">
-    <div><span>Alt+T</span><h2>Cartão / TEF / POS</h2><p>Dados que acompanham o grupo de pagamento eletrônico da NFC-e.</p></div>
+    <div><span>Alt+T</span><h2>Dados de cartão e PIX</h2><p>Informe os dados da transação que precisam acompanhar a NFC-e.</p></div>
     <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
   </div>
   <div class="pdv-electronic-body">
-    <div class="pdv-electronic-target" id="pdvElectronicTarget">Selecione uma forma de pagamento com cartão.</div>
+    <div class="pdv-electronic-target" id="pdvElectronicTarget">Selecione uma forma de pagamento com cartão ou PIX.</div>
     <div class="pdv-electronic-grid">
-      <label><span>Integração</span><select id="pdvElectronicIntegration"><option value="">Não informado</option><option value="1">1 — Integrado / TEF / POS integrado</option><option value="2">2 — POS não integrado</option></select></label>
-      <label><span>Bandeira</span><select id="pdvElectronicBrand"><option value="">Não informada</option><option value="01">01 — Visa</option><option value="02">02 — Mastercard</option><option value="03">03 — American Express</option><option value="04">04 — Sorocred</option><option value="05">05 — Diners Club</option><option value="06">06 — Elo</option><option value="07">07 — Hipercard</option><option value="08">08 — Aura</option><option value="09">09 — Cabal</option><option value="99">99 — Outros</option></select></label>
-      <label><span>CNPJ instituição / adquirente</span><input id="pdvElectronicInstitution" maxlength="18" placeholder="Somente números ou formatado"></label>
-      <label><span>Autorização da transação</span><input id="pdvElectronicAuthorization" maxlength="128" placeholder="cAut"></label>
-      <label><span>CNPJ beneficiário</span><input id="pdvElectronicBeneficiary" maxlength="18" placeholder="CNPJReceb"></label>
-      <label><span>Terminal</span><input id="pdvElectronicTerminal" maxlength="40" placeholder="idTermPag"></label>
+      <label><span>Integração</span><select id="pdvElectronicIntegration"><option value="">Não informado</option><option value="1">1 — Integrado ao sistema (TEF / pagamento integrado)</option><option value="2">2 — Não integrado (quando permitido)</option></select></label>
+      <label><span>Bandeira (apenas cartão)</span><select id="pdvElectronicBrand"><option value="">Não informada</option><option value="01">01 — Visa</option><option value="02">02 — Mastercard</option><option value="03">03 — American Express</option><option value="04">04 — Sorocred</option><option value="05">05 — Diners Club</option><option value="06">06 — Elo</option><option value="07">07 — Hipercard</option><option value="08">08 — Aura</option><option value="09">09 — Cabal</option><option value="99">99 — Outros</option></select></label>
+      <label><span>CNPJ da instituição de pagamento / adquirente</span><input id="pdvElectronicInstitution" maxlength="18" placeholder="Somente números ou formatado"></label>
+      <label><span>Código da transação</span><input id="pdvElectronicAuthorization" maxlength="128" placeholder="Autorização do cartão ou identificação do PIX"></label>
+      <label><span>CNPJ de quem recebe</span><input id="pdvElectronicBeneficiary" maxlength="18" placeholder="CNPJ beneficiário"></label>
+      <label><span>Terminal do pagamento</span><input id="pdvElectronicTerminal" maxlength="40" placeholder="Identificador do terminal, se houver"></label>
       <label><span>CNPJ da transação (quando informado, exige UF)</span><input id="pdvElectronicTransactionDocument" maxlength="18" placeholder="CNPJ do pagamento, quando aplicável"></label>
       <label><span>UF da transação</span><input id="pdvElectronicTransactionState" maxlength="2" placeholder="Ex.: BA"></label>
     </div>
-    <div class="pdv-operation-note">Esses campos são guardados na venda e seguem para o snapshot fiscal. A exigência final depende das regras da UF e do meio de pagamento.</div>
+    <div class="pdv-operation-note">Os dados informados acompanham a nota fiscal. Para cartão integrado, informe também CNPJ da adquirente e autorização. Para PIX, preencha os dados da integração quando aplicável; a exigência depende das regras da SEFAZ.</div>
     <button type="button" class="pdv-modal-primary" id="pdvElectronicApply">Salvar dados do pagamento <kbd>Ctrl+Enter</kbd></button>
   </div>
 </dialog>
