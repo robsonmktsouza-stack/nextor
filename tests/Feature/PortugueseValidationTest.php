@@ -28,8 +28,29 @@ final class PortugueseValidationTest extends TestCase
         );
 
         foreach (['required', 'numeric', 'gt.numeric', 'gte.numeric', 'decimal', 'exists'] as $rule) {
-            self::assertStringNotContainsString('validation.', __ ('validation.'.$rule));
+            self::assertStringNotContainsString('validation.', __('validation.'.$rule));
         }
+    }
+
+    public function test_authentication_and_pagination_messages_are_also_translated(): void
+    {
+        self::assertSame('Os dados de acesso informados não conferem.', __('auth.failed'));
+        self::assertSame('Não encontramos uma conta com esse e-mail.', __('passwords.user'));
+        self::assertSame('Próximo', __('pagination.next'));
+    }
+
+    public function test_decimal_errors_do_not_expose_translation_placeholders(): void
+    {
+        $validator = Validator::make(
+            ['amount' => '12.345'],
+            ['amount' => ['numeric', 'decimal:0,2']]
+        );
+
+        self::assertTrue($validator->fails());
+        $message = $validator->errors()->first('amount');
+        self::assertStringContainsString('casas decimais', $message);
+        self::assertStringNotContainsString(':decimal', $message);
+        self::assertStringNotContainsString('validation.', $message);
     }
 
     public function test_zero_quantity_and_zero_payment_have_human_readable_messages(): void
