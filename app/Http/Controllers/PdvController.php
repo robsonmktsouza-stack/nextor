@@ -478,7 +478,9 @@ class PdvController extends Controller
             $beneficiaryDocument=$this->normalizeCnpj($payment['beneficiary_document'] ?? null);
             $transactionState=strtoupper(trim((string)($payment['transaction_state'] ?? '')));
 
-            if($method->kind==='card' && empty($payment['integration_type'])) {
+            $fiscalKind=$method->fiscalKind();
+            if(in_array($fiscalKind,['card','credit_card','debit_card'],true)
+                && !in_array((string)($payment['integration_type'] ?? ''),['1','2'],true)) {
                 throw ValidationException::withMessages([
                     'payments'=>'Informe se o pagamento com cartão é integrado/TEF ou POS não integrado.',
                 ]);
