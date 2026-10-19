@@ -351,7 +351,7 @@ final class NFCeManualEditorTest extends TestCase
             'beneficiary_document','terminal_id','authorization_code',
             'card_brand','integration_type',
         ] as $field) {
-            self::assertStringContainsString("'"+$field+"'",$js);
+            self::assertStringContainsString("'".$field."'",$js);
         }
         self::assertStringContainsString('data-payment-detail',$js);
     }
