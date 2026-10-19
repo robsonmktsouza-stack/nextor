@@ -46,6 +46,13 @@ final class NFCeRtcTaxServiceTest extends TestCase
         ));
     }
 
+    public function test_normal_regime_without_rtc_is_blocked_even_if_sefaz_rejection_was_deferred(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('regime normal exige classificação');
+        (new NFCeRtcTaxService())->calculate($this->item([]),'3','2026-10-19');
+    }
+
     public function test_partial_rate_configuration_is_rejected(): void
     {
         $this->expectException(RuntimeException::class);
