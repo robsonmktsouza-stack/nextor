@@ -30,6 +30,16 @@ final class NFCeTaxCalculationService
         if ($crt === '4' && ($cfop !== '5102' || !in_array($csosn, ['102','300'], true))) {
             throw new RuntimeException('MEI (CRT 4) exige CFOP 5102 e CSOSN 102 ou 300 na NFC-e deste fluxo.');
         }
+        $hasRetainedFcp = false;
+        foreach (['fcp_st_retained_base','fcp_st_retained_rate','fcp_st_retained_value'] as $field) {
+            $hasRetainedFcp = $hasRetainedFcp || (isset($tax[$field]) && trim((string)$tax[$field]) !== '');
+        }
+        if ($hasRetainedFcp && !(
+            (in_array($crt, ['1','4'], true) && $csosn==='500')
+            || (in_array($crt, ['2','3'], true) && (string)($tax['icms_cst'] ?? '')==='60')
+        )) {
+            throw new RuntimeException('FCP-ST retido anteriormente só pode ser informado em CSOSN 500 ou CST 60.');
+        }
         if (in_array($crt, ['2','3'], true)) {
             $icms = $this->normalIcMS($tax, $item, $cfop, $origin);
         } elseif (in_array($csosn, ['102', '103', '300', '400'], true)) {
@@ -62,6 +72,7 @@ final class NFCeTaxCalculationService
                         : $this->moneyField($tax, $from);
                 }
             }
+            $this->appendRetainedFcp($icms, $tax, $factor);
         } else {
             throw new RuntimeException("CSOSN {$csosn} ainda não possui cálculo e XML NFC-e homologados.");
         }
@@ -133,6 +144,7 @@ final class NFCeTaxCalculationService
                     round((float)$this->moneyField($tax,'icms_substitutor_value')*$factor,2,PHP_ROUND_HALF_UP),2,'.',''
                 );
             }
+            $this->appendRetainedFcp($fields, $tax, $factor);
             return $fields;
         }
         if (!in_array($cfop, self::SIMPLE_CFOPS, true)) {
@@ -191,6 +203,32 @@ final class NFCeTaxCalculationService
             $fields['vICMS']=number_format($operationAmount,2,'.','');
         }
         return $fields;
+    }
+
+    /** ICMS-ST anterior com FCP retido documentado, sem recalcular o passado. */
+    private function appendRetainedFcp(array &$fields, array $tax, float $factor): void
+    {
+        $values = ['fcp_st_retained_base','fcp_st_retained_rate','fcp_st_retained_value'];
+        $filled = array_filter($values, static fn(string $field): bool =>
+            isset($tax[$field]) && trim((string)$tax[$field]) !== ''
+        );
+        if (!$filled) {
+            return;
+        }
+        if (count($filled)!==count($values)) {
+            throw new RuntimeException('FCP-ST anterior exige base, percentual e valor retido documentados.');
+        }
+        $rate = $this->rate($tax,'fcp_st_retained_rate');
+        if ((float)$rate>2.0) {
+            throw new RuntimeException('FCP-ST anterior acima de 2%: confira o documento de entrada e a regra estadual.');
+        }
+        $fields['vBCFCPSTRet'] = number_format(
+            round((float)$this->moneyField($tax,'fcp_st_retained_base')*$factor,2,PHP_ROUND_HALF_UP),2,'.',''
+        );
+        $fields['pFCPSTRet'] = $rate;
+        $fields['vFCPSTRet'] = number_format(
+            round((float)$this->moneyField($tax,'fcp_st_retained_value')*$factor,2,PHP_ROUND_HALF_UP),2,'.',''
+        );
     }
 
     private function contribution(string $type, array $tax, float $base, float $qty): array
