@@ -24,7 +24,9 @@
     'IBS / CBS'=>[
       ['cbs_rate','Alíquota CBS (%)'],['ibs_uf_rate','Alíquota IBS UF (%)'],
       ['ibs_municipal_rate','Alíquota IBS municipal (%)'],
-      ['cbs_reduction_rate','Redução CBS (%)'],['ibs_reduction_rate','Redução IBS (%)'],
+      ['cbs_reduction_rate','Redução CBS (%)'],
+      ['ibs_uf_reduction_rate','Redução IBS UF (%)'],
+      ['ibs_municipal_reduction_rate','Redução IBS municipal (%)'],
     ],
   ];
 @endphp
@@ -162,7 +164,7 @@
     <summary class="btn btn-secondary" style="cursor:pointer;display:inline-flex">Outros tributos</summary>
   <section class="editor-panel settings-panel" data-group-kind="products" @if($selectedKind==='services') hidden @endif>
     <div class="settings-panel-head"><div><h2>IBS / CBS</h2>
-      <p class="nfce-field-help">NFC-e: o cálculo integral já aceita CST 000, classificação 000001 e as três alíquotas configuradas, apenas para regime regular (CRT 2/3). Outros CSTs, redução, diferimento e regimes especiais exigem parametrização própria. Para Simples Nacional em 2026, não configure alíquota-teste automaticamente.</p>
+      <p class="nfce-field-help">NFC-e: CST 000/classificação 000001 tem tributação integral; CST 200/classificação 200003 permite alíquota zero de alimentos efetivamente enquadrados no Anexo I, com 100% de redução de IBS UF, IBS municipal e CBS. O enquadramento do produto deve ser conferido pela contabilidade. Outros CSTs e benefícios exigem regra específica. Para Simples Nacional em 2026, não configure alíquota-teste automaticamente.</p>
     </div></div>
     <div class="editor-grid cols-12 settings-grid">
       <label class="field col-3"><span>CST IBS/CBS</span><input maxlength="3" inputmode="numeric" name="tax_config[ibs_cbs_cst]" value="{{ $val('ibs_cbs_cst') }}"></label>
