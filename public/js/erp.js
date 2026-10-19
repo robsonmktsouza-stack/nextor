@@ -606,6 +606,10 @@
           if(item.top<box.top) menu.scrollTop-=box.top-item.top+8;
         }
         if(searchable)trigger.focus({preventScroll:true});
+      }else{
+        // O segundo clique também fecha o menu flutuante, sem deixar
+        // um popover órfão sobre o formulário.
+        wrapper._nextorHideMenu?.();
       }
     };
 
@@ -616,6 +620,15 @@
       }else if(!searchable) open();
     });
     if(searchable){
+      trigger.addEventListener('keydown',event=>{
+        // Com o valor já escolhido visível, uma nova digitação começa
+        // uma pesquisa limpa sem selecionar o texto em azul.
+        if(!wrapper.classList.contains('open') && event.key.length===1
+          && !event.ctrlKey && !event.altKey && !event.metaKey
+          && !event.isComposing){
+          trigger.value='';
+        }
+      });
       trigger.addEventListener('input',()=>{
         const query=trigger.value;
         if(!wrapper.classList.contains('open')) open();
