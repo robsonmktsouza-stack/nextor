@@ -442,7 +442,7 @@ final class NFCeManualEditorTest extends TestCase
             $payload=$this->postData($product);
             $payload['payments']=[[
                 'payment_method'=>$kind,'amount'=>'20.00','integration_type'=>'2',
-                'card_brand'=>'01',
+                'card_brand'=>$kind==='credit_card' ? '27' : '01',
             ]];
             $this->post(route('fiscal.nfce.store'),$payload)->assertSessionHasNoErrors();
         }
