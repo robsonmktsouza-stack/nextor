@@ -124,9 +124,7 @@
   </section>
 
   <section class="editor-panel settings-panel" data-group-kind="products" @if($selectedKind==='services') hidden @endif>
-    <div class="settings-panel-head"><div><h2>ICMS diferido e substituição tributária anterior</h2>
-      <p>Configure somente quando a operação utilizar CST 51 (diferimento), CST 60 (regime normal) ou CSOSN 500 (Simples). Os valores históricos devem vir das entradas fiscais; o sistema não estima o imposto retido.</p>
-    </div></div>
+    <div class="settings-panel-head"><div><h2>ICMS diferido e substituição tributária anterior</h2></div></div>
     <div class="editor-grid cols-12 settings-grid">
       <label class="field col-3"><span>Diferimento ICMS (%) — CST 51</span>
         <input type="number" min="0" max="100" step="0.0001" name="tax_config[icms_deferral_rate]" value="{{ $val('icms_deferral_rate') }}"></label>
@@ -152,8 +150,11 @@
         <input type="number" min="0" step="0.01" name="tax_config[fcp_st_retained_value]" value="{{ $val('fcp_st_retained_value') }}"></label>
       <label class="field col-3"><span>Percentual FCP-ST anterior (%)</span>
         <input type="number" min="0" max="2" step="0.0001" name="tax_config[fcp_st_retained_rate]" value="{{ $val('fcp_st_retained_rate') }}"></label>
-      <p class="nfce-field-help col-12">Somente para CSOSN 500 ou CST 60 com retenção anterior comprovada: informe a base, a alíquota e o valor efetivamente destacados no documento de entrada. Não use estes campos para FCP da venda atual.</p>
     </div>
+    <details class="erp-help-details">
+      <summary>Quando informar a retenção anterior?</summary>
+      <p>Somente CSOSN 500 ou CST 60. Use os valores reais do documento fiscal de entrada, nunca estimativas ou o FCP da venda atual.</p>
+    </details>
   </section>
 
   <section class="editor-panel settings-panel" data-group-kind="products" @if($selectedKind==='services') hidden @endif>
@@ -170,9 +171,11 @@
   <details data-group-kind="products" @if($selectedKind==='services') hidden @endif style="margin-bottom:14px">
     <summary class="btn btn-secondary" style="cursor:pointer;display:inline-flex">Outros tributos</summary>
   <section class="editor-panel settings-panel" data-group-kind="products" @if($selectedKind==='services') hidden @endif>
-    <div class="settings-panel-head"><div><h2>IBS / CBS</h2>
-      <p class="nfce-field-help">NFC-e: CST 000/classificação 000001 tem tributação integral; CST 200/classificação 200003 permite alíquota zero de alimentos efetivamente enquadrados no Anexo I, com 100% de redução de IBS UF, IBS municipal e CBS. O enquadramento do produto deve ser conferido pela contabilidade. Outros CSTs e benefícios exigem regra específica. Para Simples Nacional em 2026, não configure alíquota-teste automaticamente.</p>
-    </div></div>
+    <div class="settings-panel-head"><div><h2>IBS / CBS</h2></div></div>
+    <details class="erp-help-details">
+      <summary>Regras de enquadramento IBS/CBS</summary>
+      <p>CST 000 / 000001: tributação integral. CST 200 / 200003: redução de 100% para produtos legalmente enquadrados no Anexo I. Confira a classificação com a contabilidade. Não atribua alíquotas presumidas ao Simples Nacional.</p>
+    </details>
     <div class="editor-grid cols-12 settings-grid">
       <label class="field col-3"><span>CST IBS/CBS</span><input maxlength="3" inputmode="numeric" name="tax_config[ibs_cbs_cst]" value="{{ $val('ibs_cbs_cst') }}"></label>
       <label class="field col-3"><span>Classificação tributária</span><input maxlength="6" inputmode="numeric" name="tax_config[ibs_cbs_class]" value="{{ $val('ibs_cbs_class') }}"></label>
