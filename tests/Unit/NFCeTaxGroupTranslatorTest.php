@@ -51,11 +51,22 @@ final class NFCeTaxGroupTranslatorTest extends TestCase
         (new NFCeTaxGroupTranslator())->translate($this->group(['tax_config'=>['icms_st_rate'=>'18']]));
     }
 
-    public function test_rejects_non_emitted_ibs_classification(): void
+    public function test_normal_group_preserves_configured_standard_rtc_data_for_the_calculator(): void
     {
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('ainda não são gerados');
-        (new NFCeTaxGroupTranslator())->translate($this->group(['tax_config'=>['ibs_cbs_cst'=>'000']]));
+        $group=$this->group([
+            'icms_cst'=>'00',
+            'tax_config'=>[
+                'mod_bc'=>'3','icms_rate'=>'18',
+                'ibs_cbs_cst'=>'000','ibs_cbs_class'=>'000001',
+                'ibs_uf_rate'=>'0.1000','ibs_municipal_rate'=>'0.0000','cbs_rate'=>'0.9000',
+            ],
+        ]);
+        $tax=(new NFCeTaxGroupTranslator())->translate($group,'3');
+        self::assertSame('000',$tax['ibs_cbs_cst']);
+        self::assertSame('000001',$tax['ibs_cbs_class']);
+        self::assertSame('0.1000',$tax['ibs_uf_rate']);
+        self::assertSame('0.0000',$tax['ibs_municipal_rate']);
+        self::assertSame('0.9000',$tax['cbs_rate']);
     }
 
     public function test_rejects_icms_101_without_nfce_alternative(): void
