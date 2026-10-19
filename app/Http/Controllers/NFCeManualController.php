@@ -180,7 +180,7 @@ final class NFCeManualController extends Controller
         if ($customer && $consumerDocument==='') {
             $consumerDocument=preg_replace('/\D/','',(string)$customer->document);
         }
-        if ($consumerDocument!=='' && !in_array(strlen($consumerDocument),[11,14],true)) {
+        if ($consumerDocument!=='' && !BrazilianTaxId::valid($consumerDocument)) {
             throw ValidationException::withMessages([
                 'consumer_document'=>'O cliente selecionado não possui CPF ou CNPJ válido.',
             ]);
