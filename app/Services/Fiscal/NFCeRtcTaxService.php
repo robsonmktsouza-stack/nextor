@@ -22,7 +22,7 @@ final class NFCeRtcTaxService
      *  ibscbs:array,gibscbs:array,gibsuf:array,gibsmun:array,gcbs:array
      * }|null
      */
-    public function calculate(array $item, string $crt, ?string $issueDate = null): ?array
+    public function calculate(array $item, string $crt, ?string $issueDate = null, array $legacyTaxes = []): ?array
     {
         $tax = is_array($item['tax_defaults'] ?? null) ? $item['tax_defaults'] : [];
         $names = [
@@ -99,7 +99,22 @@ final class NFCeRtcTaxService
         if ($discount > $gross) {
             throw new RuntimeException('RTC: desconto maior que o valor bruto.');
         }
-        $base = round($gross - $discount, 2, PHP_ROUND_HALF_UP);
+        // LC 214/2025, art. 12, parágrafo 2º, V (2026-2032):
+        // ICMS, PIS e COFINS da operação não entram na base de IBS/CBS.
+        // Reaproveitar exclusivamente os valores já calculados para o XML
+        // pelo motor ICMS/PIS/COFINS, evitando duas bases divergentes.
+        $legacyDeduction = 0.0;
+        foreach (['icms'=>'vICMS', 'pis'=>'vPIS', 'cofins'=>'vCOFINS'] as $taxType=>$field) {
+            if (!array_key_exists($taxType, $legacyTaxes)) {
+                continue;
+            }
+            $value = $this->number($legacyTaxes[$taxType][$field] ?? 0, 'tributo '.$field);
+            $legacyDeduction += $value;
+        }
+        $base = round($gross - $discount - $legacyDeduction, 2, PHP_ROUND_HALF_UP);
+        if ($base < 0) {
+            throw new RuntimeException('RTC: ICMS, PIS e COFINS excedem o valor líquido do item.');
+        }
         $ufRate = $this->rate($tax, 'ibs_uf_rate');
         $munRate = $this->rate($tax, 'ibs_municipal_rate');
         $cbsRate = $this->rate($tax, 'cbs_rate');
