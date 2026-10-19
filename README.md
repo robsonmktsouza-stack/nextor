@@ -4,6 +4,12 @@ Sistema de gestão empresarial desenvolvido em **Laravel 13**, com PDV, vendas, 
 
 O projeto nasceu como **Nextor**. O repositório permanece com o endereço técnico original por compatibilidade com os ambientes e integrações existentes, mas o produto e a identidade visual passam a se chamar **Lumeron**.
 
+## Continuidade do desenvolvimento com IA
+
+Antes de programar neste repositório com ChatGPT, Codex, Copilot, Claude ou outro agente, leia [AGENTS.md](AGENTS.md) e o [guia de contexto em docs/ai/](docs/ai/README.md). O guia registra o estado da branch, arquitetura, decisões substituídas, restrições de segurança e [handoff entre sessões](docs/ai/HANDOFF.md).
+
+**Atenção:** a branch de trabalho de referência é `feature/acbr-nfe-bootstrap` (verifique se continua sendo a ativa); a `main` pode estar desatualizada. A documentação está versionada no GitHub, mas cada chat/agente precisa abrir os arquivos; não há sincronização automática do contexto por conversa.
+
 ## Identidade visual
 
 Os dois arquivos oficiais da marca estão incluídos em:
