@@ -25,6 +25,13 @@
   // para o módulo Fiscal após imprimir ou cancelar a impressão.
   // A situação da NFC-e é exibida no próprio PDV, sem supor autorização.
   $receiptAfterPrintUrl = route('pdv.index');
+  $canPrintAuthorizedDanfe = $nfceDocument?->status==='authorized'
+      && (str_ends_with((string)$nfceDocument->xml_path,'authorized.xml')
+          || str_ends_with((string)$nfceDocument->xml_path,'authorized-recovered.xml'));
+  $canPrintOfflineDanfe = $nfceDocument?->emission_mode==='offline'
+      && in_array($nfceDocument?->status,['offline_signed','offline_sending','pending'],true)
+      && (string)$nfceDocument?->xml_path==='fiscal/nfce/'.$nfceDocument->id.'/signed.xml';
+  $canPrintDanfe = $canPrintAuthorizedDanfe || $canPrintOfflineDanfe;
   $canPrepareNfce = auth()->user()->canAccess('fiscal')
       && $sale->status === 'completed'
       && $sale->operation_type === 'sale'
@@ -94,11 +101,9 @@ body{font-size:9px}
   @if($nfceDocument && auth()->user()->canAccess('fiscal'))
     <a href="{{ route('fiscal.show', $nfceDocument) }}">NFC-e {{ $nfceDocument->status==='authorized' ? 'autorizada' : 'da venda' }}</a>
   @endif
-  @if($nfceDocument?->status==='authorized'
-      && (str_ends_with((string)$nfceDocument->xml_path,'authorized.xml')
-          || str_ends_with((string)$nfceDocument->xml_path,'authorized-recovered.xml')))
+  @if($canPrintDanfe)
     <a href="{{ route('pdv.nfce.danfe',$nfceDocument) }}" target="_blank" rel="noopener noreferrer">
-      Imprimir DANFE NFC-e
+      {{ $canPrintOfflineDanfe ? 'DANFE contingência (2 vias)' : 'Imprimir DANFE NFC-e' }}
     </a>
   @endif
   <button type="button" data-reprint-receipt>Imprimir comprovante interno</button>
@@ -110,10 +115,10 @@ body{font-size:9px}
   @if($nfceDocument)
     <strong>NFC-e da venda #{{ $sale->id }}: {{ $nfceDocument->status === 'prepared' ? 'preparada para revisão' : $nfceDocument->status }}</strong>
     <p>A venda foi concluída e o documento fiscal está vinculado a ela. Cancelar a impressão não altera a NFC-e.</p>
-    @if($nfceDocument->status==='authorized'
-        && (str_ends_with((string)$nfceDocument->xml_path,'authorized.xml')
-            || str_ends_with((string)$nfceDocument->xml_path,'authorized-recovered.xml')))
-      <p><a class="action" href="{{ route('pdv.nfce.danfe',$nfceDocument) }}" target="_blank" rel="noopener noreferrer">Imprimir DANFE NFC-e autorizado</a></p>
+    @if($canPrintDanfe)
+      <p><a class="action" href="{{ route('pdv.nfce.danfe',$nfceDocument) }}" target="_blank" rel="noopener noreferrer">
+        {{ $canPrintOfflineDanfe ? 'Imprimir DANFE em contingência (2 vias; pendente de autorização)' : 'Imprimir DANFE NFC-e autorizado' }}
+      </a></p>
     @endif
     @if(auth()->user()->canAccess('fiscal'))
       <a class="action" href="{{ route('fiscal.show', $nfceDocument) }}">Abrir NFC-e da venda</a>
