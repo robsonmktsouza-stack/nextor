@@ -111,6 +111,16 @@
   const oldItems=json('nfceOldItems');
   const oldPayments=json('nfceOldPayments');
   const productMap=new Map(products.map(product=>[String(product.id),product]));
+  // Indexar a busca uma vez: nomes com acentos e códigos devem ser encontrados
+  // sem depender da ordem do cadastro. O catálogo original continua intacto.
+  const normalizeSearch=value=>String(value??'').normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').trim();
+  const searchCatalog=products.map(product=>({
+    product,
+    name:normalizeSearch(product.name),
+    sku:normalizeSearch(product.sku),
+    gtin:normalizeSearch(product.ean_gtin)
+  }));
   const rowItems=oldItems.filter(x=>productMap.has(String(x.product_id))).map(x=>({
     product_id:String(x.product_id),quantity:String(x.quantity||1),
     unit_price:String(x.unit_price??0),discount:String(x.discount??0)
@@ -292,11 +302,29 @@
   }
 
   function renderResults(){
-    const q=search.value.trim().toLocaleLowerCase('pt-BR');
-    const list=products.filter(product=>
-      !q || [product.name,product.sku,product.ean_gtin].some(value=>
-        String(value||'').toLocaleLowerCase('pt-BR').includes(q))
-    ).slice(0,14);
+    const q=normalizeSearch(search.value);
+    // Código/SKU exato primeiro; depois nome exato, prefixos e coincidências
+    // parciais. Preservar ordem do cadastro para itens com a mesma relevância.
+    // Manter só 14 candidatos evita ordenar todo o catálogo a cada tecla.
+    const top=[];
+    for(const entry of searchCatalog){
+      const {name,sku,gtin}=entry;
+      let rank;
+      if(!q) rank=6;
+      else if(sku===q||gtin===q) rank=0;
+      else if(name===q) rank=1;
+      else if((sku&&sku.startsWith(q))||(gtin&&gtin.startsWith(q))) rank=2;
+      else if(name.startsWith(q)) rank=3;
+      else if((sku&&sku.includes(q))||(gtin&&gtin.includes(q))) rank=4;
+      else if(name.includes(q)) rank=5;
+      else continue;
+
+      const at=top.findIndex(hit=>hit.rank>rank);
+      if(at<0 && top.length===14) continue;
+      top.splice(at<0?top.length:at,0,{product:entry.product,rank});
+      if(top.length>14)top.pop();
+    }
+    const list=top.map(hit=>hit.product);
     results.innerHTML=list.map(product=>{
       const inSale=rowItems.find(row=>row.product_id===String(product.id));
       return '<button type="button" role="option" data-pick-product="'+product.id+'">'+
