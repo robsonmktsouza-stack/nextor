@@ -270,7 +270,20 @@
             </td>
           </tr>
         @empty
-          <tr><td colspan="10" class="empty-cell">Nenhum documento fiscal encontrado neste período.</td></tr>
+          <tr>
+            <td colspan="10" class="empty-cell">
+              <div class="fiscal-empty-state" role="status">
+                @include('partials.icon',['name'=>'receipt','size'=>23])
+                <strong>Nenhum documento fiscal encontrado neste período.</strong>
+                <span>Experimente outro período ou ajuste os filtros para consultar documentos anteriores.</span>
+                @if($tab==='nfe')
+                  <a href="{{ route('fiscal.nfe.create') }}">Criar nova NF-e</a>
+                @elseif($tab==='nfce')
+                  <a href="{{ route('fiscal.nfce.create') }}">Criar nova NFC-e</a>
+                @endif
+              </div>
+            </td>
+          </tr>
         @endforelse
         </tbody>
       </table>
