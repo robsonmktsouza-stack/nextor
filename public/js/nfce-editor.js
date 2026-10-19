@@ -190,6 +190,8 @@
       panel.classList.toggle('active',active);
       panel.hidden=!active;
     });
+    // Um popup aberto na aba Produtos não pode permanecer sobre outra aba.
+    if(tab!=='products') toggleResults(false);
     if(focus) target.focus();
   }
   tabs.forEach(button=>{
@@ -266,10 +268,79 @@
   const search=el('nfceProductSearch');
   const results=el('nfceProductResults');
   const picker=el('nfceProductPicker');
-  const toggleResults=visible=>{
-    results.hidden=!visible;
-    search.setAttribute('aria-expanded',visible?'true':'false');
+  const productPanel=el('nfcePanel-products');
+  const productBody=form.querySelector('.nfe-workspace-body');
+  const dialogFooter=form.querySelector('.nfce-savebar,.nfe-dialog-footer,.dialog-footer');
+  // Os modais fiscais têm rolagem e overflow isolados. Como nos seletores
+  // globais, a Popover API coloca A MESMA lista na top layer do navegador,
+  // sem mover o elemento de seu contêiner e sem alterar o fluxo do formulário.
+  let popoverAvailable=typeof results.showPopover==='function'
+    && typeof results.hidePopover==='function';
+  if(popoverAvailable)results.setAttribute('popover','manual');
+  const layoutResults=()=>{
+    if(!popoverAvailable||results.hidden||!results.matches(':popover-open'))return;
+    const rect=search.getBoundingClientRect();
+    const viewportWidth=document.documentElement.clientWidth||window.innerWidth;
+    const viewportHeight=window.innerHeight;
+    const margin=8;
+    const bodyRect=productBody?.getBoundingClientRect();
+    // Ao rolar o campo para fora da área útil, fechar em vez de deixar
+    // um menu flutuante órfão sobre os controles da tela.
+    if(productPanel.hidden||rect.bottom<=margin||rect.top>=viewportHeight-margin
+      ||rect.right<=margin||rect.left>=viewportWidth-margin
+      ||(bodyRect&&(rect.bottom<=bodyRect.top||rect.top>=bodyRect.bottom))){
+      toggleResults(false);
+      return;
+    }
+    const width=Math.min(rect.width,viewportWidth-margin*2);
+    const left=Math.max(margin,Math.min(rect.left,viewportWidth-margin-width));
+    const footerTop=dialogFooter&&!dialogFooter.hidden
+      ?dialogFooter.getBoundingClientRect().top:viewportHeight;
+    const belowLimit=Math.min(viewportHeight-margin,footerTop-margin);
+    const below=Math.max(0,belowLimit-rect.bottom-4);
+    const above=Math.max(0,rect.top-Math.max(margin,bodyRect?.top||margin)-4);
+    const desired=Math.min(280,results.scrollHeight);
+    const dropUp=below<Math.min(160,desired)&&above>below;
+    const space=dropUp?above:below;
+    const height=Math.max(0,Math.min(desired,space));
+    if(height<36){toggleResults(false);return;}
+    results.style.width=width+'px';
+    results.style.minWidth='0';
+    results.style.maxWidth=width+'px';
+    results.style.left=left+'px';
+    results.style.right='auto';
+    results.style.top=(dropUp?rect.top-4-height:rect.bottom+4)+'px';
+    results.style.bottom='auto';
+    results.style.maxHeight=height+'px';
   };
+  const toggleResults=visible=>{
+    if(!visible){
+      if(popoverAvailable&&results.matches(':popover-open'))results.hidePopover();
+      results.hidden=true;
+      search.setAttribute('aria-expanded','false');
+      return;
+    }
+    if(productPanel.hidden)return;
+    results.hidden=false;
+    if(popoverAvailable&&!results.matches(':popover-open')){
+      try{
+        results.showPopover();
+      }catch(_){
+        // Navegadores antigos continuam com a lista absoluta original.
+        popoverAvailable=false;
+        results.removeAttribute('popover');
+      }
+    }
+    search.setAttribute('aria-expanded','true');
+    layoutResults();
+  };
+  // Reposicionar quando a área do modal rolar, sem reabrir a pesquisa.
+  document.addEventListener('scroll',event=>{
+    if(event.target!==results)layoutResults();
+  },true);
+  window.addEventListener('resize',layoutResults);
+  window.visualViewport?.addEventListener('resize',layoutResults);
+  window.visualViewport?.addEventListener('scroll',layoutResults);
   function addProduct(id){
     const key=String(id);
     const product=productMap.get(key);
