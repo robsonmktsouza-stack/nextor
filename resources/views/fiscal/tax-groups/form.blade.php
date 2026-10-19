@@ -122,6 +122,32 @@
   </section>
 
   <section class="editor-panel settings-panel" data-group-kind="products" @if($selectedKind==='services') hidden @endif>
+    <div class="settings-panel-head"><div><h2>ICMS diferido e substituição tributária anterior</h2>
+      <p>Configure somente quando a operação utilizar CST 51 (diferimento), CST 60 (regime normal) ou CSOSN 500 (Simples). Os valores históricos devem vir das entradas fiscais; o sistema não estima o imposto retido.</p>
+    </div></div>
+    <div class="editor-grid cols-12 settings-grid">
+      <label class="field col-3"><span>Diferimento ICMS (%) — CST 51</span>
+        <input type="number" min="0" max="100" step="0.0001" name="tax_config[icms_deferral_rate]" value="{{ $val('icms_deferral_rate') }}"></label>
+      <label class="field col-9"><span>Fundamento legal — CST 51</span>
+        <input maxlength="255" name="tax_config[icms_deferral_legal_basis]" value="{{ $val('icms_deferral_legal_basis') }}" placeholder="Dispositivo legal que fundamenta o diferimento"></label>
+      <label class="field col-3"><span>Apuração da retenção anterior</span>
+        <select name="tax_config[st_retained_amount_scope]">
+          <option value="">Selecione</option>
+          <option value="unit" @selected($val('st_retained_amount_scope')==='unit')>Por unidade</option>
+          <option value="line" @selected($val('st_retained_amount_scope')==='line')>Pelo valor total do item</option>
+        </select></label>
+      <label class="field col-3"><span>Base anterior do ICMS-ST (R$)</span>
+        <input type="number" min="0" step="0.01" name="tax_config[icms_st_retained_base]" value="{{ $val('icms_st_retained_base') }}"></label>
+      <label class="field col-3"><span>ICMS-ST retido anteriormente (R$)</span>
+        <input type="number" min="0" step="0.01" name="tax_config[icms_st_retained_value]" value="{{ $val('icms_st_retained_value') }}"></label>
+      <label class="field col-3"><span>Alíquota suportada pelo consumidor (%)</span>
+        <input type="number" min="0" max="100" step="0.0001" name="tax_config[st_retained_rate]" value="{{ $val('st_retained_rate') }}"></label>
+      <label class="field col-3"><span>ICMS próprio do substituto (R$)</span>
+        <input type="number" min="0" step="0.01" name="tax_config[icms_substitutor_value]" value="{{ $val('icms_substitutor_value') }}"></label>
+    </div>
+  </section>
+
+  <section class="editor-panel settings-panel" data-group-kind="products" @if($selectedKind==='services') hidden @endif>
     <div class="settings-panel-head"><div><h2>PIS / COFINS</h2></div></div>
     <div class="editor-grid cols-12 settings-grid">
       <label class="field col-3"><span>CST PIS</span><input name="pis_cst" maxlength="2" inputmode="numeric" value="{{ old('pis_cst',$group->pis_cst) }}" placeholder="Ex.: 49"></label>
