@@ -140,7 +140,7 @@ final class NFCeRtcTaxServiceTest extends TestCase
     public function test_other_cst_cannot_be_taxed_using_integral_formula(): void
     {
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('CST 000');
+        $this->expectExceptionMessage('sem mapeamento específico');
         (new NFCeRtcTaxService())->calculate($this->regular(['ibs_cbs_cst'=>'200']),'3','2026-10-19');
     }
 
