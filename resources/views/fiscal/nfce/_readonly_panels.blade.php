@@ -6,7 +6,6 @@
 
 <section class="editor-tab-panel active" id="nfcePanel-general" role="tabpanel" aria-labelledby="nfceTab-general" data-nfce-panel="general">
   <div class="nfe-general-card">
-    <div class="nfe-section-title"><h3>Dados gerais</h3></div>
     <div class="editor-grid cols-12">
       <label class="field col-4"><span>Origem da NFC-e</span>
         <input type="text" value="{{ $readOnlyDocument->sale_id ? 'Venda #'.$readOnlyDocument->sale_id : 'Emissão registrada' }}" readonly>
@@ -32,7 +31,6 @@
 
 <section class="editor-tab-panel" id="nfcePanel-consumer" role="tabpanel" aria-labelledby="nfceTab-consumer" data-nfce-panel="consumer" hidden>
   <div class="nfe-general-card">
-    <div class="nfe-section-title"><h3>Consumidor</h3></div>
     <div class="editor-grid cols-12">
       <label class="field col-6"><span>Consumidor</span>
         <input type="text" value="{{ $frozenConsumerName ?: 'Consumidor não identificado' }}" readonly>
@@ -46,7 +44,6 @@
 
 <section class="editor-tab-panel" id="nfcePanel-products" role="tabpanel" aria-labelledby="nfceTab-products" data-nfce-panel="products" hidden>
   <div class="nfe-general-card">
-    <div class="nfe-section-title"><h3>Produtos</h3></div>
     <div class="nfce-item-table-wrap">
       <table class="nfce-item-table nfce-readonly-items">
         <thead><tr><th>Produto</th><th>Quantidade</th><th>Preço</th><th>Desconto</th><th>Total</th></tr></thead>
@@ -70,7 +67,6 @@
 
 <section class="editor-tab-panel" id="nfcePanel-payment" role="tabpanel" aria-labelledby="nfceTab-payment" data-nfce-panel="payment" hidden>
   <div class="nfe-general-card">
-    <div class="nfe-section-title"><h3>Pagamento</h3></div>
     <div class="nfce-item-table-wrap">
       <table class="nfce-item-table nfce-readonly-payments">
         <thead><tr><th>Forma de pagamento</th><th>Valor</th></tr></thead>
@@ -91,7 +87,6 @@
 
 <section class="editor-tab-panel" id="nfcePanel-summary" role="tabpanel" aria-labelledby="nfceTab-summary" data-nfce-panel="summary" hidden>
   <div class="nfe-general-card">
-    <div class="nfe-section-title"><h3>Resumo da NFC-e</h3></div>
     <div class="nfce-summary-grid">
       <div><span>Subtotal</span><strong>{{ $money($frozenTotals['subtotal']) }}</strong></div>
       <div><span>Desconto</span><strong>{{ $money($frozenTotals['discount']) }}</strong></div>
