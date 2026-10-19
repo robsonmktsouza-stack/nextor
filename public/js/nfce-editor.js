@@ -130,7 +130,13 @@
   const tabs=[...form.querySelectorAll('[data-nfce-tab]')];
   const panels=[...form.querySelectorAll('[data-nfce-panel]')];
   const fmt=cents=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(cents/100);
-  const cents=x=>Math.round(Math.max(0,Number(String(x||0).replace(',','.'))||0)*100);
+  // Campos monetários globais podem estar formatados em pt-BR (1.234,56).
+  const decimal=x=>{
+    let value=String(x??0).trim();
+    if(value.includes(','))value=value.replace(/\./g,'').replace(',','.');
+    return Number(value)||0;
+  };
+  const cents=x=>Math.round(Math.max(0,decimal(x))*100);
   const mills=x=>Math.round(Math.max(0,Number(String(x||0).replace(',','.'))||0)*1000);
   const text=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   // Mensagem imediata; o servidor repete os dígitos verificadores antes
@@ -225,7 +231,7 @@
         '<input type="hidden" name="items['+index+'][product_id]" value="'+row.product_id+'"></td>'+
         '<td><input type="number" min="0.001" max="9999999999" step="0.001" name="items['+index+'][quantity]" data-item-field="quantity" value="'+text(row.quantity)+'" required></td>'+
         '<td><input type="number" min="0" max="9999999999.99" step="0.01" name="items['+index+'][unit_price]" data-item-field="unit_price" value="'+text(row.unit_price)+'" required></td>'+
-        '<td><input type="number" min="0" max="9999999999.99" step="0.01" name="items['+index+'][discount]" data-item-field="discount" value="'+text(row.discount)+'"></td>'+
+        '<td><input type="number" min="0" max="9999999999.99" step="0.01" name="items['+index+'][discount]" data-number-kind="money" data-item-field="discount" value="'+text(row.discount)+'"></td>'+
         '<td><strong data-item-total>'+fmt(lineTotal(row))+'</strong></td>'+
         '<td><button type="button" data-remove-item="'+index+'" class="nfce-remove" title="Remover produto" aria-label="Remover produto">'+trashIcon+'</button></td>'+
         '</tr>';
@@ -247,44 +253,99 @@
     rowItems.splice(Number(button.dataset.removeItem),1);
     renderItems();
   });
-  function addProduct(id){
-    if(!productMap.has(String(id))) return;
-    const product=productMap.get(String(id));
-    rowItems.push({product_id:String(id),quantity:'1',unit_price:Number(product.sale_price||0).toFixed(2),discount:'0.00'});
-    el('nfceProductSearch').value='';
-    el('nfceProductResults').hidden=true;
-    renderItems();
-    el('nfceItems').querySelector('tr:last-child [data-item-field="quantity"]')?.focus();
-  }
-
   const search=el('nfceProductSearch');
   const results=el('nfceProductResults');
+  const picker=el('nfceProductPicker');
+  const toggleResults=visible=>{
+    results.hidden=!visible;
+    search.setAttribute('aria-expanded',visible?'true':'false');
+  };
+  function addProduct(id){
+    const key=String(id);
+    const product=productMap.get(key);
+    if(!product)return;
+
+    // Uma NFC-e mantém uma linha por produto; nova seleção soma 1 unidade
+    // e preserva preço e desconto eventualmente editados pelo operador.
+    const existing=rowItems.find(row=>row.product_id===key);
+    if(existing){
+      const current=decimal(existing.quantity);
+      existing.quantity=String(Math.round((current+1)*1000)/1000);
+    }else{
+      rowItems.push({
+        product_id:key,
+        quantity:'1',
+        unit_price:Number(product.sale_price||0).toFixed(2),
+        discount:'0.00'
+      });
+    }
+
+    renderItems();
+    const row=[...el('nfceItems').querySelectorAll('[data-idx]')]
+      .find((node)=>rowItems[Number(node.dataset.idx)]?.product_id===key);
+    row?.classList.add('nfce-item-added');
+    // Não deslocar o foco para a quantidade: o operador pode buscar
+    // repetidamente o mesmo item ou passar o próximo código de barras.
+    search.value='';
+    search.focus({preventScroll:true});
+    toggleResults(false);
+  }
+
   function renderResults(){
     const q=search.value.trim().toLocaleLowerCase('pt-BR');
-    const list=products.filter(p=>!q || [p.name,p.sku,p.ean_gtin].some(value=>String(value||'').toLocaleLowerCase('pt-BR').includes(q))).slice(0,14);
-    results.innerHTML=list.map(p=>
-      '<button type="button" role="option" data-pick-product="'+p.id+'"><span><strong>'+text(p.name)+'</strong><small>'+text(p.sku||'')+'</small></span><b>'+fmt(cents(p.sale_price))+'</b></button>'
-    ).join('') || '<p>Nenhum produto encontrado.</p>';
-    results.hidden=false;
+    const list=products.filter(product=>
+      !q || [product.name,product.sku,product.ean_gtin].some(value=>
+        String(value||'').toLocaleLowerCase('pt-BR').includes(q))
+    ).slice(0,14);
+    results.innerHTML=list.map(product=>{
+      const inSale=rowItems.find(row=>row.product_id===String(product.id));
+      return '<button type="button" role="option" data-pick-product="'+product.id+'">'+
+        '<span><strong>'+text(product.name)+'</strong><small>'+text(product.sku||'')+
+        (inSale?' · Na nota: '+text(inSale.quantity)+' (selecionar soma +1)':'')+
+        '</small></span><b>'+fmt(cents(product.sale_price))+'</b></button>';
+    }).join('') || '<p>Nenhum produto encontrado.</p>';
+    toggleResults(true);
   }
   search.addEventListener('input',renderResults);
   search.addEventListener('focus',renderResults);
   search.addEventListener('keydown',event=>{
-    if(event.key==='Escape'){results.hidden=true;return;}
+    if(event.key==='Escape'){
+      toggleResults(false);
+      return;
+    }
+    if(event.key==='ArrowDown'&&!results.hidden){
+      const first=results.querySelector('[data-pick-product]');
+      if(first){event.preventDefault();first.focus();}
+      return;
+    }
     if(event.key==='Enter'&&!results.hidden){
       const first=results.querySelector('[data-pick-product]');
-      if(first){event.preventDefault();addProduct(first.dataset.pickProduct)}
+      if(first){
+        event.preventDefault();
+        addProduct(first.dataset.pickProduct);
+      }
     }
   });
   results.addEventListener('click',event=>{
     const button=event.target.closest('[data-pick-product]');
-    if(button) addProduct(button.dataset.pickProduct);
+    if(button)addProduct(button.dataset.pickProduct);
+  });
+  results.addEventListener('keydown',event=>{
+    if(event.key==='Escape'){
+      event.preventDefault();
+      toggleResults(false);
+      search.focus({preventScroll:true});
+    }
   });
   document.addEventListener('click',event=>{
-    if(!results.contains(event.target)&&event.target!==search) results.hidden=true;
+    // O botão Localizar integra a mesma barra. Não fechar a lista no
+    // mesmo clique que a abriu (comportamento antigo).
+    if(!picker.contains(event.target))toggleResults(false);
   });
   el('nfceAddProduct').addEventListener('click',()=>{
-    activateTab('products');search.focus();renderResults();
+    activateTab('products');
+    search.focus({preventScroll:true});
+    renderResults();
   });
 
   function paymentInput(index,payment,field,label,placeholder='',length=40){
