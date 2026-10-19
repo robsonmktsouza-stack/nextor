@@ -411,7 +411,8 @@
       const trigger=wrapper.querySelector('.ui-select-trigger');
       const menu=wrapper.querySelector('.ui-select-menu');
       if(trigger) trigger.setAttribute('aria-expanded','false');
-      if(menu) menu.hidden=true;
+      wrapper._nextorHideMenu?.();
+      if(!wrapper._nextorHideMenu && menu) menu.hidden=true;
       wrapper._nextorReset?.();
     });
   };
@@ -450,11 +451,18 @@
     menu.hidden=true;
     menu.setAttribute('role','listbox');
     menu.id='ui-select-menu-'+(++uiSelectSeq);
+    // A camada superior evita recortes por cards, grids e modais.
+    let useTopLayer=typeof menu.showPopover==='function' && typeof menu.hidePopover==='function';
+    if(useTopLayer) menu.setAttribute('popover','manual');
     trigger.setAttribute('aria-controls',menu.id);
 
     select.insertAdjacentElement('afterend',wrapper);
     wrapper.appendChild(trigger);
     wrapper.appendChild(menu);
+    wrapper._nextorHideMenu=()=>{
+      if(useTopLayer && menu.matches(':popover-open')) menu.hidePopover();
+      menu.hidden=true;
+    };
 
     let optionsBuilt=false;
     const normalize=text=>String(text||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').trim();
@@ -513,8 +521,7 @@
     wrapper._nextorReset=()=>{
       if(searchable) trigger.value=select.options[select.selectedIndex]?.textContent.trim()||'';
     };
-    // A largura do popup nunca deve depender diretamente do comprimento
-    // do texto da opção: no estoque isso ultrapassava o cartão e a tela.
+    // Alinha a lista com o campo sem cortá-la em áreas roláveis.
     const positionMenu=()=>{
       if(!wrapper.classList.contains('open') || menu.hidden) return;
       const rect=trigger.getBoundingClientRect();
@@ -522,26 +529,51 @@
       const viewportWidth=document.documentElement.clientWidth || window.innerWidth;
       const viewportHeight=document.documentElement.clientHeight || window.innerHeight;
       const margin=10;
+      if(rect.bottom<=0 || rect.top>=viewportHeight || rect.right<=0 || rect.left>=viewportWidth){
+        closeUiSelects();
+        return;
+      }
       const toolbar=!!wrapper.closest('.toolbar-filters');
       const maxWidth=Math.max(120,viewportWidth-margin*2);
       const preferred=toolbar ? rect.width : Math.max(rect.width,Math.min(380,menu.scrollWidth));
       const width=Math.min(preferred,maxWidth);
-      // Align with the trigger until it would leave the viewport, then
-      // slide LEFT instead of covering space outside the window.
       const left=Math.max(margin,Math.min(rect.left,viewportWidth-margin-width));
       menu.style.width=width+'px';
       menu.style.minWidth='0';
       menu.style.maxWidth=width+'px';
-      menu.style.left=(left-wrapperRect.left)+'px';
+      menu.style.left=(useTopLayer ? left : left-wrapperRect.left)+'px';
       menu.style.right='auto';
 
-      const below=Math.max(0,viewportHeight-rect.bottom-margin-4);
+      // A barra de Salvar e os rodapés de modal não podem encobrir o menu.
+      const dialog=wrapper.closest('dialog[open], .nextor-modal-window, .nfe-workspace-dialog');
+      const footer=dialog
+        ? dialog.querySelector('.dialog-footer, .nfe-dialog-footer, .settings-savebar, .editor-savebar')
+        : document.querySelector('.settings-savebar, .editor-savebar');
+      let bottomLimit=viewportHeight-margin;
+      if(footer && !footer.hidden){
+        const bounds=footer.getBoundingClientRect();
+        if(bounds.top>rect.bottom && bounds.top<bottomLimit
+          && bounds.left<rect.right && bounds.right>rect.left){
+          bottomLimit=Math.min(bottomLimit,bounds.top-6);
+        }
+      }
+      const below=Math.max(0,bottomLimit-rect.bottom-4);
       const above=Math.max(0,rect.top-margin-4);
-      const preferredHeight=Math.min(searchable?340:260,menu.scrollHeight);
-      const dropUp=below<Math.min(140,preferredHeight) && above>below;
+      const desiredHeight=Math.min(searchable?340:260,menu.scrollHeight);
+      const dropUp=below<Math.min(150,desiredHeight) && above>below;
       wrapper.classList.toggle('drop-up',dropUp);
       const space=dropUp?above:below;
-      menu.style.maxHeight=Math.max(52,Math.min(searchable?340:260,space))+'px';
+      const height=Math.max(24,Math.min(searchable?340:260,space));
+      menu.style.maxHeight=height+'px';
+      if(useTopLayer){
+        const actualHeight=Math.min(menu.scrollHeight,height);
+        const top=dropUp ? rect.top-4-actualHeight : rect.bottom+4;
+        menu.style.top=Math.max(margin,Math.min(top,viewportHeight-margin-actualHeight))+'px';
+        menu.style.bottom='auto';
+      }else{
+        menu.style.top='';
+        menu.style.bottom='';
+      }
     };
     // One shared handler for every open select; no extra listeners per field.
     wrapper._nextorLayout=positionMenu;
@@ -551,8 +583,16 @@
       closeUiSelects(wrapper);
       wrapper.classList.toggle('open',willOpen);
       trigger.setAttribute('aria-expanded',willOpen?'true':'false');
-      menu.hidden=!willOpen;
       if(willOpen){
+        menu.hidden=false;
+        if(useTopLayer){
+          try{
+            menu.showPopover();
+          }catch(_){
+            useTopLayer=false;
+            menu.removeAttribute('popover');
+          }
+        }
         ensureOptions();
         sync();
         filterOptions('');
@@ -572,7 +612,7 @@
     trigger.addEventListener('click',()=>{
       if(!wrapper.classList.contains('open')){
         open();
-        if(searchable) trigger.select();
+        // Sem realçar automaticamente o texto do campo.
       }else if(!searchable) open();
     });
     if(searchable){
@@ -600,7 +640,7 @@
       if(!wrapper.classList.contains('open')){
         open();
         if(key==='Enter'||key===' '){
-          if(searchable)trigger.select();
+          // Sem realçar automaticamente o texto do campo.
           return;
         }
       }
@@ -640,10 +680,10 @@
       ensureOptions();
       sync();
       trigger.focus();
-      wrapper.classList.add('open');
-      menu.hidden=false;
-      trigger.setAttribute('aria-expanded','true');
-      positionMenu();
+      // Validação abre a mesma lista, sem alterar a seleção real.
+      closeUiSelects();
+      wrapper.classList.remove('open');
+      open();
     });
     new MutationObserver(mutations=>{
       if(optionsBuilt && mutations.some(m=>m.type==='childList'||m.target.tagName==='OPTION')) buildOptions();
@@ -660,6 +700,11 @@
     document.querySelectorAll('.ui-select.open').forEach(wrapper=>wrapper._nextorLayout?.());
   };
   window.addEventListener('resize',repositionOpenSelects);
+  window.visualViewport?.addEventListener('resize',repositionOpenSelects);
+  window.visualViewport?.addEventListener('scroll',repositionOpenSelects);
+  document.addEventListener('close',event=>{
+    if(event.target?.matches?.('dialog')) closeUiSelects();
+  },true);
   document.addEventListener('scroll',event=>{
     if(event.target?.closest?.('.ui-select-menu')) return;
     repositionOpenSelects();
