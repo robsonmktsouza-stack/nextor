@@ -1366,8 +1366,23 @@
         }
       }
 
-      if(data.transaction_state && data.transaction_state.length!==2){
-        notify('Informe a UF do pagamento com 2 letras.','warning');
+      if(!['1','2'].includes(data.integration_type)){
+        notify('Informe se o cartão foi pago em TEF/POS integrado ou POS não integrado.','warning');
+        electronicIntegration?.focus();
+        return;
+      }
+
+      if(!!data.transaction_document !== !!data.transaction_state){
+        notify('Quando informar o CNPJ da transação, informe também a UF do pagamento.','warning');
+        electronicTransactionDocument?.focus();
+        return;
+      }
+
+      const validUFs=['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG',
+        'PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
+      if(data.transaction_state && !validUFs.includes(data.transaction_state)){
+        notify('Selecione uma UF brasileira válida para o pagamento.','warning');
+        electronicTransactionState?.focus();
         return;
       }
 
