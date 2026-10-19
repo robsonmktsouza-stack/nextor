@@ -23,6 +23,6 @@ final class NFCeCardBrands
 
     public static function codes(): array
     {
-        return array_keys(self::LABELS);
+        return array_map(static fn(int|string $code): string => str_pad((string)$code,2,'0',STR_PAD_LEFT),array_keys(self::LABELS));
     }
 }
