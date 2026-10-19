@@ -33,11 +33,9 @@ final class PdvFiscalCheckoutFlowTest extends TestCase
         self::assertStringContainsString("\$receiptAfterPrintUrl = route('pdv.index');", $receipt);
         self::assertStringContainsString('window.location.assign(afterPrintUrl)', $receipt);
 
-        $calculation = substr(
-            $receipt,
-            strpos($receipt, '\$receiptAfterPrintUrl = route('),
-            240
-        );
+        $offset = strpos($receipt, '$receiptAfterPrintUrl = route(');
+        self::assertNotFalse($offset);
+        $calculation = substr($receipt, $offset, 240);
         self::assertStringNotContainsString("route('fiscal.show'", $calculation);
         self::assertStringContainsString('Imprimir comprovante interno', $receipt);
         self::assertStringContainsString('SEM VALOR FISCAL', $receipt);
@@ -57,7 +55,7 @@ final class PdvFiscalCheckoutFlowTest extends TestCase
         self::assertStringContainsString('Não repita a venda nem reenvie a nota.', $view);
         self::assertStringContainsString('NFC-e rejeitada.', $view);
         self::assertStringContainsString('A autorização ainda não foi confirmada.', $view);
-        self::assertStringContainsString('Em contingência', $view);
+        self::assertStringContainsString('em contingência', $view);
     }
 
     public function test_credit_and_debit_require_explicit_integration_in_preflight_and_xml(): void
