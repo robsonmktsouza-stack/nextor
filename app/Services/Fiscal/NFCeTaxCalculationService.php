@@ -92,6 +92,21 @@ final class NFCeTaxCalculationService
         if (!in_array($cst, ['00', '20', '40', '41', '51', '60'], true)) {
             throw new RuntimeException("CST ICMS {$cst} do regime normal não possui cálculo mapeado.");
         }
+        foreach ([
+            'icms_deferral_rate','icms_deferral_legal_basis',
+        ] as $field) {
+            if ($cst !== '51' && isset($tax[$field]) && trim((string)$tax[$field]) !== '') {
+                throw new RuntimeException("CST {$cst}: {$field} somente é aplicável ao CST 51.");
+            }
+        }
+        foreach ([
+            'st_retained_amount_scope','icms_st_retained_base','icms_st_retained_value',
+            'st_retained_rate','icms_substitutor_value',
+        ] as $field) {
+            if ($cst !== '60' && isset($tax[$field]) && trim((string)$tax[$field]) !== '') {
+                throw new RuntimeException("CST {$cst}: {$field} exige CST 60 de ICMS-ST anterior.");
+            }
+        }
         if ($cst === '60') {
             if (!in_array($cfop, self::RETAINED_ST_CFOPS, true)) {
                 throw new RuntimeException('CST 60 exige CFOP de mercadoria com ICMS-ST retido anteriormente.');
