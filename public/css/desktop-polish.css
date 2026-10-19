@@ -517,16 +517,20 @@
  * O editor permanece compacto, mas não oculta campos necessários à SEFAZ.
  */
 @media screen {
-  .app-root .nfce-compliance-note{
-    display:flex;align-items:flex-start;gap:11px;margin-bottom:12px;
-    padding:11px 14px;border:1px solid #c7d9e6;border-left:3px solid #4189b7;
-    border-radius:3px;background:#eff6fa;color:#405b70;font-size:13px;
-  }
-  .app-root .nfce-compliance-note svg{flex:0 0 auto;margin-top:2px;color:#376f98}
-  .app-root .nfce-compliance-note strong{display:block;font-size:13.5px}
-  .app-root .nfce-compliance-note p{margin:4px 0 0;font-size:12.5px;line-height:1.5}
   .app-root .nfce-field-help{
     margin:10px 1px 0;color:#566f83;font-size:12.5px;line-height:1.45;
+  }
+  /* O nome da aba já contextualiza o conteúdo. Barras locais servem
+     apenas para ações, sem uma segunda faixa repetindo o título. */
+  .app-root .nfe-section-title--actions,
+  #nfceEditor .nfe-section-title--actions{
+    display:flex;align-items:center;justify-content:flex-end;
+    min-height:0;padding:0;margin:0 0 12px;
+    background:transparent;border:0;box-shadow:none;
+  }
+  .app-root .nfe-section-title--actions .btn{margin-left:auto}
+  .app-root .nfe-section-title--actions .nfe-section-toggle{
+    padding:5px 0;color:#376f8e;font-size:12px;
   }
   .app-root .nfce-item-table-wrap{max-width:100%;min-width:0;overflow-x:auto}
   .app-root .nfce-payment-detail[hidden]{display:none!important}
