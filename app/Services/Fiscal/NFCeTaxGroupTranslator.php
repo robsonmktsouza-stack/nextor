@@ -52,7 +52,7 @@ final class NFCeTaxGroupTranslator
                     && ($config['ibs_cbs_cst'] ?? '') === '200'
                     && ($config['ibs_cbs_class'] ?? '') === '200003'
                 || ($normal && in_array($name, ['icms_rate','base_reduction_rate','icms_deferral_rate'], true))
-                || (in_array($name,['st_retained_rate'],true)
+                || (in_array($name,['st_retained_rate','fcp_st_retained_rate'],true)
                     && (($normal && $icmsCst==='60') || (!$normal && $csosn==='500')))) {
                 continue; // Cálculo percentual é feito no serviço fiscal.
             }
@@ -161,6 +161,7 @@ final class NFCeTaxGroupTranslator
             'icms_deferral_rate','icms_deferral_legal_basis',
             'st_retained_amount_scope','icms_st_retained_base','icms_st_retained_value',
             'st_retained_rate','icms_substitutor_value',
+            'fcp_st_retained_base','fcp_st_retained_rate','fcp_st_retained_value',
             'ibs_cbs_cst','ibs_cbs_class','ibs_uf_rate','ibs_municipal_rate','cbs_rate',
             'cbs_reduction_rate','ibs_uf_reduction_rate','ibs_municipal_reduction_rate'] as $field) {
             if (array_key_exists($field,$config) && $config[$field] !== '') {
