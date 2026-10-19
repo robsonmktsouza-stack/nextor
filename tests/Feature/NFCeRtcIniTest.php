@@ -110,4 +110,42 @@ final class NFCeRtcIniTest extends TestCase
         $this->expectExceptionMessage('cbs_rate');
         app(NFCeIniBuilder::class)->build($this->job([$item]),$this->company());
     }
+    public function test_normal_icms_51_includes_legal_basis_and_deducts_only_tax_due_from_rtc(): void
+    {
+        $item=$this->item(1);
+        $item['tax_defaults']=array_replace($item['tax_defaults'],[
+            'icms_cst'=>'51',
+            'icms_deferral_rate'=>'50.0000',
+            'icms_deferral_legal_basis'=>'Artigo aplicável informado pelo escritório',
+        ]);
+        $ini=app(NFCeIniBuilder::class)->build($this->job([$item]),$this->company());
+        self::assertStringContainsString('pDif=50.0000',$ini);
+        self::assertStringContainsString('vICMSOp=18.00',$ini);
+        self::assertStringContainsString('vICMSDif=9.00',$ini);
+        self::assertStringContainsString('vICMS=9.00',$ini);
+        self::assertStringContainsString('infAdProd=ICMS diferido conforme Artigo aplicável informado pelo escritório',$ini);
+        self::assertStringContainsString('vBCIBSCBS=91.00',$ini);
+    }
+
+    public function test_normal_icms_60_writes_previous_st_and_rtc_without_double_counting(): void
+    {
+        $item=$this->item(1);
+        $item['tax_defaults']=array_replace($item['tax_defaults'],[
+            'cfop_outbound_internal'=>'5405',
+            'icms_cst'=>'60',
+            'st_retained_amount_scope'=>'line',
+            'icms_st_retained_base'=>'120.00',
+            'icms_st_retained_value'=>'21.60',
+            'st_retained_rate'=>'18.0000',
+            'icms_substitutor_value'=>'12.00',
+        ]);
+        $ini=app(NFCeIniBuilder::class)->build($this->job([$item]),$this->company());
+        self::assertStringContainsString("CST=60\r\nvBCSTRet=120.00",$ini);
+        self::assertStringContainsString('pST=18.0000',$ini);
+        self::assertStringContainsString('vICMSSTRet=21.60',$ini);
+        self::assertStringContainsString('vICMSSubstituto=12.00',$ini);
+        self::assertStringContainsString('vBCIBSCBS=100.00',$ini);
+        self::assertStringContainsString('vNF=100.00',$ini);
+    }
+
 }
