@@ -147,6 +147,55 @@ class SettingsModuleTest extends TestCase
         $this->assertSame(2,$method->settlement_days);
     }
 
+    public function test_card_catalog_migration_preserves_existing_customizations_and_backfills_only_missing_codes(): void
+    {
+        $credit=PaymentMethod::query()->where('code','credit_card')->firstOrFail();
+        $credit->update([
+            'kind'=>'card','name'=>'Crédito personalizado',
+            'fee_percent'=>'3.5000','settlement_days'=>30,
+            'is_active'=>false,'pdv_enabled'=>false,'sort_order'=>87,
+        ]);
+        PaymentMethod::query()->where('code','debit_card')->delete();
+
+        $migration=require database_path('migrations/2026_10_19_210000_reconcile_card_payment_kinds.php');
+        $migration->up();
+        $migration->up();
+
+        $credit->refresh();
+        self::assertSame('credit_card',$credit->kind);
+        self::assertSame('Crédito personalizado',$credit->name);
+        self::assertSame('3.5000',$credit->fee_percent);
+        self::assertSame(30,$credit->settlement_days);
+        self::assertFalse($credit->is_active);
+        self::assertFalse($credit->pdv_enabled);
+        self::assertSame(87,$credit->sort_order);
+        self::assertSame(1,PaymentMethod::where('code','credit_card')->count());
+        self::assertSame(1,PaymentMethod::where('code','debit_card')->count());
+        self::assertSame('debit_card',PaymentMethod::where('code','debit_card')->value('kind'));
+    }
+
+    public function test_settings_accept_distinct_cards_but_not_new_ambiguous_card_type(): void
+    {
+        $this->actingAs($this->admin())
+            ->get(route('settings.index',['tab'=>'payments']))
+            ->assertOk()
+            ->assertSee('Cartão de crédito')
+            ->assertSee('Cartão de débito');
+
+        $payload=[
+            'code'=>'credit-custom','name'=>'Crédito da loja',
+            'kind'=>'credit_card','fee_percent'=>'0',
+            'fee_fixed'=>'0','settlement_days'=>0,'sort_order'=>80,
+            'is_active'=>'1','pdv_enabled'=>'1',
+        ];
+        $this->post(route('settings.payment-methods.store'),$payload)->assertSessionHasNoErrors();
+        self::assertSame('credit_card',PaymentMethod::where('code','credit-custom')->value('kind'));
+
+        $this->post(route('settings.payment-methods.store'),array_replace($payload,[
+            'code'=>'generic-new','kind'=>'card',
+        ]))->assertSessionHasErrors('kind');
+    }
+
     public function test_module_permissions_are_enforced(): void
     {
         $user=User::query()->create([
