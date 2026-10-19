@@ -55,7 +55,7 @@ class FiscalModuleTest extends TestCase
 
     public function test_fiscal_tab_only_lists_selected_document_type(): void
     {
-        FiscalDocumentJob::query()->create([
+        $nfe=FiscalDocumentJob::query()->create([
             'document_type'=>'nfe',
             'status'=>'prepared',
             'environment'=>'homologation',
@@ -64,7 +64,7 @@ class FiscalModuleTest extends TestCase
             'prepared_at'=>now(),
         ]);
 
-        FiscalDocumentJob::query()->create([
+        $nfce=FiscalDocumentJob::query()->create([
             'document_type'=>'nfce',
             'status'=>'prepared',
             'environment'=>'homologation',
@@ -76,13 +76,13 @@ class FiscalModuleTest extends TestCase
         $this->actingAs($this->admin())
             ->get(route('fiscal.index',['tab'=>'nfe']))
             ->assertOk()
-            ->assertSee('15')
-            ->assertDontSee('99');
+            ->assertSee('<a class="table-link" href="'.route('fiscal.show',$nfe).'">15</a>',false)
+            ->assertDontSee('<a class="table-link" href="'.route('fiscal.show',$nfce).'">99</a>',false);
     }
 
     public function test_fiscal_month_navigation_filters_documents(): void
     {
-        FiscalDocumentJob::query()->create([
+        $october=FiscalDocumentJob::query()->create([
             'document_type'=>'nfe',
             'status'=>'authorized',
             'environment'=>'production',
@@ -91,7 +91,7 @@ class FiscalModuleTest extends TestCase
             'prepared_at'=>'2026-10-03 10:00:00',
         ]);
 
-        FiscalDocumentJob::query()->create([
+        $september=FiscalDocumentJob::query()->create([
             'document_type'=>'nfe',
             'status'=>'authorized',
             'environment'=>'production',
@@ -106,8 +106,8 @@ class FiscalModuleTest extends TestCase
             ->get(route('fiscal.index',['tab'=>'nfe','month'=>'2026-10']))
             ->assertOk()
             ->assertSee('Outubro 2026')
-            ->assertSee('101')
-            ->assertDontSee('88')
+            ->assertSee('<a class="table-link" href="'.route('fiscal.show',$october).'">101</a>',false)
+            ->assertDontSee('<a class="table-link" href="'.route('fiscal.show',$september).'">88</a>',false)
             ->assertSee('Autorizada')
             ->assertSee('status-ok',false);
 
@@ -115,8 +115,8 @@ class FiscalModuleTest extends TestCase
             ->get(route('fiscal.index',['tab'=>'nfe','month'=>'2026-09']))
             ->assertOk()
             ->assertSee('Setembro 2026')
-            ->assertSee('88')
-            ->assertDontSee('101');
+            ->assertSee('<a class="table-link" href="'.route('fiscal.show',$september).'">88</a>',false)
+            ->assertDontSee('<a class="table-link" href="'.route('fiscal.show',$october).'">101</a>',false);
     }
 
     public function test_fiscal_document_has_detail_page(): void
