@@ -2,7 +2,26 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
-## Entrega mais recente — 19/10/2026 — formulário manual NFC-e x SEFAZ-BA
+## Entrega mais recente — 19/10/2026 — motor RTC da NFC-e, CI real e limitações
+
+**Motivo da continuidade:** usuário pediu emissão de NFC-e COMPLETA SEFAZ. A entrega anterior adequava somente formulário, pagamentos e CPF/CNPJ, sem gerar grupos IBS/CBS no XML. Foi erro tratar essa intervenção como completa.
+
+**Evolução publicada:** `feature/acbr-nfe-bootstrap`.
+- `app/Services/Fiscal/NFCeRtcTaxService.php`: novo cálculo do grupo **CST 000 / cClassTrib 000001**, a partir de alíquotas explicitamente configuradas no grupo tributário (IBS-UF, IBS-município e CBS), base com desconto e arredondamento monetário por item. Não inventar alíquotas ou classificação.
+- `app/Services/Fiscal/NFCeTaxGroupTranslator.php`: mantém CST, cClassTrib e três alíquotas no snapshot de produtos elegíveis; continua rejeitando benefícios/combustível/IS sem mapeamento.
+- `app/Services/Fiscal/NFCeIniBuilder.php`: adiciona seções ACBr `[IBSCBSnnn]`, `[gIBSCBSnnn]`, `[gIBSUFnnn]`, `[gIBSMunnn]`, `[gCBSnnn]` e os totais `[IBSCBSTot]`, `[gIBS]`, `[gIBSUFTot]`, `[gIBSMunTot]`, `[gCBSTot]`. Não soma IBS/CBS ao vNF da transição 2026.
+- `app/Services/Fiscal/NFCePreflightService.php`: exige perfil RTC para CRT 2/3 na emissão de 2026, valida todos os itens e impede tratamento parcial. Simples Nacional CRT 1/4 em 2026 não recebe alíquotas-teste inventadas; regime a partir de 2027 precisa de implementação própria.
+- `resources/views/fiscal/tax-groups/form.blade.php`: esclarece quais regras são suportadas.
+- Testes: `tests/Unit/NFCeRtcTaxServiceTest.php` (10), `tests/Feature/NFCeRtcIniTest.php` (2), `tests/Feature/NFCeIniBuilderTest.php` atualizado. Correções reais de sintaxe em `NFCeManualEditorTest.php` e de regressão em `NFCeTaxGroupTranslatorTest.php`.
+- `.github/workflows/nfce-rtc-tests.yml`: rotina PHP 8.3, Composer, `php -l`, PHPUnit, ativada no GitHub Actions. **Regressão RTC ficou verde no run 39300149793.** O workflow `ACBr integration checks` ainda precisa de confirmação verde na última revisão.
+
+**Fontes oficiais da análise:** Portal NF-e schemas 010f NT 2025.002 v1.50 (31/08/2026), modelo NFC-e INI RTC da ACBrLib, CGIBS/RFB esclarecimento 06/08/2026 (adiamento da rejeição não elimina a obrigação), Receita Federal orientações do Simples Nacional 2027. URL e checklist na matriz `docs/fiscal/nfce-formulario-conformidade-2026.md`.
+
+**PENDENTE e não fingir implementado:** cClassTrib e CST de redução/diferimento, monofásicos/combustíveis, benefícios específicos de ICMS, IS, CNPJ alfanumérico e perfis do Simples em 2027; confirmar regras estaduais vigentes e versões ACBr/XSD/QR Code v3; executar teste **real** com certificado e credenciamento em SEFAZ-BA **homologação**, inspecionando XML assinado, rejeições e protocolo. Não habilitar produção sem isso.
+
+**Testes locais:** no repositório com `composer install`, usar `vendor/bin/phpunit --filter=NFCeRtcTaxServiceTest`, `vendor/bin/phpunit --filter=NFCeRtcIniTest`, `vendor/bin/phpunit --filter=NFCeIniBuilderTest`, `vendor/bin/phpunit --filter=NFCeManualEditorTest`. **Não usar `php artisan test`: comando não existe neste Laravel 13 do projeto.**
+
+## Entrega anterior — 19/10/2026 — formulário manual NFC-e x SEFAZ-BA
 
 **Pedido:** adaptar a emissão de NFC-e manual às exigências fiscais vigentes, mantendo aparência do Lumeron.
 
