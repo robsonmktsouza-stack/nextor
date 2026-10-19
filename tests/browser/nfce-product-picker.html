@@ -13,6 +13,7 @@ body{margin:0}.app-root{width:100%;min-height:100vh}
 #nfceEditor .nfe-general-card{max-width:980px}
 #testResult{position:fixed;z-index:9999;right:0;top:0;background:white;padding:4px}
 </style>
+<script defer src="../../public/js/erp.js"></script>
 <script defer src="../../public/js/nfce-editor.js"></script>
 </head>
 <body>
@@ -124,14 +125,17 @@ window.addEventListener('load',()=>{
       expect(list.querySelectorAll('[data-pick-product]').length===2,'Localizar não exibiu catálogo');
       clickResult('1');
       expect($$('#nfceItems tr').length===1 && qty()===3,'botão Localizar duplicou linha');
-      expect(Number($('#nfceItems [data-item-field="unit_price"]').value)===20,
-        'incremento sobrescreveu preço editado');
+      const actualUnit=String($('#nfceItems [data-item-field="unit_price"]').value)
+        .replace(/\./g,'').replace(',','.');
+      expect(Number(actualUnit)===20,'incremento sobrescreveu preço editado');
       expect($('#nfceFixedTotal').textContent.includes('60,00'),'total após edição do preço incorreto');
 
       query('FILTRO');
       input.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}));
       expect($$('#nfceItems tr').length===2,'Enter não inseriu o segundo produto');
       expect($('#nfceFixedTotal').textContent.includes('72,50'),'total com segundo produto incorreto');
+      expect($('#nfceItems .numeric-number .numeric-input-prefix')===null,
+        'quantidade deve ficar sem o ícone decorativo de lista');
       expect(document.documentElement.scrollWidth<=innerWidth+3,'a barra criou rolagem horizontal na tela');
       document.body.dataset.nfcePickerTest='passed';
       $('#testResult').textContent='PASS repetição + foco + botão + Enter + valores';
