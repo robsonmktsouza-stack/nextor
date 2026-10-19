@@ -7,8 +7,9 @@ use RuntimeException;
 /**
  * Reforma tributária do consumo: grupo regular gIBSCBS da NFC-e.
  *
- * Suporta estritamente a classificação integral CST 000 / cClassTrib
- * 000001, sem redução, diferimento, devolução ou monofásico.
+ * Suporta as classificações integral 000/000001 e de alíquota zero
+ * 200/200003 (alimentação humana enquadrada no Anexo I, quando correta
+ * a classificação do produto pelo escritório). Sem diferimento ou monofasia.
  * Os códigos e as três alíquotas vêm exclusivamente da regra/grupo
  * tributário aprovado pelo escritório, jamais de constantes do sistema.
  *
@@ -37,8 +38,7 @@ final class NFCeRtcTaxService
                 throw new RuntimeException("RTC: {$field} requer emissão do grupo Imposto Seletivo; não transmitir omitindo o dado.");
             }
         }
-        foreach (['is_rate','cbs_reduction_rate','ibs_uf_reduction_rate',
-            'ibs_municipal_reduction_rate','cbs_deferral_rate',
+        foreach (['is_rate','cbs_deferral_rate',
             'ibs_uf_deferral_rate','ibs_municipal_deferral_rate',
             'ibs_reduction_rate'] as $field) {
             if (isset($tax[$field]) && trim((string)$tax[$field]) !== ''
@@ -73,15 +73,20 @@ final class NFCeRtcTaxService
                 throw new RuntimeException("RTC: o campo {$name} deve estar configurado no grupo tributário.");
             }
         }
-        if ((string)$tax['ibs_cbs_cst'] !== '000'
-            || (string)$tax['ibs_cbs_class'] !== '000001') {
-            throw new RuntimeException('RTC: somente CST 000 e cClassTrib 000001 têm cálculo padrão implementado. Configure um perfil fiscal específico para outros tratamentos.');
+        $cst = (string)$tax['ibs_cbs_cst'];
+        $classification = (string)$tax['ibs_cbs_class'];
+        $integral = $cst === '000' && $classification === '000001';
+        // Tabela cClassTrib IT 2025.002 v1.70: 200003, alimentos do
+        // Anexo I (redução integral). Nenhuma classificação é deduzida
+        // automaticamente pelo NCM.
+        $zeroRatedFood = $cst === '200' && $classification === '200003';
+        if (!$integral && !$zeroRatedFood) {
+            throw new RuntimeException('RTC: CST/cClassTrib ainda sem mapeamento específico válido para NFC-e; confira a tabela oficial antes da emissão.');
         }
         if (in_array($crt, ['1', '4'], true)) {
             throw new RuntimeException('RTC do Simples Nacional: não aplicar cálculo de regime regular sem opção e parametrização específica do emitente.');
         }
         foreach ([
-            'cbs_reduction_rate', 'ibs_uf_reduction_rate', 'ibs_municipal_reduction_rate',
             'cbs_deferral_rate', 'ibs_uf_deferral_rate', 'ibs_municipal_deferral_rate',
             'ibs_reduction_rate', 'is_rate', 'is_cst', 'is_class',
         ] as $unsupported) {
@@ -122,20 +127,42 @@ final class NFCeRtcTaxService
         $munRate = $this->rate($tax, 'ibs_municipal_rate');
         $cbsRate = $this->rate($tax, 'cbs_rate');
 
+        $reduction = [];
+        foreach ([
+            'ibs_uf_reduction_rate' => 'uf',
+            'ibs_municipal_reduction_rate' => 'mun',
+            'cbs_reduction_rate' => 'cbs',
+        ] as $field=>$destination) {
+            $raw=$tax[$field] ?? null;
+            if ($zeroRatedFood) {
+                if ($raw === null || $raw === '' || $this->rate($tax,$field) !== '100.0000') {
+                    throw new RuntimeException("RTC 200003: {$field} deve ser 100%, conforme classificação oficial.");
+                }
+                $reduction[$destination]=['pRedAliq'=>'100.0000','pAliqEfet'=>'0.0000'];
+            } elseif ($raw !== null && $raw !== '' && (float)$raw != 0.0) {
+                throw new RuntimeException("RTC: {$field} não é permitido para CST 000 integral.");
+            }
+        }
+
         $ibsUf = $this->money($base * (float)$ufRate / 100);
         $ibsMun = $this->money($base * (float)$munRate / 100);
         $cbs = $this->money($base * (float)$cbsRate / 100);
+        if ($zeroRatedFood) {
+            $ibsUf='0.00';
+            $ibsMun='0.00';
+            $cbs='0.00';
+        }
         $ibs = $this->money((float)$ibsUf + (float)$ibsMun);
 
         return [
             'ibscbs' => [
-                'CST' => '000',
-                'cClassTrib' => '000001',
+                'CST' => $cst,
+                'cClassTrib' => $classification,
             ],
             'gibscbs' => ['vBC' => $this->money($base), 'vIBS' => $ibs],
-            'gibsuf' => ['pIBSUF' => $ufRate, 'vIBSUF' => $ibsUf],
-            'gibsmun' => ['pIBSMun' => $munRate, 'vIBSMun' => $ibsMun],
-            'gcbs' => ['pCBS' => $cbsRate, 'vCBS' => $cbs],
+            'gibsuf' => array_merge(['pIBSUF' => $ufRate, 'vIBSUF' => $ibsUf],$reduction['uf'] ?? []),
+            'gibsmun' => array_merge(['pIBSMun' => $munRate, 'vIBSMun' => $ibsMun],$reduction['mun'] ?? []),
+            'gcbs' => array_merge(['pCBS' => $cbsRate, 'vCBS' => $cbs],$reduction['cbs'] ?? []),
         ];
     }
 
