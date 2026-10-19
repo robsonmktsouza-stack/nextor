@@ -198,6 +198,9 @@ final class NFCePreflightService
                 }
 
                 $brand = trim((string) ($payment['card_brand'] ?? ''));
+                if($kind==='pix' && $brand!==''){
+                    $errors[] = "Pagamento {$number}: bandeira de cartão não se aplica ao PIX.";
+                }
                 if ($isCard && $brand !== '' && !in_array($brand,\App\Support\NFCeCardBrands::codes(),true)) {
                     $errors[] = "Pagamento {$number}: bandeira do cartão inválida.";
                 }
