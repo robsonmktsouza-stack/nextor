@@ -46,6 +46,17 @@
         @endif
 
         <div id="nfceFormError" class="nfce-form-error" role="alert" hidden></div>
+        @unless($readOnly || $correctionMode)
+          <div class="nfce-compliance-note" role="note">
+            @include('partials.icon',['name'=>'shield','size'=>18])
+            <div>
+              <strong>NFC-e modelo 65 — {{ $settings->environment('nfce')==='production' ? 'Produção' : 'Homologação (testes)' }}</strong>
+              <p>Emitente e tributação vêm do cadastro e das regras fiscais dos produtos.
+              Somente uma resposta autorizada da SEFAZ confirma a nota.
+              Confira certificado A1, numeração, CSC/QR Code e o regime da empresa nas Configurações.</p>
+            </div>
+          </div>
+        @endunless
 
         <div class="nfe-emitter-summary">
           <div class="nfe-emitter-logo">
@@ -252,13 +263,14 @@
                   @endforeach
                 </select>
               </label>
-              <label class="field col-3"><span>CPF / CNPJ</span>
+              <label class="field col-3"><span>CPF / CNPJ (opcional)</span>
                 <input name="consumer_document" id="nfceConsumerDocument" inputmode="numeric" maxlength="20" value="{{ $readOnly?$frozenConsumerDocument:old('consumer_document') }}" placeholder="Opcional">
               </label>
               <label class="field col-3"><span>Nome</span>
                 <input name="consumer_name" id="nfceConsumerName" maxlength="190" value="{{ $readOnly?$frozenConsumerName:old('consumer_name') }}" placeholder="Opcional">
               </label>
             </div>
+            <p class="nfce-field-help">Quando o consumidor for identificado, informe um CPF ou CNPJ com dígitos verificadores válidos. Sem documento, a NFC-e será emitida para consumidor não identificado.</p>
           </div>
         </section>
 
@@ -279,6 +291,7 @@
               </table>
             </div>
             <p class="nfce-muted" id="nfceNoItems">Nenhum produto adicionado.</p>
+            <p class="nfce-field-help">NCM, CFOP, ICMS, PIS, COFINS e demais dados tributários são obtidos das regras fiscais dos produtos. Não preencha códigos aleatórios: configure o cadastro antes da emissão.</p>
           </div>
         </section>
 
@@ -297,6 +310,7 @@
             <div class="nfce-payment-subtotal">
               <span>Total informado</span><strong id="nfcePaymentTotal">R$ 0,00</strong>
             </div>
+            <p class="nfce-field-help">A soma dos pagamentos deve corresponder ao valor da NFC-e. Para cartões, identifique TEF/POS. Se o cartão for integrado, informe CNPJ da adquirente e autorização. Os dados adicionais de PIX devem refletir a transação real.</p>
           </div>
         </section>
 
