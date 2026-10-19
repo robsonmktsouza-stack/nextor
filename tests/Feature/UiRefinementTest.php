@@ -138,4 +138,85 @@ final class UiRefinementTest extends TestCase
             );
         }
     }
+
+    public function test_desktop_polish_is_loaded_last_without_replacing_existing_themes(): void
+    {
+        $this->actingAs($this->admin());
+
+        foreach ([
+            route('products.index'),
+            route('customers.index'),
+            route('stock.index'),
+            route('sales.index'),
+            route('fiscal.index', ['tab' => 'nfe']),
+            route('settings.index'),
+        ] as $url) {
+            $html = $this->get($url)->assertOk()->getContent();
+            self::assertIsString($html);
+            self::assertStringContainsString('css/desktop-polish.css', $html);
+            self::assertLessThan(
+                strpos($html, 'css/desktop-polish.css'),
+                strpos($html, 'css/branding.css'),
+                'O acabamento deve ser carregado depois da marca e do tema base.'
+            );
+        }
+
+        $pdv = $this->get(route('pdv.index'))->assertOk()->getContent();
+        self::assertIsString($pdv);
+        self::assertStringContainsString('css/desktop-polish.css', $pdv);
+        self::assertLessThan(
+            strpos($pdv, 'css/desktop-polish.css'),
+            strpos($pdv, 'css/pdv-lumeron.css'),
+            'O PDV precisa manter seu próprio tema antes do acabamento.'
+        );
+    }
+
+    public function test_desktop_polish_preserves_print_and_covers_breakpoints(): void
+    {
+        $css = file_get_contents(public_path('css/desktop-polish.css'));
+        self::assertNotFalse($css);
+
+        foreach ([
+            '@media screen',
+            '.app-root .grid-actionbar',
+            '.app-root .table-scroll',
+            '.app-root .fiscal-empty-state',
+            '.app-root .table-footerbar.table-footer-controls',
+            '.app-root .settings-subtabs',
+            '.lumeron-pdv-page .pdv-topbar',
+            'max-width:1260px',
+            'max-width:900px',
+            'max-width:620px',
+            'max-width:385px',
+            'prefers-reduced-motion',
+        ] as $token) {
+            self::assertStringContainsString($token, $css);
+        }
+        self::assertStringNotContainsString('@page', $css);
+        self::assertStringNotContainsString('nfce-danfe.css', $css);
+
+        $withoutComments = preg_replace('~/\\*.*?\\*/~s', '', $css);
+        self::assertNotNull($withoutComments);
+        self::assertSame(substr_count($withoutComments, '{'), substr_count($withoutComments, '}'));
+    }
+
+    public function test_fiscal_empty_state_provides_only_supported_create_actions(): void
+    {
+        $this->actingAs($this->admin());
+
+        $nfe = $this->get(route('fiscal.index', ['tab' => 'nfe']))->assertOk();
+        $nfe->assertSee('class="fiscal-empty-state"', false);
+        $nfe->assertSee('Criar nova NF-e');
+        $nfe->assertSee(route('fiscal.nfe.create'), false);
+
+        $nfce = $this->get(route('fiscal.index', ['tab' => 'nfce']))->assertOk();
+        $nfce->assertSee('Criar nova NFC-e');
+        $nfce->assertSee(route('fiscal.nfce.create'), false);
+
+        $cte = $this->get(route('fiscal.index', ['tab' => 'cte']))->assertOk();
+        $cte->assertSee('Nenhum documento fiscal encontrado');
+        $cte->assertDontSee('Criar nova NF-e');
+        $cte->assertDontSee('Criar nova NFC-e');
+    }
+
 }
