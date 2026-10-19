@@ -96,9 +96,11 @@ class PdvController extends Controller
         $lastPdvNfceStatusLabel=$lastPdvNfceDocument ? match($lastPdvNfceDocument->status) {
             'prepared'=>'preparada',
             'processing'=>'processando',
-            'pending'=>'pendente',
+            'pending'=>'pendente de consulta',
             'authorized'=>'autorizada',
             'rejected'=>'rejeitada',
+            'offline_signed'=>'em contingência (sem autorização)',
+            'offline_sending'=>'aguardando autorização após contingência',
             'cancelled'=>'cancelada',
             default=>'verificar',
         } : 'ainda não preparada';
