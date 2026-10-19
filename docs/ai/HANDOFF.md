@@ -2,7 +2,19 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
-## Entrega mais recente — 19/10/2026 — fiscal sem títulos repetidos e textos didáticos
+## Entrega mais recente — 19/10/2026 — busca e inclusão repetida de produtos na NFC-e
+
+**Relato do usuário:** na aba Produtos de Nova NFC-e, após escolher uma mercadoria no dropdown, a busca repetida do mesmo produto não tinha um fluxo confiável; botão "Adicionar produto" separado acima da busca e colunas numéricas desalinhadas em relação ao desktop do ERP. Print de `/fiscal/nfce/create` com duas mercadorias.
+
+**Alterações na branch `feature/acbr-nfe-bootstrap`:**
+- `public/js/nfce-editor.js`: `addProduct(id)` passa a localizar a linha existente pelo **ID do produto** e **somar 1 na quantidade**, em vez de adicionar uma segunda linha; mantém preço/desconto editados, recalcula total, limpa pesquisa, volta foco para o campo sem reabrir a lista. Produtos existentes **continuam aparecendo nos resultados**, marcados "Na nota: Q · +1"; botão Localizar abre resultados sem fechamento imediato pelo listener global de cliques. Enter no resultado, Enter no campo e clique fazem mesma operação. Parser monetário entende formatação pt-BR.
+- `resources/views/fiscal/nfce/create.blade.php`: campo Buscar produto e botão `nfceAddProduct` (agora **Localizar**, preservando ID) ocupam **uma única barra**; dropdown ancorado no campo, com `aria-expanded`, `aria-controls` e seleção acessível. Estrutura do formulário/nomes fiscais preservada.
+- `public/css/desktop-polish.css`: barra de busca alinhada, resultados sobrepostos com `position:absolute` para não deslocar a tabela, colunas densas e alinhadas. Remove ícone de lista do campo Quantidade, usa prefixos "R$" nos campos Preço e Desconto. Regras restritas ao painel `#nfcePanel-products`, para não afetar consultas/documentos fiscais, Pagamento nem outros módulos.
+- `tests/browser/nfce-product-picker.html`: smoke teste no Chromium com **JS global real `erp.js` + `nfce-editor.js`**; busca → clique → busca repetida → incremento sem duplicar linha → preço editado preservado → Localizar não fecha lista → Enter adiciona outro produto → total correto → layout alinhado. `.github/workflows/acbr-integration-checks.yml` executa este teste em cada push na branch.
+
+**Ao testar no Laragon:** `git switch feature/acbr-nfe-bootstrap`, `git pull origin feature/acbr-nfe-bootstrap`, `php artisan optimize:clear` e Ctrl+F5. Em Nova NFC-e, adicionar produto, repetir 2×, verificar uma única linha quantidade 3, testar alteração do preço e uso de Localizar/Enter. Não há migração, dados fiscais ou estoque alterados pelos commits.
+
+## Entrega anterior — 19/10/2026 — fiscal sem títulos repetidos e textos didáticos
 
 Usuário enviou imagens de consulta NFC-e e Nova NFC-e no modal e pediu eliminar redundância: aba **Dados gerais** seguida de título **Dados gerais** e parágrafos permanentes com instruções longas no fiscal e em outros módulos, como “Série, ambiente e modalidade...”.
 
