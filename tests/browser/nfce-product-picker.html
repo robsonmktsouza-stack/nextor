@@ -14,7 +14,7 @@ body{margin:0}.app-root{width:100%;min-height:100vh}
 /* Reproduz a área rolável real do modal: o popup não pode ser recortado
    pelo limite inferior do formulário. */
 #nfceEditor .nfe-workspace-body{
-  height:260px;overflow-y:auto;overflow-x:hidden;
+  height:185px;overflow-y:auto;overflow-x:hidden;
   border:1px solid #d8e2eb;box-sizing:border-box;
 }
 #nfceEditor .nfce-savebar{
@@ -117,7 +117,7 @@ window.addEventListener('load',()=>{
       const button=$('#nfceAddProduct');
       const rect=input.getBoundingClientRect(),btn=button.getBoundingClientRect();
       expect(Math.abs(rect.bottom-btn.bottom)<3,'busca e botão desalinhados');
-      query('CAMISETA');
+      query('');
       expect(list.matches(':popover-open'),'lista de produtos não abriu na camada superior');
       const clipping=$('#nfceTestScrollBody').getBoundingClientRect();
       const popup=list.getBoundingClientRect();
@@ -127,8 +127,9 @@ window.addEventListener('load',()=>{
         'lista ficou recortada pela rolagem do modal');
       expect(popup.bottom<=$('.nfce-savebar').getBoundingClientRect().top-4,
         'lista avançou sobre o rodapé do modal');
+      query('CAMISETA');
       clickResult('1');
-      expect($$('#nfceItems tr').length===1,'primeiro produto não criou uma linha');
+      expect($('#nfceItems tr').length===1,'primeiro produto não criou uma linha');
       expect(qty()===1,'primeira quantidade não é 1');
       expect(input.value===''&&document.activeElement===input,'foco não voltou à busca');
       expect(list.hidden&&input.getAttribute('aria-expanded')==='false','lista não fechou depois da escolha');
