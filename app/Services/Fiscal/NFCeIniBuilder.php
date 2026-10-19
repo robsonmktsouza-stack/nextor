@@ -97,6 +97,7 @@ final class NFCeIniBuilder
         $totalIcmsBase = 0;
         $totalIcms = 0;
         $rtc = new NFCeRtcTaxService();
+        $valueGuard = new NFCeItemValueGuard();
         $totalRtc = ['base'=>0, 'ibsuf'=>0, 'ibsmun'=>0, 'cbs'=>0];
         $hasRtc = false;
         foreach ($items as $index => $item) {
@@ -114,6 +115,8 @@ final class NFCeIniBuilder
             $totalGross += (int) round($gross * 100);
             $totalDiscount += (int) round($discount * 100);
             $cfop = $tax['cfop_outbound_internal'] ?? $tax['nfce_cfop'] ?? $tax['cfop'] ?? AppSetting::value('nfce', 'default_cfop', '');
+            $valueGuard->verify($item);
+            $valueGuard->verifyGtin($item['gtin'] ?? null);
             $calculated = $this->calculator->calculate($item, (string)$company->crt);
             $rtcItem = $rtc->calculate($item, (string)$company->crt, now()->toDateString(), $calculated);
             if ($rtcItem !== null) {
