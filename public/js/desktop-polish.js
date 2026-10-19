@@ -25,9 +25,37 @@
     });
   };
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', keepCurrentModuleVisible, { once: true });
-  } else {
+  // Padrão desktop: a aba é o título da seção. Evitar repetir esse
+  // título dentro de formulários em qualquer módulo, sem ocultar ações,
+  // mensagens de validação ou avisos da SEFAZ.
+  const removeRepeatedTabHeadings = () => {
+    document.querySelectorAll('[role="tab"][aria-controls]').forEach(tab => {
+      const id=tab.getAttribute('aria-controls');
+      if(!id)return;
+      const panel=document.getElementById(id);
+      if(!panel || panel.getAttribute('role')!=='tabpanel')return;
+      const title=tab.textContent.trim().replace(/\\s+/g,' ').toLocaleLowerCase('pt-BR');
+      if(!title)return;
+      panel.querySelectorAll(
+        ':scope > h2,:scope > h3,:scope > .nfe-general-card > h2,'+
+        ':scope > .nfe-general-card > h3,'+
+        ':scope > .nfe-general-card > .nfe-section-title,'+
+        ':scope > .editor-panel > .editor-panel-title'
+      ).forEach(node=>{
+        if(node.querySelector('a,button,input,select,textarea,[role="button"]'))return;
+        if(node.textContent.trim().replace(/\\s+/g,' ').toLocaleLowerCase('pt-BR')===title){
+          node.remove();
+        }
+      });
+    });
+  };
+  const polish = () => {
     keepCurrentModuleVisible();
+    removeRepeatedTabHeadings();
+  };
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', polish, { once: true });
+  } else {
+    polish();
   }
 })();
