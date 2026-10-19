@@ -83,6 +83,7 @@ final class NFCePreflightService
         $source = $job->source_snapshot ?? [];
         $items = $source['items'] ?? [];
         $rtc = new NFCeRtcTaxService();
+        $valueGuard = new NFCeItemValueGuard();
         $rtcItemCount = 0;
         if (!is_array($items) || count($items) === 0) {
             $errors[] = 'Venda sem itens fiscais.';
@@ -117,6 +118,8 @@ final class NFCePreflightService
                 // Compartilha o mesmo validador/cálculo utilizado no INI ACBr.
                 // Nenhum perfil não implementado pode chegar à transmissão.
                 try {
+                    $valueGuard->verify($item);
+                    $valueGuard->verifyGtin($item['gtin'] ?? null);
                     $calculated = $this->calculator->calculate($item, (string)$company->crt);
                     if ($rtc->calculate($item, (string)$company->crt, now()->toDateString(), $calculated) !== null) {
                         $rtcItemCount++;
