@@ -54,7 +54,7 @@
 </tbody></table></div>@include('partials.table-footer',['paginator'=>$movements])</div>
 </section>
 <dialog class="erp-dialog" id="stock-add"><form action="{{ route('stock.store') }}" method="post">@csrf
-<div class="dialog-header"><div><h2>Nova movimentação</h2><p>Atualize as quantidades disponíveis</p></div><button type="button" data-dialog-close class="close-dialog">@include('partials.icon',['name'=>'x'])</button></div>
+<div class="dialog-header"><div><h2>Nova movimentação</h2></div><button type="button" data-dialog-close class="close-dialog">@include('partials.icon',['name'=>'x'])</button></div>
 <div class="dialog-body"><div class="form-grid">
 <label class="field wide"><span>Produto *</span><select name="product_id" required><option value="">Selecione um produto</option>@foreach($products as $product)<option value="{{ $product->id }}" @selected(old('product_id', request('product_id'))==$product->id)>{{ $product->sku }} — {{ $product->name }} ({{ number_format((float)$product->stock_quantity,$stockDecimalPlaces,',','.') }} {{ $product->unit }})</option>@endforeach</select></label>
 <label class="field"><span>Tipo de movimentação *</span><select name="type" id="stock-type"><option value="entry">Entrada</option><option value="exit">Saída</option><option value="adjustment">Ajuste de saldo</option></select></label>
