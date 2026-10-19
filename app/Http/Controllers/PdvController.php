@@ -506,6 +506,11 @@ class PdvController extends Controller
 
             $isCard=in_array($fiscalKind,['card','credit_card','debit_card'],true);
             $electronic=$isCard || $fiscalKind==='pix';
+            if($fiscalKind==='pix' && trim((string)($payment['card_brand'] ?? ''))!==''){
+                throw ValidationException::withMessages([
+                    'payments'=>'Bandeira de cartão não se aplica ao PIX.',
+                ]);
+            }
             $integration=(string)($payment['integration_type'] ?? '');
             if($isCard && $integration==='1'
                 && (!$institutionDocument || !trim((string)($payment['authorization_code'] ?? '')))) {
