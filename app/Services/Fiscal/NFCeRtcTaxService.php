@@ -51,6 +51,14 @@ final class NFCeRtcTaxService
             array_key_exists($name, $tax) && $tax[$name] !== null && trim((string)$tax[$name]) !== ''
         );
         if (!$present) {
+            foreach ([
+                'cbs_reduction_rate','ibs_uf_reduction_rate','ibs_municipal_reduction_rate',
+            ] as $field) {
+                if (isset($tax[$field]) && trim((string)$tax[$field]) !== ''
+                    && (!is_numeric($tax[$field]) || (float)$tax[$field] != 0.0)) {
+                    throw new RuntimeException("RTC: {$field} não pode ser informado sem CST, cClassTrib e as alíquotas fiscais.");
+                }
+            }
             // O adiamento de rejeição automática em 2026 NÃO suspendeu a
             // obrigação de destaque para o regime regular. O emissor não
             // pode transmitir uma NFC-e regular omitindo o bloco fiscal.
