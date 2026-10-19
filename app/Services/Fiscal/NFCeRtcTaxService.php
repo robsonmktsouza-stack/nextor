@@ -29,6 +29,24 @@ final class NFCeRtcTaxService
             'ibs_cbs_cst', 'ibs_cbs_class',
             'ibs_uf_rate', 'ibs_municipal_rate', 'cbs_rate',
         ];
+        // Imposto Seletivo tem grupo e vigência próprios. Mesmo CST "000"
+        // NÃO é um valor numérico zero descartável: sua presença precisa
+        // ser tratada pelo XML IS específico, ainda não implementado.
+        foreach (['is_cst','is_class'] as $field) {
+            if (isset($tax[$field]) && trim((string)$tax[$field]) !== '') {
+                throw new RuntimeException("RTC: {$field} requer emissão do grupo Imposto Seletivo; não transmitir omitindo o dado.");
+            }
+        }
+        foreach (['is_rate','cbs_reduction_rate','ibs_uf_reduction_rate',
+            'ibs_municipal_reduction_rate','cbs_deferral_rate',
+            'ibs_uf_deferral_rate','ibs_municipal_deferral_rate',
+            'ibs_reduction_rate'] as $field) {
+            if (isset($tax[$field]) && trim((string)$tax[$field]) !== ''
+                && (!is_numeric($tax[$field]) || (float)$tax[$field] != 0.0)) {
+                throw new RuntimeException("RTC: {$field} requer cálculo específico ainda não disponível na NFC-e.");
+            }
+        }
+
         $present = array_filter($names, static fn(string $name): bool =>
             array_key_exists($name, $tax) && $tax[$name] !== null && trim((string)$tax[$name]) !== ''
         );
