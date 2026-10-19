@@ -56,7 +56,7 @@ final class NFCeIniBuilder
             'indFinal' => '1',
             'indPres' => '1',
             'procEmi' => '0',
-            'verProc' => 'NEXTOR 1.0',
+            'verProc' => 'LUMERON 1.0',
             'cMunFG' => $digits($company->city_ibge_code),
         ]);
         $add('Emitente', [
@@ -181,8 +181,12 @@ final class NFCeIniBuilder
                 'vPag' => $price($payment['amount']),
             ];
             if (in_array($paymentType, ['03', '04'], true)) {
+                $integration = (string) ($payment['integration_type'] ?? '');
+                if (!in_array($integration, ['1', '2'], true)) {
+                    throw new RuntimeException('Pagamento com cartão sem identificação TEF/POS. Confira os dados da venda antes de emitir.');
+                }
                 $fields += [
-                    'tpIntegra' => $payment['integration_type'] ?? '2',
+                    'tpIntegra' => $integration,
                     'CNPJ' => $digits($payment['transaction_document'] ?? ''),
                     'tBand' => $payment['card_brand'] ?? null,
                     'cAut' => $payment['authorization_code'] ?? null,
