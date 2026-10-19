@@ -2,7 +2,24 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
-## Entrega mais recente — 19/10/2026 — hardening de produção NFC-e para Simples Nacional (BA)
+## Entrega mais recente — 19/10/2026 — limpeza editorial dos modais e mensagens redundantes
+
+**Pedido:** usuário mostrou três capturas do Lumeron Fiscal (NFC-e consulta/nova emissão) e apontou a duplicação "Dados gerais" na aba e no painel, além de muitos parágrafos didáticos permanentes espalhados pelo ERP. Regra de interface: **uma aba já nomeia sua seção; não repetir seu título dentro dela. Campos e ações primeiro. Textos longos só sob demanda. Avisos reais de erro/segurança/SEFAZ não devem ser escondidos.**
+
+**Arquivos alterados na branch `feature/acbr-nfe-bootstrap`:**
+- `resources/views/fiscal/nfce/create.blade.php`: retira segunda barra de títulos em Dados gerais, Consumidor, Produtos, Pagamento e Resumo, mantém botões Adicionar produto / Adicionar pagamento alinhados como ações; remove grande banner didático sobre modelo 65 e os parágrafos de orientações fiscais gerais de cada aba. Mantém status real, emitente, ambiente, modelo, número, campos, erros, cinco abas, emissão, confirmação e avisos de rejeição.
+- `resources/views/fiscal/nfce/_readonly_panels.blade.php`: elimina títulos duplicados da consulta histórica, preservando dados/status.
+- `resources/views/fiscal/nfce/correct-rejection.blade.php`: elimina títulos duplicados das abas durante correção de rejeição e o tutorial do total do pagamento; mantém justificativas fiscais, campos corrigíveis e contagem de produtos.
+- `resources/views/fiscal/nfe/editor.blade.php`: remove barras redundantes (Dados gerais, Pagamento, ICMS, PIS/COFINS e IBS/CBS dentro das abas), preserva botão do recolhimento/expansão e seções secundárias realmente distintas.
+- `resources/views/settings/index.blade.php`: retira 22 legendas genéricas e conselhos permanentes, remove parágrafo fixo dos CSCs e textos redundantes dos switches; preserva opções/credenciais, descrições ligadas a riscos de produção e os campos críticos.
+- `resources/views/fiscal/tax-groups/form.blade.php`: avisos tributários extensos saem da leitura principal e ficam em `details` opcionais (ICMS-ST/FCP e IBS/CBS). Nada alterado em submissão de campos/regras.
+- Vendas, Financeiro, Dashboard, Estoque e PDV: remoção seletiva de textos que só repetiam os rótulos, preservando ajudas contextuais realmente operacionais, como confirmação de cancelamento, contingência e ajuste do estoque.
+- `public/css/desktop-polish.css`: remove estilo do banner NFC-e, cria `nfe-section-title--actions` compacto e detalhes fiscais discretos `erp-help-details`. Não altera desenho da Ribbon, paleta ou regras de seleção/modal.
+- `tests/Feature/NFCeManualEditorTest.php`: mantém verificações fiscais, passa a exigir interface sem banner e sem segunda seção "Dados gerais". Novo `tests/Feature/FiscalConciseLayoutTest.php` cobre os três modos da NFC-e, NF-e e Configurações. Executar PHPUnit e verificar CI.
+
+**Criterio visual:** telas densas e limpas no padrão ERP desktop clássico, sem grandes callouts instrucionais ou repetição de título em abas. Não remover rótulos, indicadores de ambiente, botões, erros de validação nem alertas fiscais acionáveis. Se editor sofrer regressão, restaurar funcionalidade, não os textos redundantes.
+
+## Entrega anterior — 19/10/2026 — hardening de produção NFC-e para Simples Nacional (BA)
 
 **Pedido:** concluir o fechamento operacional do Lumeron para empresas do Simples Nacional, que já haviam emitido NFC-e em homologação, sem alterar dados reais ou reinventar a integração ACBr. O usuário quer código em produção, não um plano.
 
