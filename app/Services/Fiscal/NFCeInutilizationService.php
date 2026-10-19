@@ -20,13 +20,15 @@ final class NFCeInutilizationService
     public function request(array $input,int $userId): NFCeInutilization
     {
         return DB::transaction(function() use($input,$userId) {
-            // Coordinate the same number reservation setting used by sales.
-            AppSetting::query()->where('group','nfce')->where('key','next_number')
+            // Lock exactly the sequence of the selected environment.
+            $environment=app(FiscalDocumentSettings::class)->environment('nfce');
+            $parameters=app(NFCeEnvironmentParameters::class);
+            $sequenceKey=$parameters->numberKey($environment);
+            AppSetting::query()->where('group','nfce')->where('key',$sequenceKey)
                 ->lockForUpdate()->first();
             $company=CompanySetting::current();
             \App\Support\InstanceIdentity::assertCompanyDocument($company->document);
             $cnpj=preg_replace('/\D/','',(string)$company->document);
-            $environment=app(FiscalDocumentSettings::class)->environment('nfce');
             app(NFCeProductionGate::class)->assertAllowed($environment);
             $series=(int)$input['series'];
             $first=(int)$input['first_number'];
@@ -34,10 +36,10 @@ final class NFCeInutilizationService
             $year=(int)$input['year'];
             $reason=trim((string)$input['reason']);
             if (preg_match('/^\d{14}$/',$cnpj)!==1 || strtoupper((string)$company->state)!=='BA'
-                || $series!==(int)AppSetting::value('nfce','series',1)
+                || $series!==$parameters->series($environment)
                 || $year<2020 || $year>(int)now()->year
                 || $first<1 || $last<$first || $last-$first>999
-                || $last >= (int)AppSetting::value('nfce','next_number',1)
+                || $last >= (int)$parameters->nextNumber($environment)
                 || mb_strlen($reason)<15 || mb_strlen($reason)>255) {
                 throw ValidationException::withMessages([
                     'first_number'=>'Informe somente lacuna de numeração anterior à próxima NFC-e, com série e ano válidos.',
@@ -47,6 +49,7 @@ final class NFCeInutilizationService
                 throw ValidationException::withMessages(['first_number'=>'Ative a NFC-e antes de solicitar inutilização.']);
             }
             if (FiscalDocumentJob::query()->where('document_type','nfce')
+                ->where('environment',$environment)
                 ->where('series',$series)->whereBetween('document_number',[$first,$last])->exists()) {
                 throw ValidationException::withMessages([
                     'first_number'=>'A faixa inclui número já reservado ou utilizado no NEXTOR.',
@@ -88,6 +91,7 @@ final class NFCeInutilizationService
                 }
                 // Last guard against a number being assigned after the request.
                 if (FiscalDocumentJob::query()->where('document_type','nfce')
+                    ->where('environment',$row->environment)
                     ->where('series',$row->series)
                     ->whereBetween('document_number',[$row->first_number,$row->last_number])->exists()) {
                     throw new RuntimeException('A faixa foi utilizada após a solicitação; não transmitir.');
