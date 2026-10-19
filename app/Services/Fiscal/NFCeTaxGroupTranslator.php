@@ -45,7 +45,8 @@ final class NFCeTaxGroupTranslator
 
         $config=$group->tax_config ?? [];
         foreach ($config as $name=>$value) {
-            if (in_array($name, ['pis_rate', 'cofins_rate', 'pis_quantity_rate', 'cofins_quantity_rate'], true)
+            if (in_array($name, ['pis_rate', 'cofins_rate', 'pis_quantity_rate', 'cofins_quantity_rate',
+                    'ibs_uf_rate', 'ibs_municipal_rate', 'cbs_rate'], true)
                 || ($normal && in_array($name, ['icms_rate','base_reduction_rate'], true))) {
                 continue; // Cálculo percentual é feito no serviço fiscal.
             }
@@ -56,9 +57,9 @@ final class NFCeTaxGroupTranslator
                 throw new RuntimeException('Grupo "'.$group->name.'": a alíquota '.$name.' foi informada, mas seu cálculo ainda não está implementado na NFC-e atual.');
             }
         }
-        foreach (['ibs_cbs_cst','ibs_cbs_class','is_cst','is_class'] as $name) {
+        foreach (['is_cst','is_class'] as $name) {
             if (trim((string) ($config[$name] ?? '')) !== '') {
-                throw new RuntimeException('Grupo "'.$group->name.'": classificação '.$name.' informada, mas os grupos de IBS/CBS/IS ainda não são gerados pelo XML NFC-e atual.');
+                throw new RuntimeException('Grupo "'.$group->name.'": Imposto Seletivo não está homologado neste fluxo; não gerar XML incompleto.');
             }
         }
         // Outros parâmetros cadastráveis ainda não foram mapeados para o
@@ -139,7 +140,8 @@ final class NFCeTaxGroupTranslator
             'fiscal_group_name'=>$group->name,
         ];
         foreach (['pis_rate','cofins_rate','pis_quantity_rate','cofins_quantity_rate','pis_calc_type','cofins_calc_type',
-            'icms_rate','base_reduction_rate','mod_bc'] as $field) {
+            'icms_rate','base_reduction_rate','mod_bc',
+            'ibs_cbs_cst','ibs_cbs_class','ibs_uf_rate','ibs_municipal_rate','cbs_rate'] as $field) {
             if (array_key_exists($field,$config) && $config[$field] !== '') {
                 $mapped[$field] = $config[$field];
             }
