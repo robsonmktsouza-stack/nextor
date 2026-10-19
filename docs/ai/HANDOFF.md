@@ -12,8 +12,8 @@ Este documento registra o último trabalho concluído. Verifique sempre o códig
 - `app/Services/Fiscal/NFCeIniBuilder.php`: adiciona seções ACBr `[IBSCBSnnn]`, `[gIBSCBSnnn]`, `[gIBSUFnnn]`, `[gIBSMunnn]`, `[gCBSnnn]` e os totais `[IBSCBSTot]`, `[gIBS]`, `[gIBSUFTot]`, `[gIBSMunTot]`, `[gCBSTot]`. Não soma IBS/CBS ao vNF da transição 2026.
 - `app/Services/Fiscal/NFCePreflightService.php`: exige perfil RTC para CRT 2/3 na emissão de 2026, valida todos os itens e impede tratamento parcial. Simples Nacional CRT 1/4 em 2026 não recebe alíquotas-teste inventadas; regime a partir de 2027 precisa de implementação própria.
 - `resources/views/fiscal/tax-groups/form.blade.php`: esclarece quais regras são suportadas.
-- Testes: `tests/Unit/NFCeRtcTaxServiceTest.php` (10), `tests/Feature/NFCeRtcIniTest.php` (2), `tests/Feature/NFCeIniBuilderTest.php` atualizado. Correções reais de sintaxe em `NFCeManualEditorTest.php` e de regressão em `NFCeTaxGroupTranslatorTest.php`.
-- `.github/workflows/nfce-rtc-tests.yml`: rotina PHP 8.3, Composer, `php -l`, PHPUnit, ativada no GitHub Actions. **Regressão RTC ficou verde no run 39300149793.** O workflow `ACBr integration checks` ainda precisa de confirmação verde na última revisão.
+- Testes: `tests/Unit/NFCeRtcTaxServiceTest.php` (12), `tests/Feature/NFCeRtcIniTest.php` (2), `tests/Feature/NFCeIniBuilderTest.php` atualizado. Correções reais de sintaxe em `NFCeManualEditorTest.php` e de regressão em `NFCeTaxGroupTranslatorTest.php`.
+- `.github/workflows/nfce-rtc-tests.yml`: rotina PHP 8.3, Composer, `php -l`, PHPUnit, ativada no GitHub Actions. **Regressão RTC ficou verde no run 39300149793 e novamente no run 39301286051 (com proteções de IS e redução).** O workflow `ACBr integration checks` ainda precisa de confirmação verde na última revisão.
 
 **Fontes oficiais da análise:** Portal NF-e schemas 010f NT 2025.002 v1.50 (31/08/2026), modelo NFC-e INI RTC da ACBrLib, CGIBS/RFB esclarecimento 06/08/2026 (adiamento da rejeição não elimina a obrigação), Receita Federal orientações do Simples Nacional 2027. URL e checklist na matriz `docs/fiscal/nfce-formulario-conformidade-2026.md`.
 
