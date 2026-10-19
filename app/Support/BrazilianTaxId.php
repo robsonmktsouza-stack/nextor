@@ -11,6 +11,11 @@ final class BrazilianTaxId
 {
     public static function valid(string $value): bool
     {
+        // Não remover letras silenciosamente de um identificador informado:
+        // os layouts numéricos vigentes exigem dígitos/máscara válida.
+        if (!preg_match('/^[0-9.\\/\\-\\s]+$/', $value)) {
+            return false;
+        }
         $value = preg_replace('/\D/', '', $value);
         if (strlen($value) === 11) {
             if (preg_match('/^(\d)\1{10}$/', $value)) {
