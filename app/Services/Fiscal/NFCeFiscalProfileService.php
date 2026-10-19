@@ -42,13 +42,13 @@ final class NFCeFiscalProfileService
             throw new RuntimeException('Informe um NCM de oito dígitos no produto.');
         }
 
-        // Não descartar alíquotas configuradas no cadastro do produto:
-        // se o emissor atual não calcula o tributo, não transmitir com zero.
+        // IBS/CBS integral agora tem cálculo explícito em NFCeRtcTaxService.
+        // As demais alíquotas não suportadas continuam bloqueadas antes do XML.
+        // Não descartar dados do produto nem substituí-los por valores zero.
         $savedTaxes = is_array($item['tax_defaults'] ?? null) ? $item['tax_defaults'] : [];
         foreach ([
             'icms_rate', 'icms_st_rate', 'base_reduction_rate', 'simple_credit_rate',
             'mva_rate', 'fcp_rate', 'ipi_rate',
-            'cbs_rate', 'ibs_uf_rate', 'ibs_municipal_rate',
         ] as $field) {
             if (in_array($crt, ['2','3'], true) && in_array($field, ['icms_rate','base_reduction_rate'], true)) {
                 continue;
