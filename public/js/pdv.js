@@ -1370,18 +1370,18 @@
         }
       }
 
-      if(!['1','2'].includes(data.integration_type)){
-        notify('Informe se o pagamento eletrônico é integrado ao sistema ou não integrado.','warning');
+      const electronicSourceInfo=electronicSource();
+      const isCard=electronicSourceInfo && (electronicTarget==='single'
+        ? isCardKind(paymentKind(payment.value))
+        : isCardKind(splitPayments[Number(electronicTarget)]?.kind));
+      // Cartão exige TEF/POS explícito. PIX não recebe integração fictícia:
+      // o campo pode ficar vazio quando nenhum dado foi fornecido.
+      if(isCard && !['1','2'].includes(data.integration_type)){
+        notify('Informe se o cartão foi recebido por TEF integrado ou POS não integrado.','warning');
         electronicIntegration?.focus();
         return;
       }
-
-      const electronicSourceInfo=electronicSource();
-      const isIntegratedCard=electronicSourceInfo
-        && (electronicTarget==='single'
-          ? isCardKind(paymentKind(payment.value))
-          : isCardKind(splitPayments[Number(electronicTarget)]?.kind))
-        && data.integration_type==='1';
+      const isIntegratedCard=isCard && data.integration_type==='1';
       if(isIntegratedCard && (!data.institution_document || !data.authorization_code)){
         notify('Cartão integrado: informe o CNPJ da adquirente e a autorização da transação.','warning');
         electronicInstitution?.focus();
