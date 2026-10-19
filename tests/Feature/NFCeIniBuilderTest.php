@@ -313,6 +313,8 @@ final class NFCeIniBuilderTest extends TestCase
                         'cfop_outbound_internal'=>'5102','icms_cst'=>'20',
                         'mod_bc'=>'3','icms_rate'=>'18','base_reduction_rate'=>'20',
                         'pis_cst'=>'49','cofins_cst'=>'49',
+                        'ibs_cbs_cst'=>'000','ibs_cbs_class'=>'000001',
+                        'ibs_uf_rate'=>'0.1000','ibs_municipal_rate'=>'0.0000','cbs_rate'=>'0.9000',
                     ],
                 ]],
                 'payments'=>[['payment_method'=>'cash','payment_kind'=>'cash','amount'=>'90.00']],
@@ -323,6 +325,9 @@ final class NFCeIniBuilderTest extends TestCase
         self::assertStringContainsString("[ICMS001]\r\norig=0\r\nCST=20\r\nmodBC=3\r\npRedBC=20.0000\r\nvBC=72.00\r\npICMS=18.0000\r\nvICMS=12.96", $ini);
         self::assertStringContainsString("[Total]\r\nvBC=72.00\r\nvICMS=12.96", $ini);
         self::assertStringContainsString("vNF=90.00", $ini);
+        self::assertStringContainsString("[IBSCBS001]", $ini);
+        self::assertStringContainsString("vBCIBSCBS=90.00", $ini);
+        self::assertStringContainsString("vCBS=0.81", $ini);
     }
 
 }
