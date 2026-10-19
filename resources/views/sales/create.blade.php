@@ -59,7 +59,7 @@
   <div class="sale-section-title">
     <div>
       <h2>Carrinho</h2>
-      <p>Produtos, serviços, frete e outras despesas na mesma operação.</p>
+      
     </div>
     <button type="button" class="btn btn-secondary" id="addSaleItem">
       @include('partials.icon',['name'=>'plus','size'=>16]) Adicionar item
@@ -102,7 +102,7 @@
   <div class="sale-section-title">
     <div>
       <h2>Financeiro</h2>
-      <p>Parcelas e forma prevista de recebimento.</p>
+      
     </div>
   </div>
 
