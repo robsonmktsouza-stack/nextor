@@ -75,6 +75,33 @@
 @endif
 @endif
 
+{{-- Esta confirmação aparece somente ao voltar da impressão da venda atual.
+     Nunca equivale a protocolo de autorização da SEFAZ. --}}
+@if($lastCompletedPdvSale && (int)session('pdv_last_sale')===(int)$lastCompletedPdvSale->id)
+  @php
+    $lastFiscalStatus = $lastPdvNfceDocument?->status;
+    $fiscalAuthorized = $lastFiscalStatus==='authorized' && (bool)$lastPdvNfceDocument?->protocol;
+    $fiscalMessage = match($lastFiscalStatus) {
+      'authorized' => $fiscalAuthorized
+        ? 'NFC-e autorizada pela SEFAZ. O DANFE pode ser impresso em Operações > Última venda.'
+        : 'A NFC-e precisa de conferência: autorização sem protocolo disponível.',
+      'processing' => 'NFC-e em processamento. A autorização ainda não foi confirmada.',
+      'pending' => 'Retorno da SEFAZ pendente de consulta. Não repita a venda nem reenvie a nota.',
+      'prepared' => 'NFC-e preparada, mas ainda não autorizada. Revise e emita a partir da última venda.',
+      'rejected' => 'NFC-e rejeitada. Corrija o documento da venda; não registre outra venda.',
+      'offline_signed', 'offline_sending' => 'NFC-e em contingência: autorização da SEFAZ ainda pendente.',
+      'cancelled' => 'NFC-e cancelada. Consulte o histórico fiscal da venda.',
+      default => 'NFC-e ainda não preparada. Consulte a última venda antes de emitir.',
+    };
+  @endphp
+  <div data-system-notification
+       data-type="{{ $fiscalAuthorized ? 'success' : 'warning' }}"
+       data-notification-title="Venda #{{ $lastCompletedPdvSale->id }} concluída"
+       hidden>
+    {{ $fiscalMessage }} Você pode continuar atendendo no PDV.
+  </div>
+@endif
+
 <form id="pdvForm" method="post" action="{{ route('pdv.store') }}">
 @csrf
 
