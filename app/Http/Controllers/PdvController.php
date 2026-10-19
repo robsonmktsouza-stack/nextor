@@ -504,6 +504,27 @@ class PdvController extends Controller
                 }
             }
 
+            $isCard=in_array($fiscalKind,['card','credit_card','debit_card'],true);
+            $electronic=$isCard || $fiscalKind==='pix';
+            $integration=(string)($payment['integration_type'] ?? '');
+            if($isCard && $integration==='1'
+                && (!$institutionDocument || !trim((string)($payment['authorization_code'] ?? '')))) {
+                throw ValidationException::withMessages([
+                    'payments'=>'Cartão integrado exige CNPJ da adquirente e código de autorização.',
+                ]);
+            }
+            if(!$electronic && (
+                $integration!=='' || $transactionDocument!==null || $transactionState!==''
+                || $institutionDocument!==null || $beneficiaryDocument!==null
+                || trim((string)($payment['card_brand'] ?? ''))!==''
+                || trim((string)($payment['authorization_code'] ?? ''))!==''
+                || trim((string)($payment['terminal_id'] ?? ''))!==''
+            )) {
+                throw ValidationException::withMessages([
+                    'payments'=>'Dados eletrônicos incompatíveis com a forma de pagamento selecionada.',
+                ]);
+            }
+
             $payments[]=[
                 'amount'=>number_format($amount,2,'.',''),
                 'due_date'=>now()->copy()->addDays((int)$method->settlement_days)->toDateString(),
