@@ -414,6 +414,7 @@
   @endphp
   <script type="application/json" id="nfceProductsJson">@json($products)</script>
   <script type="application/json" id="nfceMethodsJson">@json($methods)</script>
+  <script type="application/json" id="nfceCardBrandsJson">@json(\App\Support\NFCeCardBrands::LABELS)</script>
   <script type="application/json" id="nfceOldItems">@json($formItems)</script>
   <script type="application/json" id="nfceOldPayments">@json($formPayments)</script>
 @endif
