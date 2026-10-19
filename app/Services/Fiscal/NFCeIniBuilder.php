@@ -129,6 +129,9 @@ final class NFCeIniBuilder
             $totalIcms += (int) round((float)($calculated['icms']['vICMS'] ?? 0) * 100);
 
             $add('Produto'.$i, [
+                'infAdProd' => (($tax['icms_cst'] ?? null) === '51')
+                    ? 'ICMS diferido conforme '.trim((string)($tax['icms_deferral_legal_basis'] ?? ''))
+                    : null,
                 'cProd' => ($item['sku'] ?? null) ?: 'PROD-'.$item['product_id'],
                 'cEAN' => $digits($item['gtin'] ?? '') ?: 'SEM GTIN',
                 // A SEFAZ exige a descrição especial somente no primeiro
