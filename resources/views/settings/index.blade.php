@@ -5,76 +5,52 @@
 
 @php
 $primaryTabs=[
-  'general'=>[
-    'label'=>'Geral','icon'=>'settings',
-    'members'=>['general','printing','catalog'],
-  ],
-  'chart'=>[
-    'label'=>'Plano de contas','icon'=>'layers',
-    'members'=>['chart'],
-  ],
-  'accounts'=>[
-    'label'=>'Contas caixa','icon'=>'money',
-    'members'=>['accounts'],
-  ],
-  'operations'=>[
-    'label'=>'Operações','icon'=>'sales',
-    'members'=>['operations','inventory','pdv'],
-  ],
-  'payments'=>[
-    'label'=>'Formas pgto','icon'=>'receipt',
-    'members'=>['payments'],
-  ],
-  'billing'=>[
-    'label'=>'Cobranças / PIX','icon'=>'money',
-    'members'=>['billing'],
-  ],
-  'fiscal'=>[
-    'label'=>'Fiscal','icon'=>'shield',
-    'members'=>['fiscal','nfe','nfce','nfse','cte'],
-  ],
-  'tax'=>[
-    'label'=>'Tributação','icon'=>'layers',
-    'members'=>['tax'],
-  ],
-  'accounting'=>[
-    'label'=>'Contábil','icon'=>'services',
-    'members'=>['accounting'],
-  ],
-  'users'=>[
-    'label'=>'Usuários','icon'=>'customers',
-    'members'=>['users'],
-  ],
-  'integrations'=>[
-    'label'=>'API / Integrações','icon'=>'layers',
-    'members'=>['integrations'],
-  ],
-  'system'=>[
-    'label'=>'Sistema','icon'=>'settings',
-    'members'=>['system'],
-  ],
+  'general'=>['label'=>'Minha empresa','icon'=>'settings','members'=>['general','printing','catalog']],
+  'operations'=>['label'=>'Vendas e estoque','icon'=>'sales','members'=>['operations','inventory','pdv']],
+  'chart'=>['label'=>'Financeiro','icon'=>'money','members'=>['chart','accounts','payments','billing','accounting']],
+  'fiscal'=>['label'=>'Notas fiscais','icon'=>'receipt','members'=>['fiscal','nfe','nfce','nfse','cte','tax']],
+  'users'=>['label'=>'Equipe e acessos','icon'=>'customers','members'=>['users']],
+  'system'=>['label'=>'Outras opções','icon'=>'settings','members'=>['system','integrations']],
 ];
-
 $subTabs=[
   'general'=>[
     'general'=>['Dados da empresa','settings'],
-    'printing'=>['Impressão e identidade','receipt'],
+    'printing'=>['Logotipo e impressão','receipt'],
     'catalog'=>['Produtos e serviços','products'],
   ],
   'operations'=>[
-    'operations'=>['Vendas e operações','sales'],
+    'operations'=>['Vendas','sales'],
     'inventory'=>['Estoque','stock'],
-    'pdv'=>['PDV','pdv'],
+    'pdv'=>['Frente de caixa (PDV)','pdv'],
+  ],
+  'chart'=>[
+    'chart'=>['Categorias financeiras','layers'],
+    'accounts'=>['Caixa e bancos','money'],
+    'payments'=>['Formas de pagamento','receipt'],
+    'billing'=>['Cobranças e PIX','money'],
+    'accounting'=>['Contabilidade','services'],
   ],
   'fiscal'=>[
-    'fiscal'=>['Geral fiscal','shield'],
-    'nfe'=>['NF-e','receipt'],
-    'nfce'=>['NFC-e','receipt'],
-    'nfse'=>['NFS-e','services'],
-    'cte'=>['CT-e / MDF-e','stock'],
+    'fiscal'=>['Informações fiscais','shield'],
+    'nfe'=>['Nota de produto (NF-e)','receipt'],
+    'nfce'=>['Nota do consumidor (NFC-e)','receipt'],
+    'nfse'=>['Nota de serviço (NFS-e)','services'],
+    'cte'=>['Transporte (CT-e / MDF-e)','stock'],
+    'tax'=>['Impostos e tributação','layers'],
+  ],
+  'system'=>[
+    'system'=>['Aparência e preferências','settings'],
+    'integrations'=>['Integrações avançadas','layers'],
   ],
 ];
-
+$sectionGuides=[
+  'general'=>'Atualize os dados da empresa, o logotipo e os padrões dos produtos.',
+  'operations'=>'Defina como funcionam as vendas, o controle de estoque e o caixa.',
+  'chart'=>'Organize o dinheiro da empresa, os pagamentos, as cobranças e a contabilidade.',
+  'fiscal'=>'Configure a emissão de notas e as informações exigidas pelo fisco.',
+  'users'=>'Cadastre quem pode entrar no sistema e escolha o que cada pessoa pode acessar.',
+  'system'=>'Personalize o uso do Lumeron e acesse recursos avançados quando precisar.',
+];
 
 
 $activePrimary='general';
@@ -86,20 +62,22 @@ foreach($primaryTabs as $key=>$item){
 }
 @endphp
 
-<nav class="settings-main-tabs" aria-label="Configurações">
+<nav class="settings-main-tabs" aria-label="Áreas de configurações">
   @foreach($primaryTabs as $key=>$item)
-    <a href="{{ route('settings.index',['tab'=>$key]) }}"
-       class="{{ $activePrimary===$key?'active':'' }}">
-      @include('partials.icon',['name'=>$item['icon'],'size'=>13])
+    <a href="{{ route('settings.index',['tab'=>$item['members'][0]]) }}"
+       class="{{ $activePrimary===$key?'active':'' }}"
+       @if($activePrimary===$key) aria-current="page" @endif>
+      @include('partials.icon',['name'=>$item['icon'],'size'=>15])
       <span>{{ $item['label'] }}</span>
     </a>
   @endforeach
 </nav>
+<p class="settings-section-guide">{{ $sectionGuides[$activePrimary] }}</p>
 
 @if(isset($subTabs[$activePrimary]))
   <nav class="settings-subtabs" aria-label="Seção de configurações">
     @foreach($subTabs[$activePrimary] as $key=>$item)
-      <a href="{{ route('settings.index',['tab'=>$key]) }}" class="{{ $tab===$key?'active':'' }}">
+      <a href="{{ route('settings.index',['tab'=>$key]) }}" class="{{ $tab===$key?'active':'' }}" @if($tab===$key) aria-current="page" @endif>
         @include('partials.icon',['name'=>$item[1],'size'=>13])
         <span>{{ $item[0] }}</span>
       </a>
@@ -113,7 +91,7 @@ foreach($primaryTabs as $key=>$item){
     @csrf
     <section class="editor-panel settings-panel">
       <div class="settings-panel-head">
-        <div><h2>Dados gerais da empresa</h2><p>Identificação usada em vendas, financeiro, documentos e impressões.</p></div>
+        <div><h2>Dados da empresa</h2><p>Identificação usada em vendas, financeiro, documentos e impressões.</p></div>
         
       </div>
 
@@ -150,7 +128,7 @@ foreach($primaryTabs as $key=>$item){
         <label class="field col-5"><span>Cidade</span>
           <select name="city" data-city-select data-current-city="{{ old('city',$company->city) }}"><option value="{{ old('city',$company->city) }}">{{ old('city',$company->city) ?: 'Selecione o estado' }}</option></select>
         </label>
-        <label class="field col-2"><span>Cód. IBGE</span><input name="city_ibge_code" value="{{ old('city_ibge_code',$company->city_ibge_code) }}"></label>
+        <label class="field col-2"><span>Código do município (IBGE)</span><input name="city_ibge_code" value="{{ old('city_ibge_code',$company->city_ibge_code) }}"></label>
 
         <label class="field col-8"><span>Endereço</span><input name="address" value="{{ old('address',$company->address) }}" data-address-input></label>
         <label class="field col-2"><span>Número</span><input name="address_number" value="{{ old('address_number',$company->address_number) }}"></label>
@@ -161,7 +139,7 @@ foreach($primaryTabs as $key=>$item){
     </section>
 
     <section class="editor-panel settings-panel">
-      <div class="settings-panel-head"><div><h2>Dados tributários da empresa</h2></div></div>
+      <div class="settings-panel-head"><div><h2>Regime tributário da empresa</h2></div></div>
       <div class="editor-grid cols-12 settings-grid">
         <label class="field col-4"><span>Regime tributário</span>
           <select name="tax_regime">
@@ -171,13 +149,13 @@ foreach($primaryTabs as $key=>$item){
             @endforeach
           </select>
         </label>
-        <label class="field col-2"><span>CRT</span><select name="crt">
+        <label class="field col-2"><span>Regime da nota (CRT)</span><select name="crt">
           <option value="">Selecione</option>
           @foreach(['1'=>'Simples Nacional','2'=>'Simples - sublimite','3'=>'Regime normal','4'=>'MEI'] as $code=>$name)
             <option value="{{ $code }}" @selected((string)old('crt',$company->crt)===(string)$code)>{{ $code }} — {{ $name }}</option>
           @endforeach
         </select></label>
-        <label class="field col-3"><span>Alíquota Simples (%)</span><input type="number" step="0.0001" min="0" max="100" name="simple_rate" value="{{ old('simple_rate',$company->simple_rate) }}"></label>
+        <label class="field col-3"><span>Alíquota do Simples Nacional (%)</span><input type="number" step="0.0001" min="0" max="100" name="simple_rate" value="{{ old('simple_rate',$company->simple_rate) }}"></label>
         <label class="field col-3"><span>Atividade principal</span>
           <select name="main_activity">
             <option value="">Selecione</option>
@@ -201,7 +179,7 @@ foreach($primaryTabs as $key=>$item){
     @csrf
     <section class="editor-panel settings-panel">
       <div class="settings-panel-head">
-        <div><h2>Impressão e identidade</h2><p>Identidade usada em recibos, comprovantes, pedidos e relatórios.</p></div>
+        <div><h2>Logotipo e impressão</h2><p>Identidade usada em recibos, comprovantes, pedidos e relatórios.</p></div>
         
       </div>
       <div class="settings-brand-grid">
@@ -227,7 +205,7 @@ foreach($primaryTabs as $key=>$item){
       <div class="settings-panel-head"><div><h2>Impressão fiscal</h2></div></div>
       <div class="editor-grid cols-12 settings-grid">
         <label class="field col-4">
-          <span>Papel do DANFE NFC-e</span>
+          <span>Tamanho do papel da nota do consumidor</span>
           <select name="nfce_paper">
             <option value="80" @selected((string)old('nfce_paper',$printing['nfce_paper'])==='80')>Bobina 80 mm</option>
             <option value="58" @selected((string)old('nfce_paper',$printing['nfce_paper'])==='58')>Bobina 58 mm</option>
@@ -275,7 +253,7 @@ foreach($primaryTabs as $key=>$item){
 
 @elseif($tab==='chart')
   <section class="editor-panel settings-panel">
-    <div class="settings-panel-head"><div><h2>Plano de contas</h2><p>Categorias usadas nas receitas, despesas e relatórios financeiros.</p></div></div>
+    <div class="settings-panel-head"><div><h2>Categorias de receitas e despesas</h2><p>Categorias usadas nas receitas, despesas e relatórios financeiros.</p></div></div>
     <form method="post" action="{{ route('finance.categories.store') }}" class="settings-inline-form">
       @csrf
       <label class="field"><span>Nome</span><input name="name" maxlength="120" required placeholder="Ex.: Receita de vendas"></label>
@@ -305,7 +283,7 @@ foreach($primaryTabs as $key=>$item){
 
 @elseif($tab==='accounts')
   <section class="editor-panel settings-panel">
-    <div class="settings-panel-head"><div><h2>Contas financeiras</h2><p>Caixas, bancos e contas digitais usados nas movimentações.</p></div></div>
+    <div class="settings-panel-head"><div><h2>Caixa e contas bancárias</h2><p>Caixas, bancos e contas digitais usados nas movimentações.</p></div></div>
     <form method="post" action="{{ route('finance.accounts.store') }}" class="settings-inline-form settings-inline-4">
       @csrf
       <label class="field"><span>Nome</span><input name="name" maxlength="120" required></label>
@@ -335,17 +313,17 @@ foreach($primaryTabs as $key=>$item){
   <form method="post" action="{{ route('settings.group.update','operations') }}" class="settings-editor">
     @csrf
     <section class="editor-panel settings-panel">
-      <div class="settings-panel-head"><div><h2>Operações de vendas e estoque</h2><p>Padrões usados no fluxo comercial do Lumeron.</p></div></div>
+      <div class="settings-panel-head"><div><h2>Preferências de vendas</h2><p>Padrões usados no fluxo comercial do Lumeron.</p></div></div>
       <div class="editor-grid cols-12 settings-grid">
         <label class="field col-3"><span>Validade padrão do orçamento</span><input type="number" name="quote_valid_days" value="{{ $operations['quote_valid_days'] }}" min="0"><small>Dias</small></label>
         <label class="field col-3"><span>Vencimento padrão</span><input type="number" name="default_due_days" value="{{ $operations['default_due_days'] }}" min="0"><small>Dias após a venda</small></label>
-        <label class="field col-6"><span>Conta financeira padrão</span><select name="default_financial_account_id"><option value="">Sem padrão</option>@foreach($accounts as $a)<option value="{{ $a->id }}" @selected((string)$operations['default_financial_account_id']===(string)$a->id)>{{ $a->name }}</option>@endforeach</select></label>
+        <label class="field col-6"><span>Conta usada por padrão</span><select name="default_financial_account_id"><option value="">Sem padrão</option>@foreach($accounts as $a)<option value="{{ $a->id }}" @selected((string)$operations['default_financial_account_id']===(string)$a->id)>{{ $a->name }}</option>@endforeach</select></label>
         <label class="field col-6"><span>Categoria padrão de receita</span><select name="default_income_category_id"><option value="">Sem padrão</option>@foreach($categories->where('type','income') as $c)<option value="{{ $c->id }}" @selected((string)$operations['default_income_category_id']===(string)$c->id)>{{ $c->name }}</option>@endforeach</select></label>
         <label class="field col-6"><span>Categoria padrão de despesa</span><select name="default_expense_category_id"><option value="">Sem padrão</option>@foreach($categories->where('type','expense') as $c)<option value="{{ $c->id }}" @selected((string)$operations['default_expense_category_id']===(string)$c->id)>{{ $c->name }}</option>@endforeach</select></label>
       </div>
       <div class="settings-switch-grid">
         <label class="settings-switch"><input type="checkbox" name="default_final_consumer" value="1" @checked($operations['default_final_consumer'])><span><strong>Consumidor final por padrão</strong><small>Novas vendas iniciam marcadas como consumidor final.</small></span></label>
-        <label class="settings-switch"><input type="checkbox" name="auto_finance_sale" value="1" @checked($operations['auto_finance_sale'])><span><strong>Gerar financeiro da venda</strong><small>Integra vendas e parcelas ao financeiro.</small></span></label>
+        <label class="settings-switch"><input type="checkbox" name="auto_finance_sale" value="1" @checked($operations['auto_finance_sale'])><span><strong>Criar contas a receber ao vender</strong><small>Integra vendas e parcelas ao financeiro.</small></span></label>
         <label class="settings-switch"><input type="checkbox" name="allow_partial_return" value="1" @checked($operations['allow_partial_return'])><span><strong>Permitir devolução parcial</strong><small>Permite devolver parte da quantidade vendida.</small></span></label>
       </div>
     </section>
@@ -364,7 +342,7 @@ foreach($primaryTabs as $key=>$item){
         
       </div>
       <div class="editor-grid cols-12 settings-grid">
-        <label class="field col-3"><span>Casas decimais da quantidade</span>
+        <label class="field col-3"><span>Casas decimais nas quantidades</span>
           <select name="stock_decimal_places">
             @foreach(['0','1','2','3'] as $places)<option value="{{ $places }}" @selected((string)$inventory['stock_decimal_places']===$places)>{{ $places }}</option>@endforeach
           </select>
@@ -373,7 +351,7 @@ foreach($primaryTabs as $key=>$item){
       </div>
       <div class="settings-switch-grid">
         <label class="settings-switch"><input type="checkbox" name="allow_negative_stock" value="1" @checked($inventory['allow_negative_stock'])><span><strong>Permitir estoque negativo</strong><small>Autoriza venda mesmo quando o saldo controlado for insuficiente.</small></span></label>
-        <label class="settings-switch"><input type="checkbox" name="minimum_stock_alerts" value="1" @checked($inventory['minimum_stock_alerts'])><span><strong>Alertar estoque mínimo</strong><small>Habilita avisos quando o produto atingir o limite configurado.</small></span></label>
+        <label class="settings-switch"><input type="checkbox" name="minimum_stock_alerts" value="1" @checked($inventory['minimum_stock_alerts'])><span><strong>Avisar quando o estoque estiver baixo</strong><small>Habilita avisos quando o produto atingir o limite configurado.</small></span></label>
       </div>
     </section>
   
@@ -391,10 +369,10 @@ foreach($primaryTabs as $key=>$item){
       <label class="field"><span>Nome</span><input name="name" required placeholder="Vale / voucher"></label>
       <label class="field"><span>Tipo</span><select name="kind"><option value="cash">Dinheiro</option><option value="pix">PIX</option><option value="card">Cartão</option><option value="bank_slip">Boleto</option><option value="transfer">Transferência</option><option value="other">Outro</option></select></label>
       <label class="field"><span>Conta padrão</span><select name="financial_account_id"><option value="">Nenhuma</option>@foreach($accounts as $a)<option value="{{ $a->id }}">{{ $a->name }}</option>@endforeach</select></label>
-      <label class="field"><span>Taxa %</span><input type="number" step="0.0001" min="0" name="fee_percent" value="0"></label>
+      <label class="field"><span>Taxa percentual (%)</span><input type="number" step="0.0001" min="0" name="fee_percent" value="0"></label>
       <label class="field"><span>Taxa fixa</span><input type="number" step="0.01" min="0" name="fee_fixed" value="0"></label>
-      <label class="field"><span>Crédito em</span><input type="number" min="0" name="settlement_days" value="0"><small>Dias</small></label>
-      <label class="field"><span>Ordem</span><input type="number" min="0" name="sort_order" value="100"></label>
+      <label class="field"><span>Receber após</span><input type="number" min="0" name="settlement_days" value="0"><small>Dias</small></label>
+      <label class="field"><span>Ordem de exibição</span><input type="number" min="0" name="sort_order" value="100"></label>
       <label class="check-line"><input type="checkbox" name="is_active" value="1" checked><span>Ativa</span></label>
       <label class="check-line"><input type="checkbox" name="pdv_enabled" value="1" checked><span>Disponível no PDV</span></label>
       <button class="btn btn-success" type="submit">@include('partials.icon',['name'=>'plus','size'=>15]) Criar</button>
@@ -413,10 +391,10 @@ foreach($primaryTabs as $key=>$item){
             <label class="field"><span>Nome</span><input name="name" value="{{ $method->name }}" required></label>
             <label class="field"><span>Tipo</span><select name="kind">@foreach(['cash'=>'Dinheiro','pix'=>'PIX','card'=>'Cartão','bank_slip'=>'Boleto','transfer'=>'Transferência','other'=>'Outro'] as $k=>$v)<option value="{{ $k }}" @selected($method->kind===$k)>{{ $v }}</option>@endforeach</select></label>
             <label class="field"><span>Conta padrão</span><select name="financial_account_id"><option value="">Nenhuma</option>@foreach($accounts as $a)<option value="{{ $a->id }}" @selected($method->financial_account_id===$a->id)>{{ $a->name }}</option>@endforeach</select></label>
-            <label class="field"><span>Taxa %</span><input type="number" step="0.0001" min="0" name="fee_percent" value="{{ $method->fee_percent }}"></label>
+            <label class="field"><span>Taxa percentual (%)</span><input type="number" step="0.0001" min="0" name="fee_percent" value="{{ $method->fee_percent }}"></label>
             <label class="field"><span>Taxa fixa</span><input type="number" step="0.01" min="0" name="fee_fixed" value="{{ $method->fee_fixed }}"></label>
-            <label class="field"><span>Crédito em</span><input type="number" min="0" name="settlement_days" value="{{ $method->settlement_days }}"></label>
-            <label class="field"><span>Ordem</span><input type="number" min="0" name="sort_order" value="{{ $method->sort_order }}"></label>
+            <label class="field"><span>Receber após</span><input type="number" min="0" name="settlement_days" value="{{ $method->settlement_days }}"></label>
+            <label class="field"><span>Ordem de exibição</span><input type="number" min="0" name="sort_order" value="{{ $method->sort_order }}"></label>
             <label class="check-line"><input type="checkbox" name="is_active" value="1" @checked($method->is_active)><span>Ativa</span></label>
             <label class="check-line"><input type="checkbox" name="pdv_enabled" value="1" @checked($method->pdv_enabled)><span>PDV</span></label>
             <button class="btn btn-primary">Salvar</button>
@@ -430,7 +408,7 @@ foreach($primaryTabs as $key=>$item){
   <form method="post" action="{{ route('settings.group.update','pdv') }}" class="settings-editor">
     @csrf
     <section class="editor-panel settings-panel">
-      <div class="settings-panel-head"><div><h2>PDV</h2><p>Comportamento padrão do ponto de venda.</p></div></div>
+      <div class="settings-panel-head"><div><h2>Frente de caixa (PDV)</h2><p>Comportamento padrão do ponto de venda.</p></div></div>
       <div class="editor-grid cols-12 settings-grid">
         <label class="field col-6"><span>Forma de pagamento padrão</span><select name="default_payment_method"><option value="">Sem padrão</option>@foreach($paymentMethods->where('is_active',true)->where('pdv_enabled',true) as $m)<option value="{{ $m->code }}" @selected($pdv['default_payment_method']===$m->code)>{{ $m->name }}</option>@endforeach</select></label>
         <label class="field col-3"><span>Largura do cupom</span><select name="receipt_width"><option value="58" @selected((string)$pdv['receipt_width']==='58')>58 mm</option><option value="80" @selected((string)$pdv['receipt_width']==='80')>80 mm</option></select></label>
@@ -442,7 +420,7 @@ foreach($primaryTabs as $key=>$item){
         <label class="settings-switch"><input type="checkbox" name="require_cash_opening" value="1" @checked($pdv['require_cash_opening'])><span><strong>Exigir abertura de caixa</strong><small>Bloqueia vendas enquanto o operador não abrir o turno de caixa.</small></span></label>
         <label class="settings-switch"><input type="checkbox" name="ask_consumer_document" value="1" @checked($pdv['ask_consumer_document'])><span><strong>Perguntar CPF/CNPJ na nota</strong><small>Antes de finalizar, pergunta se o consumidor deseja ser identificado no documento fiscal.</small></span></label>
         <label class="settings-switch"><input type="checkbox" name="allow_split_payment" value="1" @checked($pdv['allow_split_payment'])><span><strong>Permitir pagamento dividido</strong><small>Permite combinar dinheiro, PIX, cartão e outras formas na mesma venda.</small></span></label>
-        <label class="settings-switch"><input type="checkbox" name="allow_cash_movements" value="1" @checked($pdv['allow_cash_movements'])><span><strong>Permitir sangria e suprimento</strong><small>Registra entradas e retiradas manuais do caixa durante o turno.</small></span></label>
+        <label class="settings-switch"><input type="checkbox" name="allow_cash_movements" value="1" @checked($pdv['allow_cash_movements'])><span><strong>Permitir retiradas e reforços no caixa</strong><small>Registra entradas e retiradas manuais do caixa durante o turno.</small></span></label>
         <label class="settings-switch"><input type="checkbox" name="show_stock" value="1" @checked($pdv['show_stock'])><span><strong>Mostrar estoque</strong><small>Exibe saldo disponível na busca de produtos.</small></span></label>
         <label class="settings-switch"><input type="checkbox" name="auto_nfce" value="1" @checked($pdv['auto_nfce'])><span><strong>Transmitir NFC-e automaticamente</strong><small>Com esta opção desativada, a nota fica preparada para revisão e emissão manual após a venda.</small></span></label>
       </div>
@@ -457,16 +435,16 @@ foreach($primaryTabs as $key=>$item){
   <form method="post" action="{{ route('settings.group.update','billing') }}" class="settings-editor">
     @csrf
     <section class="editor-panel settings-panel">
-      <div class="settings-panel-head"><div><h2>Cobranças e PIX</h2><p>Regras internas usadas pelo financeiro para vencimento, encargos e PIX copia e cola.</p></div></div>
+      <div class="settings-panel-head"><div><h2>Cobranças e PIX</h2><p>Defina vencimentos, juros, multas e pagamentos por PIX.</p></div></div>
       <div class="editor-grid cols-12 settings-grid">
-        <label class="field col-4"><span>Conta financeira padrão</span><select name="default_financial_account_id"><option value="">Nenhuma</option>@foreach($accounts as $a)<option value="{{ $a->id }}" @selected((string)$billing['default_financial_account_id']===(string)$a->id)>{{ $a->name }}</option>@endforeach</select></label>
+        <label class="field col-4"><span>Conta usada por padrão</span><select name="default_financial_account_id"><option value="">Nenhuma</option>@foreach($accounts as $a)<option value="{{ $a->id }}" @selected((string)$billing['default_financial_account_id']===(string)$a->id)>{{ $a->name }}</option>@endforeach</select></label>
         <label class="field col-4"><span>Chave PIX</span><input name="pix_key" value="{{ $billing['pix_key'] }}"></label>
         <label class="field col-4"><span>Vencimento padrão</span><input type="number" min="0" name="default_due_days" value="{{ $billing['default_due_days'] }}"><small>Dias</small></label>
         <label class="field col-3"><span>Multa (%)</span><input type="number" step="0.0001" min="0" name="fine_percent" value="{{ $billing['fine_percent'] }}"></label>
         <label class="field col-3"><span>Juros mensal (%)</span><input type="number" step="0.0001" min="0" name="interest_monthly_percent" value="{{ $billing['interest_monthly_percent'] }}"></label>
         <label class="field col-12"><span>Instruções padrão</span><textarea name="instructions" rows="4">{{ $billing['instructions'] }}</textarea></label>
       </div>
-      <label class="settings-switch settings-switch-single"><input type="checkbox" name="enabled" value="1" @checked($billing['enabled'])><span><strong>Habilitar cobranças internas</strong><small>Ativa cálculo de multa e juros e geração de PIX copia e cola nas contas a receber.</small></span></label>
+      <label class="settings-switch settings-switch-single"><input type="checkbox" name="enabled" value="1" @checked($billing['enabled'])><span><strong>Ativar cobranças</strong><small>Ativa cálculo de multa e juros e geração de PIX copia e cola nas contas a receber.</small></span></label>
     </section>
   
   <div class="editor-savebar settings-savebar">
@@ -479,14 +457,14 @@ foreach($primaryTabs as $key=>$item){
     <form method="post" action="{{ route('settings.group.update','fiscal') }}" class="settings-editor">
       @csrf
       <section class="editor-panel settings-panel">
-        <div class="settings-panel-head"><div><h2>Configuração fiscal geral</h2></div></div>
+        <div class="settings-panel-head"><div><h2>Emissão de notas fiscais</h2><p>Homologação é para testes; produção emite notas reais.</p></div></div>
         <div class="editor-grid cols-12 settings-grid">
-          <label class="field col-4"><span>Ambiente padrão</span><select name="default_environment"><option value="homologation" @selected($fiscal['default_environment']==='homologation')>Homologação</option><option value="production" @selected($fiscal['default_environment']==='production')>Produção</option></select></label>
+          <label class="field col-4"><span>Ambiente de emissão</span><select name="default_environment"><option value="homologation" @selected($fiscal['default_environment']==='homologation')>Homologação</option><option value="production" @selected($fiscal['default_environment']==='production')>Produção</option></select></label>
           <label class="field col-4"><span>E-mail do contador</span><input type="email" name="accountant_email" value="{{ $fiscal['accountant_email'] }}"></label>
           <label class="field col-4"><span>Perfil tributário</span><input name="tax_profile" value="{{ $fiscal['tax_profile'] }}" placeholder="Ex.: padrão Simples Nacional"></label>
         </div>
         <div class="settings-switch-grid">
-          <label class="settings-switch"><input type="checkbox" name="enabled" value="1" @checked($fiscal['enabled'])><span><strong>Habilitar recursos fiscais</strong></span></label>
+          <label class="settings-switch"><input type="checkbox" name="enabled" value="1" @checked($fiscal['enabled'])><span><strong>Ativar emissão de documentos fiscais</strong></span></label>
           <label class="settings-switch"><input type="checkbox" name="send_xml_email" value="1" @checked($fiscal['send_xml_email'])><span><strong>Enviar XML por e-mail</strong><small>Preferência padrão para documentos autorizados.</small></span></label>
           <label class="settings-switch"><input type="checkbox" name="keep_xml_copy" value="1" @checked($fiscal['keep_xml_copy'])><span><strong>Guardar cópia dos XMLs</strong><small>Preserva documentos autorizados no armazenamento do sistema.</small></span></label>
         </div>
@@ -498,7 +476,7 @@ foreach($primaryTabs as $key=>$item){
 </form>
 
     <section class="editor-panel settings-panel">
-      <div class="settings-panel-head"><div><h2>Certificado digital A1</h2></div></div>
+      <div class="settings-panel-head"><div><h2>Certificado digital da empresa (A1)</h2><p>Usado para assinar notas fiscais eletrônicas.</p></div></div>
       @if($company->certificate_path)
         <div class="certificate-status ok">
           @include('partials.icon',['name'=>'shield','size'=>24])
@@ -527,7 +505,7 @@ foreach($primaryTabs as $key=>$item){
 
     <section class="editor-panel settings-panel">
       <div class="settings-panel-head">
-        <div><h2>Notas recentes</h2></div>
+        <div><h2>Últimos documentos fiscais</h2></div>
       </div>
       <div class="table-scroll">
         <table class="cms-table">
@@ -560,7 +538,7 @@ foreach($primaryTabs as $key=>$item){
     @csrf
     <section class="editor-panel settings-panel">
       <div class="settings-panel-head">
-        <div><h2>Dados tributários</h2></div>
+        <div><h2>Impostos e códigos fiscais</h2><p>Área avançada: confira os códigos com a contabilidade antes de alterar.</p></div>
         <div class="row" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
           <a class="btn btn-secondary" href="{{ route('fiscal.tax-groups.index') }}">
             @include('partials.icon',['name'=>'layers','size'=>15]) Grupos de tributação
@@ -572,7 +550,7 @@ foreach($primaryTabs as $key=>$item){
         
       </div>
       <div class="editor-grid cols-12 settings-grid">
-        <label class="field col-2"><span>Origem ICMS</span><input name="icms_origin_default" value="{{ $tax['icms_origin_default'] }}" maxlength="2" placeholder="0"></label>
+        <label class="field col-2"><span>Origem da mercadoria (ICMS)</span><input name="icms_origin_default" value="{{ $tax['icms_origin_default'] }}" maxlength="2" placeholder="0"></label>
         <label class="field col-2"><span>CSOSN padrão</span><input name="icms_csosn_default" value="{{ $tax['icms_csosn_default'] }}" maxlength="4"></label>
         <label class="field col-2"><span>CST ICMS padrão</span><input name="icms_cst_default" value="{{ $tax['icms_cst_default'] }}" maxlength="4"></label>
         <label class="field col-2"><span>CST PIS padrão</span><input name="pis_cst_default" value="{{ $tax['pis_cst_default'] }}" maxlength="4"></label>
@@ -600,7 +578,7 @@ foreach($primaryTabs as $key=>$item){
   <form method="post" action="{{ route('settings.group.update','nfe') }}" class="settings-editor">
     @csrf
     <section class="editor-panel settings-panel">
-      <div class="settings-panel-head"><div><h2>NF-e — modelo 55</h2></div></div>
+      <div class="settings-panel-head"><div><h2>Nota fiscal de produtos (NF-e)</h2><p>Configurações de emissão das notas de produtos.</p></div></div>
       <div class="editor-grid cols-12 settings-grid">
         <label class="field col-3"><span>Ambiente</span><select name="environment"><option value="homologation" @selected($nfe['environment']==='homologation')>Homologação</option><option value="production" @selected($nfe['environment']==='production')>Produção</option></select></label>
         <label class="field col-2"><span>Série</span><input type="number" min="0" max="999" name="series" value="{{ $nfe['series'] }}"></label>
@@ -626,14 +604,14 @@ foreach($primaryTabs as $key=>$item){
   <form method="post" action="{{ route('settings.group.update','nfce') }}" class="settings-editor">
     @csrf
     <section class="editor-panel settings-panel">
-      <div class="settings-panel-head"><div><h2>NFC-e — modelo 65</h2></div></div>
+      <div class="settings-panel-head"><div><h2>Nota fiscal do consumidor (NFC-e)</h2><p>Configurações do cupom fiscal eletrônico.</p></div></div>
       <div class="editor-grid cols-12 settings-grid">
         <label class="field col-3"><span>Ambiente</span><select name="environment"><option value="homologation" @selected($nfce['environment']==='homologation')>Homologação</option><option value="production" @selected($nfce['environment']==='production')>Produção</option></select></label>
         <label class="field col-2"><span>Série</span><input type="number" min="0" max="999" name="series" value="{{ $nfce['series'] }}"></label>
         <label class="field col-3"><span>Próximo número</span><input type="number" min="1" name="next_number" value="{{ $nfce['next_number'] }}"></label>
         <label class="field col-2"><span>CFOP padrão</span><input name="default_cfop" value="{{ $nfce['default_cfop'] ?? '' }}" maxlength="4" placeholder="Ex.: 5102"></label>
-        <label class="field col-2"><span>ID CSC</span><input name="csc_id" value="{{ $nfce['csc_id'] }}"></label>
-        <label class="field col-6"><span>CSC / Token</span><input type="password" name="csc_token" placeholder="{{ $nfce['csc_token'] ? 'CSC já configurado' : 'Informe o CSC' }}"></label>
+        <label class="field col-2"><span>Identificador do CSC</span><input name="csc_id" value="{{ $nfce['csc_id'] }}"></label>
+        <label class="field col-6"><span>Código de segurança (CSC)</span><input type="password" name="csc_token" placeholder="{{ $nfce['csc_token'] ? 'CSC já configurado' : 'Informe o CSC' }}"></label>
       </div>
       <div class="settings-switch-grid">
         <label class="settings-switch"><input type="checkbox" name="enabled" value="1" @checked($nfce['enabled'])><span><strong>NFC-e habilitada</strong><small>Disponibiliza esta configuração ao emissor.</small></span></label>
@@ -654,16 +632,16 @@ foreach($primaryTabs as $key=>$item){
   <form method="post" action="{{ route('settings.group.update','nfse') }}" class="settings-editor">
     @csrf
     <section class="editor-panel settings-panel">
-      <div class="settings-panel-head"><div><h2>NFS-e</h2></div></div>
+      <div class="settings-panel-head"><div><h2>Nota fiscal de serviços (NFS-e)</h2><p>Dados necessários para emissão de notas de serviços.</p></div></div>
       <div class="editor-grid cols-12 settings-grid">
         <label class="field col-3"><span>Ambiente</span><select name="environment"><option value="homologation" @selected($nfse['environment']==='homologation')>Homologação</option><option value="production" @selected($nfse['environment']==='production')>Produção</option></select></label>
-        <label class="field col-4"><span>Provedor / padrão</span><input name="provider" value="{{ $nfse['provider'] }}" placeholder="Ex.: Nacional / prefeitura / provedor"></label>
+        <label class="field col-4"><span>Padrão usado pela prefeitura</span><input name="provider" value="{{ $nfse['provider'] }}" placeholder="Ex.: Nacional / prefeitura / provedor"></label>
         <label class="field col-3"><span>Código do município</span><input name="municipality_code" value="{{ $nfse['municipality_code'] }}"></label>
         <label class="field col-2"><span>Série RPS</span><input name="series" value="{{ $nfse['series'] }}"></label>
         <label class="field col-3"><span>Próximo RPS</span><input type="number" min="1" name="next_rps" value="{{ $nfse['next_rps'] }}"></label>
         <label class="field col-5"><span>Código tributário de serviço padrão</span><input name="default_service_tax_code" value="{{ $nfse['default_service_tax_code'] }}"></label>
-        <label class="field col-4"><span>Login municipal</span><input name="municipal_login" value="{{ $nfse['municipal_login'] }}"></label>
-        <label class="field col-6"><span>Senha / token municipal</span><input type="password" name="municipal_password" placeholder="{{ $nfse['municipal_password'] ? 'Credencial já configurada' : 'Informe somente quando necessário' }}"></label>
+        <label class="field col-4"><span>Usuário da prefeitura</span><input name="municipal_login" value="{{ $nfse['municipal_login'] }}"></label>
+        <label class="field col-6"><span>Senha ou chave de acesso da prefeitura</span><input type="password" name="municipal_password" placeholder="{{ $nfse['municipal_password'] ? 'Credencial já configurada' : 'Informe somente quando necessário' }}"></label>
       </div>
       <div class="settings-switch-grid">
         <label class="settings-switch"><input type="checkbox" name="enabled" value="1" @checked($nfse['enabled'])><span><strong>NFS-e habilitada</strong><small>Disponibiliza os parâmetros ao emissor de serviços.</small></span></label>
@@ -682,7 +660,7 @@ foreach($primaryTabs as $key=>$item){
   <form method="post" action="{{ route('settings.group.update','cte') }}" class="settings-editor">
     @csrf
     <section class="editor-panel settings-panel">
-      <div class="settings-panel-head"><div><h2>CT-e e MDF-e</h2><p>Numeração e dados-base para operações de transporte.</p></div></div>
+      <div class="settings-panel-head"><div><h2>Documentos de transporte (CT-e e MDF-e)</h2><p>Numeração e dados-base para operações de transporte.</p></div></div>
       <div class="settings-subsection"><h3>CT-e</h3>
         <div class="editor-grid cols-12 settings-grid">
           <label class="field col-3"><span>Ambiente</span><select name="cte_environment"><option value="homologation" @selected($cte['cte_environment']==='homologation')>Homologação</option><option value="production" @selected($cte['cte_environment']==='production')>Produção</option></select></label>
@@ -713,7 +691,7 @@ foreach($primaryTabs as $key=>$item){
     @csrf
     <section class="editor-panel settings-panel">
       <div class="settings-panel-head">
-        <div><h2>Contábil</h2><p>Dados do escritório e preferências para integração e exportação contábil.</p></div>
+        <div><h2>Contabilidade</h2><p>Dados do escritório e preferências para integração e exportação contábil.</p></div>
         
       </div>
       <div class="editor-grid cols-12 settings-grid">
@@ -724,7 +702,7 @@ foreach($primaryTabs as $key=>$item){
         <label class="field col-3"><span>E-mail</span><input type="email" name="email" value="{{ $accounting['email'] }}"></label>
         <label class="field col-3"><span>Telefone</span><input name="phone" value="{{ $accounting['phone'] }}"></label>
         <label class="field col-6"><span>Sistema contábil de destino</span><input name="accounting_system" value="{{ $accounting['accounting_system'] }}" placeholder="Ex.: Domínio, Alterdata, outro"></label>
-        <div class="field col-6"><span>Formato disponível</span><div class="inline-note"><strong>CSV</strong> · formato atualmente gerado pelo Lumeron.</div></div>
+        <div class="field col-6"><span>Formato do arquivo</span><div class="inline-note"><strong>CSV</strong> · formato atualmente gerado pelo Lumeron.</div></div>
         <label class="field col-12"><span>Observações</span><textarea name="notes" rows="4">{{ $accounting['notes'] }}</textarea></label>
       </div>
       <div class="settings-switch-grid">
@@ -740,11 +718,11 @@ foreach($primaryTabs as $key=>$item){
 
 <section class="editor-panel settings-panel settings-accounting-export">
   <div class="settings-panel-head">
-    <div><h2>Exportação contábil</h2><p>Gere agora o arquivo da competência ou deixe a geração mensal automática habilitada.</p></div>
+    <div><h2>Enviar dados para a contabilidade</h2><p>Gere agora o arquivo da competência ou deixe a geração mensal automática habilitada.</p></div>
   </div>
   <form method="post" action="{{ route('settings.accounting.export') }}" class="settings-inline-form">
     @csrf
-    <label class="field"><span>Competência</span><input type="month" name="month" value="{{ now()->subMonthNoOverflow()->format('Y-m') }}" required></label>
+    <label class="field"><span>Mês de referência</span><input type="month" name="month" value="{{ now()->subMonthNoOverflow()->format('Y-m') }}" required></label>
     <div></div>
     <button class="btn btn-success" type="submit">@include('partials.icon',['name'=>'download','size'=>15]) Gerar CSV</button>
   </form>
@@ -762,7 +740,7 @@ foreach($primaryTabs as $key=>$item){
   <div class="settings-users-page">
     <section class="editor-panel settings-panel">
       <div class="settings-panel-head">
-        <div><h2>Novo usuário</h2><p>Cadastre o acesso e defina quais áreas do Lumeron estarão disponíveis.</p></div>
+        <div><h2>Adicionar pessoa à equipe</h2><p>Cadastre o acesso e defina quais áreas do Lumeron estarão disponíveis.</p></div>
       </div>
 
       <form method="post" action="{{ route('settings.users.store') }}" class="settings-user-form" autocomplete="off">
@@ -784,11 +762,11 @@ foreach($primaryTabs as $key=>$item){
         </div>
 
         <div class="settings-permissions-block">
-          <h3>Permissões</h3>
+          <h3>O que esta pessoa pode acessar?</h3>
           <p>Administrador possui acesso completo. Para os demais perfis, marque as áreas liberadas.</p>
           <div class="settings-permissions-toolbar">
-            <button type="button" class="btn btn-light btn-sm" data-permission-all>Marcar todas</button>
-            <button type="button" class="btn btn-light btn-sm" data-permission-none>Limpar</button>
+            <button type="button" class="btn btn-light btn-sm" data-permission-all>Permitir todas</button>
+            <button type="button" class="btn btn-light btn-sm" data-permission-none>Desmarcar todas</button>
           </div>
           <div class="settings-permission-grid">
             @foreach($permissions as $key=>$label)
@@ -848,10 +826,10 @@ foreach($primaryTabs as $key=>$item){
               </div>
 
               <div class="settings-permissions-block compact">
-                <h3>Permissões</h3>
+                <h3>O que esta pessoa pode acessar?</h3>
                 <div class="settings-permissions-toolbar">
-                  <button type="button" class="btn btn-light btn-sm" data-permission-all>Marcar todas</button>
-                  <button type="button" class="btn btn-light btn-sm" data-permission-none>Limpar</button>
+                  <button type="button" class="btn btn-light btn-sm" data-permission-all>Permitir todas</button>
+                  <button type="button" class="btn btn-light btn-sm" data-permission-none>Desmarcar todas</button>
                 </div>
                 <div class="settings-permission-grid">
                   @foreach($permissions as $key=>$label)
@@ -886,28 +864,28 @@ foreach($primaryTabs as $key=>$item){
   <form method="post" action="{{ route('settings.group.update','integrations') }}" class="settings-editor">
     @csrf
     <section class="editor-panel settings-panel">
-      <div class="settings-panel-head"><div><h2>E-mail / SMTP</h2><p>Servidor usado para mensagens enviadas pelo Lumeron.</p></div></div>
+      <div class="settings-panel-head"><div><h2>Envio de e-mails</h2><p>Servidor usado para mensagens enviadas pelo Lumeron.</p></div></div>
       <div class="editor-grid cols-12 settings-grid">
-        <label class="field col-4"><span>Host SMTP</span><input name="smtp_host" value="{{ $integrations['smtp_host'] }}"></label>
+        <label class="field col-4"><span>Servidor SMTP</span><input name="smtp_host" value="{{ $integrations['smtp_host'] }}"></label>
         <label class="field col-2"><span>Porta</span><input type="number" min="1" max="65535" name="smtp_port" value="{{ $integrations['smtp_port'] }}"></label>
         <label class="field col-2"><span>Criptografia</span><select name="smtp_encryption"><option value="">Nenhuma</option><option value="tls" @selected($integrations['smtp_encryption']==='tls')>TLS</option><option value="ssl" @selected($integrations['smtp_encryption']==='ssl')>SSL</option></select></label>
         <label class="field col-4"><span>Usuário</span><input name="smtp_username" value="{{ $integrations['smtp_username'] }}"></label>
         <label class="field col-4"><span>Senha</span><input type="password" name="smtp_password" placeholder="{{ $integrations['smtp_password'] ? 'Senha já configurada' : '' }}"></label>
-        <label class="field col-4"><span>E-mail remetente</span><input type="email" name="smtp_from_address" value="{{ $integrations['smtp_from_address'] }}"></label>
-        <label class="field col-4"><span>Nome remetente</span><input name="smtp_from_name" value="{{ $integrations['smtp_from_name'] }}"></label>
+        <label class="field col-4"><span>E-mail usado para enviar</span><input type="email" name="smtp_from_address" value="{{ $integrations['smtp_from_address'] }}"></label>
+        <label class="field col-4"><span>Nome exibido no envio</span><input name="smtp_from_name" value="{{ $integrations['smtp_from_name'] }}"></label>
       </div>
-      <label class="settings-switch settings-switch-single"><input type="checkbox" name="smtp_enabled" value="1" @checked($integrations['smtp_enabled'])><span><strong>Usar SMTP configurado</strong></span></label>
+      <label class="settings-switch settings-switch-single"><input type="checkbox" name="smtp_enabled" value="1" @checked($integrations['smtp_enabled'])><span><strong>Ativar envio pelo servidor configurado</strong></span></label>
     </section>
 
     <section class="editor-panel settings-panel">
-      <div class="settings-panel-head"><div><h2>API e webhook</h2></div></div>
+      <div class="settings-panel-head"><div><h2>Integrações para desenvolvedores</h2><p>Recursos avançados para conectar o Lumeron a outros sistemas.</p></div></div>
       <div class="editor-grid cols-12 settings-grid">
         <label class="field col-6"><span>Webhook</span><input type="url" name="webhook_url" value="{{ $integrations['webhook_url'] }}" placeholder="https://..."></label>
         <label class="field col-6"><span>Segredo do webhook</span><input type="password" name="webhook_secret" placeholder="{{ $integrations['webhook_secret'] ? 'Segredo já configurado' : '' }}"></label>
       </div>
       <div class="settings-switch-grid">
-        <label class="settings-switch"><input type="checkbox" name="api_enabled" value="1" @checked($integrations['api_enabled'])><span><strong>API habilitada</strong></span></label>
-        <label class="settings-switch"><input type="checkbox" name="webhook_enabled" value="1" @checked($integrations['webhook_enabled'])><span><strong>Webhook habilitado</strong></span></label>
+        <label class="settings-switch"><input type="checkbox" name="api_enabled" value="1" @checked($integrations['api_enabled'])><span><strong>Permitir acesso pela API</strong></span></label>
+        <label class="settings-switch"><input type="checkbox" name="webhook_enabled" value="1" @checked($integrations['webhook_enabled'])><span><strong>Enviar avisos automáticos para integrações (webhook)</strong></span></label>
       </div>
     </section>
   
@@ -918,7 +896,7 @@ foreach($primaryTabs as $key=>$item){
 
 <section class="editor-panel settings-panel">
   <div class="settings-panel-head">
-    <div><h2>API do Lumeron</h2></div>
+    <div><h2>Acesso de integração (API)</h2></div>
   </div>
   <div class="settings-api-grid">
     <div>
@@ -959,16 +937,16 @@ foreach($primaryTabs as $key=>$item){
   <form method="post" action="{{ route('settings.group.update','system') }}" class="settings-editor">
     @csrf
     <section class="editor-panel settings-panel">
-      <div class="settings-panel-head"><div><h2>Sistema</h2><p>Preferências de uso e comportamento da interface.</p></div></div>
+      <div class="settings-panel-head"><div><h2>Aparência e preferências</h2><p>Preferências de uso e comportamento da interface.</p></div></div>
       <div class="editor-grid cols-12 settings-grid">
         <label class="field col-3"><span>Linhas por página</span><select name="rows_per_page">@foreach(['10','25','50','100'] as $n)<option value="{{ $n }}" @selected((string)$system['rows_per_page']===$n)>{{ $n }}</option>@endforeach</select></label>
-        <label class="field col-3"><span>Busca dinâmica</span><input type="number" min="120" max="1000" name="search_delay" value="{{ $system['search_delay'] }}"><small>Espera em milissegundos</small></label>
+        <label class="field col-3"><span>Tempo de espera da pesquisa</span><input type="number" min="120" max="1000" name="search_delay" value="{{ $system['search_delay'] }}"><small>Em milissegundos (300 equivale a 0,3 segundo).</small></label>
         <label class="field col-3"><span>Formato de data</span><select name="date_format"><option value="d/m/Y" @selected($system['date_format']==='d/m/Y')>DD/MM/AAAA</option><option value="Y-m-d" @selected($system['date_format']==='Y-m-d')>AAAA-MM-DD</option></select></label>
       </div>
       <div class="settings-switch-grid">
-        <label class="settings-switch"><input type="checkbox" name="compact_mode" value="1" @checked($system['compact_mode'])><span><strong>Interface compacta</strong><small>Mantém tabelas e controles com densidade de ERP desktop.</small></span></label>
-        <label class="settings-switch"><input type="checkbox" name="show_tutorials" value="1" @checked($system['show_tutorials'])><span><strong>Exibir tutoriais</strong><small>Mostra atalhos e ajuda contextual.</small></span></label>
-        <label class="settings-switch"><input type="checkbox" name="confirm_destructive_actions" value="1" @checked($system['confirm_destructive_actions'])><span><strong>Confirmar ações destrutivas</strong><small>Exige confirmação antes de cancelar ou excluir.</small></span></label>
+        <label class="settings-switch"><input type="checkbox" name="compact_mode" value="1" @checked($system['compact_mode'])><span><strong>Exibir mais informações na tela</strong><small>Mantém tabelas e controles com densidade de ERP desktop.</small></span></label>
+        <label class="settings-switch"><input type="checkbox" name="show_tutorials" value="1" @checked($system['show_tutorials'])><span><strong>Mostrar dicas e atalhos</strong><small>Mostra atalhos e ajuda contextual.</small></span></label>
+        <label class="settings-switch"><input type="checkbox" name="confirm_destructive_actions" value="1" @checked($system['confirm_destructive_actions'])><span><strong>Pedir confirmação antes de excluir ou cancelar</strong><small>Exige confirmação antes de cancelar ou excluir.</small></span></label>
       </div>
     </section>
   
