@@ -115,7 +115,7 @@ final class NFCeIniBuilder
             $totalDiscount += (int) round($discount * 100);
             $cfop = $tax['cfop_outbound_internal'] ?? $tax['nfce_cfop'] ?? $tax['cfop'] ?? AppSetting::value('nfce', 'default_cfop', '');
             $calculated = $this->calculator->calculate($item, (string)$company->crt);
-            $rtcItem = $rtc->calculate($item, (string)$company->crt, now()->toDateString());
+            $rtcItem = $rtc->calculate($item, (string)$company->crt, now()->toDateString(), $calculated);
             if ($rtcItem !== null) {
                 $hasRtc = true;
                 $totalRtc['base'] += (int) round((float)$rtcItem['gibscbs']['vBC'] * 100);
