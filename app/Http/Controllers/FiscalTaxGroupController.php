@@ -13,7 +13,7 @@ final class FiscalTaxGroupController extends Controller
 {
     private const RATE_FIELDS = [
         'icms_rate','base_reduction_rate','credit_rate','icms_st_rate','mva_rate','fcp_deferral_rate',
-        'icms_deferral_rate','st_retained_rate',
+        'icms_deferral_rate','st_retained_rate','fcp_st_retained_rate',
         'pis_rate','pis_st_rate','pis_quantity_rate',
         'cofins_rate','cofins_st_rate','cofins_quantity_rate',
         'ipi_rate','iss_rate','is_rate','biodiesel_mix_rate','fuel_origin_rate',
@@ -24,6 +24,7 @@ final class FiscalTaxGroupController extends Controller
 
     private const MONEY_FIELDS = [
         'icms_st_retained_base','icms_st_retained_value','icms_substitutor_value',
+        'fcp_st_retained_base','fcp_st_retained_value',
     ];
 
     private const TEXT_FIELDS = [
