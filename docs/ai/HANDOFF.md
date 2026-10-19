@@ -2,7 +2,19 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
-## Entrega mais recente — 19/10/2026 — limpeza editorial dos modais e mensagens redundantes
+## Entrega mais recente — 19/10/2026 — fiscal sem títulos repetidos e textos didáticos
+
+Usuário enviou imagens de consulta NFC-e e Nova NFC-e no modal e pediu eliminar redundância: aba **Dados gerais** seguida de título **Dados gerais** e parágrafos permanentes com instruções longas no fiscal e em outros módulos, como “Série, ambiente e modalidade...”.
+
+**Alterações aplicadas à branch `feature/acbr-nfe-bootstrap`:**
+- `resources/views/fiscal/nfce/create.blade.php`: retirados campos visuais redundantes de modelo/série/CRT/modalidade do painel Dados gerais; série, ambiente e CRT permanecem no cabeçalho, sem perder dados fiscais nem envio para o servidor. A versão atual da view já não contém o aviso “Série, ambiente e modalidade...” e não deve reintroduzi-lo.
+- `public/js/nfce-editor.js`: ao iniciar qualquer editor (novo, consulta, correção), remove somente títulos **decorativos**, cujo texto seja exatamente igual ao nome da aba e que não contenham controles ou links. Preserva ações, campos, avisos de rejeição, erros e fluxo de edição.
+- `resources/views/settings/index.blade.php`: removidas mensagens permanentes genéricas sobre homologação/produção, tributos, documentos de transporte e habilitação de eventos, preservando campos, nomes e validação fiscal; sem ocultar mensagens de erro/advertência de retorno.
+- `tests/Feature/NFCeEditorClarityTest.php`: verifica ausência da nota explicativa, campos repetidos e preservação de abas e ações.
+- Testar manualmente em `/fiscal/nfce/create`, `/fiscal/{id}`, edição de rejeição, outras telas de Configurações; `php artisan optimize:clear` + Ctrl+F5 se houver HTML cacheado.
+- **Não esconder alerta/erro fiscal real** por CSS global. Padrão futuro: ajuda via tooltip contextual quando necessária, não banners de texto permanente no formulário. Sem alterações a ACBr, schema, CSC, números e banco.
+
+## Entrega anterior — 19/10/2026 — limpeza editorial dos modais e mensagens redundantes
 
 **Pedido:** usuário mostrou três capturas do Lumeron Fiscal (NFC-e consulta/nova emissão) e apontou a duplicação "Dados gerais" na aba e no painel, além de muitos parágrafos didáticos permanentes espalhados pelo ERP. Regra de interface: **uma aba já nomeia sua seção; não repetir seu título dentro dela. Campos e ações primeiro. Textos longos só sob demanda. Avisos reais de erro/segurança/SEFAZ não devem ser escondidos.**
 
