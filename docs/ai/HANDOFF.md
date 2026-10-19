@@ -2,6 +2,25 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
+## Continuidade — 19/10/2026 — correção funcional de cartões NFC-e/PDV
+
+**Pedido:** a aba Pagamento de Nova NFC-e não mostrava cartão de crédito/débito apesar dos códigos originais; separação dos tipos nas Configurações, compatibilidade com pagamentos antigos, emissão ACBr correta e pagamentos mistos, sem envio a SEFAZ.
+
+**Causa encontrada:** a migration original `2026_10_02_000005_create_settings_module.php` semeia `credit_card` e `debit_card` com o mesmo tipo genérico `card`, mas `NFCeManualController` só exibe e aceita os tipos `credit_card` e `debit_card`.
+
+**Alterações na branch `feature/acbr-nfe-bootstrap`:**
+- `database/migrations/2026_10_19_210000_reconcile_card_payment_kinds.php`: conciliação idempotente dos DOIS códigos internos originais. Só reclassifica `kind=card` nos registros exatos ou insere os ausentes; nunca muda nomes personalizados, taxas, contas, ordem, disponibilidade PDV ou ativo/inativo. `down()` sem remoção destrutiva.
+- `app/Models/PaymentMethod.php`: resolvedor compatível com códigos originais e aliases conhecidos `credit-card/debit-card`; cartões genéricos ambíguos ficam com tipo `card` e não são convertidos por heurística de substring.
+- `SettingsController` e `settings/index.blade.php`: crédito e débito separados; tipo `card` legível/editável apenas nos históricos, não criado em novos cadastros.
+- `NFCeManualController`: opções de catálogo ativas apenas com tipo fiscal válido, inclusive legados reconhecíveis; bloqueio server-side de formas ambíguas antes de criar venda; validação de dados TEF/POS mantida.
+- `PdvController`/`public/js/pdv.js`: reconhecimento de débito/crédito em todos os caminhos de seleção, cartão integrado e pagamento misto; validação de adquirente e autorização antes de salvar venda; tipos antigos `card` continuam identificáveis.
+- `FiscalPreparationService`: congela `payment_kind` reconhecido no snapshot da NFC-e. `NFCeIniBuilder`: reconcilia soma das parcelas em centavos e gera `tPag` 03/04/17/01/15/18, grupo eletrônico quando aplicável e `vTroco` no último pag; não inventa adquirente ou integração. `NFCePreflightService`: recusa dados eletrônicos incompatíveis com dinheiro/boleto, pagamento negativo/zero ou soma diferente.
+- `App/Support/NFCeCardBrands.php`: catálogo único de `tBand` 01–27 e 99; usado por validação Laravel, preflight, PDV e renderização NFC-e via JSON de servidor.
+- `tests/Feature/NFCeManualEditorTest.php`, `NFCePaymentIniRegressionTest.php` (novo), `SettingsModuleTest.php`, `PdvFiscalCheckoutFlowTest.php`: regressões dos dois cartões, venda única com dinheiro+PIX+débito, migração idempotente, bloqueio do legado ambíguo, dados TEF/POS e tPag/vPag/tBand/cAut/CNPJ e troco.
+- Matriz de cobertura e limites em `docs/fiscal/nfce-payment-methods-2026.md`.
+
+**Importante:** nenhum documento foi transmitido, não houve acesso ao banco Laragon/VPS do proprietário. O GitHub Actions executa PHP/SQLite/Chromium e valida INI, **não XML assinado/autorizado em ACBr Windows/SEFAZ-BA**. Conferir run verde no HEAD antes de alegar regressão completa. Para aplicar no Laragon: `git pull origin feature/acbr-nfe-bootstrap`, `php artisan migrate` (nova migração necessária), `php artisan optimize:clear`; recarregar com Ctrl+F5. Não rodar em produção sem aprovação.
+
 ## Continuidade — 19/10/2026 — lista de produtos cortada na Nova NFC-e
 
 **Problema observado no Chrome/Laragon:** o dropdown da busca em `/fiscal/nfce/create` era recortado logo abaixo do campo, dentro do modal da NFC-e. A lista absoluta era filha da área rolável `.nfe-workspace-body`, que deliberadamente tem `overflow-y:auto!important` e `overflow-x:hidden!important`. Aumentar `z-index` ou liberar `overflow` do modal não resolveria com segurança.
