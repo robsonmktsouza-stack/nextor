@@ -1,0 +1,43 @@
+# Arquitetura, contratos e decisões aprovadas — Lumeron
+
+Referência: código e documentação da branch `feature/acbr-nfe-bootstrap` conferidos em 19/10/2026. Decisões novas explícitas do proprietário substituem estas; registrem a mudança e seus impactos.
+
+## D01 — Identidade e compatibilidade
+
+O produto se chama **Lumeron ERP** (antigo Nextor). O repositório Laravel continua `robsonmktsouza-stack/nextor` e tem nomes técnicos legados. Não executar renomeação massiva que quebre migrações, classes, cookies, filas, integrações ou históricos. A API `/api/lumeron` convive com o alias `/api/nextor`. Não misturar com `robsonmktsouza-stack/lumeronerp`, protótipo WPF desktop separado.
+
+A marca oficial utiliza `public/images/lumeron/logo.png` (logo completa) e `public/images/lumeron/elephant.png` (elefante isolado). Reutilizar os arquivos existentes; não regenerar/reinterpretar a logo. Não colocar a marca do ERP no lugar da identificação legal do emitente nos documentos fiscais.
+
+## D02 — Produto e interface
+
+ERP web em Laravel/Blade/CSS/JavaScript; frontend atual sem dependência necessária de build Node no README. Preservar as experiências de painel administrativo e PDV dedicado. O PDV usa `resources/views/layouts/pdv.blade.php`, **sem herdar o sidebar administrativo**; painel usa os layouts convencionais. Estilo compartilhado em `public/css/erp.css`, `public/css/ui-refinement.css`, `public/css/branding.css` e folhas específicas do PDV. Respeitar padrões de tipografia, cores, densidade de tabela, controles e responsividade já implantados; não aplicar redesign ou framework novo sem pedido. Conferir `UiRefinementTest` e `LumeronBrandingTest`.
+
+## D03 — Isolamento contratual
+
+**Um CNPJ = uma instalação Laravel independente = um banco e ambiente próprios**, mesmo se uma pessoa tiver várias empresas. Cada instalação possui usuários, sessões, APP_KEY, storage, certificados A1, CSC, fila/worker e configurações próprios. Não criar seletor multiempresa compartilhado nem banco único com tenant_id. `config/instance.php` define `LUMERON_INSTANCE_CNPJ` e identidade de instância; preflight/transmissão devem rejeitar emitente CNPJ divergente. Desenvolvimento local pode operar sem vínculo de CNPJ; VPS gerenciada não pode. Documentos: `docs/deployment/one-cnpj-per-instance.md`, `docs/deployment/login-by-subdomain.md`.
+
+## D04 — Autenticação e segurança
+
+Login por subdomínio + usuário + senha, controle de permissões por módulo, recuperação de senha por e-mail da instalação. Portal central é **planejado/não implantado**, não autentica com banco comum e não recebe senhas. Toda rota sensível deve checar autenticação, permissão e identidade da instalação. Nunca versionar `.env`, APP_KEY, CSC, senha de certificado, PFX/A1, documentos de cliente, XMLs privados ou dados reais; nunca imprimir tais segredos em logs/testes. Rejeitar IDs cruzados e proteger ações destrutivas com autorização, validação e transações.
+
+## D05 — Comercial, estoque e financeiro
+
+Uma venda/PDV concluída é a referência do fato comercial. `SalesService` coordena a operação; conferir serviços de estoque, financeiro, `FiscalPreparationService` e relações antes de alterar fluxos. Uma tentativa fiscal rejeitada/corrigida **não cria outra venda, cobrança ou baixa de estoque**. Transações SQL, locks, idempotência e rastreabilidade devem ser preservados; devoluções/cancelamentos exigem regras comerciais e fiscais distintas.
+
+## D06 — Motor fiscal atual (substitui proposta antiga)
+
+**Motor vigente: ACBrLibNFe via PHP FFI, com serviços próprios do Lumeron ao redor dela**. O antigo plano de motor NFC-e completamente próprio foi substituído; há protótipo histórico arquivado em `archive/nextor-native-nfce-2026-10-02.zip`. Não recriar um emissor paralelo nem migrar para serviço/API paga ou NFePHP por iniciativa da IA. Serviço principal da biblioteca: `app/Services/Fiscal/ACBr/ACBrNFeService.php` (ACBr MT/Cdecl x64 no Windows). Biblioteca Linux e dependências devem ser configuradas separadamente na futura VPS; DLL Windows não é a versão Linux. Isolar instância/configuração ACBr por processo/documento, sem reusar handle global concorrente.
+
+Prioridade prática atual: **NFC-e modelo 65**, com foco de validação na **Bahia (BA)**. O código de preflight contém checagens específicas para BA: não declarar suporte a todas as UFs por analogia. NF-e 55, NFS-e, CT-e e MDF-e podem ter interface ou trabalho parcial; implementar/considerar completos somente com evidência.
+
+## D07 — Integridade dos documentos fiscais
+
+Nunca fabricar QR Code, chave, autorização, cStat, recibo ou protocolo. Seguir schemas e documentação oficial vigentes para o cenário/UF/ambiente. Exigir configurações do emitente, CRT, CFOP/CSOSN/CST, NCM, regras tributárias, pagamentos, certificado e CSC válidos conforme o caso; cálculos monetários devem ser exatos. Fiscal prepara dados a partir da operação comercial, assina XML, valida XSD e conserva XMLs/protocolos sem exposição pública. Não confundir `prepared`, `processing`, `rejected`, `authorized`, `offline_signed`, `offline_sending` e outros estados; verificar código atual antes de ampliar transições. Nunca reenviar às cegas depois de timeout: consultar e reconciliar o estado primeiro. Correção de rejeição preserva vínculo e histórico da venda; só uma NFC-e autorizada/ativa para a mesma venda. Cancelamento, inutilização e contingência precisam das pré-condições legais e rastreio de eventos. Contingência offline depende de condição real de falha e não significa autorização SEFAZ.
+
+## D08 — Implantação e mudanças de banco
+
+Não implantar em produção, alterar DNS, certificados, infraestrutura, cobranças ou dados de clientes sem pedido expresso. Scripts `deploy/instances/` são material de preparação com dry-run. Rodar migrations primeiro em base descartável ou backup restaurável, evitar mutações destrutivas e não inventar credenciais. `composer.lock` faltava no momento da inspeção e é requisito antes de provisionar clientes. Só divulgar ambiente como pronto após testes automatizados e homologação assistida.
+
+## D09 — Política de manutenção para agentes
+
+Antes de cada tarefa: ler `AGENTS.md`, `docs/ai/README.md`, `PROJECT_STATE.md`, `HANDOFF.md` e os arquivos afetados. Preferir mudanças mínimas, aderentes ao código e cobrindo regressões. Depois: atualizar o handoff, marcar resultado real de testes e registrar nova decisão neste documento se houver mudança aprovada. Não reivindicar que arquivos de IA têm memória automática entre conversas; eles são referência versionada que cada novo agente precisa carregar.
