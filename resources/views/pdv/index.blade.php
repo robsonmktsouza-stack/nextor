@@ -681,8 +681,8 @@
       <label><span>Autorização da transação</span><input id="pdvElectronicAuthorization" maxlength="128" placeholder="cAut"></label>
       <label><span>CNPJ beneficiário</span><input id="pdvElectronicBeneficiary" maxlength="18" placeholder="CNPJReceb"></label>
       <label><span>Terminal</span><input id="pdvElectronicTerminal" maxlength="40" placeholder="idTermPag"></label>
-      <label><span>CNPJ transacional</span><input id="pdvElectronicTransactionDocument" maxlength="18" placeholder="CNPJPag — opcional"></label>
-      <label><span>UF do pagamento</span><input id="pdvElectronicTransactionState" maxlength="2" placeholder="UFPag"></label>
+      <label><span>CNPJ da transação (quando informado, exige UF)</span><input id="pdvElectronicTransactionDocument" maxlength="18" placeholder="CNPJ do pagamento, quando aplicável"></label>
+      <label><span>UF da transação</span><input id="pdvElectronicTransactionState" maxlength="2" placeholder="Ex.: BA"></label>
     </div>
     <div class="pdv-operation-note">Esses campos são guardados na venda e seguem para o snapshot fiscal. A exigência final depende das regras da UF e do meio de pagamento.</div>
     <button type="button" class="pdv-modal-primary" id="pdvElectronicApply">Salvar dados do pagamento <kbd>Ctrl+Enter</kbd></button>
