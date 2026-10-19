@@ -30,13 +30,13 @@ final class NFCeTaxGroupTranslator
         $csosn=(string) ($group->nfce_csosn ?: $group->icms_csosn);
         $normal = in_array($crt, ['2','3'], true);
         $icmsCst = (string)$group->icms_cst;
-        if (($normal && !in_array($icmsCst, ['00','20','40','41'], true))
+        if (($normal && !in_array($icmsCst, ['00','20','40','41','51','60'], true))
             || (!$normal && !in_array($csosn, ['102','103','300','400','500'], true))
             || !in_array((string)$group->pis_cst, ['01','02','03','04','06','07','08','09','49','99'], true)
             || !in_array((string)$group->cofins_cst, ['01','02','03','04','06','07','08','09','49','99'], true)) {
             throw new RuntimeException('Grupo "'.$group->name.'": código fiscal sem cálculo NFC-e homologado.');
         }
-        $permittedCfops = !$normal && $csosn === '500'
+        $permittedCfops = ($normal && $icmsCst === '60') || (!$normal && $csosn === '500')
             ? ['5405','5656','5667']
             : ['5101','5102','5103','5104','5115'];
         if (!in_array($cfop, $permittedCfops, true)) {
@@ -47,7 +47,9 @@ final class NFCeTaxGroupTranslator
         foreach ($config as $name=>$value) {
             if (in_array($name, ['pis_rate', 'cofins_rate', 'pis_quantity_rate', 'cofins_quantity_rate',
                     'ibs_uf_rate', 'ibs_municipal_rate', 'cbs_rate'], true)
-                || ($normal && in_array($name, ['icms_rate','base_reduction_rate'], true))) {
+                || ($normal && in_array($name, ['icms_rate','base_reduction_rate','icms_deferral_rate'], true))
+                || (in_array($name,['st_retained_rate'],true)
+                    && (($normal && $icmsCst==='60') || (!$normal && $csosn==='500')))) {
                 continue; // Cálculo percentual é feito no serviço fiscal.
             }
             if (!str_ends_with((string)$name,'_rate') && $name !== 'mva_rate') {
@@ -114,7 +116,7 @@ final class NFCeTaxGroupTranslator
         if (($group->icms_cst && !$normal) || $group->ipi_cst) {
             throw new RuntimeException('Grupo "'.$group->name.'": CST do ICMS normal ou IPI incompatível com este regime e emissor.');
         }
-        if ($normal && in_array($icmsCst, ['00','20'], true) && (
+        if ($normal && in_array($icmsCst, ['00','20','51'], true) && (
             !isset($config['icms_rate']) || $config['icms_rate'] === ''
             || !isset($config['mod_bc']) || $config['mod_bc'] === ''
             || ($icmsCst === '20' && (!isset($config['base_reduction_rate']) || $config['base_reduction_rate'] === ''))
@@ -126,6 +128,23 @@ final class NFCeTaxGroupTranslator
             && ((isset($config['icms_rate']) && (float)$config['icms_rate'] > 0)
                 || (isset($config['base_reduction_rate']) && (float)$config['base_reduction_rate'] > 0))) {
             throw new RuntimeException('Grupo "'.$group->name.'": CST 40/41 não admite alíquota ICMS ou redução de base neste fluxo.');
+        }
+
+        if ($normal && $icmsCst==='51'
+            && (empty($config['icms_deferral_legal_basis'])
+                || !array_key_exists('icms_deferral_rate',$config)
+                || $config['icms_deferral_rate']==='')) {
+            throw new RuntimeException('CST 51: configure percentual e fundamento legal do diferimento.');
+        }
+        if (($normal && $icmsCst==='60') || (!$normal && $csosn==='500')) {
+            foreach (['st_retained_amount_scope','icms_st_retained_base','icms_st_retained_value'] as $required) {
+                if (!isset($config[$required]) || $config[$required]==='') {
+                    throw new RuntimeException("ICMS-ST anterior: configure {$required} conforme os documentos fiscais de entrada.");
+                }
+            }
+            if ($normal && $icmsCst==='60' && (!isset($config['st_retained_rate']) || $config['st_retained_rate']==='')) {
+                throw new RuntimeException('CST 60: informe a alíquota da retenção anterior.');
+            }
         }
 
         $mapped = [
@@ -141,6 +160,9 @@ final class NFCeTaxGroupTranslator
         ];
         foreach (['pis_rate','cofins_rate','pis_quantity_rate','cofins_quantity_rate','pis_calc_type','cofins_calc_type',
             'icms_rate','base_reduction_rate','mod_bc',
+            'icms_deferral_rate','icms_deferral_legal_basis',
+            'st_retained_amount_scope','icms_st_retained_base','icms_st_retained_value',
+            'st_retained_rate','icms_substitutor_value',
             'ibs_cbs_cst','ibs_cbs_class','ibs_uf_rate','ibs_municipal_rate','cbs_rate'] as $field) {
             if (array_key_exists($field,$config) && $config[$field] !== '') {
                 $mapped[$field] = $config[$field];
