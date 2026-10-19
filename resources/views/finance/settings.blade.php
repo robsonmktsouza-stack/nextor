@@ -9,7 +9,7 @@
 
 <div class="finance-settings-grid">
   <section class="cms-card">
-    <div class="card-header"><div><h2>Categorias</h2><p>Classificação de receitas e despesas</p></div></div>
+    <div class="card-header"><div><h2>Categorias</h2></div></div>
 
     <form method="post" action="{{ route('finance.categories.store') }}" class="finance-settings-form">
       @csrf
@@ -42,7 +42,7 @@
   </section>
 
   <section class="cms-card">
-    <div class="card-header"><div><h2>Caixas e contas</h2><p>Onde recebimentos e pagamentos são movimentados</p></div></div>
+    <div class="card-header"><div><h2>Caixas e contas</h2></div></div>
 
     <form method="post" action="{{ route('finance.accounts.store') }}" class="finance-settings-form finance-account-form">
       @csrf
