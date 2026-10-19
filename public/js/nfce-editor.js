@@ -108,6 +108,7 @@
   const readOnly=form.dataset.readonly==='1';
   const products=json('nfceProductsJson');
   const methods=json('nfceMethodsJson');
+  const cardBrands=Object.entries(json('nfceCardBrandsJson'));
   const oldItems=json('nfceOldItems');
   const oldPayments=json('nfceOldPayments');
   const productMap=new Map(products.map(product=>[String(product.id),product]));
@@ -483,7 +484,7 @@
         '</select></label>'+
         '<label class="field"><span>Bandeira (cartão)</span><select name="payments['+index+'][card_brand]" data-payment-field="card_brand">'+
         '<option value="">Selecione</option>'+
-        [['01','Visa'],['02','Mastercard'],['03','American Express'],['04','Sorocred'],['05','Diners Club'],['06','Elo'],['07','Hipercard'],['08','Aura'],['09','Cabal'],['99','Outros']].map(([code,name])=>
+        cardBrands.map(([code,name])=>
           '<option value="'+code+'" '+(payment.card_brand===code?'selected':'')+'>'+name+'</option>').join('')+
         '</select></label>'+
         paymentInput(index,payment,'institution_document','CNPJ da adquirente','Somente números',18)+
