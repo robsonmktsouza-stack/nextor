@@ -131,7 +131,7 @@ window.addEventListener('load',()=>{
         'lista avançou sobre o rodapé do modal');
       query('CAMISETA');
       clickResult('1');
-      expect($('#nfceItems tr').length===1,'primeiro produto não criou uma linha');
+      expect($$('#nfceItems tr').length===1,'primeiro produto não criou uma linha');
       expect(qty()===1,'primeira quantidade não é 1');
       expect(input.value===''&&document.activeElement===input,'foco não voltou à busca');
       expect(list.hidden&&input.getAttribute('aria-expanded')==='false','lista não fechou depois da escolha');
