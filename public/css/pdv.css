@@ -14,7 +14,7 @@
   overflow:hidden;
   background:#eef2f6;
   color:#26384b;
-  font-family:"Open Sans",Arial,sans-serif;
+  font-family:"Roboto",Arial,Helvetica,sans-serif;
 }
 
 .pdv-body button,
@@ -1707,7 +1707,7 @@
   border-radius:5px;
   outline:0;
   color:#30465c;
-  font:12px/1.5 "Open Sans",Arial,sans-serif;
+  font:12px/1.5 "Roboto",Arial,Helvetica,sans-serif;
 }
 
 #pdvNotesModalInput:focus{
