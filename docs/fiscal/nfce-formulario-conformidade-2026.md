@@ -32,9 +32,21 @@
 | CNPJPag/UFPag/CNPJReceb | Campos de CNPJ local+UF, beneficiário; informações preservadas no pagamento e snapshot | Implementado; exigibilidade varia por cenário/NT |
 | Emissão e assinatura | Transmissão ACBrLib por fila `database/fiscal`, fora da requisição | Código preparado; execução/credenciamento pendentes |
 | XML de resposta / protocolo / DANFE | Serviços existentes de consulta, estados e impressão | Depende de resposta real da SEFAZ |
-| IBS/CBS/IS, cClassTrib RTC | **Não presumir implementado pelo simples fato de existir um XML**: calculadora e builder atuais não cobrem todos os grupos RTC | PENDENTE: implementar e validar perfis/tributos aplicáveis, tabelas e NT; não bloquear indiscriminadamente emissor do Simples |
-| CNPJ alfanumérico | O fluxo atual trabalha com CPF/CNPJ numéricos; não simular conversão de identificador alfanumérico | PENDENTE: adaptar quando leiaute, UF e implantação exigirem |
+| IBS/CBS integral, CST 000 / cClassTrib 000001 | Motor RTC independente lê as três alíquotas do grupo fiscal, calcula valores por item e totais inteiros em centavos, gera grupos de INI ACBr; preflight exige classificação para regime normal a partir de agosto/2026 | Implementado no código; testes PHPUnit e XSD/ACBr ainda precisam passar |
+| RTC: redução, diferimento, monofásico, transferências, IS, CNPJ alfanumérico | Grupos que exigem fórmulas distintas são bloqueados; o cálculo padrão não os substitui | PENDENTE: implementar cada perfil com tabela vigente e homologação real |
 | Operações especiais (combustíveis, ST, monofásicos, entre outros) | Alguns perfis bloqueados pela calculadora quando não implementados | PENDENTE: tratar individualmente antes de declarar suporte |
+
+## Adequação RTC realizada após a revisão inicial (19/10/2026)
+
+- **Novo serviço:** `app/Services/Fiscal/NFCeRtcTaxService.php` calcula apenas `CST=000`, `cClassTrib=000001` (tributação integral). Usa `ibs_uf_rate`, `ibs_municipal_rate`, `cbs_rate` cadastrados no grupo. **Não** presume alíquota-teste, redução, classificação nem legislação estadual.
+- **Vínculo com regras:** `NFCeTaxGroupTranslator` preserva classificação e alíquotas no snapshot fiscal de cada produto; a configuração é feita em `Fiscal → Grupos tributários → IBS/CBS`.
+- **INI conforme modelo ACBrLibNFe:** `NFCeIniBuilder` gera `[IBSCBSnnn]`, `[gIBSCBSnnn]`, `[gIBSUFnnn]`, `[gIBSMunnnn]` (com índice de três dígitos), `[gCBSnnn]` e totalizações `[IBSCBSTot]`, `[gIBS]`, `[gIBSUFTot]`, `[gIBSMunTot]`, `[gCBSTot]`. Os grupos só são adicionados quando há cálculo aplicável.
+- **Regime regular CRT 2/3:** considerando o cronograma de agosto/2026, o preflight bloqueia a NFC-e sem classificação RTC; o adiamento das **rejeições automáticas** não eliminou a obrigação de preenchimento. Fonte: [esclarecimento conjunto CGIBS/RFB de 06/08/2026](https://cgibs.gov.br/receita-federal-e-comite-gestor-do-ibs-esclarecem-adiamento-das-regras-de-validacao-dos-documentos-fiscais-eletronicos).
+- **Simples Nacional CRT 1/4:** não atribui IBS/CBS por conta própria em 2026, de acordo com os efeitos previstos para 2027; o perfil especial de 2027 exigirá tratamento próprio, em vez de copiar a fórmula integral.
+- **Testes adicionados:** `tests/Unit/NFCeRtcTaxServiceTest.php`, `tests/Feature/NFCeRtcIniTest.php`, com CI `.github/workflows/nfce-rtc-tests.yml`. Os testes validam cálculos em centavos, segregação das alíquotas, omissões e INI. Ainda dependem de execução na branch.
+- **Atenção:** a documentação ACBr indica nomes das seções, mas a validação final depende da **versão instalada da ACBrLib** + schemas oficiais e autorização em homologação. Não liberar produção antes disso.
+
+**Demais situações tributárias e cClassTrib:** redução, diferimento, alíquota zero com grupos específicos, transferência de créditos, crédito presumido, monofásicos, IS e benefícios estaduais ainda **não são tratados integralmente**. Recusar emissão desses perfis, sem inventar valores, é intencional.
 
 ## Contrato entre formulário, controller e emissão
 
@@ -48,7 +60,7 @@
 
 ## Testes que ainda precisam ocorrer
 
-1. Executar `php artisan test --filter=NFCeManualEditorTest`, `php artisan test --filter=BrazilianTaxIdTest`, `php artisan test --filter=NFCeFiscalLifecycleTest`, `php artisan test --filter=PdvFiscalCheckoutFlowTest`.
+1. Executar `vendor/bin/phpunit --filter=NFCeManualEditorTest`, `vendor/bin/phpunit --filter=BrazilianTaxIdTest`, `vendor/bin/phpunit --filter=NFCeFiscalLifecycleTest`, `vendor/bin/phpunit --filter=PdvFiscalCheckoutFlowTest`.
 2. Verificar navegador real: adicionar cartões/PIX/dinheiro, mudar a forma, dividir o pagamento e enviar formulário; abertura de selects dentro do modal com zoom 125%.
 3. Testar SEFAZ-BA **em homologação** com certificado A1, CSC/QR Code/ACBr compatíveis, schemas vigentes, XML de venda completa, CFOP/CRT/CSOSN/CST, múltiplos pagamentos, identificador do consumidor, rejeição, reconsulta e impressão DANFE.
 4. Somente depois ampliar grupos RTC aplicáveis e cenários tributários de exceção; sem copiar percentuais, cClassTrib ou regras específicas por palpite.
