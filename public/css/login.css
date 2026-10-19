@@ -1,4 +1,4 @@
-:root{color-scheme:light;font-family:Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:#263444;background:#f4f6f9}
+:root{color-scheme:light;font-family:"Roboto",Arial,Helvetica,sans-serif;color:#263444;background:#f4f6f9}
 *,*::before,*::after{box-sizing:border-box}
 body{margin:0}
 button,input{font:inherit}
