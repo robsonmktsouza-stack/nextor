@@ -2,7 +2,40 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
-## Entrega mais recente — 19/10/2026 — correção global de dropdowns em telas e modais
+## Entrega mais recente — 19/10/2026 — formulário manual NFC-e x SEFAZ-BA
+
+**Pedido:** adaptar a emissão de NFC-e manual às exigências fiscais vigentes, mantendo aparência do Lumeron.
+
+**Fontes:** manuais/notas técnicas do Portal Nacional NF-e (NT 2025.001 QR Code v3, NT 2025.002 RTC), atualização Receita Federal de agosto/outubro de 2026, documentação ACBrLibNFe, diretrizes SEFAZ-BA. Matriz detalhada, links e limitações em `docs/fiscal/nfce-formulario-conformidade-2026.md`.
+
+**Implementado na branch `feature/acbr-nfe-bootstrap`:**
+- `resources/views/fiscal/nfce/create.blade.php`: orientações ambientais, fiscais e de pagamento, informações controladas de modelo 65, série, CRT e contingência, NCM e consumidor identificado. Mantém cinco abas e não expõe certificado/CSC secreto.
+- `public/js/nfce-editor.js`: corrigido **ReferenceError de `readOnly` não definido** na tela de nova NFC-e. Campos eletrônicos condicionais para cartão/PIX (TEF/POS, bandeira, adquirente, autorização, CNPJ/UF da transação, beneficiário, terminal), preservados após `old()`; troca para dinheiro limpa metadados; segue usando `select` nativo e wrapper do ERP. Verificações de CPF/CNPJ, CNPJ de pagamento e total. NCM exibido por produto.
+- `app/Http/Controllers/NFCeManualController.php`: campos recebidos e validados ANTES da criação da venda e baixa de estoque/financeiro; usa `App\\Support\\BrazilianTaxId` para dígitos verificadores, CNPJ de pagamento com 14 dígitos, código TEF/POS e campos coerentes com meio; armazena os dados no pagamento e snapshot usados pelo mesmo ACBrLib. Catálogo carrega NCM/CEST/origem/grupo fiscal para a UI. Emissão solicitada enfileira explicitamente `database/fiscal`, nunca `sync`.
+- `app/Support/BrazilianTaxId.php` (novo): validação numérica CPF/CNPJ, inclusive dígitos verificadores e repetições; não remove letras antes de validar.
+- `public/css/desktop-polish.css`: campos fiscais responsivos e discretos sem redesenhar o ERP.
+- `tests/Feature/NFCeManualEditorTest.php`: casos de CPF inválido, cartão integrado ausente/incorreto, cartão válido até snapshot, PIX com dados reais, dinheiro sem dados de cartão e interface.
+- `tests/Unit/BrazilianTaxIdTest.php` (novo): CPF/CNPJ válidos e inválidos.
+- `docs/ai/ARCHITECTURE_AND_DECISIONS.md`: decisão D06-B; matriz de conformidade fiscal nova.
+
+**Verificado:** arquivos/alterações remotas no GitHub; sintaxe JavaScript por compilação V8 (`new Function`) = PASS; folha CSS com pares de chaves equilibradas = PASS; inspeção estática dos campos `payments.*`, preservação no snapshot, `readonly` definido, encaminhamento para fila dedicada, 5 abas originais preservadas. **Ainda não foram executados PHPUnit/Laravel, nenhum navegador com dados do usuário ou ACBr/SEFAZ de verdade. Não afirmar conformidade total em produção.**
+
+**Pendências fiscais relevantes:** implementação/validação dos grupos IBS/CBS/IS/cClassTrib segundo NT e regime de cada contribuinte, CNPJ alfanumérico na vigência efetiva, cenários especiais (combustível, ST, monofásico, etc.), QR Code v3/CSC conforme ACBr/UF, testes reais de XML/QR e retorno cStat em homologação BA. A flexibilização de rejeições IBS/CBS em 2026 não equivale a isenção de todas as obrigações; não forçar indiscriminadamente. O motor atual já rejeita perfis tributários não implementados no preflight.
+
+**Executar no Laragon antes de continuar ou publicar:**
+
+```powershell
+git switch feature/acbr-nfe-bootstrap
+git pull origin feature/acbr-nfe-bootstrap
+php artisan optimize:clear
+php artisan test --filter=BrazilianTaxIdTest
+php artisan test --filter=NFCeManualEditorTest
+php artisan test --filter=NFCeFiscalLifecycleTest
+```
+
+Conferir no Chrome emissão manual de 5 abas, cadastro produto NCM/tributação, consumidor, cartões (integrado/não integrado), PIX, dinheiro, total, troca do pagamento, scroll do modal e impressão. Só testar SEFAZ com emitente e certificados de **homologação**, sem transmissão de notas reais sem autorização. Se qualquer teste falhar, corrigir antes de afirmar conclusão.
+
+## Entrega anterior — 19/10/2026 — correção global de dropdowns em telas e modais
 
 **Pedido:** resolver o menu do seletor CRT que ultrapassava o rodapé de Configurações e outros campos que eram cortados dentro dos modais do Lumeron.
 
