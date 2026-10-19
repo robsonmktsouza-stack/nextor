@@ -35,7 +35,7 @@ return [
     'date' => 'O campo :attribute deve conter uma data válida.',
     'date_equals' => 'O campo :attribute deve conter a data :date.',
     'date_format' => 'O campo :attribute deve estar no formato :format.',
-    'decimal' => 'O campo :attribute deve ter de :min a :max casas decimais.',
+    'decimal' => 'O campo :attribute deve ter :decimal casas decimais.',
     'declined' => 'O campo :attribute deve ser recusado.',
     'declined_if' => 'O campo :attribute deve ser recusado quando :other for :value.',
     'different' => 'Os campos :attribute e :other devem ser diferentes.',
