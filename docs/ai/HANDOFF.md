@@ -2,7 +2,24 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
-## Entrega mais recente — 19/10/2026 — motor RTC da NFC-e, CI real e limitações
+## Entrega mais recente — 19/10/2026 — ampliação real do emissor NFC-e BA
+
+Usuário exigiu continuar desenvolvimento até ser viável operar de verdade, sem encerrar com plano. Alterações nesta branch:
+
+1. Corrigida a **base IBS/CBS** em `NFCeRtcTaxService` durante o período 2026–2032: deduz ICMS, PIS, COFINS **efetivamente calculados para o item** no próprio serviço legado, alinhado ao art. 12, §2º, V, LC 214/2025. Builder e Preflight usam o mesmo conjunto de impostos. Fora da transição não deduz esses tributos. Bloqueia base negativa.
+2. Implementados **ICMS CST 51 (diferimento, fundamento legal, vICMSOp/pDif/vICMSDif/vICMS líquido)** e **CST 60 (ICMS-ST anterior, valores históricos com escopo unitário/linha, pST/vICMSSubstituto)** em `NFCeTaxCalculationService`, classificados por `NFCeFiscalProfileService` e `NFCeTaxGroupTranslator`.
+3. `FiscalTaxGroupController` e formulário de grupos agora validam/cadastram ICMS diferido e dados de retenção anterior, sem inventar base nem imposto histórico. Emissões incorretas continuam recusadas; grupos padrão ST podem ser cadastrados antes de se conhecerem os valores de entrada.
+4. RTC reduzido **CST 200 / cClassTrib 200003** (alimentos especificamente enquadrados no Anexo I): aceita somente redução integral de 100% de IBS UF, IBS municipal e CBS. Escreve `pRedAliq` e `pAliqEfet` no INI ACBr, mantém base e zera os tributos. Não classifica automaticamente qualquer alimento. Corrigido formulário que enviava `ibs_reduction_rate` (campo sem persistência): agora envia `ibs_uf_reduction_rate` e `ibs_municipal_reduction_rate`.
+5. Novo `NFCeManualTaxPreviewService`: na emissão manual de nova venda (botão **Emitir**, não o mero Salvar), classifica e valida os produtos **antes** da operação com estoque/financeiro. Se NCM, grupo, CST/CSOSN ou RTC forem inválidos, retorna erro por item sem criar a venda. O snapshot fiscal ainda é recalculado após criação da venda.
+6. Testes novos em `NFCeRtcTaxServiceTest`, `NFCeTaxCalculationServiceTest`, `NFCeRtcIniTest` e `NFCeManualEditorTest`. Integração CI de `95f0e6de` já ficou verde: **349 testes, 2.202 assertions**; novo teste de não baixa de estoque está sendo verificado em execução posterior.
+
+**Fontes oficiais verificadas nesta rodada:** LC 214/2025 art 12 §2 V (Planalto); calculadora-base Receita `https://piloto-cbs.tributos.gov.br/servico/calculadora-consumo/calculadora/bases-de-calculo`; modelo ACBrLib INI com ICMS 51/60 e RTC `https://acbr.sourceforge.io/ACBrLib/ModeloNFeINIReformaTributaria.html`; tabela IT 2025.002 v1.70 (cClassTrib 200003); schemas oficiais PL 010f publicados no Portal NF-e. Detalhes e escopo em `docs/fiscal/nfce-formulario-conformidade-2026.md`.
+
+**Conformidade em produção ainda exige testes EXTERNOS:** o GitHub CI não usa a ACBrLib Windows real nem possui certificado A1, CSC e credenciamento do emitente na SEFAZ-BA. Verificar `php artisan acbr:nfce-status` no Laragon com cert/schema configurados (somente consulta); emitir NFC-e teste em homologação e verificar **cStat 100, XML assinado, QR Code e DANFE**. Não afirmar autorização real sem essa evidência. ICMS monofásico combustível e várias classificações RTC/IS ainda precisam de módulos específicos; não substituir códigos por cálculos genéricos.
+
+**Instalar/atualizar no Laragon:** `git switch feature/acbr-nfe-bootstrap`, `git pull origin feature/acbr-nfe-bootstrap`, `php artisan optimize:clear`; PHPUnit via `vendor/bin/phpunit` (Laravel 13 não oferece `artisan test` neste projeto). Alterações não requerem migração.
+
+## Entrega anterior — 19/10/2026 — motor RTC da NFC-e, CI real e limitações
 
 **Motivo da continuidade:** usuário pediu emissão de NFC-e COMPLETA SEFAZ. A entrega anterior adequava somente formulário, pagamentos e CPF/CNPJ, sem gerar grupos IBS/CBS no XML. Foi erro tratar essa intervenção como completa.
 
