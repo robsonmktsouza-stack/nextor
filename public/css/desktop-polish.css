@@ -532,6 +532,22 @@
   .app-root .nfe-section-title--actions .nfe-section-toggle{
     padding:5px 0;color:#376f8e;font-size:12px;
   }
+  /* As instruções fiscais longas ficam sob demanda, em vez de
+     ocupar permanentemente espaço nos cadastros. */
+  .app-root .erp-help-details{
+    margin:4px 0 10px;padding:0;
+    font-size:12px;color:#526b7d;
+  }
+  .app-root .erp-help-details>summary{
+    display:list-item;width:fit-content;
+    cursor:pointer;color:#376f91;font-weight:600;
+    padding:4px 0;list-style:disclosure-closed;
+  }
+  .app-root .erp-help-details[open]>summary{list-style:disclosure-open}
+  .app-root .erp-help-details>p{
+    margin:4px 0 8px;max-width:72ch;
+    font-size:12px;line-height:1.45;
+  }
   .app-root .nfce-item-table-wrap{max-width:100%;min-width:0;overflow-x:auto}
   .app-root .nfce-payment-detail[hidden]{display:none!important}
   .app-root .nfce-payment-detail>td{
