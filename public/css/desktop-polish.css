@@ -605,6 +605,18 @@
     overflow-y:auto;overscroll-behavior:contain;
     box-shadow:0 10px 24px rgba(24,44,63,.16);
   }
+  /* A lista de produtos, como os seletores globais, deve ficar fora do
+     recorte do modal. A altura/largura efetivas são calculadas pelo JS
+     respeitando o rodapé de emissão e a borda visível da janela. */
+  #nfceEditor .nfce-product-search-anchor>.nfce-search-results[popover]{
+    position:fixed;inset:auto;margin:0;
+    right:auto;bottom:auto;
+    max-height:none;max-width:none;min-width:0;
+    z-index:2147483647;
+  }
+  #nfceEditor .nfce-product-search-anchor>.nfce-search-results[popover]:popover-open{
+    display:block;
+  }
   #nfceEditor #nfcePanel-products .nfce-item-table{min-width:765px}
   #nfceEditor #nfcePanel-products .nfce-item-table th:nth-child(1),
   #nfceEditor #nfcePanel-products .nfce-item-table td:nth-child(1){width:34%}
