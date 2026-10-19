@@ -136,16 +136,10 @@ final class NFCeTaxGroupTranslator
                 || $config['icms_deferral_rate']==='')) {
             throw new RuntimeException('CST 51: configure percentual e fundamento legal do diferimento.');
         }
-        if (($normal && $icmsCst==='60') || (!$normal && $csosn==='500')) {
-            foreach (['st_retained_amount_scope','icms_st_retained_base','icms_st_retained_value'] as $required) {
-                if (!isset($config[$required]) || $config[$required]==='') {
-                    throw new RuntimeException("ICMS-ST anterior: configure {$required} conforme os documentos fiscais de entrada.");
-                }
-            }
-            if ($normal && $icmsCst==='60' && (!isset($config['st_retained_rate']) || $config['st_retained_rate']==='')) {
-                throw new RuntimeException('CST 60: informe a alíquota da retenção anterior.');
-            }
-        }
+        // O grupo tributário padrão pode ser cadastrado sem valores históricos
+        // (que dependem de cada lote/compra). A calculadora + preflight
+        // exigirão os valores reais antes de gerar ou transmitir a NFC-e.
+        // Nunca pré-popular a retenção com zeros ou estimativas.
 
         $mapped = [
             'cfop_outbound_internal'=>$cfop,
