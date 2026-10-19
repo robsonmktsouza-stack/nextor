@@ -115,7 +115,7 @@ final class NFCePreflightService
                 // Nenhum perfil não implementado pode chegar à transmissão.
                 try {
                     $this->calculator->calculate($item, (string)$company->crt);
-                    if ($rtc->calculate($item, (string)$company->crt, $source['operation_date'] ?? null) !== null) {
+                    if ($rtc->calculate($item, (string)$company->crt, now()->toDateString()) !== null) {
                         $rtcItemCount++;
                     }
                 } catch (\RuntimeException $exception) {
