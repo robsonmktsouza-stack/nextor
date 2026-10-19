@@ -107,7 +107,7 @@ final class NFCeManualController extends Controller
             ],
             'payments.*.amount'=>['required','numeric','gt:0','max:9999999999.99','decimal:0,2'],
             'payments.*.integration_type'=>['nullable',Rule::in(['1','2'])],
-            'payments.*.card_brand'=>['nullable',Rule::in(['01','02','03','04','05','06','07','08','09','99'])],
+            'payments.*.card_brand'=>['nullable',Rule::in(\App\Support\NFCeCardBrands::codes())],
             'payments.*.authorization_code'=>['nullable','string','max:128'],
             'payments.*.transaction_document'=>['nullable','string','max:18'],
             'payments.*.transaction_state'=>['nullable','string','size:2'],
