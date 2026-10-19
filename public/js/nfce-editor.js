@@ -291,10 +291,6 @@
         field.disabled=!electronic ||
           (field.name.endsWith('[card_brand]') && !card);
       });
-      const hint=detail.querySelector('[data-payment-hint]');
-      if(hint)hint.textContent=card
-        ?'Informe TEF/POS. Se for integrado, preencha CNPJ da adquirente e autorização.'
-        :'No PIX, informe os dados da transação disponíveis. Não invente autorização.';
     });
   }
   function renderPayments(){
@@ -304,7 +300,7 @@
         '</select></td><td><input type="number" name="payments['+index+'][amount]" data-payment-field="amount" step="0.01" min="0.01" max="9999999999.99" value="'+text(payment.amount)+'" required></td>'+
         '<td><button class="nfce-remove" type="button" data-remove-payment="'+index+'" title="Remover pagamento" aria-label="Remover pagamento">'+trashIcon+'</button></td></tr>';
       const detail='<tr class="nfce-payment-detail" data-payment-detail="'+index+'" hidden><td colspan="3">'+
-        '<div class="nfce-payment-detail-head"><strong>Dados do pagamento eletrônico</strong><small data-payment-hint></small></div>'+
+        '<div class="nfce-payment-detail-head"><strong>Dados do pagamento eletrônico</strong></div>'+
         '<div class="nfce-payment-detail-grid">'+
         '<label class="field"><span>Integração com o sistema</span><select name="payments['+index+'][integration_type]" data-payment-field="integration_type">'+
         '<option value="">Selecione quando aplicável</option>'+
