@@ -421,4 +421,80 @@ final class NFCeManualEditorTest extends TestCase
     }
 
 
+    public function test_seeded_card_methods_are_distinct_and_available_in_nfce(): void
+    {
+        $this->configure();
+        self::assertSame('credit_card',PaymentMethod::where('code','credit_card')->value('kind'));
+        self::assertSame('debit_card',PaymentMethod::where('code','debit_card')->value('kind'));
+
+        $this->actingAs($this->admin())
+            ->get(route('fiscal.nfce.create'))
+            ->assertOk()
+            ->assertSee('Cartão de crédito')
+            ->assertSee('Cartão de débito');
+    }
+
+    public function test_credit_and_debit_are_saved_as_distinct_fiscal_payments(): void
+    {
+        $product=$this->configure();
+        $this->actingAs($this->admin());
+        foreach (['credit_card','debit_card'] as $kind) {
+            $payload=$this->postData($product);
+            $payload['payments']=[[
+                'payment_method'=>$kind,'amount'=>'20.00','integration_type'=>'2',
+                'card_brand'=>'01',
+            ]];
+            $this->post(route('fiscal.nfce.store'),$payload)->assertSessionHasNoErrors();
+        }
+
+        self::assertSame(2,Sale::query()->count());
+        self::assertSame(2,FiscalDocumentJob::query()->where('document_type','nfce')->count());
+        $snapshots=FiscalDocumentJob::query()->orderBy('id')->get()
+            ->map(fn($job)=>$job->source_snapshot['payments'][0])->all();
+        self::assertSame('credit_card',$snapshots[0]['payment_kind']);
+        self::assertSame('debit_card',$snapshots[1]['payment_kind']);
+        self::assertSame('2',$snapshots[0]['integration_type']);
+        self::assertSame('2',$snapshots[1]['integration_type']);
+    }
+
+    public function test_mixed_cash_pix_and_debit_are_saved_as_one_sale(): void
+    {
+        $product=$this->configure();
+        $this->actingAs($this->admin());
+        $payload=$this->postData($product);
+        $payload['payments']=[
+            ['payment_method'=>'cash','amount'=>'5.00'],
+            ['payment_method'=>'pix','amount'=>'5.00'],
+            ['payment_method'=>'debit_card','amount'=>'10.00','integration_type'=>'2'],
+        ];
+
+        $this->post(route('fiscal.nfce.store'),$payload)->assertSessionHasNoErrors();
+        self::assertSame(1,Sale::query()->count());
+        $sale=Sale::query()->firstOrFail();
+        self::assertSame(3,$sale->payments()->count());
+        $job=FiscalDocumentJob::query()->firstOrFail();
+        self::assertSame(['cash','pix','debit_card'],
+            array_column($job->source_snapshot['payments'],'payment_kind'));
+        self::assertSame('20.00',(string)$job->source_snapshot['total']);
+    }
+
+    public function test_ambiguous_generic_card_cannot_create_a_manual_nfce_sale(): void
+    {
+        $product=$this->configure();
+        PaymentMethod::query()->create([
+            'code'=>'card-custom','name'=>'Cartão sem definição',
+            'kind'=>'card','is_active'=>true,'pdv_enabled'=>true,
+        ]);
+        $this->actingAs($this->admin());
+        $payload=$this->postData($product);
+        $payload['payments']=[[
+            'payment_method'=>'card-custom','amount'=>'20.00','integration_type'=>'2',
+        ]];
+
+        $this->post(route('fiscal.nfce.store'),$payload)
+            ->assertSessionHasErrors('payments.0.payment_method');
+        self::assertSame(0,Sale::query()->count());
+        self::assertSame(0,FiscalDocumentJob::query()->count());
+    }
+
 }
