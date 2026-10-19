@@ -164,7 +164,8 @@ final class PdvFiscalCheckoutFlowTest extends TestCase
         self::assertStringContainsString('cartão integrado exige CNPJ da adquirente e código de autorização.', $preflight);
         self::assertStringContainsString('Cartão integrado: informe o CNPJ da adquirente', $js);
         self::assertStringContainsString('Dados de cartão e PIX', $view);
-        self::assertStringContainsString("['card','pix'].includes(paymentKind(payment.value))", $js);
+        self::assertStringContainsString("const isCardKind=kind=>['card','credit_card','debit_card'].includes(kind);", $js);
+        self::assertStringContainsString("isCardKind(paymentKind(payment.value))", $js);
     }
 
 }
