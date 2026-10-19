@@ -11,7 +11,7 @@
   overflow:hidden!important;
   background:#eef0f3;
   color:#314558;
-  font-family:"Segoe UI",system-ui,-apple-system,BlinkMacSystemFont,Arial,sans-serif;
+  font-family:"Roboto",Arial,Helvetica,sans-serif;
   font-size:13px;
 }
 .pdv-root.lumeron-pdv-page{
@@ -183,7 +183,7 @@
   border:1px solid #d4dee6;
   background:#f6f8fa;
   color:#8999a7;
-  font:650 9px/1.2 "Segoe UI",sans-serif;
+  font:650 9px/1.2 "Roboto",Arial,Helvetica,sans-serif;
   padding:2px 4px;
   opacity:1;
 }
