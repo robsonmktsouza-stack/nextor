@@ -18,7 +18,9 @@ body{margin:0}.app-root{width:100%;min-height:100vh}
   border:1px solid #d8e2eb;box-sizing:border-box;
 }
 #nfceEditor .nfce-savebar{
-  position:fixed;bottom:12px;left:18px;right:18px;
+  /* Sobrepõe a posição absoluta legada usada somente com o shell real. */
+  position:fixed!important;top:auto!important;
+  bottom:12px!important;left:18px!important;right:18px!important;
   height:52px;background:#f8fafc;border-top:1px solid #d8e2eb;
 }
 #testResult{position:fixed;z-index:9999;right:0;top:0;background:white;padding:4px}
