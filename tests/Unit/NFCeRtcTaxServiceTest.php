@@ -67,6 +67,20 @@ final class NFCeRtcTaxServiceTest extends TestCase
         (new NFCeRtcTaxService())->calculate($this->regular(['ibs_cbs_cst'=>'200']),'3','2026-10-19');
     }
 
+    public function test_selective_tax_cst_without_integral_rtc_must_not_disappear(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Imposto Seletivo');
+        (new NFCeRtcTaxService())->calculate($this->item(['is_cst'=>'000']),'1','2026-10-19');
+    }
+
+    public function test_reduction_without_standard_rtc_fields_must_be_blocked(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('cbs_reduction_rate');
+        (new NFCeRtcTaxService())->calculate($this->item(['cbs_reduction_rate'=>'5']),'1','2026-10-19');
+    }
+
     public function test_reduction_cannot_be_ignored(): void
     {
         $this->expectException(RuntimeException::class);
