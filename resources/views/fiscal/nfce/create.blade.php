@@ -213,18 +213,6 @@
                   <option value="presential" selected>Operação presencial</option>
                 </select>
               </label>
-              <label class="field col-3"><span>Modelo fiscal</span>
-                <input value="65 — NFC-e" readonly>
-              </label>
-              <label class="field col-3"><span>Série configurada</span>
-                <input value="{{ \App\Models\AppSetting::value('nfce','series',1) }}" readonly>
-              </label>
-              <label class="field col-3"><span>Regime da empresa (CRT)</span>
-                <input value="{{ $company->crt ?: 'Não configurado' }}" readonly>
-              </label>
-              <label class="field col-3"><span>Emissão fiscal</span>
-                <input value="{{ \App\Models\AppSetting::value('nfce','offline_contingency_active',false) ? 'Contingência offline' : 'Normal' }}" readonly>
-              </label>
               @if($readOnly && $readOnlyDocument->sale_id)
                 <p class="nfce-muted nfce-readonly-sale">Venda de origem: #{{ $readOnlyDocument->sale_id }} — somente consulta.</p>
               @endif
