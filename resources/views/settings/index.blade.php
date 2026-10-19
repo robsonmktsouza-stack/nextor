@@ -457,7 +457,7 @@ foreach($primaryTabs as $key=>$item){
     <form method="post" action="{{ route('settings.group.update','fiscal') }}" class="settings-editor">
       @csrf
       <section class="editor-panel settings-panel">
-        <div class="settings-panel-head"><div><h2>Emissão de notas fiscais</h2><p>Homologação é para testes; produção emite notas reais.</p></div></div>
+        <div class="settings-panel-head"><div><h2>Emissão de notas fiscais</h2></div></div>
         <div class="editor-grid cols-12 settings-grid">
           <label class="field col-4"><span>Ambiente de emissão</span><select name="default_environment"><option value="homologation" @selected($fiscal['default_environment']==='homologation')>Homologação</option><option value="production" @selected($fiscal['default_environment']==='production')>Produção</option></select></label>
           <label class="field col-4"><span>E-mail do contador</span><input type="email" name="accountant_email" value="{{ $fiscal['accountant_email'] }}"></label>
@@ -538,7 +538,7 @@ foreach($primaryTabs as $key=>$item){
     @csrf
     <section class="editor-panel settings-panel">
       <div class="settings-panel-head">
-        <div><h2>Impostos e códigos fiscais</h2><p>Área avançada: confira os códigos com a contabilidade antes de alterar.</p></div>
+        <div><h2>Impostos e códigos fiscais</h2></div>
         <div class="row" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
           <a class="btn btn-secondary" href="{{ route('fiscal.tax-groups.index') }}">
             @include('partials.icon',['name'=>'layers','size'=>15]) Grupos de tributação
@@ -626,8 +626,8 @@ foreach($primaryTabs as $key=>$item){
       </div>
       <div class="settings-switch-grid">
         <label class="settings-switch"><input type="checkbox" name="enabled" value="1" @checked($nfce['enabled'])><span><strong>NFC-e habilitada</strong></span></label>
-        <label class="settings-switch"><input type="checkbox" name="production_enabled" value="1" @checked($nfce['production_enabled'])><span><strong>Permitir emissão em produção</strong><small>Libera emissão normal, após conferir o credenciamento e o CSC de produção.</small></span></label>
-        <label class="settings-switch"><input type="checkbox" name="advanced_operations_production_approved" value="1" @checked($nfce['advanced_operations_production_approved'] ?? false)><span><strong>Permitir eventos e contingência em produção</strong><small>Habilita cancelamento, inutilização e contingência offline somente após validar os procedimentos para esta instalação e UF. É independente da emissão normal.</small></span></label>
+        <label class="settings-switch"><input type="checkbox" name="production_enabled" value="1" @checked($nfce['production_enabled'])><span><strong>Permitir emissão em produção</strong></span></label>
+        <label class="settings-switch"><input type="checkbox" name="advanced_operations_production_approved" value="1" @checked($nfce['advanced_operations_production_approved'] ?? false)><span><strong>Permitir eventos e contingência em produção</strong></span></label>
         <label class="settings-switch"><input type="checkbox" name="auto_from_pdv" value="1" @checked($nfce['auto_from_pdv'])><span><strong>Transmitir NFC-e automaticamente pelo PDV</strong></span></label>
         <label class="settings-switch"><input type="checkbox" name="print_danfe" value="1" @checked($nfce['print_danfe'])><span><strong>Imprimir DANFE NFC-e</strong></span></label>
       </div>
@@ -671,7 +671,7 @@ foreach($primaryTabs as $key=>$item){
   <form method="post" action="{{ route('settings.group.update','cte') }}" class="settings-editor">
     @csrf
     <section class="editor-panel settings-panel">
-      <div class="settings-panel-head"><div><h2>Documentos de transporte (CT-e e MDF-e)</h2><p>Numeração e dados-base para operações de transporte.</p></div></div>
+      <div class="settings-panel-head"><div><h2>Documentos de transporte (CT-e e MDF-e)</h2></div></div>
       <div class="settings-subsection"><h3>CT-e</h3>
         <div class="editor-grid cols-12 settings-grid">
           <label class="field col-3"><span>Ambiente</span><select name="cte_environment"><option value="homologation" @selected($cte['cte_environment']==='homologation')>Homologação</option><option value="production" @selected($cte['cte_environment']==='production')>Produção</option></select></label>
