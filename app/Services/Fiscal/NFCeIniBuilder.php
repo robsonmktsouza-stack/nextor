@@ -179,17 +179,25 @@ final class NFCeIniBuilder
             $fields = [
                 'tPag' => $paymentType,
                 'vPag' => $price($payment['amount']),
+                // CNPJPag/UFPag identificam ONDE o pagamento foi transacionado.
+                // Não confundir com CNPJ da adquirente no grupo de cartões.
+                'CNPJPag' => $digits($payment['transaction_document'] ?? ''),
+                'UFPag' => strtoupper(trim((string) ($payment['transaction_state'] ?? ''))),
             ];
-            if (in_array($paymentType, ['03', '04'], true)) {
+            if (in_array($paymentType, ['03', '04', '17'], true)) {
                 $integration = (string) ($payment['integration_type'] ?? '');
-                if (!in_array($integration, ['1', '2'], true)) {
+                if (in_array($paymentType, ['03','04'],true) && !in_array($integration, ['1', '2'], true)) {
                     throw new RuntimeException('Pagamento com cartão sem identificação TEF/POS. Confira os dados da venda antes de emitir.');
                 }
+                // Não inventar integração para PIX: mapear somente a informada
+                // na venda; validações por UF/NT são responsabilidade do preflight.
                 $fields += [
-                    'tpIntegra' => $integration,
-                    'CNPJ' => $digits($payment['transaction_document'] ?? ''),
-                    'tBand' => $payment['card_brand'] ?? null,
+                    'tpIntegra' => $integration !== '' ? $integration : null,
+                    'CNPJ' => $digits($payment['institution_document'] ?? ''),
+                    'tBand' => in_array($paymentType,['03','04'],true) ? ($payment['card_brand'] ?? null) : null,
                     'cAut' => $payment['authorization_code'] ?? null,
+                    'CNPJReceb' => $digits($payment['beneficiary_document'] ?? ''),
+                    'idTermPag' => $payment['terminal_id'] ?? null,
                 ];
             }
             if ((float) ($source['change_amount'] ?? 0) > 0 && !$cashChangeAssigned && in_array($kind, ['cash', 'money'], true)) {
