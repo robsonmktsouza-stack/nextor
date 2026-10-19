@@ -193,10 +193,10 @@ final class NFCeTaxCalculationServiceTest extends TestCase
     public function test_normal_crt_rejects_unmapped_cst_or_wrong_base_modality(): void
     {
         $calculator = new NFCeTaxCalculationService();
-        $item = $this->item(['icms_cst'=>'60', 'mod_bc'=>'3', 'icms_rate'=>'18']);
+        $item = $this->item(['icms_cst'=>'90', 'mod_bc'=>'3', 'icms_rate'=>'18']);
         try {
             $calculator->calculate($item, '3');
-            self::fail('CST 60 cannot use the CST 00 formula');
+            self::fail('CST 90 cannot use the CST 00 formula');
         } catch (RuntimeException $exception) {
             self::assertStringContainsString('não possui cálculo', $exception->getMessage());
         }
