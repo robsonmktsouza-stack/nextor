@@ -292,4 +292,43 @@ final class NFCeTaxCalculationServiceTest extends TestCase
     }
 
 
+    public function test_simples_500_preserves_fcp_st_retention_per_unit_from_input_document(): void
+    {
+        $actual=(new NFCeTaxCalculationService())->calculate($this->item([
+            'cfop'=>'5405','icms_csosn'=>'500',
+            'icms_st_retained_base'=>'50.00','icms_st_retained_value'=>'9.00',
+            'st_retained_amount_scope'=>'unit',
+            'fcp_st_retained_base'=>'50.00',
+            'fcp_st_retained_rate'=>'2.0000',
+            'fcp_st_retained_value'=>'1.00',
+        ]),'1');
+        self::assertSame('100.00',$actual['icms']['vBCFCPSTRet']);
+        self::assertSame('2.0000',$actual['icms']['pFCPSTRet']);
+        self::assertSame('2.00',$actual['icms']['vFCPSTRet']);
+    }
+
+    public function test_fcp_st_without_full_historical_evidence_fails(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('FCP-ST anterior exige base');
+        (new NFCeTaxCalculationService())->calculate($this->item([
+            'cfop'=>'5405','icms_csosn'=>'500',
+            'icms_st_retained_base'=>'90.00','icms_st_retained_value'=>'16.20',
+            'st_retained_amount_scope'=>'line',
+            'fcp_st_retained_rate'=>'2.0000',
+        ]),'1');
+    }
+
+    public function test_fcp_st_retained_is_rejected_on_plain_csosn_102(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('só pode ser informado');
+        (new NFCeTaxCalculationService())->calculate($this->item([
+            'icms_csosn'=>'102',
+            'fcp_st_retained_base'=>'90.00',
+            'fcp_st_retained_rate'=>'2.0000',
+            'fcp_st_retained_value'=>'1.80',
+        ]),'1');
+    }
+
 }
