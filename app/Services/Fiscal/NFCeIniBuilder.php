@@ -197,17 +197,31 @@ final class NFCeIniBuilder
             'credit_card' => '03', 'debit_card' => '04',
             'bank_slip' => '15', 'bank_transfer' => '18', 'transfer' => '18',
         ];
-        $cashChangeAssigned = false;
-        foreach (($source['payments'] ?? []) as $index => $payment) {
-            $kind = (string) ($payment['payment_kind'] ?? '');
-            $kind = $kind !== '' ? $kind : strtolower((string) ($payment['payment_method'] ?? ''));
-            if ($kind === 'card') {
-                $code = strtolower((string) ($payment['payment_method'] ?? ''));
-                $kind = str_contains($code, 'debit') || str_contains($code, 'debito') ? 'debit_card' : (str_contains($code, 'credit') || str_contains($code, 'credito') ? 'credit_card' : 'card');
+        $payments=$source['payments'] ?? [];
+        if (!is_array($payments) || !$payments) {
+            throw new RuntimeException('NFC-e sem formas de pagamento.');
+        }
+        $paymentCents=0;
+        foreach ($payments as $payment) {
+            if (!is_array($payment) || !is_numeric($payment['amount'] ?? null)
+                || (float)$payment['amount']<=0) {
+                throw new RuntimeException('Valor ou registro de pagamento inválido.');
             }
+            $paymentCents+=(int)round((float)$payment['amount']*100,0,PHP_ROUND_HALF_UP);
+        }
+        if ($paymentCents !== (int)round((float)$total*100,0,PHP_ROUND_HALF_UP)) {
+            throw new RuntimeException('Pagamentos não conciliam com o total da NFC-e.');
+        }
+
+        $cashChangeAssigned = false;
+        foreach ($payments as $index => $payment) {
+            $kind=\App\Models\PaymentMethod::resolveFiscalKind(
+                (string)($payment['payment_kind'] ?? $payment['payment_method'] ?? ''),
+                (string)($payment['payment_method'] ?? '')
+            );
             $paymentType = $methods[$kind] ?? null;
             if ($paymentType === null) {
-                throw new RuntimeException('Forma de pagamento sem mapeamento NFC-e: '.$text($kind));
+                throw new RuntimeException('Forma de pagamento sem classificação fiscal NFC-e: '.$text($kind).'. Configure explicitamente o tipo.');
             }
             $fields = [
                 'tPag' => $paymentType,
