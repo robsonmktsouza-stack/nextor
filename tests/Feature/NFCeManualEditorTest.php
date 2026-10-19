@@ -430,8 +430,8 @@ final class NFCeManualEditorTest extends TestCase
         $this->actingAs($this->admin())
             ->get(route('fiscal.nfce.create'))
             ->assertOk()
-            ->assertSee('Cartão de crédito')
-            ->assertSee('Cartão de débito');
+            ->assertSee('"kind":"credit_card"',false)
+            ->assertSee('"kind":"debit_card"',false);
     }
 
     public function test_credit_and_debit_are_saved_as_distinct_fiscal_payments(): void
