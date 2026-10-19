@@ -146,6 +146,13 @@
         <input type="number" min="0" max="100" step="0.0001" name="tax_config[st_retained_rate]" value="{{ $val('st_retained_rate') }}"></label>
       <label class="field col-3"><span>ICMS próprio do substituto (R$)</span>
         <input type="number" min="0" step="0.01" name="tax_config[icms_substitutor_value]" value="{{ $val('icms_substitutor_value') }}"></label>
+      <label class="field col-3"><span>Base de FCP-ST anterior (R$)</span>
+        <input type="number" min="0" step="0.01" name="tax_config[fcp_st_retained_base]" value="{{ $val('fcp_st_retained_base') }}"></label>
+      <label class="field col-3"><span>FCP-ST retido anteriormente (R$)</span>
+        <input type="number" min="0" step="0.01" name="tax_config[fcp_st_retained_value]" value="{{ $val('fcp_st_retained_value') }}"></label>
+      <label class="field col-3"><span>Percentual FCP-ST anterior (%)</span>
+        <input type="number" min="0" max="2" step="0.0001" name="tax_config[fcp_st_retained_rate]" value="{{ $val('fcp_st_retained_rate') }}"></label>
+      <p class="nfce-field-help col-12">Somente para CSOSN 500 ou CST 60 com retenção anterior comprovada: informe a base, a alíquota e o valor efetivamente destacados no documento de entrada. Não use estes campos para FCP da venda atual.</p>
     </div>
   </section>
 
