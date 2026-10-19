@@ -13,6 +13,7 @@ final class FiscalTaxGroupController extends Controller
 {
     private const RATE_FIELDS = [
         'icms_rate','base_reduction_rate','credit_rate','icms_st_rate','mva_rate','fcp_deferral_rate',
+        'icms_deferral_rate','st_retained_rate',
         'pis_rate','pis_st_rate','pis_quantity_rate',
         'cofins_rate','cofins_st_rate','cofins_quantity_rate',
         'ipi_rate','iss_rate','is_rate','biodiesel_mix_rate','fuel_origin_rate',
@@ -21,8 +22,14 @@ final class FiscalTaxGroupController extends Controller
         'ibs_municipal_rate','ibs_municipal_deferral_rate','ibs_municipal_reduction_rate',
     ];
 
+    private const MONEY_FIELDS = [
+        'icms_st_retained_base','icms_st_retained_value','icms_substitutor_value',
+    ];
+
     private const TEXT_FIELDS = [
         'mod_bc' => 1,
+        'st_retained_amount_scope' => 4,
+        'icms_deferral_legal_basis' => 255,
         'service_list_item' => 5,
         'national_tax_code' => 6,
         'iss_calculation' => 25,
@@ -157,6 +164,9 @@ final class FiscalTaxGroupController extends Controller
         foreach (self::RATE_FIELDS as $key) {
             $rules['tax_config.'.$key]=['nullable','numeric','min:0','max:100'];
         }
+        foreach (self::MONEY_FIELDS as $key) {
+            $rules['tax_config.'.$key]=['nullable','numeric','min:0','max:99999999999.99','decimal:0,2'];
+        }
         foreach (self::TEXT_FIELDS as $key=>$max) {
             $rules['tax_config.'.$key]=['nullable','string','max:'.$max];
         }
@@ -164,6 +174,7 @@ final class FiscalTaxGroupController extends Controller
             $rules['tax_config.'.$key]=['nullable',Rule::in(['none','percentage','quantity'])];
         }
         $rules['tax_config.mod_bc']=['nullable',Rule::in(['0','1','2','3'])];
+        $rules['tax_config.st_retained_amount_scope']=['nullable',Rule::in(['unit','line'])];
         $rules['tax_config.force_interstate_cfop']=['nullable','boolean'];
         $rules['tax_config.iss_incentive']=['nullable','boolean'];
         $rules['tax_config.fuel_origin_uf']=['nullable',Rule::in(self::UF)];
@@ -220,7 +231,7 @@ final class FiscalTaxGroupController extends Controller
         }
 
         $config=Arr::only($data['tax_config'] ?? [],
-            array_merge(self::RATE_FIELDS,array_keys(self::TEXT_FIELDS),self::CALC_FIELDS,
+            array_merge(self::RATE_FIELDS,self::MONEY_FIELDS,array_keys(self::TEXT_FIELDS),self::CALC_FIELDS,
                 ['force_interstate_cfop','iss_incentive','municipal_variations','state_variations']));
         foreach (['force_interstate_cfop','iss_incentive'] as $flag) {
             $config[$flag]=$request->boolean('tax_config.'.$flag);
