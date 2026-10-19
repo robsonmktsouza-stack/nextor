@@ -124,7 +124,7 @@ window.addEventListener('load',()=>{
       price.dispatchEvent(new Event('input',{bubbles:true}));
       button.click();
       expect(!list.hidden,'clique em Localizar fechou a própria lista');
-      expect(list.querySelectorAll('[data-pick-product]').length===2,'Localizar não exibiu catálogo');
+      expect(list.querySelectorAll('[data-pick-product]').length===4,'Localizar não exibiu catálogo');
       clickResult('1');
       expect($$('#nfceItems tr').length===1 && qty()===3,'botão Localizar duplicou linha');
       const actualUnit=String($('#nfceItems [data-item-field="unit_price"]').value)
