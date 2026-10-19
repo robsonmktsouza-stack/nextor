@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="{{ asset('css/desktop-polish.css') }}?v={{ filemtime(public_path('css/desktop-polish.css')) }}">
 @stack('styles')
 <script defer src="{{ asset('js/erp.js') }}?v={{ filemtime(public_path('js/erp.js')) }}"></script>
+<script defer src="{{ asset('js/desktop-polish.js') }}?v={{ filemtime(public_path('js/desktop-polish.js')) }}"></script>
 <script defer src="{{ asset('js/fiscal-codes.js') }}"></script>
 </head><body
   class="{{ \App\Models\AppSetting::value('system','compact_mode',true) ? 'system-compact' : 'system-comfortable' }} @yield('bodyClass')"
