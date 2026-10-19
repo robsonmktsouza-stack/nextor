@@ -134,7 +134,7 @@ foreach($primaryTabs as $key=>$item){
         <label class="field col-2"><span>Número</span><input name="address_number" value="{{ old('address_number',$company->address_number) }}"></label>
         <label class="field col-2"><span>Bairro</span><input name="district" value="{{ old('district',$company->district) }}" data-district-input></label>
         <label class="field col-8"><span>Complemento</span><input name="address_complement" value="{{ old('address_complement',$company->address_complement) }}"></label>
-        <label class="field col-4"><span>Fuso horário</span><input name="timezone" value="{{ old('timezone',$company->timezone ?: 'America/Sao_Paulo') }}" required></label>
+        <label class="field col-4"><span>Fuso horário da empresa</span><input name="timezone" value="{{ old('timezone',$company->timezone ?: 'America/Sao_Paulo') }}" required></label>
       </div>
     </section>
 
@@ -258,7 +258,7 @@ foreach($primaryTabs as $key=>$item){
       @csrf
       <label class="field"><span>Nome</span><input name="name" maxlength="120" required placeholder="Ex.: Receita de vendas"></label>
       <label class="field"><span>Tipo</span><select name="type"><option value="income">Receita</option><option value="expense">Despesa</option></select></label>
-      <button class="btn btn-success" type="submit">@include('partials.icon',['name'=>'plus','size'=>15]) Adicionar</button>
+      <button class="btn btn-success" type="submit">@include('partials.icon',['name'=>'plus','size'=>15]) Adicionar categoria</button>
     </form>
     <div class="settings-split-tables">
       @foreach(['income'=>'Receitas','expense'=>'Despesas'] as $kind=>$label)
@@ -289,7 +289,7 @@ foreach($primaryTabs as $key=>$item){
       <label class="field"><span>Nome</span><input name="name" maxlength="120" required></label>
       <label class="field"><span>Tipo</span><select name="type"><option value="cash">Caixa</option><option value="bank">Banco</option><option value="digital">Conta digital</option><option value="other">Outra</option></select></label>
       <label class="field"><span>Saldo inicial</span><input type="number" data-number-kind="money" name="opening_balance" step="0.01" min="0" value="0.00" required></label>
-      <button class="btn btn-primary">@include('partials.icon',['name'=>'plus','size'=>15]) Adicionar</button>
+      <button class="btn btn-primary">@include('partials.icon',['name'=>'plus','size'=>15]) Adicionar conta</button>
     </form>
     <div class="table-scroll">
       <table class="cms-table">
@@ -370,12 +370,12 @@ foreach($primaryTabs as $key=>$item){
       <label class="field"><span>Tipo</span><select name="kind"><option value="cash">Dinheiro</option><option value="pix">PIX</option><option value="card">Cartão</option><option value="bank_slip">Boleto</option><option value="transfer">Transferência</option><option value="other">Outro</option></select></label>
       <label class="field"><span>Conta padrão</span><select name="financial_account_id"><option value="">Nenhuma</option>@foreach($accounts as $a)<option value="{{ $a->id }}">{{ $a->name }}</option>@endforeach</select></label>
       <label class="field"><span>Taxa percentual (%)</span><input type="number" step="0.0001" min="0" name="fee_percent" value="0"></label>
-      <label class="field"><span>Taxa fixa</span><input type="number" step="0.01" min="0" name="fee_fixed" value="0"></label>
+      <label class="field"><span>Taxa fixa (R$)</span><input type="number" step="0.01" min="0" name="fee_fixed" value="0"></label>
       <label class="field"><span>Receber após</span><input type="number" min="0" name="settlement_days" value="0"><small>Dias</small></label>
       <label class="field"><span>Ordem de exibição</span><input type="number" min="0" name="sort_order" value="100"></label>
       <label class="check-line"><input type="checkbox" name="is_active" value="1" checked><span>Ativa</span></label>
       <label class="check-line"><input type="checkbox" name="pdv_enabled" value="1" checked><span>Disponível no PDV</span></label>
-      <button class="btn btn-success" type="submit">@include('partials.icon',['name'=>'plus','size'=>15]) Criar</button>
+      <button class="btn btn-success" type="submit">@include('partials.icon',['name'=>'plus','size'=>15]) Adicionar forma de pagamento</button>
     </form>
 
     <div class="settings-payment-list">
@@ -392,7 +392,7 @@ foreach($primaryTabs as $key=>$item){
             <label class="field"><span>Tipo</span><select name="kind">@foreach(['cash'=>'Dinheiro','pix'=>'PIX','card'=>'Cartão','bank_slip'=>'Boleto','transfer'=>'Transferência','other'=>'Outro'] as $k=>$v)<option value="{{ $k }}" @selected($method->kind===$k)>{{ $v }}</option>@endforeach</select></label>
             <label class="field"><span>Conta padrão</span><select name="financial_account_id"><option value="">Nenhuma</option>@foreach($accounts as $a)<option value="{{ $a->id }}" @selected($method->financial_account_id===$a->id)>{{ $a->name }}</option>@endforeach</select></label>
             <label class="field"><span>Taxa percentual (%)</span><input type="number" step="0.0001" min="0" name="fee_percent" value="{{ $method->fee_percent }}"></label>
-            <label class="field"><span>Taxa fixa</span><input type="number" step="0.01" min="0" name="fee_fixed" value="{{ $method->fee_fixed }}"></label>
+            <label class="field"><span>Taxa fixa (R$)</span><input type="number" step="0.01" min="0" name="fee_fixed" value="{{ $method->fee_fixed }}"></label>
             <label class="field"><span>Receber após</span><input type="number" min="0" name="settlement_days" value="{{ $method->settlement_days }}"></label>
             <label class="field"><span>Ordem de exibição</span><input type="number" min="0" name="sort_order" value="{{ $method->sort_order }}"></label>
             <label class="check-line"><input type="checkbox" name="is_active" value="1" @checked($method->is_active)><span>Ativa</span></label>
@@ -584,7 +584,7 @@ foreach($primaryTabs as $key=>$item){
         <label class="field col-2"><span>Série</span><input type="number" min="0" max="999" name="series" value="{{ $nfe['series'] }}"></label>
         <label class="field col-3"><span>Próximo número</span><input type="number" min="1" name="next_number" value="{{ $nfe['next_number'] }}"></label>
         <label class="field col-4"><span>CFOP padrão</span><input name="default_cfop" value="{{ $nfe['default_cfop'] }}"></label>
-        <label class="field col-12"><span>Natureza da operação padrão</span><input name="default_nature" value="{{ $nfe['default_nature'] }}"></label>
+        <label class="field col-12"><span>Tipo de operação usado por padrão</span><input name="default_nature" value="{{ $nfe['default_nature'] }}"></label>
       </div>
       <div class="settings-switch-grid">
         <label class="settings-switch"><input type="checkbox" name="enabled" value="1" @checked($nfe['enabled'])><span><strong>NF-e habilitada</strong><small>Disponibiliza esta configuração ao emissor.</small></span></label>
@@ -638,8 +638,8 @@ foreach($primaryTabs as $key=>$item){
         <label class="field col-4"><span>Padrão usado pela prefeitura</span><input name="provider" value="{{ $nfse['provider'] }}" placeholder="Ex.: Nacional / prefeitura / provedor"></label>
         <label class="field col-3"><span>Código do município</span><input name="municipality_code" value="{{ $nfse['municipality_code'] }}"></label>
         <label class="field col-2"><span>Série RPS</span><input name="series" value="{{ $nfse['series'] }}"></label>
-        <label class="field col-3"><span>Próximo RPS</span><input type="number" min="1" name="next_rps" value="{{ $nfse['next_rps'] }}"></label>
-        <label class="field col-5"><span>Código tributário de serviço padrão</span><input name="default_service_tax_code" value="{{ $nfse['default_service_tax_code'] }}"></label>
+        <label class="field col-3"><span>Próximo número do RPS</span><input type="number" min="1" name="next_rps" value="{{ $nfse['next_rps'] }}"></label>
+        <label class="field col-5"><span>Código tributário do serviço</span><input name="default_service_tax_code" value="{{ $nfse['default_service_tax_code'] }}"></label>
         <label class="field col-4"><span>Usuário da prefeitura</span><input name="municipal_login" value="{{ $nfse['municipal_login'] }}"></label>
         <label class="field col-6"><span>Senha ou chave de acesso da prefeitura</span><input type="password" name="municipal_password" placeholder="{{ $nfse['municipal_password'] ? 'Credencial já configurada' : 'Informe somente quando necessário' }}"></label>
       </div>
