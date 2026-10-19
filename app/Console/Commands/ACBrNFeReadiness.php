@@ -81,12 +81,27 @@ final class ACBrNFeReadiness extends Command
         $checks['Certificado A1 dentro da validade'] = $notExpired;
 
         $schemaPath = (string) config('services.acbr_nfe.schemas_path', '');
+        if ($schemaPath==='') {
+            foreach ([
+                'C:/laragon/acbr/dep/Schemas/NFe',
+                'C:/laragon/acbr/Schemas/NFe',
+                'C:/laragon/acbr/dep/Schemas',
+                'C:/laragon/acbr/Schemas',
+            ] as $candidate) {
+                if (is_dir($candidate)) {
+                    $schemaPath=$candidate;
+                    break;
+                }
+            }
+        }
         $libraryPath = (string) config('services.acbr_nfe.library_path', '');
         $checks['Schemas ACBr configurados no disco'] =
             $schemaPath !== '' && is_dir($schemaPath);
         $checks['ACBrLibNFe encontrada no disco'] =
             $libraryPath !== '' && is_file($libraryPath);
-        $checks['FFI disponível no PHP do worker'] = extension_loaded('ffi');
+        $ffiSetting=strtolower(trim((string)ini_get('ffi.enable')));
+        $checks['FFI disponível no PHP do worker'] =
+            extension_loaded('ffi') && in_array($ffiSetting, ['1','on','true'], true);
 
         foreach ($checks as $label => $passed) {
             $this->line(($passed?'[OK] ':'[PENDENTE] ').$label);
