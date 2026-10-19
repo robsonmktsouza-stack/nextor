@@ -5,10 +5,14 @@
 <title>@yield('title','Painel') — Lumeron</title>
 <link rel="icon" type="image/png" href="{{ asset('images/lumeron/elephant.png') }}">
 <meta name="theme-color" content="#12335b">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="{{ asset('css/erp.css') }}?v={{ filemtime(public_path('css/erp.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/ui-refinement.css') }}?v={{ filemtime(public_path('css/ui-refinement.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/branding.css') }}?v={{ filemtime(public_path('css/branding.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/desktop-polish.css') }}?v={{ filemtime(public_path('css/desktop-polish.css')) }}">
+<link rel="stylesheet" href="{{ asset('css/erp-typography.css') }}?v={{ filemtime(public_path('css/erp-typography.css')) }}">
 @stack('styles')
 <script defer src="{{ asset('js/erp.js') }}?v={{ filemtime(public_path('js/erp.js')) }}"></script>
 <script defer src="{{ asset('js/desktop-polish.js') }}?v={{ filemtime(public_path('js/desktop-polish.js')) }}"></script>
