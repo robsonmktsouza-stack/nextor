@@ -261,13 +261,19 @@
 
         <section class="editor-tab-panel" id="nfcePanel-products" role="tabpanel" aria-labelledby="nfceTab-products" data-nfce-panel="products" hidden>
           <div class="nfe-general-card">
-            <div class="nfe-section-title nfe-section-title--actions">
-              <button type="button" id="nfceAddProduct" class="btn btn-secondary">@include('partials.icon',['name'=>'plus','size'=>15]) Adicionar produto</button>
+            <div class="nfce-product-toolbar" id="nfceProductPicker">
+              <div class="field nfce-product-search-field">
+                <label for="nfceProductSearch">Buscar produto</label>
+                <div class="nfce-product-search-anchor">
+                  <input type="search" id="nfceProductSearch" placeholder="Nome, código ou código de barras" autocomplete="off"
+                    role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="nfceProductResults">
+                  <div id="nfceProductResults" class="nfce-search-results" role="listbox" hidden></div>
+                </div>
+              </div>
+              <button type="button" id="nfceAddProduct" class="btn btn-secondary" aria-label="Localizar produto">
+                @include('partials.icon',['name'=>'search','size'=>15]) Localizar
+              </button>
             </div>
-            <label class="field"><span>Buscar produto</span>
-              <input type="search" id="nfceProductSearch" placeholder="Digite o nome, código ou código de barras" autocomplete="off">
-            </label>
-            <div id="nfceProductResults" class="nfce-search-results" role="listbox" hidden></div>
             <div class="nfce-item-table-wrap">
               <table class="nfce-item-table">
                 <thead><tr><th>Produto</th><th>Quantidade</th><th>Preço</th><th>Desconto</th><th>Total</th><th></th></tr></thead>
