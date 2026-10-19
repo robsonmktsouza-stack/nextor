@@ -1,7 +1,7 @@
 /*
  * Lumeron ERP — tipografia de trabalho.
  * Fonte principal Roboto: carregada por Google Fonts no layout; Arial em
- * contingência/offline. Não usar Segoe UI, nem mexer em DANFE/impressões.
+ * contingência/offline. Evite fontes legadas; não mexer em DANFE/impressões.
  * Esta folha deve ser a ÚLTIMA nos layouts administrativos e do PDV.
  */
 :root {
