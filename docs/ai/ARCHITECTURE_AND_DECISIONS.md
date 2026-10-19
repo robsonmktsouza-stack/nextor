@@ -18,6 +18,14 @@ O proprietário rejeitou a Segoe UI e a escala tipográfica anterior (muitos ró
 
 Padrão de legibilidade: texto geral **14 px**, registros em tabelas **13 px**, títulos de coluna **12 px**, rótulos **13 px**, descrições secundárias **12–12,5 px**. Mantenha a densidade operacional e adapte largura/rolagem, sem voltar a minúsculos textos nem recorrer a zoom global. A folha `erp-typography.css` deve carregar **após** `desktop-polish.css` e `branding.css`, sem afetar os arquivos do DANFE ou impressão fiscal. Ao modificar tipografia, manter `tests/Feature/ErpTypographyTest.php`.
 
+## D02-B — Configurações compreensíveis (19/10/2026)
+
+**Decisão de produto:** termos técnicos não devem dominar a navegação de uso diário. Os controles devem dizer o que o usuário quer fazer ou o que acontece ao ativá-los. A referência funcional são práticas publicamente documentadas por eGestor, Omie, Bling e Conta Azul, sem replicar material proprietário. Guia e links: [docs/ux/erp-settings-language.md](../ux/erp-settings-language.md).
+
+Em `resources/views/settings/index.blade.php`, manter os seis grupos principais **Minha empresa; Vendas e estoque; Financeiro; Notas fiscais; Equipe e acessos; Outras opções** e as subabas organizadas por tarefa. Os 20 valores internos de `SettingsController::TABS`, rotas `?tab=...`, actions, nomes de input, validações e permissões são contratos e não podem ser trocados apenas para simplificar a linguagem visível. A UI explica termos como CRT, IBGE, CSC, NF-e, NCM, RPS sem omiti-los quando são necessários. As configurações de API/webhook/SMTP ficam em **Outras opções → Integrações avançadas**; não esconder acesso administrativo ou alterar segurança.
+
+**Padrão para botões:** verbo + objeto quando houver ambiguidade (ex.: “Adicionar categoria”, “Adicionar conta”, “Adicionar forma de pagamento”, “Gerar arquivo contábil”). “Salvar” e “Cancelar” continuam adequados quando o contexto já está claro. Não prometer emissão, envio, baixa ou download quando o fluxo de código não faz isso. Atalhos e atributos `data-*` não devem ser alterados por mudanças de texto. Seções com opções fiscais de risco devem distinguir homologação/teste de produção real. O arquivo `tests/Feature/SettingsClarityTest.php` cobre navegação e compatibilidade.
+
 ## D03 — Isolamento contratual
 
 **Um CNPJ = uma instalação Laravel independente = um banco e ambiente próprios**, mesmo se uma pessoa tiver várias empresas. Cada instalação possui usuários, sessões, APP_KEY, storage, certificados A1, CSC, fila/worker e configurações próprios. Não criar seletor multiempresa compartilhado nem banco único com tenant_id. `config/instance.php` define `LUMERON_INSTANCE_CNPJ` e identidade de instância; preflight/transmissão devem rejeitar emitente CNPJ divergente. Desenvolvimento local pode operar sem vínculo de CNPJ; VPS gerenciada não pode. Documentos: `docs/deployment/one-cnpj-per-instance.md`, `docs/deployment/login-by-subdomain.md`.
