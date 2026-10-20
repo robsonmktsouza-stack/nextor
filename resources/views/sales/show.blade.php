@@ -15,6 +15,11 @@
 </button>
 @endif
 @endif
+@if($sale->operation_type==='sale')
+<a class="btn btn-secondary" href="{{ route('sales.receipt',['sale'=>$sale,'print'=>0]) }}" target="_blank" rel="noopener noreferrer">
+  @include('partials.icon',['name'=>'print','size'=>16]) Comprovante de venda
+</a>
+@endif
 @if(auth()->user()->canAccess('returns') && $sale->operation_type==='sale' && $sale->status==='completed')
 <a class="btn btn-primary" href="{{ route('sales.returns.create',['sale'=>$sale->id]) }}">@include('partials.icon',['name'=>'return','size'=>16]) Nova devolução</a>
 @endif
