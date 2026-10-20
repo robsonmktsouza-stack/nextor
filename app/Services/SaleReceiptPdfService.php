@@ -64,8 +64,20 @@ class SaleReceiptPdfService
             $disk=Storage::disk('public');
             $mime=$disk->mimeType($company->logo_path);
             $size=$disk->size($company->logo_path);
-            if (in_array($mime,['image/png','image/jpeg'],true) && $size<=4194304) {
+            if ($size<=4194304 && in_array($mime,['image/png','image/jpeg'],true)) {
                 $logo=$disk->get($company->logo_path);
+            } elseif ($size<=4194304 && $mime==='image/webp'
+                && function_exists('imagecreatefromwebp') && function_exists('imagepng')) {
+                // Compatibilidade com logomarcas WebP quando GD estiver disponível.
+                $source=@imagecreatefromwebp($disk->path($company->logo_path));
+                if ($source!==false) {
+                    ob_start();
+                    imagesavealpha($source,true);
+                    $converted=imagepng($source);
+                    $png=ob_get_clean();
+                    imagedestroy($source);
+                    if ($converted && is_string($png)) $logo=$png;
+                }
             }
         }
 
