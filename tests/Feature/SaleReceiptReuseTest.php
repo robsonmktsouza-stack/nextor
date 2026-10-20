@@ -92,7 +92,7 @@ final class SaleReceiptReuseTest extends TestCase
             ->assertOk()
             ->assertHeader('Content-Type','application/pdf')
             ->assertHeader('Content-Disposition','inline; filename="Comprovante-Venda-'.str_pad((string)$sale->id,5,'0',STR_PAD_LEFT).'.pdf"')
-            ->assertHeader('Cache-Control','private, no-store, max-age=0')
+            ->assertHeader('Cache-Control','max-age=0, no-store, private')
             ->assertHeader('X-Content-Type-Options','nosniff')
             ->assertSee('%PDF-1.4',false);
 
@@ -127,7 +127,7 @@ final class SaleReceiptReuseTest extends TestCase
             $this->get($url)
                 ->assertOk()
                 ->assertHeader('Content-Type','application/pdf')
-                ->assertHeader('Cache-Control','private, no-store, max-age=0');
+                ->assertHeader('Cache-Control','max-age=0, no-store, private');
         }
         $this->get(route('sales.index'))->assertOk()
             ->assertSee(route('sales.receipt',$sale),false);
@@ -183,7 +183,7 @@ final class SaleReceiptReuseTest extends TestCase
             ->assertOk()
             ->assertHeader('Content-Type','application/pdf')
             ->assertHeader('Content-Disposition','inline; filename="Comprovante-Venda-'.str_pad((string)$sale->id,5,'0',STR_PAD_LEFT).'.pdf"')
-            ->assertHeader('Cache-Control','private, no-store, max-age=0');
+            ->assertHeader('Cache-Control','max-age=0, no-store, private');
         $this->get(route('sales.receipt',$sale))->assertForbidden();
 
         // Falha na preparação fiscal ainda mostra a explicação ao operador.
