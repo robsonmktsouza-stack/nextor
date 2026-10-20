@@ -69,6 +69,10 @@ Cada CNPJ contratado possui seu próprio banco, arquivos, usuários, certificado
 
 A API de leitura utiliza `/api/lumeron/products`, `/api/lumeron/customers` e `/api/lumeron/sales`. O caminho anterior `/api/nextor` continua disponível para compatibilidade.
 
+## Controle central de clientes e licenças (opt-in)
+
+O painel privado independente **Lumeron Control** está na branch isolada `control-center` deste GitHub (não mesclar a árvore dessa branch no ERP). A integração cliente HMAC entrou na `develop`, **desativada por padrão**: [guia de integração](docs/deployment/control-center-integration.md). O cadastro/ativação no painel não cria um servidor nem altera a versão estável `main`/`v1.0.0`. Não ativar nem transmitir dados de clientes sem autorização por CNPJ.
+
 ## Cuidados
 
 Não versionar `.env`, certificados digitais, credenciais de CSC, arquivos fiscais, sessões ou bancos. Antes de emissão real, validar por empresa/UF, cenários tributários, fila fiscal, recuperação de falhas, backup e impressão.
