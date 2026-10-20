@@ -122,6 +122,37 @@ final class QuoteCommercialDocumentTest extends TestCase
         self::assertStringNotContainsString('border-radius:', $html);
     }
 
+    public function test_commercial_quote_with_products_and_services_shows_correct_breakdown_without_changing_totals(): void
+    {
+        $quote=$this->createQuote($this->product());
+        $quote->items()->create([
+            'item_type'=>'service','product_id'=>null,'service_id'=>null,
+            'product_name'=>'Instalação de acessórios','product_sku'=>null,
+            'quantity'=>'1.000','unit_price'=>'50.00','discount'=>'0.00',
+            'line_total'=>'50.00','notes'=>null,
+        ]);
+        $quote->update([
+            'subtotal'=>'149.00','discount_total'=>'5.00','total'=>'144.00',
+        ]);
+
+        $html=app(QuotePdfService::class)->renderHtml($quote);
+        foreach ([
+            'background:#4f7d7c',
+            'border-left:3px solid #558983',
+            'Serviço',
+            'Instalação de acessórios',
+            'R$ 99,00',
+            'R$ 50,00',
+            'R$ 149,00',
+            'R$ 144,00',
+            'TOTAL GERAL',
+        ] as $expected) {
+            self::assertStringContainsString($expected,$html);
+        }
+        self::assertSame('144.00',(string)$quote->fresh()->total);
+        self::assertSame(0,FinancialEntry::count());
+    }
+
     public function test_company_logo_is_embedded_without_exposing_a_public_attachment_url(): void
     {
         \Illuminate\Support\Facades\Storage::fake('public');
