@@ -2,6 +2,23 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
+## Continuidade — 20/10/2026 — comprovante de venda no leitor nativo de PDF do Chrome
+
+**Solicitação e evidência:** captura real de `localhost:8000/pdv/receipt/9?print=0`. Ao reabrir uma venda pelo histórico do PDV, aparecia uma página HTML estreita com botões, painel da NFC-e e prévia do cupom; o proprietário pediu que abrisse como o orçamento: **PDF inline no leitor nativo do Chrome, com imprimir/baixar pelos próprios controles do navegador**, sem essa página intermediária.
+
+**Alteração na branch `feature/acbr-nfe-bootstrap`:**
+- `app/Services/SaleReceiptPdfService.php` (novo): usa os dados persistidos de `SaleReceiptPresenter`, o mesmo Blade `pdv.receipt` e a configuração térmica de **58/80 mm**. Chrome/Edge headless gera PDF em diretório privado temporário; incorpora a logo comercial cadastrada via data URI quando disponível; verifica assinatura/EOF e remove os arquivos temporários. Não cria venda, NFC-e, movimentação ou pagamento e não lê valores transitórios da sessão do PDV.
+- `resources/views/pdv/receipt.blade.php`: modo `receiptPdfMode` reutiliza a apresentação do comprovante e retira ações HTML, alertas fiscais e o script de impressão automática do arquivo PDF; as cópias e largura de impressão continuam governadas pelas mesmas configurações do PDV.
+- `SaleController::receipt`: `/sales/{sale}/receipt` entrega `application/pdf` com `Content-Disposition: inline`, `no-store`, permissão de Vendas, e `?download=1` opcional. Orçamentos continuam rejeitados nessa rota.
+- `PdvController::receipt`: a consulta histórica `/pdv/receipt/{sale}?print=0` devolve o mesmo PDF inline, sem janela HTML. **A finalização normal do PDV (URL sem `print=0`) mantém a impressão automática e o retorno ao caixa.** Se houve erro no preparo da NFC-e, os cinco redirecionamentos agora usam `?print=0&status=1` para preservar a página explicativa sem impressão automática, em vez de ocultar o erro dentro do PDF.
+- `tests/Feature/SaleReceiptReuseTest.php`: regressões de acesso, PDF inline/download, página de venda, conteúdo da via térmica, retorno automático do PDV, erro fiscal visível e ausência de dados de caixa da sessão anterior. Inclui geração real de PDF no CI quando Chromium estiver instalado.
+
+**Sem mudanças:** rotas e nomes dos links, impressão fiscal DANFE, regras de NFC-e, PDF A4 de orçamentos, banco/migrations, estoque, financeiro, operações de caixa e VPS. A aparência do PDF é a do cupom térmico existente, **não A4**; a diferença é o visualizador nativo do navegador.
+
+**Conferência no Laragon:** `git status -sb`, `git pull origin feature/acbr-nfe-bootstrap`, `php artisan optimize:clear`, `Ctrl+F5`. Abrir **PDV → histórico → comprovante** (URL `?print=0`) e **Vendas → Comprovante de venda**; as duas abas devem mostrar a barra de ferramentas do leitor PDF do Chrome, não os controles HTML antigos. Concluir uma nova venda no PDV e confirmar que a impressão automática do caixa permanece. Testar 58/80 mm e duas vias antes do uso real. Não há migração por esta mudança e não houve acesso ao Laragon do proprietário.
+
+**Validar:** execução `ACBr integration checks` no último commit do trabalho, especialmente PHP lint, Blade, testes de `SaleReceiptReuseTest` e teste de PDF real pelo Chromium. Não presumir aprovação até a CI concluir.
+
 ## Continuidade — 20/10/2026 — reconciliação operacional e auditoria do caixa PDV
 
 **Pedido:** o proprietário solicitou corrigir completamente a abertura/fechamento do caixa e rastreabilidade de troco, sangrias, suprimentos, devoluções e relatórios após auditoria do fluxo. Trabalho na branch `feature/acbr-nfe-bootstrap` (sem deploy/SEFAZ). Não confundir obrigações fiscais da NFC-e ou escrituração legal com controle gerencial de caixa.
