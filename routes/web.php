@@ -109,6 +109,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/sales',[SaleController::class,'index'])->name('sales.index')->middleware(['permission:sales','company.configured']);
     Route::get('/sales/create',[SaleController::class,'create'])->name('sales.create')->middleware(['permission:sales','company.configured']);
     Route::post('/sales',[SaleController::class,'store'])->name('sales.store')->middleware(['permission:sales','company.configured']);
+    Route::get('/sales/{sale}/quote/pdf',[SaleController::class,'quotePdf'])->name('sales.quote.pdf')->middleware(['permission:sales','company.configured']);
+    Route::post('/sales/{sale}/quote/convert',[SaleController::class,'convertQuote'])->name('sales.quote.convert')->middleware(['permission:sales','company.configured']);
 
     Route::get('/sales/returns',[SaleReturnController::class,'index'])->name('sales.returns.index')->middleware(['permission:returns','company.configured']);
     Route::get('/sales/returns/create',[SaleReturnController::class,'create'])->name('sales.returns.create')->middleware(['permission:returns','company.configured']);
