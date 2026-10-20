@@ -104,6 +104,22 @@ final class QuoteCommercialDocumentTest extends TestCase
         self::assertStringNotContainsString('Segue o detalhamento dos produtos',$html);
         self::assertStringNotContainsString('border-radius:', $html);
         self::assertStringNotContainsString('sum-final',$html);
+        // Printed ERP quotation: consistent gray table, spacing, typography
+        // and restrained total emphasis without changing the sale amounts.
+        foreach ([
+            '@page { size:A4; margin:13mm 13mm 20mm; }',
+            'font:10.5px/1.42 Arial,Helvetica,sans-serif',
+            'background:#e9edef;',
+            'font-variant-numeric:tabular-nums',
+            '.items tbody tr:nth-child(even)',
+            '.totals .total td',
+            'position:fixed; bottom:-11mm',
+            'border-bottom:2px solid #667780',
+        ] as $token) {
+            self::assertStringContainsString($token,$html);
+        }
+        self::assertStringNotContainsString('background:#294e68',$html);
+        self::assertStringNotContainsString('border-radius:', $html);
     }
 
     public function test_company_logo_is_embedded_without_exposing_a_public_attachment_url(): void
