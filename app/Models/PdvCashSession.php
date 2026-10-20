@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class PdvCashSession extends Model
 {
     protected $fillable=[
-        'user_id','opening_amount','closing_amount','opening_notes','closing_notes','opened_at','closed_at',
+        'user_id','opening_amount','closing_amount','expected_amount','difference_amount','closing_breakdown','opening_notes','closing_notes','opened_at','closed_at','closed_by','reviewed_by','reviewed_at','review_notes',
     ];
 
     protected function casts(): array
@@ -17,6 +17,10 @@ class PdvCashSession extends Model
         return [
             'opening_amount'=>'decimal:2',
             'closing_amount'=>'decimal:2',
+            'expected_amount'=>'decimal:2',
+            'difference_amount'=>'decimal:2',
+            'closing_breakdown'=>'array',
+            'reviewed_at'=>'datetime',
             'opened_at'=>'datetime',
             'closed_at'=>'datetime',
         ];
@@ -26,6 +30,11 @@ class PdvCashSession extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function sales(): HasMany { return $this->hasMany(Sale::class,'pdv_cash_session_id'); }
+
+    public function closer(): BelongsTo { return $this->belongsTo(User::class,'closed_by'); }
+    public function reviewer(): BelongsTo { return $this->belongsTo(User::class,'reviewed_by'); }
 
     public function movements(): HasMany
     {
