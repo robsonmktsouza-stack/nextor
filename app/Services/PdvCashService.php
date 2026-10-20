@@ -169,9 +169,12 @@ final class PdvCashService
                     ]);
                 }
                 if($returnId) {
+                    $returnReference=SaleReturn::query()->findOrFail($returnId);
+                    // A venda é o lock comum para reembolsos de devoluções
+                    // diferentes; evita que duas saídas superem o total em espécie.
+                    $sale=Sale::query()->lockForUpdate()->findOrFail($returnReference->sale_id);
                     $return=SaleReturn::query()->lockForUpdate()->findOrFail($returnId);
-                    $sale=Sale::query()->findOrFail($return->sale_id);
-                    if($return->status!=='completed' || $sale->source!=='pdv') {
+                    if($return->sale_id!==$sale->id || $return->status!=='completed' || $sale->source!=='pdv') {
                         throw ValidationException::withMessages(['amount'=>'Devolução inválida para reembolso do PDV.']);
                     }
                 } else {
