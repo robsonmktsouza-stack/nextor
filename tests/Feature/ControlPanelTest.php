@@ -63,7 +63,7 @@ final class ControlPanelTest extends TestCase
         $this->assertCount(2, $company->modules);
         $this->assertSame(1, $company->events()->count());
         $this->assertNotSame($company->license_secret, \Illuminate\Support\Facades\DB::table('companies')->value('license_secret'));
-        $this->get('/clients/'.$company->id)->assertOk()->assertSee('Nova', false);
+        $this->get('/clients/'.$company->id)->assertOk()->assertSee('EMPRESA DE TESTE LTDA');
     }
 
     public function test_rejects_invalid_cnpj_and_duplicate_subdomain(): void
