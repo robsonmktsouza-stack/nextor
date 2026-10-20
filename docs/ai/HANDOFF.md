@@ -2,6 +2,21 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
+## Continuidade — 20/10/2026 — correção de paginação e escala A4 do orçamento
+
+**Problema reportado com capturas reais:** o PDF do Excel do proprietário é **uma folha A4**, com conteúdo desde cerca de 4 mm da borda lateral, cabeçalho mais abaixo e corpo tipográfico legível. O documento exportado pelo Nextor em `/sales/11/quote/pdf` estava em **duas páginas**, a segunda praticamente vazia, com conteúdo excessivamente estreito e texto menor. O orçamento #00011 da captura tem apenas um item, ao passo que a referência tem nove — comparar a altura sem preservar a grade gera uma página visualmente muito diferente.
+
+**Correções somente no modelo `resources/views/sales/quote-pdf.blade.php`:**
+- `@page A4` mudou de `12mm 10mm 17mm` para `20mm 3mm 14mm` (topo mais próximo da planilha e largura útil maior);
+- Removido o `position:fixed; bottom:-12mm` no rodapé, que podia projetá-lo para fora da área de impressão e ocasionar folha fantasma; aviso fiscal agora acompanha o fluxo normal;
+- Margem superior de assinaturas reduzida de 23 para 13 mm;
+- Grade preserva o mínimo visual de **nove linhas** com `empty-row` vazias, sem criar itens em banco ou simular produto. Em orçamentos mais longos, linhas reais continuam e há paginação natural;
+- Fonte (corpo, empresa, seções, rótulos, itens, totais e assinaturas) aumentada para acompanhar o Excel exportado, em vez de versões minúsculas anteriores.
+
+**Regressão obrigatória** em `tests/Feature/QuoteCommercialDocumentTest.php`: usa Chrome/Chromium real em CI para gerar PDFs com 1 e 9 itens e verifica **exatamente uma página** usando `pdfinfo`, quando disponível no runner Linux. Em Windows o comando externo é dispensável; inspecionar visualmente no Chrome/Edge continua obrigatório. O commit `8676a5dc` passou CI de 396 testes, 2.539 assertions. A última alteração de fonte é `d58d6c21`; conferir CI desse commit e do HEAD antes de atestar aprovação. Nenhuma mudança em `erp.css`, banco, regras fiscais ou vendas. **Sem migrations** nesta atualização.
+
+**Atualização Laragon:** `git pull origin feature/acbr-nfe-bootstrap`, `php artisan optimize:clear`, reabrir o PDF `/sales/11/quote/pdf` com Ctrl+F5. Testar impressão em A4 do orçamento #00011 e um de nove linhas, confrontando com o PDF do Excel anexado pelo proprietário.
+
 ## Continuidade — 20/10/2026 — orçamento PDF reproduzido do Excel/PDF editados pelo proprietário
 
 **Solicitação e fontes:** o proprietário anexou `Modelo_Impressao_Orcamento_Nextor(1).xlsx` e `Modelo_Impressao_Orcamento_Nextor.pdf` editados por ele e autorizou aplicar exatamente este desenho ao Nextor/Lumeron. **Os arquivos enviados, sobretudo a página A4 exportada no Excel, são agora a referência visual específica do orçamento**, superando propostas visuais anteriores. Não implementar sistema de cadastro em Excel nem alterar o visual do ERP como um todo.
