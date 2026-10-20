@@ -16,7 +16,7 @@
 @endif
 @endif
 @if($sale->operation_type==='sale')
-<a class="btn btn-secondary" href="{{ route('sales.receipt',['sale'=>$sale,'print'=>0]) }}" target="_blank" rel="noopener noreferrer">
+<a class="btn btn-secondary" href="{{ route('sales.receipt',$sale) }}" target="_blank" rel="noopener noreferrer">
   @include('partials.icon',['name'=>'print','size'=>16]) Comprovante de venda
 </a>
 @endif
