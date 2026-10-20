@@ -6,7 +6,7 @@
 <style>
 /* Reprodução do modelo A4 aprovado no Excel do proprietário (20/10/2026).
    Não importar CSS do painel: este documento possui identidade de impressão. */
-@page { size:A4; margin:12mm 10mm 17mm; }
+@page { size:A4; margin:20mm 3mm 14mm; }
 * { box-sizing:border-box; }
 html,body { margin:0; padding:0; }
 body { font:10px/1.4 Calibri,Arial,Helvetica,sans-serif; color:#2e373b; background:#fff; }
@@ -61,7 +61,7 @@ strong { font-weight:700; }
 .items th:nth-child(7) { width:10%; }
 .items th:nth-child(8) { width:9%; }
 .items th:nth-child(9) { width:12%; }
-.items tbody tr { page-break-inside:avoid; break-inside:avoid; }
+.items tbody tr { height:21pt; page-break-inside:avoid; break-inside:avoid; }
 .items tbody tr:nth-child(even) { background:#fafbfb; }
 .items td { padding:6px 4px; border-bottom:1px solid #d8dddd;
     font-size:9.3px; line-height:1.35; vertical-align:top; overflow-wrap:anywhere; }
@@ -86,13 +86,13 @@ strong { font-weight:700; }
 .notes .section-title { margin-bottom:4px; }
 .notes p { margin:5px 1px; font-size:9.5px; line-height:1.5;
     white-space:pre-wrap; overflow-wrap:anywhere; }
-.signature-row { display:table; width:100%; table-layout:fixed; margin-top:23mm;
+.signature-row { display:table; width:100%; table-layout:fixed; margin-top:13mm;
     page-break-inside:avoid; break-inside:avoid; }
 .signature { display:table-cell; width:50%; text-align:center; padding:0 15px; }
 .signature-line { width:77%; margin:0 auto 5px; height:1px; border-top:1px solid #8e999a; }
 .signature-label { font-size:9px; color:#617078; }
-.footer { position:fixed; bottom:-12mm; left:0; right:0; text-align:center;
-    color:#8a9a9b; font-size:8px; }
+.footer { position:static; margin-top:10mm; padding-top:5px; border-top:1px solid #d9dfdf;
+    text-align:center; color:#8a9a9b; font-size:8px; page-break-inside:avoid; break-inside:avoid; }
 @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
 </style>
 </head>
