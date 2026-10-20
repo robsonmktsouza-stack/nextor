@@ -57,7 +57,7 @@ A licença **não** deve apagar banco, documentos fiscais, XMLs, autorizações,
 ## Testes
 
 ```bash
-php artisan test
+php vendor/bin/phpunit
 php artisan route:list
 ```
 
