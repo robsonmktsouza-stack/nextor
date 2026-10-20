@@ -15,7 +15,7 @@ class QuotePdfService
             throw new RuntimeException('Este documento não é um orçamento.');
         }
 
-        $quote->loadMissing(['items','customer','user']);
+        $quote->loadMissing(['items.product','customer','user']);
         $company=CompanySetting::current();
         $logo=null;
         if ($company->logo_path && Storage::disk('public')->exists($company->logo_path)) {
