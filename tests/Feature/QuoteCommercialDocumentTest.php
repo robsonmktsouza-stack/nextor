@@ -151,6 +151,29 @@ final class QuoteCommercialDocumentTest extends TestCase
         self::assertSame(0,FinancialEntry::count());
     }
 
+    public function test_quote_pdf_uses_saved_payment_label_and_actual_validity_length(): void
+    {
+        $quote=$this->createQuote($this->product());
+        \App\Models\PaymentMethod::query()->firstOrCreate(['code'=>'pix'],[
+            'name'=>'PIX','kind'=>'pix','sort_order'=>10,
+            'is_active'=>true,'pdv_enabled'=>true,
+        ]);
+        $quote->payments()->create([
+            'installment'=>1,
+            'amount'=>'94.00',
+            'payment_method'=>'pix',
+            'receivable'=>false,
+        ]);
+
+        $html=app(QuotePdfService::class)->renderHtml($quote);
+        self::assertStringContainsString('Pagamento: PIX.', $html);
+        self::assertStringContainsString('(10 dias)', $html);
+        self::assertStringContainsString('Forma de pagamento', $html);
+        self::assertStringContainsString('Prazo de entrega / execução: a combinar.', $html);
+        self::assertSame('94.00',(string)$quote->fresh()->total);
+        self::assertSame(0,FinancialEntry::count());
+    }
+
     public function test_company_logo_is_embedded_without_exposing_a_public_attachment_url(): void
     {
         \Illuminate\Support\Facades\Storage::fake('public');
