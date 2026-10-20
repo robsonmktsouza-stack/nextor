@@ -115,9 +115,24 @@ body{font-size:9px}
   .receipt{width:{{ $receiptWidth }}mm!important;min-width:{{ $receiptWidth }}mm!important;max-width:{{ $receiptWidth }}mm!important;margin:0!important;padding:{{ $receiptWidth==='58'?'3':'4' }}mm!important;page-break-after:always}
   .receipt:last-of-type{page-break-after:auto}
 }
+@if($receiptPdfMode ?? false)
+/* O Chrome mede a via no mesmo tamanho em tela e impressão.
+   A altura da página PDF será ajustada ao conteúdo real, incluindo a logo. */
+html,body{width:{{ $receiptWidth }}mm!important;min-width:{{ $receiptWidth }}mm!important;max-width:{{ $receiptWidth }}mm!important;background:#fff!important}
+body.receipt-pdf-source .receipt,
+body.receipt-pdf-source.sales-receipt-preview .receipt{
+  width:{{ $receiptWidth }}mm!important;
+  min-width:{{ $receiptWidth }}mm!important;
+  max-width:{{ $receiptWidth }}mm!important;
+  margin:0!important;
+  padding:{{ $receiptWidth==='58'?'3':'4' }}mm!important;
+  box-shadow:none!important;
+}
+body.receipt-pdf-source .receipt-copy+.receipt-copy{margin-top:0!important}
+@endif
 </style>
 </head>
-<body class="{{ $receiptOrigin==='sales' ? 'sales-receipt-preview' : '' }}">
+<body class="{{ $receiptOrigin==='sales' ? 'sales-receipt-preview' : '' }}{{ ($receiptPdfMode ?? false) ? ' receipt-pdf-source' : '' }}">
 @if(!($receiptPdfMode ?? false))
 <div class="screen-actions">
   @if($receiptOrigin==='sales')
@@ -273,6 +288,33 @@ body{font-size:9px}
   </footer>
 </main>
 @endfor
+
+@if($receiptPdfMode ?? false)
+<script id="receipt-paper-fit">
+(() => {
+  // O cálculo por número de itens não considera a altura real da logo,
+  // quebras de linha e observações. Medir o recibo evita folhas extras.
+  const adjustPaper = () => {
+    const copies=[...document.querySelectorAll('main.receipt-copy')];
+    if (!copies.length) return;
+    const pxPerMillimeter=96/25.4;
+    const heightPx=Math.max(...copies.map(copy => copy.getBoundingClientRect().height));
+    if (!Number.isFinite(heightPx) || heightPx<=0) return;
+    const heightMm=Math.max(50,Math.ceil(heightPx/pxPerMillimeter+4));
+    let paper=document.getElementById('receipt-exact-paper');
+    if (!paper) {
+      paper=document.createElement('style');
+      paper.id='receipt-exact-paper';
+      document.head.appendChild(paper);
+    }
+    paper.textContent='@page{size:{{ $receiptWidth }}mm '+heightMm+'mm;margin:0}';
+  };
+  // O segundo cálculo inclui imagens incorporadas que terminam de carregar.
+  adjustPaper();
+  window.addEventListener('load',adjustPaper,{once:true});
+})();
+</script>
+@endif
 
 @if(!($receiptPdfMode ?? false))
 <script>
