@@ -2,6 +2,8 @@ name: NFC-e RTC regression
 on:
   push:
     branches:
+      - main
+      - develop
       - feature/acbr-nfe-bootstrap
     paths:
       - "app/Services/Fiscal/NFCeRtcTaxService.php"
