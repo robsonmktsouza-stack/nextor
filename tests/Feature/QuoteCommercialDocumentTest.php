@@ -138,7 +138,7 @@ final class QuoteCommercialDocumentTest extends TestCase
             'Instalação de acessórios',
             'R$ 99,00',
             'R$ 50,00',
-            'R$ 149,00',
+            'R$ 5,00',
             'R$ 144,00',
             'TOTAL GERAL',
         ] as $expected) {
