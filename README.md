@@ -8,13 +8,13 @@ O projeto nasceu como **Nextor**. O repositório permanece com o endereço técn
 
 Antes de programar neste repositório com ChatGPT, Codex, Copilot, Claude ou outro agente, leia [AGENTS.md](AGENTS.md) e o [guia de contexto em docs/ai/](docs/ai/README.md). O guia registra o estado da branch, arquitetura, decisões substituídas, restrições de segurança e [handoff entre sessões](docs/ai/HANDOFF.md).
 
-**Atenção:** a branch de trabalho de referência é `feature/acbr-nfe-bootstrap` (verifique se continua sendo a ativa); a `main` pode estar desatualizada. A documentação está versionada no GitHub, mas cada chat/agente precisa abrir os arquivos; não há sincronização automática do contexto por conversa.
+**Branches atuais:** `main` contém a base estável aprovada e `develop` recebe as próximas implementações. A antiga `feature/acbr-nfe-bootstrap` originou a primeira promoção. Todo agente deve conferir branch/commit reais e ler a [política de releases](docs/deployment/versioning-and-release-policy.md) antes de trabalhar. A documentação está no GitHub, mas não entra automaticamente em todos os chats.
 
 ## Versões, desenvolvimento contínuo e produção
 
 **Política permanente aprovada em 20/10/2026:** o piloto NFC-e e futuros clientes recebem **versões estáveis individualmente aprovadas**, enquanto o desenvolvimento de novos módulos continua sem afetar a produção. Push/merge na branch de desenvolvimento **não implanta cliente automaticamente**. Os detalhes obrigatórios de `main`, `develop`, `feature/*`, `hotfix/*`, tags `vX.Y.Z`, staging, backup, rollback e deploy por CNPJ estão em **[Política de versões e publicação](docs/deployment/versioning-and-release-policy.md)**.
 
-O estado real ainda exige preparar branches, `composer.lock`, CI e infraestrutura de hospedagem antes do primeiro deploy; a existência de scripts **não significa** produção configurada. Outros agentes devem ler a política antes de alterar fluxos de versão/implantação.
+As branches `main`/`develop` foram separadas e o `composer.lock` está versionado; a CI principal cobre as duas branches. **Ainda é necessária infraestrutura de hospedagem configurada e aprovada antes do primeiro deploy**; a existência de scripts não significa cliente instalado. Outros agentes devem ler a política antes de alterar fluxos de versão/implantação.
 
 ## Identidade visual
 
