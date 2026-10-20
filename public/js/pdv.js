@@ -43,6 +43,11 @@
     const cashMovementAmount=document.getElementById('pdvCashMovementAmount');
     const cashMovementReason=document.getElementById('pdvCashMovementReason');
     const cashMovementSubmit=document.getElementById('pdvCashMovementSubmit');
+    const cashRefundFields=document.getElementById('pdvCashRefundFields');
+    const cashRefundReturn=document.getElementById('pdvCashRefundReturn');
+    const cashRefundSale=document.getElementById('pdvCashRefundSale');
+    cashRefundReturn?.addEventListener('change',()=>{if(cashRefundReturn.value&&cashRefundSale) cashRefundSale.value='';});
+    cashRefundSale?.addEventListener('change',()=>{if(cashRefundSale.value&&cashRefundReturn) cashRefundReturn.value='';});
 
     const operationsButton=document.getElementById('pdvOperations');
     const operationsModal=document.getElementById('pdvOperationsModal');
@@ -1669,13 +1674,18 @@
 
     const openCashMovementModal=type=>{
       if(!cashMovementModal || !cashSessionOpen) return;
-      const kind=type==='withdrawal'?'withdrawal':'supply';
+      const kind=['withdrawal','refund'].includes(type)?type:'supply';
+      const label=kind==='refund'?'reembolso':(kind==='withdrawal'?'sangria':'suprimento');
       if(cashMovementType) cashMovementType.value=kind;
-      if(cashMovementTitle) cashMovementTitle.textContent=kind==='withdrawal'?'Registrar sangria':'Registrar suprimento';
-      if(cashMovementHelp) cashMovementHelp.textContent=kind==='withdrawal'
-        ? 'Retirada de dinheiro do caixa durante o turno.'
-        : 'Entrada manual de dinheiro para reforço de troco.';
-      if(cashMovementSubmit) cashMovementSubmit.textContent=kind==='withdrawal'?'Registrar sangria':'Registrar suprimento';
+      if(cashMovementTitle) cashMovementTitle.textContent='Registrar '+label;
+      if(cashMovementHelp) cashMovementHelp.textContent=kind==='refund'
+        ? 'Informe o dinheiro efetivamente devolvido, vinculado a uma devolução ou venda cancelada.'
+        : kind==='withdrawal'?'Retirada de dinheiro do caixa durante o turno.':
+          'Entrada manual de dinheiro para reforço de troco.';
+      if(cashMovementSubmit) cashMovementSubmit.textContent='Registrar '+label;
+      if(cashRefundFields) cashRefundFields.hidden=kind!=='refund';
+      if(cashRefundReturn) cashRefundReturn.value='';
+      if(cashRefundSale) cashRefundSale.value='';
       if(cashMovementAmount) cashMovementAmount.value='';
       if(cashMovementReason) cashMovementReason.value='';
       operationsModal?.close();
@@ -1694,6 +1704,7 @@
         case 'close-cash': operationsModal?.close(); cashCloseDialog?.showModal(); break;
         case 'supply': openCashMovementModal('supply'); break;
         case 'withdrawal': openCashMovementModal('withdrawal'); break;
+        case 'refund': openCashMovementModal('refund'); break;
       }
     };
 
