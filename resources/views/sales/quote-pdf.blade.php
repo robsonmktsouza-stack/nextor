@@ -67,11 +67,32 @@ $state=match(true) {
   @if($logo)<img src="{{ $logo }}" alt="Logomarca da empresa">@endif
   <div>
    <div class="company-name">{{ $companyName }}</div>
-   <div class="company-data">@if($company->legal_name && $company->trade_name && $company->legal_name!==$company->trade_name){{ $company->legal_name }}
-@endif@if($company->document)CNPJ: {{ $company->document }}
-@endif@if($address){{ $address }}
-@endif@if($company->district){{ $company->district }}@if($city) — @endif@endif{{ $city }}@if($company->zip_code) · CEP {{ $company->zip_code }}@endif
-@if($company->phone){{ $company->phone }}@endif@if($company->email) · {{ $company->email }}@endif</div>
+   <div class="company-data">
+@if($company->legal_name && $company->trade_name && $company->legal_name!==$company->trade_name)
+{{ $company->legal_name }}
+@endif
+@if($company->document)
+CNPJ: {{ $company->document }}
+@endif
+@if($address)
+{{ $address }}
+@endif
+@if($company->district)
+{{ $company->district }}
+@endif
+@if($city)
+{{ $city }}
+@endif
+@if($company->zip_code)
+CEP {{ $company->zip_code }}
+@endif
+@if($company->phone)
+{{ $company->phone }}
+@endif
+@if($company->email)
+{{ $company->email }}
+@endif
+</div>
   </div>
  </div>
  <div class="doc-meta">
@@ -87,10 +108,26 @@ $state=match(true) {
  <div class="cell">
   <span class="caption">Preparado para</span>
   <div class="value">{{ $customer?->name ?: ($quote->consumer_name ?: 'Cliente não identificado') }}</div>
-  <div class="client-detail">@if($customer?->document)Documento: {{ $customer->document }}
-@endif@if($customerAddress){{ $customerAddress }}
-@endif@if($customer?->district){{ $customer->district }}@if($customer?->city) — @endif@endif@if($customer?->city){{ $customer->city }} / {{ $customer->state }}
-@endif@if($customer?->phone){{ $customer->phone }}@endif@if($customer?->email) · {{ $customer->email }}@endif</div>
+  <div class="client-detail">
+@if($customer?->document)
+Documento: {{ $customer->document }}
+@endif
+@if($customerAddress)
+{{ $customerAddress }}
+@endif
+@if($customer?->district)
+{{ $customer->district }}
+@endif
+@if($customer?->city)
+{{ $customer->city }} / {{ $customer->state }}
+@endif
+@if($customer?->phone)
+{{ $customer->phone }}
+@endif
+@if($customer?->email)
+{{ $customer->email }}
+@endif
+</div>
  </div>
  <div class="cell">
   <span class="caption">Condições</span>
