@@ -81,6 +81,19 @@ final class QuoteCommercialDocumentTest extends TestCase
         self::assertStringNotContainsString('images/lumeron/logo.png',$html);
     }
 
+    public function test_real_chromium_generates_valid_pdf_when_installed(): void
+    {
+        if (!is_file('/usr/bin/google-chrome') && !is_file('/usr/bin/chromium')
+            && !is_file('/usr/bin/chromium-browser')) {
+            $this->markTestSkipped('Chrome/Chromium não instalado no runner Linux.');
+        }
+        $quote=$this->createQuote($this->product());
+        $pdf=app(QuotePdfService::class)->render($quote);
+        self::assertStringStartsWith('%PDF-',$pdf);
+        self::assertStringContainsString('%%EOF',substr($pdf,-1024));
+        self::assertGreaterThan(1500,strlen($pdf));
+    }
+
     public function test_pdf_is_restricted_to_authenticated_sales_and_quote_documents(): void
     {
         $quote=$this->createQuote($this->product());
