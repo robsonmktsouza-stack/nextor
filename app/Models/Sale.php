@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Sale extends Model {
     protected $fillable=[
         'customer_id','consumer_document','consumer_name','cash_received','change_amount','user_id','operation_type','source','operation_date','quote_expires_at','final_consumer','keyword',
-        'status','subtotal','discount_total','total','notes','completed_at','cancelled_at'
+        'status','subtotal','discount_total','total','notes','completed_at','cancelled_at','source_quote_id'
     ];
 
     protected function casts(): array {
@@ -24,6 +24,9 @@ class Sale extends Model {
             'cancelled_at'=>'datetime',
         ];
     }
+
+    public function sourceQuote(): BelongsTo { return $this->belongsTo(self::class,'source_quote_id'); }
+    public function convertedSale(): \Illuminate\Database\Eloquent\Relations\HasOne { return $this->hasOne(self::class,'source_quote_id'); }
 
     public function customer(): BelongsTo { return $this->belongsTo(Customer::class); }
     public function user(): BelongsTo { return $this->belongsTo(User::class); }
