@@ -2,6 +2,19 @@
 @section('title',($sale->operation_type==='quote'?'Orçamento ':'Venda ').'#'.str_pad($sale->id,5,'0',STR_PAD_LEFT))
 @section('actions')
 <a class="btn btn-secondary" href="{{ route('sales.index') }}">@include('partials.icon',['name'=>'arrow-left','size'=>16]) Voltar</a>
+@if($sale->operation_type==='quote')
+<a class="btn btn-secondary" href="{{ route('sales.quote.pdf',$sale) }}" target="_blank" rel="noopener noreferrer">
+  @include('partials.icon',['name'=>'print','size'=>16]) Visualizar PDF
+</a>
+<a class="btn btn-primary" href="{{ route('sales.quote.pdf',['sale'=>$sale,'download'=>1]) }}">
+  @include('partials.icon',['name'=>'download','size'=>16]) Baixar PDF
+</a>
+@if($sale->status==='completed')
+<button type="button" class="btn btn-success" data-dialog-open="sale-quote-convert">
+  @include('partials.icon',['name'=>'check','size'=>16]) Converter em venda
+</button>
+@endif
+@endif
 @if(auth()->user()->canAccess('returns') && $sale->operation_type==='sale' && $sale->status==='completed')
 <a class="btn btn-primary" href="{{ route('sales.returns.create',['sale'=>$sale->id]) }}">@include('partials.icon',['name'=>'return','size'=>16]) Nova devolução</a>
 @endif
@@ -28,7 +41,7 @@
         <h2>Itens da operação</h2>
         <p>{{ $sale->items->count() }} item(ns)</p>
       </div>
-      <span class="status {{ $sale->status==='completed'?'status-ok':'status-muted' }}">{{ $sale->status==='completed'?'Concluída':'Cancelada' }}</span>
+      <span class="status {{ $sale->status==='completed'?'status-ok':'status-muted' }}">{{ match($sale->status){'converted'=>'Convertido', 'cancelled'=>'Cancelado', default=>$sale->operation_type==='quote'?'Em aberto':'Concluída'} }}</span>
     </div>
 
     <div class="table-scroll">
@@ -118,7 +131,12 @@
       <div><span>Consumidor final</span><strong>{{ $sale->final_consumer?'Sim':'Não' }}</strong></div>
       @if($sale->keyword)<div><span>Palavra-chave</span><strong>{{ $sale->keyword }}</strong></div>@endif
       <div><span>Responsável</span><strong>{{ $sale->user?->name ?? '—' }}</strong></div>
-      <div><span>Status</span><strong>{{ $sale->status==='completed'?'Concluída':'Cancelada' }}</strong></div>
+      <div><span>Status</span><strong>{{ match($sale->status){'converted'=>'Convertido em venda','cancelled'=>'Cancelado',default=>$sale->operation_type==='quote'?'Em aberto':'Concluída'} }}</strong></div>
+      @if($sale->operation_type==='quote' && $sale->convertedSale)
+        <div><span>Venda gerada</span><strong><a href="{{ route('sales.show',$sale->convertedSale) }}">#{{ str_pad((string)$sale->convertedSale->id,5,'0',STR_PAD_LEFT) }}</a></strong></div>
+      @elseif($sale->sourceQuote)
+        <div><span>Originada do orçamento</span><strong><a href="{{ route('sales.show',$sale->sourceQuote) }}">#{{ str_pad((string)$sale->sourceQuote->id,5,'0',STR_PAD_LEFT) }}</a></strong></div>
+      @endif
       @if($sale->cancelled_at)<div><span>Cancelada em</span><strong>{{ $sale->cancelled_at->format(\App\Models\AppSetting::dateFormat().' H:i') }}</strong></div>@endif
       @if($sale->notes)<div><span>Observações</span><strong>{{ $sale->notes }}</strong></div>@endif
     </div>
@@ -138,6 +156,28 @@
     <div class="dialog-footer">
       <button type="button" data-dialog-close class="btn btn-secondary">Voltar</button>
       <button class="btn btn-danger">Confirmar cancelamento</button>
+    </div>
+  </form>
+</dialog>
+@endif
+
+@if($sale->operation_type==='quote' && $sale->status==='completed')
+<dialog class="erp-dialog small-dialog" id="sale-quote-convert">
+  <form action="{{ route('sales.quote.convert',$sale) }}" method="post">
+    @csrf
+    <div class="dialog-header">
+      <div><h2>Converter orçamento #{{ $sale->id }} em venda?</h2></div>
+      <button type="button" data-dialog-close class="close-dialog">@include('partials.icon',['name'=>'x'])</button>
+    </div>
+    <div class="dialog-body">
+      <p>O orçamento será mantido no histórico. A nova venda usará os mesmos preços e itens, com verificação do estoque atual e lançamentos comerciais normais.</p>
+      @if($sale->quote_expires_at && $sale->quote_expires_at->lt(today()))
+      <p class="text-danger">O orçamento está vencido. Não é possível convertê-lo sem uma nova proposta.</p>
+      @endif
+    </div>
+    <div class="dialog-footer">
+      <button type="button" data-dialog-close class="btn btn-secondary">Voltar</button>
+      <button class="btn btn-success" @disabled($sale->quote_expires_at && $sale->quote_expires_at->lt(today()))>Confirmar conversão</button>
     </div>
   </form>
 </dialog>
