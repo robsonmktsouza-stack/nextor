@@ -4,15 +4,15 @@
 
 ## Decisão de gestão de releases — 20/10/2026 (não é deploy)
 
-O proprietário **decidiu avançar para piloto de NFC-e em produção e continuar desenvolvendo novas funções sem interromper clientes**. Política permanente em [docs/deployment/versioning-and-release-policy.md](../deployment/versioning-and-release-policy.md). A versão instalada por CNPJ deve ser aprovada, identificada por tag/commit e isolada de pushes de desenvolvimento. Estratégia futura: `main` estável, `develop` integração, `feature/*` recursos e `hotfix/*` patches. **Não inferir que o piloto já foi implantado**. Na revisão do repositório, `main` estava atrás, `develop` e a primeira tag ainda não existiam, `composer.lock` faltava e CI estava focada na branch de trabalho; revisar novamente no GitHub antes de agir. Não executar merge, tag, deploy ou migração em ambiente real só por esta decisão.
+O proprietário **decidiu avançar para piloto de NFC-e em produção e continuar desenvolvendo novas funções sem interromper clientes**. Política permanente em [docs/deployment/versioning-and-release-policy.md](../deployment/versioning-and-release-policy.md). A versão instalada por CNPJ deve ser aprovada, identificada por tag/commit e isolada de pushes de desenvolvimento. Estratégia futura: `main` estável, `develop` integração, `feature/*` recursos e `hotfix/*` patches. **Não inferir que o piloto já foi implantado**. Posteriormente, em 20/10/2026, a `main` foi promovida por fast-forward, a `develop` foi criada, o `composer.lock` foi versionado e o workflow principal passou a cobrir as branches estável/de integração. A tag `v1.0.0` deve ser verificada no GitHub antes de afirmar sua existência, assim como qualquer deploy real. Não executar merge, tag, deploy ou migração em ambiente real só por esta decisão.
 
 ## Identidade e base
 
 - Nome de exibição: **Lumeron ERP**, antes **Nextor**. O nome GitHub `nextor`, caminhos `nextor.*`, classes históricas e alias `/api/nextor` permanecem quando necessários para compatibilidade; a API nova está em `/api/lumeron`.
 - Stack verificada no `composer.json`: Laravel 13, PHP ^8.3, Blade, CSS/JavaScript, MySQL/MariaDB (SQLite disponível para testes, conforme configuração).
 - Ambiente de desenvolvimento documentado: Windows + Laragon. Projeto Laravel **web**, não confundir com `robsonmktsouza-stack/lumeronerp` (**WPF desktop**, projeto distinto).
-- Branch de trabalho em 19/10/2026: `feature/acbr-nfe-bootstrap`; a `main` contém uma versão antiga do projeto. **Não trabalhar ou mesclar a `main` por suposição.** Revalidar sempre os commits.
-- `composer.lock` **não estava versionado** nesta branch durante a inspeção. Isso bloqueia implantação reprodutível e os scripts de provisionamento; gerar/testar o lock em desenvolvimento, não executar `composer update` na VPS.
+- Histórico de 19/10/2026: `feature/acbr-nfe-bootstrap` era a branch de trabalho e `main` era antiga. **Atualização de 20/10/2026:** `main` recebeu a linha estável e `develop` foi criada para novos trabalhos. Não alterar `main` diretamente; verificar commits antes de qualquer promoção.
+- Em 19/10, `composer.lock` ainda não existia. **Em 20/10, foi gerado no CI PHP 8.3, versionado e validado.** Instalações de release devem usar `composer install` com lock; não executar `composer update` na VPS.
 
 ## Funcionalidades com código identificado
 
@@ -61,4 +61,4 @@ php artisan test --filter=NFCeFiscalLifecycleTest
 php artisan test --filter=UiRefinementTest
 ```
 
-**Atenção:** `composer install` sem lock emite resolução local de dependências; confirme a estratégia antes de produção. Tests marcados acima são comandos recomendados, **não resultados executados** durante esta documentação. Chamadas reais à SEFAZ, FFI/ACBr e emissão dependem de instalação/configuração próprias e testes explícitos.
+**Atenção:** usar o `composer.lock` agora versionado e não resolver novas versões diretamente em produção. Os comandos acima são sugestões de regressão, não alegações de execução local pelo proprietário. Chamadas reais à SEFAZ, FFI/ACBr e emissão dependem de instalação/configuração próprias e testes explícitos.
