@@ -15,6 +15,8 @@ use App\Models\Product;
 use App\Models\Sale;
 use App\Services\InventoryService;
 use App\Services\SalesService;
+use App\Services\PdvCashService;
+use App\Models\SaleReturn;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -43,7 +45,7 @@ class PdvController extends Controller
             ->latest('opened_at')
             ->first();
 
-        $cashExpected=$cashSession ? $this->cashExpectedForSession($cashSession) : null;
+        $cashExpected=$cashSession ? PdvCashService::currency(app(PdvCashService::class)->breakdown($cashSession)['expected']) : null;
         $cashMovements=$cashSession
             ? PdvCashMovement::query()
                 ->where('cash_session_id',$cashSession->id)
@@ -130,6 +132,12 @@ class PdvController extends Controller
             'cashSession'=>$cashSession,
             'cashExpected'=>$cashExpected,
             'cashMovements'=>$cashMovements,
+            'refundReturns'=>$cashSession ? SaleReturn::query()
+                ->where('status','completed')->whereHas('sale',fn($q)=>$q->where('source','pdv'))
+                ->latest('id')->limit(20)->get(['id','sale_id','total']) : collect(),
+            'refundSales'=>$cashSession ? Sale::query()
+                ->where('source','pdv')->where('status','cancelled')
+                ->latest('id')->limit(20)->get(['id','total']) : collect(),
             'suspendedSales'=>$suspendedSales,
             'nfceContingencyActive'=>$nfceContingencyActive,
             'nfceContingencyReason'=>$nfceContingencyReason,
@@ -697,97 +705,48 @@ class PdvController extends Controller
         );
     }
 
-    public function openCash(Request $request)
+    public function openCash(Request $request, PdvCashService $cash)
     {
         $data=$request->validate([
             'opening_amount'=>['required','numeric','min:0','max:9999999999.99','decimal:0,2'],
             'opening_notes'=>['nullable','string','max:1000'],
         ]);
-
-        if(PdvCashSession::query()->where('user_id',$request->user()->id)->open()->exists()) {
-            throw ValidationException::withMessages(['opening_amount'=>'Já existe um caixa aberto para este usuário.']);
-        }
-
-        PdvCashSession::query()->create([
-            'user_id'=>$request->user()->id,
-            'opening_amount'=>$data['opening_amount'],
-            'opening_notes'=>$data['opening_notes'] ?? null,
-            'opened_at'=>now(),
-        ]);
-
+        $cash->open((int)$request->user()->id,(string)$data['opening_amount'],$data['opening_notes'] ?? null);
         return redirect()->route('pdv.index')->with('success','Caixa aberto.');
     }
 
-    public function closeCash(Request $request)
+    public function closeCash(Request $request, PdvCashService $cash)
     {
         $data=$request->validate([
             'closing_amount'=>['required','numeric','min:0','max:9999999999.99','decimal:0,2'],
             'closing_notes'=>['nullable','string','max:1000'],
         ]);
-
-        $session=PdvCashSession::query()
-            ->where('user_id',$request->user()->id)
-            ->open()
-            ->latest('opened_at')
-            ->first();
-
-        if(!$session) {
-            throw ValidationException::withMessages(['closing_amount'=>'Não há caixa aberto para fechar.']);
-        }
-
-        $session->update([
-            'closing_amount'=>$data['closing_amount'],
-            'closing_notes'=>$data['closing_notes'] ?? null,
-            'closed_at'=>now(),
-        ]);
-
-        return redirect()->route('pdv.index')->with('success','Caixa fechado.');
+        $session=$cash->close((int)$request->user()->id,(string)$data['closing_amount'],$data['closing_notes'] ?? null);
+        return redirect()->route('pdv.cash.report',$session)
+            ->with('success','Caixa fechado. Confira o relatório do turno.');
     }
 
-    public function cashMovement(Request $request)
+    public function cashMovement(Request $request, PdvCashService $cash)
     {
         $data=$request->validate([
-            'type'=>['required',Rule::in(['supply','withdrawal'])],
+            'type'=>['required',Rule::in(['supply','withdrawal','refund'])],
             'amount'=>['required','numeric','gt:0','max:9999999999.99','decimal:0,2'],
             'reason'=>['required','string','max:255'],
+            'sale_id'=>['nullable','integer','exists:sales,id'],
+            'sale_return_id'=>['nullable','integer','exists:sale_returns,id'],
         ]);
-
         if(!(bool)AppSetting::value('pdv','allow_cash_movements',true)) {
             abort(403,'Movimentações de caixa estão desativadas.');
         }
-
-        $session=PdvCashSession::query()
-            ->where('user_id',$request->user()->id)
-            ->open()
-            ->latest('opened_at')
-            ->first();
-
-        if(!$session) {
-            throw ValidationException::withMessages([
-                'amount'=>'Abra o caixa antes de registrar sangria ou suprimento.',
-            ]);
-        }
-
-        $amount=round((float)$data['amount'],2);
-
-        if($data['type']==='withdrawal' && $amount>$this->cashExpectedForSession($session)+0.0001) {
-            throw ValidationException::withMessages([
-                'amount'=>'A sangria não pode ser maior que o saldo esperado em dinheiro.',
-            ]);
-        }
-
-        PdvCashMovement::query()->create([
-            'cash_session_id'=>$session->id,
-            'user_id'=>$request->user()->id,
-            'type'=>$data['type'],
-            'amount'=>number_format($amount,2,'.',''),
-            'reason'=>trim($data['reason']),
-        ]);
-
-        return redirect()->route('pdv.index')->with(
-            'success',
-            $data['type']==='supply' ? 'Suprimento registrado.' : 'Sangria registrada.'
-        );
+        $type=$data['type'];
+        $cash->movement((int)$request->user()->id,$type,(string)$data['amount'],$data['reason'],
+            isset($data['sale_id'])?(int)$data['sale_id']:null,
+            isset($data['sale_return_id'])?(int)$data['sale_return_id']:null);
+        return redirect()->route('pdv.index')->with('success',match($type) {
+            'supply'=>'Suprimento registrado.',
+            'withdrawal'=>'Sangria registrada.',
+            default=>'Reembolso em dinheiro registrado.',
+        });
     }
 
     /**
@@ -859,29 +818,7 @@ class PdvController extends Controller
     }
     private function cashExpectedForSession(PdvCashSession $session): float
     {
-        $cashCodes=PaymentMethod::query()->where('kind','cash')->pluck('code');
-
-        $cashSales=(float)SalePayment::query()
-            ->whereIn('payment_method',$cashCodes)
-            ->whereHas('sale',fn($query)=>$query
-                ->where('source','pdv')
-                ->where('user_id',$session->user_id)
-                ->where('status','completed')
-                ->where('completed_at','>=',$session->opened_at)
-                ->when($session->closed_at,fn($q)=>$q->where('completed_at','<=',$session->closed_at)))
-            ->sum('amount');
-
-        $supply=(float)PdvCashMovement::query()
-            ->where('cash_session_id',$session->id)
-            ->where('type','supply')
-            ->sum('amount');
-
-        $withdrawal=(float)PdvCashMovement::query()
-            ->where('cash_session_id',$session->id)
-            ->where('type','withdrawal')
-            ->sum('amount');
-
-        return round((float)$session->opening_amount+$cashSales+$supply-$withdrawal,2);
+        return app(PdvCashService::class)->breakdown($session)['expected']/100;
     }
 
     private function buildSuspendedSnapshot(array $data): array
