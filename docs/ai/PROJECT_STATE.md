@@ -29,6 +29,10 @@ Venda concluída / pedido explícito da interface -> preparação fiscal -> pref
 
 Arquivos relevantes: `app/Services/Fiscal/`, `app/Services/FiscalPreparationService.php`, `app/Jobs/ProcessNFCeJob.php`, `app/Http/Controllers/NFCeManualController.php`, `app/Http/Controllers/FiscalController.php`, `app/Services/SalesService.php`.
 
+## Orçamentos comerciais (20/10/2026)
+
+O fluxo existente de orçamentos `sales.operation_type=quote` ganhou template de PDF A4 personalizado por empresa, geração privada com Chrome/Edge, visualização/download e conversão para venda vinculada a `sales.source_quote_id` único. Validade opcional em `sales.create`; consultas e listagens exibem ações correspondentes. Converter aciona o próprio serviço comercial com estoque/financeiro normais; salvar orçamento não movimenta estoque. Exige migration `2026_10_20_100000_add_source_quote_to_sales.php`. Ver `docs/commercial/quote-pdf.md` e testes `QuoteCommercialDocumentTest`. Não foi feito deploy ou envio real de arquivos a clientes.
+
 ## Próximas verificações prioritárias
 
 1. Confirmar a branch ativa e rodar testes locais sem usar dados fiscais/credenciais reais.
