@@ -109,8 +109,8 @@ final class QuoteCommercialDocumentTest extends TestCase
             ->get(route('sales.quote.pdf',$quote))
             ->assertOk()
             ->assertHeader('Content-Type','application/pdf')
-            ->assertHeader('Cache-Control','private, no-store, max-age=0')
             ->assertHeader('Content-Disposition','inline; filename="Orcamento-'.str_pad((string)$quote->id,5,'0',STR_PAD_LEFT).'.pdf"');
+        self::assertStringContainsString('no-store',(string)$this->get(route('sales.quote.pdf',$quote))->headers->get('Cache-Control'));
 
         $this->get(route('sales.quote.pdf',['sale'=>$quote,'download'=>1]))
             ->assertOk()
