@@ -767,13 +767,13 @@ class PdvController extends Controller
         }
 
         if ($sale->status !== 'completed' || $sale->operation_type !== 'sale') {
-            return redirect()->route('pdv.receipt', ['sale' => $sale->id, 'print' => 0])
+            return redirect()->route('pdv.receipt', ['sale' => $sale->id, 'print' => 0, 'status' => 1])
                 ->with('error', 'A NFC-e só pode ser preparada para uma venda concluída.');
         }
 
         if (!(bool) AppSetting::value('fiscal', 'enabled', false)
             || !(bool) AppSetting::value('nfce', 'enabled', false)) {
-            return redirect()->route('pdv.receipt', ['sale' => $sale->id, 'print' => 0])
+            return redirect()->route('pdv.receipt', ['sale' => $sale->id, 'print' => 0, 'status' => 1])
                 ->with('error', 'Habilite Fiscal e NFC-e nas configurações antes de preparar este documento.');
         }
 
@@ -781,7 +781,7 @@ class PdvController extends Controller
         if ($sale->items->isEmpty() || !$sale->items->every(
             fn ($item) => $item->item_type === 'product' && $item->product_id
         )) {
-            return redirect()->route('pdv.receipt', ['sale' => $sale->id, 'print' => 0])
+            return redirect()->route('pdv.receipt', ['sale' => $sale->id, 'print' => 0, 'status' => 1])
                 ->with('error', 'Esta venda contém itens que não podem ser emitidos como NFC-e de produtos.');
         }
 
@@ -795,7 +795,7 @@ class PdvController extends Controller
                 'error' => $error->getMessage(),
             ]);
 
-            return redirect()->route('pdv.receipt', ['sale' => $sale->id, 'print' => 0])
+            return redirect()->route('pdv.receipt', ['sale' => $sale->id, 'print' => 0, 'status' => 1])
                 ->with('error', 'Não foi possível preparar a NFC-e desta venda. Consulte o log do Lumeron.');
         }
 
@@ -806,7 +806,7 @@ class PdvController extends Controller
 
         return $document
             ? redirect()->route('fiscal.show', $document)
-            : redirect()->route('pdv.receipt', ['sale' => $sale->id, 'print' => 0])
+            : redirect()->route('pdv.receipt', ['sale' => $sale->id, 'print' => 0, 'status' => 1])
                 ->with('error', 'A NFC-e não foi preparada. Confira se o módulo fiscal está habilitado.');
     }
 
@@ -816,8 +816,9 @@ class PdvController extends Controller
         abort_unless($sale->source==='pdv',404);
 
         // Histórico do PDV (?print=0): prévia pelo leitor nativo de PDF.
+        // Erros fiscais (?status=1) mantêm a página informativa sem imprimir.
         // Finalização da venda (sem o parâmetro) preserva impressão e retorno ao caixa.
-        if ($request->query('print')==='0') {
+        if ($request->query('print')==='0' && !$request->boolean('status')) {
             try {
                 $bytes=$pdf->render($sale);
             } catch (\RuntimeException $e) {
