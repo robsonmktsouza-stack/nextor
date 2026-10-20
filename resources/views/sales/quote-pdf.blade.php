@@ -9,7 +9,7 @@
 @page { size:A4; margin:20mm 3mm 14mm; }
 * { box-sizing:border-box; }
 html,body { margin:0; padding:0; }
-body { font:10px/1.4 Calibri,Arial,Helvetica,sans-serif; color:#2e373b; background:#fff; }
+body { font:11px/1.38 Calibri,Arial,Helvetica,sans-serif; color:#2e373b; background:#fff; }
 table { width:100%; border-collapse:collapse; }
 strong { font-weight:700; }
 .right { text-align:right!important; font-variant-numeric:tabular-nums; }
@@ -22,24 +22,24 @@ strong { font-weight:700; }
     border:1px solid #d8dfdf; background:#f3f6f6; }
 .logo-box img { display:block; width:auto; height:auto; max-width:97px; max-height:67px; object-fit:contain; }
 .company { padding:0 12px 0 0; vertical-align:middle; }
-.company-name { font-size:14px; font-weight:700; line-height:1.2; margin:0 0 13px; }
-.company-details { font-size:9px; color:#617078; line-height:1.55; overflow-wrap:anywhere; }
+.company-name { font-size:17px; font-weight:700; line-height:1.2; margin:0 0 13px; }
+.company-details { font-size:11px; color:#617078; line-height:1.55; overflow-wrap:anywhere; }
 .document { width:202px; text-align:right; white-space:nowrap; vertical-align:top!important; padding-top:3px; }
-.document-kind { font-size:10px; font-weight:700; color:#477b78; margin:0 0 6px; }
-.document-number { font-size:23px; font-weight:700; color:#2e5555;
+.document-kind { font-size:12px; font-weight:700; color:#477b78; margin:0 0 6px; }
+.document-number { font-size:26px; font-weight:700; color:#2e5555;
     line-height:1.05; font-variant-numeric:tabular-nums; }
-.document-dates { margin-top:9px; font-size:9px; color:#617078; white-space:normal; }
+.document-dates { margin-top:9px; font-size:11px; color:#617078; white-space:normal; }
 .accent-band { height:11px; background:#477b78; margin:11px 0 5px; }
-.proposal-line { padding:1px 0 6px; font-size:8.5px; color:#617078; text-transform:uppercase; }
-.section-title { background:#e9eff0; color:#2e5555; font-size:10px;
+.proposal-line { padding:1px 0 6px; font-size:9.5px; color:#617078; text-transform:uppercase; }
+.section-title { background:#e9eff0; color:#2e5555; font-size:12px;
     line-height:1.25; font-weight:700; text-transform:uppercase; margin:0;
     padding:5px 3px; }
 .customer-section { margin-top:0; }
 .info { table-layout:fixed; }
 .info td { vertical-align:top; padding:5px 4px 8px 0; overflow-wrap:anywhere; }
-.info .label { display:block; font-size:8.5px; color:#617078; font-weight:700;
+.info .label { display:block; font-size:10px; color:#617078; font-weight:700;
     text-transform:uppercase; margin-bottom:5px; line-height:1.15; }
-.info .value { font-size:10px; color:#2e373b; line-height:1.45; white-space:pre-wrap; }
+.info .value { font-size:12px; color:#2e373b; line-height:1.45; white-space:pre-wrap; }
 .info .name { font-weight:500; }
 .info .muted { color:#617078; }
 .info .spacer { padding-left:12px; }
@@ -50,7 +50,7 @@ strong { font-weight:700; }
 .items-section { margin-top:10px; }
 .items { table-layout:fixed; }
 .items thead { display:table-header-group; }
-.items th { background:#477b78; color:#fff; font-size:9px; font-weight:700;
+.items th { background:#477b78; color:#fff; font-size:10.5px; font-weight:700;
     padding:7px 3px; line-height:1.2; text-align:left; white-space:nowrap; }
 .items th:nth-child(1) { width:4%; }
 .items th:nth-child(2) { width:7%; }
@@ -65,35 +65,35 @@ strong { font-weight:700; }
 .items tbody tr:nth-child(even) { background:#fafbfb; }
 .items tbody tr.empty-row td { height:21pt; }
 .items td { padding:6px 4px; border-bottom:1px solid #d8dddd;
-    font-size:9.3px; line-height:1.35; vertical-align:top; overflow-wrap:anywhere; }
+    font-size:11px; line-height:1.35; vertical-align:top; overflow-wrap:anywhere; }
 .items td:first-child,.items td:nth-child(2) { color:#617078; }
 .item-name { font-weight:400; }
-.item-note { display:block; color:#617078; margin-top:3px; font-size:8.7px; white-space:pre-wrap; }
+.item-note { display:block; color:#617078; margin-top:3px; font-size:10px; white-space:pre-wrap; }
 .number-cell { text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; }
 .tail { display:table; width:100%; table-layout:fixed; margin-top:12px; }
 .tail-left,.tail-right { display:table-cell; vertical-align:top; }
 .tail-left { width:58%; padding-right:10px; }
 .tail-right { width:42%; padding-left:2px; }
 .tail .section-title { margin-bottom:3px; }
-.conditions { font-size:9.4px; line-height:1.5; }
+.conditions { font-size:11px; line-height:1.5; }
 .conditions p { margin:4px 0; overflow-wrap:anywhere; }
 .totals { table-layout:fixed; }
-.totals td { padding:5px 5px; font-size:9.5px; border:1px solid #e4e8e8; }
+.totals td { padding:5px 5px; font-size:11px; border:1px solid #e4e8e8; }
 .totals td:first-child { text-align:right; width:60%; color:#617078; }
 .totals td:last-child { text-align:right; font-weight:700; font-variant-numeric:tabular-nums; }
 .totals .total td { background:#e9eff0; border-color:#e9eff0; padding:12px 5px;
-    font-size:13px; font-weight:700; color:#2e5555; }
+    font-size:15px; font-weight:700; color:#2e5555; }
 .notes { margin-top:12px; }
 .notes .section-title { margin-bottom:4px; }
-.notes p { margin:5px 1px; font-size:9.5px; line-height:1.5;
+.notes p { margin:5px 1px; font-size:11px; line-height:1.5;
     white-space:pre-wrap; overflow-wrap:anywhere; }
 .signature-row { display:table; width:100%; table-layout:fixed; margin-top:13mm;
     page-break-inside:avoid; break-inside:avoid; }
 .signature { display:table-cell; width:50%; text-align:center; padding:0 15px; }
 .signature-line { width:77%; margin:0 auto 5px; height:1px; border-top:1px solid #8e999a; }
-.signature-label { font-size:9px; color:#617078; }
+.signature-label { font-size:11px; color:#617078; }
 .footer { position:static; margin-top:10mm; padding-top:5px; border-top:1px solid #d9dfdf;
-    text-align:center; color:#8a9a9b; font-size:8px; page-break-inside:avoid; break-inside:avoid; }
+    text-align:center; color:#8a9a9b; font-size:9px; page-break-inside:avoid; break-inside:avoid; }
 @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
 </style>
 </head>
