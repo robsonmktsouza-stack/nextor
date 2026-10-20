@@ -78,7 +78,7 @@ final class LicenseApiTest extends TestCase
         $company = $this->company();
         $company->update(['license_status' => 'suspended']);
         $this->check($company)->assertJsonPath('status', 'suspended');
-        $company->update(['license_status' => 'active', 'expires_at' => yesterday()->toDateString()]);
+        $company->update(['license_status' => 'active', 'expires_at' => today()->subDay()->toDateString()]);
         $this->check($company)->assertJsonPath('status', 'expired');
     }
 }
