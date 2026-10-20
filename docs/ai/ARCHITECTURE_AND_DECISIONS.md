@@ -96,6 +96,16 @@ Nunca fabricar QR Code, chave, autorização, cStat, recibo ou protocolo. Seguir
 
 Não implantar em produção, alterar DNS, certificados, infraestrutura, cobranças ou dados de clientes sem pedido expresso. Scripts `deploy/instances/` são material de preparação com dry-run. Rodar migrations primeiro em base descartável ou backup restaurável, evitar mutações destrutivas e não inventar credenciais. `composer.lock` faltava no momento da inspeção e é requisito antes de provisionar clientes. Só divulgar ambiente como pronto após testes automatizados e homologação assistida.
 
+## D08-A — Política permanente de versões e separação de ambientes (20/10/2026)
+
+**Decisão explícita do proprietário:** lançar a NFC-e primeiro em um piloto controlado e continuar desenvolvendo o ERP, mantendo versões estáveis em clientes. **Desenvolvimento, staging/homologação e produção devem ser separados** e não podem ser vinculados por deploy automático de `git push`/`git pull` de branch de trabalho. Cada CNPJ roda o release específico publicado para sua instância.
+
+**Fluxo aprovado como política:** `main` = linha estável aprovada; `develop` = integração de trabalho; `feature/*` = implementação; `hotfix/*` = correções baseadas no release instalado; releases identificados por tags imutáveis `vX.Y.Z` e commit SHA. **A política é o estado desejado; não afirmar que já está implementada**: `main` estava antiga, `develop` não existia e `v1.0.0` ainda não fora criada em 20/10/2026. Não mover branches, criar tags ou implantar automaticamente.
+
+**Restrições de publicação:** `composer.lock` versionado e testado, CI cobrindo branches estáveis, ambiente staging separado, `APP_ENV=production`, servidor HTTP gerenciado (não `artisan serve`), worker fiscal próprio, backups externos e teste de recuperação; deploy individual por CNPJ via release identificado, sem compartilhar dados/CSC/A1/XML. Rollback de código via release anterior não desfaz migrations nem substitui análise de registros fiscais criados após backup.
+
+**Fonte de verdade operacional:** [docs/deployment/versioning-and-release-policy.md](../deployment/versioning-and-release-policy.md), em conjunto com [one-cnpj-per-instance.md](../deployment/one-cnpj-per-instance.md). Esta decisão reforça D03/D06/D08. Na ausência de hospedagem definida, não assumir Linux nem Windows; ACBrLib Linux é distinta da DLL Windows.
+
 ## D09 — Política de manutenção para agentes
 
 Antes de cada tarefa: ler `AGENTS.md`, `docs/ai/README.md`, `PROJECT_STATE.md`, `HANDOFF.md` e os arquivos afetados. Preferir mudanças mínimas, aderentes ao código e cobrindo regressões. Depois: atualizar o handoff, marcar resultado real de testes e registrar nova decisão neste documento se houver mudança aprovada. Não reivindicar que arquivos de IA têm memória automática entre conversas; eles são referência versionada que cada novo agente precisa carregar.
