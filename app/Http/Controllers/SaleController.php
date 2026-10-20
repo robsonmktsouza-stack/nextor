@@ -8,6 +8,8 @@ use App\Models\Product;
 use App\Models\Sale;
 use App\Models\Service;
 use App\Services\SalesService;
+use App\Services\QuotePdfService;
+use RuntimeException;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -84,6 +86,8 @@ class SaleController extends Controller
             'customer_id'=>['nullable','integer','exists:customers,id'],
             'operation_type'=>['required','in:sale,quote'],
             'operation_date'=>['required','date'],
+            'quote_expires_at'=>['nullable','date','after_or_equal:operation_date'],
+            'after_save'=>['nullable','in:show,pdf'],
             'final_consumer'=>['nullable','boolean'],
             'keyword'=>['nullable','string','max:190'],
             'notes'=>['nullable','string','max:5000'],
@@ -113,12 +117,15 @@ class SaleController extends Controller
             ? 'Orçamento salvo.'
             : 'Venda concluída e estoque atualizado.';
 
+        if($sale->operation_type==='quote' && $request->input('after_save')==='pdf') {
+            return redirect()->route('sales.quote.pdf',$sale)->with('success',$message);
+        }
         return redirect()->route('sales.show',$sale)->with('success',$message);
     }
 
     public function show(Sale $sale)
     {
-        $sale->load(['items.product','items.service','payments','customer','user']);
+        $sale->load(['items.product','items.service','payments','customer','user','convertedSale','sourceQuote']);
         $saleReturns=$sale->returns()->withCount('items')->orderByDesc('return_date')->orderByDesc('id')->get();
         $paymentLabels=PaymentMethod::query()->orderBy('sort_order')->pluck('name','code')->all();
         $nfceDocument=\App\Models\FiscalDocumentJob::query()
@@ -128,6 +135,31 @@ class SaleController extends Controller
             ->first();
 
         return view('sales.show',compact('sale','saleReturns','paymentLabels','nfceDocument'));
+    }
+
+    public function quotePdf(Request $request, Sale $sale, QuotePdfService $pdf)
+    {
+        abort_unless($sale->operation_type==='quote',404);
+        try {
+            $bytes=$pdf->render($sale);
+        } catch (RuntimeException $e) {
+            abort(503,$e->getMessage());
+        }
+        $name='Orcamento-'.str_pad((string)$sale->id,5,'0',STR_PAD_LEFT).'.pdf';
+        $mode=$request->boolean('download')?'attachment':'inline';
+        return response($bytes,200,[
+            'Content-Type'=>'application/pdf',
+            'Content-Disposition'=>$mode.'; filename="'.$name.'"',
+            'Cache-Control'=>'private, no-store, max-age=0',
+            'X-Content-Type-Options'=>'nosniff',
+        ]);
+    }
+
+    public function convertQuote(Sale $sale, SalesService $sales, Request $request)
+    {
+        $converted=$sales->convertQuote($sale,(int)$request->user()->id);
+        return redirect()->route('sales.show',$converted)
+            ->with('success','Orçamento convertido na venda #'.$converted->id.'.');
     }
 
     public function cancel(Request $request, Sale $sale, SalesService $sales)
