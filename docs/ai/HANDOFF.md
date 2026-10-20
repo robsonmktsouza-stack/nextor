@@ -2,6 +2,23 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
+## Continuidade — 20/10/2026 — PDF comercial personalizado de orçamento e conversão segura
+
+**Pedido:** em **Vendas > Nova venda/orçamento**, permitir gerar proposta A4 com logo e dados da própria empresa para baixar e enviar ao cliente, sem fazer orçamento parecer documento fiscal. Dar acesso ao arquivo também pela consulta e listagem. Converter o orçamento em venda com aproveitamento de itens e valores sem movimentar estoque/financeiro na etapa de cotação.
+
+**Branch:** `feature/acbr-nfe-bootstrap`, a partir de `5453516f`. Não há envio a SEFAZ, alteração de produção ou novo provedor PDF. Arquivos principais:
+- `app/Services/QuotePdfService.php` (novo): renderização real de PDF A4 por Chrome/Edge local, arquivo temporário privado/limpo, cabeçalhos HTTP privados; usa logo da empresa cadastrada em `CompanySetting`/disco público, incorporada em data URI. `resources/views/sales/quote-pdf.blade.php` (novo) contém layout comercial com CNPJ/endereço, cliente, vendedor, validade, itens, descontos, totais, observações e rodapé.
+- `SaleController.php`, `routes/web.php`: rota GET protegida `sales.quote.pdf` que abre PDF inline ou baixa com `?download=1`; POST protegido `sales.quote.convert`. O usuário precisa de sessão + permissão sales + configuração da empresa. Em nova venda, `after_save=pdf` redireciona ao PDF apenas para orçamento.
+- `resources/views/sales/create.blade.php`: validade opcional e botão Salvar e visualizar PDF somente para tipo orçamento; `show.blade.php` apresenta PDF e conversão com confirmação; `index.blade.php` tem atalho PDF e filtro de status convertido.
+- `SalesService.php`, `app/Models/Sale.php`, `database/migrations/2026_10_20_100000_add_source_quote_to_sales.php`: conversão pela mesma transação de vendas e estoque, bloqueio de vencidos/cancelados/já convertidos e `source_quote_id` único. Cotação original fica marcada converted e vinculada à venda, sem nova baixa/cobrança no orçamento. Falha por estoque insuficiente não efetiva conversão.
+- `tests/Feature/QuoteCommercialDocumentTest.php` (novo): autenticação, cabeçalho inline/attachment e cache privado, PDF HTML com dados comerciais, PDF real quando Chromium presente, logo local, cotação não mexe em estoque/financeiro, conversão preserva valores, bloqueia duplicata e status vencido/cancelado. Documentação detalhada: `docs/commercial/quote-pdf.md`.
+
+**Evidência:** commit de implementação `980ceadd` passou `ACBr integration checks` com **392 testes e 2.487 assertions**, incluindo cenários de PDF e conversão. Há um teste adicional de logo em commit posterior; conferir CI do HEAD antes de declarar essa última variante aprovada. Os testes não equivalem a revisão visual do PDF no Laragon com a marca real do cliente.
+
+**Laragon:** após backup e confirmação de branch sem alterações locais, `git pull origin feature/acbr-nfe-bootstrap`, `php artisan migrate` (**nova migração necessária**), `php artisan optimize:clear`, Ctrl+F5. Verificar Chrome/Edge instalado e PHP `proc_open` habilitado. A URL do PDF é privada, não compartilhável como link público: baixe e anexe manualmente no WhatsApp/e-mail. Não foram implementados integração WhatsApp automática, aprovação eletrônica ou editor drag-and-drop de layout.
+
+
+
 ## Continuidade — 19/10/2026 — correção funcional de cartões NFC-e/PDV
 
 **Pedido:** a aba Pagamento de Nova NFC-e não mostrava cartão de crédito/débito apesar dos códigos originais; separação dos tipos nas Configurações, compatibilidade com pagamentos antigos, emissão ACBr correta e pagamentos mistos, sem envio a SEFAZ.
