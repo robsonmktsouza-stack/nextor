@@ -70,7 +70,7 @@ final class CompanyController extends Controller
             'email' => ['required', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:30'],
             'subdomain' => ['required', 'regex:/^[a-z][a-z0-9-]{1,38}$/',
-                Rule::unique('companies', 'subdomain')],
+                Rule::notIn(['admin', 'api', 'login', 'www']), Rule::unique('companies', 'subdomain')],
             'installation_url' => ['nullable', 'url', 'max:500', 'regex:/^https:\/\//i'],
             'admin_login' => ['nullable', 'string', 'regex:/^[a-zA-Z0-9_.-]{3,100}$/'],
             'plan' => ['required', Rule::in(array_keys(config('license.plans')))],
