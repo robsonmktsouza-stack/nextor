@@ -81,6 +81,19 @@ final class QuoteCommercialDocumentTest extends TestCase
         self::assertStringNotContainsString('images/lumeron/logo.png',$html);
     }
 
+    public function test_company_logo_is_embedded_without_exposing_a_public_attachment_url(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('public');
+        $png=base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/rX0AAAAASUVORK5CYII=');
+        \Illuminate\Support\Facades\Storage::disk('public')->put('company/logo.png',$png);
+        CompanySetting::current()->update(['logo_path'=>'company/logo.png']);
+        $quote=$this->createQuote($this->product());
+        $html=app(QuotePdfService::class)->renderHtml($quote);
+
+        self::assertStringContainsString('data:image/png;base64,',$html);
+        self::assertStringNotContainsString('http://127.0.0.1:8000/company/logo.png',$html);
+    }
+
     public function test_real_chromium_generates_valid_pdf_when_installed(): void
     {
         if (!is_file('/usr/bin/google-chrome') && !is_file('/usr/bin/chromium')
