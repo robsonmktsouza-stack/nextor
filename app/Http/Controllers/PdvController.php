@@ -810,9 +810,28 @@ class PdvController extends Controller
                 ->with('error', 'A NFC-e não foi preparada. Confira se o módulo fiscal está habilitado.');
     }
 
-    public function receipt(Sale $sale, \App\Services\SaleReceiptPresenter $presenter)
+    public function receipt(Request $request, Sale $sale, \App\Services\SaleReceiptPresenter $presenter,
+        \App\Services\SaleReceiptPdfService $pdf)
     {
         abort_unless($sale->source==='pdv',404);
+
+        // Histórico do PDV (?print=0): prévia pelo leitor nativo de PDF.
+        // Finalização da venda (sem o parâmetro) preserva impressão e retorno ao caixa.
+        if ($request->query('print')==='0') {
+            try {
+                $bytes=$pdf->render($sale);
+            } catch (\RuntimeException $e) {
+                abort(503,$e->getMessage());
+            }
+            $name='Comprovante-Venda-'.str_pad((string)$sale->id,5,'0',STR_PAD_LEFT).'.pdf';
+            $mode=$request->boolean('download')?'attachment':'inline';
+            return response($bytes,200,[
+                'Content-Type'=>'application/pdf',
+                'Content-Disposition'=>$mode.'; filename="'.$name.'"',
+                'Cache-Control'=>'private, no-store, max-age=0',
+                'X-Content-Type-Options'=>'nosniff',
+            ]);
+        }
 
         return view('pdv.receipt',$presenter->data($sale,true));
     }
