@@ -81,6 +81,31 @@ final class QuoteCommercialDocumentTest extends TestCase
         self::assertStringNotContainsString('images/lumeron/logo.png',$html);
     }
 
+    public function test_quote_pdf_uses_compact_rectangular_erp_document_layout(): void
+    {
+        $quote=$this->createQuote($this->product());
+        $html=app(QuotePdfService::class)->renderHtml($quote);
+
+        foreach ([
+            'Dados do cliente',
+            'Itens do orçamento',
+            'TOTAL GERAL',
+            'Código',
+            'Un.',
+            '<table class="info">',
+            '<table class="items">',
+            '<table class="totals">',
+            'border-collapse:collapse',
+            'page-break-inside:avoid',
+        ] as $expected) {
+            self::assertStringContainsString($expected,$html);
+        }
+        self::assertStringNotContainsString('Proposta comercial',$html);
+        self::assertStringNotContainsString('Segue o detalhamento dos produtos',$html);
+        self::assertStringNotContainsString('border-radius:', $html);
+        self::assertStringNotContainsString('sum-final',$html);
+    }
+
     public function test_company_logo_is_embedded_without_exposing_a_public_attachment_url(): void
     {
         \Illuminate\Support\Facades\Storage::fake('public');
