@@ -84,6 +84,13 @@ final class ControlPanelTest extends TestCase
             'subdomain' => 'empresa-exemplo',
             'plan' => 'standard',
         ])->assertSessionHasErrors('subdomain');
+        $this->post('/clients', [
+            'legal_name' => 'Outra Empresa',
+            'cnpj' => '11444777000161',
+            'email' => 'a@example.test',
+            'subdomain' => 'admin',
+            'plan' => 'standard',
+        ])->assertSessionHasErrors('subdomain');
     }
 
     public function test_suspension_renewal_and_notes_are_audited(): void
