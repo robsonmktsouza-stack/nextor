@@ -48,6 +48,12 @@ Login por subdomínio + usuário + senha, controle de permissões por módulo, r
 
 Uma venda/PDV concluída é a referência do fato comercial. `SalesService` coordena a operação; conferir serviços de estoque, financeiro, `FiscalPreparationService` e relações antes de alterar fluxos. Uma tentativa fiscal rejeitada/corrigida **não cria outra venda, cobrança ou baixa de estoque**. Transações SQL, locks, idempotência e rastreabilidade devem ser preservados; devoluções/cancelamentos exigem regras comerciais e fiscais distintas.
 
+## D05-A — Orçamento PDF comercial e conversão (20/10/2026)
+
+O tipo `quote` continua em `sales` e **não movimenta estoque, caixa ou financeiro** na criação. O orçamento gera PDF A4 comercial pela camada `QuotePdfService`, utilizando Chrome/Edge local e template Blade, com marca e dados da **empresa emitente** (sem substituir pela logo do ERP). O PDF é disponibilizado apenas a usuários autenticados com permissão `sales`, e nunca simula DANFE/NF-e. Para enviar a um cliente, baixar e anexar o arquivo; URL local do documento não é link público.
+
+O processo de aprovação comercial via botão Converter em venda usa `SalesService::convertQuote`, que chama o fluxo de criação de venda existente. Revalidar estoque atual, calcular a venda com os itens/valores do orçamento e impedir conversão repetida usando transação, lock, status `converted` no orçamento e índice único `sales.source_quote_id`. Não gerar venda alternativa fora do serviço de vendas. Orçamentos vencidos, cancelados ou já convertidos não podem ser convertidos. O registro original segue auditável. Detalhes e limite da implementação em `docs/commercial/quote-pdf.md`.
+
 ## D06 — Motor fiscal atual (substitui proposta antiga)
 
 **Motor vigente: ACBrLibNFe via PHP FFI, com serviços próprios do Lumeron ao redor dela**. O antigo plano de motor NFC-e completamente próprio foi substituído; há protótipo histórico arquivado em `archive/nextor-native-nfce-2026-10-02.zip`. Não recriar um emissor paralelo nem migrar para serviço/API paga ou NFePHP por iniciativa da IA. Serviço principal da biblioteca: `app/Services/Fiscal/ACBr/ACBrNFeService.php` (ACBr MT/Cdecl x64 no Windows). Biblioteca Linux e dependências devem ser configuradas separadamente na futura VPS; DLL Windows não é a versão Linux. Isolar instância/configuração ACBr por processo/documento, sem reusar handle global concorrente.
