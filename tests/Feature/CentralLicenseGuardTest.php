@@ -85,6 +85,6 @@ final class CentralLicenseGuardTest extends TestCase
         Route::middleware(['auth', 'control.license'])->get('/__license-business', fn () => 'permitido')->name('license.business');
         Route::middleware(['auth', 'control.license'])->get('/__license-fiscal', fn () => 'fiscal-permitido')->name('fiscal.license-legal');
         $this->actingAs($user)->get('/__license-business')->assertRedirect(route('license.status'));
-        $this->actingAs($user)->get('/fiscal/__license-legal')->assertOk()->assertSee('fiscal-permitido');
+        $this->actingAs($user)->get('/__license-fiscal')->assertOk()->assertSee('fiscal-permitido');
     }
 }
