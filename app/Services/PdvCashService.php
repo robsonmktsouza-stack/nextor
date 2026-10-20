@@ -1,0 +1,231 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\AppSetting;
+use App\Models\PaymentMethod;
+use App\Models\PdvCashMovement;
+use App\Models\PdvCashSession;
+use App\Models\Sale;
+use App\Models\SaleReturn;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+
+final class PdvCashService
+{
+    public function current(int $userId, bool $lock = false): ?PdvCashSession
+    {
+        $query=PdvCashSession::query()->where('user_id',$userId)->open()->latest('id');
+        return $lock ? $query->lockForUpdate()->first() : $query->first();
+    }
+
+    /** Called within SalesService's transaction before writing the sale. */
+    public function forSale(int $userId): ?PdvCashSession
+    {
+        $session=$this->current($userId,true);
+        if(!$session && (bool)AppSetting::value('pdv','require_cash_opening',false)) {
+            throw ValidationException::withMessages([
+                'cash_session'=>'Abra o caixa antes de concluir uma venda no PDV.',
+            ]);
+        }
+        return $session;
+    }
+
+    public function open(int $userId, string $amount, ?string $notes): PdvCashSession
+    {
+        return DB::transaction(function () use ($userId,$amount,$notes) {
+            // Serialize openings even when no session row exists yet.
+            User::query()->whereKey($userId)->lockForUpdate()->firstOrFail();
+            if($this->current($userId,true)) {
+                throw ValidationException::withMessages([
+                    'opening_amount'=>'Já existe um caixa aberto para este usuário.',
+                ]);
+            }
+            return PdvCashSession::query()->create([
+                'user_id'=>$userId,'opening_amount'=>$amount,
+                'opening_notes'=>$notes,'opened_at'=>now(),
+            ]);
+        },3);
+    }
+
+    /**
+     * SalePayment.amount is already the NET cash allocated to the sale,
+     * not the notes tendered (cash_received). Never subtract change again.
+     * All captured sales remain physical inflows even when later cancelled;
+     * explicit refund movements account for the subsequent cash outflow.
+     */
+    public function breakdown(PdvCashSession $session): array
+    {
+        $end=$session->closed_at ?? now();
+        $sales=Sale::query()
+            ->with('payments')
+            ->where('source','pdv')
+            ->where('operation_type','sale')
+            ->where(function ($q) use ($session,$end) {
+                $q->where('pdv_cash_session_id',$session->id)
+                  ->orWhere(function ($legacy) use ($session,$end) {
+                      $legacy->whereNull('pdv_cash_session_id')
+                          ->where('user_id',$session->user_id)
+                          ->where('completed_at','>=',$session->opened_at)
+                          ->where('completed_at','<=',$end);
+                  });
+            })->get();
+
+        $methods=PaymentMethod::query()->pluck('kind','code');
+        $cash=0;
+        $byMethod=[];
+        $cancelledCount=0;
+        foreach($sales as $sale) {
+            if($sale->status==='cancelled') $cancelledCount++;
+            foreach($sale->payments as $payment) {
+                $code=(string)($payment->payment_method ?: 'unclassified');
+                $value=(int)round((float)$payment->amount*100);
+                $byMethod[$code]=($byMethod[$code] ?? 0)+$value;
+                if(($methods[$code] ?? null)==='cash' || $code==='cash') {
+                    $cash+=$value;
+                }
+            }
+        }
+        $movementSums=['supply'=>0,'withdrawal'=>0,'refund'=>0];
+        foreach(PdvCashMovement::query()->where('cash_session_id',$session->id)->get() as $movement) {
+            if(array_key_exists($movement->type,$movementSums)) {
+                $movementSums[$movement->type]+=(int)round((float)$movement->amount*100);
+            }
+        }
+
+        $expected=(int)round((float)$session->opening_amount*100)
+            +$cash+$movementSums['supply']
+            -$movementSums['withdrawal']-$movementSums['refund'];
+
+        return [
+            'opening'=>(int)round((float)$session->opening_amount*100),
+            'cash_sales'=>$cash,
+            'sales_count'=>$sales->count(),
+            'cancelled_count'=>$cancelledCount,
+            'payments'=>$byMethod,
+            'supply'=>$movementSums['supply'],
+            'withdrawal'=>$movementSums['withdrawal'],
+            'refund'=>$movementSums['refund'],
+            'expected'=>$expected,
+        ];
+    }
+
+    public static function currency(int $cents): string
+    {
+        return number_format($cents/100,2,'.','');
+    }
+
+    public function close(int $userId, string $counted, ?string $notes): PdvCashSession
+    {
+        return DB::transaction(function () use ($userId,$counted,$notes) {
+            User::query()->whereKey($userId)->lockForUpdate()->firstOrFail();
+            $session=$this->current($userId,true);
+            if(!$session) {
+                throw ValidationException::withMessages([
+                    'closing_amount'=>'Não há caixa aberto para fechar.',
+                ]);
+            }
+            $breakdown=$this->breakdown($session);
+            $cents=(int)round((float)$counted*100);
+            $difference=$cents-$breakdown['expected'];
+            if($difference!==0 && trim((string)$notes)==='') {
+                throw ValidationException::withMessages([
+                    'closing_notes'=>'Informe o motivo ou observação para a diferença apurada no caixa.',
+                ]);
+            }
+            $session->update([
+                'closing_amount'=>self::currency($cents),
+                'expected_amount'=>self::currency($breakdown['expected']),
+                'difference_amount'=>self::currency($difference),
+                'closing_breakdown'=>$breakdown,
+                'closing_notes'=>$notes,
+                'closed_by'=>$userId,
+                'closed_at'=>now(),
+            ]);
+            return $session->refresh();
+        },3);
+    }
+
+    public function movement(int $userId, string $type, string $amount, string $reason,
+        ?int $saleId = null, ?int $returnId = null): PdvCashMovement
+    {
+        return DB::transaction(function () use ($userId,$type,$amount,$reason,$saleId,$returnId) {
+            User::query()->whereKey($userId)->lockForUpdate()->firstOrFail();
+            $session=$this->current($userId,true);
+            if(!$session) {
+                throw ValidationException::withMessages([
+                    'amount'=>'Abra o caixa antes de movimentar dinheiro.',
+                ]);
+            }
+            $cents=(int)round((float)$amount*100);
+            if($cents<=0) {
+                throw ValidationException::withMessages(['amount'=>'Informe um valor positivo.']);
+            }
+            if($type==='refund') {
+                if((bool)$saleId===(bool)$returnId) {
+                    throw ValidationException::withMessages([
+                        'amount'=>'Informe uma venda cancelada ou uma devolução, mas não ambas.',
+                    ]);
+                }
+                if($returnId) {
+                    $return=SaleReturn::query()->lockForUpdate()->findOrFail($returnId);
+                    $sale=Sale::query()->findOrFail($return->sale_id);
+                    if($return->status!=='completed' || $sale->source!=='pdv') {
+                        throw ValidationException::withMessages(['amount'=>'Devolução inválida para reembolso do PDV.']);
+                    }
+                } else {
+                    $sale=Sale::query()->lockForUpdate()->findOrFail($saleId);
+                    if($sale->source!=='pdv' || $sale->status!=='cancelled') {
+                        throw ValidationException::withMessages([
+                            'amount'=>'Reembolso direto somente para vendas do PDV canceladas.',
+                        ]);
+                    }
+                }
+                $cashCodes=PaymentMethod::query()->where('kind','cash')->pluck('code')->push('cash')->unique();
+                $cashPaid=(int)round((float)$sale->payments()
+                    ->whereIn('payment_method',$cashCodes)->sum('amount')*100);
+                $already=(int)round((float)PdvCashMovement::query()
+                    ->where('sale_id',$sale->id)->where('type','refund')->sum('amount')*100);
+                if($cents>$cashPaid-$already) {
+                    throw ValidationException::withMessages(['amount'=>'Reembolso maior que o dinheiro disponível desta venda.']);
+                }
+                if($returnId) {
+                    $refunded=(int)round((float)PdvCashMovement::query()
+                        ->where('sale_return_id',$returnId)->where('type','refund')->sum('amount')*100);
+                    if($cents>(int)round((float)$return->total*100)-$refunded) {
+                        throw ValidationException::withMessages(['amount'=>'Reembolso maior que o saldo desta devolução.']);
+                    }
+                }
+                $saleId=$sale->id;
+            } elseif(!in_array($type,['supply','withdrawal'],true)) {
+                throw ValidationException::withMessages(['type'=>'Tipo de movimento inválido.']);
+            }
+            if(in_array($type,['withdrawal','refund'],true)
+                && $cents>$this->breakdown($session)['expected']) {
+                throw ValidationException::withMessages([
+                    'amount'=>'A saída de dinheiro não pode ultrapassar o saldo esperado do caixa.',
+                ]);
+            }
+            return PdvCashMovement::query()->create([
+                'cash_session_id'=>$session->id,'user_id'=>$userId,
+                'type'=>$type,'amount'=>self::currency($cents),
+                'reason'=>trim($reason),'sale_id'=>$type==='refund'?$saleId:null,
+                'sale_return_id'=>$type==='refund'?$returnId:null,
+            ]);
+        },3);
+    }
+
+    public function review(PdvCashSession $session, int $reviewer, string $notes): void
+    {
+        DB::transaction(function () use ($session,$reviewer,$notes) {
+            $locked=PdvCashSession::query()->lockForUpdate()->findOrFail($session->id);
+            if(!$locked->closed_at || $locked->reviewed_at) {
+                throw ValidationException::withMessages(['review'=>'Fechamento ainda aberto ou já conferido.']);
+            }
+            $locked->update([
+                'reviewed_by'=>$reviewer,'reviewed_at'=>now(),'review_notes'=>trim($notes),
+            ]);
+        },3);
+    }
+}
