@@ -2,6 +2,16 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
+## Continuidade — 20/10/2026 — reequilíbrio da paleta cinza + azul do ERP
+
+**Pedido do proprietário:** o ERP estava visualmente azul demais. A decisão anterior era **base cinza tradicional, cinza-azulado discreto nas faixas estruturais e azul da marca apenas em comandos/destaques**, nunca um bloco monocromático azul. Não modificar outros módulos/fluxos para corrigir apenas cores.
+
+**Diagnóstico:** diff dos últimos commits do PDF (`a838abd5..38ea0e20`) confirmou que a mudança do PDF não editou o CSS geral. Porém o acabamento já presente em `public/css/erp.css`, seção `NEXTOR color hierarchy inspired by the fiscal base system`, continha título `#648493`, abas inativas `#567381` e sidebar `#37474f`, formando superfícies azuis concorrentes. São variáveis do shell, não do PDF.
+
+**Correção:** só `public/css/erp.css` na hierarquia final: barra superior cinza `#f2f2f2`, sidebar grafite `#424b50` (ativo `#30393e`), cabeçalho cinza-azulado `#798a92`, abas inativas `#edf0f2` (hover `#e0e6e9`) com textos escuros e fundo de trabalho `#e9e9e9`. Mantidos logo oficial, azul nos botões primários, verde funcional nas ações/sucesso e cores próprias de situações financeiras. Sem alterações de JS, PHP, rotas, banco, PDF ou integração fiscal.
+
+**Teste:** `tests/Feature/LumeronShellPaletteTest.php` (novo) garante a hierarquia neutra, preserva destaques funcionais e confirma que o PDF do orçamento continua com HTML independente. Conferir CI no HEAD antes de alegar suíte aprovada. **Laragon:** apenas `git pull origin feature/acbr-nfe-bootstrap`, `php artisan optimize:clear`, `Ctrl+F5`. Sem migração.
+
 ## Continuidade — 20/10/2026 — orçamento PDF visual de ERP tradicional
 
 **Solicitação mais recente:** após visualizar o PDF real de `/sales/{sale}/quote/pdf`, o proprietário rejeitou o estilo de peça publicitária/gerada por IA. O documento precisa ter aparência de **relatório comercial de ERP clássico**, sem cartões arredondados, tons saturados, títulos de marketing, status em badges ou total em faixa azul grande.
