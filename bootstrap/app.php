@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission'=>\App\Http\Middleware\RequirePermission::class,
             'company.configured'=>\App\Http\Middleware\RequireCompanyConfigured::class,
             'nextor.api'=>\App\Http\Middleware\RequireApiToken::class,
+            'control.license'=>\App\Http\Middleware\RequireCentralLicense::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
