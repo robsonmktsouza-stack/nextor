@@ -144,6 +144,9 @@ $serviceSubtotal=$quote->items->where('item_type','service')
   @endif
   <td class="company">
     <div class="company-name">{{ $companyName }}</div>
+    @if($company->legal_name && $company->legal_name!==$companyName)
+      <div class="company-details">{{ $company->legal_name }}</div>
+    @endif
     <div class="company-details">
       @if($company->document)CNPJ {{ $company->document }}@endif
       @if($company->state_registration) · IE {{ $company->state_registration }}@endif
