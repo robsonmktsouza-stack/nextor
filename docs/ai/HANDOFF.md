@@ -2,6 +2,14 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
+## Continuidade — 20/10/2026 — acabamento fino do PDF de orçamento ERP
+
+**Solicitação:** o usuário aprovou a direção de relatório empresarial tradicional para o orçamento, mas pediu melhorar seu acabamento. **Não reinterpretar como autorização para alterar as cores do ERP inteiro:** o episódio de paleta global foi revertido e permaneceu fora do escopo.
+
+**Mudanças estritamente locais:** `resources/views/sales/quote-pdf.blade.php` recebeu refinamento de tipografia (corpo 10,5px, hierarquia contida), margens A4, espaçamento e alinhamento de cabeçalho/identificação empresarial, número/data/validade, campos de cliente, zebra muito leve e bordas alinhadas na tabela, números monetários tabulares e área de totais compacta, com fundo cinza neutro e um filete cinza-azulado discreto. Campos opcionais sem dado exibem um traço, evitando repetição de “Não informado”. O aviso não fiscal permanece no rodapé fixo. **Nenhuma mudança em nomes, valores, fórmulas, banco, conversão de orçamento, serviço de PDF, rotas ou temas globais.**
+
+**Regressão:** `tests/Feature/QuoteCommercialDocumentTest.php` passou a verificar o acabamento impresso A4 (tabela, fundo neutro, números tabulares, aviso e ausência de cartão azul); preservados os testes existentes de geração real de PDF pelo Chromium e conversão de orçamento. Confirmar resultado do workflow `ACBr integration checks` no HEAD antes de declarar entrega validada. Atualização Laragon apenas `git pull origin feature/acbr-nfe-bootstrap`, `php artisan optimize:clear` e reabertura do PDF com Ctrl+F5; sem migração.
+
 ## Continuidade — 20/10/2026 — orçamento PDF visual de ERP tradicional
 
 **Solicitação mais recente:** após visualizar o PDF real de `/sales/{sale}/quote/pdf`, o proprietário rejeitou o estilo de peça publicitária/gerada por IA. O documento precisa ter aparência de **relatório comercial de ERP clássico**, sem cartões arredondados, tons saturados, títulos de marketing, status em badges ou total em faixa azul grande.
