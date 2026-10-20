@@ -2,6 +2,21 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
+## Continuidade — 20/10/2026 — eliminar espera infinita ao abrir comprovante PDF
+
+**Problema real:** após o ajuste de altura do comprovante, o usuário mostrou `/pdv/receipt/9?print=0` com aba do Chrome carregando indefinidamente, em branco. A rota `SaleReceiptPdfService::render` iniciava **Chrome/Edge headless externo em todas as consultas**, aguardando o processo e arquivo temporário. Esse fluxo era pesado e podia bloquear a requisição do Laragon.
+
+**Mudança aprovada e aplicada na branch `feature/acbr-nfe-bootstrap`:**
+- `app/Services/Receipts/ThermalReceiptPdfWriter.php` (novo) gera PDF 1.4 **em memória, diretamente no PHP** (fontes padrão, linhas, tabela, valores, layout térmico, imagem JPEG ou PNG inclusive PNG transparente), calculando a altura do documento a partir das linhas efetivamente desenhadas. Cada via vira exatamente uma página com largura 58 ou 80 mm, sem folha extra só para o rodapé.
+- `app/Services/SaleReceiptPdfService.php`: `render(Sale)` não chama `proc_open`, Chrome, Edge, `usleep`, sistema de arquivos temporários ou fila. Reaproveita `SaleReceiptPresenter` para dados persistidos de venda, empresa, cliente, pagamentos, operador e configurações térmicas. Incorpora logotipo PNG/JPEG e WebP quando GD permite converter WebP para PNG. Conserva `renderHtml` apenas para compatibilidade com testes e a versão HTML da impressão inicial do PDV permanece intacta.
+- Rotas `sales.receipt` e `pdv.receipt?print=0` seguem retornando `application/pdf` privado inline para visualizador PDF do Chrome, com permissões e políticas de cache anteriores; `?download=1` permanece disponível. A finalização original do PDV sem `print=0` mantém seu próprio HTML e impressão automática, sem afetar NFC-e/DANFE.
+- `tests/Feature/SaleReceiptReuseTest.php`: valida geração sem browser, tempo inferior a dois segundos em fixture pequena, uso de logo RGBA transparente, via única 58/80 mm e exatamente duas páginas quando configuradas duas vias; não depende de `pdfinfo` nem Chromium para a regressão rápida.
+- PDF de exemplo produzido em PHP no ambiente de desenvolvimento da IA: comprovante 80 mm com 1 item, 1 página, validade confirmada por `pdfinfo` e renderização visual por `pdftoppm`; cenário 58 mm, 13 itens, PNG transparente e duas vias confirmou 2 páginas. Benchmark local de 15 itens com imagem RGBA 900×360: aproximadamente **0,33 s** (não representa benchmark no PC do usuário).
+
+**Limites honestos:** o motor PDF interno recompõe o comprovante a partir dos mesmos dados e regras, mas não reutiliza o CSS do HTML nem promete equivalência pixel a pixel. Imagens WebP precisam da extensão GD para conversão. Não foi acessado o localhost do proprietário; verificar a velocidade real e impressão física 58/80 mm no Chrome após `git pull`. Sem nova migration, biblioteca Composer, serviço pago ou deploy.
+
+**Verificação:** consultar o último workflow `ACBr integration checks` e registrar resultados reais. No Laragon: `git status -sb`, `git pull origin feature/acbr-nfe-bootstrap`, `php artisan optimize:clear`, reabrir `/pdv/receipt/9?print=0` (Ctrl+F5); deve mostrar PDF quase imediatamente e página única com o rodapé.
+
 ## Continuidade — 20/10/2026 — corrigir comprovante térmico dividido em duas páginas
 
 **Problema reportado:** screenshot de `/pdv/receipt/9?print=0` no Chrome já mostrava o leitor PDF nativo, mas a impressão do comprovante de **uma via** estava dividida em duas páginas: a primeira terminava após dados do consumidor e a segunda continha só o rodapé não fiscal.
