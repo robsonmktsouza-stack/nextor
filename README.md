@@ -50,7 +50,7 @@ Cabeçalhos:
 - `X-Lumeron-Nonce`: hexadecimal aleatório de 32 caracteres, uso único
 - `X-Lumeron-Signature`: HMAC-SHA256 hexadecimal, chave secreta; mensagem `POST\n/api/license/check\n{timestamp}\n{nonce}\n{sha256(raw JSON body)}`
 
-Resposta (HTTPS obrigatório em produção): `status` (active, suspended, expired), `expires_at`, `modules`, `instance_id`, `checked_at`, `plan`, cabeçalho `X-Lumeron-Signature` com HMAC-SHA256 **sobre o corpo JSON exato** para autenticar a resposta. O cliente ERP deve validar HMAC, UUID, CNPJ, nonce de saída e política de cache antes de aplicar restrições; a integração do cliente é tarefa separada para não alterar o PDV fiscal estável sem testes. Sem heartbeat não se afirma que o cliente está bloqueado remotamente.
+Resposta (HTTPS obrigatório em produção): `status` (active, suspended, expired), `expires_at`, `modules`, `instance_id`, `checked_at`, `plan`, cabeçalho `X-Lumeron-Signature` com HMAC-SHA256 **sobre o corpo JSON exato** para autenticar a resposta. O agente cliente implementado na branch `develop` do ERP valida o HMAC da resposta, UUID/CNPJ e tolerância de cache offline; a consulta só entra em operação nas instalações que forem atualizadas e habilitadas pelo proprietário. Sem a ativação desse agente em cada cliente, o bloqueio no painel ainda não tem efeito remoto.
 
 A licença **não** deve apagar banco, documentos fiscais, XMLs, autorizações, nem impedir a regularização legal de NFC-e. Bloqueio comercial e continuidade fiscal requerem política operacional específica no ERP.
 
