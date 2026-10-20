@@ -18,7 +18,7 @@ final class RequireCentralLicense
         // Fiscal/legal continuity: status consultation, authorized XML/DANFE,
         // cancellation and contingency remain accessible even if suspended.
         if ($request->is('fiscal', 'fiscal/*', 'pdv/nfce/*', 'pdv/receipt/*')
-            || $request->routeIs('pdv.nfce.*', 'pdv.receipt', 'sales.receipt')) {
+            || $request->routeIs('fiscal.*', 'pdv.nfce.*', 'pdv.receipt', 'sales.receipt')) {
             return $next($request);
         }
 
