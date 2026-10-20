@@ -2,6 +2,30 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
+## Continuidade — 20/10/2026 — reconciliação operacional e auditoria do caixa PDV
+
+**Pedido:** o proprietário solicitou corrigir completamente a abertura/fechamento do caixa e rastreabilidade de troco, sangrias, suprimentos, devoluções e relatórios após auditoria do fluxo. Trabalho na branch `feature/acbr-nfe-bootstrap` (sem deploy/SEFAZ). Não confundir obrigações fiscais da NFC-e ou escrituração legal com controle gerencial de caixa.
+
+**Nova migração:** `2026_10_20_180000_reconcile_pdv_cash_sessions.php` liga `sales.pdv_cash_session_id` ao turno (nullable para vendas legadas), congela `expected_amount`, `difference_amount` e `closing_breakdown` no fechamento e adiciona `closed_by`, `reviewed_by`, `reviewed_at`, `review_notes`. `pdv_cash_movements` permite `sale_id` e `sale_return_id` para rastrear devoluções pagas em dinheiro. Não rodar migração em produção sem aprovação e backup.
+
+**Motor único:** `app/Services/PdvCashService.php`. Abre/fecha com transação e lock no usuário e na sessão; uma venda de PDV adquire lock na sessão ainda dentro da transação do `SalesService`, de modo que fechamento simultâneo não desassocia venda da apuração. O saldo esperado considera fundo inicial + parcelas de vendas em espécie + suprimentos − sangrias − reembolsos **efetivamente registrados**, usando valores `SalePayment.amount` líquidos de troco (não subtrair `change_amount` novamente). O valor contado é informado sem pré-preenchimento: diferença não nula exige observação. Fechamento congela os dados originais; revisão administrativa é auditada e só pode ocorrer uma vez. Vendas canceladas ainda representam dinheiro recebido até que o dinheiro seja comprovadamente reembolsado por movimento próprio. Devoluções de mercadorias não presumem automaticamente saída de dinheiro. Os reembolsos de PDV exigem venda cancelada ou devolução concluída, limite de dinheiro originalmente pago, limite da devolução, saldo de caixa disponível e motivo; concorrências entre devoluções da mesma venda são serializadas no banco. Devolução com reembolso registrado não pode ser cancelada silenciosamente pelo módulo de devoluções.
+
+**Telas/rotas:** `PdvController` delega abertura, fechamento e movimentos ao serviço existente; formulário de contagem em branco, ações de reembolso vinculado e acesso ao histórico na interface PDV. `PdvCashReportController` e templates `pdv/cash-history.blade.php` e `pdv/cash-report.blade.php` permitem listar e imprimir/Salvar PDF no Chrome. Operador só vê seus caixas, administrador vê todos e pode registrar conferência com justificativa. Rotas `pdv.cash.history`, `pdv.cash.report`, `pdv.cash.review` exigem autenticação e permissão de PDV, última ainda valida role admin. CSS/JS apenas ajustes pontuais ao PDV, sem redesign do ERP.
+
+**Compatibilidade histórica e limites importantes:** `require_cash_opening` **continua configurável**, com default antigo `false`; para garantir vinculação de **todas** as vendas a sessões, habilite **Configurações → PDV → Exigir abertura de caixa** e mantenha essa regra ativa. Vendas anteriores sem vínculo são apuradas como legado por operador e janela de tempo; não fingir ter sessão vinculada na época. Fechamentos antigos sem snapshot continuam exibidos por cálculo histórico, sem afirmar que os valores eram congelados. Reembolso em espécie depende de confirmação/lançamento pelo operador; a funcionalidade não cria baixa bancária, escrituração contábil ou um crédito automático para devoluções. Reconciliar esses movimentos com Financeiro conforme política de cada empresa. A impressão do caixa é comprovante operacional, **não substitui documento fiscal nem Livro Caixa/contabilidade**. Revisar com cliente a política de permissões, suprimentos e diferenças antes de produção.
+
+**Testes:** `tests/Feature/PdvCashReconciliationTest.php` cobre venda vinculada, pagamentos mistos, troco sem desconto duplicado, sangria/suprimento, divergência, snapshot, dupla abertura/fechamento, reembolsos rastreados e bloqueios/permutações, histórico/permissões e não cancelamento de devolução com dinheiro devolvido. Execução `ACBr integration checks` do commit `9d122f1e` aprovada: **408 testes e 2645 assertions** em https://github.com/robsonmktsouza-stack/nextor/actions/runs/39479772602; verificar CI do HEAD posterior à proteção adicional de concorrência em reembolsos. Testes automatizados não substituem simular caixa real no Laragon.
+
+**Laragon (após backup, conferir branch e estado local):**
+```powershell
+cd C:\laragon\www\nextor
+git status -sb
+git pull origin feature/acbr-nfe-bootstrap
+php artisan migrate
+php artisan optimize:clear
+```
+Validar com operador e administrador: abrir fundo de troco, venda PIX+dinheiro com troco, sangria, suprimento, devolução de dinheiro, contagem/falta/sobra, relatório PDF e aprovação administrativa. Nenhuma transação real foi transmitida.
+
 ## Continuidade — 20/10/2026 — prévia do comprovante no Chrome, sem imprimir automaticamente
 
 **Pedido:** após incluir comprovante comercial em **Vendas**, o proprietário reiterou que a venda deve **abrir em nova aba do Chrome, permitindo conferir e só depois imprimir**. A versão anterior fazia isso apenas quando a URL carregava `?print=0`: abrir `/sales/{id}/receipt` diretamente disparava `window.print()` e causava uma experiência indesejada.
