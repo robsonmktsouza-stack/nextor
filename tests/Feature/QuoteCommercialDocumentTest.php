@@ -229,7 +229,7 @@ final class QuoteCommercialDocumentTest extends TestCase
         self::assertNotFalse($temporary);
         try {
             file_put_contents($temporary,$pdf);
-            $process=new \\Symfony\\Component\\Process\\Process(['pdfinfo',$temporary]);
+            $process=new \Symfony\Component\Process\Process(['pdfinfo',$temporary]);
             $process->run();
             self::assertTrue($process->isSuccessful(),$process->getErrorOutput());
             self::assertMatchesRegularExpression('/^Pages:\\s+1\\s*$/m',$process->getOutput(),
