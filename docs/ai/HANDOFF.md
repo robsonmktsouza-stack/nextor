@@ -2,6 +2,18 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
+## Continuidade — 20/10/2026 — documento comercial inspirado na referência eGestor
+
+**Pedido mais recente:** o usuário mostrou um orçamento real do eGestor e pediu aplicar aquela **pegada de documento comercial enviado ao cliente**, mantendo a organização superior do modelo atual do Lumeron. Não copiar logotipo/layout de terceiros nem alterar o tema global; o histórico de correção indevida da paleta do ERP foi revertido.
+
+**Aplicado exclusivamente no PDF comercial:** em `resources/views/sales/quote-pdf.blade.php`, título/número do orçamento mais visível no topo direito, hierarquia melhor de empresa, cliente, validade e situação; títulos de seção com fundo cinza suave e barra vertical verde-acinzentada; cabeçalho da grade em verde-petróleo moderado (`#4f7d7c`), mantendo dados, linhas e zebra leve em tons neutros; descrição distingue produto/serviço com rótulo tipográfico discreto; resumo mais firme com total geral e subtotais brutos de Produtos/Serviços **apenas se houver ambos** (soma de `line_total+discount` de cada grupo), sem alterar `subtotal`, `discount_total` ou `total` persistidos. A4, logo real da empresa, rodapé não fiscal e múltiplas páginas preservados. **Sem marca d'água, cartões coloridos ou recursos supérfluos.**
+
+**Arquivos da rodada:** `resources/views/sales/quote-pdf.blade.php` (única alteração funcional/visual), `tests/Feature/QuoteCommercialDocumentTest.php` (novo cenário de produto + serviço e totais, além da regressão anterior), e esta documentação. Não alterar `erp.css`, demais telas, estoque, financeiro, fiscal, serviços de PDF ou banco.
+
+**Validação:** verificar a execução do workflow `ACBr integration checks` após o commit `476db373` e eventual commit desta documentação. O renderizador real Chrome/Edge deve ser revisado no Laragon com um orçamento de vários itens e um com produto + serviço. Nenhuma emissão real, migração ou deploy foram realizados.
+
+**Atualização local (branch feature/acbr-nfe-bootstrap):** `git pull origin feature/acbr-nfe-bootstrap`, `php artisan optimize:clear`, recarregar `/sales/11/quote/pdf`. Não executar migrations por causa desta alteração.
+
 ## Continuidade — 20/10/2026 — acabamento fino do PDF de orçamento ERP
 
 **Solicitação:** o usuário aprovou a direção de relatório empresarial tradicional para o orçamento, mas pediu melhorar seu acabamento. **Não reinterpretar como autorização para alterar as cores do ERP inteiro:** o episódio de paleta global foi revertido e permaneceu fora do escopo.
