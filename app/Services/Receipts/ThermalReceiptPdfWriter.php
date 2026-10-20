@@ -340,6 +340,9 @@ final class ThermalReceiptPdfWriter
         if (($details['mime'] ?? '') === 'image/jpeg' && ($details['channels'] ?? 3) === 3) {
             return ['width' => $width, 'height' => $height, 'filter' => 'DCTDecode', 'data' => $bytes];
         }
+        // Descompressão de PNG grande em PHP puro bloqueia o worker do Laragon.
+        // O service converte logo grande em JPEG reduzido quando GD está disponível.
+        if ($width * $height > 250000) return null;
         if (($details['mime'] ?? '') !== 'image/png' || substr($bytes, 0, 8) !== "\x89PNG\r\n\x1a\n") return null;
         $cursor = 8;
         $compression = '';
