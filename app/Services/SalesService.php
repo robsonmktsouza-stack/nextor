@@ -346,6 +346,8 @@ class SalesService
             'source'=>'manual',
             'operation_date'=>now()->toDateString(),
             'customer_id'=>$quote->customer_id,
+            'consumer_document'=>$quote->consumer_document,
+            'consumer_name'=>$quote->consumer_name,
             'final_consumer'=>$quote->final_consumer,
             'keyword'=>$quote->keyword,
             'notes'=>$quote->notes,
