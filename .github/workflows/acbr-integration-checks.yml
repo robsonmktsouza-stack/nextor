@@ -2,7 +2,11 @@ name: ACBr integration checks
 on:
   push:
     branches:
+      - main
+      - develop
       - feature/acbr-nfe-bootstrap
+    tags:
+      - 'v*'
   pull_request:
 
 jobs:
@@ -141,8 +145,11 @@ jobs:
               }
             done
           fi
-      - name: Install PHP dependencies
-        run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Install PHP dependencies (locked)
+        run: |
+          test -s composer.lock
+          composer validate --no-check-publish --strict
+          composer install --no-interaction --prefer-dist --no-progress
       - name: Prepare Laravel
         run: |
           cp .env.example .env || touch .env
