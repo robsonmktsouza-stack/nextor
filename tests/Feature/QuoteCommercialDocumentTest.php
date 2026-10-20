@@ -81,45 +81,40 @@ final class QuoteCommercialDocumentTest extends TestCase
         self::assertStringNotContainsString('images/lumeron/logo.png',$html);
     }
 
-    public function test_quote_pdf_uses_compact_rectangular_erp_document_layout(): void
+    public function test_quote_pdf_matches_user_excel_a4_print_model_without_loading_erp_css(): void
     {
         $quote=$this->createQuote($this->product());
         $html=app(QuotePdfService::class)->renderHtml($quote);
 
         foreach ([
+            '@page { size:A4; margin:12mm 10mm 17mm; }',
+            'background:#477b78',
+            'background:#e9eff0',
+            '<div class="accent-band"></div>',
+            'PROPOSTA DE FORNECIMENTO | PRODUTOS E SERVIÇOS',
             'Dados do cliente',
-            'Itens do orçamento',
-            'TOTAL GERAL',
-            'Código',
-            'Un.',
-            '<table class="info">',
+            'Cliente / Razão social',
+            'Validade da proposta',
+            'Discriminação dos itens',
             '<table class="items">',
+            '<th>Tipo</th><th>Código</th><th>Descrição do produto / serviço</th>',
+            '<th class="center">Un.</th>',
+            'Condições comerciais',
+            'Resumo financeiro',
             '<table class="totals">',
-            'border-collapse:collapse',
-            'page-break-inside:avoid',
+            'Observações / informações adicionais',
+            'Responsável pela proposta',
+            'Aceite do cliente',
+            'TOTAL GERAL',
+            'Orçamento comercial — não é documento fiscal e não comprova pagamento.',
         ] as $expected) {
             self::assertStringContainsString($expected,$html);
         }
-        self::assertStringNotContainsString('Proposta comercial',$html);
-        self::assertStringNotContainsString('Segue o detalhamento dos produtos',$html);
+        self::assertStringNotContainsString('images/lumeron/logo.png',$html);
+        self::assertStringNotContainsString('css/erp.css',$html);
         self::assertStringNotContainsString('border-radius:', $html);
-        self::assertStringNotContainsString('sum-final',$html);
-        // Printed ERP quotation: consistent gray table, spacing, typography
-        // and restrained total emphasis without changing the sale amounts.
-        foreach ([
-            '@page { size:A4; margin:13mm 13mm 20mm; }',
-            'font:10.5px/1.42 Arial,Helvetica,sans-serif',
-            'background:#e9edef;',
-            'font-variant-numeric:tabular-nums',
-            '.items tbody tr:nth-child(even)',
-            '.totals .total td',
-            'position:fixed; bottom:-11mm',
-            'border-bottom:2px solid #667780',
-        ] as $token) {
-            self::assertStringContainsString($token,$html);
-        }
+        self::assertStringNotContainsString('Proposta comercial</h1>',$html);
         self::assertStringNotContainsString('background:#294e68',$html);
-        self::assertStringNotContainsString('border-radius:', $html);
     }
 
     public function test_commercial_quote_with_products_and_services_shows_correct_breakdown_without_changing_totals(): void
@@ -137,8 +132,8 @@ final class QuoteCommercialDocumentTest extends TestCase
 
         $html=app(QuotePdfService::class)->renderHtml($quote);
         foreach ([
-            'background:#4f7d7c',
-            'border-left:3px solid #558983',
+            'background:#477b78',
+            'PROPOSTA DE FORNECIMENTO | PRODUTOS E SERVIÇOS',
             'Serviço',
             'Instalação de acessórios',
             'R$ 99,00',
@@ -149,6 +144,9 @@ final class QuoteCommercialDocumentTest extends TestCase
         ] as $expected) {
             self::assertStringContainsString($expected,$html);
         }
+        self::assertStringContainsString('Produtos',$html);
+        self::assertStringContainsString('Serviços',$html);
+        self::assertStringContainsString('R$ 5,00',$html);
         self::assertSame('144.00',(string)$quote->fresh()->total);
         self::assertSame(0,FinancialEntry::count());
     }
