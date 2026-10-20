@@ -2,12 +2,13 @@
 
 > Leia este arquivo antes de propor ou alterar código. Atualizado em 19/10/2026.
 > **Projeto ativo:** `robsonmktsouza-stack/nextor`, branch `feature/acbr-nfe-bootstrap`.
+> **Decisão de 20/10/2026:** avançar para um piloto NFC-e com versão estável isolada, enquanto o desenvolvimento continua. **Nenhum agente pode implantar automaticamente a partir de pushes.** Ver a [política de publicação](../deployment/versioning-and-release-policy.md).
 > **Produto:** Lumeron ERP (antigo Nextor). Não confundir com o repositório separado `lumeronerp` (protótipo desktop WPF).
 
 ## Como assumir o desenvolvimento em qualquer novo chat/agente
 
 1. Abrir o repositório e conferir a branch/commit atuais com `git status -sb`, `git branch --show-current` e `git log -5 --oneline`. Não confiar apenas no nome do chat.
-2. Ler `/AGENTS.md`, este índice, `PROJECT_STATE.md`, `ARCHITECTURE_AND_DECISIONS.md` e `HANDOFF.md`.
+2. Ler `/AGENTS.md`, este índice, `PROJECT_STATE.md`, `ARCHITECTURE_AND_DECISIONS.md`, **`docs/deployment/versioning-and-release-policy.md`** e `HANDOFF.md`.
 3. Ler `/README.md`, além dos documentos específicos do módulo afetado; comparar as afirmações com o **código atual**.
 4. Antes de programar, identificar componentes existentes, impactos em banco, estoque, vendas, financeiro, emissões fiscais e permissões. Corrigir o fluxo real, não criar uma segunda implementação paralela.
 5. Após cada mudança, registrar o resumo verificável, arquivos alterados, testes executados (ou não), pendências e próximo passo em `HANDOFF.md`. Atualizar as decisões se alguma for aprovada ou substituída.
@@ -23,6 +24,7 @@
 Documentos de referência existentes:
 - [README principal](../../README.md)
 - [Isolamento por CNPJ](../deployment/one-cnpj-per-instance.md)
+- [Política permanente de branches, releases e produção isolada](../deployment/versioning-and-release-policy.md)
 - [Login por subdomínio](../deployment/login-by-subdomain.md)
 - [Estado verificado](PROJECT_STATE.md)
 - [Arquitetura e decisões](ARCHITECTURE_AND_DECISIONS.md)
