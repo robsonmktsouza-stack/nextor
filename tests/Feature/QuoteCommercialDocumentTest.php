@@ -20,8 +20,8 @@ final class QuoteCommercialDocumentTest extends TestCase
 
     private function admin(): User
     {
-        return User::create([
-            'name'=>'Comercial Teste','email'=>'quote-tests@example.com',
+        return User::firstOrCreate(['email'=>'quote-tests@example.com'],[
+            'name'=>'Comercial Teste',
             'password'=>'senhaSegura123','role'=>'admin','is_active'=>true,
         ]);
     }
