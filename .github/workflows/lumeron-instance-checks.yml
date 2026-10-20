@@ -30,7 +30,7 @@ jobs:
           touch "$testroot/composer.lock"
           bash deploy/instances/provision.sh \
             --id cliente_a_1 --cnpj 00000000000000 \
-            --domain cliente-a-1.example.com --source "$testroot" |
+            --domain cliente-a-1.example.com --base-domain example.com --source "$testroot" |
             grep -q 'Simulação: nada foi alterado'
       - name: PHP syntax for tenant guard and health command
         shell: bash
