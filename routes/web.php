@@ -61,7 +61,9 @@ Route::middleware('guest')->group(function () {
     Route::post('/reset-password', [PasswordRecoveryController::class,'reset'])
         ->name('password.update')->middleware('throttle:5,1');
 });
-Route::middleware('auth')->group(function () {
+Route::get('/license-status', fn () => view('errors.license-blocked'))
+    ->middleware('auth')->name('license.status');
+Route::middleware(['auth','control.license'])->group(function () {
     Route::post('/logout', [AuthController::class,'logout'])->name('logout');
     Route::get('/reference/fiscal-codes', FiscalCodeCatalogController::class)->name('reference.fiscal-codes');
     Route::get('/dashboard', DashboardController::class)->name('dashboard')->middleware('permission:dashboard');
