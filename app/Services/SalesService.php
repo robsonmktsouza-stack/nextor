@@ -328,6 +328,40 @@ class SalesService
         return $sale;
     }
 
+    /**
+     * Converts an existing quote into a new sale using the regular commercial
+     * pipeline. Original item prices/discounts remain fixed, but current
+     * inventory restrictions still apply. A unique source_quote_id and a
+     * locked status transition prevent duplicate stock/financial effects.
+     */
+    public function convertQuote(Sale $quote, int $userId): Sale
+    {
+        if($quote->operation_type!=='quote') {
+            throw ValidationException::withMessages(['sale'=>'Somente orçamentos podem ser convertidos.']);
+        }
+        $quote->loadMissing('items');
+        return $this->create([
+            'source_quote_id'=>$quote->id,
+            'operation_type'=>'sale',
+            'source'=>'manual',
+            'operation_date'=>now()->toDateString(),
+            'customer_id'=>$quote->customer_id,
+            'final_consumer'=>$quote->final_consumer,
+            'keyword'=>$quote->keyword,
+            'notes'=>$quote->notes,
+            'items'=>$quote->items->map(fn($item)=>[
+                'item_type'=>$item->item_type,
+                'product_id'=>$item->product_id,
+                'service_id'=>$item->service_id,
+                'description'=>$item->product_name,
+                'quantity'=>(string)$item->quantity,
+                'unit_price'=>(string)$item->unit_price,
+                'discount'=>(string)$item->discount,
+                'notes'=>$item->notes,
+            ])->all(),
+        ],$userId);
+    }
+
     public function cancel(Sale $sale, int $userId): void
     {
         DB::transaction(function () use ($sale, $userId) {
