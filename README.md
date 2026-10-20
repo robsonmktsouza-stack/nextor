@@ -10,6 +10,12 @@ Antes de programar neste repositório com ChatGPT, Codex, Copilot, Claude ou out
 
 **Atenção:** a branch de trabalho de referência é `feature/acbr-nfe-bootstrap` (verifique se continua sendo a ativa); a `main` pode estar desatualizada. A documentação está versionada no GitHub, mas cada chat/agente precisa abrir os arquivos; não há sincronização automática do contexto por conversa.
 
+## Versões, desenvolvimento contínuo e produção
+
+**Política permanente aprovada em 20/10/2026:** o piloto NFC-e e futuros clientes recebem **versões estáveis individualmente aprovadas**, enquanto o desenvolvimento de novos módulos continua sem afetar a produção. Push/merge na branch de desenvolvimento **não implanta cliente automaticamente**. Os detalhes obrigatórios de `main`, `develop`, `feature/*`, `hotfix/*`, tags `vX.Y.Z`, staging, backup, rollback e deploy por CNPJ estão em **[Política de versões e publicação](docs/deployment/versioning-and-release-policy.md)**.
+
+O estado real ainda exige preparar branches, `composer.lock`, CI e infraestrutura de hospedagem antes do primeiro deploy; a existência de scripts **não significa** produção configurada. Outros agentes devem ler a política antes de alterar fluxos de versão/implantação.
+
 ## Identidade visual
 
 Os dois arquivos oficiais da marca estão incluídos em:
