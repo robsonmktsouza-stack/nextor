@@ -2,6 +2,10 @@
 
 **Retrato de referência:** 19/10/2026, inspeção do código remoto da branch `feature/acbr-nfe-bootstrap` no repositório `robsonmktsouza-stack/nextor`. **Não é um atestado de funcionamento em produção**; não foram executados testes locais ou chamadas reais à SEFAZ para elaborar este retrato.
 
+## Decisão de gestão de releases — 20/10/2026 (não é deploy)
+
+O proprietário **decidiu avançar para piloto de NFC-e em produção e continuar desenvolvendo novas funções sem interromper clientes**. Política permanente em [docs/deployment/versioning-and-release-policy.md](../deployment/versioning-and-release-policy.md). A versão instalada por CNPJ deve ser aprovada, identificada por tag/commit e isolada de pushes de desenvolvimento. Estratégia futura: `main` estável, `develop` integração, `feature/*` recursos e `hotfix/*` patches. **Não inferir que o piloto já foi implantado**. Na revisão do repositório, `main` estava atrás, `develop` e a primeira tag ainda não existiam, `composer.lock` faltava e CI estava focada na branch de trabalho; revisar novamente no GitHub antes de agir. Não executar merge, tag, deploy ou migração em ambiente real só por esta decisão.
+
 ## Identidade e base
 
 - Nome de exibição: **Lumeron ERP**, antes **Nextor**. O nome GitHub `nextor`, caminhos `nextor.*`, classes históricas e alias `/api/nextor` permanecem quando necessários para compatibilidade; a API nova está em `/api/lumeron`.
