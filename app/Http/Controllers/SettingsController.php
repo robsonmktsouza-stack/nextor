@@ -363,6 +363,16 @@ class SettingsController extends Controller
     public function updatePaymentMethod(Request $request, PaymentMethod $paymentMethod)
     {
         $data=$this->validatePaymentMethod($request,$paymentMethod);
+        // O PDV usa código e tipo para apurar caixa e histórico de venda.
+        // Renomear ou reclassificar um meio já utilizado reescreveria o
+        // significado de pagamentos anteriores sem tocar em suas linhas.
+        if(($data['code']!==$paymentMethod->code || $data['kind']!==$paymentMethod->kind)
+            && \App\Models\SalePayment::query()
+                ->where('payment_method',$paymentMethod->code)->exists()) {
+            throw ValidationException::withMessages([
+                'kind'=>'Uma forma de pagamento já utilizada não pode trocar código ou tipo. Cadastre outra forma para a nova classificação.',
+            ]);
+        }
         $data['is_active']=$request->boolean('is_active');
         $data['pdv_enabled']=$request->boolean('pdv_enabled');
 
