@@ -851,45 +851,11 @@ class PdvController extends Controller
                 ->with('error', 'A NFC-e não foi preparada. Confira se o módulo fiscal está habilitado.');
     }
 
-    public function receipt(Sale $sale)
+    public function receipt(Sale $sale, \App\Services\SaleReceiptPresenter $presenter)
     {
         abort_unless($sale->source==='pdv',404);
 
-        $sale->load([
-            'customer:id,name,document',
-            'user:id,name',
-            'items.product:id,unit',
-            'payments',
-        ]);
-
-        $allPaymentMethods=PaymentMethod::query()->orderBy('sort_order')->get(['code','name','kind']);
-        $paymentLabels=$allPaymentMethods->pluck('name','code')->all();
-        $paymentKinds=$allPaymentMethods->pluck('kind','code')->all();
-        $pdvSettings=AppSetting::groupValues('pdv',['receipt_width'=>'80','receipt_copies'=>1]);
-        $company=CompanySetting::current();
-
-        $cashReceived=(float)session('pdv_cash_received',(float)($sale->cash_received ?? $sale->total));
-        $change=(float)session('pdv_change',(float)($sale->change_amount ?? 0));
-
-        session()->keep(['pdv_last_sale','pdv_change']);
-
-        $nfceDocument=FiscalDocumentJob::query()
-            ->where('sale_id',$sale->id)
-            ->where('document_type','nfce')
-            ->latest('id')
-            ->first();
-
-        return view('pdv.receipt',[
-            'nfceDocument'=>$nfceDocument,
-            'nfceAuto'=>(bool)AppSetting::value('pdv','auto_nfce',false) || (bool)AppSetting::value('nfce','auto_from_pdv',false),
-            'sale'=>$sale,
-            'paymentLabels'=>$paymentLabels,
-            'paymentKinds'=>$paymentKinds,
-            'pdvSettings'=>$pdvSettings,
-            'company'=>$company,
-            'cashReceived'=>$cashReceived,
-            'change'=>$change,
-        ]);
+        return view('pdv.receipt',$presenter->data($sale,true));
     }
     private function cashExpectedForSession(PdvCashSession $session): float
     {
