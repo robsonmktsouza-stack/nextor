@@ -111,6 +111,15 @@ $customerCity=implode(' · ',array_filter([$customer?->district,implode('/',arra
 $customerContact=implode(' · ',array_filter([$customer?->contact_name,$customer?->phone]));
 $customerAddressFull=implode(' · ',array_filter([$customerAddress,$customerCity]));
 $validDate=$quote->quote_expires_at?->format('d/m/Y');
+$validDays=($quote->operation_date && $quote->quote_expires_at)
+    ? (int)$quote->operation_date->copy()->startOfDay()
+        ->diffInDays($quote->quote_expires_at->copy()->startOfDay(),false)
+    : null;
+$paymentCodes=$quote->payments->pluck('payment_method')->filter()->unique()->values();
+$paymentCatalog=$paymentCodes->isNotEmpty()
+    ? \App\Models\PaymentMethod::query()->whereIn('code',$paymentCodes->all())->pluck('name','code')
+    : collect();
+$paymentTerms=$paymentCodes->map(fn($code)=>$paymentCatalog->get($code) ?? $code)->implode(', ') ?: 'A combinar';
 $createdDate=($quote->operation_date ?? $quote->created_at)->format('d/m/Y');
 $expired=$quote->quote_expires_at && $quote->quote_expires_at->copy()->startOfDay()->lt(today());
 $state=match(true) {
@@ -173,11 +182,11 @@ $serviceSubtotal=$quote->items->where('item_type','service')
       <td colspan="2"><span class="label">Endereço de entrega / atendimento</span>
           <span class="value">{{ $customerAddressFull ?: '—' }}</span></td>
       <td><span class="label">Validade da proposta</span>
-          <span class="value">{{ $validDate ?: 'A combinar' }}</span></td>
+          <span class="value">{{ $validDate ?: 'A combinar' }}@if($validDate && $validDays!==null && $validDays>=0) ({{ $validDays }} {{ $validDays===1 ? 'dia' : 'dias' }})@endif</span></td>
     </tr>
     <tr>
       <td><span class="label">Responsável comercial</span><span class="value">{{ $quote->user?->name ?? '—' }}</span></td>
-      <td class="spacer"><span class="label">Forma de pagamento</span><span class="value">A combinar</span></td>
+      <td class="spacer"><span class="label">Forma de pagamento</span><span class="value">{{ $paymentTerms }}</span></td>
       <td><span class="label">Situação</span><span class="value">{{ $state }}</span></td>
     </tr>
   </table>
@@ -218,7 +227,7 @@ $serviceSubtotal=$quote->items->where('item_type','service')
   <div class="tail-left">
     <h2 class="section-title">Condições comerciais</h2>
     <div class="conditions">
-      <p>Pagamento: a combinar.</p>
+      <p>Pagamento: {{ $paymentTerms }}.</p>
       <p>Prazo de entrega / execução: a combinar.</p>
       <p>Disponibilidade sujeita à confirmação.</p>
       @if($validDate)<p>Preços e condições válidos até {{ $validDate }}.</p>@endif
@@ -235,13 +244,12 @@ $serviceSubtotal=$quote->items->where('item_type','service')
   </div>
 </section>
 
-@if($quote->notes || $company->print_footer)
 <section class="notes no-break">
   <h2 class="section-title">Observações / informações adicionais</h2>
   @if($quote->notes)<p>{{ $quote->notes }}</p>@endif
   @if($company->print_footer)<p>{{ $company->print_footer }}</p>@endif
+  @if(!$quote->notes && !$company->print_footer)<p>—</p>@endif
 </section>
-@endif
 
 <section class="signature-row">
   <div class="signature"><div class="signature-line"></div>
