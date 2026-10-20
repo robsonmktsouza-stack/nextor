@@ -42,6 +42,14 @@ Este é o contrato de trabalho para agentes de IA que leem o repositório. **Apl
 
 **Leitura obrigatória:** [política completa de versões e publicação](docs/deployment/versioning-and-release-policy.md). Se o pedido envolver versão, produção, hotfix, migração, infraestrutura ou NFC-e, consulte-a **antes de propor comandos ou editar código**.
 
+## 2-B. Lumeron Control e licenciamento central (20/10/2026)
+
+A aplicação administrativa **independente** está na branch isolada `control-center`. **Jamais fazer merge dessa branch na `develop`/`main`**: são projetos distintos na raiz, enquanto não houver um repositório exclusivo.
+
+A `develop` do ERP recebeu somente o **agente opt-in** em `app/Services/License/CentralLicenseService.php`, middleware `control.license`, comando `lumeron:license-sync`, migração própria e `config/central_license.php`; **está desativado por padrão**. A versão `v1.0.0` na `main` não foi alterada. Ler [docs/deployment/control-center-integration.md](docs/deployment/control-center-integration.md) antes de editar/ativar.
+
+Habilitação requer autorização por CNPJ, URL HTTPS, UUID/chave da licença em `.env` privado, backup/migração e sincronização confirmada. Nunca copiar chaves entre CNPJs, expor segredos ou bloquear operações legais de regularização de NFC-e. A criação de conta central não cria automaticamente VPS, usuário ou implantação.
+
 ## 3. Procedimento por tarefa
 
 **Antes:** resumir o objetivo, localizar arquivos/rotas/testes existentes, mapear possíveis efeitos em outros módulos; verificar se solicitações recentes revogaram alguma decisão antiga.
