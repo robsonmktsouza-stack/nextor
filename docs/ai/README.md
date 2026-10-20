@@ -1,7 +1,7 @@
 # Lumeron ERP — ponto de entrada para IAs
 
 > Leia este arquivo antes de propor ou alterar código. Atualizado em 19/10/2026.
-> **Projeto ativo:** `robsonmktsouza-stack/nextor`, branch `feature/acbr-nfe-bootstrap`.
+> **Projeto ativo:** `robsonmktsouza-stack/nextor`; `main` contém a linha estável e `develop` é a branch padrão para novos recursos. `feature/acbr-nfe-bootstrap` é a origem histórica da primeira promoção.
 > **Decisão de 20/10/2026:** avançar para um piloto NFC-e com versão estável isolada, enquanto o desenvolvimento continua. **Nenhum agente pode implantar automaticamente a partir de pushes.** Ver a [política de publicação](../deployment/versioning-and-release-policy.md).
 > **Produto:** Lumeron ERP (antigo Nextor). Não confundir com o repositório separado `lumeronerp` (protótipo desktop WPF).
 
@@ -32,6 +32,6 @@ Documentos de referência existentes:
 
 ## Para usar em outro chat do ChatGPT
 
-Conecte/forneça acesso ao repositório e peça: **“Continue o Lumeron ERP a partir de `robsonmktsouza-stack/nextor`, branch `feature/acbr-nfe-bootstrap`. Leia `AGENTS.md` e `docs/ai/README.md` antes de alterar qualquer coisa; confira o código e atualize `docs/ai/HANDOFF.md` ao terminar.”**
+Conecte/forneça acesso ao repositório e peça: **“Continue o Lumeron ERP a partir de `robsonmktsouza-stack/nextor`, branch `develop` para novas funcionalidades. Leia `AGENTS.md`, `docs/ai/README.md` e `docs/deployment/versioning-and-release-policy.md` antes de alterar qualquer coisa; confira o código e atualize `docs/ai/HANDOFF.md` ao terminar. Não publicar a `main` sem aprovação.”**
 
 Esses arquivos persistem no GitHub, mas **não entram automaticamente no contexto de todos os chats**: a nova sessão precisa abrir o repositório/arquivos. Ferramentas que reconhecem `AGENTS.md`, `CLAUDE.md` ou instruções do Copilot poderão usá-los quando estiverem operando sobre esta cópia do código.
