@@ -2,6 +2,21 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
+## Continuidade — 20/10/2026 — política PERMANENTE de versões e desenvolvimento paralelo à produção
+
+**Decisão explícita do proprietário:** após extensa validação da NFC-e no Laragon, quer avançar para **piloto controlado em produção** e continuar desenvolvendo módulos e melhorias no Nextor/Lumeron **sem parar as vendas e emissão dos clientes**. Foi solicitada documentação durável no GitHub para que agentes futuros sempre respeitem esta regra.
+
+**Fonte normativa recém-criada:** [`docs/deployment/versioning-and-release-policy.md`](../deployment/versioning-and-release-policy.md). **Ler antes de executar trabalhos envolvendo branches, migrações, releases, fiscal ou VPS.** Links e instruções também adicionados a `AGENTS.md`, `CLAUDE.md`, `README.md`, `docs/ai/README.md`, `docs/ai/PROJECT_STATE.md`, `docs/ai/ARCHITECTURE_AND_DECISIONS.md` e `docs/deployment/one-cnpj-per-instance.md`.
+
+**Regra absoluta:** `git push`/desenvolvimento **não** publica automaticamente no cliente. Política futura: `main` para linha estável aprovada, `develop` para integração, `feature/*` para funcionalidades, `hotfix/*` para correção a partir da tag/commit instalado. Cada CNPJ roda release aprovado e isolado, publicado individualmente com backup, janela e possibilidade de recuperação. `v1.0.0` é **candidata futura, não tag criada**. `php artisan serve` só para desenvolvimento, não produção.
+
+**Estado verificado nesta tarefa:** branch de escrita `feature/acbr-nfe-bootstrap` (no começo: `f3ddfb538ed2`); `main` estava desatualizada; `develop` não existia; `composer.lock` ainda não estava na raiz; workflow `ACBr integration checks` ativado para push na feature e PR; scripts `deploy/instances/provision.sh`, `update.sh`, `list.sh` já existem, com `--apply` explícito, isolamento por CNPJ e backup MySQL local em atualização. Linux requer ACBrLib própria e backup externo. Hospedagem final ainda não foi escolhida/confirmada.
+
+**Escopo realizado:** SOMENTE edição/criação de documentação via GitHub, sem alterar código de negócio, composer, workflow, branch, tag, certificados, base de dados, DNS, VPS, instalações ou SEFAZ. Não foi criado release `v1.0.0`; não afirmar que já ocorreu deploy. Testes de aplicação não são necessários para esta alteração documental; conferir existência dos arquivos/links no repositório.
+
+**Próxima tarefa quando o proprietário solicitar:** definir hospedagem e sequência de implantação, gerar/versionar `composer.lock` na branch de desenvolvimento, reconciliar `main` com a linha funcional, criar `develop`, ajustar CI para `main`/`develop`, e preparar primeiro release **sem implantar nada sem autorização específica**. Não reiniciar do zero a homologação fiscal sem motivo técnico concreto.
+
+
 ## Continuidade — 20/10/2026 — eliminar espera infinita ao abrir comprovante PDF
 
 **Problema real:** após o ajuste de altura do comprovante, o usuário mostrou `/pdv/receipt/9?print=0` com aba do Chrome carregando indefinidamente, em branco. A rota `SaleReceiptPdfService::render` iniciava **Chrome/Edge headless externo em todas as consultas**, aguardando o processo e arquivo temporário. Esse fluxo era pesado e podia bloquear a requisição do Laragon.
