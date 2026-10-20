@@ -2,6 +2,18 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
+## Continuidade — 20/10/2026 — prévia do comprovante no Chrome, sem imprimir automaticamente
+
+**Pedido:** após incluir comprovante comercial em **Vendas**, o proprietário reiterou que a venda deve **abrir em nova aba do Chrome, permitindo conferir e só depois imprimir**. A versão anterior fazia isso apenas quando a URL carregava `?print=0`: abrir `/sales/{id}/receipt` diretamente disparava `window.print()` e causava uma experiência indesejada.
+
+**Correção no mesmo fluxo (sem novo PDF nem modelo paralelo):**
+- `resources/views/pdv/receipt.blade.php`: JavaScript de impressão automática agora exige `$receiptOrigin==='pdv'` **e** ausência de `?print=0`; para origens `sales`, a prévia nunca chama `window.print()` no `load`, mesmo com `?print=1`. Apenas o clique em **Imprimir comprovante interno** chama o diálogo do navegador. Após imprimir pela área Vendas, a aba permanece aberta.
+- CSS `@media screen` e classe `sales-receipt-preview`: prévia mais larga e legível na aba Chrome, somente para vendas comuns. O CSS `@media print` continua com a largura térmica configurada em 58/80 mm, preservando o impresso do PDV e seus recibos.
+- `resources/views/sales/show.blade.php` e `sales/index.blade.php`: hyperlinks `target="_blank" rel="noopener noreferrer"` continuam, mas agora usam a rota direta `sales.receipt` **sem `?print=0`**. Funciona também ao colar URL manualmente.
+- `tests/Feature/SaleReceiptReuseTest.php`: cobre abertura direta, URLs antigas `?print=0`, `?print=1`, visualização sem impressão automática, nova aba em links e preservação da impressão automática padrão no PDV. Sem alterações no banco, rotas, NFC-e, estoque ou financeiro.
+
+**Validar:** conferir CI da branch `feature/acbr-nfe-bootstrap` após commit `4d99d7ee`; caso ainda em execução, não alegar sucesso. Revisar manualmente no Chrome que uma venda comum abre na aba com texto legível, imprimir exibe janela do Chrome (opção Salvar como PDF) e o PDV continua imprimindo por padrão conforme seu fluxo atual. Atualização Laragon: `git pull origin feature/acbr-nfe-bootstrap`, `php artisan optimize:clear`, Ctrl+F5. Nenhuma migration.
+
 ## Continuidade — 20/10/2026 — impressão de venda comum com o mesmo comprovante térmico do PDV
 
 **Solicitação:** no módulo Vendas, uma venda comum só apresentava impressão da NFC-e quando disponível; o proprietário pediu **imprimir também o comprovante não fiscal de venda, exatamente o mesmo já existente no PDV**. Não criar PDF A4 paralelo nem confundir recibo comercial com DANFE.
