@@ -127,7 +127,7 @@ final class QuoteCommercialDocumentTest extends TestCase
         $quote=$this->createQuote($this->product());
         $quote->items()->create([
             'item_type'=>'service','product_id'=>null,'service_id'=>null,
-            'product_name'=>'Instalação de acessórios','product_sku'=>null,
+            'product_name'=>'Instalação de acessórios','product_sku'=>'',
             'quantity'=>'1.000','unit_price'=>'50.00','discount'=>'0.00',
             'line_total'=>'50.00','notes'=>null,
         ]);
