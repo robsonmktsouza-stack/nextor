@@ -137,14 +137,24 @@ class SaleController extends Controller
         return view('sales.show',compact('sale','saleReturns','paymentLabels','nfceDocument'));
     }
 
-    public function receipt(Sale $sale, \App\Services\SaleReceiptPresenter $presenter)
+    public function receipt(Request $request, Sale $sale, \App\Services\SaleReceiptPdfService $pdf)
     {
-        // Um orçamento não é venda: nunca imprimir comprovante de pagamento.
+        // Comprovante comercial: o Chrome recebe um PDF inline, como no orçamento.
+        // Não preparar NFC-e nem movimentar venda, caixa, estoque ou financeiro.
         abort_unless($sale->operation_type==='sale',404);
-
-        // Reutiliza o mesmo template e configuração térmica do PDV.
-        // A rota exige permissão Vendas, não permissão exclusiva do caixa.
-        return view('pdv.receipt',$presenter->data($sale));
+        try {
+            $bytes=$pdf->render($sale);
+        } catch (RuntimeException $e) {
+            abort(503,$e->getMessage());
+        }
+        $name='Comprovante-Venda-'.str_pad((string)$sale->id,5,'0',STR_PAD_LEFT).'.pdf';
+        $mode=$request->boolean('download')?'attachment':'inline';
+        return response($bytes,200,[
+            'Content-Type'=>'application/pdf',
+            'Content-Disposition'=>$mode.'; filename="'.$name.'"',
+            'Cache-Control'=>'private, no-store, max-age=0',
+            'X-Content-Type-Options'=>'nosniff',
+        ]);
     }
 
     public function quotePdf(Request $request, Sale $sale, QuotePdfService $pdf)
