@@ -63,6 +63,7 @@ strong { font-weight:700; }
 .items th:nth-child(9) { width:12%; }
 .items tbody tr { height:21pt; page-break-inside:avoid; break-inside:avoid; }
 .items tbody tr:nth-child(even) { background:#fafbfb; }
+.items tbody tr.empty-row td { height:21pt; }
 .items td { padding:6px 4px; border-bottom:1px solid #d8dddd;
     font-size:9.3px; line-height:1.35; vertical-align:top; overflow-wrap:anywhere; }
 .items td:first-child,.items td:nth-child(2) { color:#617078; }
@@ -222,6 +223,14 @@ $serviceSubtotal=$quote->items->where('item_type','service')
         <td class="number-cell">{{ $numberOnly($item->line_total) }}</td>
       </tr>
       @endforeach
+      {{-- Preserva a altura da grade da folha Excel sem criar itens fictícios.
+           Mais de nove itens continuam em páginas adicionais naturalmente. --}}
+      @for($emptyRow=0;$emptyRow<max(0,9-$quote->items->count());$emptyRow++)
+      <tr class="empty-row" aria-hidden="true">
+        <td>&nbsp;</td><td></td><td></td><td></td><td></td>
+        <td></td><td></td><td></td><td></td>
+      </tr>
+      @endfor
     </tbody>
   </table>
 </section>
