@@ -2,6 +2,22 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
+## Continuidade — 20/10/2026 — corrigir comprovante térmico dividido em duas páginas
+
+**Problema reportado:** screenshot de `/pdv/receipt/9?print=0` no Chrome já mostrava o leitor PDF nativo, mas a impressão do comprovante de **uma via** estava dividida em duas páginas: a primeira terminava após dados do consumidor e a segunda continha só o rodapé não fiscal.
+
+**Causa identificada no Blade:** `@page` usava altura fixa estimada pela quantidade de itens (`receiptHeightMm`). O cálculo não refletia altura variável do logo real incorporado, endereço, linhas quebradas, cabeçalhos/rodapés personalizados nem observações. Por isso o Chrome paginava o último trecho.
+
+**Correção na branch `feature/acbr-nfe-bootstrap`:**
+- Somente em `receiptPdfMode`, o Blade `resources/views/pdv/receipt.blade.php` usa a mesma largura térmica de 58/80 mm na tela e na impressão, com as mesmas margens internas; elimina a diferença entre medidas antes e depois do modo de impressão.
+- Script leve `receipt-paper-fit` calcula a altura real de cada via através de `getBoundingClientRect()`, após montar os elementos e novamente em `load` (logo carregada); acrescenta uma pequena folga de 4 mm ao `@page` do PDF, garantindo espaço para todo o rodapé. Para duas vias intencionais, cada via continua em página própria, sem fragmentos extras.
+- `tests/Feature/SaleReceiptReuseTest.php`: novos cenários no Chromium/pdfinfo para largura 80 e 58 mm, logo cadastrada, cabeçalho/rodapé, várias descrições longas e observações, verificando **1 página por via** e 2 páginas somente quando `receipt_copies=2`.
+- Não alterar a rota, leitor PDF, DANFE, emissão fiscal, dados comerciais, PDF de orçamento nem CSS/JS do restante do sistema. O comportamento HTML de finalização automática do PDV continua sem o script de ajuste de papel.
+
+**Validação:** conferir os resultados do workflow `ACBr integration checks` para os commits `be9130ff` (correção Blade) e `eff95515` (teste de paginação); a verificação visual no Chrome/Laragon do usuário ainda é necessária para confirmar o resultado com a logo real. Sem migrações.
+
+**Atualização Laragon:** após `git status -sb`, `git pull origin feature/acbr-nfe-bootstrap` e `php artisan optimize:clear`, atualizar `/pdv/receipt/9?print=0` com Ctrl+F5. Com uma via configurada, deve haver só uma página PDF contendo rodapé; com duas vias configuradas, uma página por via.
+
 ## Continuidade — 20/10/2026 — comprovante de venda no leitor nativo de PDF do Chrome
 
 **Solicitação e evidência:** captura real de `localhost:8000/pdv/receipt/9?print=0`. Ao reabrir uma venda pelo histórico do PDV, aparecia uma página HTML estreita com botões, painel da NFC-e e prévia do cupom; o proprietário pediu que abrisse como o orçamento: **PDF inline no leitor nativo do Chrome, com imprimir/baixar pelos próprios controles do navegador**, sem essa página intermediária.
