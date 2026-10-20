@@ -185,6 +185,12 @@ final class SaleReceiptReuseTest extends TestCase
             ->assertHeader('Content-Disposition','inline; filename="Comprovante-Venda-'.str_pad((string)$sale->id,5,'0',STR_PAD_LEFT).'.pdf"')
             ->assertHeader('Cache-Control','private, no-store, max-age=0');
         $this->get(route('sales.receipt',$sale))->assertForbidden();
+
+        // Falha na preparação fiscal ainda mostra a explicação ao operador.
+        $this->get(route('pdv.receipt',['sale'=>$sale,'print'=>0,'status'=>1]))
+            ->assertOk()->assertViewIs('pdv.receipt')
+            ->assertSee('let automatic=false;',false)
+            ->assertSee('NFC-e ainda não preparada');
     }
 
     public function test_sales_receipt_pdf_does_not_use_cash_values_from_previous_session(): void
