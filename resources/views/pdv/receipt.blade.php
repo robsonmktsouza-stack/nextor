@@ -90,6 +90,25 @@ body{font-size:9px}
 .footer{font-size:7.2px;line-height:1.45;text-align:center;overflow-wrap:anywhere}
 .copy-label{font-size:6.5px;color:#555;margin-top:1mm}
 @page{size:{{ $receiptWidth }}mm {{ $receiptHeightMm }}mm;margin:0}
+/* No módulo Vendas, o Chrome abre primeiro uma prévia legível.
+   A impressão continua usando exatamente a largura térmica do PDV. */
+@media screen {
+  .sales-receipt-preview .screen-actions,
+  .sales-receipt-preview .receipt { width:min(460px,calc(100vw - 24px)); }
+  .sales-receipt-preview .receipt { max-width:calc(100vw - 24px);padding:20px;box-shadow:0 2px 14px rgba(24,36,46,.12); }
+  .sales-receipt-preview .company-logo { max-height:86px; }
+  .sales-receipt-preview .brand { font-size:17px; }
+  .sales-receipt-preview .subtitle { font-size:13px; }
+  .sales-receipt-preview .warning { font-size:11px; }
+  .sales-receipt-preview .meta,
+  .sales-receipt-preview .custom-header { font-size:11px; }
+  .sales-receipt-preview .items th { font-size:11px; }
+  .sales-receipt-preview .items td { font-size:11px; }
+  .sales-receipt-preview .row { font-size:12px; }
+  .sales-receipt-preview .total { font-size:15px; }
+  .sales-receipt-preview .footer { font-size:10px; }
+  .sales-receipt-preview .copy-label { font-size:10px; }
+}
 @media print{
   html,body{width:{{ $receiptWidth }}mm!important;min-width:{{ $receiptWidth }}mm!important;max-width:{{ $receiptWidth }}mm!important;background:#fff!important}
   .screen-actions,.post-sale-status{display:none!important}
@@ -98,7 +117,7 @@ body{font-size:9px}
 }
 </style>
 </head>
-<body>
+<body class="{{ $receiptOrigin==='sales' ? 'sales-receipt-preview' : '' }}">
 <div class="screen-actions">
   @if($receiptOrigin==='sales')
     <a href="{{ route('sales.show',$sale) }}">Voltar à venda</a>
@@ -255,7 +274,9 @@ body{font-size:9px}
 
 <script>
 (()=>{
-  let automatic=@json(request()->query('print') !== '0');
+  // Venda comum: sempre visualizar primeiro no Chrome. Apenas o clique
+  // explícito em Imprimir abre o diálogo. O PDV conserva seu fluxo automático.
+  let automatic=@json($receiptOrigin==='pdv' && request()->query('print') !== '0');
   const afterPrintUrl=@json($receiptAfterPrintUrl);
   const salesReceipt=@json($receiptOrigin==='sales');
   const printButton=document.querySelector('[data-reprint-receipt]');
