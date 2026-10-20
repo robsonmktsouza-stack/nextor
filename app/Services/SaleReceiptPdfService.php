@@ -60,24 +60,14 @@ class SaleReceiptPdfService
         $displayMoney=fn($amount)=>$currencyPrefix.$formatMoney($amount);
         $logo=null;
 
+        // Logo é opcional: uma imagem enorme não pode travar o servidor Laravel.
+        // PNG e WebP grandes são reduzidos com GD (rotinas nativas em C) quando
+        // disponível; sem GD, somente PNG pequeno passa ao leitor PHP.
         if ($company->logo_path && Storage::disk('public')->exists($company->logo_path)) {
             $disk=Storage::disk('public');
-            $mime=$disk->mimeType($company->logo_path);
             $size=$disk->size($company->logo_path);
-            if ($size<=4194304 && in_array($mime,['image/png','image/jpeg'],true)) {
-                $logo=$disk->get($company->logo_path);
-            } elseif ($size<=4194304 && $mime==='image/webp'
-                && function_exists('imagecreatefromwebp') && function_exists('imagepng')) {
-                // Compatibilidade com logomarcas WebP quando GD estiver disponível.
-                $source=@imagecreatefromwebp($disk->path($company->logo_path));
-                if ($source!==false) {
-                    ob_start();
-                    imagesavealpha($source,true);
-                    $converted=imagepng($source);
-                    $png=ob_get_clean();
-                    imagedestroy($source);
-                    if ($converted && is_string($png)) $logo=$png;
-                }
+            if ($size>0 && $size<=4194304) {
+                $logo=$this->prepareLogo($disk->get($company->logo_path));
             }
         }
 
@@ -137,4 +127,55 @@ class SaleReceiptPdfService
             'notes'=>$sale->notes,
         ]);
     }
+    /**
+     * Evita consumo excessivo de CPU no servidor PHP de desenvolvimento.
+     * A miniatura é suficiente para um recibo físico de 58/80 mm.
+     */
+    private function prepareLogo(string $bytes): ?string
+    {
+        $info=@getimagesizefromstring($bytes);
+        if (!$info || ($info[0] ?? 0)<1 || ($info[1] ?? 0)<1) return null;
+
+        $width=(int)$info[0];
+        $height=(int)$info[1];
+        $pixels=$width*$height;
+        $mime=(string)($info['mime'] ?? '');
+
+        if ($mime==='image/jpeg' && ($info['channels'] ?? 3)===3) return $bytes;
+        if (!in_array($mime,['image/png','image/webp'],true) || $pixels>12000000) return null;
+
+        // Sem GD, usar o decodificador PHP apenas para imagens pequenas.
+        if (!function_exists('imagecreatefromstring')
+            || !function_exists('imagecreatetruecolor')
+            || !function_exists('imagecopyresampled')
+            || !function_exists('imagejpeg')) {
+            return $mime==='image/png' && $pixels<=250000 ? $bytes : null;
+        }
+
+        // PNG pequeno pode continuar transparente usando a rotina existente.
+        if ($mime==='image/png' && $pixels<=250000) return $bytes;
+
+        $source=@imagecreatefromstring($bytes);
+        if ($source===false) return null;
+        $scale=min(1.0,480/$width,240/$height);
+        $w=max(1,(int)round($width*$scale));
+        $h=max(1,(int)round($height*$scale));
+        $target=imagecreatetruecolor($w,$h);
+        if ($target===false) {
+            imagedestroy($source);
+            return null;
+        }
+
+        // Transparência de PNG/WebP sobre branco: cor natural de papel térmico.
+        $white=imagecolorallocate($target,255,255,255);
+        imagefilledrectangle($target,0,0,$w,$h,$white);
+        imagecopyresampled($target,$source,0,0,0,0,$w,$h,$width,$height);
+        ob_start();
+        $ok=imagejpeg($target,null,86);
+        $jpg=ob_get_clean();
+        imagedestroy($target);
+        imagedestroy($source);
+        return $ok && is_string($jpg) ? $jpg : null;
+    }
+
 }
