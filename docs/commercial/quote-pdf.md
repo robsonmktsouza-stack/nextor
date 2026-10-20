@@ -8,6 +8,12 @@
 4. No detalhe do orçamento, use **Visualizar PDF** (nova aba) ou **Baixar PDF**. Na listagem de Vendas, há atalho de impressão para linhas de orçamento. O download pode ser anexado manualmente no WhatsApp/e-mail; **não há envio automático de arquivo por WhatsApp ou e-mail nesta entrega**.
 5. Em orçamentos ativos e dentro da validade, **Converter em venda** exige confirmação. A nova venda é vinculada ao orçamento original; o estoque e financeiro seguem `SalesService` e o estoque disponível no momento da conversão. Repetir o pedido de conversão não gera segunda venda.
 
+## Padrão gráfico do documento (20/10/2026)
+
+A impressão deve parecer um **orçamento emitido por ERP empresarial tradicional**, não um material publicitário: A4 com margens de relatório, tipografia Arial, cabeçalho empresarial compacto, dados de cliente em células delimitadas, tabela de itens densa com SKU e unidade, linhas finas, cinza neutro, total em quadro tabular sem faixa grande colorida, observações e aviso não fiscal no rodapé. Sem bordas arredondadas, cartões flutuantes, selos decorativos ou parágrafos promocionais. O nome e a marca da própria empresa vêm de Configurações; sem logo cadastrada, o cabeçalho continua alinhado apenas com texto.
+
+A HTML Blade usa `items.product` apenas para a unidade corrente do cadastro de produtos; registros antigos sem unidade usam `UN`, serviços usam `SV`. A apresentação não recalcula descontos/preços e não interfere no serviço de conversão comercial. Para auditar alterações, ver `test_quote_pdf_uses_compact_rectangular_erp_document_layout` em `QuoteCommercialDocumentTest`.
+
 ## Personalização e segurança
 
 O PDF utiliza automaticamente nome e CNPJ, endereço, contatos, logo (armazenada nas Configurações da empresa) e rodapé configurado de impressão; exibe cliente, número e validade, vendedor, itens com descontos, observações e total. **Não usa a logo do próprio Lumeron como se fosse a empresa emitente.** É um documento comercial, não DANFE, NF-e ou NFC-e.
