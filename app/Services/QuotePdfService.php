@@ -7,7 +7,7 @@ use App\Models\Sale;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 
-final class QuotePdfService
+class QuotePdfService
 {
     public function renderHtml(Sale $quote): string
     {
