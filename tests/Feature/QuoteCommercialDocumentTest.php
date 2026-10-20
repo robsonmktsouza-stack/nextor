@@ -87,7 +87,7 @@ final class QuoteCommercialDocumentTest extends TestCase
         $html=app(QuotePdfService::class)->renderHtml($quote);
 
         foreach ([
-            '@page { size:A4; margin:12mm 10mm 17mm; }',
+            '@page { size:A4; margin:20mm 3mm 14mm; }',
             'background:#477b78',
             'background:#e9eff0',
             '<div class="accent-band"></div>',
@@ -198,6 +198,45 @@ final class QuoteCommercialDocumentTest extends TestCase
         self::assertStringStartsWith('%PDF-',$pdf);
         self::assertStringContainsString('%%EOF',substr($pdf,-1024));
         self::assertGreaterThan(1500,strlen($pdf));
+        $this->assertSinglePrintPage($pdf);
+
+        // O modelo de referência enviado pelo usuário tem nove itens numa
+        // única página A4; teste real de paginação, não apenas HTML válido.
+        $original=$quote->items()->firstOrFail();
+        for($i=2;$i<=9;$i++) {
+            $quote->items()->create([
+                'item_type'=>'product','product_id'=>$original->product_id,'service_id'=>null,
+                'product_name'=>'FILTRO DE AR MOTOR E SISTEMA DE REFRIGERAÇÃO DO VEÍCULO',
+                'product_sku'=>'FIL-'.str_pad((string)$i,3,'0',STR_PAD_LEFT),
+                'quantity'=>'1.000','unit_price'=>'10.00',
+                'discount'=>'0.00','line_total'=>'10.00','notes'=>null,
+            ]);
+        }
+        $quote->update(['subtotal'=>'179.00','discount_total'=>'5.00','total'=>'174.00']);
+        $nineItemPdf=app(QuotePdfService::class)->render($quote->fresh());
+        self::assertStringStartsWith('%PDF-',$nineItemPdf);
+        $this->assertSinglePrintPage($nineItemPdf);
+    }
+
+    private function assertSinglePrintPage(string $pdf): void
+    {
+        if (!is_file('/usr/bin/pdfinfo')) {
+            // Ambiente Windows não precisa de poppler para executar o teste
+            // funcional; no runner Linux validamos a paginação de verdade.
+            return;
+        }
+        $temporary=tempnam(sys_get_temp_dir(),'quote-a4-');
+        self::assertNotFalse($temporary);
+        try {
+            file_put_contents($temporary,$pdf);
+            $process=new \\Symfony\\Component\\Process\\Process(['pdfinfo',$temporary]);
+            $process->run();
+            self::assertTrue($process->isSuccessful(),$process->getErrorOutput());
+            self::assertMatchesRegularExpression('/^Pages:\\s+1\\s*$/m',$process->getOutput(),
+                'A proposta de até nove itens deve ocupar exatamente uma folha A4.');
+        } finally {
+            @unlink($temporary);
+        }
     }
 
     public function test_pdf_is_restricted_to_authenticated_sales_and_quote_documents(): void
