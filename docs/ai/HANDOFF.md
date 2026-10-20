@@ -2,6 +2,24 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
+## Continuidade — 20/10/2026 — primeira promoção de código à `main` e abertura da `develop`
+
+**Autorização:** o proprietário pediu explicitamente colocar a versão atual aprovada na `main`, criar a linha de desenvolvimento e preparar `v1.0.0`. Não autorizou instalar/deployar em servidores ou emitir notas reais.
+
+**Executado no GitHub:**
+- Comparação de `main` antiga (`36bbdbf5044d68d384fea5b9e7a1560b20363253`) contra `feature/acbr-nfe-bootstrap` confirmou histórico linear: **1.340 commits à frente e 0 atrás** no início da operação, sem divergência.
+- Criado e validado `composer.lock` no GitHub Actions com PHP 8.3; o trabalho foi incorporado à feature e o workflow provisório gerador do lock foi **removido**. Não resolver dependências na VPS.
+- Workflow `ACBr integration checks` ampliado para `main`, `develop`, `feature/acbr-nfe-bootstrap`, tags `v*` e PRs; valida a existência/integridade do lock. Regressões fiscais complementares passam a cobrir `main`/`develop`.
+- A `main` foi promovida com `update_ref` **fast-forward, sem force push**, ao commit `8746a6cf0000f81a6ae1d43127fc6fc484a80607`, depois de novo CI completo aprovado.
+- A `develop` foi criada a partir exatamente desse commit, para os próximos módulos. Os arquivos `AGENTS.md`, `CLAUDE.md`, `README.md` e `docs/ai/` foram atualizados na `develop` para instruir futuros agentes a não usar `main` como branch de trabalho.
+- Será publicada a nota de versão `docs/releases/v1.0.0.md`. A tag `v1.0.0` só deve ser considerada existente **após** verificação do GitHub: seu job é condicionado a CI verde no SHA exato da `main`, com commit de aprovação e verificação de tag preexistente. Nenhuma rotina faz deploy.
+- CI comprovada antes da primeira promoção: [workflow `39507374699`](https://github.com/robsonmktsouza-stack/nextor/actions/runs/39507374699); verificar resultados dos workflows posteriores, pois novos commits de documentação também geram CI.
+
+**Obrigatório a partir de agora:** `main` = versão base estável, `develop` = próxima integração, `feature/*` = alterações menores, `hotfix/*` = urgência em release. Nada na `main` instala em cliente automaticamente. Diferenciar GitHub/tag de operação SEFAZ em produção. Manter um ambiente/banco/CNPJ, XMLs, APP_KEY e ACBr próprios por cliente. `php artisan serve` continua exclusivo de desenvolvimento.
+
+**Pendente fora do GitHub:** definição de hospedagem (Linux ACBr própria ou Windows), HTTPS, servidor e worker gerenciados, backup externo e teste de restauração, aprovação individual para o primeiro deploy. Não prometer painel central criado nem infraestrutura pronta.
+
+
 ## Continuidade — 20/10/2026 — política PERMANENTE de versões e desenvolvimento paralelo à produção
 
 **Decisão explícita do proprietário:** após extensa validação da NFC-e no Laragon, quer avançar para **piloto controlado em produção** e continuar desenvolvendo módulos e melhorias no Nextor/Lumeron **sem parar as vendas e emissão dos clientes**. Foi solicitada documentação durável no GitHub para que agentes futuros sempre respeitem esta regra.
