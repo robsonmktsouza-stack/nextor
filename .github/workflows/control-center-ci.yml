@@ -27,4 +27,4 @@ jobs:
       - name: Run application integration suite
         run: |
           php artisan route:list
-          php artisan test
+          php vendor/bin/phpunit
