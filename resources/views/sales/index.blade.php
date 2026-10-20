@@ -36,13 +36,18 @@
     <input type="search" autocomplete="off" name="search" value="{{ $term }}" placeholder="Código, cliente, palavra-chave ou responsável..." aria-label="Buscar vendas">
     <button type="submit" class="table-search-submit" data-tooltip="Pesquisar">@include('partials.icon',['name'=>'search','size'=>17])</button>
   </div>
-  <select name="status" class="input-filter"><option value="">Todos os status</option><option value="completed" @selected($status==='completed')>Concluídas</option><option value="cancelled" @selected($status==='cancelled')>Canceladas</option></select>
+  <select name="status" class="input-filter"><option value="">Todos os status</option><option value="completed" @selected($status==='completed')>Concluídas</option><option value="cancelled" @selected($status==='cancelled')>Canceladas</option><option value="converted" @selected($status==='converted')>Convertidos</option></select>
   <button class="btn btn-secondary">Filtrar</button>
   @if($term || $status)<a class="btn btn-light" href="{{ route('sales.index',['month'=>$month]) }}">Limpar</a>@endif
 </form>
 </div>
 <div id="sales-live-results" data-live-search-results><div class="table-scroll"><table class="cms-table"><thead><tr><th class="select-cell"><input type="checkbox" data-check-all aria-label="Selecionar todos"></th><th>Nº</th><th>Tipo</th><th>Data</th><th>Cliente</th><th>Responsável</th><th>Valor total</th><th>Status</th><th class="action-cell">Detalhes</th></tr></thead><tbody>
-@forelse($sales as $sale)<tr><td class="select-cell"><input type="checkbox" data-row-select value="{{ $sale->id }}" aria-label="Selecionar venda {{ $sale->id }}"></td><td><a class="table-link" href="{{ route('sales.show',$sale) }}">#{{ str_pad($sale->id,5,'0',STR_PAD_LEFT) }}</a></td><td><span class="status status-blue">{{ $sale->operation_type==='quote'?'Orçamento':'Venda' }}</span></td><td class="nowrap">{{ ($sale->operation_date ?? $sale->created_at)->format(\App\Models\AppSetting::dateFormat()) }}</td><td>{{ $sale->customer?->name ?? 'Consumidor não identificado' }}</td><td>{{ $sale->user?->name ?? '—' }}</td><td class="price-strong nowrap">R$ {{ number_format((float)$sale->total,2,',','.') }}</td><td><span class="status {{ $sale->status==='completed'?'status-ok':'status-muted' }}">{{ $sale->status==='completed'?'Concluída':'Cancelada' }}</span></td><td class="action-cell"><a class="btn-icon" href="{{ route('sales.show',$sale) }}" aria-label="Abrir venda">@include('partials.icon',['name'=>'chevron','size'=>17])</a></td></tr>
+@forelse($sales as $sale)<tr><td class="select-cell"><input type="checkbox" data-row-select value="{{ $sale->id }}" aria-label="Selecionar venda {{ $sale->id }}"></td><td><a class="table-link" href="{{ route('sales.show',$sale) }}">#{{ str_pad($sale->id,5,'0',STR_PAD_LEFT) }}</a></td><td><span class="status status-blue">{{ $sale->operation_type==='quote'?'Orçamento':'Venda' }}</span></td><td class="nowrap">{{ ($sale->operation_date ?? $sale->created_at)->format(\App\Models\AppSetting::dateFormat()) }}</td><td>{{ $sale->customer?->name ?? 'Consumidor não identificado' }}</td><td>{{ $sale->user?->name ?? '—' }}</td><td class="price-strong nowrap">R$ {{ number_format((float)$sale->total,2,',','.') }}</td><td><span class="status {{ $sale->status==='completed'?'status-ok':'status-muted' }}">{{ match($sale->status){'converted'=>'Convertido','cancelled'=>'Cancelado',default=>$sale->operation_type==='quote'?'Em aberto':'Concluída'} }}</span></td><td class="action-cell">
+ @if($sale->operation_type==='quote')
+ <a class="btn-icon" href="{{ route('sales.quote.pdf',$sale) }}" target="_blank" rel="noopener noreferrer" title="Visualizar orçamento PDF" aria-label="Visualizar PDF">@include('partials.icon',['name'=>'print','size'=>17])</a>
+ @endif
+ <a class="btn-icon" href="{{ route('sales.show',$sale) }}" aria-label="Abrir operação">@include('partials.icon',['name'=>'chevron','size'=>17])</a>
+ </td></tr>
 @empty<tr><td class="empty-cell" colspan="9">Nenhuma venda ou orçamento cadastrado.</td></tr>@endforelse
 </tbody></table></div>@include('partials.table-footer',['paginator'=>$sales])</div>
 </section>
