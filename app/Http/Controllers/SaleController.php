@@ -56,7 +56,7 @@ class SaleController extends Controller
                         ->orWhere('document','like',"%{$term}%"))
                     ->orWhereHas('user',fn($user)=>$user->where('name','like',"%{$term}%"));
             }))
-            ->when(in_array($status,['completed','cancelled'],true),fn($q)=>$q->where('status',$status))
+            ->when(in_array($status,['completed','cancelled','converted'],true),fn($q)=>$q->where('status',$status))
             ->latest()
             ->paginate($perPage)
             ->withQueryString();
