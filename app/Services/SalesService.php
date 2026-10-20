@@ -22,6 +22,22 @@ class SalesService
         $sale=DB::transaction(function () use ($data, $userId) {
             $rows=collect($data['items']);
             $operationType=$data['operation_type'] ?? 'sale';
+            $sourceQuote=null;
+            if(!empty($data['source_quote_id'])) {
+                if($operationType!=='sale') {
+                    throw ValidationException::withMessages(['sale'=>'A conversão precisa resultar em uma venda.']);
+                }
+                $sourceQuote=Sale::query()->lockForUpdate()->findOrFail($data['source_quote_id']);
+                if($sourceQuote->operation_type!=='quote' || $sourceQuote->status!=='completed'
+                   || ($sourceQuote->quote_expires_at && $sourceQuote->quote_expires_at->lt(today()))) {
+                    throw ValidationException::withMessages([
+                        'sale'=>'Este orçamento está cancelado, expirado ou já foi convertido.'
+                    ]);
+                }
+                if(Sale::query()->where('source_quote_id',$sourceQuote->id)->exists()) {
+                    throw ValidationException::withMessages(['sale'=>'Este orçamento já foi convertido em venda.']);
+                }
+            }
             $allowNegativeStock=(bool)AppSetting::value(
                 'inventory',
                 'allow_negative_stock',
@@ -159,11 +175,12 @@ class SalesService
                 'user_id'=>$userId,
                 'operation_type'=>$operationType,
                 'source'=>$data['source'] ?? 'manual',
+                'source_quote_id'=>$sourceQuote?->id,
                 'operation_date'=>$data['operation_date'] ?? now()->toDateString(),
                 'quote_expires_at'=>$operationType==='quote'
-                    ? \Carbon\Carbon::parse($data['operation_date'] ?? now()->toDateString())
+                    ? ($data['quote_expires_at'] ?? \Carbon\Carbon::parse($data['operation_date'] ?? now()->toDateString())
                         ->addDays(max(0,(int)AppSetting::value('operations','quote_valid_days',15)))
-                        ->toDateString()
+                        ->toDateString())
                     : null,
                 'final_consumer'=>(bool)($data['final_consumer'] ?? true),
                 'keyword'=>$data['keyword'] ?? null,
@@ -249,6 +266,10 @@ class SalesService
 
             if($operationType==='sale' && (bool)AppSetting::value('operations','auto_finance_sale',true)) {
                 $this->financial->syncSale($sale,$userId);
+            }
+
+            if($sourceQuote) {
+                $sourceQuote->update(['status'=>'converted']);
             }
 
             return $sale->refresh();
