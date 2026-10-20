@@ -1,0 +1,37 @@
+@extends('layouts.main')
+@section('title','Nova conta')
+@section('actions')<a class="btn subtle" href="{{ route('clients.index') }}">Voltar</a>@endsection
+@section('content')
+<section class="panel wizard-panel">
+<form id="newAccountForm" method="post" action="{{ route('clients.store') }}">@csrf
+<div class="wizard-progress"><span class="bubble current" data-step-dot="0">1</span><span class="wizard-line"></span><span class="bubble" data-step-dot="1">2</span><span class="wizard-line"></span><span class="bubble" data-step-dot="2">3</span></div>
+<fieldset data-wizard-step="0"><legend>Dados da empresa</legend>
+<p class="field-hint">Identifique a empresa que receberá uma instalação exclusiva do Lumeron.</p>
+<div class="form-grid">
+<label class="span-two">Razão social <strong>*</strong><input type="text" name="legal_name" maxlength="220" value="{{ old('legal_name') }}" required autofocus></label>
+<label>Nome fantasia <input name="trade_name" maxlength="220" value="{{ old('trade_name') }}"></label>
+<label>CNPJ <strong>*</strong><input name="cnpj" inputmode="numeric" maxlength="18" placeholder="00.000.000/0000-00" value="{{ old('cnpj') }}" required></label>
+<label>Nome do contato <input name="contact_name" maxlength="160" value="{{ old('contact_name') }}"></label>
+<label>E-mail <strong>*</strong><input name="email" type="email" maxlength="255" value="{{ old('email') }}" required></label>
+<label>Telefone <input name="phone" maxlength="30" value="{{ old('phone') }}"></label>
+</div></fieldset>
+<fieldset data-wizard-step="1" hidden><legend>Acesso da instalação</legend>
+<p class="field-hint">O cadastro reserva a identidade de uma instalação. Usuários e senhas do ERP são criados dentro da própria instalação, não aqui.</p>
+<div class="form-grid">
+<label>Subdomínio <strong>*</strong><input name="subdomain" maxlength="40" placeholder="empresa-exemplo" value="{{ old('subdomain') }}" pattern="[a-z][a-z0-9-]{1,38}" required></label>
+<label>Login do administrador (referência) <input name="admin_login" maxlength="100" pattern="[A-Za-z0-9_.-]{3,100}" value="{{ old('admin_login') }}" placeholder="administrador"></label>
+<label class="span-two">Endereço da instalação (opcional) <input name="installation_url" type="url" placeholder="https://empresa.seudominio.com.br" value="{{ old('installation_url') }}"></label>
+</div></fieldset>
+<fieldset data-wizard-step="2" hidden><legend>Plano e liberação</legend>
+<p class="field-hint">Escolha a validade e os módulos que o cliente terá direito a utilizar.</p>
+<div class="form-grid">
+<label>Plano <strong>*</strong><select name="plan" required>@foreach(config('license.plans') as $value=>$label)<option value="{{ $value }}" @selected(old('plan','standard')===$value)>{{ $label }}</option>@endforeach</select></label>
+<label>Vencimento <input name="expires_at" type="date" value="{{ old('expires_at') }}"><small>Em branco = sem vencimento automático.</small></label>
+</div>
+<div class="modules"><strong>Módulos liberados</strong><div class="module-grid">@foreach(config('license.modules') as $code=>$label)<label class="check"><input type="checkbox" name="modules[]" value="{{ $code }}" @checked(in_array($code, old('modules',['pdv','products','finance','fiscal','services'])))>{{ $label }}</label>@endforeach</div></div>
+<div class="info-line">A chave de licença será gerada automaticamente e mostrada somente após salvar. Nenhuma conta será criada diretamente no servidor do cliente.</div>
+</fieldset>
+<div class="wizard-footer"><button class="btn subtle" type="button" data-wizard-back hidden>Voltar</button><span class="nav-spacer"></span><button class="btn primary" type="button" data-wizard-next>Próximo <svg><use href="#i-arrow"/></svg></button><button class="btn primary" type="submit" data-wizard-submit hidden><svg><use href="#i-check"/></svg>Criar conta</button></div>
+</form>
+</section>
+@endsection

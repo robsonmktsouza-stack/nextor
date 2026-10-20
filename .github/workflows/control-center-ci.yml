@@ -1,0 +1,30 @@
+name: Lumeron Control checks
+on:
+  push:
+    branches:
+      - control-center
+  pull_request:
+    branches:
+      - control-center
+jobs:
+  php:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, ctype, openssl, pdo_sqlite, fileinfo
+          coverage: none
+      - name: PHP syntax
+        run: |
+          find app bootstrap config database routes tests public -name '*.php' -not -path '*/vendor/*' -print0 | xargs -0 -n1 php -l
+          node --check public/js/control.js
+      - name: Install dependencies
+        run: |
+          if test -s composer.lock; then composer install --no-interaction --prefer-dist --no-progress; else composer update --no-interaction --prefer-dist --no-progress; fi
+      - name: Run application integration suite
+        run: |
+          php artisan route:list
+          php artisan test
