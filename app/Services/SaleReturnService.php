@@ -164,6 +164,14 @@ class SaleReturnService
                 throw ValidationException::withMessages(['return'=>'Esta devolução já está cancelada.']);
             }
 
+            if(\App\Models\PdvCashMovement::query()
+                ->where('sale_return_id',$locked->id)
+                ->where('type','refund')->exists()) {
+                throw ValidationException::withMessages([
+                    'return'=>'Esta devolução já tem reembolso em dinheiro registrado. Regularize financeiramente antes de cancelar.',
+                ]);
+            }
+
             $items=$locked->items()->where('item_type','product')->whereNotNull('product_id')->orderBy('product_id')->get();
             $products=Product::query()->whereIn('id',$items->pluck('product_id')->all())->orderBy('id')->lockForUpdate()->get()->keyBy('id');
 
