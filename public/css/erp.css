@@ -3621,13 +3621,13 @@ body.nfe-modal-open{overflow:hidden}
 
 /* NEXTOR color hierarchy inspired by the fiscal base system */
 :root{
-  --base-topbar:#f2f2f2;
+  --base-topbar:#ededed;
   --base-topbar-border:#d2d6d9;
-  --base-sidebar:#424b50;
-  --base-sidebar-active:#30393e;
-  --base-module:#798a92;
-  --base-tab:#edf0f2;
-  --base-tab-hover:#e0e6e9;
+  --base-sidebar:#37474f;
+  --base-sidebar-active:#263238;
+  --base-module:#648493;
+  --base-tab:#567381;
+  --base-tab-hover:#4b6876;
   --base-green:#3ec300;
   --base-green-dark:#32a500;
 }
@@ -3717,7 +3717,7 @@ body.nfe-modal-open{overflow:hidden}
   color:#d6dee2;
 }
 .sidebar-link:hover{
-  background:#364147;
+  background:#314048;
   color:#fff;
 }
 .sidebar-link.active{
@@ -3732,8 +3732,8 @@ body.nfe-modal-open{overflow:hidden}
   color:#fff;
 }
 .sidebar-settings-link{
-  background:#404b51;
-  border-top-color:#566168;
+  background:#33434b;
+  border-top-color:#465861;
   color:#edf1f3;
 }
 .sidebar-settings-link:hover{
@@ -3753,7 +3753,7 @@ body.nfe-modal-open{overflow:hidden}
 /* Module title strip */
 .page-heading{
   background:var(--base-module);
-  border-bottom:1px solid #63757e;
+  border-bottom:1px solid #587886;
   box-shadow:none;
 }
 .page-heading h1{
@@ -3775,8 +3775,8 @@ body.nfe-modal-open{overflow:hidden}
 .finance-module-tabs a,
 .settings-main-tabs a{
   background:var(--base-tab);
-  color:#45545e;
-  border-color:#cfd7dc;
+  color:#fff;
+  border-color:var(--base-tab);
   border-bottom:0;
   box-shadow:none;
 }
@@ -3784,8 +3784,8 @@ body.nfe-modal-open{overflow:hidden}
 .finance-module-tabs a:hover,
 .settings-main-tabs a:hover{
   background:var(--base-tab-hover);
-  border-color:#bccbd4;
-  color:#344a57;
+  border-color:var(--base-tab-hover);
+  color:#fff;
 }
 .sales-module-tabs a.active,
 .finance-module-tabs a.active,
@@ -3797,11 +3797,11 @@ body.nfe-modal-open{overflow:hidden}
 }
 .finance-module-tabs .finance-settings-tab{
   background:var(--base-tab);
-  color:#45545e;
+  color:#fff;
 }
 .finance-module-tabs .finance-settings-tab:hover{
   background:var(--base-tab-hover);
-  color:#344a57;
+  color:#fff;
 }
 
 /* Action hierarchy follows the same pattern */
@@ -3843,7 +3843,7 @@ body.nfe-modal-open{overflow:hidden}
   box-shadow:0 1px 2px #17242d0a;
 }
 .main-content{
-  background:#e9e9e9;
+  background:#eef0f3;
 }
 
 
