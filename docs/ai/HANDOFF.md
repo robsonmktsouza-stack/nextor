@@ -2,6 +2,22 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
+## Continuidade — 20/10/2026 — impressão de venda comum com o mesmo comprovante térmico do PDV
+
+**Solicitação:** no módulo Vendas, uma venda comum só apresentava impressão da NFC-e quando disponível; o proprietário pediu **imprimir também o comprovante não fiscal de venda, exatamente o mesmo já existente no PDV**. Não criar PDF A4 paralelo nem confundir recibo comercial com DANFE.
+
+**Implementado na branch `feature/acbr-nfe-bootstrap`:**
+- `app/Services/SaleReceiptPresenter.php` (novo) extraiu o carregamento de itens, pagamentos, formas, configurações de impressão 58/80 mm, emitente e eventual NFC-e já ligada à venda, antes feito diretamente em `PdvController::receipt`. No PDV, mantém uso da sessão de caixa `pdv_cash_received`/`pdv_change`; no módulo Vendas, usa apenas os valores persistidos na própria venda, não a sessão do caixa.
+- `PdvController::receipt` continua restrito a `sale.source=pdv` e passa a reutilizar o mesmo presenter com `fromPdv=true`. Não houve mudança de autorização, preparação ou transmissão fiscal.
+- `SaleController::receipt` (novo) mostra a **mesma view `pdv.receipt`** para `operation_type=sale`, inclusive para vendas criadas fora do PDV; recusa orçamento com 404. Nova rota GET `sales.receipt` em `/sales/{sale}/receipt`, com middlewares `permission:sales` e `company.configured` em `routes/web.php`.
+- `resources/views/pdv/receipt.blade.php` agora diferencia somente a origem server-side: em Vendas exibe `Voltar à venda`, oferece `Imprimir comprovante interno`, não mostra controles de preparação NFC-e/status do fechamento de caixa e não redireciona para o PDV após imprimir; em PDV mantém integralmente sua experiência atual, incluindo fluxo de impressão e retorno ao caixa. O cupom é **SEM VALOR FISCAL** nos dois fluxos.
+- `resources/views/sales/show.blade.php` exibe botão `Comprovante de venda` para operações `sale`, separado do botão `Imprimir DANFE NFC-e` fiscal. `sales/index.blade.php` exibe atalho de impressão para vendas; orçamentos preservam seu atalho PDF.
+- `tests/Feature/SaleReceiptReuseTest.php` (novo) verifica sessão/autenticação/permissão de Vendas, distinção de orçamento, reaproveitamento do template, dados monetários/pagamentos e isolamento da sessão do PDV, rota antiga PDV exclusiva e ausência de movimentação por impressão.
+
+**Resultados:** execução `ACBr integration checks` do commit `4440f0fa` em https://github.com/robsonmktsouza-stack/nextor/actions/runs/39469867539 passou com **401 testes e 2.582 assertions** na suíte completa, além das verificações de sintaxe, Blade, navegador e fiscal direcionado. Após este registro de documentação, conferir o CI do novo HEAD se necessário. Nenhuma venda real, NFC-e ou operação em produção foi criada/transmitida. Sem novas migrations.
+
+**Laragon:** `cd C:\laragon\www\nextor`, `git pull origin feature/acbr-nfe-bootstrap`, `php artisan optimize:clear` e `Ctrl+F5`. Abrir **Vendas → venda existente → Comprovante de venda** (ou atalho da listagem); a tela é visualização térmica, não um PDF A4; imprimir manualmente e conferir o papel 58/80 mm configurado no PDV. Não exigir permissão `pdv` para um vendedor que já tem `sales`.
+
 ## Continuidade — 20/10/2026 — correção de paginação e escala A4 do orçamento
 
 **Problema reportado com capturas reais:** o PDF do Excel do proprietário é **uma folha A4**, com conteúdo desde cerca de 4 mm da borda lateral, cabeçalho mais abaixo e corpo tipográfico legível. O documento exportado pelo Nextor em `/sales/11/quote/pdf` estava em **duas páginas**, a segunda praticamente vazia, com conteúdo excessivamente estreito e texto menor. O orçamento #00011 da captura tem apenas um item, ao passo que a referência tem nove — comparar a altura sem preservar a grade gera uma página visualmente muito diferente.
