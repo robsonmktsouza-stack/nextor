@@ -272,6 +272,38 @@ final class SaleReceiptReuseTest extends TestCase
         self::assertStringNotContainsString('usleep(',$service);
     }
 
+    public function test_large_png_logo_does_not_block_other_laravel_pages(): void
+    {
+        $seller=$this->operator(['sales']);
+        $sale=$this->sale($seller);
+        $this->actingAs($seller);
+        \Illuminate\Support\Facades\Storage::fake('public');
+
+        // Imagem válida de 1024x768 pixels, comprimida, que antes seria
+        // decodificada pixel por pixel no próprio worker PHP do Laragon.
+        $width=1024;
+        $height=768;
+        $chunk=fn(string $type,string $body)=>
+            pack('N',strlen($body)).$type.$body.pack('N',crc32($type.$body));
+        $rgba=str_repeat("\x22\x99\xcc\xbb",$width);
+        $raw=str_repeat("\x00".$rgba,$height);
+        $logo="\x89PNG\r\n\x1a\n"
+            .$chunk('IHDR',pack('NNCCCCC',$width,$height,8,6,0,0,0))
+            .$chunk('IDAT',gzcompress($raw,6))
+            .$chunk('IEND','');
+        \Illuminate\Support\Facades\Storage::disk('public')->put('big-logo.png',$logo);
+        \App\Models\CompanySetting::current()->update(['logo_path'=>'big-logo.png']);
+
+        $start=microtime(true);
+        $pdf=app(SaleReceiptPdfService::class)->render($sale);
+        self::assertLessThan(2.0,microtime(true)-$start,
+            'A logo não pode consumir o worker enquanto o usuário acessa o ERP.');
+        self::assertStringStartsWith('%PDF-',$pdf);
+        self::assertStringContainsString('%%EOF',substr($pdf,-1024));
+
+        $this->get(route('sales.index'))->assertOk();
+    }
+
     public function test_native_php_generator_produces_valid_pdf_without_chromium(): void
     {
         $seller=$this->operator(['sales']);
