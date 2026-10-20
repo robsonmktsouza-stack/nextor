@@ -2,6 +2,16 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
+## Continuidade — 20/10/2026 — orçamento PDF visual de ERP tradicional
+
+**Solicitação mais recente:** após visualizar o PDF real de `/sales/{sale}/quote/pdf`, o proprietário rejeitou o estilo de peça publicitária/gerada por IA. O documento precisa ter aparência de **relatório comercial de ERP clássico**, sem cartões arredondados, tons saturados, títulos de marketing, status em badges ou total em faixa azul grande.
+
+**Implementação:** `resources/views/sales/quote-pdf.blade.php` totalmente reestruturado apenas na apresentação. Agora contém cabeçalho empresarial compacto (logo da empresa opcional, razão social, CNPJ, contatos), título/número do orçamento e emissão/validade/situação em área tabular discreta, dados do cliente em grade com bordas retas, tabela compacta de produtos com SKU, unidade, quantidade, preços, descontos e valor total, resumo de totais sem cartão colorido, observações e aviso não fiscal no rodapé de impressão. Tipografia Arial, cinzas neutros, linhas finas, A4 e cabeçalho de itens repetível em mais de uma página. Retiradas frases como “Proposta comercial” e “Segue o detalhamento”. A mudança não altera os cálculos, arquivos gerados, permissões, estado do orçamento nem fluxo de conversão.
+
+**Serviço:** `app/Services/QuotePdfService.php` carrega `items.product` para mostrar unidade cadastrada do produto, evitando consultas por linha; cai para `UN` quando ausente e para `SV` em serviços. Sem alteração de banco ou migrations nesta rodada.
+
+**Regressão:** `tests/Feature/QuoteCommercialDocumentTest.php` passou a exigir o layout tabular de ERP e a ausência dos antigos cartões, mantendo testes do PDF real via Chromium, segurança, logo e conversão. CI do commit `79047f43` aprovado; confira execução de HEAD ao concluir. Para atualizar no Laragon: `git pull origin feature/acbr-nfe-bootstrap`, `php artisan optimize:clear`, Ctrl+F5 e reabrir o PDF. **Nenhuma nova migração para este ajuste visual.**
+
 ## Continuidade — 20/10/2026 — PDF comercial personalizado de orçamento e conversão segura
 
 **Pedido:** em **Vendas > Nova venda/orçamento**, permitir gerar proposta A4 com logo e dados da própria empresa para baixar e enviar ao cliente, sem fazer orçamento parecer documento fiscal. Dar acesso ao arquivo também pela consulta e listagem. Converter o orçamento em venda com aproveitamento de itens e valores sem movimentar estoque/financeiro na etapa de cotação.
