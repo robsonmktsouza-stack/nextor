@@ -28,12 +28,12 @@
 **Estado real em 20/10/2026 (conferir novamente antes de agir):**
 
 - O trabalho funcional mais recente está em `feature/acbr-nfe-bootstrap`, repositório `robsonmktsouza-stack/nextor`.
-- A `main` atual é **antiga/desatualizada**; não tratá-la como cópia automaticamente equivalente à candidata aprovada.
-- A branch `develop` ainda **não foi criada**. A tabela acima define a política futura; não inventar que a migração de branches já ocorreu.
-- Os testes atuais em `.github/workflows/acbr-integration-checks.yml` são acionados principalmente por push na `feature/acbr-nfe-bootstrap` e PRs. A cobertura de `main`/`develop` deve ser ajustada **antes da operação regular de releases**.
-- `composer.lock` não estava versionado na revisão. Os scripts de provisionamento/atualização exigem esse arquivo e bloqueiam deploy sem ele. Preparar e validar em desenvolvimento, **não executar `composer update` no servidor do cliente**.
+- A `main` foi **promovida por fast-forward** da linha funcional em 20/10/2026, preservando histórico; é a base estável aprovada em GitHub. Isto não realiza implantação em clientes.
+- A branch `develop` **foi criada** a partir da base estável para receber novas funcionalidades; novas tarefas devem usar `develop` ou `feature/*`, não editar `main` diretamente.
+- `.github/workflows/acbr-integration-checks.yml` foi atualizado para validar `main`, `develop`, a branch histórica `feature/acbr-nfe-bootstrap`, tags `v*` e PRs, com `composer.lock` exigido. CI comprova testes de código, não prontidão automática de SEFAZ.
+- `composer.lock` **foi gerado, validado e versionado** usando PHP 8.3 em GitHub Actions. Publicações usam `composer install` a partir do lock; **nunca `composer update` no servidor do cliente**.
 - A produção, os domínios, a infraestrutura real, a estratégia de hospedagem e a primeira tag **não estão declarados como provisionados ou criados** por este documento.
-- **Ninguém deve fazer merge de `feature/acbr-nfe-bootstrap` para `main` automaticamente**. Primeiro comparar histórico, alterações e dependências, aprovar a linha estável e revisar estratégia de migração.
+- A primeira promoção da branch funcional para `main` já foi executada com autorização expressa e após comparar histórico e dependências. **Promover futuras alterações só após nova aprovação**; o push em `develop` não atualiza `main` nem clientes.
 
 ## 3. Desenvolvimento, validação e produção
 
@@ -119,9 +119,9 @@ Scripts já existentes:
 Estas são tarefas de **preparação de publicação**, não autorização para uma rodada infinita de testes de NFC-e já feitos:
 
 - [ ] Definir hospedagem real (VPS Linux, Windows ou servidor local), domínio/HTTPS e responsáveis pelo suporte.
-- [ ] Reconciliar `main` com a candidata atual e estabelecer `develop`; preservar histórico e mudanças, sem merge automático.
-- [ ] Gerar, versionar e validar `composer.lock` em ambiente de desenvolvimento.
-- [ ] Estender as verificações do GitHub Actions às branches de integração/estável e exigir aprovação antes de release.
+- [x] Reconciliar `main` com a linha funcional aprovada e criar `develop`, mantendo todo o histórico; futuras promoções continuam controladas.
+- [x] Gerar, versionar e validar `composer.lock` em GitHub Actions PHP 8.3.
+- [x] Estender verificações do GitHub Actions às branches de integração/estável; aprovar cada novo lançamento individualmente.
 - [ ] Criar tag `v1.0.0` **somente após aceite do proprietário** e registrar manifesto por CNPJ (versão, SHA, data, ambiente).
 - [ ] Preparar staging e procedimento de deploy/rollback próprio da hospedagem escolhida.
 - [ ] Implantar backup externo, teste de restauração, worker fiscal gerenciado, monitoramento e recuperação operacional.
