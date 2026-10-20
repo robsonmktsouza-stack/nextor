@@ -2,6 +2,20 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
+## Continuidade — 20/10/2026 — orçamento PDF reproduzido do Excel/PDF editados pelo proprietário
+
+**Solicitação e fontes:** o proprietário anexou `Modelo_Impressao_Orcamento_Nextor(1).xlsx` e `Modelo_Impressao_Orcamento_Nextor.pdf` editados por ele e autorizou aplicar exatamente este desenho ao Nextor/Lumeron. **Os arquivos enviados, sobretudo a página A4 exportada no Excel, são agora a referência visual específica do orçamento**, superando propostas visuais anteriores. Não implementar sistema de cadastro em Excel nem alterar o visual do ERP como um todo.
+
+**Estrutura reproduzida** em `resources/views/sales/quote-pdf.blade.php`: cabeçalho com logo cadastrada opcional, nome fantasia/razão social, CNPJ, IE, endereço e contatos; título **ORÇAMENTO COMERCIAL** e número em destaque à direita; faixa horizontal verde-petróleo `#477B78`; linha `PROPOSTA DE FORNECIMENTO | PRODUTOS E SERVIÇOS`; seção `DADOS DO CLIENTE` com três colunas e campos de cliente, CPF/CNPJ, contato, endereço, validade com dias, responsável, forma de pagamento e situação; `DISCRIMINAÇÃO DOS ITENS` em nove colunas (ITEM, TIPO, CÓDIGO, DESCRIÇÃO, UN., QTD., VLR. UNIT., DESCONTO, VALOR TOTAL) com grade compacta e zebra cinza muito clara; parte inferior em colunas `CONDIÇÕES COMERCIAIS` e `RESUMO FINANCEIRO` com Produtos, Serviços, Descontos e Total Geral; observações e duas assinaturas (`Responsável pela proposta` / `Aceite do cliente`). Tipografia Calibri/Arial, branco, verde-petróleo `#477B78`, cinza claro `#E9EFF0`, A4, sem cartões arredondados ou enfeites de IA.
+
+**Dados e limitações:** substituir dados de demonstração pelos dados reais da instância e orçamento. Nome fantasia e razão social são exibidos quando distintos; **não imprimir o placeholder `SUA MARCA`**: se não há logo, imprimir cabeçalho textual alinhado. Produtos/serviços e descontos são calculados apenas a partir dos itens persistidos, sem alterar a venda. Campo `Forma de pagamento` mostra nomes das formas já gravadas, quando houver; caso contrário `A combinar`. Prazo de entrega/execução inexistente no modelo de dados aparece como `A combinar`, e não inventamos `5 dias úteis`, bandeiras ou qualquer forma específica de pagamento. Observações são as do orçamento/rodapé comercial já configurado. Identificação de documento não fiscal e cabeçalho da tabela repetível em múltiplas páginas permanecem.
+
+**Arquivos desta entrega:** `resources/views/sales/quote-pdf.blade.php`, `app/Services/QuotePdfService.php` (carregamento existente de `payments` para apresentar meios cadastrados), `tests/Feature/QuoteCommercialDocumentTest.php` (regressão estrutural 9 colunas, data em dias, pagamento gravado, somatórios, proteção comercial). Nenhuma alteração em `public/css/erp.css`, banco, rotas, serviço de vendas ou emissão fiscal. Nenhuma migração.
+
+**Validação:** conferir workflow `ACBr integration checks` após o commit `704b148f`, mais commits subsequentes. Dois testes de versões intermediárias acusaram ausência da razão social alternativa e expectativa antiga do subtotal; ambos foram corrigidos preservando o desenho do Excel. Testar visualmente no Laragon, inclusive PDF com 9+ itens e logos reais, antes de afirmar equivalência pixel a pixel. Não houve acesso ao computador ou emissão fiscal.
+
+**Atualização:** na branch `feature/acbr-nfe-bootstrap`, `git pull origin feature/acbr-nfe-bootstrap` e `php artisan optimize:clear`; atualizar o PDF existente em `/sales/11/quote/pdf`. Não executar migração por esta revisão.
+
 ## Continuidade — 20/10/2026 — documento comercial inspirado na referência eGestor
 
 **Pedido mais recente:** o usuário mostrou um orçamento real do eGestor e pediu aplicar aquela **pegada de documento comercial enviado ao cliente**, mantendo a organização superior do modelo atual do Lumeron. Não copiar logotipo/layout de terceiros nem alterar o tema global; o histórico de correção indevida da paleta do ERP foi revertido.
