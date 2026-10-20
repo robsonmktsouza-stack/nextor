@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\PaymentMethod;
 use App\Models\FinancialEntry;
 use App\Models\StockMovement;
+use App\Services\SaleReceiptPdfService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -14,6 +15,14 @@ final class SaleReceiptReuseTest extends TestCase
 {
     use RefreshDatabase;
     use \Tests\Concerns\WithConfiguredCompany;
+
+    private function fakePdfRenderer(): void
+    {
+        $mock=\Mockery::mock(SaleReceiptPdfService::class);
+        $mock->shouldReceive('render')
+            ->andReturn("%PDF-1.4\nComprovante de teste\n%%EOF");
+        $this->app->instance(SaleReceiptPdfService::class,$mock);
+    }
 
     private function operator(array $permissions=['sales']): User
     {
@@ -52,7 +61,7 @@ final class SaleReceiptReuseTest extends TestCase
         return $sale;
     }
 
-    public function test_regular_sale_uses_the_same_thermal_receipt_without_pdv_permission(): void
+    public function test_regular_sale_opens_a_private_native_pdf_using_the_pdv_thermal_template(): void
     {
         $user=$this->operator(['sales']);
         $sale=$this->sale($user);
@@ -64,24 +73,32 @@ final class SaleReceiptReuseTest extends TestCase
             'payment_method'=>'pix','receivable'=>false,
         ]);
 
-        $response=$this->actingAs($user)->get(route('sales.receipt',$sale));
-        $response->assertOk()->assertViewIs('pdv.receipt')
-            ->assertSee('COMPROVANTE DE VENDA')
-            ->assertSee('SEM VALOR FISCAL')
-            ->assertSee('BAL-001')
-            ->assertSee('Produto para balcão')
-            ->assertSee('65,00')
-            ->assertSee('PIX')
-            ->assertSee('Voltar à venda')
-            ->assertSee('Imprimir comprovante interno')
-            ->assertSee('let automatic=false',false)
-            ->assertSee('sales-receipt-preview')
-            ->assertSee('window.print()',false)
-            ->assertDontSee('Voltar ao PDV')
-            ->assertDontSee('Preparar NFC-e desta venda')
-            ->assertDontSee('NFC-e ainda não preparada');
-        self::assertSame(route('sales.show',$sale),$response->viewData('receiptOrigin')==='sales'
-            ? route('sales.show',$sale) : null);
+        $this->actingAs($user);
+        $html=app(SaleReceiptPdfService::class)->renderHtml($sale);
+        self::assertStringContainsString('COMPROVANTE DE VENDA',$html);
+        self::assertStringContainsString('SEM VALOR FISCAL',$html);
+        self::assertStringContainsString('BAL-001',$html);
+        self::assertStringContainsString('Produto para balcão',$html);
+        self::assertStringContainsString('65,00',$html);
+        self::assertStringContainsString('PIX',$html);
+        self::assertStringContainsString('@page{size:80mm ',$html);
+        self::assertStringNotContainsString('Voltar à venda',$html);
+        self::assertStringNotContainsString('Imprimir comprovante interno',$html);
+        self::assertStringNotContainsString('<script>',$html);
+        self::assertStringNotContainsString('NFC-e da venda',$html);
+
+        $this->fakePdfRenderer();
+        $this->get(route('sales.receipt',$sale))
+            ->assertOk()
+            ->assertHeader('Content-Type','application/pdf')
+            ->assertHeader('Content-Disposition','inline; filename="Comprovante-Venda-'.str_pad((string)$sale->id,5,'0',STR_PAD_LEFT).'.pdf"')
+            ->assertHeader('Cache-Control','private, no-store, max-age=0')
+            ->assertHeader('X-Content-Type-Options','nosniff')
+            ->assertSee('%PDF-1.4',false);
+
+        $this->get(route('sales.receipt',['sale'=>$sale,'download'=>1]))
+            ->assertOk()
+            ->assertHeader('Content-Disposition','attachment; filename="Comprovante-Venda-'.str_pad((string)$sale->id,5,'0',STR_PAD_LEFT).'.pdf"');
 
         $this->get(route('sales.show',$sale))->assertOk()
             ->assertSee('Comprovante de venda')
@@ -95,14 +112,13 @@ final class SaleReceiptReuseTest extends TestCase
         self::assertSame(0,FinancialEntry::count());
     }
 
-    public function test_sales_receipt_never_starts_chrome_print_dialog_automatically(): void
+    public function test_sales_receipt_bookmarked_urls_always_open_native_pdf_without_print_dialog(): void
     {
         $seller=$this->operator(['sales']);
         $sale=$this->sale($seller);
         $this->actingAs($seller);
+        $this->fakePdfRenderer();
 
-        // Direct navigation and old bookmarked URLs must behave the same:
-        // display a readable Chrome preview, then print only by click.
         foreach ([
             route('sales.receipt',$sale),
             route('sales.receipt',['sale'=>$sale,'print'=>0]),
@@ -110,13 +126,9 @@ final class SaleReceiptReuseTest extends TestCase
         ] as $url) {
             $this->get($url)
                 ->assertOk()
-                ->assertSee('sales-receipt-preview')
-                ->assertSee('let automatic=false;',false)
-                ->assertSee('data-reprint-receipt')
-                ->assertSee('Voltar à venda');
+                ->assertHeader('Content-Type','application/pdf')
+                ->assertHeader('Cache-Control','private, no-store, max-age=0');
         }
-
-        // No query parameter is needed to render the ordinary sale receipt.
         $this->get(route('sales.index'))->assertOk()
             ->assertSee(route('sales.receipt',$sale),false);
     }
@@ -133,7 +145,9 @@ final class SaleReceiptReuseTest extends TestCase
 
         $normal=$this->sale($user,'sale','manual');
         $this->get(route('pdv.receipt',$normal))->assertForbidden();
-        $this->get(route('sales.receipt',$normal))->assertOk();
+        $this->fakePdfRenderer();
+        $this->get(route('sales.receipt',$normal))
+            ->assertOk()->assertHeader('Content-Type','application/pdf');
     }
 
     public function test_receipt_requires_authentication_and_sales_permission(): void
@@ -149,29 +163,31 @@ final class SaleReceiptReuseTest extends TestCase
         $this->get(route('pdv.receipt',$sale))->assertNotFound();
     }
 
-    public function test_pdv_receipt_preserves_cashier_flow_and_its_existing_print_template(): void
+    public function test_pdv_history_opens_pdf_but_new_sale_keeps_automatic_print(): void
     {
         $cashier=$this->operator(['pdv']);
         $sale=$this->sale($cashier,'sale','pdv');
-        $this->actingAs($cashier)
-            ->get(route('pdv.receipt',['sale'=>$sale,'print'=>0]))
+        $this->actingAs($cashier);
+
+        // A finalização sem ?print=0 continua no recibo HTML com retorno ao PDV.
+        $this->get(route('pdv.receipt',$sale))
             ->assertOk()
             ->assertViewIs('pdv.receipt')
             ->assertSee('Voltar ao PDV')
-            ->assertSee('let automatic=false;',false)
+            ->assertSee('let automatic=true;',false)
             ->assertSee('NFC-e ainda não preparada')
-            ->assertSee('SEM VALOR FISCAL')
-            ->assertDontSee('Voltar à venda');
+            ->assertSee('SEM VALOR FISCAL');
 
-        $this->get(route('sales.receipt',$sale))->assertForbidden();
-
-        // The cashier keeps its existing automatic print-on-load behavior.
-        $this->get(route('pdv.receipt',$sale))
+        $this->fakePdfRenderer();
+        $this->get(route('pdv.receipt',['sale'=>$sale,'print'=>0]))
             ->assertOk()
-            ->assertSee('let automatic=true;',false);
+            ->assertHeader('Content-Type','application/pdf')
+            ->assertHeader('Content-Disposition','inline; filename="Comprovante-Venda-'.str_pad((string)$sale->id,5,'0',STR_PAD_LEFT).'.pdf"')
+            ->assertHeader('Cache-Control','private, no-store, max-age=0');
+        $this->get(route('sales.receipt',$sale))->assertForbidden();
     }
 
-    public function test_sales_receipt_does_not_use_pdv_cash_amount_from_previous_session(): void
+    public function test_sales_receipt_pdf_does_not_use_cash_values_from_previous_session(): void
     {
         $seller=$this->operator(['sales']);
         $sale=$this->sale($seller);
@@ -187,10 +203,38 @@ final class SaleReceiptReuseTest extends TestCase
         $this->actingAs($seller)->withSession([
             'pdv_cash_received'=>1000,
             'pdv_change'=>935,
-        ])->get(route('sales.receipt',$sale))
-            ->assertOk()
-            ->assertSee('65,00')
-            ->assertDontSee('1.000,00')
-            ->assertDontSee('935,00');
+        ]);
+        $html=app(SaleReceiptPdfService::class)->renderHtml($sale);
+        self::assertStringContainsString('65,00',$html);
+        self::assertStringNotContainsString('1.000,00',$html);
+        self::assertStringNotContainsString('935,00',$html);
+    }
+
+    public function test_real_chromium_generates_thermal_pdf_when_available(): void
+    {
+        if (!is_file('/usr/bin/google-chrome') && !is_file('/usr/bin/chromium')
+            && !is_file('/usr/bin/chromium-browser')) {
+            $this->markTestSkipped('Chrome/Chromium não instalado no runner Linux.');
+        }
+        $seller=$this->operator(['sales']);
+        $sale=$this->sale($seller);
+        $this->actingAs($seller);
+        $pdf=app(SaleReceiptPdfService::class)->render($sale);
+        self::assertStringStartsWith('%PDF-',$pdf);
+        self::assertStringContainsString('%%EOF',substr($pdf,-1024));
+        self::assertGreaterThan(1000,strlen($pdf));
+
+        if (is_file('/usr/bin/pdfinfo')) {
+            $temporary=tempnam(sys_get_temp_dir(),'receipt-pdf-');
+            try {
+                file_put_contents($temporary,$pdf);
+                $process=new \Symfony\Component\Process\Process(['pdfinfo',$temporary]);
+                $process->run();
+                self::assertTrue($process->isSuccessful(),$process->getErrorOutput());
+                self::assertMatchesRegularExpression('/Pages:\s+1\b/',$process->getOutput());
+            } finally {
+                @unlink($temporary);
+            }
+        }
     }
 }
