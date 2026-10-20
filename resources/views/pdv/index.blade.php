@@ -59,20 +59,20 @@
       <label><span>Motivo</span><input type="text" name="reason" maxlength="255" id="pdvCashMovementReason" placeholder="Ex.: troco adicional, depósito no cofre..." required></label>
       <div id="pdvCashRefundFields" hidden>
         <label><span>Devolução concluída (se aplicável)</span>
-          <select name="sale_return_id" id="pdvCashRefundReturn">
-            <option value="">Selecione uma devolução</option>
+          <input type="number" min="1" step="1" name="sale_return_id" id="pdvCashRefundReturn" list="pdvCashRefundReturnOptions" placeholder="Número da devolução">
+          <datalist id="pdvCashRefundReturnOptions">
             @foreach($refundReturns as $return)
-              <option value="{{ $return->id }}">Devolução #{{ $return->id }} · Venda #{{ $return->sale_id }} · R$ {{ number_format((float)$return->total,2,',','.') }}</option>
+              <option value="{{ $return->id }}" label="Venda #{{ $return->sale_id }} · R$ {{ number_format((float)$return->total,2,',','.') }}"></option>
             @endforeach
-          </select>
+          </datalist>
         </label>
         <label><span>Ou venda cancelada</span>
-          <select name="sale_id" id="pdvCashRefundSale">
-            <option value="">Selecione uma venda cancelada</option>
+          <input type="number" min="1" step="1" name="sale_id" id="pdvCashRefundSale" list="pdvCashRefundSaleOptions" placeholder="Número da venda cancelada">
+          <datalist id="pdvCashRefundSaleOptions">
             @foreach($refundSales as $saleRefund)
-              <option value="{{ $saleRefund->id }}">Venda #{{ $saleRefund->id }} · R$ {{ number_format((float)$saleRefund->total,2,',','.') }}</option>
+              <option value="{{ $saleRefund->id }}" label="Valor R$ {{ number_format((float)$saleRefund->total,2,',','.') }}"></option>
             @endforeach
-          </select>
+          </datalist>
         </label>
         <small>Registre somente dinheiro realmente devolvido. Selecione uma devolução ou uma venda cancelada, nunca ambas.</small>
       </div>
