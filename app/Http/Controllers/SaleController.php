@@ -137,6 +137,16 @@ class SaleController extends Controller
         return view('sales.show',compact('sale','saleReturns','paymentLabels','nfceDocument'));
     }
 
+    public function receipt(Sale $sale, \App\Services\SaleReceiptPresenter $presenter)
+    {
+        // Um orçamento não é venda: nunca imprimir comprovante de pagamento.
+        abort_unless($sale->operation_type==='sale',404);
+
+        // Reutiliza o mesmo template e configuração térmica do PDV.
+        // A rota exige permissão Vendas, não permissão exclusiva do caixa.
+        return view('pdv.receipt',$presenter->data($sale));
+    }
+
     public function quotePdf(Request $request, Sale $sale, QuotePdfService $pdf)
     {
         abort_unless($sale->operation_type==='quote',404);
