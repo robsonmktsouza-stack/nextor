@@ -64,7 +64,7 @@ final class SaleReceiptReuseTest extends TestCase
             'payment_method'=>'pix','receivable'=>false,
         ]);
 
-        $response=$this->actingAs($user)->get(route('sales.receipt',['sale'=>$sale,'print'=>0]));
+        $response=$this->actingAs($user)->get(route('sales.receipt',$sale));
         $response->assertOk()->assertViewIs('pdv.receipt')
             ->assertSee('COMPROVANTE DE VENDA')
             ->assertSee('SEM VALOR FISCAL')
@@ -75,6 +75,8 @@ final class SaleReceiptReuseTest extends TestCase
             ->assertSee('Voltar à venda')
             ->assertSee('Imprimir comprovante interno')
             ->assertSee('let automatic=false',false)
+            ->assertSee('sales-receipt-preview')
+            ->assertSee('window.print()',false)
             ->assertDontSee('Voltar ao PDV')
             ->assertDontSee('Preparar NFC-e desta venda')
             ->assertDontSee('NFC-e ainda não preparada');
@@ -83,13 +85,40 @@ final class SaleReceiptReuseTest extends TestCase
 
         $this->get(route('sales.show',$sale))->assertOk()
             ->assertSee('Comprovante de venda')
-            ->assertSee(route('sales.receipt',['sale'=>$sale,'print'=>0]),false);
+            ->assertSee(route('sales.receipt',$sale),false)
+            ->assertSee('target="_blank" rel="noopener noreferrer"',false);
         $this->get(route('sales.index'))->assertOk()
             ->assertSee('Imprimir comprovante de venda');
 
         self::assertSame(1,Sale::count());
         self::assertSame(0,StockMovement::count());
         self::assertSame(0,FinancialEntry::count());
+    }
+
+    public function test_sales_receipt_never_starts_chrome_print_dialog_automatically(): void
+    {
+        $seller=$this->operator(['sales']);
+        $sale=$this->sale($seller);
+        $this->actingAs($seller);
+
+        // Direct navigation and old bookmarked URLs must behave the same:
+        // display a readable Chrome preview, then print only by click.
+        foreach ([
+            route('sales.receipt',$sale),
+            route('sales.receipt',['sale'=>$sale,'print'=>0]),
+            route('sales.receipt',['sale'=>$sale,'print'=>1]),
+        ] as $url) {
+            $this->get($url)
+                ->assertOk()
+                ->assertSee('sales-receipt-preview')
+                ->assertSee('let automatic=false;',false)
+                ->assertSee('data-reprint-receipt')
+                ->assertSee('Voltar à venda');
+        }
+
+        // No query parameter is needed to render the ordinary sale receipt.
+        $this->get(route('sales.index'))->assertOk()
+            ->assertSee(route('sales.receipt',$sale),false);
     }
 
     public function test_receipt_is_not_exposed_for_quotes_and_does_not_change_pdv_source_rules(): void
@@ -129,11 +158,17 @@ final class SaleReceiptReuseTest extends TestCase
             ->assertOk()
             ->assertViewIs('pdv.receipt')
             ->assertSee('Voltar ao PDV')
+            ->assertSee('let automatic=false;',false)
             ->assertSee('NFC-e ainda não preparada')
             ->assertSee('SEM VALOR FISCAL')
             ->assertDontSee('Voltar à venda');
 
         $this->get(route('sales.receipt',$sale))->assertForbidden();
+
+        // The cashier keeps its existing automatic print-on-load behavior.
+        $this->get(route('pdv.receipt',$sale))
+            ->assertOk()
+            ->assertSee('let automatic=true;',false);
     }
 
     public function test_sales_receipt_does_not_use_pdv_cash_amount_from_previous_session(): void
