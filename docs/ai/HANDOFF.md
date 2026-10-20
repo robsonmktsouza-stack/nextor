@@ -2,6 +2,17 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
+## Continuidade — 20/10/2026 — Lumeron Control isolado e integração opt-in
+
+**Pedido do proprietário:** desenvolver painel administrativo simples de clientes/licenças inspirado no fluxo do eGestor, **sem Sites, NFe+, revendedores, cobranças ou dashboards gigantes**, mantendo visual Lumeron.
+
+**Projeto entregue no GitHub:** branch **`control-center`** (raiz de aplicação Laravel 13 própria, banco e sessão próprios; **jamais mesclar essa branch com a `main`/`develop` do ERP**). Conteúdo: login sem registro público; `control:admin` interativo; Início/Clientes/Licenças/Histórico; cadastro em três etapas, busca e modal de detalhes; liberar/suspender/renovar, planos, módulos, chaves rotativas, notas/eventos; API `POST /api/license/check` com HMAC, nonce e assinatura da resposta. `composer.lock` versionado, logotipo original da marca, testes `tests/Feature/`. Workflow `Lumeron Control checks` aprovado com **9 testes e 44 assertions** no GitHub. Não é VPS implantada nem repositório exclusivo ainda; clone separado via `git clone --branch control-center --single-branch ... lumeron-control` e servidor local porta 8002. O painel **não cria automaticamente usuários nem instalações**.
+
+**Agente mínimo no ERP:** `develop` contém `config/central_license.php`, `app/Services/License/CentralLicenseService.php`, `app/Http/Middleware/RequireCentralLicense.php`, `app/Console/Commands/CentralLicenseSync.php`, migration `2026_10_20_220000_create_central_license_states.php`, `resources/views/errors/license-blocked.blade.php`, testes `CentralLicenseGuardTest`, documentação `docs/deployment/control-center-integration.md`, entrada do middleware e arquivo `.env.example`. **DESATIVADO POR PADRÃO** para não alterar operação do cliente nem o `v1.0.0`. HMAC na chamada e resposta, CNPJ/UUID conferidos, cache de 5 min, tolerância offline de 72 horas, módulos comerciais e continuidade de regularização fiscal acessível mesmo com licença suspensa. Ativação sempre por instância/CNPJ com autorização, backup/migração e URL HTTPS configurados. Documentar verificação final do GitHub Actions antes de declarar integração pronta.
+
+**Não realizado:** novo repositório próprio para o painel, instalação VPS, DNS, dados de clientes, pagamentos ou envio fiscal. **Nenhuma empresa real foi cadastrada/ativada**. Próximas tarefas: definir servidor/domínio, migrar painel para repo exclusivo quando criado, configurar acesso real e publicar uma versão do ERP com agente aprovado (não alterar `main` sem novo pedido).
+
+
 ## Continuidade — 20/10/2026 — primeira promoção de código à `main` e abertura da `develop`
 
 **Autorização:** o proprietário pediu explicitamente colocar a versão atual aprovada na `main`, criar a linha de desenvolvimento e preparar `v1.0.0`. Não autorizou instalar/deployar em servidores ou emitir notas reais.
