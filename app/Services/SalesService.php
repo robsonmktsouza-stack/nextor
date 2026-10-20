@@ -21,6 +21,11 @@ class SalesService
     {
         $sale=DB::transaction(function () use ($data, $userId) {
             $rows=collect($data['items']);
+            // Lock the active shift in the SAME sale transaction. A concurrent
+            // close must not detach a paid sale from its cash reconciliation.
+            $cashSession=($data['source'] ?? 'manual')==='pdv'
+                ? app(PdvCashService::class)->forSale($userId)
+                : null;
             $operationType=$data['operation_type'] ?? 'sale';
             $sourceQuote=null;
             if(!empty($data['source_quote_id'])) {
@@ -175,6 +180,7 @@ class SalesService
                 'user_id'=>$userId,
                 'operation_type'=>$operationType,
                 'source'=>$data['source'] ?? 'manual',
+                'pdv_cash_session_id'=>$cashSession?->id,
                 'source_quote_id'=>$sourceQuote?->id,
                 'operation_date'=>$data['operation_date'] ?? now()->toDateString(),
                 'quote_expires_at'=>$operationType==='quote'
