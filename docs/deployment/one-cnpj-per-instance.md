@@ -1,5 +1,7 @@
 # Lumeron na VPS: uma instalação por CNPJ
 
+**Governança obrigatória:** leia também [Política de versões, branches e publicação](versioning-and-release-policy.md). Um push de desenvolvimento não publica automaticamente novos releases; a origem `--source` deve corresponder ao commit/tag aprovado para aquele CNPJ, e a atualização requer autorização específica.
+
 ## Contrato de isolamento
 
 **1 CNPJ = 1 contratação = 1 aplicação Laravel própria**, mesmo que um cliente possua duas empresas. Um único código-fonte versionado pode originar todas as instalações, mas o ambiente de execução não é compartilhado.
