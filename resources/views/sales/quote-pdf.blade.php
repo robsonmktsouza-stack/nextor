@@ -13,27 +13,28 @@ body { font:10.5px/1.42 Arial,Helvetica,sans-serif; color:#272c2f; background:#f
   -webkit-font-smoothing:antialiased; }
 table { border-collapse:collapse; width:100%; }
 strong { font-weight:700; }
-.header { margin-bottom:13px; padding-bottom:11px; border-bottom:2px solid #667780; }
+.header { margin-bottom:14px; padding-bottom:12px; border-bottom:2px solid #667780; }
 .header td { vertical-align:top; }
 .company-logo { width:115px; padding:2px 14px 0 0; }
 .company-logo img { display:block; max-width:104px; max-height:56px; object-fit:contain; }
 .company { padding-right:15px; }
-.company-name { font-size:16px; line-height:1.18; font-weight:700; color:#242a2d; margin:0 0 5px; }
+.company-name { font-size:16px; line-height:1.22; font-weight:700; color:#263238; margin:0 0 5px; }
 .company-legal { font-size:9.5px; color:#4b565b; margin-bottom:4px; }
 .company-detail { font-size:9.5px; line-height:1.5; color:#48545a; overflow-wrap:anywhere; }
-.document { width:167px; border-left:1px solid #bec8cd; padding:2px 0 0 12px; }
-.document-name { font-size:12px; font-weight:700; letter-spacing:.7px; margin-bottom:3px; }
-.document-number { font-size:18px; line-height:1.15; font-weight:700; margin-bottom:7px;
+.document { width:181px; border-left:1px solid #bdc8ca; padding:2px 0 0 14px; }
+.document-name { font-size:17px; line-height:1.1; font-weight:700; letter-spacing:.35px; margin-bottom:2px; color:#3d6768; }
+.document-number { font-size:23px; line-height:1.1; font-weight:700; margin-bottom:9px;
   font-variant-numeric:tabular-nums; }
 .document-line { display:table; width:100%; font-size:9.5px; padding:3px 0;
   border-bottom:1px solid #e7eaec; }
 .document-line:last-child { border-bottom:0; }
 .document-line span { display:table-cell; width:60px; color:#556168; }
 .document-line strong { display:table-cell; color:#242e33; }
-.section-title { font-size:10.5px; line-height:1.3; font-weight:700;
-  letter-spacing:.18px; text-transform:uppercase; color:#333c41;
-  border-bottom:1px solid #aeb9be; margin:12px 0 0; padding:0 0 5px; }
-.info { margin:0 0 11px; border:1px solid #bcc5ca; border-top:0; table-layout:fixed; }
+.section-title { font-size:11px; line-height:1.3; font-weight:700;
+  letter-spacing:.18px; text-transform:uppercase; color:#35494b;
+  background:#f1f3f3; border-left:3px solid #558983;
+  border-bottom:1px solid #c8d1d2; margin:15px 0 0; padding:7px 9px; }
+.info { margin:0 0 13px; border:1px solid #c6cfd0; border-top:0; table-layout:fixed; }
 .info td { width:50%; padding:7px 9px 8px; vertical-align:top;
   border-right:1px solid #d7dde0; border-bottom:1px solid #e2e6e8; overflow-wrap:anywhere; }
 .info tr:last-child td { border-bottom:0; }
@@ -45,8 +46,8 @@ strong { font-weight:700; }
 .items thead { display:table-header-group; }
 .items tbody tr { page-break-inside:avoid; break-inside:avoid; }
 .items tbody tr:nth-child(even) { background:#fafbfb; }
-.items th { background:#e9edef; color:#364148; border-bottom:1px solid #acb8be;
-  border-right:1px solid #cbd3d7; padding:8px 6px; font-size:9px; font-weight:700;
+.items th { background:#4f7d7c; color:#fff; border-bottom:1px solid #456f70;
+  border-right:1px solid rgba(255,255,255,.22); padding:8px 6px; font-size:9px; font-weight:700;
   line-height:1.3; text-align:left; text-transform:uppercase; letter-spacing:.1px; }
 .items td { padding:8px 6px; border-right:1px solid #e0e5e7;
   border-bottom:1px solid #dfe4e7; vertical-align:top; overflow-wrap:anywhere; }
@@ -63,16 +64,18 @@ strong { font-weight:700; }
 .right { text-align:right!important; white-space:nowrap; font-variant-numeric:tabular-nums; }
 .center { text-align:center!important; }
 .item-name { font-weight:600; color:#293138; line-height:1.35; }
+.item-kind { display:inline; font-size:9px; color:#647578; font-weight:400; }
+.item-kind::after { content:'  ·  '; }
 .item-note { display:block; color:#667076; margin-top:4px; font-size:9.5px;
   line-height:1.35; white-space:pre-wrap; }
-.totals { width:285px; margin:11px 0 0 auto; border:1px solid #c1cacf;
+.totals { width:303px; margin:13px 0 0 auto; border:1px solid #c1cacf;
   break-inside:avoid; page-break-inside:avoid; font-variant-numeric:tabular-nums; }
 .totals td { padding:5px 9px; border-bottom:1px solid #e1e5e7; }
 .totals td:first-child { color:#4a555a; }
 .totals td:last-child { font-weight:600; width:130px; text-align:right; white-space:nowrap; }
-.totals .total td { padding:8px 9px; border-top:1px solid #aeb9bf; border-bottom:0;
-  background:#e9edef; font-size:11.5px; font-weight:700; color:#263037; }
-.notes { margin-top:15px; }
+.totals .total td { padding:10px 9px; border-top:2px solid #558983; border-bottom:0;
+  background:#e9edef; font-size:12.5px; font-weight:700; color:#263037; }
+.notes { margin-top:18px; break-inside:avoid; page-break-inside:avoid; }
 .notes .section-title { margin-bottom:7px; }
 .notes p { margin:5px 0; font-size:10px; line-height:1.48; white-space:pre-wrap;
   overflow-wrap:anywhere; }
@@ -90,6 +93,14 @@ $companyName=$company->trade_name ?: ($company->legal_name ?: 'Empresa');
 $address=implode(', ',array_filter([$company->address,$company->address_number,$company->address_complement]));
 $location=implode(' - ',array_filter([$company->district,implode(' / ',array_filter([$company->city,$company->state]))]));
 $customer=$quote->customer;
+// Valores de exibição, calculados a partir das linhas já gravadas.
+// Preços/descontos do orçamento não são recalculados nem persistidos.
+$productSubtotal=$quote->items->filter(fn($item)=>$item->item_type!=='service')
+    ->sum(fn($item)=>(float)$item->line_total+(float)$item->discount);
+$serviceSubtotal=$quote->items->filter(fn($item)=>$item->item_type==='service')
+    ->sum(fn($item)=>(float)$item->line_total+(float)$item->discount);
+$hasProducts=$quote->items->contains(fn($item)=>$item->item_type!=='service');
+$hasServices=$quote->items->contains(fn($item)=>$item->item_type==='service');
 $customerAddress=implode(', ',array_filter([$customer?->address,$customer?->address_number,$customer?->address_complement]));
 $customerLocation=implode(' - ',array_filter([$customer?->district,implode(' / ',array_filter([$customer?->city,$customer?->state]))]));
 $expired=$quote->quote_expires_at && $quote->quote_expires_at->copy()->startOfDay()->lt(today());
@@ -167,7 +178,7 @@ $state=match(true) {
         <td class="center">{{ $loop->iteration }}</td>
         <td>{{ $item->product_sku ?: '—' }}</td>
         <td>
-          <span class="item-name">{{ $item->product_name }}</span>
+          <span class="item-kind">{{ $item->item_type==='service' ? 'Serviço' : 'Produto' }}</span><span class="item-name">{{ $item->product_name }}</span>
           @if($item->notes)<span class="item-note">{{ $item->notes }}</span>@endif
         </td>
         <td class="center">{{ $item->item_type==='service' ? 'SV' : ($item->product?->unit ?: 'UN') }}</td>
@@ -180,6 +191,10 @@ $state=match(true) {
     </tbody>
   </table>
   <table class="totals">
+    @if($hasProducts && $hasServices)
+      <tr><td>Produtos</td><td>{{ $money($productSubtotal) }}</td></tr>
+      <tr><td>Serviços</td><td>{{ $money($serviceSubtotal) }}</td></tr>
+    @endif
     <tr><td>Subtotal</td><td>{{ $money($quote->subtotal) }}</td></tr>
     <tr><td>Descontos</td><td>{{ $money($quote->discount_total) }}</td></tr>
     <tr class="total"><td>TOTAL GERAL</td><td>{{ $money($quote->total) }}</td></tr>
