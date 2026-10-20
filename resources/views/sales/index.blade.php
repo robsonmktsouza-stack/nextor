@@ -47,7 +47,7 @@
  <a class="btn-icon" href="{{ route('sales.quote.pdf',$sale) }}" target="_blank" rel="noopener noreferrer" title="Visualizar orçamento PDF" aria-label="Visualizar PDF">@include('partials.icon',['name'=>'print','size'=>17])</a>
  @endif
  @if($sale->operation_type==='sale')
- <a class="btn-icon" href="{{ route('sales.receipt',['sale'=>$sale,'print'=>0]) }}" target="_blank" rel="noopener noreferrer" title="Comprovante de venda (não fiscal)" aria-label="Imprimir comprovante de venda">@include('partials.icon',['name'=>'print','size'=>17])</a>
+ <a class="btn-icon" href="{{ route('sales.receipt',$sale) }}" target="_blank" rel="noopener noreferrer" title="Comprovante de venda (não fiscal)" aria-label="Imprimir comprovante de venda">@include('partials.icon',['name'=>'print','size'=>17])</a>
  @endif
  <a class="btn-icon" href="{{ route('sales.show',$sale) }}" aria-label="Abrir operação">@include('partials.icon',['name'=>'chevron','size'=>17])</a>
  </td></tr>
