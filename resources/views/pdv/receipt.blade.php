@@ -118,6 +118,7 @@ body{font-size:9px}
 </style>
 </head>
 <body class="{{ $receiptOrigin==='sales' ? 'sales-receipt-preview' : '' }}">
+@if(!($receiptPdfMode ?? false))
 <div class="screen-actions">
   @if($receiptOrigin==='sales')
     <a href="{{ route('sales.show',$sale) }}">Voltar à venda</a>
@@ -169,12 +170,13 @@ body{font-size:9px}
   @endif
 </section>
 @endif
+@endif
 
 @for($copy=1;$copy<=$receiptCopies;$copy++)
 <main class="receipt receipt-copy">
   <header class="center">
     @if($company->logo_path)
-      <img class="company-logo" src="{{ asset('storage/'.$company->logo_path) }}" alt="">
+      <img class="company-logo" src="{{ $receiptPdfLogo ?? asset('storage/'.$company->logo_path) }}" alt="">
     @endif
     <div class="brand">{{ $companyName }}</div>
     @if($companyDocument)<div class="meta">{{ $companyDocument }}</div>@endif
@@ -272,6 +274,7 @@ body{font-size:9px}
 </main>
 @endfor
 
+@if(!($receiptPdfMode ?? false))
 <script>
 (()=>{
   // Venda comum: sempre visualizar primeiro no Chrome. Apenas o clique
@@ -291,5 +294,6 @@ body{font-size:9px}
   printButton?.addEventListener('click',()=>{automatic=false;window.print();});
 })();
 </script>
+@endif
 </body>
 </html>
