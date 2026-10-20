@@ -97,6 +97,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/pdv/cash/open',[PdvController::class,'openCash'])->name('pdv.cash.open')->middleware(['permission:pdv','company.configured']);
     Route::post('/pdv/cash/close',[PdvController::class,'closeCash'])->name('pdv.cash.close')->middleware(['permission:pdv','company.configured']);
     Route::post('/pdv/cash/movement',[PdvController::class,'cashMovement'])->name('pdv.cash.movement')->middleware(['permission:pdv','company.configured']);
+    Route::get('/pdv/cash/history',[\App\Http\Controllers\PdvCashReportController::class,'index'])->name('pdv.cash.history')->middleware(['permission:pdv','company.configured']);
+    Route::get('/pdv/cash/{cashSession}/report',[\App\Http\Controllers\PdvCashReportController::class,'show'])->name('pdv.cash.report')->middleware(['permission:pdv','company.configured']);
+    Route::post('/pdv/cash/{cashSession}/review',[\App\Http\Controllers\PdvCashReportController::class,'review'])->name('pdv.cash.review')->middleware(['permission:pdv','company.configured']);
     Route::post('/pdv/suspended',[PdvController::class,'suspendSale'])->name('pdv.suspended.store')->middleware(['permission:pdv','company.configured']);
     Route::post('/pdv/suspended/{suspendedSale}/resume',[PdvController::class,'resumeSale'])->name('pdv.suspended.resume')->middleware(['permission:pdv','company.configured']);
     Route::delete('/pdv/suspended/{suspendedSale}',[PdvController::class,'discardSuspendedSale'])->name('pdv.suspended.destroy')->middleware(['permission:pdv','company.configured']);
