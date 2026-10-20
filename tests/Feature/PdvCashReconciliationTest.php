@@ -167,6 +167,28 @@ final class PdvCashReconciliationTest extends TestCase
         self::assertSame(1,PdvCashMovement::where('type','refund')->count());
     }
 
+    public function test_used_cash_payment_code_or_kind_cannot_be_reclassified_retroactively(): void
+    {
+        $user=$this->cashier();
+        $cash=app(PdvCashService::class);
+        $cash->open($user->id,'0.00',null);
+        $this->sale($user,$this->mixedPayments());
+        $method=\App\Models\PaymentMethod::query()->where('code','cash')->firstOrFail();
+
+        $payload=[
+            'code'=>'cash','name'=>'Dinheiro',
+            'kind'=>'other','fee_percent'=>'0',
+            'fee_fixed'=>'0','settlement_days'=>0,'sort_order'=>10,
+        ];
+        $this->actingAs($user)->put(route('settings.payment-methods.update',$method),$payload)
+            ->assertSessionHasErrors('kind');
+        self::assertSame('cash',$method->fresh()->kind);
+        $this->put(route('settings.payment-methods.update',$method),
+            array_replace($payload,['code'=>'cash-renamed','kind'=>'cash']))
+            ->assertSessionHasErrors('kind');
+        self::assertSame('cash',$method->fresh()->code);
+    }
+
     public function test_operator_cannot_review_or_view_other_operators_shifts(): void
     {
         $admin=$this->cashier();
