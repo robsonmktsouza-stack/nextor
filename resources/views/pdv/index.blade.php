@@ -27,9 +27,10 @@
     </div>
     <div class="pdv-cash-modal-body">
       @if($cashExpected!==null)
-        <div class="pdv-cash-total"><span>Saldo esperado</span><strong>R$ {{ number_format((float)$cashExpected,2,',','.') }}</strong></div>
+        <div class="pdv-cash-total"><span>Saldo esperado (conferência)</span><strong>R$ {{ number_format((float)$cashExpected,2,',','.') }}</strong></div>
       @endif
-      <label><span>Saldo contado</span><input type="number" step="0.01" min="0" name="closing_amount" value="{{ old('closing_amount',$cashExpected ?? 0) }}" required autofocus></label>
+      <label><span>Saldo contado</span><input type="number" step="0.01" min="0" name="closing_amount" value="{{ old('closing_amount','') }}" required autofocus></label>
+      <p style="margin:4px 0;font-size:12px">Conte o dinheiro físico antes de informar o valor. Divergências exigem justificativa e ficam registradas para conferência.</p>
       <label><span>Observação</span><textarea name="closing_notes" rows="3" maxlength="1000" placeholder="Opcional"></textarea></label>
       <button class="pdv-modal-primary" type="submit">@include('partials.icon',['name'=>'check','size'=>18]) Fechar caixa</button>
     </div>
@@ -56,6 +57,25 @@
       </div>
       <label><span>Valor</span><input type="number" step="0.01" min="0.01" name="amount" id="pdvCashMovementAmount" required></label>
       <label><span>Motivo</span><input type="text" name="reason" maxlength="255" id="pdvCashMovementReason" placeholder="Ex.: troco adicional, depósito no cofre..." required></label>
+      <div id="pdvCashRefundFields" hidden>
+        <label><span>Devolução concluída (se aplicável)</span>
+          <select name="sale_return_id" id="pdvCashRefundReturn">
+            <option value="">Selecione uma devolução</option>
+            @foreach($refundReturns as $return)
+              <option value="{{ $return->id }}">Devolução #{{ $return->id }} · Venda #{{ $return->sale_id }} · R$ {{ number_format((float)$return->total,2,',','.') }}</option>
+            @endforeach
+          </select>
+        </label>
+        <label><span>Ou venda cancelada</span>
+          <select name="sale_id" id="pdvCashRefundSale">
+            <option value="">Selecione uma venda cancelada</option>
+            @foreach($refundSales as $saleRefund)
+              <option value="{{ $saleRefund->id }}">Venda #{{ $saleRefund->id }} · R$ {{ number_format((float)$saleRefund->total,2,',','.') }}</option>
+            @endforeach
+          </select>
+        </label>
+        <small>Registre somente dinheiro realmente devolvido. Selecione uma devolução ou uma venda cancelada, nunca ambas.</small>
+      </div>
       @if($cashMovements->isNotEmpty())
         <div class="pdv-cash-history">
           <strong>Últimas movimentações</strong>
@@ -632,15 +652,18 @@
     @if($pdvSettings['require_cash_opening'])
       @if($cashSession)
         <button type="button" data-pdv-operation="close-cash"><span><strong>Fechar caixa</strong><small>Encerra o turno atual.</small></span><kbd>Alt+K</kbd></button>
+        <a href="{{ route('pdv.cash.report',$cashSession) }}" target="_blank" rel="noopener noreferrer" style="display:block;padding:10px 14px;color:inherit">Resumo do turno atual</a>
         @if($pdvSettings['allow_cash_movements'])
           <button type="button" data-pdv-operation="supply"><span><strong>Suprimento</strong><small>Entrada manual de dinheiro para reforço de troco.</small></span><kbd>Alt+P</kbd></button>
           <button type="button" data-pdv-operation="withdrawal"><span><strong>Sangria</strong><small>Retirada manual de dinheiro do caixa.</small></span><kbd>Alt+S</kbd></button>
+          <button type="button" data-pdv-operation="refund"><span><strong>Reembolso</strong><small>Registra dinheiro devolvido ao cliente, vinculado à operação.</small></span><kbd>—</kbd></button>
         @endif
       @else
         <button type="button" data-pdv-operation="open-cash"><span><strong>Abrir caixa</strong><small>Inicia o turno do operador.</small></span><kbd>Alt+A</kbd></button>
       @endif
     @endif
   </div>
+  <p style="margin:12px 16px"><a href="{{ route('pdv.cash.history') }}" target="_blank" rel="noopener noreferrer">Histórico e relatórios de caixa</a></p>
   <div class="pdv-modal-help"><span><kbd>↑</kbd><kbd>↓</kbd> Navegar</span><span><kbd>Enter</kbd> Abrir</span><span><kbd>Esc</kbd> Fechar</span></div>
 </dialog>
 
