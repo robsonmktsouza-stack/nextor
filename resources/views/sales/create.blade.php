@@ -34,6 +34,10 @@
       <span>Data</span>
       <input type="date" name="operation_date" value="{{ old('operation_date',now()->format('Y-m-d')) }}" required>
     </label>
+    <label class="field col-3" id="saleQuoteValidity" @if(old('operation_type','sale')!=='quote') hidden @endif>
+      <span>Validade do orçamento</span>
+      <input type="date" id="saleQuoteExpires" name="quote_expires_at" value="{{ old('quote_expires_at') }}">
+    </label>
 
     <div class="field col-3">
       <span>Consumidor final?</span>
@@ -138,6 +142,9 @@
     <strong id="saleSaveTotal">R$ 0,00</strong>
   </div>
   <button id="submitSale" type="submit" class="btn btn-success">@include('partials.icon',['name'=>'check','size'=>16]) Salvar</button>
+  <button id="saveQuotePdf" type="submit" name="after_save" value="pdf" class="btn btn-primary" @if(old('operation_type','sale')!=='quote') hidden @endif>
+    @include('partials.icon',['name'=>'print','size'=>16]) Salvar e visualizar PDF
+  </button>
   <a class="btn btn-secondary" href="{{ route('sales.index') }}">Cancelar</a>
 </div>
 </form>
@@ -148,4 +155,22 @@
 <script type="application/json" id="sale-old-payments">@json(old('payments',[]))</script>
 <script type="application/json" id="sale-payment-methods">@json($paymentMethods)</script>
 <script type="application/json" id="sale-default-due-days">@json($defaultDueDays)</script>
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+  const type=document.getElementById('saleOperationType');
+  const validity=document.getElementById('saleQuoteValidity');
+  const preview=document.getElementById('saveQuotePdf');
+  if(!type || !validity || !preview)return;
+  const update=()=>{
+    const quote=type.value==='quote';
+    validity.hidden=!quote;
+    preview.hidden=!quote;
+    validity.querySelector('input').disabled=!quote;
+  };
+  type.addEventListener('change',update);
+  update();
+});
+</script>
+@endpush
 @endsection
