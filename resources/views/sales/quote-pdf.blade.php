@@ -66,8 +66,8 @@ strong { font-weight:700; }
 .notes { margin-top:14px; break-inside:avoid; page-break-inside:avoid; }
 .notes .section-title { margin-bottom:6px; }
 .notes p { margin:4px 0; font-size:10px; white-space:pre-wrap; overflow-wrap:anywhere; }
-.footer { margin-top:18px; border-top:1px solid #999; padding-top:5px;
-  color:#555; font-size:9px; }
+.footer { position:fixed; bottom:-11mm; left:0; right:0; border-top:1px solid #999;
+  padding-top:5px; color:#555; font-size:9px; }
 @media print {
   body { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 }
