@@ -183,7 +183,7 @@ $state=match(true) {
 </section>
 @endif
 <footer class="footer">
-  Orçamento comercial sem valor fiscal. Não representa nota fiscal nem comprovante de pagamento.
+  Orçamento comercial — não é documento fiscal e não comprova pagamento.
 </footer>
 </body>
 </html>
