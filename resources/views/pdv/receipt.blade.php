@@ -25,6 +25,9 @@
   // para o módulo Fiscal após imprimir ou cancelar a impressão.
   // A situação da NFC-e é exibida no próprio PDV, sem supor autorização.
   $receiptAfterPrintUrl = route('pdv.index');
+  if ($receiptOrigin === 'sales') {
+      $receiptAfterPrintUrl = route('sales.show', $sale);
+  }
   $canPrintAuthorizedDanfe = $nfceDocument?->status==='authorized'
       && (str_ends_with((string)$nfceDocument->xml_path,'authorized.xml')
           || str_ends_with((string)$nfceDocument->xml_path,'authorized-recovered.xml'));
@@ -97,6 +100,9 @@ body{font-size:9px}
 </head>
 <body>
 <div class="screen-actions">
+  @if($receiptOrigin==='sales')
+    <a href="{{ route('sales.show',$sale) }}">Voltar à venda</a>
+  @else
   <a href="{{ route('pdv.index') }}">Voltar ao PDV</a>
   @if($nfceDocument && auth()->user()->canAccess('fiscal'))
     <a href="{{ route('fiscal.show', $nfceDocument) }}">NFC-e {{ $nfceDocument->status==='authorized' ? 'autorizada' : 'da venda' }}</a>
@@ -106,8 +112,10 @@ body{font-size:9px}
       {{ $canPrintOfflineDanfe ? 'DANFE contingência (2 vias)' : 'Imprimir DANFE NFC-e' }}
     </a>
   @endif
+  @endif
   <button type="button" data-reprint-receipt>Imprimir comprovante interno</button>
 </div>
+@if($receiptOrigin!=='sales')
 <section class="post-sale-status" aria-live="polite">
   @if(session('error'))
     <div class="receipt-alert">{{ session('error') }}</div>
@@ -141,6 +149,7 @@ body{font-size:9px}
     @endif
   @endif
 </section>
+@endif
 
 @for($copy=1;$copy<=$receiptCopies;$copy++)
 <main class="receipt receipt-copy">
@@ -248,11 +257,13 @@ body{font-size:9px}
 (()=>{
   let automatic=@json(request()->query('print') !== '0');
   const afterPrintUrl=@json($receiptAfterPrintUrl);
+  const salesReceipt=@json($receiptOrigin==='sales');
   const printButton=document.querySelector('[data-reprint-receipt]');
   window.addEventListener('load',()=>window.setTimeout(()=>{if(automatic) window.print();},250));
   window.addEventListener('afterprint',()=>{
     if(!automatic) return;
     automatic=false;
+    if(salesReceipt) return; // Na venda comum, manter o comprovante aberto.
     // Retornar sempre à frente de caixa: abrir a NFC-e é escolha explícita.
     window.setTimeout(()=>window.location.assign(afterPrintUrl),150);
   });
