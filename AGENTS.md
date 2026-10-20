@@ -5,7 +5,7 @@ Este é o contrato de trabalho para agentes de IA que leem o repositório. **Apl
 ## 1. Contexto e leitura obrigatória
 
 - **Produto:** Lumeron ERP, sistema **web Laravel 13/PHP 8.3+**, MySQL/MariaDB, Blade, CSS e JavaScript.
-- **Código ativo:** GitHub `robsonmktsouza-stack/nextor`, branch de desenvolvimento de referência `feature/acbr-nfe-bootstrap` em 19/10/2026. `main` está historicamente atrás; conferir o branch/commit real antes de qualquer alteração. Nunca fazer merge ou troca de branch automaticamente.
+- **Branches ativas desde 20/10/2026:** `main` = base estável aprovada; `develop` = integração do desenvolvimento; `feature/acbr-nfe-bootstrap` = branch histórica que originou a primeira promoção. Repositório `robsonmktsouza-stack/nextor`. Conferir branch/commit real antes de cada tarefa; nunca fazer merge/troca de branch automaticamente.
 - **Não confundir** com o repositório `lumeronerp` (projeto WPF desktop separado).
 - Antes de editar qualquer coisa, leia nesta ordem:
   1. [docs/ai/README.md](docs/ai/README.md)
@@ -34,7 +34,7 @@ Este é o contrato de trabalho para agentes de IA que leem o repositório. **Apl
 **O proprietário decidiu lançar um piloto de NFC-e em produção e continuar desenvolvendo o Nextor/Lumeron em paralelo.** Isso é uma política de manutenção, **não prova que uma instância já está implantada**.
 
 - **Não** permitir que commit/push/pull, branch `feature/*` ou `develop` atualize automaticamente clientes. Produção sempre usa **release/tag/commit explicitamente aprovado**; cada CNPJ pode permanecer em sua versão.
-- Estratégia de destino: `main` para linha estável aprovada; `develop` para integração de novas funções; `feature/*` para implementação; `hotfix/*` para corrigir uma versão publicada. **Estado atual:** `main` historicamente desatualizada e `develop` ainda não criada. Não trocar nem mesclar branches por iniciativa própria.
+- Estratégia de destino: `main` para linha estável aprovada; `develop` para integração de novas funções; `feature/*` para implementação; `hotfix/*` para corrigir uma versão publicada. **Estado atual:** `main` foi promovida por fast-forward a partir da linha funcional em 20/10/2026, com `composer.lock` versionado e `develop` criada. A tag `v1.0.0` somente existe após sua confirmação na referência Git; verificar antes de afirmar que foi criada. Não realizar deploy por conta própria.
 - O primeiro release `v1.0.0` é **candidato futuro**, não tag já criada. Exigir `composer.lock`, testes por versão, staging compatível e estratégia de implantação/backup/rollback antes da publicação.
 - Uma instalação, banco, A1/CSC, armazenamento e worker por CNPJ. Scripts `deploy/instances/` permitem simulação e atualização individual, mas não significam produção provisionada; `--apply` **nunca** sem autorização expressa.
 - `php artisan serve` só para desenvolvimento. VPS Linux exige ACBrLibNFe **Linux**, não DLL Windows/Laragon; a hospedagem de produção ainda depende de decisão.
