@@ -21,7 +21,7 @@ final class CentralLicenseGuardTest extends TestCase
     {
         $secret = str_repeat('a', 96);
         config()->set('central_license.enabled', true);
-        config()->set('central_license.url', 'http://control.test');
+        config()->set('central_license.url', 'http://127.0.0.1:8000');
         config()->set('central_license.instance_id', self::INSTANCE);
         config()->set('central_license.secret', $secret);
         config()->set('instance.cnpj', self::CNPJ);
