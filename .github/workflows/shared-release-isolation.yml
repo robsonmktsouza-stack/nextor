@@ -57,6 +57,8 @@ jobs:
         run: composer install --no-interaction --prefer-dist --no-progress
       - name: Laravel hardlink instances, update and rollback safety
         run: bash tests/Deployment/shared-release-isolation.sh
+      - name: Safe release cleanup, rollback references and fiscal files
+        run: bash tests/Deployment/prune-retention.sh
       - name: Real MySQL database grants, two isolated users
         env:
           GITHUB_ACTIONS: "true"

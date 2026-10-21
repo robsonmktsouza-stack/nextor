@@ -140,3 +140,19 @@ Estas são tarefas de **preparação de publicação**, não autorização para 
 7. Se não houver confirmação de onde hospedar, **não supor Linux ou Windows** e não executar provisionamento.
 
 **Decisão do proprietário:** seguir em frente com um **piloto controlado de NFC-e** e continuar desenvolvendo o produto em paralelo. Não reinterpretar isto como “pausar novos módulos até nova homologação completa”, nem como “produção já implantada”.
+
+
+## Revisão de hospedagem econômica — 21/10/2026 (somente develop)
+
+Permanece a regra de release aprovado por CNPJ; a economia é física,
+**não** uma transformação para multitenancy de banco compartilhado.
+deploy/instances/release.sh prepara código+vendor de SHA/tag aprovado em
+/srv/lumeron/code/releases/; approve.sh define apenas padrão para NOVOS
+clientes. As aplicações ficam por CNPJ em runtimes separados, com hardlinks
+root-owned para executáveis, e .env/storage/bootstrap/cache próprios.
+update.sh aplica backup/migrations exclusivamente ao banco daquele cliente
+e troca current atomicamente; rollback é apenas de código e exige confirmação
+adicional. prune.sh nunca remove versões apontadas por current/previous
+ou por qualquer snapshot, nem vasculha XML, certificados ou backups.
+Todas as mudanças seguem dependentes de autorização de deploy em staging/
+produção. Guia: [shared-immutable-releases.md](shared-immutable-releases.md).

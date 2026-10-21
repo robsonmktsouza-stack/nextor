@@ -103,3 +103,17 @@ Ver [docs/deployment/control-center-integration.md](docs/deployment/control-cent
 - Antes da atualização do ERP, executar a migration `2026_10_22_000001_preserve_legacy_entitlements_as_plans.php` no **Control** para impedir a perda de autorizações individuais antigas. Não tocar os documentos XML, certificados, CNPJ, estoque, bancos, filas, `main` ou `v1.0.0`.
 
 O cadastro compartilhado **Clientes** não tem módulo comercial próprio no catálogo, portanto segue disponível conforme permissões do usuário mesmo sem o módulo PDV. Não inventar uma restrição de Clientes baseada em PDV; Vendas/PDV e seus fluxos seguem bloqueados quando não contratados.
+
+
+## 2-E. Economia de armazenamento da hospedagem (21/10/2026)
+
+A pedido expresso do proprietário, os releases aprovados do **ERP** podem
+compartilhar conteúdo executável por **hardlinks imutáveis root-owned**
+(do mesmo filesystem), preservando **runtime e bootstrap/cache próprios** por
+CNPJ. APP_KEY, banco/usuário MySQL, sessão, cache, certificados, XMLs e upload
+permanecem privados. PHP-FPM isolado, ondemand; workers fiscais em lote ou
+rápidos conforme perfil, habilitados só após validação. Nenhuma publicação
+ocorre com push em develop; não alterar a branch control-center. Código novo
+de deploy em deploy/instances/ e documentação técnica detalhada em
+docs/deployment/shared-immutable-releases.md. Nunca alegar que estes scripts
+foram aplicados à VPS sem execução/medição explícitas.

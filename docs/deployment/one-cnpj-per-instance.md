@@ -1,3 +1,5 @@
+> **Atualização da arquitetura (21/10/2026):** continua **uma instalação operacional por CNPJ**, mas versões aprovadas podem usar hardlinks de código Laravel/vendor imutável, sem compartilhar banco, APP_KEY, bootstrap/cache, arquivos fiscais ou sessões. Os comandos antigos de instalação e atualização foram substituídos na branch develop; não siga os exemplos legados abaixo para fazer implantação antes de ler o novo documento: [releases compartilhados imutáveis](shared-immutable-releases.md). O Control continua independente, e nenhum deploy foi feito.
+
 # Lumeron na VPS: uma instalação por CNPJ
 
 **Governança obrigatória:** leia também [Política de versões, branches e publicação](versioning-and-release-policy.md). Um push de desenvolvimento não publica automaticamente novos releases; a origem `--source` deve corresponder ao commit/tag aprovado para aquele CNPJ, e a atualização requer autorização específica.

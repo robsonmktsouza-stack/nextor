@@ -95,3 +95,14 @@ A implantação inicial desse agente, do DNS e do TLS é um trabalho
 nem um serviço que o GitHub ativa automaticamente.
 Não utilizar um banco compartilhado para as instalações ERP.
 Consulte `docs/deployment/managed-first-access.md`.
+
+
+## Hospedagem SaaS com código deduplicado (develop)
+
+Releases Laravel imutáveis com arquivos executáveis hardlinked para cada CNPJ,
+mas bases MySQL/usuários, APP_KEY, configuração em cache, sessão, storage,
+XML, A1/CSC e runtime privados. Sem alteração de Control ou main.
+A instalação de clientes usa apenas SHAs explicitamente aprovados;
+nenhum git pull publica no servidor. Comandos de aprovação, deploy, atualização
+por CNPJ, rollback de código e limpeza segura:
+[Arquitetura de releases compartilhados](docs/deployment/shared-immutable-releases.md).

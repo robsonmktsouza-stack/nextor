@@ -62,3 +62,15 @@ php artisan test --filter=UiRefinementTest
 ```
 
 **Atenção:** usar o `composer.lock` agora versionado e não resolver novas versões diretamente em produção. Os comandos acima são sugestões de regressão, não alegações de execução local pelo proprietário. Chamadas reais à SEFAZ, FFI/ACBr e emissão dependem de instalação/configuração próprias e testes explícitos.
+
+
+## Atualização de hospedagem SaaS econômica — 21/10/2026
+
+Somente na develop, foram adicionados releases de código+vendor imutáveis,
+deduplicados por hardlinks de inodes entre runtimes por CNPJ, sem compartilhar
+banco ou arquivos privados, com controles de aprovação, versão, atualização,
+rollback e limpeza. Consumo de RAM potencial dos workers permanentes reduzido
+por opção fiscal batch oneshot; cliente exigindo baixa latência pode habilitar
+worker rápido dedicado. A VPS ainda não recebeu esta arquitetura. Estado e
+limites estão em docs/deployment/shared-immutable-releases.md. Consulte a
+CI do último SHA da develop antes de declarar testes plenamente aprovados.

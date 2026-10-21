@@ -71,10 +71,22 @@ if ((!ROLLBACK)); then
 fi
 
 FISCAL_RUNNING=0 FAST_RUNNING=0 SCHEDULE_RUNNING=0 MAINTENANCE=0 SWITCHED=0
+# A failed activation must not overwrite the operator's existing rollback point.
+PREVIOUS_POINTER=''
+if [[ -L "$BASE/previous" ]]; then
+  lm_safe_active "$BASE" previous >/dev/null
+  PREVIOUS_POINTER="$(readlink "$BASE/previous")"
+fi
 cleanup() {
   local code="$?"
   if ((code!=0 && SWITCHED)); then
     lm_atomic_current "$BASE" "$CURRENT" || true
+    if [[ -n "$PREVIOUS_POINTER" ]]; then
+      ln -s "$PREVIOUS_POINTER" "$BASE/.previous-next"
+      mv -Tf "$BASE/.previous-next" "$BASE/previous"
+    else
+      rm -f "$BASE/previous"
+    fi
     systemctl reload "php$PHP_VERSION-fpm" || true
     echo '[ERRO] Código retornou ao release anterior. Banco pode ter migrations aplicadas; avalie compatibilidade.' >&2
   fi

@@ -1,3 +1,29 @@
+## Continuidade — 21/10/2026 — hospedagem SaaS deduplicada por versão (somente develop)
+
+- Pedido do proprietário: reduzir a duplicação de vendor/código na VPS
+  mantendo banco e usuário MySQL, UID Linux, PHP-FPM, APP_KEY, storage,
+  bootstrap/cache, XML, A1, CSC, sessões, filas e workers isolados por CNPJ.
+- Implementação: releases de código+vendor preparados de tag/SHA aprovado,
+  root-owned e imutáveis; runtimes por empresa copiam estrutura com hardlinks
+  dos mesmos inodes. Bootstrap de Laravel e Composer ocorre sempre no caminho
+  próprio da empresa; somente bootstrap/cache e storage são mutáveis.
+- Novos scripts deploy/instances/lib.sh, release.sh, approve.sh, prune.sh,
+  logrotate e revisão de provision.sh/update.sh/list.sh. Atualização e
+  rollback por CNPJ, backup MySQL exclusivo e checagem de refs antes de
+  limpar código. Novo modo fiscal oneshot e opção de worker rápido persistente.
+- Novo workflow de CI testes/Deployment: em Ubuntu simula dois runtimes
+  Laravel/hardlinks SQLite, caches e versões separadas, sem alteração
+  automática na VPS; testa grants MySQL em serviço descartável. Cenários
+  de retenção e proteção de certificados/XML também adicionados.
+- Correção já detectada pela CI: runner Docker acessa MySQL via host de
+  origem bridge, diferente de 127.0.0.1. **Somente fixture CI** usa grant
+  em host % para testar escopo estrito de database; scripts de produção
+  continuam com usuario MySQL restrito a 127.0.0.1.
+- Limites: sem benchmark real na VPS, sem testes FPM/ACBr com hardware
+  de produção, nem autorização para migrar instalações legadas. TAG e
+  produção não foram alteradas. Leia o novo documento detalhado em
+  docs/deployment/shared-immutable-releases.md e confira CI do SHA final.
+
 ## Fluxo de primeiro acesso automatizado por VPS — 21/10/2026
 
 - O usuário quer apenas cadastrar a empresa no Control e entregar o acesso

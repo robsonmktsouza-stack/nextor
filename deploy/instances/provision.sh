@@ -36,7 +36,7 @@ lm_valid_id "$ID" || { echo 'ID inválido.' >&2; exit 2; }
 [[ "$BASE_DOMAIN" =~ ^[a-z0-9]+([.-][a-z0-9]+)*\.[a-z]{2,}$ ]] ||
   { echo 'Domínio base inválido.' >&2; exit 2; }
 [[ "$DOMAIN" == *."$BASE_DOMAIN" ]] || { echo 'Fora do domínio contratado.' >&2; exit 2; }
-SUBDOMAIN="$(printf '%s' "$DOMAIN" | sed "s/\.$BASE_DOMAIN$//")"
+SUBDOMAIN="${DOMAIN%.$BASE_DOMAIN}"
 [[ "$SUBDOMAIN" =~ ^[a-z][a-z0-9-]{1,38}$ && "$SUBDOMAIN" != *--* ]] ||
   { echo 'Subdomínio inválido.' >&2; exit 2; }
 [[ ! "$SUBDOMAIN" =~ ^(www|login|admin|api)$ ]] || { echo 'Subdomínio reservado.' >&2; exit 2; }
@@ -70,11 +70,17 @@ fi
 lm_root
 lm_require mysql git cp runuser systemctl nginx openssl flock
 exec 8>/run/lumeron-code.lock
-flock -s 8
+flock -x 8
 [[ -d "$SOURCE" ]] || lm_die 'Fonte inexistente.'
 SHA="$(lm_selected_sha "$RELEASE_SHA")"
 CODE="$(lm_code_path "$SHA")"
 [[ ! -e "$BASE" && ! -L "$BASE" ]] || lm_die 'Instalação existente. Use update.sh.'
+for other in "$LM_INSTANCES"/*/shared/.env; do
+  [[ -f "$other" && ! -L "$other" ]] || continue
+  if grep -Fxq "LUMERON_INSTANCE_CNPJ=$CNPJ" "$other"; then
+    lm_die 'Este CNPJ já está provisionado em outra instalação.'
+  fi
+done
 ! id "$USER" >/dev/null 2>&1 || lm_die 'Usuário Unix já existe.'
 [[ -r "$CERT" && -r "$CERTKEY" && -r "$MYSQL_CNF" ]] || lm_die 'TLS ou MySQL administrativo indisponível.'
 [[ -x "/usr/bin/php$PHP_VERSION" && -d "/etc/php/$PHP_VERSION/fpm/pool.d" ]] ||
@@ -174,7 +180,7 @@ listen.group = www-data
 listen.mode = 0660
 clear_env = yes
 pm = ondemand
-pm.max_children = 3
+pm.max_children = 6
 pm.process_idle_timeout = 10s
 pm.max_requests = 500
 php_admin_flag[log_errors] = on
@@ -201,8 +207,8 @@ server {
         fastcgi_param HTTPS on;
         fastcgi_pass unix:/run/php/php$PHP_VERSION-fpm-lumeron-$ID.sock;
     }
-    location ^~ /uploads/ {
-        add_header Content-Disposition attachment always;
+    # Never bypass the PHP/hidden-file deny regex with a ^~ uploads rule.
+    location /uploads/ {
         add_header X-Content-Type-Options nosniff always;
         try_files \$uri =404;
     }
@@ -258,7 +264,7 @@ cat >"$FISCAL_TIMER" <<ENV
 Description=Lumeron $ID - fiscal queue wakeup (opt-in)
 [Timer]
 OnBootSec=30s
-OnUnitInactiveSec=10s
+OnUnitInactiveSec=30s
 Unit=lumeron-fiscal-$ID.service
 [Install]
 WantedBy=timers.target
