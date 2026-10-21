@@ -92,6 +92,20 @@
     }
   }
 
+  // Selecionar um plano aplica somente aos campos ainda não enviados. O
+  // operador pode ajustar os módulos manualmente depois.
+  document.querySelectorAll('[data-plan-selector]').forEach(select => {
+    select.addEventListener('change', () => {
+      const form = select.closest('form');
+      const selected = select.selectedOptions[0];
+      const defaults = (selected?.dataset.modules || '').split(',').filter(Boolean);
+      if (!form) return;
+      form.querySelectorAll('input[name="modules[]"]').forEach(box => {
+        box.checked = defaults.includes(box.value);
+      });
+    });
+  });
+
   document.querySelectorAll('[data-copy-target]').forEach(button => {
     button.addEventListener('click', async () => {
       const value = document.getElementById(button.dataset.copyTarget)?.textContent ?? '';
