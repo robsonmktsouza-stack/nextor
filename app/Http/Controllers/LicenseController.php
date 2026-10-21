@@ -63,10 +63,10 @@ final class LicenseController extends Controller
         if (!$plan->active && $company->plan !== $plan->code) {
             return back()->withErrors(['plan' => 'Este plano está arquivado. Selecione um plano disponível.']);
         }
-        DB::transaction(function () use ($company, $data, $plan): void {
+        DB::transaction(function () use ($company, $data, $plan, $request): void {
             $company->update([
                 'plan' => $data['plan'],
-                'modules' => array_values(array_unique($data['modules'] ?? $plan->modules ?? [])),
+                'modules' => array_values(array_unique($data['modules'] ?? ($request->has('modules_present') ? [] : ($plan->modules ?? [])))),
                 'expires_at' => $data['expires_at'] ?? null,
             ]);
             $company->record('license_changed', 'Plano, módulos ou validade alterados.');
