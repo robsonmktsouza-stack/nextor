@@ -25,7 +25,6 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/clients/{company}/status', [LicenseController::class, 'status'])->name('clients.status');
     Route::post('/clients/{company}/renew', [LicenseController::class, 'renew'])->name('clients.renew');
     Route::post('/clients/{company}/modules', [LicenseController::class, 'modules'])->name('clients.modules');
-    Route::post('/clients/{company}/rotate-secret', [CompanyController::class, 'rotateSecret'])->name('clients.rotate-secret');
     Route::get('/licenses', [LicenseController::class, 'index'])->name('licenses.index');
     Route::get('/history', [HistoryController::class, 'index'])->name('history.index');
 });
