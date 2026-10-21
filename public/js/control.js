@@ -198,15 +198,20 @@
       if (!grid) return;
       document.body.classList.add('print-grid-only');
       grid.classList.add('print-target');
-      window.print();
-      // Chrome fires afterprint; fallback for browsers without it.
       const cleanPrint = () => {
         document.body.classList.remove('print-grid-only');
         grid.classList.remove('print-target');
         window.removeEventListener('afterprint', cleanPrint);
       };
       window.addEventListener('afterprint', cleanPrint, {once: true});
-      setTimeout(cleanPrint, 1500);
+      try {
+        window.print();
+      } catch (error) {
+        cleanPrint();
+        throw error;
+      }
+      // Restore even on browsers that do not dispatch afterprint.
+      setTimeout(cleanPrint, 3000);
       return;
     }
     const exportButton = event.target.closest?.('[data-grid-export]');
