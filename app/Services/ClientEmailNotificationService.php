@@ -67,9 +67,15 @@ final class ClientEmailNotificationService
                 ));
                 $delivery->update(['status' => 'sent', 'sent_at' => now(),
                     'claimed_at' => null, 'next_attempt_at' => null]);
-                $company->record('client_email_sent', 'Aviso de licença enviado por e-mail.', [
-                    'automation_rule_id' => $rule->id, 'delivery_id' => $delivery->id,
-                ]);
+                // The outbox is the authoritative delivery audit. An optional
+                // history-write failure must never retry an already sent email.
+                try {
+                    $company->record('client_email_sent', 'Aviso de licença enviado por e-mail.', [
+                        'automation_rule_id' => $rule->id, 'delivery_id' => $delivery->id,
+                    ]);
+                } catch (\Throwable) {
+                    // Delivery is already stored as sent.
+                }
                 $result['sent']++;
             } catch (\Throwable) {
                 // Store no SMTP credentials, address or exception text in the audit.
