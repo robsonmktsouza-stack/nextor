@@ -48,7 +48,7 @@ class User extends Authenticatable {
             'pdv' => ['pdv.index', 'pdv'],
             'products' => ['products.index', 'products'],
             'services' => ['services.index', 'services'],
-            'customers' => ['customers.index', 'pdv'],
+            'customers' => ['customers.index', null],
             'stock' => ['stock.index', 'products'],
             'returns' => ['sales.returns.index', 'pdv'],
             'fiscal' => ['fiscal.index', 'fiscal'],
