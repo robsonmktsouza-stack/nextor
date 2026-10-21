@@ -20,6 +20,40 @@ final class BindManagedInstallation extends Command
 
     protected $description = 'Vincula uma instalação ERP existente automaticamente, sem copiar licença ou alterar .env.';
 
+    /**
+     * Inicia o Artisan de OUTRA instalação Laravel sem herdar as configurações
+     * de banco, aplicação ou cache do próprio Lumeron Control.
+     *
+     * Symfony Process normalmente herda o ambiente do processo pai. Laravel
+     * prioriza variáveis herdadas sobre o .env do projeto filho; sem esse
+     * isolamento, o Nextor acessa o banco do Control e não acha company_settings.
+     *
+     * Preservamos PATH, SystemRoot, PHP_INI_SCAN_DIR e demais variáveis do SO,
+     * mas anulamos apenas variáveis de configuração de aplicações Laravel.
+     */
+    private function erpProcess(string $folder, string $command): Process
+    {
+        $os = getenv();
+        $keys = array_unique(array_merge(
+            array_keys($_ENV),
+            array_keys($_SERVER),
+            is_array($os) ? array_keys($os) : []
+        ));
+
+        $env = [];
+        foreach ($keys as $key) {
+            if (!is_string($key)) {
+                continue;
+            }
+
+            if (preg_match('/^(?:APP_|DB_|DATABASE_URL$|CACHE_|SESSION_|QUEUE_|REDIS_|LUMERON_|NEXTOR_|LOG_|MAIL_|FILESYSTEM_|BROADCAST_|VITE_|ACBR_|LARAVEL_|JWT_|AWS_)/i', $key)) {
+                $env[$key] = false;
+            }
+        }
+
+        return new Process([PHP_BINARY, 'artisan', $command], $folder, $env);
+    }
+
     public function handle(): int
     {
         $folder = realpath((string) $this->argument('erp-path'));
@@ -42,7 +76,7 @@ final class BindManagedInstallation extends Command
             return self::FAILURE;
         }
 
-        $proc = new Process([PHP_BINARY, 'artisan', 'lumeron:license-identity'], $folder);
+        $proc = $this->erpProcess($folder, 'lumeron:license-identity');
         $proc->setTimeout(30);
         $proc->run();
         $cnpj = trim($proc->getOutput());
@@ -136,7 +170,7 @@ final class BindManagedInstallation extends Command
 
         // Verify a live, signed handshake before declaring this instance linked.
         // On failure, undo only the new private file, never touch fiscal data.
-        $check = new Process([PHP_BINARY, 'artisan', 'lumeron:license-sync'], $folder);
+        $check = $this->erpProcess($folder, 'lumeron:license-sync');
         $check->setTimeout(30);
         $check->run();
         if (!$check->isSuccessful() || !str_contains($check->getOutput(), 'origem: online')) {
