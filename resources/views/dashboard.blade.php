@@ -30,7 +30,7 @@
 <section class="panel"><div class="panel-heading"><h2>Atividades recentes</h2><a href="{{ route('history.index') }}">Histórico <svg><use href="#i-arrow"/></svg></a></div>
 <div class="activity-list">
 @forelse($events as $event)
-<div class="activity"><span class="activity-dot"></span><div><strong>{{ $event->company?->legal_name ?? 'Conta indisponível' }}</strong><p>{{ $event->description }}</p><small>{{ $event->created_at?->format('d/m/Y H:i') }}</small></div></div>
+<div class="activity"><span class="activity-dot"></span><div><strong>{{ $event->company?->legal_name ?? 'Conta indisponível' }}</strong><p>{{ \App\Support\OperatorMessage::event($event->description) }}</p><small>{{ $event->created_at?->format('d/m/Y H:i') }}</small></div></div>
 @empty<div class="empty">Nenhuma movimentação registrada.</div>@endforelse
 </div></section>
 </div>
