@@ -9,12 +9,23 @@ use Illuminate\Http\Request;
 
 final class AutomationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $rules = AutomationRule::query();
+        $search = trim((string) $request->query('q', ''));
+        if ($search !== '') {
+            $rules->where(fn ($q) => $q->where('name', 'like', '%'.$search.'%')
+                ->orWhere('description', 'like', '%'.$search.'%'));
+        }
+        if (in_array($request->query('status'), ['enabled', 'disabled'], true)) {
+            $rules->where('enabled', $request->query('status') === 'enabled');
+        }
+        $perPage = (int) $request->query('per_page', 20);
+        $perPage = in_array($perPage, [20, 50, 100], true) ? $perPage : 20;
         return view('automations.index', [
-            'rules' => AutomationRule::query()->orderBy('id')->get(),
+            'rules' => $rules->orderBy('id')->paginate($perPage, ['*'], 'rules_page')->withQueryString(),
             'deliveries' => AutomationDelivery::query()->with(['company', 'rule'])
-                ->latest('id')->limit(25)->get(),
+                ->latest('id')->paginate($perPage, ['*'], 'alerts_page')->withQueryString(),
         ]);
     }
 
