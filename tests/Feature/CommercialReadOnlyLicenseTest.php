@@ -61,8 +61,10 @@ final class CommercialReadOnlyLicenseTest extends TestCase
         $this->get('/products')
             ->assertOk()
             ->assertSee('data-commercial-readonly', false)
+            ->assertSee('commercialReadOnlyDialog')
             ->assertSee('Modo de consulta')
             ->assertSee('Assinatura suspensa');
+        $this->get('/license-status')->assertRedirect('/dashboard');
     }
 
     public function test_commercial_writes_are_blocked_by_server_for_every_http_method(): void
