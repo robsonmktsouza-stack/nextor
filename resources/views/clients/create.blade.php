@@ -27,7 +27,7 @@
 </div>
 <div class="modules"><strong>Módulos liberados</strong><input type="hidden" name="modules_present" value="1"><div class="module-grid">@foreach(config('license.modules') as $code=>$label)<label class="module-switch"><input type="checkbox" role="switch" name="modules[]" value="{{ $code }}" @checked(in_array($code,old('modules',$plans->firstWhere('code',old('plan',$plans->first()?->code))?->modules ?? [])))><span class="switch-track" aria-hidden="true"></span><span>{{ $label }}</span></label>@endforeach</div></div>
 </fieldset>
-<div class="wizard-footer"><button class="btn subtle" type="button" data-wizard-back hidden>Voltar</button><span class="nav-spacer"></span><button class="btn primary" type="button" data-wizard-next>Próximo <svg><use href="#i-arrow"/></svg></button><button class="btn primary" type="submit" data-wizard-submit hidden><svg><use href="#i-check"/></svg>Criar conta</button></div>
+<div class="wizard-footer"><button class="btn subtle" type="button" data-wizard-back hidden>Voltar</button><span class="nav-spacer"></span><button class="btn primary" type="button" data-wizard-next>Próximo @include('partials.icon',['name'=>'arrow','size'=>16])</button><button class="btn primary" type="submit" data-wizard-submit hidden>@include('partials.icon',['name'=>'check','size'=>18])Criar conta</button></div>
 </form>
 </section>
 @endsection
