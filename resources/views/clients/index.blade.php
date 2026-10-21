@@ -1,7 +1,9 @@
 @extends('layouts.main')
 @section('title', $licenses?'Licenças':'Clientes')
 @section('actions')
+@unless($licenses)
 <a href="{{ route('clients.create') }}" class="btn primary"><svg><use href="#i-plus"/></svg>Nova conta</a>
+@endunless
 @endsection
 @section('content')
 @if($licenses)
