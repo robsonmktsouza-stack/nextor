@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Company;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Http;
 use Symfony\Component\Process\Process;
 
 /**
@@ -57,6 +58,15 @@ final class BindManagedInstallation extends Command
             return self::FAILURE;
         }
 
+        try {
+            if (!Http::connectTimeout(2)->timeout(5)->get($url.'/up')->successful()) {
+                throw new \RuntimeException('Health check retornou erro.');
+            }
+        } catch (\Throwable) {
+            $this->error('O Lumeron Control não está acessível nesse endereço. Nenhuma licença foi vinculada.');
+            return self::FAILURE;
+        }
+
         $secret = $company->license_secret;
         $payload = [
             'instance_id' => $company->instance_id,
@@ -86,6 +96,7 @@ final class BindManagedInstallation extends Command
             }
         }
 
+        $previous = is_file($target) ? file_get_contents($target) : null;
         $temp = tempnam($dir, '.lumeron-bind-');
         if ($temp === false) {
             $this->error('Não foi possível preparar vínculo seguro.');
@@ -102,6 +113,22 @@ final class BindManagedInstallation extends Command
         } catch (\Throwable) {
             @unlink($temp);
             $this->error('Não foi possível salvar o vínculo da instalação.');
+            return self::FAILURE;
+        }
+
+        // Verify a live, signed handshake before declaring this instance linked.
+        // On failure, undo only the new private file, never touch fiscal data.
+        $check = new Process([PHP_BINARY, 'artisan', 'lumeron:license-sync'], $folder);
+        $check->setTimeout(30);
+        $check->run();
+        if (!$check->isSuccessful() || !str_contains($check->getOutput(), 'origem: online')) {
+            if ($previous !== null) {
+                file_put_contents($target, $previous, LOCK_EX);
+                chmod($target, 0600);
+            } else {
+                @unlink($target);
+            }
+            $this->error('O ERP não confirmou a conexão assinada com o Control. O vínculo novo foi desfeito.');
             return self::FAILURE;
         }
 
