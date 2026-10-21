@@ -38,7 +38,7 @@ final class CompanyController extends Controller
                 if ($scheme === 'http' && app()->environment('local', 'testing')
                     && (in_array($host, ['localhost', '127.0.0.1', '::1'], true)
                         || (app()->environment('local')
-                            && preg_match('/^lumeron-[a-z][a-z0-9-]{1,38}\\.test$/', $host)))) {
+                            && preg_match('/^lumeron-[a-z][a-z0-9-]{1,38}\.test$/', $host)))) {
                     return;
                 }
 
