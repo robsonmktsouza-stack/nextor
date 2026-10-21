@@ -74,19 +74,19 @@ final class AutomationRunner
         if ($rule->code === 'expiry_soon') {
             return [
                 'expiry-'.$company->expires_at->toDateString(),
-                'Automação: licença próxima do vencimento em '.$company->expires_at->format('d/m/Y').'. Verifique a renovação.',
+                'Licença próxima do vencimento: '.$company->expires_at->format('d/m/Y').'.',
             ];
         }
         if ($rule->code === 'expired') {
             return [
                 'expired-'.$company->expires_at->toDateString(),
-                'Automação: licença vencida em '.$company->expires_at->format('d/m/Y').'. O estado de acesso já é calculado pelo prazo.',
+                'Licença vencida em '.$company->expires_at->format('d/m/Y').'.',
             ];
         }
         $last = $company->last_seen_at ?? $company->created_at;
         return [
             'offline-'.$last->format('Y-m-d-His'),
-            'Automação: instalação sem comunicação com a central desde '.$last->format('d/m/Y H:i').'.',
+            'Sem comunicação desde '.$last->format('d/m/Y H:i').'.',
         ];
     }
 }
