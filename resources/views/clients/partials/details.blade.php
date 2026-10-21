@@ -12,8 +12,8 @@
 <label>Responsável <input name="contact_name" value="{{ $company->contact_name }}" maxlength="160"></label>
 <label>E-mail <input name="email" type="email" value="{{ $company->email }}" required></label>
 <label>Telefone <input name="phone" value="{{ $company->phone }}" maxlength="30"></label>
-<label>Login inicial de referência <input name="admin_login" value="{{ $company->admin_login }}" maxlength="100"></label>
-<label class="span-two">URL da instalação <input name="installation_url" type="url" value="{{ $company->installation_url }}" placeholder="https://..."></label>
+<label>Login de referência <input name="admin_login" value="{{ $company->admin_login }}" maxlength="100"></label>
+<label class="span-two">Endereço da instalação <input name="installation_url" type="url" value="{{ $company->installation_url }}" placeholder="https://..."></label>
 </div><button type="submit" class="btn primary small">Salvar dados</button>
 </form>
 <div class="metadata"><strong>Subdomínio</strong><span>{{ $company->subdomain }}</span><strong>Conexão</strong><span><span class="status {{ $company->last_seen_at ? 'active' : 'expired' }}">{{ $company->last_seen_at ? 'Conectada anteriormente' : 'Aguardando instalação' }}</span></span><strong>Último contato</strong><span>{{ $company->last_seen_at?->format('d/m/Y H:i')??'Ainda não conectada' }}</span></div>
