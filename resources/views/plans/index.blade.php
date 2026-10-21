@@ -29,7 +29,7 @@
     <div class="table-scroll">
         <table class="license-data-table" data-grid-table>
             <thead><tr><th>Código</th><th>Plano</th><th>Preço</th><th>Período</th>
-                <th>Módulos padrão</th><th>Clientes</th><th>Situação</th><th class="license-actions-heading">Ações</th>
+                <th>Módulos incluídos</th><th>Clientes</th><th>Situação</th><th class="license-actions-heading">Ações</th>
             </tr></thead>
             <tbody>
             @forelse($plans as $plan)
