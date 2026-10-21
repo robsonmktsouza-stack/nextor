@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 final class AutomationRunner
 {
     /**
-     * Internal-only reminders; never emails clients, bills, renews or
+     * Internal history and optional email outbox; never bills, renews or
      * suspends anyone. The expiry status already derives from expires_at.
      *
      * Delivery rows are uniquely indexed so repeated scheduler runs won't
@@ -55,6 +55,17 @@ final class AutomationRunner
                             'created_at' => now(),
                         ]);
                         if ($inserted > 0) {
+                            // Add a pending customer notice only for NEW internal
+                            // events; enabling email never resends older notices.
+                            if ($rule->notify_client_email
+                                && in_array($rule->kindCode(), ['expiry_soon', 'expired'], true)
+                                && filter_var($company->email, FILTER_VALIDATE_EMAIL) !== false) {
+                                \App\Models\ClientEmailDelivery::query()->firstOrCreate([
+                                    'automation_rule_id' => $rule->id,
+                                    'company_id' => $company->id,
+                                    'fingerprint' => $fingerprint,
+                                ], ['status' => 'pending']);
+                            }
                             $company->record('automation_'.$rule->code, $description, [
                                 'automation_rule_id' => $rule->id,
                                 'fingerprint' => $fingerprint,

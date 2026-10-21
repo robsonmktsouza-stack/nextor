@@ -11,12 +11,13 @@ final class AutomationRule extends Model
         'offline' => 'Instalações sem comunicação',
     ];
 
-    protected $fillable = ['name', 'description', 'kind', 'enabled', 'days'];
+    protected $fillable = ['name', 'description', 'kind', 'enabled', 'days', 'notify_client_email'];
 
     protected function casts(): array
     {
         return [
             'enabled' => 'boolean',
+            'notify_client_email' => 'boolean',
             'days' => 'integer',
             'last_run_at' => 'datetime',
         ];

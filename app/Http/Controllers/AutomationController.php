@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AutomationDelivery;
+use App\Models\ClientEmailDelivery;
 use App\Models\AutomationRule;
 use App\Services\AutomationRunner;
 use Illuminate\Http\Request;
@@ -29,6 +30,8 @@ final class AutomationController extends Controller
             'rules' => $rules->orderBy('id')->paginate($perPage, ['*'], 'rules_page')->withQueryString(),
             'deliveries' => AutomationDelivery::query()->with(['company', 'rule'])
                 ->latest('id')->paginate($perPage, ['*'], 'alerts_page')->withQueryString(),
+            'clientEmails' => ClientEmailDelivery::query()->with(['company', 'rule'])
+                ->latest('id')->paginate($perPage, ['*'], 'emails_page')->withQueryString(),
         ]);
     }
 
@@ -50,6 +53,7 @@ final class AutomationController extends Controller
             'kind' => [$rule ? 'prohibited' : 'required', Rule::in(array_keys(AutomationRule::KINDS))],
             'days' => ['required', 'integer', 'min:0', 'max:365'],
             'enabled' => ['required', 'boolean'],
+            'notify_client_email' => ['sometimes', 'boolean'],
         ]);
         $kind = $rule?->kindCode() ?? $data['kind'];
         if ($kind === 'offline' && (int) $data['days'] < 1) {
@@ -59,6 +63,14 @@ final class AutomationController extends Controller
         }
         $data['days'] = $kind === 'expired' ? 0 : (int) $data['days'];
         $data['enabled'] = $request->boolean('enabled');
+        if ($request->exists('notify_client_email') || !$rule) {
+            $data['notify_client_email'] = $request->boolean('notify_client_email');
+        }
+        if ($kind === 'offline' && !empty($data['notify_client_email'])) {
+            throw ValidationException::withMessages([
+                'notify_client_email' => 'E-mail ao cliente disponível somente para avisos de vencimento.',
+            ]);
+        }
         unset($data['kind']);
         if (!$rule) $data['kind'] = $kind;
 
