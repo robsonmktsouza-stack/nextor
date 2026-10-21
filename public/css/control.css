@@ -154,3 +154,69 @@ input:disabled+.switch-track{opacity:.5;cursor:not-allowed}
   .two-cols [data-admin-list] .license-data-table th,
   .two-cols [data-admin-list] .license-data-table td{padding:8px 7px}
 }
+
+
+/* Ícones nativos do Nextor ERP — um único componente SVG compartilhado.
+   Mesma espessura de traço, geometrias e tamanhos da grade Produtos. */
+svg.nextor-icon{
+  display:block;
+  flex:0 0 auto;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  vector-effect:non-scaling-stroke;
+  vertical-align:middle;
+}
+.nav-link .nextor-icon{color:#d4e1e8;opacity:.97}
+.nav-link.active .nextor-icon{color:#f0f8fc}
+.license-grid-toolbar{
+  background:linear-gradient(180deg,#fff 0%,#fbfcfe 100%);
+  border-bottom-color:#dfe5ec;
+}
+.license-grid-new{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  min-height:35px;padding:0 12px;
+  color:#2e668f;background:#f5f9fc;border-color:#c4d5e1;
+  font-weight:650;
+}
+.license-grid-new:hover{background:#edf5fb;border-color:#acc7d9;color:#245a82}
+.license-tool-group{box-shadow:0 1px 2px rgba(22,55,76,.055)}
+.license-tool-group .license-tool{
+  min-width:35px;
+  background:#fff;
+  color:#627a8c;
+  border-color:#d0dde5;
+}
+.license-tool-group .license-tool:hover{background:#f3f8fb;color:#2b668e}
+.license-filter-toggle{
+  min-width:37px;
+  background:#286d9a;
+  border-color:#226187;
+  color:#fff;
+}
+.license-filter-toggle:hover{background:#225f86;color:#fff}
+.license-row-actions{gap:4px}
+.license-icon-action{
+  display:inline-grid;place-items:center;
+  width:30px;height:30px;
+  background:#f5f8fa;
+  border:1px solid #cbd9e3;
+  border-radius:3px;
+  color:#56778f;
+}
+.license-icon-action:hover{
+  background:#e7f2f9;
+  border-color:#a9c5d6;
+  color:#2c6c99;
+}
+.license-icon-action .nextor-icon,
+.license-grid-new .nextor-icon,
+.license-tool .nextor-icon{margin:0}
+.license-icon-action:focus-visible,
+.license-tool:focus-visible,
+.license-grid-new:focus-visible{
+  outline:2px solid #3484b0;
+  outline-offset:2px;
+}
