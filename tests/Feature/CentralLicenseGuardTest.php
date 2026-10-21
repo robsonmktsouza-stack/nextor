@@ -122,6 +122,44 @@ final class CentralLicenseGuardTest extends TestCase
         }
     }
 
+    public function test_signed_notice_threshold_is_stored_for_future_offline_grace(): void
+    {
+        $secret = $this->setupLicense();
+        $body = json_encode([
+            'instance_id' => self::INSTANCE,
+            'cnpj' => self::CNPJ,
+            'status' => 'active',
+            'plan' => 'standard',
+            'modules' => ['products'],
+            'expires_at' => today()->addDays(3)->toDateString(),
+            'notice_days' => 7,
+            'checked_at' => now()->toIso8601String(),
+        ], JSON_UNESCAPED_SLASHES);
+        Http::fake(['*' => Http::response($body, 200, [
+            'X-Lumeron-Signature' => hash_hmac('sha256', $body, $secret),
+        ])]);
+        $state = app(CentralLicenseService::class)->refresh();
+        $this->assertSame(7, $state['notice_days']);
+        $this->assertDatabaseHas('central_license_states', ['id' => 1, 'notice_days' => 7]);
+        $this->assertSame(3, \App\Support\LicenseReminder::fromState($state)['days']);
+    }
+
+    public function test_untrusted_or_invalid_reminder_cannot_be_displayed(): void
+    {
+        $this->assertNull(\App\Support\LicenseReminder::fromState([
+            'status' => 'active', 'notice_days' => null,
+            'expires_at' => today()->addDays(1)->toDateString(),
+        ]));
+        $this->assertNull(\App\Support\LicenseReminder::fromState([
+            'status' => 'expired', 'notice_days' => 7,
+            'expires_at' => today()->subDay()->toDateString(),
+        ]));
+        $this->assertNull(\App\Support\LicenseReminder::fromState([
+            'status' => 'active', 'notice_days' => 3,
+            'expires_at' => today()->addDays(7)->toDateString(),
+        ]));
+    }
+
     public function test_missing_or_invalid_signature_fails_closed_for_business(): void
     {
         $this->setupLicense();

@@ -39,3 +39,16 @@
     </div>
 </dialog>
 @endif
+
+@php($commercialReminder = $licenseContext['reminder'] ?? null)
+@if(!$isCommercialReadOnly && $commercialReminder)
+<div class="commercial-license-reminder" role="status"
+     aria-label="{{ $commercialReminder['text'] }} — {{ $commercialReminder['date'] }}"
+     data-central-license-reminder>
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none"
+         stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>
+    </svg>
+    <span>{{ $commercialReminder['text'] }}</span>
+</div>
+@endif

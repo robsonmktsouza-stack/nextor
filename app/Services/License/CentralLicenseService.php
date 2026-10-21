@@ -87,6 +87,13 @@ final class CentralLicenseService
                 || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $expires))) {
                 throw new \RuntimeException('Validade da licença inválida.');
             }
+            // Optional extension for older Control versions. Never trust an
+            // unsigned or malformed reminder threshold.
+            $noticeDays = $payload['notice_days'] ?? null;
+            if ($noticeDays !== null
+                && (!is_int($noticeDays) || $noticeDays < 0 || $noticeDays > 365)) {
+                throw new \RuntimeException('Prazo de aviso incompatível.');
+            }
             $modules = $payload['modules'];
             if (count($modules) > count(\App\Support\CommercialModuleAccess::ALLOWED)
                 || count($modules) !== count(array_unique($modules))
@@ -98,11 +105,13 @@ final class CentralLicenseService
                 'plan' => $payload['plan'],
                 'modules' => json_encode($modules, JSON_THROW_ON_ERROR),
                 'expires_at' => $expires,
+                'notice_days' => $noticeDays,
                 'verified_at' => now(),
                 'updated_at' => now(),
             ]);
             $state = ['status' => $payload['status'], 'plan' => $payload['plan'],
-                'modules' => $modules, 'expires_at' => $expires, 'source' => 'online'];
+                'modules' => $modules, 'expires_at' => $expires,
+                'notice_days' => $noticeDays, 'source' => 'online'];
             Cache::put('lumeron:central-license:v1', $state,
                 (int) config('central_license.cache_seconds', 60));
             return $this->withLocalExpiry($state);
@@ -117,6 +126,7 @@ final class CentralLicenseService
                     'plan' => $last->plan,
                     'modules' => json_decode($last->modules, true) ?: [],
                     'expires_at' => $last->expires_at,
+                    'notice_days' => $last->notice_days === null ? null : (int) $last->notice_days,
                     'source' => 'offline-grace',
                 ]);
             }

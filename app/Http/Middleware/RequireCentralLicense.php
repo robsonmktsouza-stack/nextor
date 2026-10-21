@@ -6,6 +6,7 @@ use App\Services\License\CentralLicenseService;
 use App\Support\CommercialLicensePolicy;
 use App\Support\CommercialModuleAccess;
 use App\Support\ManagedLicenseConfig;
+use App\Support\LicenseReminder;
 use Closure;
 use Illuminate\Http\Request;
 
@@ -28,6 +29,7 @@ final class RequireCentralLicense
             'readonly' => $readonly,
             'modules' => $state['modules'] ?? [],
             'source' => $state['source'] ?? null,
+            'reminder' => LicenseReminder::fromState($state),
             'title' => CommercialLicensePolicy::title($status),
             'explanation' => CommercialLicensePolicy::explanation($status),
             'denied' => CommercialLicensePolicy::deniedOperationMessage($status),

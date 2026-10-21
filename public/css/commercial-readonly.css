@@ -92,3 +92,17 @@ body .license-locked-action:focus-visible{outline:2px solid #648aa6;outline-offs
   .commercial-readonly-dialog-body{padding:15px 18px;}
   .commercial-readonly-dialog-footer{padding:12px 18px;}
 }
+
+/* Aviso de vencimento coordenado pelo Control e assinado na licença. */
+.commercial-license-reminder{
+  display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;
+  border:1px solid #e6c58f;border-radius:4px;
+  background:#fff7e8;color:#8a5a25;
+  padding:7px 10px;font:600 11px/1.2 Roboto,Arial,sans-serif;
+  white-space:nowrap;
+}
+.commercial-license-reminder svg{width:14px;height:14px;flex:none}
+.app-root .cms-topbar .commercial-license-reminder{margin:0 9px 0 0}
+.lumeron-pdv-page .pdv-topbar>.commercial-license-reminder{margin-left:auto}
+.lumeron-pdv-page .pdv-topbar>.commercial-license-reminder+.pdv-topbar-actions{margin-left:0}
+@media(max-width:840px){.commercial-license-reminder{font-size:10px;padding:6px 8px}}
