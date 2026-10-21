@@ -105,3 +105,41 @@ input:disabled+.switch-track{opacity:.5;cursor:not-allowed}
 .switch-hint{color:#8da0a9;font-size:11px;line-height:1.5}
 @media(max-width:780px){.license-grid-toolbar{padding:9px}.license-grid-footer{flex-wrap:wrap}.license-result-count{display:none}.license-page-controls{margin-left:auto}.license-grid-new{padding:0 9px}.license-filter-form label{flex:1}}
 @media print{.sidebar,.topbar,.page-header,.license-grid-toolbar,.license-filters,.license-grid-footer,.license-row-actions,.switch-control{display:none!important}.shell{display:block;height:auto}.page{overflow:visible}.content{padding:0}.license-data-table{min-width:0}.license-grid{border:0;box-shadow:none}.license-data-table td,.license-data-table th{padding:6px 8px;font-size:10px}}
+
+/* A grade administrativa única é usada em Clientes, Licenças, Planos,
+   Automações, Histórico e pequenos relatórios do painel inicial. */
+[data-admin-list] .license-data-table{width:100%;border-collapse:collapse}
+[data-admin-list] .license-data-table th{background:#eaf1f6;color:#4d6982;font-size:11px;text-transform:uppercase;letter-spacing:.018em;padding:10px 11px;white-space:nowrap;border-bottom:1px solid #d0dde6}
+[data-admin-list] .license-data-table td{font-size:12px;padding:9px 11px;border-bottom:1px solid #e4ebf0;vertical-align:middle}
+[data-admin-list] .license-data-table tbody tr:nth-child(even){background:#f9fcfe}
+[data-admin-list] .license-data-table tbody tr:hover{background:#e9f4fa}
+[data-admin-list] .license-row-actions{justify-content:flex-end}
+[data-admin-list] .table-scroll{overflow-x:auto}
+[data-admin-list] .license-grid-footer{border-top:1px solid #e4ebf0}
+.automation-history{margin-top:16px}
+.admin-grid-heading{padding:11px 14px}
+.admin-grid-mini-footer{border-top:1px solid #e4ebf0;padding:9px 12px;display:flex;justify-content:flex-end}
+.admin-grid-mini-footer a{color:#286e94;font-size:11px;font-weight:700;display:flex;align-items:center;gap:5px}
+.admin-grid-mini-footer svg{width:12px;height:12px}
+.automation-inline-days{display:inline-flex;align-items:center;gap:6px;color:#617d8d;font-size:11px}
+.automation-inline-days input{width:62px;max-width:62px;height:29px;border:1px solid #c8d6df;border-radius:3px;background:#fff;padding:4px 7px;color:#36566e;font-size:12px}
+.automation-table-switch{gap:8px;white-space:nowrap}
+.automation-table-switch .status{padding:3px 7px}
+[data-admin-list] .panel-heading{background:#fbfcfd}
+@media print{
+  body.print-grid-only .content > :not(.print-target):not(.two-cols),
+  body.print-grid-only .content .panel:not(.print-target),
+  body.print-grid-only .content .two-cols > :not(.print-target){display:none!important}
+  body.print-grid-only .content .two-cols{display:block!important}
+  body.print-grid-only .license-grid.print-target{display:block!important}
+  body.print-grid-only .license-grid.print-target .table-scroll{overflow:visible!important}
+  body.print-grid-only [data-admin-list] .license-data-table{min-width:0!important}
+  [data-admin-list] .license-grid-toolbar,
+  [data-admin-list] .license-filters,
+  [data-admin-list] .license-grid-footer,
+  [data-admin-list] .admin-grid-mini-footer,
+  [data-admin-list] .license-row-actions,
+  [data-admin-list] .switch-row,
+  [data-admin-list] .switch-control,
+  [data-admin-list] .license-actions-heading{display:none!important}
+}
