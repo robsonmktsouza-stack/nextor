@@ -78,8 +78,7 @@ final class LicenseApiTest extends TestCase
             $response->headers->get('X-Lumeron-Signature')
         );
 
-        \App\Models\AutomationRule::query()->create([
-            'code' => 'custom_'.strtolower(\Illuminate\Support\Str::random(16)),
+        $customRule = new \App\Models\AutomationRule([
             'name' => 'Antecedência estendida',
             'description' => 'Aviso antecipado na instalação',
             'kind' => 'expiry_soon',
@@ -87,6 +86,8 @@ final class LicenseApiTest extends TestCase
             'days' => 15,
             'notify_client_email' => false,
         ]);
+        $customRule->code = 'custom_'.strtolower(\Illuminate\Support\Str::random(16));
+        $customRule->save();
         $this->check($company)->assertOk()->assertJsonPath('notice_days', 15);
     }
 
