@@ -8,8 +8,10 @@
 <link rel="icon" href="{{ asset('images/lumeron/elephant.png') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap">
-<link rel="stylesheet" href="{{ asset('css/control.css') }}">
-<script src="{{ asset('js/control.js') }}" defer></script>
+<link rel="stylesheet" href="{{ asset('css/control.css') }}?v={{ filemtime(public_path('css/control.css')) }}">
+<link rel="stylesheet" href="{{ asset('css/control-tooltip.css') }}?v={{ filemtime(public_path('css/control-tooltip.css')) }}">
+<script src="{{ asset('js/control-tooltip.js') }}?v={{ filemtime(public_path('js/control-tooltip.js')) }}" defer></script>
+<script src="{{ asset('js/control.js') }}?v={{ filemtime(public_path('js/control.js')) }}" defer></script>
 <title>@yield('title','Administração') — Lumeron Control</title>
 </head>
 <body>
