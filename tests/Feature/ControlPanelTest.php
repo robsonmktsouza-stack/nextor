@@ -93,6 +93,60 @@ final class ControlPanelTest extends TestCase
         ])->assertSessionHasErrors('subdomain');
     }
 
+    public function test_local_laragon_installation_url_can_be_registered(): void
+    {
+        $this->actingAs($this->user());
+        $this->post('/clients', [
+            'legal_name' => 'Empresa de Testes',
+            'cnpj' => '11.222.333/0001-81',
+            'email' => 'operador@example.test',
+            'subdomain' => 'empresa-laragon',
+            'installation_url' => 'http://127.0.0.1:8001',
+            'admin_login' => 'admin',
+            'plan' => 'standard',
+        ])->assertRedirect();
+        $this->assertDatabaseHas('companies', [
+            'subdomain' => 'empresa-laragon',
+            'installation_url' => 'http://127.0.0.1:8001',
+        ]);
+    }
+
+    public function test_remote_http_installation_url_shows_portuguese_error_on_correct_wizard_step(): void
+    {
+        $this->actingAs($this->user());
+        $this->from('/clients/create')->post('/clients', [
+            'legal_name' => 'Empresa de Testes',
+            'cnpj' => '11.222.333/0001-81',
+            'email' => 'operador@example.test',
+            'subdomain' => 'empresa-laragon',
+            'installation_url' => 'http://empresa.example.com.br',
+            'plan' => 'standard',
+        ])->assertRedirect('/clients/create')->assertSessionHasErrors('installation_url');
+        $this->get('/clients/create')
+            ->assertOk()
+            ->assertSee('data-error-field="installation_url"', false)
+            ->assertSee('endereço da instalação deve usar HTTPS')
+            ->assertSee('http://empresa.example.com.br');
+    }
+
+    public function test_bad_subdomain_has_readable_validation_and_preserves_form(): void
+    {
+        $this->actingAs($this->user());
+        $this->from('/clients/create')->post('/clients', [
+            'legal_name' => 'Empresa de Testes',
+            'cnpj' => '11.222.333/0001-81',
+            'email' => 'operador@example.test',
+            'subdomain' => 'nome com espacos',
+            'plan' => 'standard',
+        ])->assertRedirect('/clients/create')->assertSessionHasErrors('subdomain');
+        $this->get('/clients/create')
+            ->assertOk()
+            ->assertSee('data-error-field="subdomain"', false)
+            ->assertSee('O formato do campo subdomínio é inválido.')
+            ->assertDontSee('validation.regex')
+            ->assertSee('Empresa de Testes');
+    }
+
     public function test_suspension_renewal_and_notes_are_audited(): void
     {
         $this->actingAs($this->user());
