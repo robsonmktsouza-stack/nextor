@@ -143,3 +143,14 @@ input:disabled+.switch-track{opacity:.5;cursor:not-allowed}
   [data-admin-list] .switch-control,
   [data-admin-list] .license-actions-heading{display:none!important}
 }
+
+/* A tabela de vencimentos é um resumo de três colunas dentro do dashboard:
+   mantém o mesmo cabeçalho e linhas, sem impor 900px de largura e rolagem. */
+.two-cols [data-admin-list] .license-data-table{min-width:0;width:100%}
+.two-cols [data-admin-list] .license-name-cell{min-width:0}
+.two-cols [data-admin-list] .license-name{overflow-wrap:anywhere}
+@media(max-width:720px){
+  .two-cols [data-admin-list] .license-data-table{min-width:0}
+  .two-cols [data-admin-list] .license-data-table th,
+  .two-cols [data-admin-list] .license-data-table td{padding:8px 7px}
+}
