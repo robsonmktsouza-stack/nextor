@@ -74,10 +74,11 @@ final class PlansAndAutomationsTest extends TestCase
         ])->assertRedirect();
         $company = Company::query()->where('subdomain', 'cliente-pro')->firstOrFail();
         $this->assertSame('profissional', $company->plan);
-        $this->assertSame(['finance', 'products'], $company->modules);
+        $this->assertNull($company->modules);
+        $this->assertSame(['finance', 'products'], $company->entitledModules());
     }
 
-    public function test_plan_edit_does_not_retroactively_change_customer_modules(): void
+    public function test_plan_edit_updates_all_customers_effective_access_without_overwriting_old_snapshots(): void
     {
         $this->actingAs($this->user());
         $company = $this->company();
@@ -94,6 +95,7 @@ final class PlansAndAutomationsTest extends TestCase
 
         $this->assertSame('Padrão Personalizado', $plan->fresh()->name);
         $this->assertSame(['pdv', 'fiscal'], $company->fresh()->modules);
+        $this->assertSame(['finance'], $company->fresh()->entitledModules());
         $this->get('/clients')->assertSee('Padrão Personalizado');
         $this->put(route('plans.update', $plan), [
             'code' => 'different',
