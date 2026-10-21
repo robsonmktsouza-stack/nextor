@@ -39,7 +39,7 @@ final class CompanyController extends Controller
                     return;
                 }
 
-                $fail('O endereço da instalação deve usar HTTPS. Para testar no Laragon, use http://127.0.0.1:8001.');
+                $fail('Informe um endereço seguro (HTTPS).');
             },
         ];
     }
@@ -127,7 +127,7 @@ final class CompanyController extends Controller
             return $company;
         });
         return redirect()->route('clients.show', $company)
-            ->with('success', 'Conta cadastrada e acesso liberado no painel. A instalação será sincronizada pelo gerenciador de implantação.');
+            ->with('success', 'Conta cadastrada.');
     }
 
     public function show(Company $company)
