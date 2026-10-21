@@ -304,3 +304,59 @@ ninguém a alterou posteriormente; a reversão é auditada. Não é permitido
 estornar um pagamento ou cancelar uma fatura com renovação aplicada sem
 antes desfazê-la com segurança. Esta operação não comprova recebimento
 bancário: pagamentos seguem sendo lançados manualmente.
+
+
+## Fluxo integrado de cadastro, cobrança e validade — 21/10/2026
+
+**Não há telas nem módulos novos.** O formulário Clientes > Nova conta mantém as
+mesmas etapas e campos. Ao concluir, o Control cria cliente, licença HMAC e,
+se o plano tiver `monthly_price > 0`, uma **fatura em rascunho** para o
+PRÓXIMO período a partir do dia seguinte à validade inicial escolhida.
+O plano determina a duração de 1/3/6/12 meses, e o preço da fatura é
+`monthly_price × period_months` no momento da criação. Nunca reutilizar
+uma fatura de outro ciclo. Se o plano não tiver preço, o cadastro conclui,
+mas não inventa valor nem fatura; a confirmação orienta o operador a
+configurar o preço na tela Planos.
+
+A validade digitada ao cadastrar é o **prazo de liberação inicial**
+(trial, contrato já vigente ou condição comercial acertada). **Não será
+substituída pelo prazo do plano:** essa escolha continua com o operador.
+Se ficar em branco, o acesso inicial vai **somente até o dia do cadastro**
+(nunca indefinido). Datas anteriores a hoje são recusadas.
+
+A primeira fatura não deve cobrar novamente o período inicialmente liberado:
+ela começa no dia seguinte ao vencimento atual e cobre a duração do plano.
+O vencimento da fatura coincide com a validade inicial informada. A
+fatura permanece em rascunho até o operador usar **Emitir** na tela
+Faturas. Não há cobrança externa, pagamento criado ou e-mail nesse fluxo.
+A transação de cadastro e a preparação da fatura são atômicas: se
+qualquer operação falhar, o cliente e a fatura não ficam pela metade.
+
+Em uma fatura preparada pelo Control (origem `onboarding` ou
+`recurring`), o operador registra o pagamento manualmente; a licença
+só avança automaticamente após **quitação integral**, se o período da
+fatura começar **exatamente no dia seguinte** à validade atual. Esta
+ação é auditada e não reativa uma suspensão administrativa. Faturas
+criadas manualmente e períodos desalinhados seguem exigindo aplicação
+explícita da validade. Estornos requerem antes desfazer essa aplicação;
+duas quitações/duas renovações para um mesmo período não são permitidas.
+
+`control:invoices-prepare`, agendado diariamente às **08h05**,
+prepara **um** rascunho para o próximo ciclo quando faltarem até sete dias
+para terminar o último ciclo já emitido e não cancelado. Não gera
+históricos de meses anteriores, não inventa cobrança para clientes
+existentes sem um primeiro ciclo, não emite fatura, não envia e-mails,
+não aciona gateway e não gera quando há um rascunho posterior existente.
+Se uma empresa estiver suspensa ou o plano não tiver preço, pula a
+preparação. O comando manual `php artisan control:invoices-prepare`
+também respeita essas verificações, é seguro contra repetição e pode
+ser usado em testes de homologação sem comunicar o cliente. O cron/
+agendador do Control deve estar funcionando para a recorrência operar.
+
+A integração ERP **não mudou**: continua recebendo apenas a validade,
+status, plano e módulos assinados pela API HMAC. Registrar/emitir uma
+fatura não cria instalação nem prova que o ERP está conectado; o
+vínculo inicial de instalação continua sendo um passo de
+infraestrutura autorizado. Essa migração é **exclusiva** do banco Control:
+`2026_10_21_000007_invoice_cycle_origins.php`. Instalações já
+cadastradas e suas faturas anteriores não sofrem reemissão retroativa.

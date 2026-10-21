@@ -126,3 +126,26 @@ Alterações em autenticação/licença exigem testes e revisão de segurança. 
   saldo. Pagamentos são auditados; estorno não deleta linha; nenhuma rota
   pública de pagamentos. Impedir pagamentos acima do saldo e períodos
   de faturas sobrepostos para o mesmo cliente.
+
+
+## Cadastro e ciclo automático de faturas sem alterar telas (21/10/2026)
+
+- Nenhum nome, menu, layout, formulário de Clientes/Planos/Faturas,
+  módulos do ERP ou regras de licenciamento foi renomeado.
+- `CompanyController::store`: transação cria cliente, licença e primeiro
+  rascunho de cobrança do **próximo** período somente quando o plano
+  possui preço mensal positivo; plano sem preço nunca recebe valor fictício.
+  Se a validade opcional não foi informada, a licença vence no dia do
+  cadastro, não é ilimitada. Recusar datas anteriores a hoje.
+- `InvoiceCycleService` calcula os períodos a partir do fim da validade
+  inicial ou último ciclo emitido, respeita `period_months`, valor do plano
+  vigente e nunca prepara ciclos sobrepostos. O comando recorrente diário
+  só cria rascunhos, nunca envia cobrança, altera licença ou retroage.
+- `InvoiceService::recordPayment` aplica o período automaticamente
+  somente quando a fatura é de origem segura gerada pelo Control,
+  foi quitada integralmente e começa exatamente após a validade
+  atual. Pagamentos manuais seguem sendo confirmações do operador;
+  faturas manuais continuam exigindo aplicar licença explicitamente.
+- Não criar nova tela nem alterar a UI existente apenas para
+  parametrizar as operações; manter atomicidade, idempotência,
+  trilha de eventos, isolamento do banco Control e a API HMAC do ERP.

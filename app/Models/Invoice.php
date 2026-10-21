@@ -12,7 +12,7 @@ final class Invoice extends Model
     protected $fillable = [
         'company_id', 'company_name', 'company_cnpj', 'plan_code', 'plan_name',
         'description', 'period_start', 'period_end', 'issue_date', 'due_date',
-        'amount', 'created_by',
+        'amount', 'created_by', 'origin',
     ];
 
     protected function casts(): array

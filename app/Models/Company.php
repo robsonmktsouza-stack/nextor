@@ -38,6 +38,11 @@ final class Company extends Model
         return $this->planDefinition?->modules ?? [];
     }
 
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
     public function events(): HasMany
     {
         return $this->hasMany(LicenseEvent::class);

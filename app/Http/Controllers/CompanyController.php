@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Company;
 use App\Models\Plan;
+use App\Services\InvoiceCycleService;
 use App\Support\Cnpj;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -89,7 +90,7 @@ final class CompanyController extends Controller
         return view('clients.create', ['plans' => Plan::enabled()->get()]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, InvoiceCycleService $cycles)
     {
         $request->merge([
             'cnpj' => Cnpj::digits($request->input('cnpj')),
@@ -108,12 +109,15 @@ final class CompanyController extends Controller
             'installation_url' => $this->installationUrlRules(),
             'admin_login' => ['nullable', 'string', 'regex:/^[a-zA-Z0-9_.-]{3,100}$/'],
             'plan' => ['required', Rule::exists('plans', 'code')->where('active', true)],
-            'expires_at' => ['nullable', 'date_format:Y-m-d'],
+            'expires_at' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:today'],
             'modules' => ['prohibited'],
             'modules_present' => ['prohibited'],
         ]);
+        // A new licence must not accidentally become unlimited just because
+        // the existing optional date field was left blank.
+        $data['expires_at'] = $data['expires_at'] ?? today()->toDateString();
         $secret = bin2hex(random_bytes(48));
-        $company = DB::transaction(function () use ($data, $secret): Company {
+        [$company, $invoice] = DB::transaction(function () use ($data, $secret, $cycles): array {
             $company = Company::create([
                 ...$data,
                 'instance_id' => (string) Str::uuid(),
@@ -122,10 +126,12 @@ final class CompanyController extends Controller
                 'modules' => null,
             ]);
             $company->record('created', 'Conta cadastrada e licença criada.');
-            return $company;
+            $invoice = $cycles->prepareForNewCompany($company);
+            return [$company, $invoice];
         });
-        return redirect()->route('clients.show', $company)
-            ->with('success', 'Conta cadastrada.');
+        return redirect()->route('clients.show', $company)->with('success',
+            $invoice ? 'Conta cadastrada. Fatura preparada em rascunho.'
+                : 'Conta cadastrada. Configure o preço do plano para preparar a fatura.');
     }
 
     public function show(Company $company)

@@ -48,6 +48,7 @@ final class InvoiceService
                 'due_date' => $data['due_date'],
                 'amount' => $amount,
                 'created_by' => auth()->id(),
+                'origin' => $data['origin'] ?? 'manual',
             ]);
             $invoice->number = 'FAT-'.str_pad((string) $invoice->id, 6, '0', STR_PAD_LEFT);
             $invoice->save();
@@ -115,6 +116,21 @@ final class InvoiceService
                     'invoice_id' => $invoice->id, 'payment_id' => $payment->id,
                     'amount' => $payment->amount,
                 ]);
+
+            // A manually confirmed full payment of an automatically prepared
+            // cycle is sufficient to apply the covered term. Leave manually
+            // created invoices and mismatched/ad-hoc licence terms alone.
+            if (in_array($invoice->origin, ['onboarding', 'recurring'], true)
+                && $invoice->balanceCents() === 0
+                && $invoice->license_applied_at === null) {
+                $company = Company::query()->lockForUpdate()->findOrFail($invoice->company_id);
+                $termImmediatelyFollows = $company->expires_at !== null
+                    && $company->expires_at->copy()->addDay()->toDateString()
+                        === $invoice->period_start->toDateString();
+                if ($termImmediatelyFollows) {
+                    $this->applyPaidPeriod($invoice);
+                }
+            }
             return $payment;
         });
     }
