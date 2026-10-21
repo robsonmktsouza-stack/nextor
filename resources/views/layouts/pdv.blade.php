@@ -17,6 +17,8 @@
 <link rel="stylesheet" href="{{ asset('css/pdv-lumeron.css') }}?v={{ filemtime(public_path('css/pdv-lumeron.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/desktop-polish.css') }}?v={{ filemtime(public_path('css/desktop-polish.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/erp-typography.css') }}?v={{ filemtime(public_path('css/erp-typography.css')) }}">
+<link rel="stylesheet" href="{{ asset('css/commercial-readonly.css') }}?v={{ filemtime(public_path('css/commercial-readonly.css')) }}">
+<script defer src="{{ asset('js/commercial-readonly.js') }}?v={{ filemtime(public_path('js/commercial-readonly.js')) }}"></script>
 <script defer src="{{ asset('js/erp.js') }}?v={{ filemtime(public_path('js/erp.js')) }}"></script>
 </head>
 <body class="pdv-body"
@@ -66,6 +68,7 @@
   </header>
 
   <main class="pdv-screen">
+    @include('partials.commercial-readonly')
     @if(session('success'))
       <div data-system-notification data-type="success" data-notification-title="Concluído" hidden>{{ session('success') }}</div>
     @endif
