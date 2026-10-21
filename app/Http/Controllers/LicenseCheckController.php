@@ -48,12 +48,18 @@ final class LicenseCheckController extends Controller
             'last_version' => (string) ($payload['version'] ?? ''),
         ])->save();
 
+        // Never trust the old companies.modules snapshot for rights.
+        $company->load('planDefinition');
+        if (!$company->planDefinition) {
+            return response()->json(['message' => 'Plano indisponível.'], 409);
+        }
+
         $data = [
             'instance_id' => $company->instance_id,
             'cnpj' => $company->cnpj,
             'status' => $company->currentStatus(),
             'plan' => $company->plan,
-            'modules' => $company->modules ?? [],
+            'modules' => $company->entitledModules(),
             'expires_at' => $company->expires_at?->toDateString(),
             'checked_at' => now()->toIso8601String(),
         ];
