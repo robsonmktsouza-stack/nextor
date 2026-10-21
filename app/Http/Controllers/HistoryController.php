@@ -15,6 +15,8 @@ final class HistoryController extends Controller
             $query->whereHas('company', fn ($q) => $q->where('legal_name', 'like', "%{$term}%")
                 ->orWhere('subdomain', 'like', "%{$term}%"));
         }
-        return view('history', ['events' => $query->paginate(25)->withQueryString()]);
+        $perPage = (int) $request->query('per_page', 20);
+        $perPage = in_array($perPage, [20, 50, 100], true) ? $perPage : 20;
+        return view('history', ['events' => $query->paginate($perPage)->withQueryString()]);
     }
 }
