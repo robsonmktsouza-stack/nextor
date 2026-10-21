@@ -38,7 +38,7 @@
                         <td>
                             <div class="license-row-actions">
                                 @if($event->company)
-                                    <a class="license-icon-action" href="{{ route('clients.show',$event->company_id) }}" title="Ver cliente" aria-label="Ver cliente relacionado ao evento">@include('partials.icon',['name'=>'clients','size'=>16])</a>
+                                    <a class="license-icon-action" href="{{ route('clients.show',$event->company_id) }}" data-tooltip="Ver cliente" aria-label="Ver cliente relacionado ao evento">@include('partials.icon',['name'=>'clients','size'=>16])</a>
                                 @endif
                             </div>
                         </td>
