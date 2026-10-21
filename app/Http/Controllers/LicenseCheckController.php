@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AutomationRule;
 use App\Models\Company;
 use App\Support\Cnpj;
 use Illuminate\Http\JsonResponse;
@@ -54,6 +55,19 @@ final class LicenseCheckController extends Controller
             return response()->json(['message' => 'Plano indisponível.'], 409);
         }
 
+        // A central is authoritative for the commercial reminder window.
+        // Only enabled rules apply; this data is covered by the HMAC response.
+        // No email addresses, recipient data or messages cross this boundary.
+        $noticeDays = AutomationRule::query()
+            ->where('enabled', true)
+            ->where(function ($query): void {
+                $query->where('kind', 'expiry_soon')
+                    ->orWhere(function ($legacy): void {
+                        $legacy->whereNull('kind')->where('code', 'expiry_soon');
+                    });
+            })
+            ->max('days');
+
         $data = [
             'instance_id' => $company->instance_id,
             'cnpj' => $company->cnpj,
@@ -61,6 +75,7 @@ final class LicenseCheckController extends Controller
             'plan' => $company->plan,
             'modules' => $company->entitledModules(),
             'expires_at' => $company->expires_at?->toDateString(),
+            'notice_days' => $noticeDays === null ? null : (int) $noticeDays,
             'checked_at' => now()->toIso8601String(),
         ];
         $json = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
