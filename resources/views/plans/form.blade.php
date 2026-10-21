@@ -21,9 +21,9 @@
 </div>
 <div class="modules"><strong>Módulos padrão para novas licenças</strong><div class="module-grid">
 @foreach(config('license.modules') as $code=>$label)
-<label class="check"><input type="checkbox" name="modules[]" value="{{ $code }}" @checked(in_array($code,old('modules',$plan->modules ?? ['pdv','products'])))>{{ $label }}</label>
+<label class="module-switch"><input type="checkbox" role="switch" name="modules[]" value="{{ $code }}" @checked(in_array($code,old('modules',$plan->modules ?? ['pdv','products'])))><span class="switch-track" aria-hidden="true"></span><span>{{ $label }}</span></label>
 @endforeach</div></div>
-<label class="check settings-check"><input type="hidden" name="active" value="0"><input type="checkbox" name="active" value="1" @checked((bool)old('active',$plan->active ?? true))>Disponível para novas contas</label>
+<label class="switch-row settings-check"><input type="hidden" name="active" value="0"><input type="checkbox" role="switch" name="active" value="1" @checked((bool)old('active',$plan->active ?? true))><span class="switch-track" aria-hidden="true"></span><span>Disponível para novas contas</span></label>
 <div class="control-form-actions"><a href="{{ route('plans.index') }}" class="btn subtle">Cancelar</a><button type="submit" class="btn primary">Salvar plano</button></div>
 </div>
 </form>
