@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Services\License\CentralLicenseService;
 use App\Support\CommercialLicensePolicy;
+use App\Support\CommercialModuleAccess;
 use App\Support\ManagedLicenseConfig;
 use Closure;
 use Illuminate\Http\Request;
@@ -25,6 +26,7 @@ final class RequireCentralLicense
         $request->attributes->set('lumeron_commercial_license', [
             'status' => $status,
             'readonly' => $readonly,
+            'modules' => $state['modules'] ?? [],
             'source' => $state['source'] ?? null,
             'title' => CommercialLicensePolicy::title($status),
             'explanation' => CommercialLicensePolicy::explanation($status),
@@ -54,29 +56,18 @@ final class RequireCentralLicense
             return $next($request);
         }
 
-        // Regularizações fiscais legais continuam disponíveis para usuários
-        // com permissão, independentemente do plano de módulos comerciais.
-        if ($request->routeIs(...CommercialLicensePolicy::CONTINUITY_ROUTES)) {
-            return $next($request);
-        }
-
-        // Em licença ativa, os módulos contratados continuam sendo exigidos.
-        // Documentos e regularizações fiscais respeitam permissões do usuário.
-        $modules = $state['modules'] ?? [];
-        $required = match (true) {
-            $request->is('pdv', 'pdv/*', 'sales', 'sales/*') => 'pdv',
-            $request->is('finance', 'finance/*') => 'finance',
-            $request->is('products', 'products/*', 'stock', 'stock/*') => 'products',
-            $request->is('services', 'services/*') => 'services',
-            default => null,
-        };
-
-        if ($required !== null && !in_array($required, $modules, true)) {
+        $required = CommercialModuleAccess::forRequest($request);
+        if ($required !== null && !in_array($required, $state['modules'] ?? [], true)) {
             $message = 'Este módulo não está incluído no plano contratado.';
             if ($request->expectsJson() || $request->ajax()) {
-                return response()->json(['message' => $message, 'code' => 'LUMERON_MODULE_UNAVAILABLE'], 403);
+                return response()->json([
+                    'message' => $message,
+                    'code' => 'LUMERON_MODULE_UNAVAILABLE',
+                    'module' => $required,
+                ], 403);
             }
-            return redirect()->route('license.status')->with('warning', $message);
+
+            abort(403, $message);
         }
 
         return $next($request);
