@@ -29,6 +29,9 @@
 <symbol id="i-edit" viewBox="0 0 24 24"><path d="m4 16 12-12 4 4-12 12-5 1zM14 6l4 4"/></symbol>
 <symbol id="i-plan" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
 <symbol id="i-automations" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.5 1.2-2 3.5-1.8-.7a8 8 0 0 1-2 1.2l-.3 1.9h-4l-.3-1.9a8 8 0 0 1-2-1.2l-1.8.7-2-3.5 1.5-1.2a8 8 0 0 1 0-2.3L4.8 11l2-3.5 1.8.7a8 8 0 0 1 2-1.2l.3-1.9h4l.3 1.9a8 8 0 0 1 2 1.2l1.8-.7 2 3.5-1.5 1.2a8 8 0 0 1 0 2.3"/></symbol>
+<symbol id="i-print" viewBox="0 0 24 24"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v7H6zM17 12h.01"/></symbol>
+<symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 18v3h16v-3"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14-5L3 9m0-6v6h6M4 13a8 8 0 0 0 14 5l3-3m0 6v-6h-6"/></symbol>
 <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="1"/><path d="M7 3v5M17 3v5M3 10h18"/></symbol>
 </svg>
 <div class="shell">
@@ -65,6 +68,15 @@
     </div>
 </main>
 </div>
+<dialog id="licenseActivationDialog" class="license-confirm-dialog" aria-labelledby="licenseConfirmTitle" aria-describedby="licenseConfirmMessage">
+    <div class="license-confirm-head"><span class="license-confirm-icon"><svg><use href="#i-lock"/></svg></span>
+        <button type="button" class="icon-button" data-license-cancel aria-label="Fechar"><svg><use href="#i-x"/></svg></button>
+    </div>
+    <h2 id="licenseConfirmTitle">Alterar acesso comercial?</h2>
+    <p id="licenseConfirmMessage">Confirme a alteração para esta empresa.</p>
+    <div class="license-confirm-footer"><button type="button" class="btn subtle" data-license-cancel>Cancelar</button>
+        <button type="button" class="btn primary" data-license-confirm>Confirmar</button></div>
+</dialog>
 <dialog id="companyDialog" class="account-dialog"><div class="dialog-header"><strong>Detalhes da conta</strong><button class="icon-button" type="button" data-dialog-close aria-label="Fechar"><svg><use href="#i-x"/></svg></button></div><div id="companyDialogBody" class="dialog-body"></div></dialog>
 </body>
 </html>
