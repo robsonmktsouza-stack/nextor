@@ -89,7 +89,7 @@
     if (element.hasAttribute('data-license-write')) return true;
     if (element.matches('a[href]')) return writeLink(element);
     if (!(element instanceof HTMLButtonElement)) return false;
-    if (element.closest('form') && writableForm(element.closest('form'))) return true;
+    if (element.type === 'submit' && element.closest('form') && writableForm(element.closest('form'))) return true;
     const formId = element.getAttribute('form') || element.dataset.bulkSubmit;
     if (formId && writableForm(document.getElementById(formId))) return true;
     if (element.matches('[data-bulk-apply]')) return true;
