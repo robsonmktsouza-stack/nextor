@@ -104,7 +104,6 @@
     if (!writeVerb.test(label) || fiscalArea()) return false;
     return element.matches('.page-actions button, .grid-actionbar button, .row-actions button, .dialog-footer button, .pdv-topbar button, .pdv-quick-modal button, .finance-actionbar button, [data-pdv-action]');
   };
-  const lockedSelector = 'a[href],button';
   const markAction = element => {
     const shouldLock = actionTarget(element);
     const isLocked = element.classList.contains('license-locked-action');
