@@ -54,13 +54,13 @@ final class ControlPanelTest extends TestCase
             'email' => 'ana@example.test',
             'subdomain' => 'empresa-a',
             'plan' => 'standard',
-            'modules' => ['pdv', 'fiscal'],
         ]);
         $company = Company::sole();
         $response->assertRedirect(route('clients.show', $company))
             ->assertSessionMissing('new_secret');
         $this->assertSame('11222333000181', $company->cnpj);
-        $this->assertCount(2, $company->modules);
+        $this->assertNull($company->modules);
+        $this->assertSame(['pdv', 'products'], $company->entitledModules());
         $this->assertSame(1, $company->events()->count());
         $this->assertNotSame($company->license_secret, \Illuminate\Support\Facades\DB::table('companies')->value('license_secret'));
         $this->get('/clients/'.$company->id)->assertOk()->assertSee('EMPRESA DE TESTE LTDA');
