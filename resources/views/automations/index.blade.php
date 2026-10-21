@@ -26,7 +26,7 @@
 <input type="hidden" name="days" value="0">
 <span class="automation-rule-no-days">No dia seguinte ao vencimento</span>
 @endif
-<label class="check automation-switch"><input type="hidden" name="enabled" value="0"><input type="checkbox" name="enabled" value="1" @checked($rule->enabled)>Ativa</label>
+<label class="switch-row automation-switch"><input type="hidden" name="enabled" value="0"><input type="checkbox" role="switch" name="enabled" value="1" @checked($rule->enabled)><span class="switch-track" aria-hidden="true"></span><span>Ativa</span></label>
 <button class="btn primary small" type="submit">Salvar</button>
 </div>
 </form>
