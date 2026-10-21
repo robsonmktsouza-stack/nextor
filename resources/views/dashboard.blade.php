@@ -21,7 +21,7 @@
 <tr>
 <td class="license-name-cell"><a class="license-name" href="{{ route('clients.show',$company) }}">{{ $company->legal_name }}</a><small>{{ $company->subdomain }}</small></td>
 <td class="license-nowrap">{{ $company->expires_at?->format('d/m/Y') }}</td>
-<td><div class="license-row-actions"><a class="license-icon-action" href="{{ route('clients.show',$company) }}" title="Gerenciar licença" aria-label="Gerenciar licença de {{ $company->legal_name }}">@include('partials.icon',['name'=>'edit','size'=>16])</a></div></td>
+<td><div class="license-row-actions"><a class="license-icon-action" href="{{ route('clients.show',$company) }}" data-tooltip="Gerenciar licença" aria-label="Gerenciar licença de {{ $company->legal_name }}">@include('partials.icon',['name'=>'edit','size'=>16])</a></div></td>
 </tr>
 @empty<tr><td colspan="3" class="empty">Nenhuma licença vencendo nos próximos 15 dias.</td></tr>@endforelse
 </tbody></table></div>
