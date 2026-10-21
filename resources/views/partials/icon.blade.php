@@ -1,5 +1,5 @@
 @php($size = $size ?? 19)
-<svg width="{{ $size }}" height="{{ $size }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="nextor-icon {{ $class ?? '' }}">
+<svg width="{{ $size }}" height="{{ $size }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="nextor-icon {{ $class ?? '' }}" style="width:{{ (int) $size }}px;height:{{ (int) $size }}px">
 @switch($name)
 @case('home')<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M9 9h12"/>@break
 @case('clients')<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M16 3a4 4 0 0 1 0 8M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/>@break
