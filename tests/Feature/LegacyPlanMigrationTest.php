@@ -53,6 +53,29 @@ final class LegacyPlanMigrationTest extends TestCase
         $this->assertDatabaseCount('license_events', 1);
     }
 
+    public function test_selecting_another_plan_changes_modules_without_any_module_checkbox(): void
+    {
+        $company = $this->company('301', ['pdv', 'products']);
+        $admin = \App\Models\User::create([
+            'name' => 'Administradora',
+            'email' => 'admin-select-plan@example.test',
+            'password' => 'senha-longa-de-teste',
+        ]);
+        $this->actingAs($admin)->post(route('clients.modules', $company), [
+            'plan' => 'advanced',
+            'expires_at' => today()->addMonth()->toDateString(),
+        ])->assertRedirect();
+
+        $company->refresh();
+        $this->assertSame('advanced', $company->plan);
+        $this->assertNull($company->modules);
+        $this->assertSame(['pdv','products','finance'], $company->entitledModules());
+        $this->assertDatabaseHas('license_events', [
+            'company_id' => $company->id,
+            'event_type' => 'license_changed',
+        ]);
+    }
+
     public function test_license_endpoint_does_not_allow_explicit_module_override(): void
     {
         $company = $this->company('201', ['pdv','products']);
