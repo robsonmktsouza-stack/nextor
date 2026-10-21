@@ -62,3 +62,12 @@ Alterações em autenticação/licença exigem testes e revisão de segurança. 
 - **Todas as telas**, incluindo menu, barra, botões da tabela, ações, modais, filtros, confirmação e paginação futura, devem renderizar `@include('partials.icon',['name'=>'...', 'size'=>16])` (ajustar `size` ao contexto); não reintroduzir sprites `<svg><use href="#i-..."/></svg>` locais nem vários conjuntos incompatíveis.
 - Ícones 16px nas ações por linha, 17–18px na toolbar e 19px no menu. Preferir ícones consistentes de `print/download/refresh/search/edit/plus` que já existem no Nextor. Usar `public/css/control.css` para tamanhos, estados hover/focus, cores e traço; não sacrificar acessibilidade `title` / `aria-label`.
 - **Não alterar `develop` ou `main`** apenas para refinar a identidade da central, nem criar dependências de CDN ou fontes de terceiros para os ícones. Manter a implementação do Control standalone.
+
+
+## Tooltips da central — padrão Nextor (21/10/2026)
+
+- **Não usar atributos HTML `title` para tooltip nos controles do Lumeron Control**. Tooltips nativos do navegador são visualmente inadequados. Use `data-tooltip="Texto curto"` nos botões, ícones, switches e ações; preserve `aria-label` para botões só com ícone.
+- O componente global `public/js/control-tooltip.js` usa o mesmo comportamento visual de `public/js/erp.js` do Nextor: balão escuro `.nextor-tooltip`, seta, posicionamento acima/abaixo conforme espaço, exibição no foco do teclado e no hover, ocultação ao clicar, rolar, redimensionar ou pressionar Escape.
+- Os estilos ficam exclusivamente em `public/css/control-tooltip.css`. O layout `resources/views/layouts/main.blade.php` deve carregá-los globalmente com versionamento de cache. Não duplicar tooltip em cada módulo e não incorporar bibliotecas/CDNs.
+- Conteúdo AJAX de modais também tem o `title` migrado automaticamente para `data-tooltip` como fallback. Preferir já entregar `data-tooltip` no HTML. Nunca inserir texto de tooltip via `innerHTML`; usar `textContent`.
+- O tooltip não deve obstruir comandos nem quebrar formulários ou afetar impressão. Testar em listagens, ações da toolbar, switches e modais, inclusive com navegação por Tab.
