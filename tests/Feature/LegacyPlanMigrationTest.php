@@ -76,6 +76,24 @@ final class LegacyPlanMigrationTest extends TestCase
         ]);
     }
 
+    public function test_new_account_and_license_detail_show_read_only_plan_summary(): void
+    {
+        $company = $this->company('401', ['products', 'pdv']);
+        $admin = \App\Models\User::create([
+            'name' => 'Administradora',
+            'email' => 'admin-summary@example.test',
+            'password' => 'senha-longa-de-teste',
+        ]);
+
+        $this->actingAs($admin)->get('/clients/create')
+            ->assertOk()->assertSee('data-plan-modules-summary', false)
+            ->assertDontSee('name="modules[]"', false);
+
+        $this->get(route('clients.show', $company))
+            ->assertOk()->assertSee('data-plan-modules-summary', false)
+            ->assertDontSee('name="modules[]"', false);
+    }
+
     public function test_license_endpoint_does_not_allow_explicit_module_override(): void
     {
         $company = $this->company('201', ['pdv','products']);
