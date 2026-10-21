@@ -4,6 +4,7 @@
     $filtersActive = $filtersActive ?? false;
     $createUrl = $createUrl ?? null;
     $createLabel = $createLabel ?? 'Novo';
+    $showFilters = $showFilters ?? true;
 @endphp
 <div class="license-grid-toolbar" data-grid-toolbar>
     <div class="license-grid-tools">
@@ -18,8 +19,10 @@
             <a class="license-tool" href="{{ request()->fullUrl() }}" title="Atualizar listagem" aria-label="Atualizar listagem"><svg><use href="#i-refresh"/></svg></a>
         </div>
     </div>
+    @if($showFilters)
     <button class="license-tool license-filter-toggle" type="button"
         data-grid-filter-toggle data-license-filter-toggle
         aria-controls="{{ $filterId }}" aria-expanded="{{ $filtersActive ? 'true' : 'false' }}"
         title="Filtros da listagem" aria-label="Filtros da listagem"><svg><use href="#i-search"/></svg></button>
+    @endif
 </div>
