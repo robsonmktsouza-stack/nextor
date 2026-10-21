@@ -206,7 +206,7 @@ final class InvoiceFlowTest extends TestCase
         $body = json_encode(['cnpj'=>$company->cnpj, 'version'=>'v1.0.0']);
         $stamp = (string) time();
         $nonce = bin2hex(random_bytes(16));
-        $canonical = "POST\\n/api/license/check\\n{$stamp}\\n{$nonce}\\n".hash('sha256', $body);
+        $canonical = "POST\n/api/license/check\n{$stamp}\n{$nonce}\n".hash('sha256', $body);
         $signature = hash_hmac('sha256', $canonical, $company->license_secret);
         $check = $this->call('POST', '/api/license/check', [], [], [], [
             'CONTENT_TYPE' => 'application/json',
