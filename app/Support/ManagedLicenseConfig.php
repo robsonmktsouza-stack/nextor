@@ -59,8 +59,11 @@ final class ManagedLicenseConfig
 
     public static function enabled(): bool
     {
-        if ((bool) config('central_license.enabled') || self::credentials() !== null) {
-            return true;
+        $file = (string) config('central_license.managed_file', storage_path('app/private/lumeron-control.json'));
+        if ((bool) config('central_license.enabled')
+            || is_file($file) || is_link($file)
+            || self::credentials() !== null) {
+            return true; // Invalid or tampered binding must fail closed.
         }
 
         // A formerly linked installation must not become unrestricted simply
