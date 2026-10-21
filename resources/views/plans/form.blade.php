@@ -10,12 +10,12 @@
 <div class="form-grid">
 <label>Código do plano <strong>*</strong>
 <input name="code" maxlength="30" required pattern="[a-z][a-z0-9_-]{2,29}" value="{{ old('code',$plan->code) }}" placeholder="ex.: profissional">
-<small>Identificador técnico estável. Não altere o código quando houver clientes vinculados.</small></label>
+</label>
 <label>Nome exibido <strong>*</strong><input name="name" maxlength="100" required value="{{ old('name',$plan->name) }}" placeholder="Plano Profissional"></label>
 <label class="span-two">Descrição <input name="description" maxlength="255" value="{{ old('description',$plan->description) }}"></label>
-<label>Preço de referência (R$)<input name="monthly_price" type="number" min="0" max="9999999999" step="0.01" value="{{ old('monthly_price',$plan->monthly_price) }}" placeholder="Não definido">
-<small>Referência administrativa; não gera faturas nem pagamentos.</small></label>
-<label>Período de referência<select name="period_months">
+<label>Preço (R$)<input name="monthly_price" type="number" min="0" max="9999999999" step="0.01" value="{{ old('monthly_price',$plan->monthly_price) }}" placeholder="Não definido">
+</label>
+<label>Período<select name="period_months">
 @foreach([1,3,6,12] as $months)<option value="{{ $months }}" @selected((int)old('period_months',$plan->period_months ?? 1)===$months)>{{ $months }} {{ $months===1?'mês':'meses' }}</option>@endforeach
 </select></label>
 </div>
