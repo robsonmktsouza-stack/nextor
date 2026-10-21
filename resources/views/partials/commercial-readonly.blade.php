@@ -9,6 +9,7 @@
         data-license-chip
         data-license-status="{{ $licenseContext['status'] }}"
         data-denied-message="{{ $licenseContext['denied'] }}"
+        data-license-explanation="{{ $licenseContext['explanation'] }}"
         aria-label="Modo consulta — {{ $licenseContext['title'] }}. Ver detalhes da restrição"
         title="{{ $licenseContext['title'] }} — Ver detalhes">
     <svg class="commercial-license-chip-lock" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8.5 10V7a3.5 3.5 0 0 1 7 0v3"/></svg>
