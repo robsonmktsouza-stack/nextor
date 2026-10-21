@@ -91,9 +91,12 @@ final class BootstrapManagedAccount extends Command
             $token = Password::broker()->createToken($user);
             $invite = [
                 'email' => $data['email'],
-                'url' => route('password.reset', [
+                // Explicitly use the installation's validated APP_URL.
+                // CLI tests and reverse proxies must never leak the
+                // control-server or localhost origin into the invitation.
+                'url' => $expectedUrl.route('password.reset', [
                     'token' => $token, 'email' => $data['email'],
-                ]),
+                ], false),
             ];
             $folder = storage_path('app/private');
             if (!is_dir($folder) && !mkdir($folder, 0700, true) && !is_dir($folder)) {
