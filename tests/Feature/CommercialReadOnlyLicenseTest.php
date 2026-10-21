@@ -29,7 +29,7 @@ final class CommercialReadOnlyLicenseTest extends TestCase
         ]);
     }
 
-    private function license(string $status): void
+    private function license(string $status, ?int $noticeDays = null, int $daysToExpiry = 30): void
     {
         $secret = str_repeat('c', 96);
         config()->set('central_license.enabled', true);
@@ -45,7 +45,8 @@ final class CommercialReadOnlyLicenseTest extends TestCase
             'status' => $status,
             'plan' => 'standard',
             'modules' => ['pdv','products','finance','fiscal','services'],
-            'expires_at' => now()->addMonth()->format('Y-m-d'),
+            'expires_at' => today()->addDays($daysToExpiry)->toDateString(),
+            'notice_days' => $noticeDays,
             'checked_at' => now()->toIso8601String(),
         ], JSON_UNESCAPED_SLASHES);
 
@@ -142,6 +143,27 @@ final class CommercialReadOnlyLicenseTest extends TestCase
         $this->get('/products')->assertOk()
             ->assertSee('Verificação de licença indisponível')
             ->assertDontSee('Assinatura vencida');
+    }
+
+    public function test_erp_displays_control_signed_reminder_without_blocking_sales(): void
+    {
+        $this->license('active', noticeDays: 7, daysToExpiry: 3);
+        $this->actingAs($this->user());
+
+        $this->get('/products')->assertOk()
+            ->assertSee('Sua licença vence em 3 dias')
+            ->assertSee('data-central-license-reminder', false)
+            ->assertDontSee('data-commercial-readonly', false);
+
+        $this->assertDatabaseHas('central_license_states', ['notice_days' => 7]);
+    }
+
+    public function test_erp_does_not_invent_reminders_when_control_has_disabled_rules(): void
+    {
+        $this->license('active', noticeDays: null, daysToExpiry: 3);
+        $this->actingAs($this->user());
+        $this->get('/products')->assertOk()
+            ->assertDontSee('data-central-license-reminder', false);
     }
 
     public function test_reactivated_account_can_write_normally(): void
