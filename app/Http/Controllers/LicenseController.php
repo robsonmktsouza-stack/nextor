@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Company;
+use App\Models\Plan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -53,15 +54,19 @@ final class LicenseController extends Controller
     public function modules(Request $request, Company $company)
     {
         $data = $request->validate([
-            'plan' => ['required', Rule::in(array_keys(config('license.plans')))],
+            'plan' => ['required', Rule::exists('plans', 'code')],
             'modules' => ['nullable', 'array'],
             'modules.*' => [Rule::in(array_keys(config('license.modules')))],
             'expires_at' => ['nullable', 'date_format:Y-m-d'],
         ]);
-        DB::transaction(function () use ($company, $data): void {
+        $plan = Plan::query()->where('code', $data['plan'])->firstOrFail();
+        if (!$plan->active && $company->plan !== $plan->code) {
+            return back()->withErrors(['plan' => 'Este plano está arquivado. Selecione um plano disponível.']);
+        }
+        DB::transaction(function () use ($company, $data, $plan): void {
             $company->update([
                 'plan' => $data['plan'],
-                'modules' => array_values(array_unique($data['modules'] ?? [])),
+                'modules' => array_values(array_unique($data['modules'] ?? $plan->modules ?? [])),
                 'expires_at' => $data['expires_at'] ?? null,
             ]);
             $company->record('license_changed', 'Plano, módulos ou validade alterados.');
