@@ -16,7 +16,7 @@
 <label class="span-two">URL da instalação <input name="installation_url" type="url" value="{{ $company->installation_url }}" placeholder="https://..."></label>
 </div><button type="submit" class="btn primary small">Salvar dados</button>
 </form>
-<div class="metadata"><strong>Identificador da instalação</strong><code>{{ $company->instance_id }}</code><strong>Subdomínio</strong><span>{{ $company->subdomain }}</span><strong>Última comunicação</strong><span>{{ $company->last_seen_at?->format('d/m/Y H:i')??'Ainda não conectada' }}</span><strong>Versão informada</strong><span>{{ $company->last_version?:'—' }}</span></div>
+<div class="metadata"><strong>Subdomínio</strong><span>{{ $company->subdomain }}</span><strong>Integração</strong><span><span class="status {{ $company->last_seen_at ? 'active' : 'expired' }}">{{ $company->last_seen_at ? 'Conectada anteriormente' : 'Aguardando instalação' }}</span></span><strong>Última comunicação</strong><span>{{ $company->last_seen_at?->format('d/m/Y H:i')??'Ainda não conectada' }}</span><strong>Versão informada</strong><span>{{ $company->last_version?:'—' }}</span></div>
 </section>
 <section class="detail-box"><h3>Licença e acesso</h3>
 <div class="license-summary"><div><span>Plano atual</span><strong>{{ config('license.plans')[$company->plan]??$company->plan }}</strong></div><div><span>Vencimento</span><strong>{{ $company->expires_at?->format('d/m/Y')??'Sem prazo' }}</strong></div></div>
@@ -34,7 +34,7 @@
 <div class="form-grid"><label>Plano<select name="plan">@foreach(config('license.plans') as $value=>$label)<option value="{{ $value }}" @selected($company->plan===$value)>{{ $label }}</option>@endforeach</select></label><label>Validade<input type="date" name="expires_at" value="{{ $company->expires_at?->format('Y-m-d') }}"></label></div>
 <div class="modules"><strong>Módulos autorizados</strong><div class="module-grid">@foreach(config('license.modules') as $code=>$label)<label class="check"><input type="checkbox" name="modules[]" value="{{ $code }}" @checked(in_array($code,$company->modules??[]))>{{ $label }}</label>@endforeach</div></div>
 <button type="submit" class="btn primary small">Salvar licença</button></form>
-<div class="rotate"><p>A chave privada de licença só é exibida na criação ou substituição.</p><form method="post" action="{{ route('clients.rotate-secret',$company) }}">@csrf<button class="btn subtle small" type="submit" data-confirm="Substituir a chave? A chave anterior deixará de autenticar a instalação até que seja atualizada.">Gerar nova chave</button></form></div>
+<div class="info-line">A liberação, suspensão e renovação são feitas somente aqui. Quando a instalação estiver conectada ao serviço central, as alterações serão recebidas automaticamente, sem ação do cliente.</div>
 </section>
 <section class="detail-box"><h3>Anotações e eventos</h3>
 <div class="events-stream">
