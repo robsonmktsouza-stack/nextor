@@ -10,10 +10,23 @@ use Illuminate\Validation\Rule;
 
 final class PlanController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $query = Plan::query();
+        $search = trim((string) $request->query('q', ''));
+        if ($search !== '') {
+            $query->where(fn ($q) => $q->where('name', 'like', '%'.$search.'%')
+                ->orWhere('code', 'like', '%'.$search.'%')
+                ->orWhere('description', 'like', '%'.$search.'%'));
+        }
+        if (in_array($request->query('status'), ['active', 'archived'], true)) {
+            $query->where('active', $request->query('status') === 'active');
+        }
+        $perPage = (int) $request->query('per_page', 20);
+        $perPage = in_array($perPage, [20, 50, 100], true) ? $perPage : 20;
+
         return view('plans.index', [
-            'plans' => Plan::query()->orderBy('id')->get(),
+            'plans' => $query->orderBy('id')->paginate($perPage)->withQueryString(),
             'usage' => Company::query()->selectRaw('plan, COUNT(*) as total')->groupBy('plan')
                 ->pluck('total', 'plan'),
         ]);
