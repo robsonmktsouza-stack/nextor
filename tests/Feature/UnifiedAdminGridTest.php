@@ -73,7 +73,7 @@ final class UnifiedAdminGridTest extends TestCase
             ->assertSee('23 clientes');
         $this->get('/licenses?per_page=50&status=active')->assertOk()
             ->assertSee('50 linhas por página')
-            ->assertSee('23 clientes');
+            ->assertSee('23 licenças');
         $this->get('/plans?per_page=50&q=Padr')->assertOk()
             ->assertSee('Padrão')
             ->assertDontSee('Completo');
