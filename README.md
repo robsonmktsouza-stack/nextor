@@ -73,6 +73,48 @@ O agente no ERP, branch `develop`, lê o arquivo privado provisionado, valida CN
 
 Em produção usar HTTPS, armazenamento privado por instância, backup protegido e ferramentas de deploy autorizadas; `127.0.0.1` só se aplica a aplicações rodando na mesma máquina.
 
+## Planos administráveis e automações
+
+A partir de 21/10/2026, os planos comerciais **não são mais definidos em `config/license.php`**. A nova migration `2026_10_21_000001_create_plans_and_automation_tables.php` cria as tabelas `plans`, `automation_rules` e `automation_deliveries` sem alterar os documentos, clientes, senhas ou as licenças existentes. Durante a migration, apenas o catálogo inicial é criado com os códigos legados `standard`, `advanced` e `full`; os dados de planos passam a ser mantidos no **banco**, pela seção **Planos** da central.
+
+O painel permite criar/editar plano, descrição, preço de referência opcional, período de referência, módulos padrão e disponibilidade. Código de plano em uso permanece estável para a API do ERP, mesmo se mudar nome ou módulos. Arquivar um plano o retira de novas contas, **sem suspender ou reclassificar as licenças já emitidas**. Novos cadastros escolhem somente planos ativos. Ao selecionar outro plano, os módulos padrão são preenchidos e continuam editáveis na licença; alterar a definição de um plano **não altera retroativamente** os clientes existentes. O preço não cria cobrança nem vincula a um gateway de pagamento.
+
+A nova seção **Automações** contém três regras configuráveis, **todas desativadas por padrão**:
+
+- Próximo vencimento: um aviso interno por data de validade quando restarem até N dias.
+- Vencimento ocorrido: um aviso interno por data de validade vencida. O estado `expired` já é calculado dinamicamente mesmo sem esse aviso.
+- Sem comunicação: aviso quando uma instalação não se comunica há N dias, incluindo pendentes há muito tempo.
+
+As regras **não** enviam e-mail ou WhatsApp, não geram faturas, não renovam e não suspendem licenças. Avisos aparecem na seção **Automações**, na ficha do cliente e no histórico; possuem chave de deduplicação no banco para evitar mensagens repetidas após reiniciar serviços, reexecutar manualmente ou processar o mesmo vencimento. Os parâmetros são alterados pelo painel.
+
+### Ativar no Laragon após atualizar a branch
+
+```powershell
+cd C:\laragon\www\lumeron-control
+git pull origin control-center
+php artisan migrate
+php artisan optimize:clear
+php artisan control:automations-run
+php artisan schedule:list
+```
+
+`control:automations-run` executa somente as regras que você habilitou na interface; enquanto todas estiverem desligadas, não cria avisos. Para **execução diária automática em desenvolvimento**, mantenha o agendador rodando em **outro terminal**:
+
+```powershell
+cd C:\laragon\www\lumeron-control
+php artisan schedule:work
+```
+
+O agendamento registrado é diário às **08:00 (America/Sao_Paulo, conforme `APP_TIMEZONE`)**, e usa `withoutOverlapping()` para reduzir sobreposição. Se o Laragon estiver desligado nesse horário, a rotina não é executada automaticamente até o próximo agendamento; use o botão **Executar verificação** no painel para conferir imediatamente.
+
+Em Linux, execute o agendador do Laravel via cron **todo minuto**, em um servidor confiável que possua acesso ao banco privado do Control:
+
+```cron
+* * * * * cd /srv/lumeron-control/current && php artisan schedule:run >> /dev/null 2>&1
+```
+
+O diretório acima é **exemplo**, não uma instalação existente. Não configurar o cron do ERP/Nextor como substituto: a rotina pertence exclusivamente ao Lumeron Control. O scheduler só funciona com o processo/cron ativo; não afirmar monitoramento 24 horas a partir da simples instalação da migration.
+
 ## Testes
 
 ```bash
