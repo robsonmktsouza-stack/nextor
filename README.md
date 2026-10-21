@@ -1,10 +1,10 @@
-# Lumeron Control — Painel Privado de Licenças
+# Lumeron Control — Licenças, Faturas e Gestão Comercial
 
 Aplicação Laravel 13 **independente** das instalações do ERP Lumeron/Nextor. Interface propositalmente enxuta, no padrão visual Lumeron, inspirada no fluxo de lista/detalhes/novo cliente do painel de representantes eGestor, sem copiar sua marca nem seu código.
 
-**Escopo efetivamente implementado:** autenticação administrativa sem cadastro público; painel inicial; empresas com CNPJ, contatos, subdomínio, plano e validade; cadastro em três etapas; listagem, filtros e modal de detalhes; ativação, suspensão, renovação, notas e auditoria; endpoint de verificação de licença assinado com HMAC, controle de replay e verificação de CNPJ; testes de integração e CI.
+**Escopo efetivamente implementado:** autenticação administrativa; painel, clientes, planos, licenças e faturas comerciais; cadastro, filtros, detalhes, pagamentos manuais, estornos, cancelamentos e auditoria; automações de vencimento e e-mails opcionais; vínculo e renovação explicitamente autorizados pela API HMAC assinada; testes de integração e CI.
 
-**Não implementado ou não presumir:** cobrança automática, faturas, controle de revendedores, instalação automática em VPS, criação de usuário no ERP, provedor de pagamento ou domínio real. **Integração do ERP:** agente de verificação HMAC implementado na branch `develop` do ERP, desativado por padrão até configuração expressa por instalação. O cadastro aqui **não** instala o ERP no servidor nem cria usuário lá. A liberação comercial é imediata no painel, mas o ERP somente aplica restrições após receber a integração em seu deploy.
+**Não implementado ou não presumir:** geração automática de faturas, cobrança por gateway, boleto bancário/Pix real, nota fiscal, controle de revendedores, instalação automática em VPS, criação de usuário no ERP ou domínio real. **Integração do ERP:** agente de verificação HMAC implementado na branch `develop` do ERP, desativado por padrão até configuração expressa por instalação. O cadastro aqui **não** instala o ERP no servidor nem cria usuário lá. A liberação comercial é imediata no painel, mas o ERP somente aplica restrições após receber a integração em seu deploy.
 
 ## Instalar (aplicação separada)
 
@@ -85,7 +85,7 @@ A nova seção **Automações** contém três regras configuráveis, **todas des
 - Vencimento ocorrido: um aviso interno por data de validade vencida. O estado `expired` já é calculado dinamicamente mesmo sem esse aviso.
 - Sem comunicação: aviso quando uma instalação não se comunica há N dias, incluindo pendentes há muito tempo.
 
-As regras **não** enviam e-mail ou WhatsApp, não geram faturas, não renovam e não suspendem licenças. Avisos aparecem na seção **Automações**, na ficha do cliente e no histórico; possuem chave de deduplicação no banco para evitar mensagens repetidas após reiniciar serviços, reexecutar manualmente ou processar o mesmo vencimento. Os parâmetros são alterados pelo painel.
+As regras geram avisos internos; as regras de vencimento podem **opcionalmente enviar e-mail**, apenas com SMTP habilitado e switch da regra ligado. Não enviam WhatsApp nem geram faturas, renovam ou suspendem licenças automaticamente. Avisos possuem deduplicação por cliente e vencimento, com histórico de entrega; os parâmetros são alterados pelo painel.
 
 ### Ativar no Laragon após atualizar a branch
 
@@ -262,7 +262,7 @@ dos ERPs são distintos.
 ## Faturas comerciais e pagamentos
 
 A aba **Faturas** pertence exclusivamente ao Lumeron Control (branch
-`control-center`) e não altera o ERP. Permite emitir faturas comerciais
+`control-center`); somente a ação administrativa explícita de aplicar uma fatura quitada altera a validade central, transmitida ao ERP via HMAC. Permite emitir faturas comerciais
 numeradas `FAT-000001` vinculadas a um CNPJ, com cópia imutável do nome do
 cliente, CNPJ, plano, período, valor, vencimento e descrição. O preço sugerido
 equivale ao preço **mensal** configurado no plano multiplicado pelo
