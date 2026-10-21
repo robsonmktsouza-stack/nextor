@@ -38,7 +38,7 @@ A interface usa cache de 5 minutos. Sem rede, aceita a última licença validada
 
 ## Efeitos de status — modo de consulta (21/10/2026)
 
-A suspensão não expulsa o cliente nem mostra uma tela de licença cobrindo o ERP. Em vez disso, o sistema mantém dashboard, buscas, listagens, detalhes, relatórios, impressões e downloads de dados existentes, conforme as permissões do próprio usuário. Nos layouts `app.blade.php` e `pdv.blade.php`, o aviso compacto é incluído por `partials/commercial-readonly.blade.php`, com estilos em `public/css/commercial-readonly.css` e aviso/modal em `public/js/commercial-readonly.js`.
+A suspensão não expulsa o cliente nem mostra uma tela de licença cobrindo o ERP. Em vez disso, o sistema mantém dashboard, buscas, listagens, detalhes, relatórios, impressões e downloads de dados existentes, conforme as permissões do próprio usuário. Nos layouts `app.blade.php` e `pdv.blade.php`, o **chip discreto no cabeçalho** é incluído por `partials/commercial-readonly.blade.php`, com estilos em `public/css/commercial-readonly.css` e interação/modal em `public/js/commercial-readonly.js`. Não há banner fixo sobre o conteúdo; o chip pode ser acionado para consultar o motivo. Ações de escrita são acinzentadas (não recebem atributo `disabled`, para ainda exibirem o modal), enquanto consultas, impressão e exportação permanecem normalmente disponíveis.
 
 - `active`: acesso operacional completo para os módulos contratados, sujeito às permissões normais.
 - `suspended`: consultas disponíveis; `POST/PUT/PATCH/DELETE` comerciais bloqueados em `RequireCentralLicense` no backend.
