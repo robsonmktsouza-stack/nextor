@@ -70,6 +70,21 @@ final class LocalErpProvisioningTest extends TestCase
         $this->get(route('clients.first-access',$company))->assertNotFound();
     }
 
+    public function test_local_provisioner_reports_failing_stage_without_dumping_sensitive_output(): void
+    {
+        $service = app(\App\Services\LocalErpProvisioner::class);
+        $this->assertStringContainsString('pdo_sqlite',
+            $service->failureHint('migrations', 'could not find driver'));
+        $this->assertStringContainsString('extensão PHP intl',
+            $service->failureHint('composer', 'package requires ext-intl *'));
+        $this->assertStringContainsString('Composer',
+            $service->failureHint('composer', 'process ended with exit code 1'));
+        $this->assertStringContainsString('Control não está acessível',
+            $service->failureHint('license-binding', 'O Lumeron Control não está acessível nesse endereço'));
+        $this->assertStringNotContainsString('secret123',
+            $service->failureHint('first-access', 'Something failed APP_KEY=secret123'));
+    }
+
     public function test_local_provisioner_rejects_unsafe_company_slug(): void
     {
         $company=$this->sample();
