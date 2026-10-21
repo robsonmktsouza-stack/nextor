@@ -8,7 +8,7 @@
 <div class="form-grid">
 <label class="span-two">Razão social <input name="legal_name" required value="{{ $company->legal_name }}" maxlength="220"></label>
 <label>Nome fantasia <input name="trade_name" value="{{ $company->trade_name }}" maxlength="220"></label>
-<label>CNPJ <input value="{{ $company->cnpj }}" disabled><small>Vinculado à instalação; não editável.</small></label>
+<label>CNPJ <input value="{{ $company->cnpj }}" disabled></label>
 <label>Responsável <input name="contact_name" value="{{ $company->contact_name }}" maxlength="160"></label>
 <label>E-mail <input name="email" type="email" value="{{ $company->email }}" required></label>
 <label>Telefone <input name="phone" value="{{ $company->phone }}" maxlength="30"></label>
@@ -16,7 +16,7 @@
 <label class="span-two">URL da instalação <input name="installation_url" type="url" value="{{ $company->installation_url }}" placeholder="https://..."></label>
 </div><button type="submit" class="btn primary small">Salvar dados</button>
 </form>
-<div class="metadata"><strong>Subdomínio</strong><span>{{ $company->subdomain }}</span><strong>Integração</strong><span><span class="status {{ $company->last_seen_at ? 'active' : 'expired' }}">{{ $company->last_seen_at ? 'Conectada anteriormente' : 'Aguardando instalação' }}</span></span><strong>Última comunicação</strong><span>{{ $company->last_seen_at?->format('d/m/Y H:i')??'Ainda não conectada' }}</span><strong>Versão informada</strong><span>{{ $company->last_version?:'—' }}</span></div>
+<div class="metadata"><strong>Subdomínio</strong><span>{{ $company->subdomain }}</span><strong>Conexão</strong><span><span class="status {{ $company->last_seen_at ? 'active' : 'expired' }}">{{ $company->last_seen_at ? 'Conectada anteriormente' : 'Aguardando instalação' }}</span></span><strong>Último contato</strong><span>{{ $company->last_seen_at?->format('d/m/Y H:i')??'Ainda não conectada' }}</span></div>
 </section>
 <section class="detail-box"><h3>Licença e acesso</h3>
 <div class="license-summary"><div><span>Plano atual</span><strong>{{ $plans->firstWhere('code',$company->plan)?->name ?? $company->plan }}</strong></div><div><span>Vencimento</span><strong>{{ $company->expires_at?->format('d/m/Y')??'Sem prazo' }}</strong></div></div>
@@ -30,7 +30,7 @@ aria-label="Ativar ou suspender licença de {{ $company->legal_name }}"
 <span class="switch-track" aria-hidden="true"></span>
 <span>Acesso comercial {{ $company->license_status === 'suspended' ? 'suspenso' : 'liberado' }}</span>
 </label>
-<span class="switch-hint">Alterações de acesso são aplicadas automaticamente à instalação conectada.</span>
+
 </form>
 <form method="post" action="{{ route('clients.renew',$company) }}" class="renew-controls">@csrf
 <label>Renovar por<select name="months"><option value="1">1 mês</option><option value="3">3 meses</option><option value="6">6 meses</option><option value="12">12 meses</option></select></label><button class="btn primary" type="submit"><svg><use href="#i-calendar"/></svg>Renovar</button>
@@ -39,7 +39,6 @@ aria-label="Ativar ou suspender licença de {{ $company->legal_name }}"
 <div class="form-grid"><label>Plano<select name="plan" data-plan-selector>@foreach($plans as $plan)<option value="{{ $plan->code }}" data-modules="{{ implode(',', $plan->modules ?? []) }}" @selected($company->plan===$plan->code)>{{ $plan->name }}{{ $plan->active ? '' : ' (arquivado)' }}</option>@endforeach</select></label><label>Validade<input type="date" name="expires_at" value="{{ $company->expires_at?->format('Y-m-d') }}"></label></div>
 <div class="modules"><strong>Módulos autorizados</strong><input type="hidden" name="modules_present" value="1"><div class="module-grid">@foreach(config('license.modules') as $code=>$label)<label class="module-switch"><input type="checkbox" role="switch" name="modules[]" value="{{ $code }}" @checked(in_array($code,$company->modules??[]))><span class="switch-track" aria-hidden="true"></span><span>{{ $label }}</span></label>@endforeach</div></div>
 <button type="submit" class="btn primary small">Salvar licença</button></form>
-<div class="info-line">A liberação, suspensão e renovação são feitas somente aqui. Quando a instalação estiver conectada ao serviço central, as alterações serão recebidas automaticamente, sem ação do cliente.</div>
 </section>
 <section class="detail-box"><h3>Anotações e eventos</h3>
 <div class="events-stream">
