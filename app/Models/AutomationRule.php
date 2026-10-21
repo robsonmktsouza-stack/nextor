@@ -1,12 +1,17 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
 final class AutomationRule extends Model
 {
-    protected $fillable = ['enabled', 'days'];
+    public const KINDS = [
+        'expiry_soon' => 'Licenças próximas do vencimento',
+        'expired' => 'Licenças vencidas',
+        'offline' => 'Instalações sem comunicação',
+    ];
+
+    protected $fillable = ['name', 'description', 'kind', 'enabled', 'days'];
 
     protected function casts(): array
     {
@@ -15,5 +20,10 @@ final class AutomationRule extends Model
             'days' => 'integer',
             'last_run_at' => 'datetime',
         ];
+    }
+
+    public function kindCode(): string
+    {
+        return (string) ($this->kind ?: $this->code);
     }
 }

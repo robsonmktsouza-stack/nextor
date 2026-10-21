@@ -6,6 +6,9 @@ use App\Models\AutomationDelivery;
 use App\Models\AutomationRule;
 use App\Services\AutomationRunner;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 final class AutomationController extends Controller
 {
@@ -29,18 +32,53 @@ final class AutomationController extends Controller
         ]);
     }
 
-    public function update(Request $request, AutomationRule $rule)
+    public function create()
+    {
+        return view('automations.form', ['rule' => new AutomationRule()]);
+    }
+
+    public function edit(AutomationRule $rule)
+    {
+        return view('automations.form', ['rule' => $rule]);
+    }
+
+    private function validated(Request $request, ?AutomationRule $rule = null): array
     {
         $data = $request->validate([
+            'name' => ['required', 'string', 'max:100'],
+            'description' => ['required', 'string', 'max:255'],
+            'kind' => [$rule ? 'prohibited' : 'required', Rule::in(array_keys(AutomationRule::KINDS))],
             'days' => ['required', 'integer', 'min:0', 'max:365'],
-            'enabled' => ['nullable', 'boolean'],
+            'enabled' => ['required', 'boolean'],
         ]);
-        $days = $rule->code === 'expired' ? 0 : (int) $data['days'];
-        if ($rule->code === 'offline' && $days < 1) {
-            return back()->withErrors(['days' => 'A ausência de comunicação precisa de pelo menos um dia.']);
+        $kind = $rule?->kindCode() ?? $data['kind'];
+        if ($kind === 'offline' && (int) $data['days'] < 1) {
+            throw ValidationException::withMessages([
+                'days' => 'Informe pelo menos 1 dia sem comunicação.',
+            ]);
         }
-        $rule->update(['days' => $days, 'enabled' => $request->boolean('enabled')]);
-        return back()->with('success', 'Automação atualizada.');
+        $data['days'] = $kind === 'expired' ? 0 : (int) $data['days'];
+        $data['enabled'] = $request->boolean('enabled');
+        unset($data['kind']);
+        if (!$rule) $data['kind'] = $kind;
+
+        return $data;
+    }
+
+    public function store(Request $request)
+    {
+        $data = $this->validated($request);
+        $rule = new AutomationRule($data);
+        $rule->code = 'custom_'.Str::lower(Str::random(20));
+        $rule->save();
+
+        return redirect()->route('automations.index')->with('success', 'Automação criada.');
+    }
+
+    public function update(Request $request, AutomationRule $rule)
+    {
+        $rule->update($this->validated($request, $rule));
+        return redirect()->route('automations.index')->with('success', 'Automação atualizada.');
     }
 
     public function run(AutomationRunner $runner)

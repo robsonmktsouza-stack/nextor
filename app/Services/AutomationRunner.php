@@ -23,16 +23,16 @@ final class AutomationRunner
             $today = today();
             $query = Company::query()->orderBy('id');
 
-            if ($rule->code === 'expiry_soon') {
+            if ($rule->kindCode() === 'expiry_soon') {
                 $query->where('license_status', 'active')
                     ->whereBetween('expires_at', [
                         $today->toDateString(),
                         $today->copy()->addDays($rule->days)->toDateString(),
                     ]);
-            } elseif ($rule->code === 'expired') {
+            } elseif ($rule->kindCode() === 'expired') {
                 $query->where('license_status', 'active')
                     ->whereDate('expires_at', '<', $today->toDateString());
-            } elseif ($rule->code === 'offline') {
+            } elseif ($rule->kindCode() === 'offline') {
                 $cutoff = $today->copy()->subDays($rule->days)->startOfDay();
                 $query->where(function ($q) use ($cutoff): void {
                     $q->where('last_seen_at', '<', $cutoff)
@@ -71,13 +71,13 @@ final class AutomationRunner
 
     private function eventFor(AutomationRule $rule, Company $company): array
     {
-        if ($rule->code === 'expiry_soon') {
+        if ($rule->kindCode() === 'expiry_soon') {
             return [
                 'expiry-'.$company->expires_at->toDateString(),
                 'Licença próxima do vencimento: '.$company->expires_at->format('d/m/Y').'.',
             ];
         }
-        if ($rule->code === 'expired') {
+        if ($rule->kindCode() === 'expired') {
             return [
                 'expired-'.$company->expires_at->toDateString(),
                 'Licença vencida em '.$company->expires_at->format('d/m/Y').'.',
