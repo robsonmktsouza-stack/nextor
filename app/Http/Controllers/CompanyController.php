@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Company;
+use App\Models\Plan;
 use App\Support\Cnpj;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -73,18 +74,19 @@ final class CompanyController extends Controller
                 fn ($q) => $q->whereNull('expires_at')->orWhereDate('expires_at', '>=', now()->toDateString())
             );
         }
-        if ($request->filled('plan') && array_key_exists((string) $request->query('plan'), config('license.plans'))) {
+        if ($request->filled('plan') && Plan::query()->where('code', (string) $request->query('plan'))->exists()) {
             $query->where('plan', $request->query('plan'));
         }
         return view('clients.index', [
             'companies' => $query->orderByDesc('id')->paginate(20)->withQueryString(),
             'licenses' => $licenses,
+            'plans' => Plan::query()->orderBy('id')->get(),
         ]);
     }
 
     public function create()
     {
-        return view('clients.create');
+        return view('clients.create', ['plans' => Plan::enabled()->get()]);
     }
 
     public function store(Request $request)
@@ -105,11 +107,13 @@ final class CompanyController extends Controller
                 Rule::notIn(['admin', 'api', 'login', 'www']), Rule::unique('companies', 'subdomain')],
             'installation_url' => $this->installationUrlRules(),
             'admin_login' => ['nullable', 'string', 'regex:/^[a-zA-Z0-9_.-]{3,100}$/'],
-            'plan' => ['required', Rule::in(array_keys(config('license.plans')))],
+            'plan' => ['required', Rule::exists('plans', 'code')->where('active', true)],
             'expires_at' => ['nullable', 'date_format:Y-m-d'],
             'modules' => ['nullable', 'array'],
             'modules.*' => [Rule::in(array_keys(config('license.modules')))],
         ]);
+        $plan = Plan::query()->where('code', $data['plan'])->firstOrFail();
+        $data['modules'] = array_values(array_unique($data['modules'] ?? $plan->modules ?? []));
         $secret = bin2hex(random_bytes(48));
         $company = DB::transaction(function () use ($data, $secret): Company {
             $company = Company::create([
@@ -117,7 +121,7 @@ final class CompanyController extends Controller
                 'instance_id' => (string) Str::uuid(),
                 'license_secret' => $secret,
                 'license_status' => 'active',
-                'modules' => array_values(array_unique($data['modules'] ?? [])),
+                'modules' => $data['modules'],
             ]);
             $company->record('created', 'Conta cadastrada e licença criada.');
             return $company;
@@ -128,13 +132,17 @@ final class CompanyController extends Controller
 
     public function show(Company $company)
     {
-        return view('clients.show', ['company' => $company->load(['events' => fn ($q) => $q->latest('id')->limit(30), 'events.user'])]);
+        return view('clients.show', [
+            'company' => $company->load(['events' => fn ($q) => $q->latest('id')->limit(30), 'events.user']),
+            'plans' => Plan::query()->where('active', true)->orWhere('code', $company->plan)->orderBy('id')->get(),
+        ]);
     }
 
     public function details(Company $company)
     {
         return view('clients.partials.details', [
             'company' => $company->load(['events' => fn ($q) => $q->latest('id')->limit(30), 'events.user']),
+            'plans' => Plan::query()->where('active', true)->orWhere('code', $company->plan)->orderBy('id')->get(),
         ]);
     }
 
