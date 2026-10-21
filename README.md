@@ -115,6 +115,14 @@ Em Linux, execute o agendador do Laravel via cron **todo minuto**, em um servido
 
 O diretório acima é **exemplo**, não uma instalação existente. Não configurar o cron do ERP/Nextor como substituto: a rotina pertence exclusivamente ao Lumeron Control. O scheduler só funciona com o processo/cron ativo; não afirmar monitoramento 24 horas a partir da simples instalação da migration.
 
+## Listagem de licenças no padrão do ERP
+
+A seção **Licenças** reutiliza a linguagem visual compacta da grade Produtos do Lumeron ERP: **Nova conta**, ícones de impressão, exportação CSV da **página atual**, atualização, filtros recolhíveis por nome/CNPJ, situação e plano, cabeçalho denso, ações de visualizar/gerenciar e paginação de 20, 50 ou 100 registros. Não foi adicionada seleção em massa por checkboxes.
+
+Ativação e suspensão por empresa usam **switch** com confirmação em modal compacto e envio CSRF ao controller autenticado. A ficha de cada empresa também mostra o switch; o status `Vencida` continua vencido mesmo quando a permissão administrativa foi ativada, até renovar a data. As opções com estados ligado/desligado em **Planos**, **Automações** e **Módulos** são representadas por switches, não caixas de marcação visíveis. Módulos do plano e da licença continuam sendo salvos por seus respectivos formulários.
+
+Impressão usa `window.print()` na página exibida, com CSS próprio; a exportação gera CSV apenas da página corrente e aplica proteção contra fórmulas em células. O bloqueio e a ativação continuam decididos pelo backend, não pelo switch visual.
+
 ## Testes
 
 ```bash
