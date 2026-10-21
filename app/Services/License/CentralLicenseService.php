@@ -36,8 +36,10 @@ final class CentralLicenseService
             if (!preg_match('/^[0-9a-f-]{36}$/i', $id)
                 || !preg_match('/^[0-9a-f]{96}$/i', $secret)
                 || !$cnpj
-                || !preg_match('/^https:\/\//i', $url)
-                && !(app()->environment('local', 'testing') && str_starts_with($url, 'http://'))) {
+                || (parse_url($url, PHP_URL_SCHEME) !== 'https'
+                    && !(parse_url($url, PHP_URL_SCHEME) === 'http'
+                        && app()->environment('local', 'testing')
+                        && in_array(parse_url($url, PHP_URL_HOST), ['localhost', '127.0.0.1', '::1'], true)))) {
                 throw new \RuntimeException('Configuração de licença central incompleta.');
             }
             $endpoint = $url.'/api/license/check';
