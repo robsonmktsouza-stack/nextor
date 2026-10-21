@@ -13,7 +13,7 @@ final class ManagedLicenseConfig
 {
     public static function credentials(): ?array
     {
-        $file = storage_path('app/private/lumeron-control.json');
+        $file = (string) config('central_license.managed_file', storage_path('app/private/lumeron-control.json'));
         if (!is_file($file) || !is_readable($file)) {
             return null;
         }
