@@ -68,7 +68,7 @@
                         <td>
                             <div class="license-row-actions">
                                 <button class="license-icon-action" type="submit" form="automation-rule-{{ $rule->id }}"
-                                    title="Salvar regra" aria-label="Salvar regra {{ $rule->name }}">@include('partials.icon',['name'=>'check','size'=>16])</button>
+                                    data-tooltip="Salvar regra" aria-label="Salvar regra {{ $rule->name }}">@include('partials.icon',['name'=>'check','size'=>16])</button>
                             </div>
                         </td>
                     </tr>
@@ -106,7 +106,7 @@
                         <td>
                             <div class="license-row-actions">
                                 @if($delivery->company)
-                                    <a class="license-icon-action" href="{{ route('clients.show',$delivery->company_id) }}" title="Ver cliente" aria-label="Ver cliente">@include('partials.icon',['name'=>'clients','size'=>16])</a>
+                                    <a class="license-icon-action" href="{{ route('clients.show',$delivery->company_id) }}" data-tooltip="Ver cliente" aria-label="Ver cliente">@include('partials.icon',['name'=>'clients','size'=>16])</a>
                                 @endif
                             </div>
                         </td>
