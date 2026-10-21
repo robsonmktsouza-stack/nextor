@@ -4,7 +4,7 @@ Aplicação Laravel 13 **independente** das instalações do ERP Lumeron/Nextor.
 
 **Escopo efetivamente implementado:** autenticação administrativa sem cadastro público; painel inicial; empresas com CNPJ, contatos, subdomínio, plano, módulos e validade; cadastro em três etapas; listagem, filtros e modal de detalhes; ativação, suspensão, renovação, notas e auditoria; endpoint de verificação de licença assinado com HMAC, controle de replay e verificação de CNPJ; testes de integração e CI.
 
-**Não implementado ou não presumir:** cobrança automática, faturas, controle de revendedores, instalação automática em VPS, criação de usuário no ERP, provedor de pagamento ou domínio real. **Integração do ERP:** agente de verificação HMAC implementado na branch `develop` do ERP, desativado por padrão até configuração expressa por instalação. O cadastro aqui **não** instala o ERP no servidor nem cria usuário lá.
+**Não implementado ou não presumir:** cobrança automática, faturas, controle de revendedores, instalação automática em VPS, criação de usuário no ERP, provedor de pagamento ou domínio real. **Integração do ERP:** agente de verificação HMAC implementado na branch `develop` do ERP, desativado por padrão até configuração expressa por instalação. O cadastro aqui **não** instala o ERP no servidor nem cria usuário lá. A liberação comercial é imediata no painel, mas o ERP somente aplica restrições após receber a integração em seu deploy.
 
 ## Instalar (aplicação separada)
 
@@ -30,29 +30,40 @@ Servidor próprio com HTTPS, PHP-FPM/Nginx (ou equivalente), MySQL/MariaDB, `APP
 
 `composer.lock` deve ser usado em deploy (gerado/versionado pelo CI do projeto); nunca executar `composer update` em instância já publicada.
 
-### Licença e integração
+### Fluxo aprovado: simples para o proprietário e transparente para o cliente
 
-Para cada empresa criada o painel gera:
-- `instance_id` UUID fixo e secreto HMAC de 48 bytes representado em base hexadecimal, armazenado criptografado com `APP_KEY`.
-- CNPJ vinculado e subdomínio exclusivo; mudança de CNPJ não é permitida após cadastro.
-- Situação `active`, `suspended` ou `expired` (expiração derivada da validade); módulos autorizados.
+1. **Nova conta** → razão social/CNPJ, dados de acesso, plano e validade.
+2. **Criar conta** → cliente e licença ficam cadastrados e ativos no painel.
+3. Na ficha, o proprietário pode **suspender, reativar, renovar, alterar plano e módulos**, sem copiar códigos e sem pedir confirmação ao usuário do ERP.
+4. A ficha separa a situação comercial (**ativa/suspensa/vencida**) da conexão técnica (**aguardando instalação / já se comunicou**). Não declarar bloqueio remoto enquanto a instalação não estiver conectada.
 
-**O segredo é mostrado apenas uma vez após a criação**, em sessão autenticada e uma resposta de uso único. Armazene-o exclusivamente no ambiente privado da instância correspondente; não divulgue em tickets ou logs.
+O painel continua gerando internamente `instance_id` e segredo HMAC individuais criptografados em seu banco, **mas não exibe esses valores**. Não existe opção de gerar nova chave na interface.
 
-`POST /api/license/check` aceita JSON:
-```json
-{"cnpj":"11222333000181","version":"v1.0.0"}
+### Instalação já existente no Laragon (vínculo controlado pela infraestrutura)
+
+Depois de cadastrar a empresa e atualizar o ERP na branch `develop`, o **operador responsável pelo servidor** executa **uma vez**, no terminal do Lumeron Control:
+
+```powershell
+cd C:\laragon\www\lumeron-control
+git pull origin control-center
+php artisan control:bind-local "C:\laragon\www\nextor" --url=http://127.0.0.1:8000
 ```
 
-Cabeçalhos:
-- `X-Lumeron-Instance`: UUID da instalação
-- `X-Lumeron-Timestamp`: Unix UTC segundos, tolerância de 300 s
-- `X-Lumeron-Nonce`: hexadecimal aleatório de 32 caracteres, uso único
-- `X-Lumeron-Signature`: HMAC-SHA256 hexadecimal, chave secreta; mensagem `POST\n/api/license/check\n{timestamp}\n{nonce}\n{sha256(raw JSON body)}`
+A porta usada deve ser a porta **real** do painel local (por exemplo, 8000 ou 8002). O comando consulta o CNPJ **diretamente do ERP**, identifica a conta correspondente no Control e instala as credenciais automaticamente em `storage/app/private/lumeron-control.json`. **Não solicita confirmação a nenhum usuário do ERP nem imprime UUID/segredo; não edita `.env`.**
 
-Resposta (HTTPS obrigatório em produção): `status` (active, suspended, expired), `expires_at`, `modules`, `instance_id`, `checked_at`, `plan`, cabeçalho `X-Lumeron-Signature` com HMAC-SHA256 **sobre o corpo JSON exato** para autenticar a resposta. O agente cliente implementado na branch `develop` do ERP valida o HMAC da resposta, UUID/CNPJ e tolerância de cache offline; a consulta só entra em operação nas instalações que forem atualizadas e habilitadas pelo proprietário. Sem a ativação desse agente em cada cliente, o bloqueio no painel ainda não tem efeito remoto.
+A rotina exige que a migração do agente esteja aplicada no ERP (`php artisan migrate` em ambiente de desenvolvimento, com backup prévio), que o CNPJ empresarial esteja configurado e que o Control possa gravar no diretório privado da instalação. Se houver CNPJ diferente ou vínculo com outra empresa, **recusa sem sobrescrever dados**. O vínculo não é executado somente porque se digitou o CNPJ no painel.
 
-A licença **não** deve apagar banco, documentos fiscais, XMLs, autorizações, nem impedir a regularização legal de NFC-e. Bloqueio comercial e continuidade fiscal requerem política operacional específica no ERP.
+Esta ligação administrativa pontual não é uma etapa do cadastro do cliente e não precisa ser repetida em cada renovação, suspensão ou alteração. Durante provisionamentos gerenciados futuros, o operador de deploy deverá invocar a mesma rotina automaticamente depois de criar a instalação; **o provisionamento remoto automático ainda não foi implantado**.
+
+### Protocolo interno de licenciamento
+
+`POST /api/license/check` aceita JSON contendo CNPJ e versão (sem vendas ou dados fiscais). A requisição inclui UUID da instância, timestamp, nonce de uso único e HMAC-SHA256 sobre método, rota e SHA-256 do corpo. A resposta `status`, `expires_at`, `modules`, `plan`, `cnpj` e `checked_at` também é assinada com HMAC.
+
+O agente no ERP, branch `develop`, lê o arquivo privado provisionado, valida CNPJ contra a empresa local, UUID, HMAC de resposta e horário, mantém cache de 5 minutos e tolerância offline limitada. A `main`/`v1.0.0` não recebe essa funcionalidade até nova promoção aprovada.
+
+**A licença nunca apaga registros, XMLs, autorização fiscal ou certificado A1 e não substitui as permissões do ERP.** A preservação de operações fiscais de regularização é obrigatória.
+
+Em produção usar HTTPS, armazenamento privado por instância, backup protegido e ferramentas de deploy autorizadas; `127.0.0.1` só se aplica a aplicações rodando na mesma máquina.
 
 ## Testes
 
