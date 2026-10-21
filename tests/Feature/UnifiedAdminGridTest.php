@@ -49,6 +49,7 @@ final class UnifiedAdminGridTest extends TestCase
             '/clients' => 1,
             '/licenses' => 1,
             '/plans' => 1,
+            '/invoices' => 1,
             '/history' => 1,
             '/automations' => 3,
         ] as $url => $expectedTables) {

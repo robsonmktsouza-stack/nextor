@@ -267,3 +267,36 @@ svg.nextor-icon{
 .automation-activity-tab{background:#edf3f7;color:#45677a;border:1px solid #d3e0e8;border-radius:3px;padding:9px 13px;font-size:12px;font-weight:700}
 .automation-activity-tab[aria-selected=true]{background:#315d78;border-color:#315d78;color:#fff}
 @media(max-width:720px){.automation-overview{gap:7px}.automation-overview-item{min-width:calc(50% - 7px);padding:9px}.automation-activity-tab{flex:1}}
+
+/* Faturas: mesma tipografia, densidade e elementos compartilhados do Control. */
+.invoice-document{margin-bottom:14px}
+.invoice-document .invoice-heading{gap:12px}
+.invoice-heading>div small{display:block;margin-top:5px;font-size:11px;color:#728997}
+.invoice-document-body{padding:19px 22px}
+.invoice-document-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:25px;margin-bottom:20px}
+.invoice-document-grid>div{font-size:12px;color:#567184;line-height:1.85}
+.invoice-document-grid strong{font-size:13px;color:#244a63;display:block}
+.invoice-label{display:block;font-size:10px;color:#7895a3;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+.invoice-line-item{display:flex;justify-content:space-between;gap:20px;padding:14px 0;border-top:1px solid #e0e9ef;border-bottom:1px solid #e0e9ef;color:#34576b}
+.invoice-line-item strong{color:#234f68;font-size:14px;white-space:nowrap}
+.invoice-totals{margin:18px 0 0 auto;max-width:360px}
+.invoice-totals>div{display:flex;justify-content:space-between;gap:20px;padding:7px 0;color:#627c8c}
+.invoice-totals>div:last-child{border-top:1px solid #cedce4;margin-top:5px;font-weight:700;color:#20506c;font-size:15px}
+.invoice-cancellation{margin-top:14px;color:#9b4450;border-top:1px solid #e6edf1;padding-top:14px}
+.invoice-pay-form{padding:18px 22px}
+.invoice-pay-form .form-grid{margin-bottom:15px}
+.invoice-control-panel,.invoice-payment-history{margin-bottom:14px}
+.invoice-reversal{display:flex;align-items:center;gap:6px}
+.invoice-reversal input{width:175px;max-width:35vw;padding:7px;border:1px solid #cbdce6;border-radius:3px}
+.invoice-danger-zone{padding:16px 0}
+.invoice-cancel-form{display:flex;align-items:end;gap:12px;flex-wrap:wrap;justify-content:flex-end}
+.invoice-cancel-form label{display:flex;flex-direction:column;gap:5px;color:#5e7687;font-size:11px;font-weight:700;flex:1;max-width:450px}
+.invoice-cancel-form input{min-height:34px;border:1px solid #cedce5;padding:7px 9px;border-radius:3px}
+.invoice-client-shortcuts{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 14px}
+@media(max-width:760px){.invoice-document-grid{grid-template-columns:1fr;gap:11px}.invoice-document-body{padding:14px}.invoice-reversal{flex-wrap:wrap}}
+@media print{
+  .invoice-document{border:0;box-shadow:none}
+  .invoice-document-body{padding:18px 0}
+  .invoice-document-grid{grid-template-columns:1.5fr 1fr 1fr}
+  .invoice-control-panel,.invoice-payment-history,.invoice-danger-zone,.page-header,.sidebar,.topbar{display:none!important}
+}

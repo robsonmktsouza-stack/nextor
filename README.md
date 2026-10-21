@@ -258,3 +258,34 @@ e possui trilha de entrega independente. Avisos exibidos no ERP não
 dependem do SMTP e não garantem que uma mensagem foi entregue ou lida.
 Não executar migrations/atualizações cruzadas: banco do Control e bancos
 dos ERPs são distintos.
+
+## Faturas comerciais e pagamentos
+
+A aba **Faturas** pertence exclusivamente ao Lumeron Control (branch
+`control-center`) e não altera o ERP. Permite emitir faturas comerciais
+numeradas `FAT-000001` vinculadas a um CNPJ, com cópia imutável do nome do
+cliente, CNPJ, plano, período, valor, vencimento e descrição. O preço sugerido
+equivale ao preço **mensal** configurado no plano multiplicado pelo
+`period_months`; o operador pode ajustar valores antes da emissão. Se o plano
+não tiver preço definido, o operador informa um valor. Não gerar documento
+fiscal, nota fiscal, link de Pix, boleto bancário ou cobrança em gateway.
+
+Fluxo: criar rascunho → editar/conferir → emitir → registrar pagamentos
+parciais ou integrais por Pix, boleto, transferência, cartão, dinheiro ou
+outro (registro **manual**, não confirmado por banco). Cada pagamento
+guarda data, valor, referência e usuário; estornos mantêm histórico e
+exigem motivo. Faturas quitadas, parciais, vencidas e em aberto derivam
+dos pagamentos não estornados e da data; uma fatura emitida não pode ser
+editada e uma fatura com pagamentos ativos não pode ser cancelada.
+A criação impede períodos sobrepostos para o mesmo cliente, exceto faturas
+canceladas. Cancelamentos exigem motivo e preservam o registro.
+
+**Sem efeitos comerciais implícitos:** registrar pagamento **não renova**
+uma licença, não modifica os módulos e não envia e-mail automaticamente.
+A renovação continua uma ação administrativa explícita em Licenças/Clientes.
+Faturas também não são encaminhadas ao ERP no payload HMAC de licenciamento.
+Não criar cobranças históricas em massa nem emitir faturas automaticamente
+após atualizar a aplicação. Uma futura integração com PSP deve exigir
+webhooks autenticados, idempotência e consentimento/aviso apropriado.
+Rodar a migration `2026_10_21_000005_create_invoices_and_payments.php`
+**somente no banco do Control**.

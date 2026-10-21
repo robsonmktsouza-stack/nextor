@@ -19,6 +19,10 @@
 <div class="metadata"><strong>Subdomínio</strong><span>{{ $company->subdomain }}</span><strong>Conexão</strong><span><span class="status {{ $company->last_seen_at ? 'active' : 'expired' }}">{{ $company->last_seen_at ? 'Conectada anteriormente' : 'Aguardando instalação' }}</span></span><strong>Último contato</strong><span>{{ $company->last_seen_at?->format('d/m/Y H:i')??'Ainda não conectada' }}</span></div>
 </section>
 <section class="detail-box"><h3>Licença e acesso</h3>
+<div class="invoice-client-shortcuts">
+    <a href="{{ route('invoices.index',['company_id'=>$company->id]) }}" class="btn subtle small">@include('partials.icon',['name'=>'receipt','size'=>16])Ver faturas</a>
+    <a href="{{ route('invoices.create',['company_id'=>$company->id]) }}" class="btn subtle small">@include('partials.icon',['name'=>'plus','size'=>16])Nova fatura</a>
+</div>
 <div class="license-summary"><div><span>Plano atual</span><strong>{{ $plans->firstWhere('code',$company->plan)?->name ?? $company->plan }}</strong></div><div><span>Vencimento</span><strong>{{ $company->expires_at?->format('d/m/Y')??'Sem prazo' }}</strong></div></div>
 <form method="post" action="{{ route('clients.status',$company) }}" class="status-controls switch-status-controls" data-license-switch-form>
 @csrf

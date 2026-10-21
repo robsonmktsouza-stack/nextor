@@ -7,6 +7,7 @@ use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\AutomationController;
+use App\Http\Controllers\InvoiceController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard');
@@ -40,5 +41,15 @@ Route::middleware('auth')->group(function (): void {
     Route::put('/automations/{rule}', [AutomationController::class, 'update'])->name('automations.update');
     Route::post('/automations/run', [AutomationController::class, 'run'])->middleware('throttle:3,1')->name('automations.run');
     Route::post('/automations/send-emails', [AutomationController::class, 'sendEmails'])->middleware('throttle:3,1')->name('automations.send-emails');
+    Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
+    Route::get('/invoices/create', [InvoiceController::class, 'create'])->name('invoices.create');
+    Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
+    Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
+    Route::get('/invoices/{invoice}/edit', [InvoiceController::class, 'edit'])->name('invoices.edit');
+    Route::put('/invoices/{invoice}', [InvoiceController::class, 'update'])->name('invoices.update');
+    Route::post('/invoices/{invoice}/issue', [InvoiceController::class, 'issue'])->name('invoices.issue');
+    Route::post('/invoices/{invoice}/pay', [InvoiceController::class, 'pay'])->name('invoices.pay');
+    Route::post('/invoices/{invoice}/payments/{payment}/reverse', [InvoiceController::class, 'reverse'])->name('invoices.payments.reverse');
+    Route::post('/invoices/{invoice}/cancel', [InvoiceController::class, 'cancel'])->name('invoices.cancel');
     Route::get('/history', [HistoryController::class, 'index'])->name('history.index');
 });

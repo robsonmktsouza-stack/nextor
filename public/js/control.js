@@ -366,3 +366,39 @@
   });
   activate(new URLSearchParams(location.search).has('emails_page') ? 'email' : 'internal');
 })();
+
+/* Fatura nova: apenas sugere período e preço do plano; backend é a autoridade. */
+(() => {
+  const form = document.querySelector('[data-invoice-editor]');
+  const select = form?.querySelector('[data-invoice-company]');
+  if (!select) return;
+  const amount = form.querySelector('[data-invoice-amount]');
+  const plan = form.querySelector('[data-invoice-plan]');
+  const start = form.querySelector('[data-invoice-period-start]');
+  const end = form.querySelector('[data-invoice-period-end]');
+  const due = form.querySelector('[data-invoice-due]');
+  const description = form.elements.namedItem('description');
+  const fill = (option, preserve) => {
+    if (!option) return;
+    plan.value = option.dataset.plan || 'Não definido';
+    if (preserve) return;
+    const date = option.dataset.start || start.value;
+    start.value = date;
+    due.value = option.dataset.due || due.value;
+    amount.value = option.dataset.price || '';
+    if (!description.value.trim()) description.value = 'Licença ' + plan.value;
+    if (date) {
+      const utc = new Date(date + 'T12:00:00Z');
+      if (!Number.isNaN(utc.getTime())) {
+        utc.setUTCMonth(utc.getUTCMonth() + Math.max(1, +(option.dataset.period || 1)));
+        utc.setUTCDate(utc.getUTCDate() - 1);
+        end.value = utc.toISOString().slice(0, 10);
+      }
+    }
+  };
+  fill(select.selectedOptions[0], Boolean(form.dataset.invoicePreserve));
+  select.addEventListener('change', () => {
+    description.value = '';
+    fill(select.selectedOptions[0], false);
+  });
+})();

@@ -110,3 +110,19 @@ Alterações em autenticação/licença exigem testes e revisão de segurança. 
   throttle. E-mail enviado só comprova aceite pelo transporte.
 - Não implementar WhatsApp fictício nem realizar campanhas: exige integração
   legítima com provedor e política de mensagens próprias.
+
+## Faturas do Lumeron Control — base administrativa
+
+- Menu Faturas: rascunho, emissão deliberada, pagamentos manuais e parciais,
+  estorno com motivo e cancelamento auditável. `invoices` e
+  `invoice_payments` são exclusivos do Control. Cópia de nome/CNPJ/plano e
+  preço ao criar; nunca alterar o histórico por edição futura de planos.
+- Rótulo "Fatura comercial — não é documento fiscal". Não afirmar integração
+  bancária, link de pagamento, boleto gerado, NF-e/NFS-e nem aprovação de PSP.
+- Não misturar licenças e cobrança: pagar fatura não renova licença por efeito
+  colateral; emitir/cancelar fatura não bloqueia ERP. A alteração comercial
+  de status/módulos/datas continua nas rotas próprias com HMAC.
+- Valores calculados em centavos inteiros, nunca `float` para validação de
+  saldo. Pagamentos são auditados; estorno não deleta linha; nenhuma rota
+  pública de pagamentos. Impedir pagamentos acima do saldo e períodos
+  de faturas sobrepostos para o mesmo cliente.

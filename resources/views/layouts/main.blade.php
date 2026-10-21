@@ -32,6 +32,7 @@
     <div class="nav-heading">GERENCIAMENTO</div>
     <a class="nav-link {{ request()->routeIs('clients.*')?'active':'' }}" href="{{ route('clients.index') }}">@include('partials.icon',['name'=>'clients','size'=>19])Clientes</a>
     <a class="nav-link {{ request()->routeIs('licenses.*')?'active':'' }}" href="{{ route('licenses.index') }}">@include('partials.icon',['name'=>'license','size'=>19])Licenças</a>
+    <a class="nav-link {{ request()->routeIs('invoices.*')?'active':'' }}" href="{{ route('invoices.index') }}">@include('partials.icon',['name'=>'receipt','size'=>19])Faturas</a>
     <a class="nav-link {{ request()->routeIs('plans.*')?'active':'' }}" href="{{ route('plans.index') }}">@include('partials.icon',['name'=>'plan','size'=>19])Planos</a>
     <a class="nav-link {{ request()->routeIs('automations.*')?'active':'' }}" href="{{ route('automations.index') }}">@include('partials.icon',['name'=>'automations','size'=>19])Automações</a>
     <a class="nav-link {{ request()->routeIs('history.*')?'active':'' }}" href="{{ route('history.index') }}">@include('partials.icon',['name'=>'history','size'=>19])Histórico</a>
