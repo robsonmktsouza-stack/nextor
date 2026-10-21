@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\FinancialEntry;
 use App\Models\FinancialRecurrence;
+use App\Support\CommercialBackgroundAccess;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -11,6 +12,12 @@ class FinancialRecurrenceService
 {
     public function generateDue(?FinancialRecurrence $only=null, ?Carbon $through=null): int
     {
+        // The scheduler has no HTTP middleware. Never generate new financial
+        // entries when the signed licence is read-only or lacks Financeiro.
+        if (!CommercialBackgroundAccess::allows('finance')) {
+            return 0;
+        }
+
         $through=($through ?: today())->copy()->startOfDay();
         $generated=0;
 

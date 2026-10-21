@@ -68,3 +68,29 @@ Não ativar em cliente real sem confirmar a URL, backup, segurança, autorizaç�
 - Antes da atualização do ERP, executar a migration `2026_10_22_000001_preserve_legacy_entitlements_as_plans.php` no **Control** para impedir a perda de autorizações individuais antigas. Não tocar os documentos XML, certificados, CNPJ, estoque, bancos, filas, `main` ou `v1.0.0`.
 
 O cadastro compartilhado **Clientes** não tem módulo comercial próprio no catálogo, portanto segue disponível conforme permissões do usuário mesmo sem o módulo PDV. Não inventar uma restrição de Clientes baseada em PDV; Vendas/PDV e seus fluxos seguem bloqueados quando não contratados.
+
+## Atualização e processos automáticos (21/10/2026)
+
+O agente ERP mantém um cache curto de **60 segundos** por instalação. Assim, alterações
+de plano, suspensão e renovação passam a ser percebidas automaticamente na próxima
+requisição após o cache expirar, desde que a central esteja alcançável. A
+sincronização manual `php artisan lumeron:license-sync` continua disponível.
+Sem rede, vale a tolerância offline contratada; não prometer efeito instantâneo
+para uma instalação desconectada. A validade da licença é reavaliada a cada acesso
+pelo calendário local, mesmo com resposta ativa em cache/offline.
+
+O agendador `finance:generate-recurring` chama
+`CommercialBackgroundAccess::allows('finance')` antes de criar qualquer
+lançamento, porque comandos Artisan não passam pelo middleware HTTP. Em licença
+suspensa, vencida, sem verificação, ou sem Financeiro contratado, não gera novas
+recorrências; após reativação, ocorrências vencidas podem ser geradas pelo
+processamento idempotente existente. Instalações não vinculadas continuam sem
+controle central para compatibilidade.
+
+Webhooks pendentes são entregas de eventos históricos, e jobs fiscais já
+enfileirados tratam fatos/documentos anteriores: NÃO devem ser descartados
+indiscriminadamente por uma suspensão comercial. Consultas, cancelamentos,
+contingência e DANFE de XML autorizado permanecem disponíveis. Antes de adotar
+bloqueio de nova emissão em workers, deve-se distinguir operações fiscais
+pendentes obrigatórias de novas emissões e criar retomada durável sem perda da
+fila ou do documento. Não afirmar que o middleware HTTP controla tais workers.

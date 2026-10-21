@@ -1,3 +1,11 @@
+## Continuidade — 21/10/2026 — expiração local, cache curto e recorrências agendadas
+
+- Redução do cache de licença central para 60 segundos, sem mudar a tolerância offline.
+- Licenças anteriormente validadas como ativas são verificadas localmente contra `expires_at` a cada acesso, inclusive durante cache e tolerância offline.
+- Comando financeiro recorrente passa pelo `CommercialBackgroundAccess` para impedir novas entradas quando a assinatura estiver restrita ou o módulo Financeiro não estiver contratado. Não altera a fila fiscal, XML ou webhooks históricos.
+- Testes novos em `CommercialBackgroundAccessTest.php`. Validar workflow da `develop` antes de declarar todos os testes aprovados.
+- A `main`/tag `v1.0.0` e os ambientes dos clientes não foram alterados.
+
 # Handoff entre chats e agentes — Lumeron ERP
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.

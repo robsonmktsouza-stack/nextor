@@ -14,11 +14,13 @@ final class CentralLicenseService
         if (!ManagedLicenseConfig::enabled()) {
             return ['status' => 'disabled', 'modules' => []];
         }
-        return Cache::remember(
+        // Apply expiry against the local calendar on every access. A cached or
+        // offline licence cannot stay active after its signed expiry date.
+        return $this->withLocalExpiry(Cache::remember(
             'lumeron:central-license:v1',
-            (int) config('central_license.cache_seconds', 300),
+            (int) config('central_license.cache_seconds', 60),
             fn (): array => $this->refresh()
-        );
+        ));
     }
 
     /** Fetch the remotely authorized license; use only signed data for decisions. */
@@ -102,23 +104,35 @@ final class CentralLicenseService
             $state = ['status' => $payload['status'], 'plan' => $payload['plan'],
                 'modules' => $modules, 'expires_at' => $expires, 'source' => 'online'];
             Cache::put('lumeron:central-license:v1', $state,
-                (int) config('central_license.cache_seconds', 300));
-            return $state;
+                (int) config('central_license.cache_seconds', 60));
+            return $this->withLocalExpiry($state);
         } catch (\Throwable $error) {
             // Do not log tokens, HMACs or request bodies; an offline cache is only
             // accepted during a bounded grace period.
             $last = DB::table('central_license_states')->where('id', 1)->first();
             if ($last && now()->diffInHours($last->verified_at, true)
                 <= (int) (ManagedLicenseConfig::settings()['grace_hours'] ?? 72)) {
-                return [
+                return $this->withLocalExpiry([
                     'status' => $last->status,
                     'plan' => $last->plan,
                     'modules' => json_decode($last->modules, true) ?: [],
                     'expires_at' => $last->expires_at,
                     'source' => 'offline-grace',
-                ];
+                ]);
             }
             return ['status' => 'unverified', 'modules' => [], 'source' => 'offline'];
         }
+    }
+
+    private function withLocalExpiry(array $state): array
+    {
+        $date = $state['expires_at'] ?? null;
+        if (($state['status'] ?? null) === 'active' && is_string($date)
+            && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)
+            && $date < now()->toDateString()) {
+            $state['status'] = 'expired';
+        }
+
+        return $state;
     }
 }

@@ -8,5 +8,5 @@ return [
     'instance_id' => (string) env('LUMERON_CONTROL_INSTANCE_ID', ''),
     'secret' => (string) env('LUMERON_CONTROL_SECRET', ''),
     'grace_hours' => max(0, (int) env('LUMERON_CONTROL_GRACE_HOURS', 72)),
-    'cache_seconds' => 300,
+    'cache_seconds' => 60,
 ];
