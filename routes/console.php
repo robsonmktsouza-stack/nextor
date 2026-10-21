@@ -4,6 +4,9 @@ use App\Models\User;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Schedule;
+
+Schedule::command('control:automations-run')->dailyAt('08:00')->withoutOverlapping();
 
 Artisan::command('control:admin {email} {--name=Administrador}', function (): int {
     $email = strtolower(trim((string) $this->argument('email')));
