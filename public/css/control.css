@@ -247,3 +247,23 @@ svg.nextor-icon{
 @media(max-width:720px){.automation-editor-body{padding:14px}}
 
 .automation-editor-dialog [data-automation-email-field][hidden]{display:none!important}
+
+/* Aplicação desktop: só a área principal rola. Evita a segunda barra no Chrome. */
+@media screen {
+  html,body{height:100%;overflow:hidden}
+  .shell{height:100vh;height:100dvh;min-height:0;overflow:hidden}
+  .shell>.page{min-height:0;min-width:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain}
+  .shell>.sidebar{min-height:0;overflow-y:auto}
+}
+@media screen and (max-height:520px){
+  .shell>.page{min-height:0}
+}
+[data-automation-history][hidden]{display:none!important}
+.automation-overview{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:13px}
+.automation-overview-item{display:flex;gap:9px;align-items:center;border:1px solid #d8e4ea;background:#fff;border-radius:4px;padding:11px 15px;flex:1;min-width:140px}
+.automation-overview-item strong{font-size:19px;font-weight:700;color:#2d617d;line-height:1}
+.automation-overview-item span{font-size:12px;color:#647e8d}
+.automation-activity-tabs{display:flex;align-items:center;gap:5px;margin:14px 0 10px}
+.automation-activity-tab{background:#edf3f7;color:#45677a;border:1px solid #d3e0e8;border-radius:3px;padding:9px 13px;font-size:12px;font-weight:700}
+.automation-activity-tab[aria-selected=true]{background:#315d78;border-color:#315d78;color:#fff}
+@media(max-width:720px){.automation-overview{gap:7px}.automation-overview-item{min-width:calc(50% - 7px);padding:9px}.automation-activity-tab{flex:1}}

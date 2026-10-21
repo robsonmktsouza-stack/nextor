@@ -16,6 +16,12 @@
 @endsection
 @section('content')
 @php $hasFilters = request()->filled('q') || request()->filled('status'); @endphp
+<div class="automation-overview" aria-label="Resumo das assinaturas e dos avisos">
+    <div class="automation-overview-item"><strong>{{ $dueSoon }}</strong><span>Vencem em até 7 dias</span></div>
+    <div class="automation-overview-item"><strong>{{ $expiredCount }}</strong><span>Licenças vencidas</span></div>
+    <div class="automation-overview-item"><strong>{{ $offlineCount }}</strong><span>Sem comunicação há 2 dias</span></div>
+    <div class="automation-overview-item"><strong>{{ $pendingEmails }}</strong><span>E-mails aguardando envio</span></div>
+</div>
 <section class="panel license-grid" data-admin-list data-grid-filename="automacoes-regras">
     @include('partials.listing.toolbar', [
         'toolbarUrl' => route('automations.index'),
@@ -110,7 +116,17 @@
     ])
 </section>
 
-<section class="panel license-grid automation-history" data-admin-list data-grid-filename="automacoes-avisos">
+<div class="automation-activity-tabs" role="tablist" aria-label="Histórico das notificações">
+    <button type="button" class="automation-activity-tab" id="automationInternalTab"
+        role="tab" aria-selected="true" aria-controls="automationInternalHistory"
+        data-automation-history-tab="internal">Ocorrências</button>
+    <button type="button" class="automation-activity-tab" id="automationEmailTab"
+        role="tab" aria-selected="false" aria-controls="automationEmailHistory"
+        data-automation-history-tab="email">E-mails para clientes</button>
+</div>
+<section id="automationInternalHistory" role="tabpanel" aria-labelledby="automationInternalTab"
+    data-automation-history="internal" class="panel license-grid automation-history"
+    data-admin-list data-grid-filename="automacoes-avisos">
     <div class="panel-heading admin-grid-heading"><h2>Últimos avisos automáticos</h2><a href="{{ route('history.index') }}">Ver histórico completo</a></div>
     @include('partials.listing.toolbar', ['showFilters' => false])
     <div class="table-scroll">
@@ -148,7 +164,9 @@
     ])
 </section>
 
-<section class="panel license-grid automation-history" data-admin-list data-grid-filename="automacoes-emails">
+<section id="automationEmailHistory" role="tabpanel" aria-labelledby="automationEmailTab"
+    data-automation-history="email" hidden class="panel license-grid automation-history"
+    data-admin-list data-grid-filename="automacoes-emails">
     <div class="panel-heading admin-grid-heading"><h2>E-mails para clientes</h2></div>
     @include('partials.listing.toolbar', ['showFilters' => false])
     <div class="table-scroll">

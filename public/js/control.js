@@ -339,3 +339,30 @@
     }
   }
 })();
+
+/* Histórico de automações: trocar abas sem gerar duas listas visíveis. */
+(() => {
+  const tabs = [...document.querySelectorAll('[data-automation-history-tab]')];
+  if (!tabs.length) return;
+  const activate = value => {
+    tabs.forEach(tab => {
+      const selected = tab.dataset.automationHistoryTab === value;
+      tab.setAttribute('aria-selected', String(selected));
+      tab.tabIndex = selected ? 0 : -1;
+    });
+    document.querySelectorAll('[data-automation-history]').forEach(panel => {
+      panel.hidden = panel.dataset.automationHistory !== value;
+    });
+  };
+  tabs.forEach((tab,index) => {
+    tab.addEventListener('click', () => activate(tab.dataset.automationHistoryTab));
+    tab.addEventListener('keydown', e => {
+      if (!['ArrowLeft','ArrowRight'].includes(e.key)) return;
+      e.preventDefault();
+      const n = (index + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+      activate(tabs[n].dataset.automationHistoryTab);
+      tabs[n].focus();
+    });
+  });
+  activate(new URLSearchParams(location.search).has('emails_page') ? 'email' : 'internal');
+})();

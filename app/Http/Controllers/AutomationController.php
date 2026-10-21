@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AutomationDelivery;
 use App\Models\ClientEmailDelivery;
+use App\Models\Company;
 use App\Models\AutomationRule;
 use App\Services\AutomationRunner;
 use App\Services\ClientEmailNotificationService;
@@ -28,6 +29,17 @@ final class AutomationController extends Controller
         $perPage = (int) $request->query('per_page', 20);
         $perPage = in_array($perPage, [20, 50, 100], true) ? $perPage : 20;
         return view('automations.index', [
+            'dueSoon' => Company::query()->where('license_status', 'active')->whereBetween('expires_at',
+                [today()->toDateString(), today()->addDays(7)->toDateString()])->count(),
+            'expiredCount' => Company::query()->where('license_status', 'active')
+                ->whereDate('expires_at', '<', today())->count(),
+            'offlineCount' => Company::query()->where(function ($q): void {
+                $cutoff = now()->subDays(2);
+                $q->where('last_seen_at', '<', $cutoff)
+                    ->orWhere(fn ($q) => $q->whereNull('last_seen_at')
+                        ->where('created_at', '<', $cutoff));
+            })->count(),
+            'pendingEmails' => ClientEmailDelivery::query()->whereIn('status', ['pending', 'retry', 'processing'])->count(),
             'rules' => $rules->orderBy('id')->paginate($perPage, ['*'], 'rules_page')->withQueryString(),
             'deliveries' => AutomationDelivery::query()->with(['company', 'rule'])
                 ->latest('id')->paginate($perPage, ['*'], 'alerts_page')->withQueryString(),
