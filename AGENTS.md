@@ -35,3 +35,13 @@ Alterações em autenticação/licença exigem testes e revisão de segurança. 
 - O switch comercial exige confirmação no diálogo padrão antes do POST CSRF para `clients.status`; não confiar no DOM para suspender/reativar. Preservar histórico, CNPJ, HMAC e acesso fiscal. Não atrelar mudança de plano ao toggle.
 - A exportação CSV do navegador inclui **apenas a página visível**, jamais afirmar exportação de toda a base. Escapar células para que não sejam interpretadas como fórmulas por programas de planilhas. Impressão oculta o cabeçalho e os controles.
 - Testes da listagem verificam controle por switch, filtragem/paginação e rotas autenticadas; não alterar o ERP/Nextor para esse refinamento da central.
+
+
+## Padrão único obrigatório de TODAS as listagens (21/10/2026)
+
+- **Clientes, Licenças, Planos, Histórico, Regras e Avisos de Automações e tabela-resumo do Dashboard** reutilizam `resources/views/partials/listing/toolbar.blade.php` e, quando paginadas, `resources/views/partials/listing/footer.blade.php`. Grade sem variações: `panel license-grid` + `data-admin-list`, `license-data-table` + `data-grid-table`, classes comuns de células, status, ações por ícone.
+- Sempre que uma tela nova possuir tabela de listagem, **usar os parciais compartilhados** e a mesma densidade, filtro recolhível, ícones, impressão, exportação CSV e paginação (20/50/100). Não criar CSS de tabela por módulo ou voltar a cabeçalhos/formulários longos acima das listagens.
+- Cada botão de imprimir/exportar atua na tabela **mais próxima**; com duas tabelas na página, nunca exportar/imprimir a errada. CSV é da página atual e exclui formulários, switches e coluna Ações; prevenção de fórmula em CSV obrigatória.
+- Tabelas pequenas de resumo no dashboard usam mesma aparência e toolbar, mas não requerem paginação artificial.
+- Switches acessíveis são usados para flags ligar/desligar; nada de caixas de seleção visuais para esse propósito. Não adicionar seleção em massa a Licenças sem solicitação explícita.
+- Paginação e filtros devem ser processados no servidor e preservar parâmetros da URL. Para Automações usar paginadores independentes `rules_page` e `alerts_page`.
