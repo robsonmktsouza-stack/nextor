@@ -55,6 +55,14 @@ A rotina exige que a migração do agente esteja aplicada no ERP (`php artisan m
 
 Esta ligação administrativa pontual não é uma etapa do cadastro do cliente e não precisa ser repetida em cada renovação, suspensão ou alteração. Durante provisionamentos gerenciados futuros, o operador de deploy deverá invocar a mesma rotina automaticamente depois de criar a instalação; **o provisionamento remoto automático ainda não foi implantado**.
 
+### Diagnóstico de conexão entre dois projetos Laravel no Laragon
+
+Se executar `php artisan lumeron:license-identity` **dentro de `nextor`** retornar corretamente o CNPJ mas `control:bind-local` **dentro de `lumeron-control`** informar que não encontrou o cadastro, a causa era o subprocesso PHP herdar configurações `APP_*/DB_*` do Control e acabar lendo o banco da aplicação errada.
+
+**Correção aplicada:** `BindManagedInstallation::erpProcess()` retira do subprocesso somente as variáveis Laravel/comerciais herdadas e deixa o Nextor carregar suas próprias variáveis do `.env`. A correção protege tanto a consulta de CNPJ quanto a sincronização HMAC. Teste de regressão simula configurações de bancos e `APP_KEY` do Control no processo pai e verifica que nenhuma delas chega ao Nextor.
+
+Após `git pull origin control-center` e `php artisan optimize:clear` no **Control**, execute novamente `php artisan control:bind-local "C:\\laragon\\www\\nextor" --url=http://127.0.0.1:8000`. **Não repita migrations nem altere o CNPJ fiscal** se `lumeron:license-identity` já retorna os 14 dígitos corretos.
+
 ### Protocolo interno de licenciamento
 
 `POST /api/license/check` aceita JSON contendo CNPJ e versão (sem vendas ou dados fiscais). A requisição inclui UUID da instância, timestamp, nonce de uso único e HMAC-SHA256 sobre método, rota e SHA-256 do corpo. A resposta `status`, `expires_at`, `modules`, `plan`, `cnpj` e `checked_at` também é assinada com HMAC.
