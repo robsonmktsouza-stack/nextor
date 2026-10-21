@@ -26,7 +26,7 @@ class RequireApiToken
         // It must respect the same signed commercial licence as the UI.
         if (\App\Support\ManagedLicenseConfig::enabled()) {
             $state = app(\App\Services\License\CentralLicenseService::class)->state();
-            $module = match ((string) $request->segment(2)) {
+            $module = match ((string) $request->segment(3)) {
                 'products' => 'products',
                 'customers', 'sales' => 'pdv',
                 default => null,
