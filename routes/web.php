@@ -61,8 +61,15 @@ Route::middleware('guest')->group(function () {
     Route::post('/reset-password', [PasswordRecoveryController::class,'reset'])
         ->name('password.update')->middleware('throttle:5,1');
 });
-Route::get('/license-status', fn () => view('errors.license-blocked'))
-    ->middleware('auth')->name('license.status');
+Route::get('/license-status', function () {
+    // Compatibilidade com URLs antigas: uma licença comercial restrita
+    // não remove o usuário da aplicação; redireciona ao modo de consulta.
+    $license = app(\App\Services\License\CentralLicenseService::class)->state();
+    if (\App\Support\CommercialLicensePolicy::isReadOnly($license)) {
+        return redirect()->route(auth()->user()->homeRouteName());
+    }
+    return view('errors.license-blocked');
+})->middleware('auth')->name('license.status');
 Route::middleware(['auth','control.license'])->group(function () {
     Route::post('/logout', [AuthController::class,'logout'])->name('logout');
     Route::get('/reference/fiscal-codes', FiscalCodeCatalogController::class)->name('reference.fiscal-codes');
