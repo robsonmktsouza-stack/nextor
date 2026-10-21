@@ -47,8 +47,25 @@ final class BindManagedInstallation extends Command
         $proc->run();
         $cnpj = trim($proc->getOutput());
         if (!$proc->isSuccessful() || !preg_match('/^[0-9]{14}$/', $cnpj)) {
-            $this->error('A instalação ERP não informou um CNPJ válido ou a migração central ainda não foi aplicada.');
-            $this->warn('Configure o CNPJ da empresa no próprio ERP e execute suas migrations antes de vincular.');
+            $this->error('Não foi possível identificar com segurança a empresa configurada no Nextor.');
+
+            // Only forward diagnostics explicitly authored by our ERP CLI;
+            // never dump arbitrary PHP errors or environment details.
+            $output = $proc->getErrorOutput()."\n".$proc->getOutput();
+            foreach ([
+                'Cadastro da empresa indisponível neste banco.',
+                'Migração de licenciamento ainda não aplicada neste banco',
+                'Dados da empresa não foram cadastrados em Configurações',
+                'O CNPJ da própria empresa está vazio',
+                'O documento em Configurações',
+                'O CNPJ cadastrado em Configurações',
+            ] as $hint) {
+                if (str_contains($output, $hint)) {
+                    $this->warn(trim(preg_replace('/\\s+/', ' ', $output)));
+                    break;
+                }
+            }
+            $this->line('No terminal do Nextor, execute: php artisan lumeron:license-identity');
             return self::FAILURE;
         }
 
