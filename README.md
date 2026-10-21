@@ -2,7 +2,7 @@
 
 Aplicação Laravel 13 **independente** das instalações do ERP Lumeron/Nextor. Interface propositalmente enxuta, no padrão visual Lumeron, inspirada no fluxo de lista/detalhes/novo cliente do painel de representantes eGestor, sem copiar sua marca nem seu código.
 
-**Escopo efetivamente implementado:** autenticação administrativa sem cadastro público; painel inicial; empresas com CNPJ, contatos, subdomínio, plano, módulos e validade; cadastro em três etapas; listagem, filtros e modal de detalhes; ativação, suspensão, renovação, notas e auditoria; endpoint de verificação de licença assinado com HMAC, controle de replay e verificação de CNPJ; testes de integração e CI.
+**Escopo efetivamente implementado:** autenticação administrativa sem cadastro público; painel inicial; empresas com CNPJ, contatos, subdomínio, plano e validade; cadastro em três etapas; listagem, filtros e modal de detalhes; ativação, suspensão, renovação, notas e auditoria; endpoint de verificação de licença assinado com HMAC, controle de replay e verificação de CNPJ; testes de integração e CI.
 
 **Não implementado ou não presumir:** cobrança automática, faturas, controle de revendedores, instalação automática em VPS, criação de usuário no ERP, provedor de pagamento ou domínio real. **Integração do ERP:** agente de verificação HMAC implementado na branch `develop` do ERP, desativado por padrão até configuração expressa por instalação. O cadastro aqui **não** instala o ERP no servidor nem cria usuário lá. A liberação comercial é imediata no painel, mas o ERP somente aplica restrições após receber a integração em seu deploy.
 
@@ -34,7 +34,7 @@ Servidor próprio com HTTPS, PHP-FPM/Nginx (ou equivalente), MySQL/MariaDB, `APP
 
 1. **Nova conta** → razão social/CNPJ, dados de acesso, plano e validade.
 2. **Criar conta** → cliente e licença ficam cadastrados e ativos no painel.
-3. Na ficha, o proprietário pode **suspender, reativar, renovar, alterar plano e módulos**, sem copiar códigos e sem pedir confirmação ao usuário do ERP.
+3. Na ficha, o proprietário pode **suspender, reativar, renovar e alterar plano**, sem copiar códigos e sem pedir confirmação ao usuário do ERP.
 4. A ficha separa a situação comercial (**ativa/suspensa/vencida**) da conexão técnica (**aguardando instalação / já se comunicou**). Não declarar bloqueio remoto enquanto a instalação não estiver conectada.
 
 O painel continua gerando internamente `instance_id` e segredo HMAC individuais criptografados em seu banco, **mas não exibe esses valores**. Não existe opção de gerar nova chave na interface.
@@ -77,7 +77,7 @@ Em produção usar HTTPS, armazenamento privado por instância, backup protegido
 
 A partir de 21/10/2026, os planos comerciais **não são mais definidos em `config/license.php`**. A nova migration `2026_10_21_000001_create_plans_and_automation_tables.php` cria as tabelas `plans`, `automation_rules` e `automation_deliveries` sem alterar os documentos, clientes, senhas ou as licenças existentes. Durante a migration, apenas o catálogo inicial é criado com os códigos legados `standard`, `advanced` e `full`; os dados de planos passam a ser mantidos no **banco**, pela seção **Planos** da central.
 
-O painel permite criar/editar plano, descrição, preço de referência opcional, período de referência, módulos padrão e disponibilidade. Código de plano em uso permanece estável para a API do ERP, mesmo se mudar nome ou módulos. Arquivar um plano o retira de novas contas, **sem suspender ou reclassificar as licenças já emitidas**. Novos cadastros escolhem somente planos ativos. Ao selecionar outro plano, os módulos padrão são preenchidos e continuam editáveis na licença; alterar a definição de um plano **não altera retroativamente** os clientes existentes. O preço não cria cobrança nem vincula a um gateway de pagamento.
+O painel permite criar/editar plano, descrição, preço de referência, período, módulos incluídos e disponibilidade. Código de plano em uso permanece estável. Arquivar um plano o retira de novas contas sem suspender licenças já emitidas. **O plano é a fonte exclusiva dos módulos:** selecionar um plano na licença aplica todos os seus módulos automaticamente. Editar os módulos de um plano altera os direitos de todos os clientes vinculados quando o ERP atualizar sua licença (cache de até cinco minutos); antes de salvar, a tela informa o número de clientes afetados. O preço ainda não cria cobrança automática.
 
 A nova seção **Automações** contém três regras configuráveis, **todas desativadas por padrão**:
 
@@ -119,7 +119,7 @@ O diretório acima é **exemplo**, não uma instalação existente. Não configu
 
 A seção **Licenças** reutiliza a linguagem visual compacta da grade Produtos do Lumeron ERP: **Nova conta**, ícones de impressão, exportação CSV da **página atual**, atualização, filtros recolhíveis por nome/CNPJ, situação e plano, cabeçalho denso, ações de visualizar/gerenciar e paginação de 20, 50 ou 100 registros. Não foi adicionada seleção em massa por checkboxes.
 
-Ativação e suspensão por empresa usam **switch** com confirmação em modal compacto e envio CSRF ao controller autenticado. A ficha de cada empresa também mostra o switch; o status `Vencida` continua vencido mesmo quando a permissão administrativa foi ativada, até renovar a data. As opções com estados ligado/desligado em **Planos**, **Automações** e **Módulos** são representadas por switches, não caixas de marcação visíveis. Módulos do plano e da licença continuam sendo salvos por seus respectivos formulários.
+Ativação e suspensão por empresa usam **switch** com confirmação em modal compacto e envio CSRF ao controller autenticado. A ficha de cada empresa também mostra o switch; o status `Vencida` continua vencido mesmo quando a permissão administrativa foi ativada, até renovar a data. As opções com estados ligado/desligado em **Planos**, **Automações** e **Módulos** são representadas por switches, não caixas de marcação visíveis. Os módulos são configurados somente em Planos; a licença salva apenas plano e validade.
 
 Impressão usa `window.print()` na página exibida, com CSS próprio; a exportação gera CSV apenas da página corrente e aplica proteção contra fórmulas em células. O bloqueio e a ativação continuam decididos pelo backend, não pelo switch visual.
 
@@ -142,3 +142,11 @@ O Lumeron Control utiliza **um único conjunto de componentes de listagem**. O m
 Todas as tabelas oferecem ferramentas por ícones, com exportação CSV restrita à tabela acionada e aos registros da página atual. Ações que modificam dados continuam protegidas por autenticação e CSRF. Filtros recolhíveis e paginação 20/50/100 se aplicam às listagens paginadas; tabelas-resumo pequenas não apresentam paginação vazia. O Dashboard mantém a seção de atividades recentes em formato de histórico visual, pois ela não é uma tabela.
 
 Não há migration adicional para a unificação visual. Após `git pull origin control-center`, executar `php artisan optimize:clear` e atualizar o navegador com Ctrl+F5.
+
+## Plano define todos os módulos — migração 21/10/2026
+
+Execute `php artisan migrate` no Control **antes de liberar o ERP atualizado**: a migração `2026_10_22_000001_preserve_legacy_entitlements_as_plans.php` preserva acessos individuais anteriores criando planos legados arquivados. Por exemplo, uma empresa anteriormente no Padrão com Financeiro liberado separadamente ficará com um plano anterior dedicado, até o operador escolher um novo plano. A auditoria registra a migração e os módulos concedidos não mudam. Os dados de CNPJ, licença, senha, validade e status não são alterados.
+
+A API assinada retorna o array `modules` **derivado de `plans.modules`**, não de `companies.modules`. Novas licenças não têm mais switches individuais para módulos. O Nextor `develop` reconhece qualquer código válido e restringe menus, URLs e API token conforme o array assinado. As operações fiscais de regularização legal permanecem acessíveis com autorização do usuário, mesmo sem o módulo Fiscal contratado. O plano não altera permissões individuais dos empregados.
+
+**Laragon:** atualize o Control, execute `php artisan migrate`, limpe o cache do Control e somente depois atualize o Nextor `develop` e execute `php artisan optimize:clear`. Não atualizar `main`/`v1.0.0`.
