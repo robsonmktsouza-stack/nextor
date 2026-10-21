@@ -114,6 +114,24 @@ final class CommercialPlanAccessTest extends TestCase
         $this->postJson('/products')->assertStatus(423);
     }
 
+    public function test_existing_api_token_cannot_read_unlicensed_module_data(): void
+    {
+        $this->signedLicense(['products'], 'professional');
+        \App\Models\AppSetting::put('integrations', 'api_enabled', true);
+        \App\Models\AppSetting::put('integrations', 'api_token', 'test-token-api-not-for-production', true);
+
+        foreach (['api/lumeron', 'api/nextor'] as $prefix) {
+            $this->withToken('test-token-api-not-for-production')
+                ->getJson('/'.$prefix.'/products')->assertOk();
+            $this->withToken('test-token-api-not-for-production')
+                ->getJson('/'.$prefix.'/customers')->assertStatus(403)
+                ->assertJsonPath('code', 'LUMERON_MODULE_UNAVAILABLE');
+            $this->withToken('test-token-api-not-for-production')
+                ->getJson('/'.$prefix.'/sales')->assertStatus(403)
+                ->assertJsonPath('code', 'LUMERON_MODULE_UNAVAILABLE');
+        }
+    }
+
     public function test_disabled_central_license_remains_backwards_compatible(): void
     {
         config()->set('central_license.enabled', false);
