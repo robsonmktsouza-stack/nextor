@@ -26,3 +26,82 @@
 .automation-rule-no-days{font-size:11px;color:#93a3ac;max-width:145px}
 .automation-history{margin-top:16px}
 @media(max-width:900px){.automation-rule{flex-direction:column;align-items:stretch;gap:12px}.automation-rule-controls{flex-wrap:wrap}}
+
+/* Grade de licenças: a mesma linguagem densa do componente Produtos do ERP. */
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.license-grid{overflow:hidden}
+.license-grid-toolbar{min-height:59px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border-bottom:1px solid #e0e9ee}
+.license-grid-tools{display:flex;align-items:center;gap:10px;min-width:0}
+.license-grid-new,.license-tool{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid #c4d2dc;border-radius:3px;min-height:35px;padding:0 12px;background:#f9fbfd;color:#3e6d89;font-size:12px;font-weight:700;line-height:1;text-decoration:none}
+.license-grid-new{color:#276b96;border-color:#b8d0e0;background:#f0f7fb}
+.license-tool{min-width:36px;padding:0 9px}
+.license-grid-new:hover,.license-tool:hover{background:#e8f2f9;text-decoration:none;color:#24618a}
+.license-tool-group{display:inline-flex;align-items:center;gap:0}
+.license-tool-group .license-tool{border-radius:0;margin-left:-1px}
+.license-tool-group .license-tool:first-child{border-radius:3px 0 0 3px;margin-left:0}
+.license-tool-group .license-tool:last-child{border-radius:0 3px 3px 0}
+.license-filter-toggle{background:#347eae;border-color:#347eae;color:#fff}
+.license-filter-toggle:hover{background:#2b6c96;color:white}
+.license-filters{padding:12px;border-bottom:1px solid #dde6ee;background:#f8fafc}
+.license-filters[hidden]{display:none}
+.license-filter-form{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.license-filter-form label{min-width:150px}
+.license-filter-form label.license-search{flex:1;min-width:210px;max-width:430px;position:relative}
+.license-search svg{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:#8197a5}
+.license-filter-form input,.license-filter-form select{height:35px;width:100%;background:#fff;color:#37576c;border:1px solid #cad9e3;padding:0 10px;border-radius:3px}
+.license-filter-form input{padding-right:35px}
+.license-data-table{width:100%;min-width:900px;border-collapse:collapse;font-size:12px}
+.license-data-table th{background:#eaf1f6;color:#4d6982;font-size:11px;text-transform:uppercase;letter-spacing:.018em;font-weight:700;padding:10px 11px;white-space:nowrap;border-bottom:1px solid #d0dde6}
+.license-data-table td{padding:9px 11px;border-bottom:1px solid #e4ebf0;vertical-align:middle;line-height:1.4;color:#29455b}
+.license-data-table tbody tr:nth-child(even){background:#f9fcfe}
+.license-data-table tbody tr:hover{background:#e9f4fa}
+.license-name-cell{min-width:230px}
+.license-name{display:block;font-size:12px;line-height:1.3;color:#17466b;font-weight:700}
+.license-name-cell small{display:block;font-size:11px;margin-top:4px;color:#7e94a5}
+.license-code{display:inline-flex;border:1px solid #c8d8e3;border-radius:3px;background:#f1f6f9;padding:3px 6px;color:#315872;font:500 11px/1.2 Roboto,Consolas,monospace;white-space:nowrap}
+.license-subdomain{font-family:Roboto,Consolas,monospace;color:#617e8f!important;font-size:11px}
+.license-nowrap{white-space:nowrap}
+.license-actions-heading{text-align:right}
+.license-row-actions{display:flex;align-items:center;justify-content:flex-end;gap:4px}
+.license-icon-action{display:inline-grid;place-items:center;width:29px;height:29px;border:1px solid #cbd9e3;border-radius:3px;background:#f4f8fb;color:#527a94;cursor:pointer}
+.license-icon-action:hover{background:#e3f1fa;border-color:#a3c5d8;color:#286c96}
+.license-icon-action svg{width:15px;height:15px}
+.license-status-control{display:flex;align-items:center;gap:9px;white-space:nowrap}
+.license-grid-footer{min-height:49px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.license-page-size select{height:32px;padding:0 26px 0 9px;border:1px solid #c6d5df;border-radius:3px;background:#fff;font-size:11px;color:#365b74;font-weight:600}
+.license-page-controls{display:flex;align-items:center;gap:0;color:#406685}
+.license-result-count{font-size:11px;margin-right:16px;color:#7b8f9e}
+.license-page-arrow{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border:1px solid #cbd9e3;margin-left:-1px;font-size:21px;font-weight:400;text-decoration:none;background:#fff}
+.license-page-arrow:hover{text-decoration:none;background:#edf4fa}
+.license-page-arrow.disabled{opacity:.4;pointer-events:none;cursor:default;background:#f8fafb}
+.license-page-current{min-width:65px;text-align:center;padding:0 9px;font-size:12px;color:#36566e;font-weight:700}
+
+/* Switch acessível (checkbox sem aparência de checkbox). */
+.switch-control,.switch-row,.module-switch{position:relative;display:inline-flex;align-items:center;gap:9px;cursor:pointer;user-select:none}
+.switch-control input[type=checkbox],.switch-row input[type=checkbox],.module-switch input[type=checkbox]{position:absolute;opacity:0;width:1px;height:1px;overflow:hidden}
+.switch-track{position:relative;flex:none;display:inline-block;width:36px;height:20px;border:1px solid #b7c7d1;border-radius:99px;background:#cbd5dd;transition:background .14s,border-color .14s}
+.switch-track:after{content:"";position:absolute;width:14px;height:14px;border-radius:50%;left:2px;top:2px;background:#fff;box-shadow:0 1px 2px #18374a33;transition:transform .14s}
+input:checked+.switch-track{background:#2988b7;border-color:#217aa5}
+input:checked+.switch-track:after{transform:translateX(16px)}
+input:focus-visible+.switch-track{outline:2px solid #65a8d1;outline-offset:3px}
+input:disabled+.switch-track{opacity:.5;cursor:not-allowed}
+.switch-small .switch-track{width:32px;height:18px}
+.switch-small .switch-track:after{width:12px;height:12px}
+.switch-small input:checked+.switch-track:after{transform:translateX(14px)}
+.module-grid .module-switch{display:flex;border:1px solid #dbe5eb;border-radius:3px;padding:9px 10px;min-height:40px;background:#f9fbfd;font-size:12px;color:#3e6379;font-weight:500}
+.module-switch>span:last-child,.switch-row>span:last-child{line-height:1.35}
+.module-grid .module-switch:has(input:checked){border-color:#c0d9e8;background:#f2f8fc}
+.switch-row{font-size:12px;color:#436376}
+.settings-check{max-width:none;min-height:38px}
+.automation-switch{border:0;background:transparent;padding:0;white-space:nowrap}
+.license-confirm-dialog{width:min(420px,calc(100vw - 26px));border:1px solid #d5e1e9;border-radius:6px;background:#fff;padding:0 20px 18px;color:#365266;box-shadow:0 20px 55px #122b3d36}
+.license-confirm-dialog::backdrop{background:#142a3b70}
+.license-confirm-head{display:flex;align-items:center;justify-content:space-between;padding:17px 0 7px}
+.license-confirm-icon{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:5px;background:#eaf3f9;color:#367ba6}
+.license-confirm-dialog h2{font-size:17px;margin:7px 0 10px;color:#2a4b63}
+.license-confirm-dialog p{font-size:13px;line-height:1.6;margin:0 0 19px;color:#667f8e}
+.license-confirm-footer{display:flex;justify-content:flex-end;gap:8px}
+.switch-status-controls{gap:14px}
+.switch-hint{color:#8da0a9;font-size:11px;line-height:1.5}
+@media(max-width:780px){.license-grid-toolbar{padding:9px}.license-grid-footer{flex-wrap:wrap}.license-result-count{display:none}.license-page-controls{margin-left:auto}.license-grid-new{padding:0 9px}.license-filter-form label{flex:1}}
+@media print{.sidebar,.topbar,.page-header,.license-grid-toolbar,.license-filters,.license-grid-footer,.license-row-actions,.switch-control{display:none!important}.shell{display:block;height:auto}.page{overflow:visible}.content{padding:0}.license-data-table{min-width:0}.license-grid{border:0;box-shadow:none}.license-data-table td,.license-data-table th{padding:6px 8px;font-size:10px}}
