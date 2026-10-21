@@ -34,7 +34,7 @@ Antes do primeiro vínculo, a instalação deve usar uma versão `develop` aprov
 
 O comando usa assinatura HMAC por requisição (UUID, timestamp Unix, nonce único e SHA-256 do corpo), confere a assinatura da resposta com o segredo da instância, UUID/CNPJ/status/horário e guarda a última resposta assinada no próprio banco da instalação. Solicitações repetidas são rejeitadas pelo servidor.
 
-A interface usa cache de 5 minutos. Sem rede, aceita a última licença validada por até 72 horas (configurável); passado esse limite, **a interface comercial requer regularização**. Falhas de comunicação nunca devem fabricar estado ativo. Consultas, cancelamentos e regularizações fiscais permanecem liberadas às permissões normais do ERP.
+A interface usa cache de 60 segundos. Sem rede, aceita a última licença validada por até 72 horas (configurável); passado esse limite, **a interface comercial requer regularização**. Falhas de comunicação nunca devem fabricar estado ativo. Consultas, cancelamentos e regularizações fiscais permanecem liberadas às permissões normais do ERP.
 
 ## Efeitos de status — modo de consulta (21/10/2026)
 
@@ -115,3 +115,31 @@ e janela de atualização. Este modo é opcional e não conecta domínios ou
 servidores distintos automaticamente. Instalações recém-criadas devem ser
 configuradas com seu CNPJ antes desse vínculo. Nunca acionar em uma VPS
 de cliente sem aprovação explícita.
+
+
+## Avisos de vencimento sincronizados com a central — 21/10/2026
+
+O Control assina e envia a configuração opcional `notice_days` junto à
+resposta de licença em `POST /api/license/check`. Só regras ativas do tipo
+`expiry_soon` participam; o ERP **não** configura prazos isolados nem pode
+transformar mensagens locais em permissões. O agente valida um inteiro
+entre 0 e 365 dias (ou null), preserva o valor em
+`central_license_states.notice_days` e compara com `expires_at` assinado
+apenas para apresentação. Nas telas administrativas e no PDV, um indicador
+compacto anuncia "Sua licença vence em N dias", "amanhã" ou "hoje".
+Módulos e venda continuam autorizados até que a situação central realmente
+seja vencida/suspensa; o aviso visual **nunca** bloqueia uma venda.
+
+Durante cache ou tolerância offline, a mensagem utiliza exclusivamente os
+últimos dados assinados e validados (o aviso pode ficar desatualizado até a
+conexão retornar); a expiração local continua aplicada imediatamente.
+Sem vínculo central, sem regra ativa ou sem validade, não apresentar chip
+algum. Assim que o Control renova a conta e a próxima sincronização online
+ocorre, a instalação deixa de exibir o aviso antigo.
+
+O Control continua sendo o único emissor de e-mail de cobrança/renovação
+(não é uma cobrança automática). Mensagens por SMTP não são encaminhadas
+nem armazenadas no ERP. `last_seen_at` é atualizado no Control somente
+na verificação autenticada da licença; não representa prova de leitura.
+**Aplicar a migration adicional do ERP antes do primeiro sync com o novo
+payload**. A branch `main`/tag `v1.0.0` segue intocada.
