@@ -22,7 +22,7 @@
     <div class="topbar-space"></div>
     <span class="topbar-tag">CONTROLE DE ACESSOS</span>
     <div class="account"><span class="avatar">{{ strtoupper(substr(auth()->user()->name,0,1)) }}</span><span><strong>{{ auth()->user()->name }}</strong><small>Administrador</small></span></div>
-    <form action="{{ route('logout') }}" method="post">@csrf<button title="Sair" class="icon-button">@include('partials.icon',['name'=>'logout','size'=>18])</button></form>
+    <form action="{{ route('logout') }}" method="post">@csrf<button data-tooltip="Sair" class="icon-button">@include('partials.icon',['name'=>'logout','size'=>18])</button></form>
 </header>
 <aside class="sidebar" id="sidebar">
     <div class="nav-heading">PRINCIPAL</div>
