@@ -40,8 +40,14 @@
 
   const form = document.querySelector('#newAccountForm');
   if (form) {
-    let current = 0;
     const steps = [...form.querySelectorAll('[data-wizard-step]')];
+    const firstErrorField = form.dataset.errorField ?? '';
+    const firstErrorStep = firstErrorField
+      ? steps.findIndex(step => [...step.querySelectorAll('[name]')].some(input =>
+          input.name === firstErrorField
+          || (input.name.endsWith('[]') && firstErrorField.startsWith(input.name.slice(0, -2)))))
+      : -1;
+    let current = firstErrorStep >= 0 ? firstErrorStep : 0;
     const next = form.querySelector('[data-wizard-next]');
     const back = form.querySelector('[data-wizard-back]');
     const submit = form.querySelector('[data-wizard-submit]');
@@ -77,6 +83,13 @@
       }
     });
     paint();
+    if (firstErrorStep >= 0) {
+      const invalidField = [...steps[firstErrorStep].querySelectorAll('[name]')]
+        .find(input => input.name === firstErrorField
+          || (input.name.endsWith('[]') && firstErrorField.startsWith(input.name.slice(0, -2))));
+      invalidField?.setAttribute('aria-invalid', 'true');
+      invalidField?.focus({ preventScroll: true });
+    }
   }
 
   document.querySelectorAll('[data-copy-target]').forEach(button => {
