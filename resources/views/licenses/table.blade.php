@@ -63,7 +63,7 @@
                                     @csrf
                                     <input type="hidden" name="action" value="{{ $company->license_status==='suspended' ? 'activate' : 'suspend' }}">
                                     <label class="switch-control switch-small"
-                                        title="{{ $company->license_status === 'suspended' ? 'Ativar acesso comercial' : 'Suspender acesso comercial' }}">
+                                        data-tooltip="{{ $company->license_status === 'suspended' ? 'Ativar acesso comercial' : 'Suspender acesso comercial' }}">
                                         <input type="checkbox" role="switch" name="license_enabled"
                                             aria-label="{{ $company->license_status === 'suspended' ? 'Ativar' : 'Suspender' }} licença de {{ $company->legal_name }}"
                                             @checked($company->license_status !== 'suspended')
@@ -77,9 +77,9 @@
                         <td>
                             <div class="license-row-actions">
                                 <button type="button" class="license-icon-action" data-account-details="{{ route('clients.details',$company) }}"
-                                    title="Visualizar detalhes" aria-label="Visualizar detalhes de {{ $company->legal_name }}">@include('partials.icon',['name'=>'clients','size'=>18])</button>
+                                    data-tooltip="Visualizar detalhes" aria-label="Visualizar detalhes de {{ $company->legal_name }}">@include('partials.icon',['name'=>'clients','size'=>18])</button>
                                 <a class="license-icon-action" href="{{ route('clients.show',$company) }}"
-                                    title="Gerenciar licença" aria-label="Gerenciar licença de {{ $company->legal_name }}">@include('partials.icon',['name'=>'edit','size'=>16])</a>
+                                    data-tooltip="Gerenciar licença" aria-label="Gerenciar licença de {{ $company->legal_name }}">@include('partials.icon',['name'=>'edit','size'=>16])</a>
                             </div>
                         </td>
                     </tr>
