@@ -14,7 +14,7 @@
         <form class="license-filter-form" method="get" action="{{ route('plans.index') }}">
             <label class="license-search"><span class="sr-only">Buscar plano</span>
                 <input type="search" name="q" value="{{ request('q') }}" placeholder="Nome, código ou descrição...">
-                <svg><use href="#i-search"/></svg>
+                @include('partials.icon',['name'=>'search','size'=>17])
             </label>
             <label><span class="sr-only">Situação</span><select name="status">
                 <option value="">Todos</option>
@@ -43,7 +43,7 @@
                     <td>{{ $usage[$plan->code] ?? 0 }}</td>
                     <td><span class="status {{ $plan->active ? 'active' : 'expired' }}">{{ $plan->active ? 'Disponível' : 'Arquivado' }}</span></td>
                     <td><div class="license-row-actions">
-                        <a class="license-icon-action" href="{{ route('plans.edit',$plan) }}" title="Editar plano" aria-label="Editar plano {{ $plan->name }}"><svg><use href="#i-edit"/></svg></a>
+                        <a class="license-icon-action" href="{{ route('plans.edit',$plan) }}" title="Editar plano" aria-label="Editar plano {{ $plan->name }}">@include('partials.icon',['name'=>'edit','size'=>16])</a>
                     </div></td>
                 </tr>
             @empty
