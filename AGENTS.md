@@ -27,3 +27,11 @@ Alterações em autenticação/licença exigem testes e revisão de segurança. 
 - Não enviar e-mails, WhatsApp, não gerar cobranças, suspender, renovar ou reativar contratos a partir dessas rotinas sem decisão expressa e testes dedicados. Vencimento continua derivado diretamente de `expires_at`; o alerta não altera o status.
 - `php artisan schedule:work` serve para Laragon em janela separada; servidor Linux precisa de cron externo a cada minuto. Sem scheduler ativo, não declarar que monitoramento periódico funciona.
 - Cobrir edições/arquivamento de planos, validade das licenças existentes, autenticação do proprietário, deduplicação e execução com as regras desligadas. Preservar CNPJ, secrets e isolamento do ERP.
+
+## Padrão visual — listagem de Licenças e switches (21/10/2026)
+
+- A listagem de `Licenças` reproduz o **padrão visual denso de Produtos do ERP**, com barra compacta de ferramentas, filtro colapsável, botões de imprimir/exportar/atualizar, busca, badges discretas, ações por ícones e rodapé de 20/50/100 linhas. Não criar tabelas grandes com filtros enormes quando a referência for a grade de Produtos.
+- **Não usar a aparência de caixa de marcação para ativar/desativar opções**: apresentar switches (role=switch, input acessível via teclado), inclusive em status de licenças, habilitação de automações, disponibilidade de planos e módulos. A seleção em massa por checkbox **não foi solicitada na listagem de Licenças**.
+- O switch comercial exige confirmação no diálogo padrão antes do POST CSRF para `clients.status`; não confiar no DOM para suspender/reativar. Preservar histórico, CNPJ, HMAC e acesso fiscal. Não atrelar mudança de plano ao toggle.
+- A exportação CSV do navegador inclui **apenas a página visível**, jamais afirmar exportação de toda a base. Escapar células para que não sejam interpretadas como fórmulas por programas de planilhas. Impressão oculta o cabeçalho e os controles.
+- Testes da listagem verificam controle por switch, filtragem/paginação e rotas autenticadas; não alterar o ERP/Nextor para esse refinamento da central.
