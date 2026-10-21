@@ -1,0 +1,76 @@
+/* Lumeron - consulta comercial com licença restrita (ERP e PDV). */
+.commercial-readonly-banner{
+  display:flex;align-items:center;gap:13px;min-height:62px;
+  margin:0 0 16px;padding:12px 15px;border:1px solid #d3e3ef;
+  border-left:3px solid #487a9e;border-radius:5px;
+  color:#24465e;background:#f0f6fb;font-family:Roboto,Arial,sans-serif;
+  box-shadow:0 1px 3px rgba(25,65,92,.035);
+}
+.commercial-readonly-mark{
+  width:34px;height:34px;display:grid;place-items:center;flex:0 0 34px;
+  background:#e0edf6;border:1px solid #cbdfea;border-radius:5px;color:#39739a;
+}
+.commercial-readonly-mark svg{width:18px;height:18px;}
+.commercial-readonly-text{display:flex;flex-direction:column;min-width:0;gap:3px;flex:1;}
+.commercial-readonly-text strong{font-size:13px;font-weight:700;line-height:1.35;color:#1f4563;}
+.commercial-readonly-text span{font-size:12px;line-height:1.45;color:#58758a;}
+.commercial-readonly-state{
+  align-self:center;flex-shrink:0;padding:5px 9px;border:1px solid #cbdce9;
+  border-radius:4px;font-size:11px;font-weight:700;color:#366c91;background:#fff;
+}
+.commercial-readonly-dialog{
+  width:min(445px,calc(100vw - 30px));max-width:445px;
+  max-height:calc(100vh - 40px);overflow:auto;margin:auto;padding:0;
+  border:1px solid #cedbe4;border-radius:7px;
+  background:#fff;color:#2a455a;font-family:Roboto,Arial,sans-serif;
+  box-shadow:0 20px 65px rgba(15,37,57,.2);
+}
+.commercial-readonly-dialog::backdrop{background:rgba(14,35,52,.36);backdrop-filter:blur(2px);}
+.commercial-readonly-dialog-head{
+  padding:22px 24px 0;display:flex;justify-content:space-between;align-items:start;
+}
+.commercial-readonly-dialog-icon{
+  width:44px;height:44px;border-radius:8px;background:#edf4fa;border:1px solid #d8e6f0;
+  display:grid;place-items:center;color:#3d7193;
+}
+.commercial-readonly-dialog-icon svg{width:24px;height:24px;}
+.commercial-readonly-close{
+  border:0;border-radius:5px;background:transparent;color:#7890a1;font-size:23px;
+  width:30px;height:30px;line-height:1;cursor:pointer;
+}
+.commercial-readonly-close:hover{background:#eef3f6;color:#2c526d;}
+.commercial-readonly-dialog-body{padding:18px 24px 20px;}
+.commercial-readonly-dialog-body h2{
+  margin:0 0 9px;font-size:18px;line-height:1.35;font-weight:700;color:#1b3d56;
+}
+.commercial-readonly-dialog-body p{
+  margin:0 0 15px;font-size:13px;line-height:1.65;color:#5a7183;
+}
+.commercial-readonly-dialog-note{
+  font-size:12px;line-height:1.55;color:#597586;
+  padding:11px 13px;border:1px solid #e1eaf0;border-radius:4px;background:#f7fafc;
+}
+.commercial-readonly-dialog-footer{
+  border-top:1px solid #e6edf2;background:#fbfcfd;padding:13px 24px;
+  display:flex;justify-content:flex-end;
+}
+.commercial-readonly-understood{
+  min-width:95px;min-height:34px;padding:7px 18px;
+  border:1px solid #2e6a96;border-radius:4px;background:#3278a8;color:white;
+  font-size:12px;font-weight:700;cursor:pointer;
+}
+.commercial-readonly-understood:hover{background:#286791;}
+.commercial-readonly-understood:focus-visible,
+.commercial-readonly-close:focus-visible{outline:2px solid #2c86bc;outline-offset:2px;}
+/* PDV ocupa a área toda; o aviso não pode empurrar o teclado ou a grade. */
+.pdv-screen>.commercial-readonly-banner{margin:10px 12px 4px;min-height:54px;}
+@media(max-width:780px){
+  .commercial-readonly-banner{padding:10px 12px;gap:9px;margin-bottom:10px;align-items:start;}
+  .commercial-readonly-state{display:none;}
+  .commercial-readonly-mark{width:30px;height:30px;flex-basis:30px;}
+  .commercial-readonly-text strong{font-size:12px;}
+  .commercial-readonly-text span{font-size:11px;}
+  .commercial-readonly-dialog-head{padding:19px 18px 0;}
+  .commercial-readonly-dialog-body{padding:15px 18px;}
+  .commercial-readonly-dialog-footer{padding:12px 18px;}
+}
