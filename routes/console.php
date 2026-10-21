@@ -7,7 +7,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Schedule;
 
 Schedule::command('control:automations-run')->dailyAt('08:00')->withoutOverlapping();
-Schedule::command('control:client-email-send')->dailyAt('08:10')->withoutOverlapping();
+Schedule::command('control:client-email-send')->everyTenMinutes()->between('08:10', '18:00')->withoutOverlapping();
 
 Artisan::command('control:admin {email} {--name=Administrador}', function (): int {
     $email = strtolower(trim((string) $this->argument('email')));
