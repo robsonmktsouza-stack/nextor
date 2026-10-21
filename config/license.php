@@ -1,11 +1,7 @@
 <?php
 
 return [
-    'plans' => [
-        'standard' => 'Padrão',
-        'advanced' => 'Avançado',
-        'full' => 'Completo',
-    ],
+    // Plan names, prices, billing periods and default modules live in the plans table.
     'modules' => [
         'pdv' => 'PDV e vendas',
         'products' => 'Produtos e estoque',
