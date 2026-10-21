@@ -65,6 +65,7 @@ final class InvoiceCycleService
 
                         // Don't leap over a draft or invent several missed cycles.
                         if (!$latest || $latest->status !== 'issued'
+                            || !in_array($latest->origin, ['onboarding', 'recurring'], true)
                             || $latest->period_end->toDateString() > today()->addDays($daysAhead)->toDateString()
                             || $latest->period_end->toDateString() < today()->subDays($daysAhead)->toDateString()) {
                             $result['skipped']++;
