@@ -67,15 +67,20 @@ final class LicenseController extends Controller
 
         DB::transaction(function () use ($company, $data): void {
             $company = Company::query()->lockForUpdate()->findOrFail($company->id);
+            // Omitir validade ao trocar de plano nao deve cancelar a vigencia.
+            // Uma data vazia explicita ainda permite remover a validade.
+            $nextExpiry = array_key_exists('expires_at', $data)
+                ? ($data['expires_at'] ?: null)
+                : $company->expires_at?->toDateString();
             $changed = $company->plan !== $data['plan']
-                || $company->expires_at?->toDateString() !== ($data['expires_at'] ?? null);
+                || $company->expires_at?->toDateString() !== $nextExpiry;
             if (!$changed) {
                 return;
             }
             $company->update([
                 'plan' => $data['plan'],
                 'modules' => null, // Old snapshots no longer grant entitlements.
-                'expires_at' => $data['expires_at'] ?? null,
+                'expires_at' => $nextExpiry,
             ]);
             $company->record('license_changed', 'Plano ou validade alterados.');
         });

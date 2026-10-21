@@ -150,3 +150,14 @@ Execute `php artisan migrate` no Control **antes de liberar o ERP atualizado**: 
 A API assinada retorna o array `modules` **derivado de `plans.modules`**, não de `companies.modules`. Novas licenças não têm mais switches individuais para módulos. O Nextor `develop` reconhece qualquer código válido e restringe menus, URLs e API token conforme o array assinado. As operações fiscais de regularização legal permanecem acessíveis com autorização do usuário, mesmo sem o módulo Fiscal contratado. O plano não altera permissões individuais dos empregados.
 
 **Laragon:** atualize o Control, execute `php artisan migrate`, limpe o cache do Control e somente depois atualize o Nextor `develop` e execute `php artisan optimize:clear`. Não atualizar `main`/`v1.0.0`.
+
+### Integridade da validade quando troca o plano
+
+O endpoint de licença mantém a data de vencimento existente quando o formulário
+envia somente um novo plano. A data só muda se `expires_at` for enviada
+explicitamente. Isso evita que integrações ou formulários parciais transformem
+acidentalmente uma licença com prazo em assinatura sem vencimento.
+
+Após mudar um plano, o ERP conectado normalmente consulta o resultado na próxima
+requisição depois do cache de 60 segundos; uma instância offline respeita sua
+tolerância assinada, portanto não recebe alterações instantâneas.

@@ -76,6 +76,26 @@ final class LegacyPlanMigrationTest extends TestCase
         ]);
     }
 
+    public function test_changing_plan_without_expiry_field_preserves_existing_term(): void
+    {
+        $company = $this->company('402', ['pdv', 'products']);
+        $expiry = $company->expires_at?->toDateString();
+        $admin = \App\Models\User::create([
+            'name' => 'Administradora',
+            'email' => 'admin-preserve-date@example.test',
+            'password' => 'senha-longa-de-teste',
+        ]);
+
+        $this->actingAs($admin)->post(route('clients.modules', $company), [
+            'plan' => 'advanced',
+        ])->assertRedirect();
+
+        $company->refresh();
+        $this->assertSame('advanced', $company->plan);
+        $this->assertSame($expiry, $company->expires_at?->toDateString());
+        $this->assertSame(['pdv', 'products', 'finance'], $company->entitledModules());
+    }
+
     public function test_new_account_and_license_detail_show_read_only_plan_summary(): void
     {
         $company = $this->company('401', ['products', 'pdv']);
