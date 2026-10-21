@@ -55,6 +55,7 @@ POOL="/etc/php/$PHP_VERSION/fpm/pool.d/lumeron-$ID.conf"
 SITE="/etc/nginx/sites-available/lumeron-$ID.conf"
 FISCAL="/etc/systemd/system/lumeron-fiscal-$ID.service"
 FISCAL_TIMER="/etc/systemd/system/lumeron-fiscal-$ID.timer"
+FISCAL_FAST="/etc/systemd/system/lumeron-fiscal-fast-$ID.service"
 SCHEDULE="/etc/systemd/system/lumeron-schedule-$ID.service"
 TIMER="/etc/systemd/system/lumeron-schedule-$ID.timer"
 TLS_DIR="$DOMAIN"
@@ -78,7 +79,7 @@ CODE="$(lm_code_path "$SHA")"
 [[ -r "$CERT" && -r "$CERTKEY" && -r "$MYSQL_CNF" ]] || lm_die 'TLS ou MySQL administrativo indisponível.'
 [[ -x "/usr/bin/php$PHP_VERSION" && -d "/etc/php/$PHP_VERSION/fpm/pool.d" ]] ||
   lm_die 'PHP CLI/FPM indisponível.'
-[[ ! -e "$POOL" && ! -e "$SITE" && ! -e "$FISCAL" && ! -e "$FISCAL_TIMER" && ! -e "$SCHEDULE" && ! -e "$TIMER" ]] ||
+[[ ! -e "$POOL" && ! -e "$SITE" && ! -e "$FISCAL" && ! -e "$FISCAL_TIMER" && ! -e "$FISCAL_FAST" && ! -e "$SCHEDULE" && ! -e "$TIMER" ]] ||
   lm_die 'Configuração pré-existente. Abortado.'
 mysql --defaults-extra-file="$MYSQL_CNF" -N -e 'SELECT 1' >/dev/null
 [[ -z "$(mysql --defaults-extra-file="$MYSQL_CNF" -N -e "SHOW DATABASES LIKE '$DB'")" ]] ||
@@ -229,6 +230,29 @@ ProtectHome=true
 ProtectSystem=strict
 ReadWritePaths=$BASE/shared $BASE/uploads $BASE/releases
 ENV
+cat >"$FISCAL_FAST" <<ENV
+[Unit]
+Description=Lumeron $ID - dedicated low latency fiscal queue (opt-in)
+After=network-online.target
+[Service]
+Type=simple
+User=$USER
+Group=$USER
+WorkingDirectory=$BASE/current
+ExecStart=/usr/bin/php$PHP_VERSION $BASE/current/artisan queue:work database --queue=fiscal,default --sleep=1 --tries=1 --timeout=180 --max-time=3600
+Restart=always
+RestartSec=5
+TimeoutStopSec=240
+KillSignal=SIGTERM
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=$BASE/shared $BASE/uploads $BASE/releases
+[Install]
+WantedBy=multi-user.target
+ENV
 cat >"$FISCAL_TIMER" <<ENV
 [Unit]
 Description=Lumeron $ID - fiscal queue wakeup (opt-in)
@@ -273,5 +297,5 @@ nginx -t
 systemctl reload "php$PHP_VERSION-fpm"
 systemctl reload nginx
 echo "Instalação preparada: https://$DOMAIN | code=$SHA"
-echo 'Fiscal timer e scheduler permanecem desativados até configuração/validação.'
+echo 'Fiscal batch/timer, fiscal fast/persistente e scheduler DESATIVADOS até validação.'
 echo 'Não habilite NFC-e sem ACBr Linux/A1/CSC e validação fiscal real.'
