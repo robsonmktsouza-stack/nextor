@@ -250,7 +250,7 @@ svg.nextor-icon{
 
 /* Aplicação desktop: só a área principal rola. Evita a segunda barra no Chrome. */
 @media screen {
-  html,body{height:100%;overflow:hidden}
+  html:has(body>.shell), body:has(>.shell){height:100%;overflow:hidden}
   .shell{height:100vh;height:100dvh;min-height:0;overflow:hidden}
   .shell>.page{min-height:0;min-width:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain}
   .shell>.sidebar{min-height:0;overflow-y:auto}
