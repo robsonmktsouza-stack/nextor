@@ -10,13 +10,11 @@
 <div class="login-panel">
 <img class="login-logo" src="{{ asset('images/lumeron/logo.png') }}" alt="Lumeron">
 <h1>Acesso administrativo</h1>
-<p>Controle privado de clientes e licenças.</p>
 @if($errors->any())<div class="notice error" role="alert">{{ $errors->first() }}</div>@endif
 <form method="post" action="{{ route('login.post') }}">@csrf
 <label>E-mail<input name="email" type="email" autocomplete="username" required autofocus value="{{ old('email') }}" placeholder="seu@email.com"></label>
 <label>Senha<input name="password" type="password" autocomplete="current-password" required placeholder="Sua senha"></label>
 <button type="submit" class="btn primary full">Entrar no painel</button>
 </form>
-<div class="login-footer">Acesso restrito ao administrador do Lumeron.</div>
 </div>
 </body></html>
