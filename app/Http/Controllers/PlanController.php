@@ -88,7 +88,23 @@ final class PlanController extends Controller
                     'code' => 'O código de um plano em uso não pode ser alterado.',
                 ]);
             }
+            $before = $plan->modules ?? [];
             $plan->update($data);
+
+            // Changing plan rights changes the licensed features of all
+            // companies on this plan. Make that visible in their audit trails.
+            if ($before !== $plan->modules) {
+                Company::query()->where('plan', $plan->code)->orderBy('id')
+                    ->chunkById(100, function ($companies) use ($before, $plan): void {
+                        foreach ($companies as $company) {
+                            $company->record('plan_updated', 'Módulos do plano alterados.', [
+                                'plan' => $plan->code,
+                                'previous_modules' => $before,
+                                'modules' => $plan->modules,
+                            ]);
+                        }
+                    });
+            }
         });
         return redirect()->route('plans.index')->with('success', 'Plano atualizado.');
     }
