@@ -78,7 +78,7 @@ final class CompanyController extends Controller
             $query->where('plan', $request->query('plan'));
         }
         return view('clients.index', [
-            'companies' => $query->orderByDesc('id')->paginate(20)->withQueryString(),
+            'companies' => $query->orderByDesc('id')->paginate(in_array((int)$request->query('per_page',20),[20,50,100],true) ? (int)$request->query('per_page',20) : 20)->withQueryString(),
             'licenses' => $licenses,
             'plans' => Plan::query()->orderBy('id')->get(),
         ]);
