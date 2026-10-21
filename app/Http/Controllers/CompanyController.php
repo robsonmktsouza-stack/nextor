@@ -11,6 +11,38 @@ use Illuminate\Validation\Rule;
 
 final class CompanyController extends Controller
 {
+    /**
+     * Endereço de uma instalação já existente. HTTPS é obrigatório para
+     * endereços remotos; HTTP só é aceito com localhost/loopback em desenvolvimento.
+     */
+    private function installationUrlRules(): array
+    {
+        return [
+            'nullable', 'url', 'max:500',
+            function (string $attribute, mixed $value, \Closure $fail): void {
+                if (!is_string($value) || trim($value) === '') {
+                    return;
+                }
+
+                $parts = parse_url($value);
+                $scheme = strtolower((string) ($parts['scheme'] ?? ''));
+                $host = strtolower((string) ($parts['host'] ?? ''));
+
+                if ($scheme === 'https') {
+                    return;
+                }
+
+                if ($scheme === 'http'
+                    && app()->environment('local', 'testing')
+                    && in_array($host, ['localhost', '127.0.0.1', '::1'], true)) {
+                    return;
+                }
+
+                $fail('O endereço da instalação deve usar HTTPS. Para testar no Laragon, use http://127.0.0.1:8001.');
+            },
+        ];
+    }
+
     public function index(Request $request)
     {
         return $this->listing($request, false);
@@ -71,7 +103,7 @@ final class CompanyController extends Controller
             'phone' => ['nullable', 'string', 'max:30'],
             'subdomain' => ['required', 'regex:/^[a-z][a-z0-9-]{1,38}$/',
                 Rule::notIn(['admin', 'api', 'login', 'www']), Rule::unique('companies', 'subdomain')],
-            'installation_url' => ['nullable', 'url', 'max:500', 'regex:/^https:\/\//i'],
+            'installation_url' => $this->installationUrlRules(),
             'admin_login' => ['nullable', 'string', 'regex:/^[a-zA-Z0-9_.-]{3,100}$/'],
             'plan' => ['required', Rule::in(array_keys(config('license.plans')))],
             'expires_at' => ['nullable', 'date_format:Y-m-d'],
@@ -115,7 +147,7 @@ final class CompanyController extends Controller
             'contact_name' => ['nullable', 'string', 'max:160'],
             'email' => ['required', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:30'],
-            'installation_url' => ['nullable', 'url', 'max:500', 'regex:/^https:\/\//i'],
+            'installation_url' => $this->installationUrlRules(),
             'admin_login' => ['nullable', 'string', 'regex:/^[a-zA-Z0-9_.-]{3,100}$/'],
         ]);
         DB::transaction(function () use ($company, $data): void {
