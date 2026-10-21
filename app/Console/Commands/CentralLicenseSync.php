@@ -15,7 +15,7 @@ final class CentralLicenseSync extends Command
         $state = $service->refresh();
         $this->line('Licença da instalação: '.($state['status'] ?? 'indefinida')
             .' / origem: '.($state['source'] ?? 'desativada'));
-        return in_array($state['status'] ?? null, ['active', 'disabled'], true)
+        return in_array($state['status'] ?? null, ['active', 'suspended', 'expired', 'disabled'], true)
             ? self::SUCCESS : self::FAILURE;
     }
 }
