@@ -36,12 +36,24 @@ O comando usa assinatura HMAC por requisição (UUID, timestamp Unix, nonce úni
 
 A interface usa cache de 5 minutos. Sem rede, aceita a última licença validada por até 72 horas (configurável); passado esse limite, **a interface comercial requer regularização**. Falhas de comunicação nunca devem fabricar estado ativo. Consultas, cancelamentos e regularizações fiscais permanecem liberadas às permissões normais do ERP.
 
-## Efeitos de status
+## Efeitos de status — modo de consulta (21/10/2026)
 
-- `active`: permite módulos comercialmente contratados, sempre respeitando as permissões do usuário.
-- `suspended` e `expired`: impedem acessos comerciais na interface e direcionam para mensagem de licença; **não apagam dados**.
-- `unverified`: quando ainda não existe verificação válida ou se ultrapassou a tolerância offline, restringe acesso comercial, preservando fiscal.
-- `disabled`: não aplica política central (instalações anteriores e ambiente local padrão).
+A suspensão não expulsa o cliente nem mostra uma tela de licença cobrindo o ERP. Em vez disso, o sistema mantém dashboard, buscas, listagens, detalhes, relatórios, impressões e downloads de dados existentes, conforme as permissões do próprio usuário. Nos layouts `app.blade.php` e `pdv.blade.php`, o aviso compacto é incluído por `partials/commercial-readonly.blade.php`, com estilos em `public/css/commercial-readonly.css` e aviso/modal em `public/js/commercial-readonly.js`.
+
+- `active`: acesso operacional completo para os módulos contratados, sujeito às permissões normais.
+- `suspended`: consultas disponíveis; `POST/PUT/PATCH/DELETE` comerciais bloqueados em `RequireCentralLicense` no backend.
+- `expired`: mesmas restrições comerciais, com mensagem específica de renovação.
+- `unverified`: após o limite de tolerância offline, consultas disponíveis e escrita comercial suspensa por motivo técnico (não afirmar inadimplência).
+- `disabled`: instalação ainda não vinculada; segue sem licença central, mantendo a política anterior.
+- Desativar o bloqueio no painel não exige logout ou novo cadastro. As alterações entram em vigor após a próxima atualização assinada do cache (normalmente até cinco minutos, sujeita à conectividade).
+
+O middleware registra o estado da licença nos atributos da requisição para os layouts, sem publicar chaves. Um formulário comum bloqueado retorna à tela com mensagem `warning`, sem realizar a ação. Chamadas AJAX/API protegidas recebem **HTTP 423** com `code=LUMERON_LICENSE_READ_ONLY`. A interface mostra o modal explicativo; o JavaScript NÃO é o mecanismo de segurança. A rota antiga `/license-status` redireciona usuários suspensos ao ERP.
+
+**Exceções fiscais explícitas**, além dos `GET/HEAD` de consulta: download de XML autorizado, consulta de NFC-e pendente, cancelamento, transmissão de contingência de documento pré-existente, inutilização legal e recuperação de XML autorizado. As exceções são mantidas por nome em `CommercialLicensePolicy::CONTINUITY_ROUTES`; **não** liberar globalmente `fiscal/*`, pois isso permitiria novas emissões, edição de tabelas ou geração de dados durante a suspensão. As permissões `permission:fiscal` continuam obrigatórias.
+
+Não permitir alteração por requisição HTTP direta ou AJAX, nem excluir banco, histórico, estoque, XMLs, certificados ou autorização fiscal. Background jobs previamente agendados exigem revisão separada antes de implantação comercial, pois o middleware HTTP não controla workers e filas.
+
+**Testar em homologação:** suspender no painel, aguardar o cache, conferir `/products`, `/sales`, `/finance`, POST comercial 423, download/regularização fiscal autorizados e reativação. Fazer backup antes de atualizar um ambiente com dados reais; somente a branch `develop` foi modificada.
 
 **Atenção:** a exigência remota só funciona nas instalações que receberam este código em uma versão futura, foram migradas e configuradas por autorização expressa. A `main`/`v1.0.0` continua intocada. O painel **não** instala usuários/servidores nem publica releases automaticamente.
 
