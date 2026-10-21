@@ -60,6 +60,7 @@ final class ProvisionLocalErpAccounts extends Command
                 if ($this->option('preview')) {
                     $this->line('Empresa #'.$company->id.': '.$preview['destination']);
                     $this->line('Endereço: '.$preview['url']);
+                    $this->line('Control API: '.$preview['controlUrl']);
                     continue;
                 }
                 $claimed = DB::transaction(function () use ($job, $id): bool {
@@ -80,7 +81,10 @@ final class ProvisionLocalErpAccounts extends Command
                     continue;
                 }
 
-                $url = $service->provision($company);
+                $url = $service->provision(
+                    $company,
+                    fn (string $step) => $this->line('  '.$step)
+                );
                 $job->forceFill(['status'=>'ready',
                     'completed_at'=>now(), 'failure_code'=>null])->save();
                 $company->forceFill(['installation_url'=>$url])->save();
