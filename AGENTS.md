@@ -48,7 +48,7 @@ A aplicação administrativa **independente** está na branch isolada `control-c
 
 A `develop` do ERP recebeu somente o **agente opt-in** em `app/Services/License/CentralLicenseService.php`, middleware `control.license`, comando `lumeron:license-sync`, migração própria e `config/central_license.php`; **está desativado por padrão**. A versão `v1.0.0` na `main` não foi alterada. Ler [docs/deployment/control-center-integration.md](docs/deployment/control-center-integration.md) antes de editar/ativar.
 
-Habilitação requer autorização por CNPJ, URL HTTPS, UUID/chave da licença em `.env` privado, backup/migração e sincronização confirmada. Nunca copiar chaves entre CNPJs, expor segredos ou bloquear operações legais de regularização de NFC-e. A criação de conta central não cria automaticamente VPS, usuário ou implantação.
+Habilitação gerenciada usa o vínculo privado HMAC criado pelo operador (`storage/app/private/lumeron-control.json`), com CNPJ verificado, backup/migração e sincronização assinada. Nunca pedir UUID/chave ou edição manual de `.env` ao cliente. Nunca copiar credenciais entre CNPJs, expor segredos ou bloquear operações legais de regularização de NFC-e. A criação de conta central não cria automaticamente VPS, usuário ou implantação.
 
 ## 2-C. Política atualizada: vinculação transparente pelo operador (21/10/2026)
 
@@ -61,6 +61,17 @@ Habilitação requer autorização por CNPJ, URL HTTPS, UUID/chave da licença e
 - **Não aceitar pareamento público só por CNPJ**, pois ele não comprova posse da instalação. Nem aplicar bloqueios fiscais destrutivos: preservar XML, NFC-e autorizadas e regularizações. `main`/`v1.0.0` continua intocada.
 
 Ver [docs/deployment/control-center-integration.md](docs/deployment/control-center-integration.md).
+
+## 2-D. Suspensão = modo de consulta (21/10/2026)
+
+**Regra permanente aprovada:** quando a licença está suspensa, vencida ou sem verificação após tolerância, **não** redirecionar usuários para uma tela de bloqueio. Permitir login e navegação do ERP para consultas. Exibir aviso compacto e modal apenas para operações bloqueadas.
+
+- Aplicar bloqueio de escrita **no backend** em `app/Http/Middleware/RequireCentralLicense.php` e `app/Support/CommercialLicensePolicy.php`. POST/PUT/PATCH/DELETE comerciais devem ser recusados; requisições AJAX recebem 423 e identificador `LUMERON_LICENSE_READ_ONLY`.
+- Liberar somente exceções fiscais legais listadas explicitamente, não por prefixos genéricos `fiscal/*` ou `pdv/nfce/*`. Permissões dos usuários continuam obrigatórias. Preservar cancelamento/consulta/contingência/recuperação de XML autorizado.
+- A interface utiliza `partials/commercial-readonly.blade.php`, `commercial-readonly.js` e `commercial-readonly.css` nos layouts `app` e `pdv`. Não duplicar a UI em cada módulo.
+- Distinguir `suspended`, `expired` e `unverified`; não imputar atraso financeiro a falhas de comunicação.
+- Reativação deve devolver capacidade de escrita após refresh do cache, sem novo login. Nunca apagar dados ao suspender.
+- Middleware HTTP não impede jobs agendados; avaliar o impacto de workers nas operações financeiras/fiscais antes de produção.
 
 ## 3. Procedimento por tarefa
 
