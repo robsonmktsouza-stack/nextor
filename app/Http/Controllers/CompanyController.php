@@ -109,11 +109,9 @@ final class CompanyController extends Controller
             'admin_login' => ['nullable', 'string', 'regex:/^[a-zA-Z0-9_.-]{3,100}$/'],
             'plan' => ['required', Rule::exists('plans', 'code')->where('active', true)],
             'expires_at' => ['nullable', 'date_format:Y-m-d'],
-            'modules' => ['nullable', 'array'],
-            'modules.*' => [Rule::in(array_keys(config('license.modules')))],
+            'modules' => ['prohibited'],
+            'modules_present' => ['prohibited'],
         ]);
-        $plan = Plan::query()->where('code', $data['plan'])->firstOrFail();
-        $data['modules'] = array_values(array_unique($data['modules'] ?? ($request->has('modules_present') ? [] : ($plan->modules ?? []))));
         $secret = bin2hex(random_bytes(48));
         $company = DB::transaction(function () use ($data, $secret): Company {
             $company = Company::create([
@@ -121,7 +119,7 @@ final class CompanyController extends Controller
                 'instance_id' => (string) Str::uuid(),
                 'license_secret' => $secret,
                 'license_status' => 'active',
-                'modules' => $data['modules'],
+                'modules' => null,
             ]);
             $company->record('created', 'Conta cadastrada e licença criada.');
             return $company;
