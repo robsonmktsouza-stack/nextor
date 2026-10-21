@@ -61,7 +61,7 @@ final class AuthController extends Controller
         }
 
         $request->session()->regenerate();
-        $redirect=route($request->user()->homeRouteName());
+        $redirect=route($request->user()->licensedHomeRouteName());
         if (LoginSubdomain::fromTrustedPortal($request)) {
             return response()->json(['redirect'=>$redirect],200,LoginSubdomain::corsHeaders());
         }
