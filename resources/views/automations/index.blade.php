@@ -2,7 +2,7 @@
 @section('title','Automações')
 @section('actions')
 <form method="post" action="{{ route('automations.run') }}">@csrf
-    <button class="btn primary" type="submit" data-confirm="Executar agora as regras habilitadas? Somente avisos internos serão registrados.">
+    <button class="btn primary" type="submit" data-confirm="Executar verificação agora?">
         <svg><use href="#i-check"/></svg>Executar verificação
     </button>
 </form>
@@ -91,7 +91,7 @@
     @include('partials.listing.toolbar', ['showFilters' => false])
     <div class="table-scroll">
         <table class="license-data-table" data-grid-table>
-            <thead><tr><th>Data</th><th>Cliente</th><th>Regra</th><th>Registro</th><th class="license-actions-heading">Ações</th></tr></thead>
+            <thead><tr><th>Data</th><th>Cliente</th><th>Regra</th><th class="license-actions-heading">Ações</th></tr></thead>
             <tbody>
                 @forelse($deliveries as $delivery)
                     <tr>
@@ -104,7 +104,6 @@
                             @endif
                         </td>
                         <td>{{ $delivery->rule?->name ?? '—' }}</td>
-                        <td>Ocorrência registrada no histórico da empresa.</td>
                         <td>
                             <div class="license-row-actions">
                                 @if($delivery->company)
@@ -113,7 +112,7 @@
                             </div>
                         </td>
                     </tr>
-                @empty<tr><td colspan="5" class="empty">Nenhum aviso automático registrado.</td></tr>@endforelse
+                @empty<tr><td colspan="4" class="empty">Nenhum aviso registrado.</td></tr>@endforelse
             </tbody>
         </table>
     </div>
@@ -124,5 +123,4 @@
         'plural' => 'avisos',
     ])
 </section>
-<div class="info-line more-space">As regras são executadas diariamente às 08h quando o agendador Laravel está ativo. Você também pode executar uma verificação manual. Nenhuma regra envia cobranças, suspende licenças ou gera mensagens para clientes.</div>
 @endsection
