@@ -116,8 +116,15 @@
 
   const targetFor = node => {
     if (!(node instanceof Element)) return null;
-    const target = node.closest('[data-tooltip],[title]');
-    if (target) convertNativeTitle(target);
+    const target = node.closest(
+      '[data-tooltip],[title],.license-icon-action[aria-label],.license-tool[aria-label],.icon-button[aria-label]'
+    );
+    if (!target) return null;
+    convertNativeTitle(target);
+    // Ícones sem título nativo usam o próprio nome acessível como tooltip.
+    if (!target.hasAttribute('data-tooltip') && target.hasAttribute('aria-label')) {
+      target.setAttribute('data-tooltip', target.getAttribute('aria-label'));
+    }
     return target;
   };
 
