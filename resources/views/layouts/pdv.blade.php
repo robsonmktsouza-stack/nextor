@@ -26,7 +26,7 @@
   data-show-tutorials="{{ \App\Models\AppSetting::value('system','show_tutorials',true) ? '1' : '0' }}">
 <div class="pdv-root lumeron-pdv-page" id="appRoot">
   <header class="pdv-topbar">
-    <a class="pdv-topbar-brand" href="{{ route(auth()->user()->canAccess('dashboard') ? 'dashboard' : auth()->user()->homeRouteName()) }}" aria-label="Lumeron — Administração">
+    <a class="pdv-topbar-brand" href="{{ route(auth()->user()->canAccess('dashboard') ? 'dashboard' : auth()->user()->licensedHomeRouteName()) }}" aria-label="Lumeron — Administração">
       <img class="lumeron-pdv-logo" src="{{ asset('images/lumeron/logo.png') }}" alt="Lumeron">
       <span class="pdv-topbar-context">PDV</span>
     </a>
@@ -61,7 +61,7 @@
         @include('partials.icon',['name'=>'receipt','size'=>17])
         <span>Vendas</span><kbd>Alt+V</kbd>
       </button>
-      <a class="pdv-topbar-button pdv-topbar-exit" id="pdvAdminLink" href="{{ route(auth()->user()->canAccess('dashboard') ? 'dashboard' : auth()->user()->homeRouteName()) }}">
+      <a class="pdv-topbar-button pdv-topbar-exit" id="pdvAdminLink" href="{{ route(auth()->user()->canAccess('dashboard') ? 'dashboard' : auth()->user()->licensedHomeRouteName()) }}">
         @include('partials.icon',['name'=>'arrow-left','size'=>17])
         <span>Administração</span><kbd>Alt+M</kbd>
       </a>
