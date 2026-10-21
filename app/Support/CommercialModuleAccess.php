@@ -20,7 +20,18 @@ final class CommercialModuleAccess
             return null;
         }
 
-        $path = $request->path();
+        // Route names cover future aliases as well as canonical URLs.
+        $named = match (true) {
+            $request->routeIs('pdv.*', 'sales.*', 'customers.*') => 'pdv',
+            $request->routeIs('products.*', 'stock.*') => 'products',
+            $request->routeIs('finance.*') => 'finance',
+            $request->routeIs('services.*') => 'services',
+            $request->routeIs('fiscal.*') => 'fiscal',
+            default => null,
+        };
+        if ($named !== null) {
+            return $named;
+        }
 
         return match (true) {
             $request->is('pdv', 'pdv/*', 'sales', 'sales/*', 'customers', 'customers/*') => 'pdv',
