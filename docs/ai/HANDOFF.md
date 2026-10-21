@@ -2,6 +2,27 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
+## Continuidade — 21/10/2026 — operação do Lumeron Control SEM copiar chaves nem confirmar no ERP
+
+**Decisão obrigatória do proprietário:** apenas cadastrar/ativar/suspender/renovar empresas pelo painel administrativo e pronto, no fluxo de representante adaptado. **Não** solicitar UUID, token, arquivo `.env`, confirmação do administrador do ERP nem senha técnica ao cliente. O CNPJ identifica a empresa, mas NÃO é credencial de posse: o pareamento exige acesso privilegiado do sistema de instalação.
+
+**Branch `control-center` (app privada e independente):**
+- Cadastro já gerava segredos HMAC criptografados; agora eles permanecem somente no backend. Removidos do `CompanyController::store` o flash `new_secret`, da view `clients.show` a chave, dos detalhes o UUID e o botão de rotação, e da rota a geração manual.
+- Botões simples Ativar/Suspender/Renovar/Plano/Módulos continuam no painel. Histórico por conta. O estado de licença `active` é diferente de `last_seen_at` e deve ser exibido como **aguardando instalação** quando a máquina nunca comunicou.
+- Comando privado `app/Console/Commands/BindManagedInstallation.php`: `control:bind-local <diretório ERP> --url=<url painel>`, rodado pelo **operador**, obtém CNPJ real com o novo comando read-only da instância, localiza empresa no banco do Control e grava `storage/app/private/lumeron-control.json` com HMAC, UUID, CNPJ e URL. Não mostra credenciais, não pede confirmação no ERP, não altera .env e não aceita sobrescrever instalação de outro CNPJ. HTTP somente loopback em APP_ENV local; remoto HTTPS.
+- Testes ampliados `ManagedBindingTest` e `ControlPanelTest`; CI Control aprovado com **15 testes e 79 assertions** em [workflow 39610616892](https://github.com/robsonmktsouza-stack/nextor/actions/runs/39610616892) antes de ajustes documentais.
+- **Limite real:** não houve execução na máquina Windows do proprietário; comando tem de ser executado pelo operador uma vez na instalação existente, depois de ERP `develop`/migração. Um simples cadastro no painel NÃO instala código em clientes nem executa deploy remoto.
+
+**Branch `develop` (ERP; `main`/`v1.0.0` não alterados):**
+- Criados `app/Support/ManagedLicenseConfig.php` e comando `lumeron:license-identity` (somente leitura do CNPJ e validação da migration).
+- `CentralLicenseService` e middleware `RequireCentralLicense` leem vínculo privado automaticamente; CNPJ precisa coincidir com `CompanySetting` e com o da instância, UUID/HMAC/HTTPS continuam verificados. Guard fail-closed se vínculo corrupto ou último estado persistido. Sem vínculo, não muda o comportamento da instalação.
+- Manter compatibilidade temporária com configurações `LUMERON_CONTROL_*` antigas, mas **não orientar novo cliente a digitar isso**. A conexão usa cache de 5 minutos e graça offline controlada; XMLs e operações legais fiscais nunca podem ser apagadas/bloqueadas destrutivamente.
+- Testes de vínculo interno adicionados em `CentralLicenseGuardTest` e CI `develop` aprovado com **418 testes e 2.710 assertions** em [workflow 39610747028](https://github.com/robsonmktsouza-stack/nextor/actions/runs/39610747028). Nova revisão de documentação/segurança pode gerar CI adicional; consultar o SHA antes de relatar resultado como atual.
+- Fonte normativa: [docs/deployment/control-center-integration.md](../deployment/control-center-integration.md), `AGENTS.md` (seção 2-C), README do Control e README ERP.
+
+**Próximos passos somente após solicitação:** atualizar os dois clones no Laragon, aplicar apenas a migration central no ERP com backup, executar o vínculo local a partir do Control (uma vez, sem expor credenciais), confirmar conexão pela última comunicação da empresa. A integração em deploys Linux remotos requer operador com acesso seguro aos dois ambientes ou serviço de provisionamento próprio; não afirmar que já foi implementado. Não tocar na tag `v1.0.0`.
+
+
 ## Continuidade — 20/10/2026 — Lumeron Control isolado e integração opt-in
 
 **Pedido do proprietário:** desenvolver painel administrativo simples de clientes/licenças inspirado no fluxo do eGestor, **sem Sites, NFe+, revendedores, cobranças ou dashboards gigantes**, mantendo visual Lumeron.
