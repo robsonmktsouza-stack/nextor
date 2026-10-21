@@ -70,7 +70,7 @@ if ((!ROLLBACK)); then
   lm_tenant_php "$ID" "$PHP_VERSION" "$TARGET" optimize
 fi
 
-FISCAL_RUNNING=0 SCHEDULE_RUNNING=0 MAINTENANCE=0 SWITCHED=0
+FISCAL_RUNNING=0 FAST_RUNNING=0 SCHEDULE_RUNNING=0 MAINTENANCE=0 SWITCHED=0
 cleanup() {
   local code="$?"
   if ((code!=0 && SWITCHED)); then
@@ -82,11 +82,16 @@ cleanup() {
     lm_tenant_php "$ID" "$PHP_VERSION" "$BASE/current" up || true
   fi
   if ((FISCAL_RUNNING)); then systemctl start "lumeron-fiscal-$ID.timer" || true; fi
+  if ((FAST_RUNNING)); then systemctl start "lumeron-fiscal-fast-$ID.service" || true; fi
   if ((SCHEDULE_RUNNING)); then systemctl start "lumeron-schedule-$ID.timer" || true; fi
 }
 trap cleanup EXIT
 if systemctl is-active --quiet "lumeron-fiscal-$ID.timer"; then
   FISCAL_RUNNING=1; systemctl stop "lumeron-fiscal-$ID.timer"
+fi
+# Persistent fast queue is stopped gracefully (TimeoutStopSec=240, job timeout=180).
+if systemctl is-active --quiet "lumeron-fiscal-fast-$ID.service"; then
+  FAST_RUNNING=1; systemctl stop "lumeron-fiscal-fast-$ID.service"
 fi
 if systemctl is-active --quiet "lumeron-schedule-$ID.timer"; then
   SCHEDULE_RUNNING=1; systemctl stop "lumeron-schedule-$ID.timer"
@@ -128,6 +133,9 @@ if ((FISCAL_RUNNING)); then
 fi
 if ((SCHEDULE_RUNNING)); then
   systemctl start "lumeron-schedule-$ID.timer"; SCHEDULE_RUNNING=0
+fi
+if ((FAST_RUNNING)); then
+  systemctl start "lumeron-fiscal-fast-$ID.service"; FAST_RUNNING=0
 fi
 trap - EXIT
 echo "Código de $ID agora usa $SHA. Banco, APP_KEY, dados fiscais e filas preservados."
