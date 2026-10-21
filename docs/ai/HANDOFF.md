@@ -2,6 +2,23 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
+## Continuidade — 21/10/2026 — refinamento visual do modo de consulta (sem faixa fixa)
+
+O usuário validou que o modo de consulta anterior estava funcional, mas considerou a **faixa azul grande acima do título Financeiro feia, fixa e invasiva**. Decisão visual permanente: retirar o banner e usar um chip compacto **"Modo consulta"** na topbar, sem consumir espaço vertical nos módulos. Indicador contextual explica a causa ao clicar (suspensa, vencida ou offline). Ações comerciais de escrita aparecem suavemente acinzentadas com pequeno cadeado, **sem atributo HTML disabled** (clique abre o modal); consultas, pesquisa, impressão e exportação continuam normais.
+
+**Código alterado (somente develop):**
+- `resources/views/partials/commercial-readonly.blade.php`: chip acessível com atributos de estado + modal existente; sem `commercial-readonly-banner`.
+- `resources/views/layouts/app.blade.php` e `layouts/pdv.blade.php`: indicador inserido dentro das topbars, removido da `main-content` e da `pdv-screen`.
+- `public/css/commercial-readonly.css`: estilo compacto coerente com o desktop ERP, tons discretos para ações bloqueadas, SVG cadeado e layout responsivo.
+- `public/js/commercial-readonly.js`: identifica links de Novo/Editar, botões de envio de formulários de escrita, ações em massa e modais; anota e estiliza controles; ao clicar exibe modal sem enviar a ação. Para menus em massa, muda a aparência quando seleção é Exportar/Imprimir; observer atualiza resultados dinâmicos. Mantém proteção de submit/fetch/XHR e botão sair.
+- `tests/Feature/CommercialReadOnlyLicenseTest.php`: checa chip dentro da topbar, sem banner, com acesso à listagem protegido pelo middleware.
+- O `RequireCentralLicense` continua **bloqueando escritas no servidor** (a interface não é barreira de segurança). Fiscal legal e dados permanecem preservados. A `main`/`v1.0.0` seguem intocadas.
+
+**Como conferir no Laragon:** backup do banco local, `git pull origin develop` no Nextor, `php artisan optimize:clear`, Ctrl+F5. Com licença suspensa abrir `/finance`, `/products`, `/pdv`: não há banner sobre o conteúdo, apenas chip no topo; `Conta a receber`/`Conta a pagar` e `Novo produto` devem aparecer neutros e clicar abre modal; filtros, histórico, impressão e exportação funcionam. Reativar no Control e atualizar página retira chip e restaura os botões. Não precisa rodar migrations, nem mexer no Control.
+
+**Validação:** JS analisado sintaticamente pelo runtime. Aguardar último GitHub Actions `develop` (workflow atual sobre o head) antes de relatar total de testes; inicialmente os testes de UI antigo falhavam porque ainda procuravam o banner, foram atualizados. Não afirmar validação visual pixel-a-pixel de produção.
+
+
 ## Continuidade — 21/10/2026 — Lumeron suspenso mantém acesso em modo de consulta
 
 **Decisão do proprietário:** substituir a página em tela inteira `/license-status` pelo ERP aberto com barra discreta "Modo de consulta" e modal elegante apenas quando o usuário tentar executar operação bloqueada. Manter login, cadastros, consultas, histórico, relatórios e impressão, **sem gravar dados comerciais**. Reativação normal pelo Control, sem logout ou novo cadastro. Mensagens específicas para `suspended`, `expired` e `unverified`.
