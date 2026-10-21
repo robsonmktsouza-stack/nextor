@@ -9,7 +9,7 @@
 <div class="license-grid-toolbar" data-grid-toolbar>
     <div class="license-grid-tools">
         @if($createUrl)
-            <a href="{{ $createUrl }}" class="license-grid-new" data-tooltip="{{ $createLabel }}">
+            <a href="{{ $createUrl }}" class="license-grid-new" @if($createModal ?? false) data-automation-open="create" @endif data-tooltip="{{ $createLabel }}">
                 @include('partials.icon',['name'=>'plus','size'=>17])<span>{{ $createLabel }}</span>
             </a>
         @endif

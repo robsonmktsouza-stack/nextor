@@ -12,6 +12,9 @@
 <section class="panel license-grid" data-admin-list data-grid-filename="automacoes-regras">
     @include('partials.listing.toolbar', [
         'toolbarUrl' => route('automations.index'),
+        'createUrl' => route('automations.create'),
+        'createLabel' => 'Nova automação',
+        'createModal' => true,
         'filterId' => 'automation-rule-filters',
         'filtersActive' => $hasFilters,
     ])
@@ -33,7 +36,7 @@
     </div>
     <div class="table-scroll">
         <table class="license-data-table" data-grid-table>
-            <thead><tr><th>Regra</th><th>Descrição</th><th>Prazo</th><th>Última verificação</th><th>Situação</th><th class="license-actions-heading">Ações</th></tr></thead>
+            <thead><tr><th>Regra</th><th>Descrição</th><th>Tipo</th><th>Prazo</th><th>Última verificação</th><th>Situação</th><th class="license-actions-heading">Ações</th></tr></thead>
             <tbody>
                 @forelse($rules as $rule)
                     <tr>
@@ -42,13 +45,16 @@
                             <form method="post" action="{{ route('automations.update',$rule) }}" id="automation-rule-{{ $rule->id }}">
                                 @csrf @method('PUT')
                                 <input type="hidden" name="enabled" value="0">
+                                <input type="hidden" name="name" value="{{ $rule->name }}">
+                                <input type="hidden" name="description" value="{{ $rule->description }}">
                             </form>
                         </td>
                         <td>{{ $rule->description }}</td>
+                        <td>{{ \App\Models\AutomationRule::KINDS[$rule->kindCode()] ?? 'Indisponível' }}</td>
                         <td class="license-nowrap">
-                            @if($rule->code !== 'expired')
+                            @if($rule->kindCode() !== 'expired')
                                 <label class="automation-inline-days"><span class="sr-only">Prazo em dias para {{ $rule->name }}</span>
-                                    <input type="number" form="automation-rule-{{ $rule->id }}" name="days" min="{{ $rule->code === 'offline' ? 1 : 0 }}" max="365" value="{{ $rule->days }}" required>
+                                    <input type="number" form="automation-rule-{{ $rule->id }}" name="days" min="{{ $rule->kindCode() === 'offline' ? 1 : 0 }}" max="365" value="{{ $rule->days }}" required>
                                     <span>dias</span>
                                 </label>
                             @else
@@ -68,11 +74,21 @@
                         <td>
                             <div class="license-row-actions">
                                 <button class="license-icon-action" type="submit" form="automation-rule-{{ $rule->id }}"
-                                    data-tooltip="Salvar regra" aria-label="Salvar regra {{ $rule->name }}">@include('partials.icon',['name'=>'check','size'=>16])</button>
+                                    data-tooltip="Salvar prazo e situação" aria-label="Salvar prazo e situação de {{ $rule->name }}">@include('partials.icon',['name'=>'check','size'=>16])</button>
+                                <a class="license-icon-action" href="{{ route('automations.edit', $rule) }}"
+                                   data-automation-open="edit"
+                                   data-automation-action="{{ route('automations.update', $rule) }}"
+                                   data-automation-rule-id="{{ $rule->id }}"
+                                   data-automation-name="{{ $rule->name }}"
+                                   data-automation-description="{{ $rule->description }}"
+                                   data-automation-kind="{{ $rule->kindCode() }}"
+                                   data-automation-days="{{ $rule->days }}"
+                                   data-automation-enabled="{{ $rule->enabled ? '1' : '0' }}"
+                                   data-tooltip="Editar automação" aria-label="Editar automação {{ $rule->name }}">@include('partials.icon',['name'=>'edit','size'=>16])</a>
                             </div>
                         </td>
                     </tr>
-                @empty<tr><td colspan="6" class="empty">Nenhuma regra encontrada.</td></tr>
+                @empty<tr><td colspan="7" class="empty">Nenhuma regra encontrada.</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -122,4 +138,27 @@
         'plural' => 'avisos',
     ])
 </section>
+<dialog id="automationEditorDialog" class="account-dialog automation-editor-dialog" aria-labelledby="automationEditorTitle"
+    data-reopen-context="{{ $errors->any() ? old('automation_context', '') : '' }}"
+    data-old-name="{{ old('name', '') }}" data-old-description="{{ old('description', '') }}"
+    data-old-kind="{{ old('kind', '') }}" data-old-days="{{ old('days', '') }}"
+    data-old-enabled="{{ old('enabled', '0') }}">
+    <div class="dialog-header">
+        <strong id="automationEditorTitle">Nova automação</strong>
+        <button class="icon-button" type="button" data-automation-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>16])</button>
+    </div>
+    <form method="post" action="{{ route('automations.store') }}" data-automation-editor-form
+        data-store-action="{{ route('automations.store') }}">
+        @csrf
+        <input type="hidden" name="_method" value="PUT" disabled>
+        <input type="hidden" name="automation_context" value="create">
+        <div class="dialog-body automation-editor-body">
+            @include('automations.partials.fields', ['rule' => new \App\Models\AutomationRule()])
+            <div class="control-form-actions">
+                <button type="button" class="btn subtle" data-automation-close>Cancelar</button>
+                <button type="submit" class="btn primary">@include('partials.icon',['name'=>'check','size'=>16])Salvar automação</button>
+            </div>
+        </div>
+    </form>
+</dialog>
 @endsection

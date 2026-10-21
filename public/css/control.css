@@ -236,3 +236,12 @@ svg.nextor-icon{
   display:block;margin:5px 0 10px;color:#466f88;font-size:11px;line-height:1.5
 }
 @media(max-width:680px){.plan-modules-overview{flex-direction:column;gap:3px}}
+
+/* Editor de automações compacto, com o mesmo diálogo dos detalhes do Control. */
+.automation-editor-dialog{width:min(630px,calc(100vw - 24px));background:#fff;max-height:92vh}
+.automation-editor-body{padding:20px 22px 16px}
+.automation-form-grid{margin:0 0 14px}
+.automation-form-grid [data-automation-days-field][hidden]{display:none!important}
+.automation-editor-dialog .settings-check{margin:8px 0}
+.automation-editor-dialog .control-form-actions{margin-top:14px;padding-top:14px}
+@media(max-width:720px){.automation-editor-body{padding:14px}}
