@@ -70,6 +70,19 @@ final class LocalErpProvisioningTest extends TestCase
         $this->get(route('clients.first-access',$company))->assertNotFound();
     }
 
+    public function test_laragon_invokes_composer_via_cmd_to_support_composer_bat(): void
+    {
+        $this->assertSame(
+            ['cmd.exe', '/d', '/c', 'composer', 'install', '--no-interaction',
+                '--prefer-dist', '--no-progress'],
+            \App\Services\LocalErpProvisioner::composerCommandForPlatform('Windows')
+        );
+        $this->assertSame(
+            ['composer', 'install', '--no-interaction', '--prefer-dist', '--no-progress'],
+            \App\Services\LocalErpProvisioner::composerCommandForPlatform('Linux')
+        );
+    }
+
     public function test_local_provisioner_reports_failing_stage_without_dumping_sensitive_output(): void
     {
         $service = app(\App\Services\LocalErpProvisioner::class);
