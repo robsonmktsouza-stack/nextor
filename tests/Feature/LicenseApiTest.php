@@ -54,7 +54,8 @@ final class LicenseApiTest extends TestCase
         $company = $this->company();
         $response = $this->check($company);
         $response->assertOk()->assertJsonPath('status', 'active')
-            ->assertJsonPath('modules.0', 'pdv')->assertJsonPath('cnpj', $company->cnpj);
+            ->assertJsonPath('modules.0', 'pdv')->assertJsonPath('modules.1', 'products')
+            ->assertJsonPath('cnpj', $company->cnpj);
         $raw = $response->getContent();
         $this->assertSame(
             hash_hmac('sha256', $raw, $company->license_secret),
@@ -71,6 +72,19 @@ final class LicenseApiTest extends TestCase
         $this->check($company, nonce: $nonce)->assertStatus(409);
         $this->check($company, secret: 'invalid-secret')->assertUnauthorized();
         $this->check($company, cnpj: '00000000000000')->assertStatus(422);
+    }
+
+    public function test_api_entitlements_come_from_editable_plan_not_obsolete_company_snapshot(): void
+    {
+        $company = $this->company();
+        $this->assertSame(['pdv', 'fiscal'], $company->modules);
+        $plan = \App\Models\Plan::where('code', 'standard')->firstOrFail();
+        $plan->update(['modules' => ['finance', 'services']]);
+
+        $this->check($company)->assertOk()
+            ->assertJsonPath('plan', 'standard')
+            ->assertJsonPath('modules', ['finance', 'services']);
+        $this->assertSame(['pdv', 'fiscal'], $company->fresh()->modules);
     }
 
     public function test_suspended_and_expired_status_are_visible(): void
