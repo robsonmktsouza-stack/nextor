@@ -65,7 +65,8 @@ final class CommercialReadOnlyLicenseTest extends TestCase
             ->assertSee('commercialReadOnlyDialog')
             ->assertSee('Modo consulta')
             ->assertDontSee('commercial-readonly-banner')
-            ->assertSee('Assinatura suspensa');
+            ->assertSee('Assinatura suspensa')
+            ->assertSeeInOrder(['class="topbar-spacer"', 'data-license-chip', 'topbar-environment'], false);
         $this->get('/license-status')->assertRedirect('/dashboard');
     }
 
