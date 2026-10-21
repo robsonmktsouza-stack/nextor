@@ -125,7 +125,7 @@ final class ControlPanelTest extends TestCase
         $this->get('/clients/create')
             ->assertOk()
             ->assertSee('data-error-field="installation_url"', false)
-            ->assertSee('endereço da instalação deve usar HTTPS')
+            ->assertSee('Informe um endereço seguro (HTTPS).')
             ->assertSee('http://empresa.example.com.br');
     }
 
