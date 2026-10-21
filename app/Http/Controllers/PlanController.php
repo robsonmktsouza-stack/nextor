@@ -39,7 +39,10 @@ final class PlanController extends Controller
 
     public function edit(Plan $plan)
     {
-        return view('plans.form', ['plan' => $plan]);
+        return view('plans.form', [
+            'plan' => $plan,
+            'customerCount' => Company::query()->where('plan', $plan->code)->count(),
+        ]);
     }
 
     private function validated(Request $request, ?Plan $plan = null): array
