@@ -21,6 +21,8 @@ final class Invoice extends Model
             'period_start' => 'date', 'period_end' => 'date',
             'issue_date' => 'date', 'due_date' => 'date',
             'issued_at' => 'datetime', 'cancelled_at' => 'datetime',
+            'license_applied_at' => 'datetime', 'license_application_reversed_at' => 'datetime',
+            'previous_license_expiry' => 'date',
             'amount' => 'decimal:2',
         ];
     }
@@ -49,6 +51,12 @@ final class Invoice extends Model
         if ($this->balanceCents() === 0) return 'paid';
         if ($this->due_date->toDateString() < today()->toDateString()) return 'overdue';
         return $this->paidCents() > 0 ? 'partial' : 'open';
+    }
+
+    public function licenseApplicationActive(): bool
+    {
+        return $this->license_applied_at !== null
+            && $this->license_application_reversed_at === null;
     }
 
     public function statusLabel(): string

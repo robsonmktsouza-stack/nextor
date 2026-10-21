@@ -51,5 +51,7 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/invoices/{invoice}/pay', [InvoiceController::class, 'pay'])->name('invoices.pay');
     Route::post('/invoices/{invoice}/payments/{payment}/reverse', [InvoiceController::class, 'reverse'])->name('invoices.payments.reverse');
     Route::post('/invoices/{invoice}/cancel', [InvoiceController::class, 'cancel'])->name('invoices.cancel');
+    Route::post('/invoices/{invoice}/apply-license', [InvoiceController::class, 'applyLicense'])->name('invoices.apply-license');
+    Route::post('/invoices/{invoice}/undo-license', [InvoiceController::class, 'undoLicense'])->name('invoices.undo-license');
     Route::get('/history', [HistoryController::class, 'index'])->name('history.index');
 });

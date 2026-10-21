@@ -289,3 +289,18 @@ após atualizar a aplicação. Uma futura integração com PSP deve exigir
 webhooks autenticados, idempotência e consentimento/aviso apropriado.
 Rodar a migration `2026_10_21_000005_create_invoices_and_payments.php`
 **somente no banco do Control**.
+
+### Renovar a licença a partir de uma fatura quitada
+
+A fatura **não renova automaticamente** quando se registra um pagamento.
+Depois de quitar 100% do valor, o operador pode usar o botão **Renovar
+licença**. O Control confere o saldo, bloqueia aplicação repetida, exige
+que o novo período realmente amplie a validade atual e audita a operação.
+A licença atualizada é transmitida ao ERP na próxima checagem HMAC assinada.
+Uma suspensão manual prévia não é removida por essa operação.
+
+O botão **Desfazer renovação** restaura a validade anterior somente se
+ninguém a alterou posteriormente; a reversão é auditada. Não é permitido
+estornar um pagamento ou cancelar uma fatura com renovação aplicada sem
+antes desfazê-la com segurança. Esta operação não comprova recebimento
+bancário: pagamentos seguem sendo lançados manualmente.

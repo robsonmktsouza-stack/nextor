@@ -183,6 +183,39 @@ final class InvoiceFlowTest extends TestCase
         $this->get(route('invoices.index').'?status=paid')->assertDontSee('FAT-000001');
     }
 
+    public function test_paid_invoice_requires_explicit_license_application_and_can_be_safely_undone(): void
+    {
+        $this->actingAs($this->admin());
+        $company = $this->company();
+        $before = $company->expires_at->toDateString();
+        $invoice = $this->createInvoice($company);
+        $this->post(route('invoices.apply-license',$invoice))->assertSessionHasErrors('invoice');
+        $this->post(route('invoices.issue',$invoice))->assertRedirect();
+        $this->post(route('invoices.apply-license',$invoice))->assertSessionHasErrors('invoice');
+        $this->post(route('invoices.pay',$invoice), [
+            'amount'=>'100.00', 'paid_on'=>today()->toDateString(), 'method'=>'pix',
+        ])->assertRedirect();
+        $this->assertSame($before, $company->fresh()->expires_at->toDateString());
+
+        $this->post(route('invoices.apply-license',$invoice))->assertRedirect();
+        $this->assertSame($invoice->period_end->toDateString(),
+            $company->fresh()->expires_at->toDateString());
+        $this->assertTrue($invoice->fresh()->licenseApplicationActive());
+        $this->post(route('invoices.apply-license',$invoice))->assertSessionHasErrors('invoice');
+
+        $payment = InvoicePayment::query()->sole();
+        $this->post(route('invoices.payments.reverse',[$invoice,$payment]),
+            ['reason'=>'Pagamento equivocado'])->assertSessionHasErrors('payment');
+        $this->post(route('invoices.undo-license',$invoice))->assertRedirect();
+        $this->assertSame($before, $company->fresh()->expires_at->toDateString());
+        $this->assertFalse($invoice->fresh()->licenseApplicationActive());
+        $this->post(route('invoices.payments.reverse',[$invoice,$payment]),
+            ['reason'=>'Pagamento equivocado'])->assertRedirect();
+        $this->assertDatabaseHas('invoices', [
+            'id'=>$invoice->id, 'license_applied_by'=>auth()->id(),
+        ]);
+    }
+
     public function test_money_validation_uses_integer_cents_and_no_floats(): void
     {
         $this->assertSame(12550, InvoiceMoney::cents('125.50'));

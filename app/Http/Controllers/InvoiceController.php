@@ -141,6 +141,18 @@ final class InvoiceController extends Controller
         return back()->with('success', 'Pagamento estornado.');
     }
 
+    public function applyLicense(Invoice $invoice, InvoiceService $service)
+    {
+        $service->applyPaidPeriod($invoice);
+        return back()->with('success', 'Validade da licença renovada.');
+    }
+
+    public function undoLicense(Invoice $invoice, InvoiceService $service)
+    {
+        $service->undoPaidPeriod($invoice);
+        return back()->with('success', 'Renovação da licença desfeita.');
+    }
+
     public function cancel(Request $request, Invoice $invoice, InvoiceService $service)
     {
         $data = $request->validate(['reason' => ['required','string','min:5','max:255']]);

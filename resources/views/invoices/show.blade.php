@@ -10,6 +10,19 @@
             </button>
         </form>
     @endif
+    @if($invoice->status==='issued' && $invoice->balanceCents()===0 && !$invoice->license_applied_at)
+        <form method="post" action="{{ route('invoices.apply-license',$invoice) }}">@csrf
+            <button class="btn primary" type="submit" data-confirm="Aplicar o período quitado à validade do cliente? Isso será refletido no ERP conectado.">
+                @include('partials.icon',['name'=>'calendar','size'=>16])Renovar licença
+            </button>
+        </form>
+    @elseif($invoice->licenseApplicationActive())
+        <form method="post" action="{{ route('invoices.undo-license',$invoice) }}">@csrf
+            <button class="btn subtle" type="submit" data-confirm="Desfazer a renovação de validade aplicada por esta fatura?">
+                Desfazer renovação
+            </button>
+        </form>
+    @endif
     <button type="button" class="btn subtle" onclick="window.print()">
         @include('partials.icon',['name'=>'print','size'=>16])Imprimir
     </button>
@@ -51,6 +64,11 @@
             <div><span>Recebido</span><strong>{{ \App\Support\InvoiceMoney::brl($paid) }}</strong></div>
             <div><span>Saldo</span><strong>{{ \App\Support\InvoiceMoney::brl($balance) }}</strong></div>
         </div>
+        @if($invoice->licenseApplicationActive())
+            <div class="invoice-license-note">Validade aplicada à licença em {{ $invoice->license_applied_at->format('d/m/Y H:i') }}.</div>
+        @elseif($invoice->license_application_reversed_at)
+            <div class="invoice-license-note">Aplicação à licença desfeita em {{ $invoice->license_application_reversed_at->format('d/m/Y H:i') }}.</div>
+        @endif
         @if($invoice->status==='cancelled')
             <div class="invoice-cancellation">Cancelada em {{ $invoice->cancelled_at?->format('d/m/Y H:i') }}. {{ $invoice->cancellation_reason }}</div>
         @endif

@@ -125,8 +125,9 @@ final class InvoiceService
             $invoice = Invoice::query()->lockForUpdate()->findOrFail($invoice->id);
             $payment = InvoicePayment::query()->where('invoice_id', $invoice->id)
                 ->lockForUpdate()->findOrFail($payment->id);
-            if ($invoice->status !== 'issued' || $payment->reversed_at !== null) {
-                throw ValidationException::withMessages(['payment' => 'Este pagamento não pode ser estornado.']);
+            if ($invoice->status !== 'issued' || $payment->reversed_at !== null
+                || $invoice->licenseApplicationActive()) {
+                throw ValidationException::withMessages(['payment' => 'Desfaça a renovação aplicada à licença antes de estornar.']);
             }
             $payment->forceFill([
                 'reversed_at' => now(),
@@ -140,12 +141,79 @@ final class InvoiceService
         });
     }
 
+    /**
+     * Explicit commercial activation after verifying the FULL manual settlement.
+     * Never reactivate a suspended license or trust an ERP-side payment.
+     */
+    public function applyPaidPeriod(Invoice $invoice): void
+    {
+        DB::transaction(function () use ($invoice): void {
+            $invoice = Invoice::query()->lockForUpdate()->findOrFail($invoice->id);
+            if ($invoice->status !== 'issued' || $invoice->balanceCents() !== 0
+                || $invoice->license_applied_at !== null) {
+                throw ValidationException::withMessages([
+                    'invoice' => 'A fatura precisa estar quitada e ainda não aplicada à licença.',
+                ]);
+            }
+            $company = Company::query()->lockForUpdate()->findOrFail($invoice->company_id);
+            $old = $company->expires_at?->toDateString();
+            $target = $invoice->period_end->toDateString();
+            if ($old === null || $target <= $old || $target < today()->toDateString()) {
+                throw ValidationException::withMessages([
+                    'invoice' => 'O período pago não amplia a validade atual desta licença.',
+                ]);
+            }
+
+            $company->update(['expires_at' => $target]);
+            $invoice->forceFill([
+                'license_applied_at' => now(),
+                'previous_license_expiry' => $old,
+                'license_applied_by' => auth()->id(),
+            ])->save();
+            $company->record('invoice_license_applied',
+                'Validade renovada pela fatura '.$invoice->number.'.', [
+                    'invoice_id' => $invoice->id,
+                    'previous_expiry' => $old,
+                    'expires_at' => $target,
+                ]);
+        });
+    }
+
+    public function undoPaidPeriod(Invoice $invoice): void
+    {
+        DB::transaction(function () use ($invoice): void {
+            $invoice = Invoice::query()->lockForUpdate()->findOrFail($invoice->id);
+            if (!$invoice->licenseApplicationActive()) {
+                throw ValidationException::withMessages(['invoice' => 'Esta fatura não possui renovação ativa.']);
+            }
+            $company = Company::query()->lockForUpdate()->findOrFail($invoice->company_id);
+            if ($company->expires_at?->toDateString() !== $invoice->period_end->toDateString()) {
+                throw ValidationException::withMessages([
+                    'invoice' => 'A licença já foi alterada depois desta renovação. Confira a validade antes de desfazer.',
+                ]);
+            }
+            $old = $invoice->previous_license_expiry?->toDateString();
+            $company->update(['expires_at' => $old]);
+            $invoice->forceFill(['license_application_reversed_at' => now()])->save();
+            $company->record('invoice_license_reversed',
+                'Renovação da fatura '.$invoice->number.' desfeita.', [
+                    'invoice_id' => $invoice->id,
+                    'expires_at' => $old,
+                ]);
+        });
+    }
+
     public function cancel(Invoice $invoice, string $reason): void
     {
         DB::transaction(function () use ($invoice, $reason): void {
             $invoice = Invoice::query()->lockForUpdate()->findOrFail($invoice->id);
             if ($invoice->status === 'cancelled') {
                 throw ValidationException::withMessages(['reason' => 'Fatura já cancelada.']);
+            }
+            if ($invoice->licenseApplicationActive()) {
+                throw ValidationException::withMessages([
+                    'reason' => 'Desfaça a renovação da licença antes de cancelar a fatura.',
+                ]);
             }
             if ($invoice->paidCents() > 0) {
                 throw ValidationException::withMessages([
