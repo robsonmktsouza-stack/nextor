@@ -18,3 +18,12 @@ Alterações em autenticação/licença exigem testes e revisão de segurança. 
 - Para instalação já existente, o operador de infraestrutura usa `php artisan control:bind-local <caminho-do-ERP> --url=<painel>`, que obtém o CNPJ do ERP, confere a conta e instala o vínculo no storage privado, sem copiar chave. Esse procedimento inicial **não exige ação do cliente** e não se repete nas renovações.
 - Deploys futuros devem invocar o vínculo automaticamente pelo sistema de provisionamento; isso **ainda não significa** que o deploy remoto está configurado. A branch `develop` contém o agente que lê as credenciais privadas.
 - Nunca implementar vínculo confiando só num CNPJ fornecido via web; exigir controle autorizado da instalação pelo servidor.
+
+## Catálogo de planos e regras agendadas (21/10/2026)
+
+- **Nunca** voltar a manter `standard/advanced/full` ou nomes/preços de planos fixos no PHP em tempo de execução. A migration inicial cria valores legados uma única vez, preservando empresas. Gerenciar pelo banco em `plans` com CRUD seguro na aba Planos.
+- **Nunca** mudar o código de um plano usado por empresas, nem alterar módulos/validade de clientes quando a definição comercial muda. Arquivar remove opção para novos cadastros, não cancela assinaturas já emitidas. API HMAC do ERP continua retornando o código de plano e módulos da licença individual.
+- As regras da seção Automações pertencem somente ao **Control** (`automation_rules`), começam **desligadas**, são executadas por `control:automations-run` (agenda 08h) e geram apenas avisos de histórico interno via `automation_deliveries` com deduplicação transacional.
+- Não enviar e-mails, WhatsApp, não gerar cobranças, suspender, renovar ou reativar contratos a partir dessas rotinas sem decisão expressa e testes dedicados. Vencimento continua derivado diretamente de `expires_at`; o alerta não altera o status.
+- `php artisan schedule:work` serve para Laragon em janela separada; servidor Linux precisa de cron externo a cada minuto. Sem scheduler ativo, não declarar que monitoramento periódico funciona.
+- Cobrir edições/arquivamento de planos, validade das licenças existentes, autenticação do proprietário, deduplicação e execução com as regras desligadas. Preservar CNPJ, secrets e isolamento do ERP.
