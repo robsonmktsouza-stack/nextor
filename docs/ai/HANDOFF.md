@@ -2,6 +2,22 @@
 
 Este documento registra o último trabalho concluído. Verifique sempre o código da branch ativa e `git status -sb` antes de continuar.
 
+## Continuidade — 21/10/2026 — Lumeron suspenso mantém acesso em modo de consulta
+
+**Decisão do proprietário:** substituir a página em tela inteira `/license-status` pelo ERP aberto com barra discreta "Modo de consulta" e modal elegante apenas quando o usuário tentar executar operação bloqueada. Manter login, cadastros, consultas, histórico, relatórios e impressão, **sem gravar dados comerciais**. Reativação normal pelo Control, sem logout ou novo cadastro. Mensagens específicas para `suspended`, `expired` e `unverified`.
+
+**Implementado somente na `develop` (nunca tocar `main`/`v1.0.0`):**
+- `app/Support/CommercialLicensePolicy.php`: política central de métodos HTTP, mensagens e nomes EXATOS de rotas fiscais preservadas. **Não** liberar `fiscal/*` em massa (permitiria novas emissões e alterações indevidas). Foram preservadas consulta de pendência, cancelamento fiscal, transmissão offline de nota anterior, inutilização, recuperação e download de XML.
+- `app/Http/Middleware/RequireCentralLicense.php`: consultas/GET liberados; POST/PUT/PATCH/DELETE comerciais são negados no **servidor**, independentemente da interface. HTML: redirect 303 ao contexto anterior + flash warning; AJAX/JSON: HTTP 423 + `LUMERON_LICENSE_READ_ONLY`. CNPJ e HMAC mantidos; permissões do ERP inalteradas.
+- `resources/views/partials/commercial-readonly.blade.php`, `public/css/commercial-readonly.css`, `public/js/commercial-readonly.js`: aviso compacto com status e modal organizado. Captura formularios normais e programáticos, links Novo/Editar e erros de fetch/XHR; defesa efetiva permanece middleware. Layouts `layouts/app.blade.php` e `layouts/pdv.blade.php` utilizam o mesmo componente.
+- `routes/web.php`: antigas visitas a `/license-status` de suspensos redirecionam para a página inicial do ERP.
+- Testes: revisão `CentralLicenseGuardTest`, novos cenários `tests/Feature/CommercialReadOnlyLicenseTest.php` cobrindo GET real de produtos, form HTML 303, métodos de escrita AJAX 423, exceção fiscal explícita, emissão fiscal bloqueada, mensagens suspensa/vencida/não-verificada, reativação e logout.
+- **Evidência CI:** workflow develop `39619729674` verde com **429 testes / 2.761 assertions**, antes dos commits adicionais documentais; conferir CI mais recente antes de declarar branch final verde.
+- Não executado deploy nem mudança no Windows do proprietário. Após `git pull origin develop` e `php artisan optimize:clear`, testar no Laragon: Control suspenso → ERP aberto em modo consulta → tentar salvar → modal → reativar no Control → operação liberada após cache até ~5 minutos.
+
+**Importante:** o middleware HTTP não controla alterações de jobs agendados, workers e transmissões fiscais já enfileiradas; revisão adicional necessária antes de implantações em produção. Não desabilitar operações legais fiscais nem apagar XMLs. Comunicação Control/ERP e vínculo automático continuam como anteriormente implementados.
+
+
 ## Continuidade — 21/10/2026 — operação do Lumeron Control SEM copiar chaves nem confirmar no ERP
 
 **Decisão obrigatória do proprietário:** apenas cadastrar/ativar/suspender/renovar empresas pelo painel administrativo e pronto, no fluxo de representante adaptado. **Não** solicitar UUID, token, arquivo `.env`, confirmação do administrador do ERP nem senha técnica ao cliente. O CNPJ identifica a empresa, mas NÃO é credencial de posse: o pareamento exige acesso privilegiado do sistema de instalação.
