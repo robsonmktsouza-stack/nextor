@@ -29,7 +29,7 @@
 <label>Vencimento <input name="expires_at" type="date" value="{{ old('expires_at') }}"><small>Em branco = sem vencimento automático.</small>@error('expires_at')<small class="field-error">{{ $message }}</small>@enderror</label>
 </div>
 <div class="modules"><strong>Módulos liberados</strong><div class="module-grid">@foreach(config('license.modules') as $code=>$label)<label class="check"><input type="checkbox" name="modules[]" value="{{ $code }}" @checked(in_array($code, old('modules',['pdv','products','finance','fiscal','services'])))>{{ $label }}</label>@endforeach</div></div>
-<div class="info-line">A chave de licença será gerada automaticamente e mostrada somente após salvar. Nenhuma conta será criada diretamente no servidor do cliente.</div>
+<div class="info-line">Após salvar, a conta estará liberada no painel. A instalação será vinculada automaticamente pelo gerenciador de implantação, sem senha, código ou confirmação do cliente.</div>
 </fieldset>
 <div class="wizard-footer"><button class="btn subtle" type="button" data-wizard-back hidden>Voltar</button><span class="nav-spacer"></span><button class="btn primary" type="button" data-wizard-next>Próximo <svg><use href="#i-arrow"/></svg></button><button class="btn primary" type="submit" data-wizard-submit hidden><svg><use href="#i-check"/></svg>Criar conta</button></div>
 </form>
