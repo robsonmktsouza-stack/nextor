@@ -39,6 +39,12 @@ final class CommercialPlanAccessTest extends TestCase
 
     private function admin(): User
     {
+        \App\Models\CompanySetting::current()->update([
+            'document' => '11222333000181',
+            'legal_name' => 'EMPRESA TESTE LTDA',
+            'state' => 'SP',
+            'city' => 'São Paulo',
+        ]);
         return User::create([
             'name' => 'Administrador',
             'username' => 'planadmin',
