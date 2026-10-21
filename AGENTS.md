@@ -68,7 +68,7 @@ Ver [docs/deployment/control-center-integration.md](docs/deployment/control-cent
 
 - Aplicar bloqueio de escrita **no backend** em `app/Http/Middleware/RequireCentralLicense.php` e `app/Support/CommercialLicensePolicy.php`. POST/PUT/PATCH/DELETE comerciais devem ser recusados; requisições AJAX recebem 423 e identificador `LUMERON_LICENSE_READ_ONLY`.
 - Liberar somente exceções fiscais legais listadas explicitamente, não por prefixos genéricos `fiscal/*` ou `pdv/nfce/*`. Permissões dos usuários continuam obrigatórias. Preservar cancelamento/consulta/contingência/recuperação de XML autorizado.
-- A interface utiliza `partials/commercial-readonly.blade.php`, `commercial-readonly.js` e `commercial-readonly.css` nos layouts `app` e `pdv`. Não duplicar a UI em cada módulo.
+- A interface utiliza `partials/commercial-readonly.blade.php`, `commercial-readonly.js` e `commercial-readonly.css` nos layouts `app` e `pdv`. O status deve ser **somente um chip discreto na barra superior**; NUNCA retornar banner grande/fixo no conteúdo. Ações comerciais são acinzentadas, mas clicáveis para abrir o modal. Impressão, exportação e consultas não ficam visualmente bloqueadas. Não duplicar a UI em cada módulo.
 - Distinguir `suspended`, `expired` e `unverified`; não imputar atraso financeiro a falhas de comunicação.
 - Reativação deve devolver capacidade de escrita após refresh do cache, sem novo login. Nunca apagar dados ao suspender.
 - Middleware HTTP não impede jobs agendados; avaliar o impacto de workers nas operações financeiras/fiscais antes de produção.
