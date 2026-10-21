@@ -54,6 +54,12 @@ final class RequireCentralLicense
             return $next($request);
         }
 
+        // Regularizações fiscais legais continuam disponíveis para usuários
+        // com permissão, independentemente do plano de módulos comerciais.
+        if ($request->routeIs(...CommercialLicensePolicy::CONTINUITY_ROUTES)) {
+            return $next($request);
+        }
+
         // Em licença ativa, os módulos contratados continuam sendo exigidos.
         // Documentos e regularizações fiscais respeitam permissões do usuário.
         $modules = $state['modules'] ?? [];
