@@ -59,7 +59,18 @@ final class ManagedLicenseConfig
 
     public static function enabled(): bool
     {
-        return (bool) config('central_license.enabled') || self::credentials() !== null;
+        if ((bool) config('central_license.enabled') || self::credentials() !== null) {
+            return true;
+        }
+
+        // A formerly linked installation must not become unrestricted simply
+        // because someone removes its private credentials file.
+        try {
+            return \Illuminate\Support\Facades\DB::table('central_license_states')
+                ->where('id', 1)->exists();
+        } catch (\Throwable) {
+            return false; // Older installs, not yet enrolled or migrated.
+        }
     }
 
     public static function settings(): array
