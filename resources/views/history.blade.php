@@ -12,7 +12,7 @@
         <form class="license-filter-form" method="get" action="{{ route('history.index') }}">
             <label class="license-search"><span class="sr-only">Buscar histórico</span>
                 <input type="search" name="q" value="{{ request('q') }}" placeholder="Empresa ou subdomínio...">
-                <svg><use href="#i-search"/></svg></label>
+                @include('partials.icon',['name'=>'search','size'=>17])</label>
             <input type="hidden" name="per_page" value="{{ $events->perPage() }}">
             <button class="btn primary small" type="submit">Filtrar</button>
             @if($hasFilters)<a href="{{ route('history.index') }}" class="btn subtle small">Limpar</a>@endif
@@ -38,7 +38,7 @@
                         <td>
                             <div class="license-row-actions">
                                 @if($event->company)
-                                    <a class="license-icon-action" href="{{ route('clients.show',$event->company_id) }}" title="Ver cliente" aria-label="Ver cliente relacionado ao evento"><svg><use href="#i-clients"/></svg></a>
+                                    <a class="license-icon-action" href="{{ route('clients.show',$event->company_id) }}" title="Ver cliente" aria-label="Ver cliente relacionado ao evento">@include('partials.icon',['name'=>'clients','size'=>16])</a>
                                 @endif
                             </div>
                         </td>
