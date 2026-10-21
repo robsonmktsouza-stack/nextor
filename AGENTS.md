@@ -45,3 +45,12 @@ Alterações em autenticação/licença exigem testes e revisão de segurança. 
 - Tabelas pequenas de resumo no dashboard usam mesma aparência e toolbar, mas não requerem paginação artificial.
 - Switches acessíveis são usados para flags ligar/desligar; nada de caixas de seleção visuais para esse propósito. Não adicionar seleção em massa a Licenças sem solicitação explícita.
 - Paginação e filtros devem ser processados no servidor e preservar parâmetros da URL. Para Automações usar paginadores independentes `rules_page` e `alerts_page`.
+
+
+## Comunicação da interface para o operador (21/10/2026)
+
+- **Não exibir mensagens técnicas ou instrutivas longas** nas páginas do Lumeron Control. Foram removidos avisos sobre Laravel, agendadores, deploy, sincronização interna, canais de comunicação não implementados e explicações negativas do tipo "não gera cobranças".
+- Telas devem apresentar somente rótulos claros, dados, controles e, quando necessário, mensagens curtas de confirmação, erro ou restrição com ação do usuário. Exemplos: "Conta cadastrada.", "Plano atualizado.", "Automação atualizada.", "Verificação concluída.".
+- Não colocar parágrafos didáticos no rodapé de listagens, abaixo de formulários ou entre componentes; evitar subtítulos redundantes e códigos internos de automação na interface. As regras de segurança e detalhes de infraestrutura **permanecem no backend e na documentação técnica**.
+- O banco preserva auditoria. A migration `2026_10_21_000002_simplify_automation_descriptions.php` altera **somente descrições padrão idênticas às originais**, sem modificar flags, cadastros, prazos ou históricos.
+- Validações realmente necessárias (CNPJ inválido, formato de URL ou plano indisponível) devem continuar visíveis em linguagem simples. Não esconder erros nem remover confirmações de operações sensíveis.
