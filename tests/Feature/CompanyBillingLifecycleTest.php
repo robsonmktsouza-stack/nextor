@@ -166,6 +166,35 @@ final class CompanyBillingLifecycleTest extends TestCase
         $this->assertDatabaseCount('invoices', 1);
     }
 
+    public function test_manual_service_invoice_does_not_start_subscription_recurring_drafts(): void
+    {
+        $this->actingAs($this->admin());
+        Plan::query()->where('code', 'standard')->update(['monthly_price' => '100.00']);
+        $this->post(route('clients.store'), $this->customerData(today()->toDateString()))
+            ->assertRedirect();
+        $company = Company::query()->sole();
+        $onboarding = Invoice::query()->sole();
+        $this->post(route('invoices.cancel', $onboarding), ['reason' => 'Ciclo de teste cancelado'])
+            ->assertRedirect();
+
+        $this->post(route('invoices.store'), [
+            'company_id' => $company->id,
+            'description' => 'Serviço avulso',
+            'period_start' => today()->toDateString(),
+            'period_end' => today()->addDays(8)->toDateString(),
+            'issue_date' => today()->toDateString(),
+            'due_date' => today()->toDateString(),
+            'amount' => '35.00',
+        ])->assertRedirect();
+        $manual = Invoice::query()->where('status', '!=', 'cancelled')->firstOrFail();
+        $this->assertSame('manual', $manual->origin);
+        $this->post(route('invoices.issue', $manual))->assertRedirect();
+
+        Carbon::setTestNow($manual->period_end->copy()->subDays(4)->startOfDay());
+        $this->artisan('control:invoices-prepare')->assertExitCode(0);
+        $this->assertSame(2, Invoice::query()->count());
+    }
+
     public function test_backdated_initial_expiry_is_rejected_without_any_mutations(): void
     {
         $this->actingAs($this->admin());
