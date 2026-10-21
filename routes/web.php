@@ -5,6 +5,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\HistoryController;
+use App\Http\Controllers\PlanController;
+use App\Http\Controllers\AutomationController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard');
@@ -26,5 +28,13 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/clients/{company}/renew', [LicenseController::class, 'renew'])->name('clients.renew');
     Route::post('/clients/{company}/modules', [LicenseController::class, 'modules'])->name('clients.modules');
     Route::get('/licenses', [LicenseController::class, 'index'])->name('licenses.index');
+    Route::get('/plans', [PlanController::class, 'index'])->name('plans.index');
+    Route::get('/plans/create', [PlanController::class, 'create'])->name('plans.create');
+    Route::post('/plans', [PlanController::class, 'store'])->name('plans.store');
+    Route::get('/plans/{plan}/edit', [PlanController::class, 'edit'])->name('plans.edit');
+    Route::put('/plans/{plan}', [PlanController::class, 'update'])->name('plans.update');
+    Route::get('/automations', [AutomationController::class, 'index'])->name('automations.index');
+    Route::put('/automations/{rule}', [AutomationController::class, 'update'])->name('automations.update');
+    Route::post('/automations/run', [AutomationController::class, 'run'])->middleware('throttle:3,1')->name('automations.run');
     Route::get('/history', [HistoryController::class, 'index'])->name('history.index');
 });
