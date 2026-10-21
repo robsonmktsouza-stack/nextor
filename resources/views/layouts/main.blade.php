@@ -13,46 +13,26 @@
 <title>@yield('title','Administração') — Lumeron Control</title>
 </head>
 <body>
-<svg xmlns="http://www.w3.org/2000/svg" class="icon-defs" aria-hidden="true">
-<symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
-<symbol id="i-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10H3zM9 20v-7h6v7"/></symbol>
-<symbol id="i-clients" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M8 7h8M8 11h8M8 15h5"/></symbol>
-<symbol id="i-license" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M12 15h9m-3 0v-3m-3 3v-2"/></symbol>
-<symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 1 2.6 6.4M3 17v-5h5M12 7v5l3 2"/></symbol>
-<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></symbol>
-<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></symbol>
-<symbol id="i-check" viewBox="0 0 24 24"><path d="m4 12 5 5L20 6"/></symbol>
-<symbol id="i-arrow" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
-<symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="1"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
-<symbol id="i-logout" viewBox="0 0 24 24"><path d="M10 3H4v18h6M14 7l5 5-5 5m5-5H9"/></symbol>
-<symbol id="i-x" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5 5 19"/></symbol>
-<symbol id="i-edit" viewBox="0 0 24 24"><path d="m4 16 12-12 4 4-12 12-5 1zM14 6l4 4"/></symbol>
-<symbol id="i-plan" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
-<symbol id="i-automations" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.5 1.2-2 3.5-1.8-.7a8 8 0 0 1-2 1.2l-.3 1.9h-4l-.3-1.9a8 8 0 0 1-2-1.2l-1.8.7-2-3.5 1.5-1.2a8 8 0 0 1 0-2.3L4.8 11l2-3.5 1.8.7a8 8 0 0 1 2-1.2l.3-1.9h4l.3 1.9a8 8 0 0 1 2 1.2l1.8-.7 2 3.5-1.5 1.2a8 8 0 0 1 0 2.3"/></symbol>
-<symbol id="i-print" viewBox="0 0 24 24"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v7H6zM17 12h.01"/></symbol>
-<symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 18v3h16v-3"/></symbol>
-<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14-5L3 9m0-6v6h6M4 13a8 8 0 0 0 14 5l3-3m0 6v-6h-6"/></symbol>
-<symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="1"/><path d="M7 3v5M17 3v5M3 10h18"/></symbol>
-</svg>
+
 <div class="shell">
 <header class="topbar">
-    <button class="icon-button menu-toggle" type="button" aria-label="Mostrar menu" data-menu-toggle><svg><use href="#i-menu"/></svg></button>
+    <button class="icon-button menu-toggle" type="button" aria-label="Mostrar menu" data-menu-toggle>@include('partials.icon',['name'=>'menu','size'=>20])</button>
     <a href="{{ route('dashboard') }}" class="brand"><img src="{{ asset('images/lumeron/logo.png') }}" alt="Lumeron"></a>
     <span class="topbar-name">Painel de Administração</span>
     <div class="topbar-space"></div>
     <span class="topbar-tag">CONTROLE DE ACESSOS</span>
     <div class="account"><span class="avatar">{{ strtoupper(substr(auth()->user()->name,0,1)) }}</span><span><strong>{{ auth()->user()->name }}</strong><small>Administrador</small></span></div>
-    <form action="{{ route('logout') }}" method="post">@csrf<button title="Sair" class="icon-button"><svg><use href="#i-logout"/></svg></button></form>
+    <form action="{{ route('logout') }}" method="post">@csrf<button title="Sair" class="icon-button">@include('partials.icon',['name'=>'logout','size'=>18])</button></form>
 </header>
 <aside class="sidebar" id="sidebar">
     <div class="nav-heading">PRINCIPAL</div>
-    <a class="nav-link {{ request()->routeIs('dashboard')?'active':'' }}" href="{{ route('dashboard') }}"><svg><use href="#i-home"/></svg>Início</a>
+    <a class="nav-link {{ request()->routeIs('dashboard')?'active':'' }}" href="{{ route('dashboard') }}">@include('partials.icon',['name'=>'home','size'=>19])Início</a>
     <div class="nav-heading">GERENCIAMENTO</div>
-    <a class="nav-link {{ request()->routeIs('clients.*')?'active':'' }}" href="{{ route('clients.index') }}"><svg><use href="#i-clients"/></svg>Clientes</a>
-    <a class="nav-link {{ request()->routeIs('licenses.*')?'active':'' }}" href="{{ route('licenses.index') }}"><svg><use href="#i-license"/></svg>Licenças</a>
-    <a class="nav-link {{ request()->routeIs('plans.*')?'active':'' }}" href="{{ route('plans.index') }}"><svg><use href="#i-plan"/></svg>Planos</a>
-    <a class="nav-link {{ request()->routeIs('automations.*')?'active':'' }}" href="{{ route('automations.index') }}"><svg><use href="#i-automations"/></svg>Automações</a>
-    <a class="nav-link {{ request()->routeIs('history.*')?'active':'' }}" href="{{ route('history.index') }}"><svg><use href="#i-history"/></svg>Histórico</a>
+    <a class="nav-link {{ request()->routeIs('clients.*')?'active':'' }}" href="{{ route('clients.index') }}">@include('partials.icon',['name'=>'clients','size'=>19])Clientes</a>
+    <a class="nav-link {{ request()->routeIs('licenses.*')?'active':'' }}" href="{{ route('licenses.index') }}">@include('partials.icon',['name'=>'license','size'=>19])Licenças</a>
+    <a class="nav-link {{ request()->routeIs('plans.*')?'active':'' }}" href="{{ route('plans.index') }}">@include('partials.icon',['name'=>'plan','size'=>19])Planos</a>
+    <a class="nav-link {{ request()->routeIs('automations.*')?'active':'' }}" href="{{ route('automations.index') }}">@include('partials.icon',['name'=>'automations','size'=>19])Automações</a>
+    <a class="nav-link {{ request()->routeIs('history.*')?'active':'' }}" href="{{ route('history.index') }}">@include('partials.icon',['name'=>'history','size'=>19])Histórico</a>
     <div class="nav-fill"></div><div class="sidebar-version">Lumeron Control <span>Administração</span></div>
 </aside>
 <main class="page">
@@ -61,7 +41,7 @@
         <div class="actions">@yield('actions')</div>
     </div>
     <div class="content">
-        @if(session('success'))<div class="notice success" role="status"><svg><use href="#i-check"/></svg>{{ session('success') }}</div>@endif
+        @if(session('success'))<div class="notice success" role="status">@include('partials.icon',['name'=>'check','size'=>18]){{ session('success') }}</div>@endif
         @if(session('error'))<div class="notice error" role="alert">{{ session('error') }}</div>@endif
         @if($errors->any())<div class="notice error" role="alert"><strong>Confira os campos:</strong><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
         @yield('content')
@@ -69,14 +49,14 @@
 </main>
 </div>
 <dialog id="licenseActivationDialog" class="license-confirm-dialog" aria-labelledby="licenseConfirmTitle" aria-describedby="licenseConfirmMessage">
-    <div class="license-confirm-head"><span class="license-confirm-icon"><svg><use href="#i-lock"/></svg></span>
-        <button type="button" class="icon-button" data-license-cancel aria-label="Fechar"><svg><use href="#i-x"/></svg></button>
+    <div class="license-confirm-head"><span class="license-confirm-icon">@include('partials.icon',['name'=>'lock','size'=>18])</span>
+        <button type="button" class="icon-button" data-license-cancel aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>16])</button>
     </div>
     <h2 id="licenseConfirmTitle">Alterar acesso comercial?</h2>
     <p id="licenseConfirmMessage">Confirme a alteração para esta empresa.</p>
     <div class="license-confirm-footer"><button type="button" class="btn subtle" data-license-cancel>Cancelar</button>
         <button type="button" class="btn primary" data-license-confirm>Confirmar</button></div>
 </dialog>
-<dialog id="companyDialog" class="account-dialog"><div class="dialog-header"><strong>Detalhes da conta</strong><button class="icon-button" type="button" data-dialog-close aria-label="Fechar"><svg><use href="#i-x"/></svg></button></div><div id="companyDialogBody" class="dialog-body"></div></dialog>
+<dialog id="companyDialog" class="account-dialog"><div class="dialog-header"><strong>Detalhes da conta</strong><button class="icon-button" type="button" data-dialog-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>16])</button></div><div id="companyDialogBody" class="dialog-body"></div></dialog>
 </body>
 </html>
