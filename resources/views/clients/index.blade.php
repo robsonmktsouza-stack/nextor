@@ -4,6 +4,9 @@
 <a href="{{ route('clients.create') }}" class="btn primary"><svg><use href="#i-plus"/></svg>Nova conta</a>
 @endsection
 @section('content')
+@if($licenses)
+@include('licenses.table')
+@else
 <section class="panel">
 <form class="filters" method="get" action="{{ $licenses?route('licenses.index'):route('clients.index') }}">
  <label class="field-search"><span>Buscar cliente</span><span class="search-wrap"><svg><use href="#i-search"/></svg><input type="search" name="q" value="{{ request('q') }}" placeholder="Nome, CNPJ ou subdomínio"></span></label>
@@ -30,4 +33,5 @@
 </tbody></table></div>
 <div class="pagination"><span>Página {{ $companies->currentPage() }} de {{ $companies->lastPage() }}</span><div>@if($companies->previousPageUrl())<a class="btn subtle small" href="{{ $companies->previousPageUrl() }}">Anterior</a>@endif @if($companies->nextPageUrl())<a class="btn subtle small" href="{{ $companies->nextPageUrl() }}">Próxima</a>@endif</div></div>
 </section>
+@endif
 @endsection
