@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Company;
 use App\Models\Plan;
+use App\Models\ManagedProvisioningJob;
 use App\Services\InvoiceCycleService;
 use App\Support\Cnpj;
 use Illuminate\Http\Request;
@@ -127,11 +128,17 @@ final class CompanyController extends Controller
             ]);
             $company->record('created', 'Conta cadastrada e licença criada.');
             $invoice = $cycles->prepareForNewCompany($company);
+            // Registration only enqueues work. Root-only installation runs
+            // asynchronously on the trusted VPS, never via HTTP.
+            ManagedProvisioningJob::query()->create([
+                'company_id' => $company->id,
+                'status' => 'queued',
+            ]);
             return [$company, $invoice];
         });
         return redirect()->route('clients.show', $company)->with('success',
-            $invoice ? 'Conta cadastrada. Fatura preparada em rascunho.'
-                : 'Conta cadastrada. Configure o preço do plano para preparar a fatura.');
+            $invoice ? 'Conta cadastrada. Fatura preparada em rascunho. Acesso ERP aguardando preparação.'
+                : 'Conta cadastrada. Configure o preço do plano para preparar a fatura. Acesso ERP aguardando preparação.');
     }
 
     public function show(Company $company)

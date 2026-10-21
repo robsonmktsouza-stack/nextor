@@ -149,3 +149,31 @@ Alterações em autenticação/licença exigem testes e revisão de segurança. 
 - Não criar nova tela nem alterar a UI existente apenas para
   parametrizar as operações; manter atomicidade, idempotência,
   trilha de eventos, isolamento do banco Control e a API HMAC do ERP.
+
+## Conta pronta sem instalar nada manualmente por cliente (21/10/2026)
+
+- Instrução expressa do proprietário: cadastrar empresa no Control, criar o
+  usuário inicial e entregar endereço/convite. O cliente entra e usa o ERP.
+  Não pedir bancos, vhosts, comandos ou chaves por cliente; não renomear nem
+  recriar menus/telas.
+- Um `managed_provisioning_jobs` é criado **na mesma transação** que o
+  cadastro. Ele registra queued, processing, ready, failed. Nunca afirmar
+  "pronto" enquanto estiver em fila/falhou.
+- Provisionamento é feito SOMENTE por um CLI privilegiado na VPS:
+  `control:provision-accounts`, nunca por requisição web. Exige opt-in
+  explícito, Linux, produção, root, paths root-owned e não graváveis por
+  grupo/outros, TLS, DNS curinga e SMTP real para convite.
+- Usa o script ERP `deploy/instances/provision.sh --managed`, que cria
+  um banco/instância por empresa, ERP admin individual, configura CNPJ
+  e chama bind local HMAC. Cliente define senha pelo link padrão de
+  recuperação do Laravel. Token não fica no banco do Control nem
+  aparece nas telas.
+- O agendador privilegiado é serviço externo de infraestrutura, não o
+  `schedule:run` do PHP-FPM. Subir o código ao GitHub não instala
+  agendador, DNS ou certificado; não prometer cadastro pronto sem VPS
+  realmente configurada e teste ponta a ponta.
+- Falhas de instalação ficam `failed`, não são excluídas nem repetidas
+  destrutivamente. Não apagar bancos/arquivos fiscais automaticamente.
+- Nenhuma alteração na árvore do ERP a partir desta branch, nem mistura
+  de bancos empresariais. A criação da conta continua produzindo seu
+  histórico de licença e rascunho de fatura de forma isolada.

@@ -16,7 +16,17 @@
 <label class="span-two">Endereço da instalação <input name="installation_url" type="url" value="{{ $company->installation_url }}" placeholder="https://..."></label>
 </div><button type="submit" class="btn primary small">Salvar dados</button>
 </form>
-<div class="metadata"><strong>Subdomínio</strong><span>{{ $company->subdomain }}</span><strong>Conexão</strong><span><span class="status {{ $company->last_seen_at ? 'active' : 'expired' }}">{{ $company->last_seen_at ? 'Conectada anteriormente' : 'Aguardando instalação' }}</span></span><strong>Último contato</strong><span>{{ $company->last_seen_at?->format('d/m/Y H:i')??'Ainda não conectada' }}</span></div>
+<div class="metadata">
+@if($company->provisioningJob)
+<strong>Preparação do ERP</strong><span>{{ match($company->provisioningJob->status) {
+    'queued' => 'Aguardando preparação',
+    'processing' => 'Preparando acesso',
+    'ready' => 'Acesso preparado',
+    'failed' => 'Preparação precisa de revisão',
+    default => 'Aguardando preparação'
+} }}</span>
+@endif
+<strong>Subdomínio</strong><span>{{ $company->subdomain }}</span><strong>Conexão</strong><span><span class="status {{ $company->last_seen_at ? 'active' : 'expired' }}">{{ $company->last_seen_at ? 'Conectada anteriormente' : 'Aguardando instalação' }}</span></span><strong>Último contato</strong><span>{{ $company->last_seen_at?->format('d/m/Y H:i')??'Ainda não conectada' }}</span></div>
 </section>
 <section class="detail-box"><h3>Licença e acesso</h3>
 <div class="invoice-client-shortcuts">

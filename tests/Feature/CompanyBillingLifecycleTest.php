@@ -50,7 +50,7 @@ final class CompanyBillingLifecycleTest extends TestCase
         $expiry = today()->addDays(15)->toDateString();
 
         $this->post(route('clients.store'), $this->customerData($expiry))
-            ->assertRedirect()->assertSessionHas('success', 'Conta cadastrada. Fatura preparada em rascunho.');
+            ->assertRedirect()->assertSessionHas('success', 'Conta cadastrada. Fatura preparada em rascunho. Acesso ERP aguardando preparação.');
 
         $company = Company::query()->sole();
         $invoice = Invoice::query()->sole();
@@ -87,7 +87,7 @@ final class CompanyBillingLifecycleTest extends TestCase
         $this->actingAs($this->admin());
         $this->post(route('clients.store'), $this->customerData())
             ->assertRedirect()->assertSessionHas('success',
-                'Conta cadastrada. Configure o preço do plano para preparar a fatura.');
+                'Conta cadastrada. Configure o preço do plano para preparar a fatura. Acesso ERP aguardando preparação.');
         $this->assertDatabaseCount('companies', 1);
         $this->assertDatabaseCount('invoices', 0);
     }

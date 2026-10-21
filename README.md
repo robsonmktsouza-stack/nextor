@@ -4,7 +4,7 @@ Aplicação Laravel 13 **independente** das instalações do ERP Lumeron/Nextor.
 
 **Escopo efetivamente implementado:** autenticação administrativa; painel, clientes, planos, licenças e faturas comerciais; cadastro, filtros, detalhes, pagamentos manuais, estornos, cancelamentos e auditoria; automações de vencimento e e-mails opcionais; vínculo e renovação explicitamente autorizados pela API HMAC assinada; testes de integração e CI.
 
-**Não implementado ou não presumir:** geração automática de faturas, cobrança por gateway, boleto bancário/Pix real, nota fiscal, controle de revendedores, instalação automática em VPS, criação de usuário no ERP ou domínio real. **Integração do ERP:** agente de verificação HMAC implementado na branch `develop` do ERP, desativado por padrão até configuração expressa por instalação. O cadastro aqui **não** instala o ERP no servidor nem cria usuário lá. A liberação comercial é imediata no painel, mas o ERP somente aplica restrições após receber a integração em seu deploy.
+**Não implementado ou não presumir:** cobrança por gateway, boleto bancário/Pix real, nota fiscal, controle de revendedores ou domínio real. O cadastro gera uma tarefa de provisionamento; a instalação e o convite de primeiro acesso só acontecem se o **agente privilegiado na VPS estiver instalado e configurado**, com DNS, HTTPS e SMTP válidos. A atualização do repositório, sozinha, não ativa esse serviço. **Integração do ERP:** agente de verificação HMAC implementado na branch `develop` do ERP, desativado por padrão até configuração expressa por instalação. O cadastro cria uma tarefa para instalar o ERP e preparar a credencial de acesso pelo serviço gerenciado da VPS, sem comandos manuais por empresa. Até que o serviço conclua, a empresa aparece como **Aguardando preparação**, não como instalação pronta. A liberação comercial é imediata no painel, mas o ERP somente aplica restrições após receber a integração em seu deploy.
 
 ## Instalar (aplicação separada)
 
@@ -53,7 +53,7 @@ A porta usada deve ser a porta **real** do painel local (por exemplo, 8000 ou 80
 
 A rotina exige que a migração do agente esteja aplicada no ERP (`php artisan migrate` em ambiente de desenvolvimento, com backup prévio), que o CNPJ empresarial esteja configurado e que o Control possa gravar no diretório privado da instalação. Antes de vincular, confere `/up` do Control; após gravar o arquivo privado, executa a sincronização HMAC no ERP e exige resultado **online**. Se a sincronização falhar, restaura o arquivo anterior ou desfaz o vínculo novo para evitar bloqueio por falha de implantação. Se houver CNPJ diferente ou vínculo com outra empresa, **recusa sem sobrescrever dados**. O vínculo não é executado somente porque se digitou o CNPJ no painel.
 
-Esta ligação administrativa pontual não é uma etapa do cadastro do cliente e não precisa ser repetida em cada renovação, suspensão ou alteração. Durante provisionamentos gerenciados futuros, o operador de deploy deverá invocar a mesma rotina automaticamente depois de criar a instalação; **o provisionamento remoto automático ainda não foi implantado**.
+Esta ligação administrativa pontual não é uma etapa do cadastro do cliente e não precisa ser repetida em cada renovação, suspensão ou alteração. No fluxo gerenciado novo, o agente da VPS aciona o instalador e a mesma rotina de vínculo sem intervenção do usuário do ERP. Em instalações legadas, o comando manual continua disponível para manutenção.
 
 ### Diagnóstico de conexão entre dois projetos Laravel no Laragon
 
@@ -360,3 +360,89 @@ vínculo inicial de instalação continua sendo um passo de
 infraestrutura autorizado. Essa migração é **exclusiva** do banco Control:
 `2026_10_21_000007_invoice_cycle_origins.php`. Instalações já
 cadastradas e suas faturas anteriores não sofrem reemissão retroativa.
+
+
+## Cadastro único com provisionamento gerenciado (21/10/2026)
+
+**Objetivo do cliente:** o proprietário cadastra uma empresa no Control com CNPJ,
+subdomínio, contato, usuário inicial, plano e validade, e o cliente recebe
+um **convite de primeiro acesso** para definir a própria senha no ERP. Não é
+necessário criar diretórios, usuários Linux, bancos ou credenciais HMAC
+individualmente para cada empresa depois da implantação inicial da infraestrutura.
+
+O formulário e todos os menus existentes foram preservados. No mesmo
+`CompanyController::store`, a transação cria uma tarefa
+`managed_provisioning_jobs` na situação `queued`, além da licença e da
+fatura em rascunho já existentes. **Uma conta em fila não é uma instalação
+pronta.** A ficha do cliente mostra o estado de preparação no bloco
+original de detalhes; nenhuma senha, chave HMAC ou token de convite aparece
+no painel. O operador informa `admin_login` (ou será usado `admin`),
+e o convite é dirigido ao e-mail cadastrado.
+
+A aplicação HTTP **nunca** executa shell, sudo ou provisionamento.
+Um serviço **separado e restrito na VPS** executa
+`php artisan control:provision-accounts --limit=1` como root;
+o comando recusa execução fora de Linux/produção, com flag desabilitada,
+código executável sem propriedade root, SMTP desconfigurado ou caminhos
+não confiáveis. Cada tarefa nova aciona
+`deploy/instances/provision.sh --managed --apply` na árvore do ERP e cria:
+
+- Um usuário Linux, banco MySQL, chave Laravel, armazenamento e ambiente
+  exclusivos para o CNPJ (pasta `/srv/lumeron/instances/c_<ID>`);
+- Aplicação, endereço HTTPS e usuário inicial do ERP;
+- Identidade fiscal empresarial básica (CNPJ e razão social) para o vínculo
+  HMAC existente, sem presumir certificado A1 nem credenciamento SEFAZ;
+- Convite para criar senha no próprio domínio da empresa, enviado pelo SMTP
+  do Control somente após sincronização segura e verificação de `/up`.
+
+A preparação exige **configuração da infraestrutura uma única vez**.
+No servidor de produção do Control, configure exclusivamente no `.env`
+privado, nunca no GitHub:
+
+```dotenv
+LUMERON_MANAGED_PROVISIONING=true
+LUMERON_ERP_RELEASE_SOURCE=/opt/lumeron/source
+LUMERON_CONTROL_RELEASE_PATH=/srv/lumeron-control/current
+LUMERON_CONTROL_PUBLIC_URL=https://control.seudominio.com.br
+LUMERON_CUSTOMER_BASE_DOMAIN=seudominio.com.br
+LUMERON_CUSTOMER_PHP_VERSION=8.3
+LUMERON_MYSQL_ADMIN_CNF=/root/.my.cnf
+LUMERON_CUSTOMER_TLS_CERT_NAME=seudominio.com.br
+LUMERON_MANAGED_INVITE_EMAIL=true
+MAIL_MAILER=smtp
+MAIL_HOST=seu-servidor-smtp
+MAIL_PORT=587
+MAIL_USERNAME=seu-usuario
+MAIL_PASSWORD=defina-na-vps
+MAIL_FROM_ADDRESS=acesso@seudominio.com.br
+MAIL_FROM_NAME="Lumeron"
+```
+
+**Os valores são exemplos, não pressupostos sobre a VPS existente.**
+O registro DNS curinga `*.seudominio.com.br` precisa apontar para a VPS,
+e o certificado TLS usado deve cobrir os subdomínios. Os binários
+Linux/PHP-FPM, Nginx, composer, MySQL e credenciais administrativas
+seguem os pré-requisitos de `provision.sh`. O código-fonte do
+Control e o provisionador executável precisam ter propriedade root e
+não permitir escrita de grupo/outros antes de habilitar o serviço.
+
+Instale **uma vez** um agendador dedicado para o comando acima no
+servidor confiável. Esse comando **não** deve ser adicionado ao scheduler
+Laravel que roda como usuário web: apenas o serviço de provisionamento
+autorizado pode criar usuários Linux e bancos MySQL. Agendar o serviço
+a cada minuto torna o cadastro diário automático; um administrador de
+infraestrutura deve inspecionar os logs do timer no início.
+
+A tarefa assume `ready` **somente depois** que a aplicação responde,
+a licença está vinculada e o SMTP aceita o convite. Uma falha deixa
+`failed` (revisão técnica), sem classificar a conta como pronta nem
+apagar silenciosamente bancos ou arquivos parciais. Corrigir falhas
+parciais exige revisão de infraestrutura, pois não é seguro fazer
+remoção automática de dados de cliente. Após convite vencido, o cliente
+pode solicitar nova senha na própria tela de login do ERP.
+
+**Não migrar os dados de dois clientes para um mesmo banco**.
+A URL de cada empresa é separada, mas o processo de provisionamento é
+invisível ao cliente. Atualizações futuras continuam preservando seu
+banco/armazenamento privado. O pagamento e a criação de fatura não
+acionam instalações duplicadas. A `main`/tag estável não é alterada.
