@@ -14,7 +14,7 @@
         <form class="license-filter-form" method="get" action="{{ $listingUrl }}">
             <label class="license-search"><span class="sr-only">Buscar empresa</span><input type="search" name="q"
                 placeholder="Buscar empresa, CNPJ ou subdomínio..." value="{{ request('q') }}">
-                <svg><use href="#i-search"/></svg></label>
+                @include('partials.icon',['name'=>'search','size'=>18])</label>
             <label><span class="sr-only">Situação</span><select name="status">
                 <option value="">Todas as situações</option>
                 <option value="active" @selected(request('status')==='active')>Ativas</option>
@@ -77,9 +77,9 @@
                         <td>
                             <div class="license-row-actions">
                                 <button type="button" class="license-icon-action" data-account-details="{{ route('clients.details',$company) }}"
-                                    title="Visualizar detalhes" aria-label="Visualizar detalhes de {{ $company->legal_name }}"><svg><use href="#i-clients"/></svg></button>
+                                    title="Visualizar detalhes" aria-label="Visualizar detalhes de {{ $company->legal_name }}">@include('partials.icon',['name'=>'clients','size'=>18])</button>
                                 <a class="license-icon-action" href="{{ route('clients.show',$company) }}"
-                                    title="Gerenciar licença" aria-label="Gerenciar licença de {{ $company->legal_name }}"><svg><use href="#i-edit"/></svg></a>
+                                    title="Gerenciar licença" aria-label="Gerenciar licença de {{ $company->legal_name }}">@include('partials.icon',['name'=>'edit','size'=>16])</a>
                             </div>
                         </td>
                     </tr>
