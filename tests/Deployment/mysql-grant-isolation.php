@@ -14,8 +14,8 @@ $users = ['ci_lum_a', 'ci_lum_b'];
 try {
     foreach ($dbs as $i => $db) {
         $root->exec("CREATE DATABASE $db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-        $root->exec("CREATE USER '{$users[$i]}'@'127.0.0.1' IDENTIFIED BY 'local-test-password-$i'");
-        $root->exec("GRANT ALL PRIVILEGES ON $db.* TO '{$users[$i]}'@'127.0.0.1'");
+        $root->exec("CREATE USER '{$users[$i]}'@'%' IDENTIFIED BY 'local-test-password-$i'");
+        $root->exec("GRANT ALL PRIVILEGES ON $db.* TO '{$users[$i]}'@'%'");
     }
     foreach ($users as $i => $user) {
         $own = new PDO("mysql:host=127.0.0.1;port=3306;dbname={$dbs[$i]}", $user,
@@ -38,7 +38,7 @@ try {
 } finally {
     foreach ($dbs as $i => $db) {
         try {
-            $root->exec("DROP USER IF EXISTS '{$users[$i]}'@'127.0.0.1'");
+            $root->exec("DROP USER IF EXISTS '{$users[$i]}'@'%'");
             $root->exec("DROP DATABASE IF EXISTS $db");
         } catch (Throwable $e) {
             fwrite(STDERR, "Falha na limpeza de fixture de CI: ".$e->getMessage()."\n");
