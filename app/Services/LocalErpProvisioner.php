@@ -120,34 +120,86 @@ final class LocalErpProvisioner
         $this->execute([PHP_BINARY, 'artisan', 'control:bind-local',
             $destination, '--url='.$controlUrl], base_path(), 90, 'license-binding');
 
-        // Laragon auto virtual hosts serve a project's /public directory.
-        // Never advertise access until the actual project responds.
-        $progress && $progress('Verificando o endereço local e a proteção dos arquivos...');
-        try {
-            $result = Http::connectTimeout(2)->timeout(6)->get($url.'/up');
-            if (!$result->successful()) {
-                throw new \RuntimeException('ERP não respondeu corretamente.');
-            }
-            $sensitive = Http::connectTimeout(2)->timeout(5)->get($url.'/.env');
-            if ($sensitive->successful()
-                && str_contains((string) $sensitive->body(), 'APP_KEY=')) {
-                throw new \RuntimeException('Virtual host não aponta para a pasta public.');
-            }
-        } catch (\Throwable) {
-            throw new \RuntimeException(
-                'Endereço local indisponível. Confira o Auto Virtual Hosts do Laragon e recarregue o Apache.'
-            );
+        return $this->verifyPrepared($company, $progress);
+    }
+
+    /**
+     * Resume only the last verification after Laragon's Reload, without
+     * reinstalling Composer dependencies or rerunning the database setup.
+     */
+    public function verifyPrepared(Company $company, ?callable $progress = null): string
+    {
+        $paths = $this->preview($company);
+        $destination = $paths['destination'];
+        $url = $paths['url'];
+
+        $marker = $destination.'/.lumeron-local-identity.json';
+        if (is_link($destination) || is_link($marker) || !is_file($marker)) {
+            throw new \RuntimeException('Esta empresa ainda não possui uma instalação local identificada.');
+        }
+        $identity = json_decode((string) file_get_contents($marker), true);
+        if (!is_array($identity)
+            || ($identity['cnpj'] ?? null) !== $company->cnpj
+            || ($identity['instance_id'] ?? null) !== $company->instance_id) {
+            throw new \RuntimeException('Esta pasta pertence a outra empresa. Nenhum dado foi alterado.');
+        }
+        if (!is_file($destination.'/database/database.sqlite')
+            || !is_file($destination.'/.env')) {
+            throw new \RuntimeException('O banco ou a configuração individual da empresa não foi criado.');
+        }
+        $bindingPath = $destination.'/storage/app/private/lumeron-control.json';
+        if (is_link($bindingPath) || !is_file($bindingPath)) {
+            throw new \RuntimeException('A licença da instalação ainda não foi vinculada ao Control.');
+        }
+        $binding = json_decode((string) file_get_contents($bindingPath), true);
+        if (!is_array($binding)
+            || ($binding['cnpj'] ?? null) !== $company->cnpj
+            || ($binding['instance_id'] ?? null) !== $company->instance_id) {
+            throw new \RuntimeException('Vínculo de licença incompatível com esta empresa.');
         }
 
         $invite = $destination.'/storage/app/private/managed-first-access.json';
-        if (!is_file($invite) || is_link($invite)) {
-            throw new \RuntimeException('Convite privado de primeiro acesso não encontrado.');
+        if (is_link($invite) || !is_file($invite)) {
+            throw new \RuntimeException('O convite privado de primeiro acesso não foi preparado.');
         }
         $data = json_decode((string) file_get_contents($invite), true);
         if (!is_array($data) || ($data['email'] ?? '') !== strtolower($company->email)
             || !str_starts_with((string) ($data['url'] ?? ''), $url.'/reset-password/')) {
             throw new \RuntimeException('Convite de acesso incompatível com a empresa.');
         }
+
+        $progress && $progress('Verificando o endereço local e a proteção dos arquivos...');
+        try {
+            $response = Http::connectTimeout(2)->timeout(7)->get($url.'/up');
+        } catch (\Illuminate\Http\Client\ConnectionException) {
+            $host = (string) parse_url($url, PHP_URL_HOST);
+            if ($host !== '' && gethostbyname($host) === $host) {
+                throw new \RuntimeException(
+                    'O Windows não reconhece '.$host.'. No Laragon, habilite Auto Virtual Hosts e clique Reload. Autorize a atualização do arquivo hosts do Windows.'
+                );
+            }
+            throw new \RuntimeException(
+                'O endereço '.$host.' foi encontrado, mas o servidor não respondeu. Confira Apache/Nginx, porta e Laragon Reload.'
+            );
+        }
+        if (!$response->successful()) {
+            throw new \RuntimeException(
+                'O ERP respondeu HTTP '.$response->status().' em /up. Confira o Virtual Host do Laragon (raiz public) e o log do Laravel dessa instalação.'
+            );
+        }
+
+        try {
+            $sensitive = Http::connectTimeout(2)->timeout(7)->get($url.'/.env');
+        } catch (\Illuminate\Http\Client\ConnectionException) {
+            throw new \RuntimeException('Não foi possível confirmar que o arquivo .env está protegido no Virtual Host.');
+        }
+        if ($sensitive->successful()
+            && str_contains((string) $sensitive->body(), 'APP_KEY=')) {
+            throw new \RuntimeException(
+                'Atenção: o endereço está expondo .env! Corrija a raiz do Virtual Host para a pasta public; acesso não será liberado.'
+            );
+        }
+
         $progress && $progress('Instalação validada.');
         return $url;
     }
