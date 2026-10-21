@@ -22,6 +22,8 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/clients/create', [CompanyController::class, 'create'])->name('clients.create');
     Route::post('/clients', [CompanyController::class, 'store'])->name('clients.store');
     Route::get('/clients/{company}', [CompanyController::class, 'show'])->name('clients.show');
+    Route::get('/clients/{company}/first-access', [CompanyController::class, 'firstAccess'])
+        ->name('clients.first-access')->middleware('throttle:5,1');
     Route::get('/clients/{company}/details', [CompanyController::class, 'details'])->name('clients.details');
     Route::put('/clients/{company}', [CompanyController::class, 'update'])->name('clients.update');
     Route::post('/clients/{company}/note', [CompanyController::class, 'note'])->name('clients.note');

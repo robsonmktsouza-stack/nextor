@@ -12,4 +12,8 @@ return [
     'mysql_admin_cnf' => env('LUMERON_MYSQL_ADMIN_CNF', '/root/.my.cnf'),
     'tls_cert_name' => env('LUMERON_CUSTOMER_TLS_CERT_NAME', ''),
     'send_invite' => (bool) env('LUMERON_MANAGED_INVITE_EMAIL', false),
+    // Laragon local only. Reuses the queued company; never touches VPS.
+    'local_enabled' => (bool) env('LUMERON_LOCAL_PROVISIONING', false),
+    'local_source' => env('LUMERON_LOCAL_ERP_SOURCE', ''),
+    'local_control_url' => env('LUMERON_LOCAL_CONTROL_URL', ''),
 ];

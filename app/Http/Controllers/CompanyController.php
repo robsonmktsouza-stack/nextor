@@ -157,6 +157,34 @@ final class CompanyController extends Controller
         ]);
     }
 
+    /**
+     * Development-only first access link for the operator. In production,
+     * the private invitation is emailed by the VPS provisioning worker.
+     */
+    public function firstAccess(Company $company)
+    {
+        abort_unless(app()->environment('local'), 404);
+        abort_unless($company->provisioningJob?->status === 'ready', 404);
+        $folder = realpath(dirname(base_path()).'/lumeron-'.$company->subdomain);
+        abort_unless($folder && dirname($folder) === dirname(base_path())
+            && !is_link($folder), 404);
+        $marker = $folder.'/.lumeron-local-identity.json';
+        abort_unless(is_file($marker) && !is_link($marker), 404);
+        $identity = json_decode((string) file_get_contents($marker), true);
+        abort_unless(is_array($identity)
+            && ($identity['instance_id'] ?? '') === $company->instance_id
+            && ($identity['cnpj'] ?? '') === $company->cnpj, 404);
+
+        $path = $folder.'/storage/app/private/managed-first-access.json';
+        abort_unless(is_file($path) && !is_link($path), 404);
+        $invite = json_decode((string) file_get_contents($path), true);
+        $url = $invite['url'] ?? null;
+        abort_unless(is_string($url)
+            && ($invite['email'] ?? '') === strtolower($company->email)
+            && str_starts_with($url, 'http://lumeron-'.$company->subdomain.'.test/reset-password/'), 404);
+        return redirect()->away($url);
+    }
+
     public function update(Request $request, Company $company)
     {
         $data = $request->validate([

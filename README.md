@@ -446,3 +446,58 @@ A URL de cada empresa é separada, mas o processo de provisionamento é
 invisível ao cliente. Atualizações futuras continuam preservando seu
 banco/armazenamento privado. O pagamento e a criação de fatura não
 acionam instalações duplicadas. A `main`/tag estável não é alterada.
+
+## Provisionamento automático no Laragon (teste de piloto local)
+
+O Control agora oferece `control:provision-local`, isolado do
+provisionador de VPS. É exclusivo de ambiente `APP_ENV=local` e não
+executa alterações no Nextor original. Cada empresa recebe a pasta
+`C:\laragon\www\lumeron-<subdominio>` (sob o diretório irmão do Control),
+instância Laravel independente, banco **SQLite exclusivo**, `APP_KEY`,
+sessões, cache e storage exclusivos, administrador inicial e vínculo
+HMAC autenticado com o Control. O URL local segue o padrão
+`http://lumeron-<subdominio>.test`. Se o Laragon não estiver com
+**Auto Virtual Hosts** habilitado, habilite/recarregue o Apache uma vez;
+a instalação só é marcada como pronta após `GET /up` do ERP responder
+corretamente e não expor o arquivo `.env` via HTTP.
+
+**Para a empresa existente #2**:
+```powershell
+cd C:\laragon\www\lumeron-control
+git pull origin control-center
+php artisan migrate
+php artisan optimize:clear
+php artisan control:provision-local 2 --preview
+php artisan control:provision-local 2
+```
+
+O `--preview` é somente leitura. O processamento reutiliza a fila
+`managed_provisioning_jobs` já criada e **não cria outra empresa ou
+fatura**. O projeto ERP de origem é obtido do `HEAD` limpo
+da branch `develop`, por `git archive`; não copia `.env`, banco,
+storage, certificados ou arquivos particulares da instância anterior.
+O Control usa o comando existente `control:bind-local` para vincular a
+licença por CNPJ confirmado pelo próprio ERP, sem revelar segredo.
+
+Quando a ficha informar **Acesso preparado**, o operador encontra
+o link **Primeiro acesso ao ERP** no bloco original de detalhes.
+Ele abre o convite do próprio Laravel para definir senha. O link é
+disponível **somente dentro da sessão autenticada do Control local**;
+não há envio de e-mail de teste ao cliente. Após criar a senha,
+o usuário acessa o endereço individual com subdomínio e login que
+já constavam no cadastro do Control.
+
+Para todos os **próximos cadastros automáticos no Laragon**, configure
+`LUMERON_LOCAL_PROVISIONING=true` no `.env` do Control, e rode
+`php artisan optimize:clear`. Mantenha
+`php artisan schedule:work` em um terminal local separado. O
+agendador processa tarefas novas uma vez por minuto, sem comandos
+por empresa. Um erro fica como **Precisa de revisão** (a tarefa não
+é declarada pronta sem o ERP estar acessível); para reprocessar
+explicitamente, use `php artisan control:provision-local ID`.
+
+O provisionamento usa PHP com extensão `zip`, `git` e `composer`
+do Laragon. A versão SQLite é exclusiva para desenvolvimento local;
+na VPS a infraestrutura gerenciada usa MySQL independente por cliente,
+como definido no script Linux. Não execute nem publique estas
+instâncias de testes como sistemas reais de produção.

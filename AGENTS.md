@@ -177,3 +177,25 @@ Alterações em autenticação/licença exigem testes e revisão de segurança. 
 - Nenhuma alteração na árvore do ERP a partir desta branch, nem mistura
   de bancos empresariais. A criação da conta continua produzindo seu
   histórico de licença e rascunho de fatura de forma isolada.
+
+## Provisionamento de teste no Windows sem alterações de telas
+
+- `LocalErpProvisioner` e `control:provision-local ID` preparam
+  instâncias independentes com pastas, SQLite, APP_KEY, storage, usuário
+  e sessão por cliente. Só `APP_ENV=local` e invocação CLI autorizada.
+- Para automatizar novas contas, habilitar
+  `LUMERON_LOCAL_PROVISIONING=true` e manter o `schedule:work`.
+  Sem esse opt-in nenhuma tarefa é executada automaticamente no Laragon.
+- O projeto origem deve ser irmão da pasta do Control, na branch
+  `develop`; copia somente arquivos rastreados via `git archive`,
+  sem .env, bancos ou storage preexistentes.
+- Status pronto somente após bind HMAC e saúde HTTPS/HTTP local
+  verificada em `/up`. Em Laragon usar virtual host
+  `lumeron-<subdominio>.test`, com raiz em `public`.
+- O convite de senha é um arquivo privado dentro da instância e
+  só pode ser aberto na rota administrativa autenticada
+  `/clients/{company}/first-access` no Control local. Não mostrar token
+  na listagem nem registrar em logs.
+- Nunca executar o provisionador Linux como consequência do comando
+  local; não criar banco compartilhado nem tocar no `.env` do
+  Nextor já usado como origem.
