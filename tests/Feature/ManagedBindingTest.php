@@ -61,7 +61,7 @@ final class ManagedBindingTest extends TestCase
         file_put_contents($dir.'/config/central_license.php', "<?php\n");
         file_put_contents($dir.'/app/Console/Commands/CentralLicenseIdentity.php', "<?php\n");
         file_put_contents($dir.'/.env', "APP_ENV=testing\n");
-        file_put_contents($dir.'/artisan', "<?php echo '". $cnpj ."\\n';\n");
+        file_put_contents($dir.'/artisan', "<?php echo '". $cnpj ."'.PHP_EOL;\n");
         return $dir;
     }
 
