@@ -52,16 +52,17 @@ final class BindManagedInstallation extends Command
             // Only forward diagnostics explicitly authored by our ERP CLI;
             // never dump arbitrary PHP errors or environment details.
             $output = $proc->getErrorOutput()."\n".$proc->getOutput();
-            foreach ([
-                'Cadastro da empresa indisponível neste banco.',
-                'Migração de licenciamento ainda não aplicada neste banco',
-                'Dados da empresa não foram cadastrados em Configurações',
-                'O CNPJ da própria empresa está vazio',
-                'O documento em Configurações',
-                'O CNPJ cadastrado em Configurações',
-            ] as $hint) {
-                if (str_contains($output, $hint)) {
-                    $this->warn(trim(preg_replace('/\\s+/', ' ', $output)));
+            $known = [
+                'Cadastro da empresa indisponível neste banco.' => 'Não foi encontrado o cadastro empresarial no banco atual do Nextor.',
+                'Migração de licenciamento ainda não aplicada neste banco' => 'Falta a migration de licenciamento neste banco do Nextor.',
+                'Dados da empresa não foram cadastrados em Configurações' => 'Abra Configurações > Geral no Nextor e complete os dados da empresa emitente.',
+                'O CNPJ da própria empresa está vazio' => 'O campo CNPJ da empresa emitente está vazio em Configurações > Geral do Nextor.',
+                'O documento em Configurações' => 'O documento empresarial do Nextor não possui 14 dígitos válidos de formato.',
+                'O CNPJ cadastrado em Configurações' => 'O CNPJ cadastrado no Nextor difere do CNPJ fixado para esta instalação.',
+            ];
+            foreach ($known as $marker => $safeMessage) {
+                if (str_contains($output, $marker)) {
+                    $this->warn($safeMessage);
                     break;
                 }
             }
