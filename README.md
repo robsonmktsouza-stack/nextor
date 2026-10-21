@@ -133,3 +133,12 @@ php artisan route:list
 Arquivos e diretórios de instância, XMLs, certificado A1 e CSC **não pertencem** a este projeto.
 
 Leia [AGENTS.md](AGENTS.md) antes de ampliar a aplicação.
+
+
+## Padrão de listagens unificado
+
+O Lumeron Control utiliza **um único conjunto de componentes de listagem**. O mesmo visual compacto de Licenças foi aplicado a Clientes, Planos, Histórico, Regras e Avisos de Automações e à tabela de vencimentos no Início. Os arquivos compartilhados são `resources/views/partials/listing/toolbar.blade.php` e `footer.blade.php`, os estilos estão em `public/css/control.css`, e o comportamento de impressão, CSV, filtros e paginação em `public/js/control.js`.
+
+Todas as tabelas oferecem ferramentas por ícones, com exportação CSV restrita à tabela acionada e aos registros da página atual. Ações que modificam dados continuam protegidas por autenticação e CSRF. Filtros recolhíveis e paginação 20/50/100 se aplicam às listagens paginadas; tabelas-resumo pequenas não apresentam paginação vazia. O Dashboard mantém a seção de atividades recentes em formato de histórico visual, pois ela não é uma tabela.
+
+Não há migration adicional para a unificação visual. Após `git pull origin control-center`, executar `php artisan optimize:clear` e atualizar o navegador com Ctrl+F5.
