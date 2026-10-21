@@ -3,7 +3,7 @@
 @section('actions')
 <form method="post" action="{{ route('automations.run') }}">@csrf
     <button class="btn primary" type="submit" data-confirm="Executar verificação agora?">
-        <svg><use href="#i-check"/></svg>Executar verificação
+        @include('partials.icon',['name'=>'check','size'=>18])Executar verificação
     </button>
 </form>
 @endsection
@@ -19,7 +19,7 @@
         <form class="license-filter-form" method="get" action="{{ route('automations.index') }}">
             <label class="license-search"><span class="sr-only">Buscar regra</span>
                 <input type="search" name="q" value="{{ request('q') }}" placeholder="Buscar regra de automação...">
-                <svg><use href="#i-search"/></svg>
+                @include('partials.icon',['name'=>'search','size'=>17])
             </label>
             <label><span class="sr-only">Situação</span><select name="status">
                 <option value="">Todas</option>
@@ -68,7 +68,7 @@
                         <td>
                             <div class="license-row-actions">
                                 <button class="license-icon-action" type="submit" form="automation-rule-{{ $rule->id }}"
-                                    title="Salvar regra" aria-label="Salvar regra {{ $rule->name }}"><svg><use href="#i-check"/></svg></button>
+                                    title="Salvar regra" aria-label="Salvar regra {{ $rule->name }}">@include('partials.icon',['name'=>'check','size'=>16])</button>
                             </div>
                         </td>
                     </tr>
@@ -106,7 +106,7 @@
                         <td>
                             <div class="license-row-actions">
                                 @if($delivery->company)
-                                    <a class="license-icon-action" href="{{ route('clients.show',$delivery->company_id) }}" title="Ver cliente" aria-label="Ver cliente"><svg><use href="#i-clients"/></svg></a>
+                                    <a class="license-icon-action" href="{{ route('clients.show',$delivery->company_id) }}" title="Ver cliente" aria-label="Ver cliente">@include('partials.icon',['name'=>'clients','size'=>16])</a>
                                 @endif
                             </div>
                         </td>
