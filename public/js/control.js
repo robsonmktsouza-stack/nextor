@@ -390,9 +390,14 @@
     if (date) {
       const utc = new Date(date + 'T12:00:00Z');
       if (!Number.isNaN(utc.getTime())) {
-        utc.setUTCMonth(utc.getUTCMonth() + Math.max(1, +(option.dataset.period || 1)));
-        utc.setUTCDate(utc.getUTCDate() - 1);
-        end.value = utc.toISOString().slice(0, 10);
+        // Match Carbon::addMonthsNoOverflow at month end.
+        const first = new Date(Date.UTC(utc.getUTCFullYear(),
+          utc.getUTCMonth() + Math.max(1, +(option.dataset.period || 1)), 1));
+        const lastDay = new Date(Date.UTC(first.getUTCFullYear(),
+          first.getUTCMonth() + 1, 0)).getUTCDate();
+        first.setUTCDate(Math.min(utc.getUTCDate(), lastDay));
+        first.setUTCDate(first.getUTCDate() - 1);
+        end.value = first.toISOString().slice(0, 10);
       }
     }
   };
