@@ -114,6 +114,26 @@ final class CommercialPlanAccessTest extends TestCase
         $this->postJson('/products')->assertStatus(423);
     }
 
+    public function test_first_page_after_login_uses_a_module_included_in_plan(): void
+    {
+        $this->signedLicense(['products'], 'products-only');
+        $this->admin();
+        $user = User::create([
+            'name' => 'Operadora',
+            'username' => 'operator-products',
+            'email' => 'operator-products@example.test',
+            'password' => 'senha-longa-de-teste',
+            'role' => 'operator',
+            'permissions' => ['finance','products'],
+            'is_active' => true,
+        ]);
+
+        $this->assertSame('finance.dashboard', $user->homeRouteName());
+        $this->assertSame('products.index', $user->licensedHomeRouteName());
+        $this->actingAs($user)->get('/')->assertRedirect(route('products.index'));
+        $this->get('/products')->assertOk();
+    }
+
     public function test_existing_api_token_cannot_read_unlicensed_module_data(): void
     {
         $this->signedLicense(['products'], 'professional');
