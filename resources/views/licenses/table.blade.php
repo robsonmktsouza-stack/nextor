@@ -1,24 +1,15 @@
 @php
-    $listingUrl = route('licenses.index');
+    $listingUrl = $licenses ? route('licenses.index') : route('clients.index');
     $hasFilters = request()->filled('q') || request()->filled('status') || request()->filled('plan');
 @endphp
-<section class="panel license-grid" data-license-grid>
-    <div class="license-grid-toolbar">
-        <div class="license-grid-tools">
-            <a href="{{ route('clients.create') }}" class="license-grid-new" title="Cadastrar empresa">
-                <svg><use href="#i-plus"/></svg><span>Nova conta</span>
-            </a>
-            <div class="license-tool-group">
-                <button class="license-tool" type="button" data-grid-print title="Imprimir listagem visível" aria-label="Imprimir listagem"><svg><use href="#i-print"/></svg></button>
-                <button class="license-tool" type="button" data-grid-export title="Exportar página atual para CSV" aria-label="Exportar página atual"><svg><use href="#i-download"/></svg></button>
-                <a class="license-tool" href="{{ request()->fullUrl() }}" title="Atualizar licenças" aria-label="Atualizar licenças"><svg><use href="#i-refresh"/></svg></a>
-            </div>
-        </div>
-        <button class="license-tool license-filter-toggle" type="button"
-            data-license-filter-toggle aria-controls="license-list-filters"
-            aria-expanded="{{ $hasFilters ? 'true' : 'false' }}" title="Mostrar filtros"
-            aria-label="Mostrar filtros"><svg><use href="#i-search"/></svg></button>
-    </div>
+<section class="panel license-grid" data-license-grid data-admin-list data-grid-filename="{{ $licenses ? 'licencas' : 'clientes' }}">
+    @include('partials.listing.toolbar', [
+        'toolbarUrl' => $listingUrl,
+        'createUrl' => route('clients.create'),
+        'createLabel' => 'Nova conta',
+        'filterId' => 'license-list-filters',
+        'filtersActive' => $hasFilters,
+    ])
     <div class="license-filters" id="license-list-filters" @unless($hasFilters) hidden @endunless>
         <form class="license-filter-form" method="get" action="{{ $listingUrl }}">
             <label class="license-search"><span class="sr-only">Buscar empresa</span><input type="search" name="q"
@@ -42,7 +33,7 @@
         </form>
     </div>
     <div class="table-scroll">
-        <table class="license-data-table" data-license-export-table>
+        <table class="license-data-table" data-license-export-table data-grid-table>
             <thead><tr>
                 <th>Código</th>
                 <th>Empresa</th>
@@ -98,34 +89,10 @@
             </tbody>
         </table>
     </div>
-    <div class="license-grid-footer">
-        <form method="get" action="{{ $listingUrl }}" class="license-page-size">
-            <label><span class="sr-only">Quantidade de linhas por página</span>
-                <select name="per_page" data-page-size>
-                    @foreach([20, 50, 100] as $limit)
-                        <option value="{{ $limit }}" @selected($companies->perPage()===$limit)>{{ $limit }} linhas por página</option>
-                    @endforeach
-                </select>
-            </label>
-            <input type="hidden" name="q" value="{{ request('q') }}">
-            <input type="hidden" name="status" value="{{ request('status') }}">
-            <input type="hidden" name="plan" value="{{ request('plan') }}">
-        </form>
-        <div class="license-page-controls">
-            <span class="license-result-count">{{ $companies->total() }} {{ $companies->total()===1 ? 'licença' : 'licenças' }}</span>
-            <a class="license-page-arrow {{ $companies->onFirstPage() ? 'disabled' : '' }}"
-                href="{{ $companies->onFirstPage() ? '#' : $companies->url(1) }}"
-                aria-label="Primeira página" @if($companies->onFirstPage()) aria-disabled="true" @endif>«</a>
-            <a class="license-page-arrow {{ $companies->onFirstPage() ? 'disabled' : '' }}"
-                href="{{ $companies->previousPageUrl() ?? '#' }}"
-                aria-label="Página anterior" @if($companies->onFirstPage()) aria-disabled="true" @endif>‹</a>
-            <span class="license-page-current">{{ $companies->currentPage() }} / {{ $companies->lastPage() }}</span>
-            <a class="license-page-arrow {{ $companies->hasMorePages() ? '' : 'disabled' }}"
-                href="{{ $companies->nextPageUrl() ?? '#' }}"
-                aria-label="Próxima página" @unless($companies->hasMorePages()) aria-disabled="true" @endunless>›</a>
-            <a class="license-page-arrow {{ $companies->hasMorePages() ? '' : 'disabled' }}"
-                href="{{ $companies->hasMorePages() ? $companies->url($companies->lastPage()) : '#' }}"
-                aria-label="Última página" @unless($companies->hasMorePages()) aria-disabled="true" @endunless>»</a>
-        </div>
-    </div>
+    @include('partials.listing.footer', [
+        'paginator' => $companies,
+        'footerUrl' => $listingUrl,
+        'singular' => $licenses ? 'licença' : 'cliente',
+        'plural' => $licenses ? 'licenças' : 'clientes',
+    ])
 </section>
