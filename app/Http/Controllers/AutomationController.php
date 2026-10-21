@@ -40,13 +40,13 @@ final class AutomationController extends Controller
             return back()->withErrors(['days' => 'A ausência de comunicação precisa de pelo menos um dia.']);
         }
         $rule->update(['days' => $days, 'enabled' => $request->boolean('enabled')]);
-        return back()->with('success', 'Regra atualizada. O próximo agendamento utilizará esses parâmetros.');
+        return back()->with('success', 'Automação atualizada.');
     }
 
     public function run(AutomationRunner $runner)
     {
         $summary = $runner->run();
         return back()->with('success',
-            'Verificação concluída: '.$summary['rules'].' regra(s), '.$summary['new_events'].' novo(s) aviso(s) interno(s).');
+            'Verificação concluída. Novos avisos: '.$summary['new_events'].'.');
     }
 }
