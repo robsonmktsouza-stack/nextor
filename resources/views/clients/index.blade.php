@@ -8,7 +8,7 @@
 <form class="filters" method="get" action="{{ $licenses?route('licenses.index'):route('clients.index') }}">
  <label class="field-search"><span>Buscar cliente</span><span class="search-wrap"><svg><use href="#i-search"/></svg><input type="search" name="q" value="{{ request('q') }}" placeholder="Nome, CNPJ ou subdomínio"></span></label>
  <label><span>Situação</span><select name="status"><option value="">Todas</option><option value="active" @selected(request('status')==='active')>Ativas</option><option value="suspended" @selected(request('status')==='suspended')>Suspensas</option><option value="expired" @selected(request('status')==='expired')>Vencidas</option></select></label>
- <label><span>Plano</span><select name="plan"><option value="">Todos</option>@foreach(config('license.plans') as $value=>$label)<option value="{{ $value }}" @selected(request('plan')===$value)>{{ $label }}</option>@endforeach</select></label>
+ <label><span>Plano</span><select name="plan"><option value="">Todos</option>@foreach($plans as $plan)<option value="{{ $plan->code }}" @selected(request('plan')===$plan->code)>{{ $plan->name }}</option>@endforeach</select></label>
  <button class="btn primary" type="submit">Buscar</button><a class="btn subtle" href="{{ $licenses?route('licenses.index'):route('clients.index') }}">Limpar</a>
 </form>
 <div class="list-actions"><strong>{{ $companies->total() }} {{ $companies->total()===1?'registro':'registros' }}</strong><span>Selecione uma conta para consultar ou alterar a licença.</span></div>
@@ -19,7 +19,7 @@
 <tr><td class="mono muted">#{{ str_pad($company->id,4,'0',STR_PAD_LEFT) }}</td>
 <td><a class="table-primary" href="{{ route('clients.show',$company) }}">{{ $company->legal_name }}</a><small class="cell-secondary">{{ substr($company->cnpj,0,2) }}.{{ substr($company->cnpj,2,3) }}.{{ substr($company->cnpj,5,3) }}/{{ substr($company->cnpj,8,4) }}-{{ substr($company->cnpj,12,2) }}</small></td>
 <td><span class="mono">{{ $company->subdomain }}</span></td>
-<td>{{ config('license.plans')[$company->plan]??$company->plan }}</td>
+<td>{{ $plans->firstWhere('code',$company->plan)?->name ?? $company->plan }}</td>
 <td>{{ $company->expires_at?->format('d/m/Y')??'Sem prazo' }}</td>
 <td><span class="status {{ $company->currentStatus() }}">{{ ['active'=>'Ativa','expired'=>'Vencida','suspended'=>'Suspensa'][$company->currentStatus()] }}</span></td>
 <td>{{ $company->last_seen_at?->format('d/m/Y H:i')??'Não conectada' }}</td>
