@@ -67,7 +67,7 @@ final class PlanController extends Controller
         $data['modules'] = array_values(array_unique($data['modules']));
         $plan = Plan::create($data);
         return redirect()->route('plans.index')->with('success',
-            'Plano '.$plan->name.' criado. Já pode ser utilizado nas novas contas.');
+            'Plano criado.');
     }
 
     public function update(Request $request, Plan $plan)
@@ -82,11 +82,11 @@ final class PlanController extends Controller
                 // Keep existing license codes, as the ERP receives their
                 // stable identifiers rather than plan database IDs.
                 throw \Illuminate\Validation\ValidationException::withMessages([
-                    'code' => 'Este código já pertence a clientes. Mantenha-o e altere somente o nome ou os recursos.',
+                    'code' => 'O código de um plano em uso não pode ser alterado.',
                 ]);
             }
             $plan->update($data);
         });
-        return redirect()->route('plans.index')->with('success', 'Plano atualizado. Licenças existentes não foram alteradas.');
+        return redirect()->route('plans.index')->with('success', 'Plano atualizado.');
     }
 }
