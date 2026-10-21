@@ -28,7 +28,7 @@
     </div>
     <div class="table-scroll">
         <table class="license-data-table" data-grid-table>
-            <thead><tr><th>Código</th><th>Plano</th><th>Preço de referência</th><th>Período</th>
+            <thead><tr><th>Código</th><th>Plano</th><th>Preço</th><th>Período</th>
                 <th>Módulos padrão</th><th>Clientes</th><th>Situação</th><th class="license-actions-heading">Ações</th>
             </tr></thead>
             <tbody>
@@ -54,5 +54,4 @@
     </div>
     @include('partials.listing.footer', ['paginator' => $plans, 'singular' => 'plano', 'plural' => 'planos'])
 </section>
-<div class="info-line more-space">Alterar um plano não modifica os módulos ou vencimentos das licenças já contratadas. Os valores são referências administrativas, sem cobrança automática.</div>
 @endsection
