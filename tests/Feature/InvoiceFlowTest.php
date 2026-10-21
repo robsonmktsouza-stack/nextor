@@ -107,7 +107,7 @@ final class InvoiceFlowTest extends TestCase
         $this->post(route('invoices.issue', $invoice))->assertRedirect();
         $this->assertSame('issued', $invoice->fresh()->status);
         $this->put(route('invoices.update',$invoice), array_merge(
-            $this->invoiceData($company), ['amount'=>'1.00']
+            \Illuminate\Support\Arr::except($this->invoiceData($company), ['company_id']), ['amount'=>'1.00']
         ))->assertSessionHasErrors('invoice');
         $this->assertSame('standard', $company->fresh()->plan);
 
@@ -175,7 +175,7 @@ final class InvoiceFlowTest extends TestCase
         $invoice = $this->createInvoice($company);
         $this->get(route('invoices.edit',$invoice))->assertOk();
         $this->put(route('invoices.update',$invoice), array_merge(
-            $this->invoiceData($company), ['amount' => '120.99', 'description'=>'Suporte avançado']
+            \Illuminate\Support\Arr::except($this->invoiceData($company), ['company_id']), ['amount' => '120.99', 'description'=>'Suporte avançado']
         ))->assertRedirect(route('invoices.show',$invoice));
         $this->assertSame('120.99', $invoice->fresh()->amount);
         $this->assertSame('Suporte avançado', $invoice->fresh()->description);
