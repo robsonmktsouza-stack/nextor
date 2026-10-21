@@ -101,6 +101,8 @@ jobs:
             tests/Unit/NFCeSefazResponseParserTest.php; do
             php -l "$f"
           done
+      - name: Validate deployment shell scripts
+        run: bash -n deploy/instances/provision.sh deploy/instances/update.sh deploy/instances/list.sh
       - name: Validate JavaScript syntax
         run: |
           node --check public/js/erp.js

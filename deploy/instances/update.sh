@@ -3,13 +3,19 @@
 # Updates ONE CNPJ and never resets its database, APP_KEY, certificates or storage.
 set -Eeuo pipefail
 umask 077
-ID="" SOURCE="" APPLY=0 PHP_VERSION="8.3"
-usage() { echo "Uso: bash deploy/instances/update.sh --id academia_ba --source /opt/lumeron/source [--php-version 8.3] [--apply]"; }
+ID="" SOURCE="" APPLY=0 PHP_VERSION="8.3" CONTROL_PATH="" CONTROL_URL=""
+usage() { echo "Uso: bash deploy/instances/update.sh --id academia_ba --source /opt/lumeron/source [--php-version 8.3] [--control-path /srv/lumeron-control/current --control-url https://control.exemplo.com] [--apply]"; }
 while (($#)); do
   case "$1" in
-    --id|--source|--php-version)
+    --id|--source|--php-version|--control-path|--control-url)
       option="$1"; (($#>=2)) || { usage; exit 2; }
-      case "$option" in --id) ID="$2";; --source) SOURCE="$2";; --php-version) PHP_VERSION="$2";; esac
+      case "$option" in
+        --id) ID="$2";;
+        --source) SOURCE="$2";;
+        --php-version) PHP_VERSION="$2";;
+        --control-path) CONTROL_PATH="$2";;
+        --control-url) CONTROL_URL="$2";;
+      esac
       shift 2;;
     --apply) APPLY=1; shift;;
     *) usage; exit 2;;
@@ -18,6 +24,16 @@ done
 [[ "$ID" =~ ^[a-z][a-z0-9_]{1,18}$ ]] || { echo "ID inválido." >&2; exit 2; }
 [[ "$PHP_VERSION" =~ ^8\.[34]$ ]] || { echo "PHP inválido." >&2; exit 2; }
 [[ -f "$SOURCE/composer.lock" ]] || { echo "Falta composer.lock versionado. Atualização bloqueada." >&2; exit 2; }
+if [[ -n "$CONTROL_PATH" || -n "$CONTROL_URL" ]]; then
+  [[ -n "$CONTROL_PATH" && -n "$CONTROL_URL" ]] || { echo "Informe --control-path e --control-url juntos." >&2; exit 2; }
+  [[ "$CONTROL_URL" == https://* ]] || { echo "O vínculo remoto exige HTTPS." >&2; exit 2; }
+  [[ -f "$CONTROL_PATH/artisan" && -f "$CONTROL_PATH/app/Console/Commands/BindManagedInstallation.php" ]] || {
+    echo "Lumeron Control indisponível nesse diretório." >&2; exit 2;
+  }
+  [[ -f "$SOURCE/app/Console/Commands/CentralLicenseIdentity.php" ]] || {
+    echo "A release não contém integração de licenças." >&2; exit 2;
+  }
+fi
 BASE="/srv/lumeron/instances/$ID"; APP="$BASE/current"
 USER="lum_$ID"; MYSQL_CNF="/root/lumeron/$ID.mysql.cnf"
 [[ -L "$APP" && -f "$BASE/shared/.env" ]] || { echo "Instância não provisionada." >&2; exit 1; }
@@ -74,6 +90,16 @@ echo "Backup criado: $BACKUPS/$STAMP.sql.gz (somente root)."
 # Laravel migration must be backward compatible with the old version during rollout.
 runuser -u "$USER" -- "/usr/bin/php$PHP_VERSION" artisan migrate --force
 runuser -u "$USER" -- "/usr/bin/php$PHP_VERSION" artisan optimize
+
+# Opcional: operador de deploy vincula a instância no Control ANTES
+# de trocar o symlink. CNPJ do ERP e cadastro no Control já devem existir.
+# Nada é feito automaticamente apenas com um CNPJ informado na internet.
+if [[ -n "$CONTROL_PATH" ]]; then
+  (cd "$CONTROL_PATH" && "/usr/bin/php$PHP_VERSION" artisan control:bind-local "$RELEASE" \
+    --url="$CONTROL_URL" --file-owner="$USER")
+  # Revalidar como o usuário efetivo do PHP-FPM, não apenas como root.
+  runuser -u "$USER" -- "/usr/bin/php$PHP_VERSION" "$RELEASE/artisan" lumeron:license-sync
+fi
 ln -s "$RELEASE" "$BASE/.current-next"
 mv -Tf "$BASE/.current-next" "$APP"
 systemctl reload "php$PHP_VERSION-fpm"

@@ -94,3 +94,24 @@ contingência e DANFE de XML autorizado permanecem disponíveis. Antes de adotar
 bloqueio de nova emissão em workers, deve-se distinguir operações fiscais
 pendentes obrigatórias de novas emissões e criar retomada durável sem perda da
 fila ou do documento. Não afirmar que o middleware HTTP controla tais workers.
+
+## Vínculo na atualização Linux autorizada
+
+Quando o Lumeron Control já está instalado no mesmo servidor e pode acessar
+seguramente o diretório ERP, `deploy/instances/update.sh` aceita os parâmetros
+opcionais `--control-path <diretório-privado-do-Control>` e
+`--control-url https://<domínio-da-central>` junto de `--apply`.
+O script não solicita senha/chave ao usuário do ERP. Ele confere o CNPJ já
+configurado em Configurações > Geral, executa `control:bind-local` a partir
+da instalação privada do Control e atribui o arquivo de licença ao usuário
+isolado do PHP-FPM, antes de trocar a release. Também executa
+`lumeron:license-sync` como esse usuário para testar acesso ao arquivo
+e comunicação real. Se o comando falha, não promove a nova release.
+
+**Pré-condições:** empresa cadastrada no Control, código Control atualizado
+com `--file-owner`, URL HTTPS operante, CNPJ emitente correto no ERP,
+Control com acesso confiável ao caminho da instalação, root autorizado, backup
+e janela de atualização. Este modo é opcional e não conecta domínios ou
+servidores distintos automaticamente. Instalações recém-criadas devem ser
+configuradas com seu CNPJ antes desse vínculo. Nunca acionar em uma VPS
+de cliente sem aprovação explícita.
