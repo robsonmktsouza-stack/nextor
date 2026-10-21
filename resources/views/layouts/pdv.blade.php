@@ -42,6 +42,7 @@
       <span>{{ auth()->user()->name }}</span>
     </div>
 
+    @include('partials.commercial-readonly')
     <div class="pdv-topbar-actions">
       @if(!empty($nfceContingencyActive))
         <span class="pdv-topbar-contingency" data-tooltip="Novas NFC-e serão preparadas em contingência offline">
@@ -68,7 +69,7 @@
   </header>
 
   <main class="pdv-screen">
-    @include('partials.commercial-readonly')
+
     @if(session('success'))
       <div data-system-notification data-type="success" data-notification-title="Concluído" hidden>{{ session('success') }}</div>
     @endif
