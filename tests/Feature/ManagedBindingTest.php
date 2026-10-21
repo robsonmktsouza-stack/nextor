@@ -61,7 +61,15 @@ final class ManagedBindingTest extends TestCase
         file_put_contents($dir.'/config/central_license.php', "<?php\n");
         file_put_contents($dir.'/app/Console/Commands/CentralLicenseIdentity.php', "<?php\n");
         file_put_contents($dir.'/.env', "APP_ENV=testing\n");
-        file_put_contents($dir.'/artisan', "<?php echo '". $cnpj ."'.PHP_EOL;\n");
+        $source = <<<'PHP'
+<?php
+if (($argv[1] ?? '') === 'lumeron:license-sync') {
+    echo 'Licença da instalação: active / origem: online'.PHP_EOL;
+} else {
+    echo '__CNPJ__'.PHP_EOL;
+}
+PHP;
+        file_put_contents($dir.'/artisan', str_replace('__CNPJ__', $cnpj, $source));
         return $dir;
     }
 
@@ -70,6 +78,8 @@ final class ManagedBindingTest extends TestCase
         $company = $this->company();
         $path = $this->fakeLocalErp($company->cnpj);
         config()->set('app.url', 'http://127.0.0.1:8000');
+        \Illuminate\Support\Facades\Http::fake(['http://127.0.0.1:8000/up' =>
+            \Illuminate\Support\Facades\Http::response('OK', 200)]);
 
         $this->artisan('control:bind-local', [
             'erp-path' => $path,
@@ -83,6 +93,22 @@ final class ManagedBindingTest extends TestCase
         $this->assertSame('http://127.0.0.1:8000', $binding['url']);
         $this->assertSame('managed_binding', $company->events()->first()->event_type);
         $this->assertSame('active', $company->fresh()->currentStatus());
+    }
+
+    public function test_failed_online_handshake_does_not_leave_instance_restricted(): void
+    {
+        $company = $this->company();
+        $path = $this->fakeLocalErp($company->cnpj);
+        $script = file_get_contents($path.'/artisan');
+        file_put_contents($path.'/artisan', str_replace('origem: online', 'origem: offline', $script));
+        \Illuminate\Support\Facades\Http::fake(['http://127.0.0.1:8000/up' =>
+            \Illuminate\Support\Facades\Http::response('OK', 200)]);
+        $this->artisan('control:bind-local', [
+            'erp-path' => $path,
+            '--url' => 'http://127.0.0.1:8000',
+        ])->assertExitCode(1);
+        $this->assertFileDoesNotExist($path.'/storage/app/private/lumeron-control.json');
+        $this->assertSame(0, $company->events()->count());
     }
 
     public function test_wrong_erp_cnpj_does_not_create_any_managed_connection(): void
