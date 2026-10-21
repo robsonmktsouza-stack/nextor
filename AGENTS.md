@@ -50,6 +50,18 @@ A `develop` do ERP recebeu somente o **agente opt-in** em `app/Services/License/
 
 Habilitação requer autorização por CNPJ, URL HTTPS, UUID/chave da licença em `.env` privado, backup/migração e sincronização confirmada. Nunca copiar chaves entre CNPJs, expor segredos ou bloquear operações legais de regularização de NFC-e. A criação de conta central não cria automaticamente VPS, usuário ou implantação.
 
+## 2-C. Política atualizada: vinculação transparente pelo operador (21/10/2026)
+
+**Decisão definitiva do proprietário:** não exigir do cliente nem do administrador do ERP confirmação, UUID/chave manual, edição de `.env` ou etapa extra para liberar, suspender ou renovar. No painel o operador só cadastra empresa, libera ou altera licença. O serviço de deploy cuida da comunicação autenticada.
+
+- O painel `control-center` continua independente. Não mesclar seu código com a `develop`/`main` do ERP.
+- O agente `develop` lê credenciais HMAC de `storage/app/private/lumeron-control.json` criado por um gerenciador **confiável** no servidor. `ManagedLicenseConfig` valida CNPJ contra `company_settings.document` e a identidade de instalação. O modo legado via variáveis de ambiente permanece somente por compatibilidade.
+- Uma instalação **não vinculada** continua com licenciamento central desativado; após vínculo válido e primeira checagem assinada, ativar/suspender/renovar no Control produz efeito sem confirmar no ERP. Estados anteriores no banco não podem ser contornados removendo o arquivo.
+- Para uma instalação legada/local, o operador roda, a partir do **painel**, `php artisan control:bind-local <diretório-do-ERP> --url=<URL-real-do-Control>` **uma vez**; o comando chama `php artisan lumeron:license-identity` no ERP para obter CNPJ e instala o arquivo sem imprimir segredos. Deploys futuros devem integrar esse passo automaticamente; não afirmar que infraestrutura remota já foi provisionada.
+- **Não aceitar pareamento público só por CNPJ**, pois ele não comprova posse da instalação. Nem aplicar bloqueios fiscais destrutivos: preservar XML, NFC-e autorizadas e regularizações. `main`/`v1.0.0` continua intocada.
+
+Ver [docs/deployment/control-center-integration.md](docs/deployment/control-center-integration.md).
+
 ## 3. Procedimento por tarefa
 
 **Antes:** resumir o objetivo, localizar arquivos/rotas/testes existentes, mapear possíveis efeitos em outros módulos; verificar se solicitações recentes revogaram alguma decisão antiga.
