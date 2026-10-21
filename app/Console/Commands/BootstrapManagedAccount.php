@@ -22,7 +22,8 @@ final class BootstrapManagedAccount extends Command
         {--company-name= : Razão social}
         {--admin-name= : Nome do administrador}
         {--admin-email= : E-mail de primeiro acesso}
-        {--admin-login=admin : Usuário inicial}';
+        {--admin-login=admin : Usuário inicial}
+        {--local : Preparação exclusivamente para Laragon/ambiente local}';
 
     protected $description = 'Prepara identidade e convite de primeiro acesso em instalação recém-provisionada.';
 
@@ -46,7 +47,13 @@ final class BootstrapManagedAccount extends Command
         $expected = (string) config('instance.cnpj', '');
         $subdomain = (string) config('instance.subdomain', '');
         $domain = (string) config('instance.base_domain', '');
-        $expectedUrl = 'https://'.$subdomain.'.'.$domain;
+        $local = (bool) $this->option('local');
+        $expectedUrl = $local ? 'http://lumeron-'.$subdomain.'.test'
+            : 'https://'.$subdomain.'.'.$domain;
+        if ($local && !app()->environment('local', 'testing')) {
+            $this->error('Primeiro acesso local indisponível fora de desenvolvimento.');
+            return self::FAILURE;
+        }
         if ($validation->fails() || $data['cnpj'] !== $expected
             || !config('instance.id') || !\App\Support\LoginSubdomain::valid($subdomain)
             || rtrim((string) config('app.url'), '/') !== $expectedUrl) {
