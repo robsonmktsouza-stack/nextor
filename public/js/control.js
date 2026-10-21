@@ -92,18 +92,15 @@
     }
   }
 
-  // Campos da página e de detalhes carregados depois por AJAX.
-  // Ao trocar o plano, aplica os módulos padrão; ainda é possível ajustá-los.
+  // Os módulos são definidos somente no plano. A licença mostra um resumo.
+  const moduleLabels = {"pdv":"PDV e vendas","products":"Produtos e estoque","finance":"Financeiro","fiscal":"Documentos fiscais","services":"Serviços"};
   document.addEventListener('change', event => {
     const select = event.target.closest?.('[data-plan-selector]');
     if (!select) return;
-    const form = select.closest('form');
-    if (!form) return;
-    const defaults = (select.selectedOptions[0]?.dataset.modules || '')
-      .split(',').filter(Boolean);
-    form.querySelectorAll('input[name="modules[]"]').forEach(box => {
-      box.checked = defaults.includes(box.value);
-    });
+    const summary = select.closest('form')?.querySelector('[data-plan-modules-summary]');
+    if (!summary) return;
+    const codes = (select.selectedOptions[0]?.dataset.modules || '').split(',').filter(Boolean);
+    summary.textContent = codes.map(code => moduleLabels[code] || code).join(' · ') || 'Nenhum módulo';
   });
 
   // Um único comportamento para todas as grades do Control.
