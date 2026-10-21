@@ -3,3 +3,26 @@
 .form-grid label .field-error{display:block;color:#a63143;font-size:11px;font-weight:600;line-height:1.4;margin-top:2px}
 .form-grid [aria-invalid="true"]{border-color:#c85e6d!important;background:#fff9f9}
 .form-grid label>small:not(.field-error){font-size:11px;font-weight:400;color:#80939e;line-height:1.4}
+
+/* Planos e automações: telas administrativas densas, sem cartões decorativos. */
+.panel-description{font-size:11px;color:#8599a5;font-weight:400;max-width:65%}
+.control-settings-panel{max-width:850px}
+.control-settings-inner{padding:18px 20px}
+.control-form-actions{display:flex;justify-content:flex-end;gap:8px;padding-top:16px;margin-top:19px;border-top:1px solid #e5ebef}
+.settings-check{max-width:300px;margin:10px 0}
+.more-space{margin-top:15px}
+.plans-table{min-width:850px}
+.automation-list{padding:0}
+.automation-rule{display:flex;align-items:center;justify-content:space-between;gap:22px;border-bottom:1px solid #e7edf1;padding:17px 20px}
+.automation-rule:last-child{border-bottom:0}
+.automation-rule-details{flex:1;min-width:0}
+.automation-rule-details strong{font-size:13px;color:#315467}
+.automation-rule-details p{margin:6px 0;color:#718896;font-size:12px;line-height:1.5}
+.automation-rule-details small{font-size:11px;color:#9aabb2}
+.automation-rule-controls{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.automation-rule-controls>label:not(.check){display:flex;flex-direction:column;font-size:11px;font-weight:700;gap:4px;color:#6d8491}
+.automation-rule-controls input[type=number]{height:34px;width:95px;border:1px solid #c8d6df;border-radius:3px;padding:0 10px}
+.automation-switch{white-space:nowrap;padding:8px 10px}
+.automation-rule-no-days{font-size:11px;color:#93a3ac;max-width:145px}
+.automation-history{margin-top:16px}
+@media(max-width:900px){.automation-rule{flex-direction:column;align-items:stretch;gap:12px}.automation-rule-controls{flex-wrap:wrap}}
