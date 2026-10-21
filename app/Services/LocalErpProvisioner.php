@@ -97,10 +97,7 @@ final class LocalErpProvisioner
             }
         }
         $progress && $progress('Instalando dependências do ERP com Composer...');
-        $composer = PHP_OS_FAMILY === 'Windows'
-            ? ['cmd.exe', '/d', '/c', 'composer', 'install', '--no-interaction',
-                '--prefer-dist', '--no-progress']
-            : ['composer', 'install', '--no-interaction', '--prefer-dist', '--no-progress'];
+        $composer = self::composerCommandForPlatform(PHP_OS_FAMILY);
         // On Windows Composer is normally composer.bat, not composer.exe.
         // It must be resolved by cmd.exe/PATHEXT rather than proc_open
         // attempting to execute a missing native composer executable.
@@ -237,6 +234,14 @@ final class LocalErpProvisioner
         } finally {
             @unlink($zip);
         }
+    }
+
+    public static function composerCommandForPlatform(string $family): array
+    {
+        $args = ['composer', 'install', '--no-interaction', '--prefer-dist', '--no-progress'];
+        return $family === 'Windows'
+            ? ['cmd.exe', '/d', '/c', ...$args]
+            : $args;
     }
 
     private function execute(array $args, string $directory, int $timeout, string $stage = 'archive'): string
