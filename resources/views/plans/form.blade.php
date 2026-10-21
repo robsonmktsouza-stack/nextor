@@ -19,7 +19,11 @@
 @foreach([1,3,6,12] as $months)<option value="{{ $months }}" @selected((int)old('period_months',$plan->period_months ?? 1)===$months)>{{ $months }} {{ $months===1?'mês':'meses' }}</option>@endforeach
 </select></label>
 </div>
-<div class="modules"><strong>Módulos padrão para novas licenças</strong><div class="module-grid">
+<div class="modules"><strong>Módulos incluídos no plano</strong>
+@if($plan->exists && ($customerCount ?? 0) > 0)
+<small class="plan-impact-note">As mudanças serão aplicadas a {{ $customerCount }} {{ $customerCount === 1 ? 'cliente' : 'clientes' }} deste plano.</small>
+@endif
+<div class="module-grid">
 @foreach(config('license.modules') as $code=>$label)
 <label class="module-switch"><input type="checkbox" role="switch" name="modules[]" value="{{ $code }}" @checked(in_array($code,old('modules',$plan->modules ?? ['pdv','products'])))><span class="switch-track" aria-hidden="true"></span><span>{{ $label }}</span></label>
 @endforeach</div></div>
