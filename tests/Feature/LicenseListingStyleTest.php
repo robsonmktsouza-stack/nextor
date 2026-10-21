@@ -97,7 +97,7 @@ final class LicenseListingStyleTest extends TestCase
         $this->get(route('clients.show', $company))->assertOk()
             ->assertSee('data-license-switch-form', false)
             ->assertSee('role="switch"', false)
-            ->assertSee('Módulos autorizados');
+            ->assertSee('data-plan-modules-summary', false)->assertDontSee('Módulos autorizados');
     }
 
     public function test_viewing_licenses_requires_authentication(): void
