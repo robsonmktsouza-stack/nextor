@@ -105,8 +105,8 @@ Alterações em autenticação/licença exigem testes e revisão de segurança. 
   regra/empresa/vencimento. Antes de enviar, validar novamente validade,
   situação, prazo e opção ativa; renovados/suspensos vão para skipped.
   Até três tentativas, sem expor senhas nem erros detalhados na UI.
-- O comando externo `control:client-email-send` corre às 08h10 se o
-  scheduler estiver realmente ativo. Rotas administrativas protegidas e
+- O comando externo `control:client-email-send` corre a cada 10 minutos
+  das 08h10 às 18h se o scheduler estiver realmente ativo. Rotas administrativas protegidas e
   throttle. E-mail enviado só comprova aceite pelo transporte.
 - Não implementar WhatsApp fictício nem realizar campanhas: exige integração
   legítima com provedor e política de mensagens próprias.

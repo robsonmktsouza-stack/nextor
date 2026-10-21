@@ -216,8 +216,9 @@ administrativo controlado antes de habilitar `LUMERON_CLIENT_EMAIL_ENABLED=true`
 O padrão é `MAIL_MAILER=log` e `LUMERON_CLIENT_EMAIL_ENABLED=false`.
 Somente os dois gates (global + switch da regra) permitem envio.
 
-O scheduler existente executa `control:automations-run` às 08:00 e depois
-`control:client-email-send` às 08:10, no fuso do Control. É preciso manter
+O scheduler existente executa `control:automations-run` às 08:00; o comando
+`control:client-email-send` processa a fila a cada 10 minutos entre 08:10 e
+18:00, no fuso do Control, inclusive para tentativas após falha. É preciso manter
 o agendador operacional em produção. É possível executar
 `php artisan control:client-email-send` manualmente (o comando respeita as
 mesmas travas). A tela Automações mostra a fila e permite um envio manual
