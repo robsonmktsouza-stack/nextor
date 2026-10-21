@@ -92,29 +92,18 @@
     }
   }
 
-  // Selecionar um plano aplica somente aos campos ainda não enviados. O
-  // operador pode ajustar os módulos manualmente depois.
-  document.querySelectorAll('[data-plan-selector]').forEach(select => {
-    select.addEventListener('change', () => {
-      const form = select.closest('form');
-      const selected = select.selectedOptions[0];
-      const defaults = (selected?.dataset.modules || '').split(',').filter(Boolean);
-      if (!form) return;
-      form.querySelectorAll('input[name="modules[]"]').forEach(box => {
-        box.checked = defaults.includes(box.value);
-      });
+  // Campos da página e de detalhes carregados depois por AJAX.
+  // Ao trocar o plano, aplica os módulos padrão; ainda é possível ajustá-los.
+  document.addEventListener('change', event => {
+    const select = event.target.closest?.('[data-plan-selector]');
+    if (!select) return;
+    const form = select.closest('form');
+    if (!form) return;
+    const defaults = (select.selectedOptions[0]?.dataset.modules || '')
+      .split(',').filter(Boolean);
+    form.querySelectorAll('input[name="modules[]"]').forEach(box => {
+      box.checked = defaults.includes(box.value);
     });
   });
 
-  document.querySelectorAll('[data-copy-target]').forEach(button => {
-    button.addEventListener('click', async () => {
-      const value = document.getElementById(button.dataset.copyTarget)?.textContent ?? '';
-      try {
-        await navigator.clipboard.writeText(value);
-        button.textContent = 'Copiado';
-      } catch {
-        button.textContent = 'Selecione a chave para copiar';
-      }
-    });
-  });
 })();
