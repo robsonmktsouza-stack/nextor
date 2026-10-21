@@ -58,3 +58,11 @@ Não permitir alteração por requisição HTTP direta ou AJAX, nem excluir banc
 **Atenção:** a exigência remota só funciona nas instalações que receberam este código em uma versão futura, foram migradas e configuradas por autorização expressa. A `main`/`v1.0.0` continua intocada. O painel **não** instala usuários/servidores nem publica releases automaticamente.
 
 Não ativar em cliente real sem confirmar a URL, backup, segurança, autorização do proprietário e política de continuidade operacional do estabelecimento.
+
+## Planos comerciais definem acesso por módulo (21/10/2026)
+
+- A licença assinada aceita qualquer código de plano válido `[a-z][a-z0-9_-]{2,29}`; não limitar a `standard/advanced/full`. O array de módulos assinado pelo Control é a autoridade comercial. Nunca usar o antigo `companies.modules` para conceder direitos.
+- `CommercialModuleAccess` vincula PDV/Vendas/Clientes a `pdv`, Produtos/Estoque a `products`, Financeiro a `finance`, Serviços a `services` e Fiscal a `fiscal`. O middleware `RequireCentralLicense` impõe HTTP **403** em telas/ações não contratadas (JSON usa `LUMERON_MODULE_UNAVAILABLE`); ocultar os links no layout, incluindo atalhos do cabeçalho. Credenciais API (`api/lumeron` e `api/nextor`) também não burlam essas licenças.
+- Exceções de regularização fiscal são taxativas, inclusive consulta de notas existentes, downloads legais e cancelamento/transmissão de contingência. **Nunca** liberar `fiscal/*` indiscriminadamente ou bloquear obrigação fiscal legal por não contratação. Uma opção de Regularizações fiscais fica no menu de usuário quando a aba Fiscal completa não foi contratada.
+- Instalações sem vínculo continuam com o comportamento antigo; suspensas, vencidas ou não verificadas após tolerância mantêm consulta e bloqueiam gravação, independentemente dos módulos, conforme política anterior. Permissões próprias dos usuários nunca são ampliadas por um plano.
+- Antes da atualização do ERP, executar a migration `2026_10_22_000001_preserve_legacy_entitlements_as_plans.php` no **Control** para impedir a perda de autorizações individuais antigas. Não tocar os documentos XML, certificados, CNPJ, estoque, bancos, filas, `main` ou `v1.0.0`.
