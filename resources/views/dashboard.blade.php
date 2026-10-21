@@ -11,12 +11,22 @@
   <a href="{{ route('licenses.index',['status'=>'expired']) }}" class="stat"><span>Vencidas</span><strong>{{ $expired }}</strong><small>Prazo de licença encerrado</small></a>
 </div>
 <div class="two-cols">
-<section class="panel"><div class="panel-heading"><h2>Próximos vencimentos</h2><a href="{{ route('licenses.index') }}">Ver licenças <svg><use href="#i-arrow"/></svg></a></div>
-<div class="table-scroll"><table><thead><tr><th>Cliente</th><th>Validade</th><th></th></tr></thead><tbody>
+<section class="panel license-grid" data-admin-list data-grid-filename="proximos-vencimentos">
+<div class="panel-heading admin-grid-heading"><h2>Próximos vencimentos</h2><a href="{{ route('licenses.index') }}">Ver licenças <svg><use href="#i-arrow"/></svg></a></div>
+@include('partials.listing.toolbar', ['showFilters' => false])
+<div class="table-scroll"><table class="license-data-table" data-grid-table>
+<thead><tr><th>Cliente</th><th>Validade</th><th class="license-actions-heading">Ações</th></tr></thead>
+<tbody>
 @forelse($renewals as $company)
-<tr><td><a href="{{ route('clients.show',$company) }}">{{ $company->legal_name }}</a><small class="cell-secondary">{{ $company->subdomain }}</small></td><td>{{ $company->expires_at?->format('d/m/Y') }}</td><td><a class="link" href="{{ route('clients.show',$company) }}">Gerenciar</a></td></tr>
+<tr>
+<td class="license-name-cell"><a class="license-name" href="{{ route('clients.show',$company) }}">{{ $company->legal_name }}</a><small>{{ $company->subdomain }}</small></td>
+<td class="license-nowrap">{{ $company->expires_at?->format('d/m/Y') }}</td>
+<td><div class="license-row-actions"><a class="license-icon-action" href="{{ route('clients.show',$company) }}" title="Gerenciar licença" aria-label="Gerenciar licença de {{ $company->legal_name }}"><svg><use href="#i-edit"/></svg></a></div></td>
+</tr>
 @empty<tr><td colspan="3" class="empty">Nenhuma licença vencendo nos próximos 15 dias.</td></tr>@endforelse
-</tbody></table></div></section>
+</tbody></table></div>
+<div class="admin-grid-mini-footer"><a href="{{ route('licenses.index') }}">Consultar todas as licenças <svg><use href="#i-arrow"/></svg></a></div>
+</section>
 <section class="panel"><div class="panel-heading"><h2>Atividades recentes</h2><a href="{{ route('history.index') }}">Histórico <svg><use href="#i-arrow"/></svg></a></div>
 <div class="activity-list">
 @forelse($events as $event)
