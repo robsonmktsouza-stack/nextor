@@ -113,7 +113,7 @@ final class CompanyController extends Controller
             'modules.*' => [Rule::in(array_keys(config('license.modules')))],
         ]);
         $plan = Plan::query()->where('code', $data['plan'])->firstOrFail();
-        $data['modules'] = array_values(array_unique($data['modules'] ?? $plan->modules ?? []));
+        $data['modules'] = array_values(array_unique($data['modules'] ?? ($request->has('modules_present') ? [] : ($plan->modules ?? []))));
         $secret = bin2hex(random_bytes(48));
         $company = DB::transaction(function () use ($data, $secret): Company {
             $company = Company::create([
