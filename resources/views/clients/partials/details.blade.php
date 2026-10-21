@@ -20,19 +20,24 @@
 </section>
 <section class="detail-box"><h3>Licença e acesso</h3>
 <div class="license-summary"><div><span>Plano atual</span><strong>{{ $plans->firstWhere('code',$company->plan)?->name ?? $company->plan }}</strong></div><div><span>Vencimento</span><strong>{{ $company->expires_at?->format('d/m/Y')??'Sem prazo' }}</strong></div></div>
-<form method="post" action="{{ route('clients.status',$company) }}" class="status-controls">@csrf
-@if($company->license_status==='suspended')
-<input type="hidden" name="action" value="activate"><button class="btn success" type="submit" data-confirm="Reativar a licença deste cliente?"><svg><use href="#i-check"/></svg>Reativar acesso</button>
-@else
-<input type="hidden" name="action" value="suspend"><input type="text" name="reason" placeholder="Motivo (opcional)" maxlength="250"><button class="btn danger" type="submit" data-confirm="Suspender o acesso comercial deste cliente?"><svg><use href="#i-lock"/></svg>Suspender acesso</button>
-@endif
+<form method="post" action="{{ route('clients.status',$company) }}" class="status-controls switch-status-controls" data-license-switch-form>
+@csrf
+<input type="hidden" name="action" value="{{ $company->license_status === 'suspended' ? 'activate' : 'suspend' }}">
+<label class="switch-row switch-status">
+<input type="checkbox" name="license_enabled" role="switch" data-license-switch
+aria-label="Ativar ou suspender licença de {{ $company->legal_name }}"
+@checked($company->license_status !== 'suspended')>
+<span class="switch-track" aria-hidden="true"></span>
+<span>Acesso comercial {{ $company->license_status === 'suspended' ? 'suspenso' : 'liberado' }}</span>
+</label>
+<span class="switch-hint">Alterações de acesso são aplicadas automaticamente à instalação conectada.</span>
 </form>
 <form method="post" action="{{ route('clients.renew',$company) }}" class="renew-controls">@csrf
 <label>Renovar por<select name="months"><option value="1">1 mês</option><option value="3">3 meses</option><option value="6">6 meses</option><option value="12">12 meses</option></select></label><button class="btn primary" type="submit"><svg><use href="#i-calendar"/></svg>Renovar</button>
 </form>
 <form method="post" action="{{ route('clients.modules',$company) }}">@csrf
 <div class="form-grid"><label>Plano<select name="plan" data-plan-selector>@foreach($plans as $plan)<option value="{{ $plan->code }}" data-modules="{{ implode(',', $plan->modules ?? []) }}" @selected($company->plan===$plan->code)>{{ $plan->name }}{{ $plan->active ? '' : ' (arquivado)' }}</option>@endforeach</select></label><label>Validade<input type="date" name="expires_at" value="{{ $company->expires_at?->format('Y-m-d') }}"></label></div>
-<div class="modules"><strong>Módulos autorizados</strong><div class="module-grid">@foreach(config('license.modules') as $code=>$label)<label class="check"><input type="checkbox" name="modules[]" value="{{ $code }}" @checked(in_array($code,$company->modules??[]))>{{ $label }}</label>@endforeach</div></div>
+<div class="modules"><strong>Módulos autorizados</strong><input type="hidden" name="modules_present" value="1"><div class="module-grid">@foreach(config('license.modules') as $code=>$label)<label class="module-switch"><input type="checkbox" role="switch" name="modules[]" value="{{ $code }}" @checked(in_array($code,$company->modules??[]))><span class="switch-track" aria-hidden="true"></span><span>{{ $label }}</span></label>@endforeach</div></div>
 <button type="submit" class="btn primary small">Salvar licença</button></form>
 <div class="info-line">A liberação, suspensão e renovação são feitas somente aqui. Quando a instalação estiver conectada ao serviço central, as alterações serão recebidas automaticamente, sem ação do cliente.</div>
 </section>
