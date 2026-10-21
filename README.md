@@ -80,3 +80,18 @@ Não versionar `.env`, certificados digitais, credenciais de CSC, arquivos fisca
 ## Histórico
 
 O protótipo antigo de motor NFC-e próprio foi arquivado em `archive/nextor-native-nfce-2026-10-02.zip`; o plano técnico atual usa ACBrLib. O nome dos diretórios históricos não deve ser alterado sem plano de migração.
+
+
+### Clientes cadastrados diretamente no Lumeron Control
+
+O provisionamento por cliente pode ser executado automaticamente
+por agente privado na VPS, sem contato técnico com a empresa.
+O Control registra a conta e o agente chama
+`deploy/instances/provision.sh --managed`, que instala banco privado,
+administrador e vínculo HMAC. O cliente recebe um convite para criar
+senha em seu domínio (envio somente via SMTP do Control).
+A implantação inicial desse agente, do DNS e do TLS é um trabalho
+**único da infraestrutura**, não um comando executado por cliente
+nem um serviço que o GitHub ativa automaticamente.
+Não utilizar um banco compartilhado para as instalações ERP.
+Consulte `docs/deployment/managed-first-access.md`.

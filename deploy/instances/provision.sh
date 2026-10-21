@@ -5,17 +5,23 @@ set -Eeuo pipefail
 umask 077
 
 ID="" CNPJ="" DOMAIN="" SOURCE="" BASE_DOMAIN="lumeron.com.br" APPLY=0 PHP_VERSION="8.3" MYSQL_CNF="/root/.my.cnf"
+MANAGED=0 COMPANY_NAME="" ADMIN_NAME="" ADMIN_EMAIL="" ADMIN_LOGIN="" CONTROL_PATH="" CONTROL_URL="" TLS_CERT_NAME=""
 usage() { echo "Uso: bash deploy/instances/provision.sh --id academia_ba --cnpj 00000000000000 --domain academia.exemplo.com.br --source /opt/lumeron/source [--base-domain lumeron.com.br] [--php-version 8.3] [--mysql-admin-cnf /root/.my.cnf] [--apply]"; }
 while (($#)); do
   case "$1" in
-    --id|--cnpj|--domain|--source|--base-domain|--php-version|--mysql-admin-cnf)
+    --id|--cnpj|--domain|--source|--base-domain|--php-version|--mysql-admin-cnf|--company-name|--admin-name|--admin-email|--admin-login|--control-path|--control-url|--tls-cert-name)
       option="$1"; (($# >= 2)) || { usage; exit 2; }
       case "$option" in
         --id) ID="$2";; --cnpj) CNPJ="$2";; --domain) DOMAIN="$2";;
         --source) SOURCE="$2";; --base-domain) BASE_DOMAIN="$2";; --php-version) PHP_VERSION="$2";;
         --mysql-admin-cnf) MYSQL_CNF="$2";;
+        --company-name) COMPANY_NAME="$2";; --admin-name) ADMIN_NAME="$2";;
+        --admin-email) ADMIN_EMAIL="$2";; --admin-login) ADMIN_LOGIN="$2";;
+        --control-path) CONTROL_PATH="$2";; --control-url) CONTROL_URL="$2";;
+        --tls-cert-name) TLS_CERT_NAME="$2";;
       esac
       shift 2;;
+    --managed) MANAGED=1; shift;;
     --apply) APPLY=1; shift;;
     *) usage; exit 2;;
   esac
@@ -31,6 +37,21 @@ SUBDOMAIN="${DOMAIN%.$BASE_DOMAIN}"
 [[ "$PHP_VERSION" =~ ^8\.[34]$ ]] || { echo "Versão PHP inválida." >&2; exit 2; }
 [[ -f "$SOURCE/composer.json" ]] || { echo "Source não contém Laravel." >&2; exit 2; }
 [[ -f "$SOURCE/composer.lock" ]] || { echo "Falta composer.lock versionado: provisionamento bloqueado para segurança." >&2; exit 2; }
+if ((MANAGED)); then
+  [[ -n "$COMPANY_NAME" && -n "$ADMIN_NAME" && "$ADMIN_EMAIL" == *@* && -n "$ADMIN_LOGIN" ]] || {
+    echo "Dados de primeiro acesso incompletos." >&2; exit 2;
+  }
+  [[ "$ADMIN_LOGIN" =~ ^[a-z][a-z0-9._-]{2,49}$ ]] || { echo "Login inválido." >&2; exit 2; }
+  [[ "$CONTROL_URL" == https://* && -f "$CONTROL_PATH/artisan" ]] || {
+    echo "O provisionamento gerenciado exige Control local e URL HTTPS." >&2; exit 2;
+  }
+  [[ -f "$SOURCE/app/Console/Commands/BootstrapManagedAccount.php" ]] || {
+    echo "A release não possui criação de primeiro acesso gerenciado." >&2; exit 2;
+  }
+fi
+[[ -z "$TLS_CERT_NAME" || "$TLS_CERT_NAME" =~ ^[a-zA-Z0-9_.-]{1,100}$ ]] || {
+  echo "Nome do certificado inválido." >&2; exit 2;
+}
 BASE="/srv/lumeron/instances/$ID"; USER="lum_$ID"; DB="lum_$ID"
 STAMP="$(date -u +%Y%m%d%H%M%S)-$(openssl rand -hex 3)"
 RELEASE="$BASE/releases/$STAMP"
@@ -39,8 +60,9 @@ SITE="/etc/nginx/sites-available/lumeron-$ID.conf"
 WORKER="/etc/systemd/system/lumeron-fiscal-$ID.service"
 SCHEDULE="/etc/systemd/system/lumeron-schedule-$ID.service"
 TIMER="/etc/systemd/system/lumeron-schedule-$ID.timer"
-CERT="/etc/letsencrypt/live/$DOMAIN/fullchain.pem"
-CERTKEY="/etc/letsencrypt/live/$DOMAIN/privkey.pem"
+TLS_DIR="${TLS_CERT_NAME:-$DOMAIN}"
+CERT="/etc/letsencrypt/live/$TLS_DIR/fullchain.pem"
+CERTKEY="/etc/letsencrypt/live/$TLS_DIR/privkey.pem"
 echo "Instalação $ID | CNPJ $CNPJ | https://$DOMAIN | Banco $DB | PHP $PHP_VERSION"
 if ((APPLY==0)); then echo "Simulação: nada foi alterado. Acrescente --apply quando aprovado."; exit 0; fi
 ((EUID==0)) || { echo "Somente root na VPS." >&2; exit 1; }
@@ -128,6 +150,15 @@ unset DB_PASSWORD APP_KEY
 cd "$RELEASE"
 runuser -u "$USER" -- composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 runuser -u "$USER" -- "/usr/bin/php$PHP_VERSION" artisan migrate --force
+if ((MANAGED)); then
+  runuser -u "$USER" -- "/usr/bin/php$PHP_VERSION" artisan erp:bootstrap-managed \
+    --cnpj="$CNPJ" --company-name="$COMPANY_NAME" \
+    --admin-name="$ADMIN_NAME" --admin-email="$ADMIN_EMAIL" --admin-login="$ADMIN_LOGIN"
+  # Execute binding only from trusted infrastructure with CNPJ verified
+  # against the ERP's own settings. Never print HMAC credentials.
+  (cd "$CONTROL_PATH" && "/usr/bin/php$PHP_VERSION" artisan control:bind-local "$RELEASE" \
+    --url="$CONTROL_URL" --file-owner="$USER")
+fi
 runuser -u "$USER" -- "/usr/bin/php$PHP_VERSION" artisan optimize
 ln -s "$RELEASE" "$BASE/current"
 
@@ -228,7 +259,11 @@ nginx -t
 systemctl reload "php$PHP_VERSION-fpm"
 systemctl reload nginx
 echo "Instância criada: https://$DOMAIN"
-echo "Crie o administrador: cd $BASE/current && runuser -u $USER -- /usr/bin/php$PHP_VERSION artisan erp:make-admin"
+if ((MANAGED)); then
+  echo "Administrador criado com convite privado; envie o link pelo Control antes de liberar o acesso."
+else
+  echo "Crie o administrador: cd $BASE/current && runuser -u $USER -- /usr/bin/php$PHP_VERSION artisan erp:make-admin"
+fi
 echo "Cadastre exatamente o CNPJ contratado, configure certificado A1, CSC e a biblioteca ACBr Linux."
 echo "Verifique: cd $BASE/current && runuser -u $USER -- /usr/bin/php$PHP_VERSION artisan lumeron:instance-check --fiscal"
 echo "Após validar: systemctl enable --now lumeron-fiscal-$ID"

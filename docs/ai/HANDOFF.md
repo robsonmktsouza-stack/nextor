@@ -1,3 +1,24 @@
+## Fluxo de primeiro acesso automatizado por VPS — 21/10/2026
+
+- O usuário quer apenas cadastrar a empresa no Control e entregar o acesso
+  ao ERP. Nunca solicitar instalação manual por cliente. Arquitetura mantém
+  **um banco/usuário Linux/storage por CNPJ**, mas o provisionador na VPS
+  passa a fazer isso automaticamente.
+- Novo comando seguro `erp:bootstrap-managed`: valida CNPJ e subdomínio
+  fixos do ambiente, cria `company_settings` e administrador inicial com
+  senha aleatória, prepara URL de redefinição de senha num arquivo privado
+  que o Control enviará pelo SMTP real. Não revela senhas ou HMAC.
+- O script `deploy/instances/provision.sh` aceita `--managed` e dados de
+  empresa/contato, TLS de domínio curinga e caminho/URL do Control. Executa
+  migrações, bootstrap do administrador e `control:bind-local`, valida
+  via handshake assinado antes de ativar a instância.
+- A fila/worker pertence unicamente à branch `control-center`.
+  Código versionado não instala serviço privilegiado na VPS; DNS,
+  wildcard TLS, SMTP, MySQL e serviço restrito exigem preparação prévia
+  única e teste ponta a ponta. `main` e tag estável intocadas.
+- O provisionamento de login não habilita emissão fiscal sem certificado,
+  CSC, ACBr, credenciamento e homologação apropriados.
+
 ## Continuidade — 21/10/2026 — aviso comercial sincronizado com Control
 
 - O endpoint HMAC do Control entrega `notice_days` opcional a partir de regras de vencimento ativas. O ERP valida o campo, o persiste em `central_license_states.notice_days` (nova migration) e mostra chip de vencimento em `app.blade.php` e `pdv.blade.php` via `partials.commercial-readonly`.
