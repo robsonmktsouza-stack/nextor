@@ -75,9 +75,7 @@ final class CentralLicenseService
                 || !hash_equals($cnpj, (string) ($payload['cnpj'] ?? ''))
                 || !in_array($payload['status'] ?? null, ['active', 'suspended', 'expired'], true)
                 || !is_array($payload['modules'] ?? null)
-                || !in_array((string) ($payload['plan'] ?? ''), array_keys(config('central_license.plans', [
-                    'standard' => true, 'advanced' => true, 'full' => true
-                ])), true)
+                || !preg_match('/^[a-z][a-z0-9_-]{2,29}$/', (string) ($payload['plan'] ?? ''))
                 || !isset($payload['checked_at'])
                 || abs(now()->diffInSeconds(\Illuminate\Support\Carbon::parse($payload['checked_at']), false)) > 300) {
                 throw new \RuntimeException('Resposta da licença incompatível.');
@@ -87,9 +85,12 @@ final class CentralLicenseService
                 || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $expires))) {
                 throw new \RuntimeException('Validade da licença inválida.');
             }
-            $modules = array_values(array_unique(array_filter(
-                $payload['modules'], fn ($module) => is_string($module) && strlen($module) < 60
-            )));
+            $modules = $payload['modules'];
+            if (count($modules) > count(\App\Support\CommercialModuleAccess::ALLOWED)
+                || count($modules) !== count(array_unique($modules))
+                || array_diff($modules, \App\Support\CommercialModuleAccess::ALLOWED)) {
+                throw new \RuntimeException('Módulos da licença incompatíveis.');
+            }
             DB::table('central_license_states')->updateOrInsert(['id' => 1], [
                 'status' => $payload['status'],
                 'plan' => $payload['plan'],
