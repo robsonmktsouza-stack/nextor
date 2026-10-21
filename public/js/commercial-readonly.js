@@ -92,7 +92,10 @@
     if (element.type === 'submit' && element.closest('form') && writableForm(element.closest('form'))) return true;
     const formId = element.getAttribute('form') || element.dataset.bulkSubmit;
     if (formId && writableForm(document.getElementById(formId))) return true;
-    if (element.matches('[data-bulk-apply]')) return true;
+    if (element.matches('[data-bulk-apply]')) {
+      const menu = element.closest('.bulk-actions')?.querySelector('[data-bulk-menu]');
+      return !['local:export', 'local:print'].includes(menu?.value);
+    }
     if (element.dataset.dialogOpen) {
       const dlg = document.getElementById(element.dataset.dialogOpen);
       if (dlg && [...dlg.querySelectorAll('form')].some(writableForm)) return true;
@@ -103,20 +106,45 @@
   };
   const lockedSelector = 'a[href],button';
   const markAction = element => {
-    if (!actionTarget(element) || element.classList.contains('license-locked-action')) return;
+    const shouldLock = actionTarget(element);
+    const isLocked = element.classList.contains('license-locked-action');
+    if (!shouldLock && isLocked) {
+      element.classList.remove('license-locked-action');
+      element.removeAttribute('data-license-action');
+      element.querySelector(':scope > .license-lock-glyph')?.remove();
+      if (element.dataset.licenseOriginalAria === '') element.removeAttribute('aria-disabled');
+      else if (element.dataset.licenseOriginalAria) element.setAttribute('aria-disabled', element.dataset.licenseOriginalAria);
+      delete element.dataset.licenseOriginalAria;
+      if (element.dataset.licenseAddedTitle) {
+        element.removeAttribute('title');
+        delete element.dataset.licenseAddedTitle;
+      }
+      return;
+    }
+    if (!shouldLock || isLocked) return;
+    element.dataset.licenseOriginalAria = element.getAttribute('aria-disabled') || '';
     element.classList.add('license-locked-action');
     element.setAttribute('aria-disabled', 'true');
     element.setAttribute('data-license-action', 'write');
     if (!element.hasAttribute('title')) {
       element.title = 'Indisponível enquanto a assinatura estiver restrita';
+      element.dataset.licenseAddedTitle = '1';
     }
     element.insertAdjacentHTML('beforeend', lockSvg);
   };
+  const lockedSelector = 'a[href],button';
   const scanActions = root => {
     if (root.matches?.(lockedSelector)) markAction(root);
     root.querySelectorAll?.(lockedSelector).forEach(markAction);
   };
   scanActions(document);
+  // Ao escolher "Exportar/Imprimir", o botão volta ao estilo de consulta.
+  document.addEventListener('change', event => {
+    if (event.target.matches?.('[data-bulk-menu]')) {
+      const button = event.target.closest('.bulk-actions')?.querySelector('[data-bulk-apply]');
+      if (button) markAction(button);
+    }
+  }, true);
   // Modais e resultados de buscas inseridos dinamicamente também são sinalizados.
   let scanFrame = 0;
   const observer = new MutationObserver(records => {
