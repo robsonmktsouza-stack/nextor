@@ -33,13 +33,12 @@
     </div>
     <div class="table-scroll">
         <table class="license-data-table" data-grid-table>
-            <thead><tr><th>Regra</th><th>Descrição</th><th>Prazo</th><th>Última execução</th><th>Situação</th><th class="license-actions-heading">Ações</th></tr></thead>
+            <thead><tr><th>Regra</th><th>Descrição</th><th>Prazo</th><th>Última verificação</th><th>Situação</th><th class="license-actions-heading">Ações</th></tr></thead>
             <tbody>
                 @forelse($rules as $rule)
                     <tr>
                         <td class="license-name-cell">
                             <strong class="license-name">{{ $rule->name }}</strong>
-                            <small>{{ $rule->code }}</small>
                             <form method="post" action="{{ route('automations.update',$rule) }}" id="automation-rule-{{ $rule->id }}">
                                 @csrf @method('PUT')
                                 <input type="hidden" name="enabled" value="0">
@@ -54,7 +53,7 @@
                                 </label>
                             @else
                                 <input type="hidden" form="automation-rule-{{ $rule->id }}" name="days" value="0">
-                                <span>No vencimento</span>
+                                <span>Após vencimento</span>
                             @endif
                         </td>
                         <td class="license-nowrap">{{ $rule->last_run_at?->format('d/m/Y H:i') ?? 'Nunca' }}</td>
