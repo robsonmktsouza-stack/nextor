@@ -64,6 +64,32 @@ final class LicenseApiTest extends TestCase
         $this->assertNotNull($company->fresh()->last_seen_at);
     }
 
+    public function test_signed_api_delivers_only_enabled_reminder_thresholds(): void
+    {
+        $company = $this->company();
+        $this->check($company)->assertOk()->assertJsonPath('notice_days', null);
+
+        \App\Models\AutomationRule::query()->where('code', 'expiry_soon')
+            ->update(['enabled' => true, 'days' => 7]);
+        $response = $this->check($company)->assertOk()->assertJsonPath('notice_days', 7);
+        $signedJson = $response->getContent();
+        $this->assertSame(
+            hash_hmac('sha256', $signedJson, $company->license_secret),
+            $response->headers->get('X-Lumeron-Signature')
+        );
+
+        \App\Models\AutomationRule::query()->create([
+            'code' => 'custom_'.strtolower(\Illuminate\Support\Str::random(16)),
+            'name' => 'Antecedência estendida',
+            'description' => 'Aviso antecipado na instalação',
+            'kind' => 'expiry_soon',
+            'enabled' => true,
+            'days' => 15,
+            'notify_client_email' => false,
+        ]);
+        $this->check($company)->assertOk()->assertJsonPath('notice_days', 15);
+    }
+
     public function test_replay_and_wrong_signature_or_cnpj_are_rejected(): void
     {
         $company = $this->company();
