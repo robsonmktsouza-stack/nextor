@@ -25,10 +25,10 @@
 <fieldset data-wizard-step="2" hidden><legend>Plano e liberação</legend>
 <p class="field-hint">Escolha a validade e os módulos que o cliente terá direito a utilizar.</p>
 <div class="form-grid">
-<label>Plano <strong>*</strong><select name="plan" required>@foreach(config('license.plans') as $value=>$label)<option value="{{ $value }}" @selected(old('plan','standard')===$value)>{{ $label }}</option>@endforeach</select>@error('plan')<small class="field-error">{{ $message }}</small>@enderror</label>
+<label>Plano <strong>*</strong><select name="plan" required data-plan-selector>@foreach($plans as $plan)<option value="{{ $plan->code }}" data-modules="{{ implode(',', $plan->modules ?? []) }}" @selected(old('plan',$plans->first()?->code)===$plan->code)>{{ $plan->name }}</option>@endforeach</select>@error('plan')<small class="field-error">{{ $message }}</small>@enderror</label>
 <label>Vencimento <input name="expires_at" type="date" value="{{ old('expires_at') }}"><small>Em branco = sem vencimento automático.</small>@error('expires_at')<small class="field-error">{{ $message }}</small>@enderror</label>
 </div>
-<div class="modules"><strong>Módulos liberados</strong><div class="module-grid">@foreach(config('license.modules') as $code=>$label)<label class="check"><input type="checkbox" name="modules[]" value="{{ $code }}" @checked(in_array($code, old('modules',['pdv','products','finance','fiscal','services'])))>{{ $label }}</label>@endforeach</div></div>
+<div class="modules"><strong>Módulos liberados</strong><div class="module-grid">@foreach(config('license.modules') as $code=>$label)<label class="check"><input type="checkbox" name="modules[]" value="{{ $code }}" @checked(in_array($code,old('modules',$plans->firstWhere('code',old('plan',$plans->first()?->code))?->modules ?? [])))>{{ $label }}</label>@endforeach</div></div>
 <div class="info-line">Após salvar, a conta estará liberada no painel. A instalação será vinculada automaticamente pelo gerenciador de implantação, sem senha, código ou confirmação do cliente.</div>
 </fieldset>
 <div class="wizard-footer"><button class="btn subtle" type="button" data-wizard-back hidden>Voltar</button><span class="nav-spacer"></span><button class="btn primary" type="button" data-wizard-next>Próximo <svg><use href="#i-arrow"/></svg></button><button class="btn primary" type="submit" data-wizard-submit hidden><svg><use href="#i-check"/></svg>Criar conta</button></div>
