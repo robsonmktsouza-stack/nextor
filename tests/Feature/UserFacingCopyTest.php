@@ -57,6 +57,23 @@ final class UserFacingCopyTest extends TestCase
         $this->assertSame(0, AutomationRule::query()->where('enabled', true)->count());
     }
 
+    public function test_existing_audit_events_keep_stored_text_but_display_without_technical_explanations(): void
+    {
+        $old = 'Automação: licença vencida em 20/10/2026. O estado de acesso já é calculado pelo prazo.';
+        $this->assertSame(
+            'Licença vencida em 20/10/2026.',
+            \App\Support\OperatorMessage::event($old)
+        );
+        $this->assertSame(
+            'Instalação vinculada.',
+            \App\Support\OperatorMessage::event('Instalação vinculada pelo gerenciador, sem interação do cliente.')
+        );
+        $this->assertSame(
+            'Anotação feita pelo operador.',
+            \App\Support\OperatorMessage::event('Anotação feita pelo operador.')
+        );
+    }
+
     public function test_rule_update_and_manual_check_have_short_confirmations(): void
     {
         $this->actingAs($this->admin());
