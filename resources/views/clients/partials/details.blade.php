@@ -33,7 +33,7 @@ aria-label="Ativar ou suspender licença de {{ $company->legal_name }}"
 
 </form>
 <form method="post" action="{{ route('clients.renew',$company) }}" class="renew-controls">@csrf
-<label>Renovar por<select name="months"><option value="1">1 mês</option><option value="3">3 meses</option><option value="6">6 meses</option><option value="12">12 meses</option></select></label><button class="btn primary" type="submit"><svg><use href="#i-calendar"/></svg>Renovar</button>
+<label>Renovar por<select name="months"><option value="1">1 mês</option><option value="3">3 meses</option><option value="6">6 meses</option><option value="12">12 meses</option></select></label><button class="btn primary" type="submit">@include('partials.icon',['name'=>'calendar','size'=>18])Renovar</button>
 </form>
 <form method="post" action="{{ route('clients.modules',$company) }}">@csrf
 <div class="form-grid"><label>Plano<select name="plan" data-plan-selector>@foreach($plans as $plan)<option value="{{ $plan->code }}" data-modules="{{ implode(',', $plan->modules ?? []) }}" @selected($company->plan===$plan->code)>{{ $plan->name }}{{ $plan->active ? '' : ' (arquivado)' }}</option>@endforeach</select></label><label>Validade<input type="date" name="expires_at" value="{{ $company->expires_at?->format('Y-m-d') }}"></label></div>
