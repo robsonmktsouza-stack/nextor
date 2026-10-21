@@ -106,15 +106,19 @@
     });
   });
 
-  const filterToggle = document.querySelector('[data-license-filter-toggle]');
-  const filterPanel = document.querySelector('#license-list-filters');
-  filterToggle?.addEventListener('click', () => {
-    if (!filterPanel) return;
-    filterPanel.hidden = !filterPanel.hidden;
-    filterToggle.setAttribute('aria-expanded', String(!filterPanel.hidden));
-    if (!filterPanel.hidden) filterPanel.querySelector('input[type="search"]')?.focus();
+  // Um único comportamento para todas as grades do Control.
+  document.addEventListener('click', event => {
+    const toggle = event.target.closest?.('[data-grid-filter-toggle]');
+    if (!toggle) return;
+    const filterId = toggle.getAttribute('aria-controls');
+    const panel = filterId ? document.getElementById(filterId) : null;
+    if (!panel) return;
+    panel.hidden = !panel.hidden;
+    toggle.setAttribute('aria-expanded', String(!panel.hidden));
+    if (!panel.hidden) panel.querySelector('input[type="search"]')?.focus();
   });
-  document.querySelector('[data-page-size]')?.addEventListener('change', event => {
+  document.addEventListener('change', event => {
+    if (!event.target.matches?.('[data-page-size]')) return;
     event.target.form?.requestSubmit();
   });
 
@@ -179,34 +183,64 @@
     licenseConfirmation.showModal();
   });
 
-  document.querySelector('[data-grid-print]')?.addEventListener('click', () => window.print());
-  document.querySelector('[data-grid-export]')?.addEventListener('click', () => {
-    const table = document.querySelector('[data-license-export-table]');
+  // Print/CSV affect only the grid whose toolbar was clicked. Actions,
+  // switches and technical buttons never enter the exported columns.
+  const gridFor = button => button.closest('[data-admin-list]');
+  const csvCell = value => {
+    const raw = String(value ?? '').replace(/\s+/g, ' ').trim();
+    const escapedFormula = /^[=+\-@\t\r]/.test(raw) ? "'" + raw : raw;
+    return '"' + escapedFormula.replace(/"/g, '""') + '"';
+  };
+  document.addEventListener('click', event => {
+    const printButton = event.target.closest?.('[data-grid-print]');
+    if (printButton) {
+      const grid = gridFor(printButton);
+      if (!grid) return;
+      document.body.classList.add('print-grid-only');
+      grid.classList.add('print-target');
+      window.print();
+      // Chrome fires afterprint; fallback for browsers without it.
+      const cleanPrint = () => {
+        document.body.classList.remove('print-grid-only');
+        grid.classList.remove('print-target');
+        window.removeEventListener('afterprint', cleanPrint);
+      };
+      window.addEventListener('afterprint', cleanPrint, {once: true});
+      setTimeout(cleanPrint, 1500);
+      return;
+    }
+    const exportButton = event.target.closest?.('[data-grid-export]');
+    if (!exportButton) return;
+    const grid = gridFor(exportButton);
+    const table = grid?.querySelector('[data-grid-table]');
     if (!table) return;
-    const clean = value => String(value ?? '').replace(/\s+/g, ' ').trim();
-    const quoted = value => {
-      const v = clean(value);
-      // Evita execução de fórmulas ao abrir um CSV exportado no Excel.
-      const safe = /^[=+\-@\t\r]/.test(v) ? "'" + v : v;
-      return '"' + safe.replace(/"/g, '""') + '"';
-    };
-    const columns = [...table.querySelectorAll('thead th')].slice(0, 7).map(c => clean(c.textContent));
-    const lines = [columns];
+    const allHeaders = [...table.querySelectorAll('thead th')];
+    const included = allHeaders.map((th, index) => ({
+      index,
+      keep: !th.matches('.license-actions-heading,[data-grid-export-exclude]')
+        && th.textContent.trim().toLowerCase() !== 'ações'
+    })).filter(item => item.keep).map(item => item.index);
+    const headers = included.map(index => allHeaders[index].textContent.trim());
+    const rows = [headers];
     table.querySelectorAll('tbody tr').forEach(tr => {
       const cells = [...tr.querySelectorAll(':scope > td')];
-      if (cells.length !== 8) return;
-      lines.push(cells.slice(0, 7).map(c => clean(c.textContent)));
+      if (cells.length !== allHeaders.length) return;
+      rows.push(included.map(index => {
+        const clone = cells[index].cloneNode(true);
+        clone.querySelectorAll('form,input,button,svg,.switch-track').forEach(node => node.remove());
+        return clone.textContent.trim();
+      }));
     });
-    const content = '\uFEFF' + lines.map(line => line.map(quoted).join(';')).join('\r\n');
-    const blob = new Blob([content], {type: 'text/csv;charset=utf-8'});
-    const href = URL.createObjectURL(blob);
+    const content = '\uFEFF' + rows.map(line => line.map(csvCell).join(';')).join('\r\n');
+    const url = URL.createObjectURL(new Blob([content], {type:'text/csv;charset=utf-8'}));
     const a = document.createElement('a');
-    a.href = href;
-    a.download = 'licencas-' + new Date().toISOString().slice(0, 10) + '.csv';
+    const safeName = (grid.dataset.gridFilename || 'listagem').replace(/[^a-z0-9_-]/gi, '-');
+    a.href = url;
+    a.download = safeName + '-' + new Date().toISOString().slice(0,10) + '.csv';
     document.body.appendChild(a);
     a.click();
     a.remove();
-    setTimeout(() => URL.revokeObjectURL(href), 1000);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   });
 
 })();
