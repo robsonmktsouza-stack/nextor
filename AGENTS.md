@@ -54,3 +54,11 @@ Alterações em autenticação/licença exigem testes e revisão de segurança. 
 - Não colocar parágrafos didáticos no rodapé de listagens, abaixo de formulários ou entre componentes; evitar subtítulos redundantes e códigos internos de automação na interface. As regras de segurança e detalhes de infraestrutura **permanecem no backend e na documentação técnica**.
 - O banco preserva auditoria. A migration `2026_10_21_000002_simplify_automation_descriptions.php` altera **somente descrições padrão idênticas às originais**, sem modificar flags, cadastros, prazos ou históricos.
 - Validações realmente necessárias (CNPJ inválido, formato de URL ou plano indisponível) devem continuar visíveis em linguagem simples. Não esconder erros nem remover confirmações de operações sensíveis.
+
+
+## Ícones do Lumeron Control: identidade visual Nextor (21/10/2026)
+
+- Padrão **obrigatório**: usar o mesmo SVG vetorial já empregado em `nextor` (branch `develop`, `resources/views/partials/icon.blade.php`), copiado e adaptado no **Control** como `resources/views/partials/icon.blade.php`. Símbolos adicionais de Plano/Licença/Automações seguem geometria e espessura dos símbolos reais do ERP; evitar desenhos SVG primitivos e bibliotecas misturadas.
+- **Todas as telas**, incluindo menu, barra, botões da tabela, ações, modais, filtros, confirmação e paginação futura, devem renderizar `@include('partials.icon',['name'=>'...', 'size'=>16])` (ajustar `size` ao contexto); não reintroduzir sprites `<svg><use href="#i-..."/></svg>` locais nem vários conjuntos incompatíveis.
+- Ícones 16px nas ações por linha, 17–18px na toolbar e 19px no menu. Preferir ícones consistentes de `print/download/refresh/search/edit/plus` que já existem no Nextor. Usar `public/css/control.css` para tamanhos, estados hover/focus, cores e traço; não sacrificar acessibilidade `title` / `aria-label`.
+- **Não alterar `develop` ou `main`** apenas para refinar a identidade da central, nem criar dependências de CDN ou fontes de terceiros para os ícones. Manter a implementação do Control standalone.
