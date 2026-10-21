@@ -65,7 +65,7 @@ final class LocalErpProvisioner
         return compact('source', 'destination', 'url', 'controlUrl', 'login');
     }
 
-    public function provision(Company $company): string
+    public function provision(Company $company, ?callable $progress = null): string
     {
         $paths = $this->preview($company);
         if ($company->currentStatus() !== 'active') {
@@ -73,6 +73,16 @@ final class LocalErpProvisioner
         }
         ['source'=>$source,'destination'=>$destination,
             'url'=>$url,'controlUrl'=>$controlUrl,'login'=>$login] = $paths;
+        if (!extension_loaded('pdo_sqlite')) {
+            throw new \RuntimeException(
+                'O PHP do Laragon está sem pdo_sqlite. Ative pdo_sqlite e sqlite3 no menu PHP > Extensions do Laragon.'
+            );
+        }
+        if (!extension_loaded('zip')) {
+            throw new \RuntimeException('Ative a extensão zip do PHP no Laragon.');
+        }
+
+        $progress && $progress('Conferindo pasta exclusiva da empresa...');
         if (!is_dir($destination)) {
             $this->copyCleanTrackedRelease($source, $destination, $company);
         } else {
@@ -86,22 +96,36 @@ final class LocalErpProvisioner
                 throw new \RuntimeException('A pasta pertence a outra empresa.');
             }
         }
-        $this->execute(['composer', 'install', '--no-interaction',
-            '--prefer-dist', '--no-progress'], $destination, 900);
-        $this->execute([PHP_BINARY, 'artisan', 'migrate', '--force'], $destination, 600);
+        $progress && $progress('Instalando dependências do ERP com Composer...');
+        $composer = PHP_OS_FAMILY === 'Windows'
+            ? ['cmd.exe', '/d', '/c', 'composer', 'install', '--no-interaction',
+                '--prefer-dist', '--no-progress']
+            : ['composer', 'install', '--no-interaction', '--prefer-dist', '--no-progress'];
+        // On Windows Composer is normally composer.bat, not composer.exe.
+        // It must be resolved by cmd.exe/PATHEXT rather than proc_open
+        // attempting to execute a missing native composer executable.
+        $this->execute($composer, $destination, 900, 'composer');
+
+        $progress && $progress('Criando tabelas no banco exclusivo da empresa...');
+        $this->execute([PHP_BINARY, 'artisan', 'migrate', '--force'],
+            $destination, 600, 'migrations');
+
+        $progress && $progress('Criando administrador e convite de primeiro acesso...');
         $this->execute([PHP_BINARY, 'artisan', 'erp:bootstrap-managed',
             '--cnpj='.$company->cnpj, '--company-name='.$company->legal_name,
             '--admin-name='.($company->contact_name ?: $company->legal_name),
             '--admin-email='.$company->email, '--admin-login='.$login,
-            '--local'], $destination, 90);
+            '--local'], $destination, 90, 'first-access');
 
         // Existing HMAC binder derives the issuer CNPJ from the ERP's own DB.
         // It verifies Control connectivity and the signed license response.
+        $progress && $progress('Vinculando licença ao Lumeron Control...');
         $this->execute([PHP_BINARY, 'artisan', 'control:bind-local',
-            $destination, '--url='.$controlUrl], base_path(), 90);
+            $destination, '--url='.$controlUrl], base_path(), 90, 'license-binding');
 
         // Laragon auto virtual hosts serve a project's /public directory.
         // Never advertise access until the actual project responds.
+        $progress && $progress('Verificando o endereço local e a proteção dos arquivos...');
         try {
             $result = Http::connectTimeout(2)->timeout(6)->get($url.'/up');
             if (!$result->successful()) {
@@ -127,6 +151,7 @@ final class LocalErpProvisioner
             || !str_starts_with((string) ($data['url'] ?? ''), $url.'/reset-password/')) {
             throw new \RuntimeException('Convite de acesso incompatível com a empresa.');
         }
+        $progress && $progress('Instalação validada.');
         return $url;
     }
 
@@ -214,7 +239,7 @@ final class LocalErpProvisioner
         }
     }
 
-    private function execute(array $args, string $directory, int $timeout): string
+    private function execute(array $args, string $directory, int $timeout, string $stage = 'archive'): string
     {
         // Never let the child ERP inherit the Control's DB, APP_KEY or session
         // environment. The ERP must load ONLY its own .env and DB.
@@ -227,12 +252,82 @@ final class LocalErpProvisioner
                 $env[$key] = false;
             }
         }
-        $process = new Process($args, $directory, $env);
-        $process->setTimeout($timeout);
-        $process->run();
-        if (!$process->isSuccessful()) {
-            throw new \RuntimeException('Falha ao preparar a instalação ERP. Verifique o terminal do Laragon.');
+
+        try {
+            $process = new Process($args, $directory, $env);
+            $process->setTimeout($timeout);
+            $process->run();
+            if ($process->isSuccessful()) {
+                return $process->getOutput();
+            }
+            $description = $this->failureHint(
+                $stage, $process->getOutput()."\n".$process->getErrorOutput()
+            );
+            throw new \RuntimeException($description);
+        } catch (\Symfony\Component\Process\Exception\ExceptionInterface $e) {
+            throw new \RuntimeException(
+                $this->failureHint($stage, $e->getMessage()), 0, $e
+            );
         }
-        return $process->getOutput();
+    }
+
+    /**
+     * Publish only a small curated diagnosis. Never print environment files,
+     * raw subprocess stdout/stderr, connection strings or reset tokens.
+     */
+    public function failureHint(string $stage, string $output): string
+    {
+        $text = strtolower($output);
+        if (str_contains($text, 'could not find driver')
+            || str_contains($text, 'pdo_sqlite')
+            || str_contains($text, 'sqlite3 extension')) {
+            return 'Etapa banco de dados: habilite pdo_sqlite e sqlite3 no PHP do Laragon.';
+        }
+        if (str_contains($text, 'composer') && (
+            str_contains($text, 'not recognized')
+            || str_contains($text, 'não é reconhecido')
+            || str_contains($text, 'cannot find the file')
+            || str_contains($text, 'não pode encontrar o arquivo')
+        )) {
+            return 'Etapa Composer: o executável composer não foi encontrado no PATH do Laragon.';
+        }
+        if (preg_match('/(?:requires? (?:ext-|php extension )|missing ext-)([a-z0-9_]+)/i',
+            $output, $matches)) {
+            return 'Etapa Composer: habilite a extensão PHP '.$matches[1].' no Laragon.';
+        }
+        if (preg_match('/(?:requires php |your php version \\()(\\^?[0-9.]+)/i',
+            $output, $matches)) {
+            return 'Etapa Composer: versão de PHP incompatível. Verifique php -v no Laragon.';
+        }
+        if (str_contains($text, 'zip extension') || str_contains($text, 'ziparchive')) {
+            return 'Etapa Composer: habilite a extensão zip do PHP no Laragon.';
+        }
+        if (str_contains($text, 'unable to download')
+            || str_contains($text, 'curl error')) {
+            return 'Etapa Composer: falha ao baixar dependências. Confira rede, certificados e conexão.';
+        }
+        if ($stage === 'license-binding') {
+            if (str_contains($text, 'não está acessível')
+                || str_contains($text, 'não respondeu')) {
+                return 'Etapa vínculo: o Control não está acessível. Confira o php artisan serve e LUMERON_LOCAL_CONTROL_URL.';
+            }
+            if (str_contains($text, 'cnpj') || str_contains($text, 'identificar')) {
+                return 'Etapa vínculo: CNPJ não pôde ser confirmado no banco exclusivo do ERP.';
+            }
+            return 'Etapa vínculo: a licença não foi confirmada. Confira se o Control está rodando na URL configurada.';
+        }
+        if ($stage === 'archive') {
+            return 'Etapa cópia: git archive não conseguiu preparar os arquivos do ERP. Confira git, branch develop e permissões.';
+        }
+        if ($stage === 'composer') {
+            return 'Etapa Composer: instalação das dependências falhou. Execute composer install na pasta exclusiva da empresa para ver o erro.';
+        }
+        if ($stage === 'migrations') {
+            return 'Etapa banco: as migrations falharam no SQLite exclusivo. Execute php artisan migrate --force na pasta exclusiva para identificar a mensagem.';
+        }
+        if ($stage === 'first-access') {
+            return 'Etapa primeiro acesso: o ERP não conseguiu criar o administrador/convite no banco exclusivo.';
+        }
+        return 'Etapa '.$stage.': preparação não concluída.';
     }
 }
