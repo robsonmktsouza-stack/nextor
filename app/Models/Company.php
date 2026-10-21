@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 final class Company extends Model
@@ -24,6 +25,17 @@ final class Company extends Model
             'license_secret' => 'encrypted',
             'last_seen_at' => 'datetime',
         ];
+    }
+
+    public function planDefinition(): BelongsTo
+    {
+        return $this->belongsTo(Plan::class, 'plan', 'code');
+    }
+
+    /** The plan is the sole source of modules; legacy snapshots are ignored. */
+    public function entitledModules(): array
+    {
+        return $this->planDefinition?->modules ?? [];
     }
 
     public function events(): HasMany
