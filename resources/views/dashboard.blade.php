@@ -5,10 +5,10 @@
 @endsection
 @section('content')
 <div class="stats">
-  <a href="{{ route('clients.index') }}" class="stat"><span>Clientes cadastrados</span><strong>{{ $total }}</strong><small>Total de instalações registradas</small></a>
-  <a href="{{ route('licenses.index',['status'=>'active']) }}" class="stat"><span>Licenças ativas</span><strong>{{ $active }}</strong><small>Acesso comercial liberado</small></a>
-  <a href="{{ route('licenses.index',['status'=>'suspended']) }}" class="stat"><span>Suspensas</span><strong>{{ $suspended }}</strong><small>Aguardando liberação</small></a>
-  <a href="{{ route('licenses.index',['status'=>'expired']) }}" class="stat"><span>Vencidas</span><strong>{{ $expired }}</strong><small>Prazo de licença encerrado</small></a>
+  <a href="{{ route('clients.index') }}" class="stat"><span>Clientes cadastrados</span><strong>{{ $total }}</strong></a>
+  <a href="{{ route('licenses.index',['status'=>'active']) }}" class="stat"><span>Licenças ativas</span><strong>{{ $active }}</strong></a>
+  <a href="{{ route('licenses.index',['status'=>'suspended']) }}" class="stat"><span>Suspensas</span><strong>{{ $suspended }}</strong></a>
+  <a href="{{ route('licenses.index',['status'=>'expired']) }}" class="stat"><span>Vencidas</span><strong>{{ $expired }}</strong></a>
 </div>
 <div class="two-cols">
 <section class="panel license-grid" data-admin-list data-grid-filename="proximos-vencimentos">
