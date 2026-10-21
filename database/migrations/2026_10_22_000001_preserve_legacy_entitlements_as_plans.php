@@ -18,7 +18,7 @@ return new class extends Migration
 
         DB::transaction(function (): void {
             $catalog = DB::table('plans')->get()->keyBy('code');
-            foreach (DB::table('companies')->orderBy('id')->cursor() as $company) {
+            foreach (DB::table('companies')->orderBy('id')->get() as $company) {
                 $currentPlan = $catalog->get($company->plan);
                 $old = $this->normalize(json_decode($company->modules ?? 'null', true));
                 $expected = $currentPlan ? $this->normalize(json_decode($currentPlan->modules, true)) : [];
