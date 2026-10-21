@@ -19,7 +19,12 @@
 <script defer src="{{ asset('js/erp.js') }}?v={{ filemtime(public_path('js/erp.js')) }}"></script>
 <script defer src="{{ asset('js/desktop-polish.js') }}?v={{ filemtime(public_path('js/desktop-polish.js')) }}"></script>
 <script defer src="{{ asset('js/fiscal-codes.js') }}"></script>
-</head><body
+</head>
+@php
+  $commercialLicense = request()->attributes->get('lumeron_commercial_license', []);
+  $hasModule = fn (string $module): bool => \App\Support\CommercialModuleAccess::visible($commercialLicense, $module);
+@endphp
+<body
   class="{{ \App\Models\AppSetting::value('system','compact_mode',true) ? 'system-compact' : 'system-comfortable' }} @yield('bodyClass')"
   data-live-search-delay="{{ \App\Models\AppSetting::value('system','search_delay',240) }}"
   data-fiscal-catalog-url="{{ route('reference.fiscal-codes') }}"
@@ -43,16 +48,16 @@
         <kbd data-tutorial>Ctrl K</kbd>
         <div class="command-results" id="commandResults" hidden>
           @if(auth()->user()->canAccess('dashboard'))<a href="{{ route('dashboard') }}">Painel geral</a>@endif
-          @if(auth()->user()->canAccess('products'))<a href="{{ route('products.index') }}">Produtos</a>@endif
-          @if(auth()->user()->canAccess('services'))<a href="{{ route('services.index') }}">Serviços</a>@endif
-          @if(auth()->user()->canAccess('stock'))<a href="{{ route('stock.index') }}">Movimentações de estoque</a>@endif
-          @if(auth()->user()->canAccess('customers'))<a href="{{ route('customers.index') }}">Clientes</a>@endif
-          @if(auth()->user()->canAccess('pdv'))<a data-company-required href="{{ route('pdv.index') }}">PDV</a>@endif
-          @if(auth()->user()->canAccess('sales'))
+          @if(auth()->user()->canAccess('products') && $hasModule('products'))<a href="{{ route('products.index') }}">Produtos</a>@endif
+          @if(auth()->user()->canAccess('services') && $hasModule('services'))<a href="{{ route('services.index') }}">Serviços</a>@endif
+          @if(auth()->user()->canAccess('stock') && $hasModule('products'))<a href="{{ route('stock.index') }}">Movimentações de estoque</a>@endif
+          @if(auth()->user()->canAccess('customers') && $hasModule('pdv'))<a href="{{ route('customers.index') }}">Clientes</a>@endif
+          @if(auth()->user()->canAccess('pdv') && $hasModule('pdv'))<a data-company-required href="{{ route('pdv.index') }}">PDV</a>@endif
+          @if(auth()->user()->canAccess('sales') && $hasModule('pdv'))
             <a data-company-required href="{{ route('sales.index') }}">Vendas</a>
             <a data-company-required href="{{ route('sales.create') }}">Nova venda</a>
           @endif
-          @if(auth()->user()->canAccess('fiscal'))
+          @if(auth()->user()->canAccess('fiscal') && $hasModule('fiscal'))
             <a data-company-required href="{{ route('fiscal.index') }}">Fiscal</a>
             <a data-company-required href="{{ route('fiscal.index',['tab'=>'nfe']) }}">NF-e</a>
             <a data-company-required href="{{ route('fiscal.index',['tab'=>'nfce']) }}">NFC-e</a>
@@ -63,7 +68,7 @@
             <a data-company-required href="{{ route('sales.returns.index') }}">Devoluções</a>
             <a data-company-required href="{{ route('sales.returns.create') }}">Nova devolução</a>
           @endif
-          @if(auth()->user()->canAccess('finance'))
+          @if(auth()->user()->canAccess('finance') && $hasModule('finance'))
             <a data-company-required href="{{ route('finance.dashboard') }}">Financeiro</a>
             <a data-company-required href="{{ route('finance.entries',['type'=>'receivable']) }}">Contas a receber</a>
             <a data-company-required href="{{ route('finance.entries',['type'=>'payable']) }}">Contas a pagar</a>
@@ -75,7 +80,7 @@
           @if(auth()->user()->canAccess('settings'))<a href="{{ route('settings.index') }}">Configurações</a>@endif
         </div>
       </div>
-      @if(auth()->user()->canAccess('pdv'))
+      @if(auth()->user()->canAccess('pdv') && $hasModule('pdv'))
       <a class="topbar-pdv-shortcut {{ request()->routeIs('pdv.*') ? 'active' : '' }}" data-company-required href="{{ route('pdv.index') }}" data-tooltip="Abrir PDV">
         @include('partials.icon',['name'=>'pdv','size'=>18])
         <span>PDV</span>
@@ -90,6 +95,9 @@
         @include('partials.icon',['name'=>'down','size'=>15])
       </summary><div class="user-dropdown">
          <span class="user-dropdown-name">{{ auth()->user()->email }}</span>
+         @if(auth()->user()->canAccess('fiscal') && !$hasModule('fiscal'))
+         <a href="{{ route('fiscal.index') }}">Regularizações fiscais</a>
+         @endif
          <form method="post" action="{{ route('logout') }}">@csrf
            <button type="submit">@include('partials.icon',['name'=>'logout','size'=>16]) Sair do Lumeron</button>
          </form>
@@ -99,40 +107,40 @@
   <div class="mobile-overlay" id="mobileOverlay" hidden></div>
   <aside class="cms-sidebar" id="sidebar">
     <div class="sidebar-section-label">PRINCIPAL</div>
-    @if(auth()->user()->canAccess('finance'))
+    @if(auth()->user()->canAccess('finance') && $hasModule('finance'))
     <a data-company-required href="{{ route('finance.dashboard') }}" class="sidebar-link {{ request()->routeIs('finance.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'money'])<span>Financeiro</span></a>
     @endif
 
     <div class="sidebar-section-label">CADASTROS</div>
-    @if(auth()->user()->canAccess('products'))
+    @if(auth()->user()->canAccess('products') && $hasModule('products'))
     <a href="{{ route('products.index') }}" class="sidebar-link {{ request()->routeIs('products.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'products'])<span>Produtos</span></a>
     @endif
-    @if(auth()->user()->canAccess('services'))
+    @if(auth()->user()->canAccess('services') && $hasModule('services'))
     <a href="{{ route('services.index') }}" class="sidebar-link {{ request()->routeIs('services.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'services'])<span>Serviços</span></a>
     @endif
-    @if(auth()->user()->canAccess('customers'))
+    @if(auth()->user()->canAccess('customers') && $hasModule('pdv'))
     <a href="{{ route('customers.index') }}" class="sidebar-link {{ request()->routeIs('customers.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'customers'])<span>Clientes</span></a>
     @endif
 
     <div class="sidebar-section-label">OPERAÇÕES</div>
-    @if(auth()->user()->canAccess('sales'))
+    @if(auth()->user()->canAccess('sales') && $hasModule('pdv'))
     <a data-company-required href="{{ route('sales.index') }}" class="sidebar-link {{ request()->routeIs('sales.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'sales'])<span>Vendas</span></a>
     @endif
-    @if(auth()->user()->canAccess('pdv'))
+    @if(auth()->user()->canAccess('pdv') && $hasModule('pdv'))
     <a data-company-required href="{{ route('pdv.index') }}" class="sidebar-link {{ request()->routeIs('pdv.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'pdv'])<span>PDV</span></a>
     @endif
-    @if(auth()->user()->canAccess('stock'))
+    @if(auth()->user()->canAccess('stock') && $hasModule('products'))
     <a href="{{ route('stock.index') }}" class="sidebar-link {{ request()->routeIs('stock.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'stock'])<span>Estoque</span></a>
     @endif
 
-    @if(auth()->user()->canAccess('fiscal'))
+    @if(auth()->user()->canAccess('fiscal') && $hasModule('fiscal'))
     <div class="sidebar-section-label">FISCAL</div>
     <a data-company-required href="{{ route('fiscal.index') }}" class="sidebar-link {{ request()->routeIs('fiscal.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'shield'])<span>Fiscal</span></a>
