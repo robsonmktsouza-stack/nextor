@@ -1,0 +1,64 @@
+name: Lumeron - releases compartilhados e isolamento real
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - 'deploy/instances/**'
+      - 'tests/Deployment/**'
+      - '.github/workflows/shared-release-isolation.yml'
+      - 'composer.lock'
+      - 'bootstrap/**'
+  pull_request:
+    paths:
+      - 'deploy/instances/**'
+      - 'tests/Deployment/**'
+      - '.github/workflows/shared-release-isolation.yml'
+  workflow_dispatch:
+
+jobs:
+  isolated-releases:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: ci_only_not_real_123
+          MYSQL_ROOT_HOST: "%"
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h localhost -pci_only_not_real_123"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: curl, dom, libxml, openssl, pdo_sqlite, pdo_mysql
+          coverage: none
+      - name: Shell and PHP syntax
+        run: |
+          set -euo pipefail
+          for f in deploy/instances/*.sh tests/Deployment/*.sh; do bash -n "$f"; done
+          php -l tests/Deployment/mysql-grant-isolation.php
+      - name: Provision and release dry-run must not touch VPS
+        run: |
+          set -euo pipefail
+          bash deploy/instances/provision.sh \
+            --id c_2 --cnpj 11222333000181 \
+            --domain martinscontabilidade.lumeron.com.br \
+            --base-domain lumeron.com.br --source "$PWD" |
+            grep -q 'Simulação: nada foi alterado'
+      - name: Install application
+        run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Laravel hardlink instances, update and rollback safety
+        run: bash tests/Deployment/shared-release-isolation.sh
+      - name: Real MySQL database grants, two isolated users
+        env:
+          GITHUB_ACTIONS: "true"
+          CI_MYSQL_ROOT_PASSWORD: ci_only_not_real_123
+        run: php tests/Deployment/mysql-grant-isolation.php

@@ -1,112 +1,135 @@
 #!/usr/bin/env bash
-# Per-instance update: new release, DB backup, migration, atomic symlink switch.
-# Updates ONE CNPJ and never resets its database, APP_KEY, certificates or storage.
+# Update ONE isolated CNPJ to an existing approved shared code release.
+# Rollback is CODE ONLY, NEVER automatically restore migrations or fiscal data.
 set -Eeuo pipefail
 umask 077
-ID="" SOURCE="" APPLY=0 PHP_VERSION="8.3" CONTROL_PATH="" CONTROL_URL=""
-usage() { echo "Uso: bash deploy/instances/update.sh --id academia_ba --source /opt/lumeron/source [--php-version 8.3] [--control-path /srv/lumeron-control/current --control-url https://control.exemplo.com] [--apply]"; }
+SELF="$(cd -- "$(dirname -- "$0")" && pwd)"
+source "$SELF/lib.sh"
+ID= SOURCE= RELEASE_SHA= PHP_VERSION=8.3 CONTROL_PATH= CONTROL_URL=
+APPLY=0 ROLLBACK=0 ALLOW_ROLLBACK=0
+usage() { echo 'Uso: update.sh --id c_2 [--release SHA] [--source /opt/lumeron/source] [--control-path ... --control-url https://...] [--rollback --allow-code-only-rollback] [--apply]'; }
 while (($#)); do
   case "$1" in
-    --id|--source|--php-version|--control-path|--control-url)
+    --id|--source|--release|--php-version|--control-path|--control-url)
       option="$1"; (($#>=2)) || { usage; exit 2; }
       case "$option" in
-        --id) ID="$2";;
-        --source) SOURCE="$2";;
-        --php-version) PHP_VERSION="$2";;
-        --control-path) CONTROL_PATH="$2";;
+        --id) ID="$2";; --source) SOURCE="$2";; --release) RELEASE_SHA="$2";;
+        --php-version) PHP_VERSION="$2";; --control-path) CONTROL_PATH="$2";;
         --control-url) CONTROL_URL="$2";;
       esac
       shift 2;;
+    --rollback) ROLLBACK=1; shift;;
+    --allow-code-only-rollback) ALLOW_ROLLBACK=1; shift;;
     --apply) APPLY=1; shift;;
     *) usage; exit 2;;
   esac
 done
-[[ "$ID" =~ ^[a-z][a-z0-9_]{1,18}$ ]] || { echo "ID inválido." >&2; exit 2; }
-[[ "$PHP_VERSION" =~ ^8\.[34]$ ]] || { echo "PHP inválido." >&2; exit 2; }
-[[ -f "$SOURCE/composer.lock" ]] || { echo "Falta composer.lock versionado. Atualização bloqueada." >&2; exit 2; }
-if [[ -n "$CONTROL_PATH" || -n "$CONTROL_URL" ]]; then
-  [[ -n "$CONTROL_PATH" && -n "$CONTROL_URL" ]] || { echo "Informe --control-path e --control-url juntos." >&2; exit 2; }
-  [[ "$CONTROL_URL" == https://* ]] || { echo "O vínculo remoto exige HTTPS." >&2; exit 2; }
-  [[ -f "$CONTROL_PATH/artisan" && -f "$CONTROL_PATH/app/Console/Commands/BindManagedInstallation.php" ]] || {
-    echo "Lumeron Control indisponível nesse diretório." >&2; exit 2;
-  }
-  [[ -f "$SOURCE/app/Console/Commands/CentralLicenseIdentity.php" ]] || {
-    echo "A release não contém integração de licenças." >&2; exit 2;
-  }
+lm_valid_id "$ID" || { echo 'ID inválido.' >&2; exit 2; }
+[[ "$PHP_VERSION" =~ ^8\.[34]$ ]] || { echo 'PHP inválido.' >&2; exit 2; }
+[[ -z "$CONTROL_PATH" && -z "$CONTROL_URL" || -n "$CONTROL_PATH" && "$CONTROL_URL" == https://* ]] ||
+  { echo 'Control exige caminho e HTTPS.' >&2; exit 2; }
+if ((ROLLBACK)); then
+  ((ALLOW_ROLLBACK)) || lm_die 'Rollback de código exige --allow-code-only-rollback (migrações não são revertidas).'
+  [[ -z "$RELEASE_SHA" && -z "$CONTROL_PATH" ]] || lm_die 'Rollback não recebe --release nem novo vínculo.'
 fi
-BASE="/srv/lumeron/instances/$ID"; APP="$BASE/current"
-USER="lum_$ID"; MYSQL_CNF="/root/lumeron/$ID.mysql.cnf"
-[[ -L "$APP" && -f "$BASE/shared/.env" ]] || { echo "Instância não provisionada." >&2; exit 1; }
-echo "Atualização apenas da instalação $ID ($APP)"
-if ((APPLY==0)); then echo "Simulação: nada foi alterado. Use --apply quando aprovado."; exit 0; fi
-((EUID==0)) || { echo "Execute como root." >&2; exit 1; }
-[[ -r "$MYSQL_CNF" ]] || { echo "Credenciais de backup do banco indisponíveis." >&2; exit 1; }
-for binary in composer rsync mysqldump gzip runuser; do command -v "$binary" >/dev/null || { echo "Falta $binary." >&2; exit 1; }; done
-STAMP="$(date -u +%Y%m%d%H%M%S)-$(openssl rand -hex 3)"
-RELEASE="$BASE/releases/$STAMP"
-install -d -m 755 "$RELEASE"
-rsync -a --delete --exclude='/.env' --exclude='/.git/' --exclude='/storage/' --exclude='/vendor/' --exclude='/public/uploads/' "$SOURCE/" "$RELEASE/"
-install -d -m 755 "$RELEASE/public" "$RELEASE/bootstrap/cache"
-ln -s "$BASE/shared/storage" "$RELEASE/storage"
-ln -s "$BASE/uploads" "$RELEASE/public/uploads"
-ln -s "$BASE/shared/.env" "$RELEASE/.env"
-chown -R "$USER:$USER" "$RELEASE"
-cd "$RELEASE"
-runuser -u "$USER" -- composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
-runuser -u "$USER" -- "/usr/bin/php$PHP_VERSION" artisan optimize
-
-WAS_RUNNING=0
-WAS_SCHEDULE=0
-MAINTENANCE=0
-cleanup() {
-  if ((MAINTENANCE)); then
-    runuser -u "$USER" -- "/usr/bin/php$PHP_VERSION" "$APP/artisan" up || true
+BASE="$LM_INSTANCES/$ID"; USER="lum_$ID"
+[[ -L "$BASE/current" && -f "$BASE/shared/.env" ]] || lm_die 'Instância não provisionada.'
+CURRENT="$(lm_safe_active "$BASE" current)"
+[[ -f "$CURRENT/.lumeron-instance-code" ]] ||
+  lm_die 'Instalação no layout legado. Exige migração assistida antes de usar releases deduplicados.'
+OLD_SHA="$(cat "$CURRENT/.lumeron-instance-code")"
+if ((ROLLBACK)); then
+  [[ -L "$BASE/previous" ]] || lm_die 'Nenhuma versão anterior disponível para rollback.'
+  TARGET="$(lm_safe_active "$BASE" previous)"
+  SHA="$(cat "$TARGET/.lumeron-instance-code")"
+else
+  SHA="$RELEASE_SHA"
+  if ((APPLY)); then SHA="$(lm_selected_sha "$SHA")"; fi
+fi
+echo "CNPJ $ID: origem=$OLD_SHA destino=$SHA (apenas esta instância)"
+if ((APPLY==0)); then echo 'Simulação: nenhuma alteração.'; exit 0; fi
+lm_root
+lm_require mysql mysqldump gzip runuser systemctl flock
+exec 8>/run/lumeron-code.lock
+flock -s 8
+[[ -r "/root/lumeron/$ID.mysql.cnf" ]] || lm_die 'Credencial exclusiva de backup ausente.'
+exec 9>"/run/lumeron-update-$ID.lock"
+flock -n 9 || lm_die 'Outra atualização em andamento.'
+[[ -z "$SOURCE" || -d "$SOURCE" ]] || lm_die 'Origem indicada não existe.'
+if ((!ROLLBACK)); then
+  CODE="$(lm_code_path "$SHA")"
+  if [[ -n "$CONTROL_PATH" ]]; then
+    [[ -f "$CONTROL_PATH/artisan" && -f "$CODE/app/Console/Commands/CentralLicenseIdentity.php" ]] ||
+      lm_die 'Integração Control ausente no release selecionado.'
   fi
-  if ((WAS_RUNNING)); then systemctl start "lumeron-fiscal-$ID" || true; fi
-  if ((WAS_SCHEDULE)); then systemctl start "lumeron-schedule-$ID.timer" || true; fi
+  [[ "$SHA" != "$OLD_SHA" ]] || lm_die 'Cliente já usa esse release.'
+  STAMP="$(date -u +%Y%m%d%H%M%S)-$(openssl rand -hex 3)"
+  TARGET="$BASE/releases/$STAMP"
+  lm_stage_runtime "$SHA" "$BASE" "$ID" "$TARGET"
+  lm_tenant_php "$ID" "$PHP_VERSION" "$TARGET" package:discover
+  lm_tenant_php "$ID" "$PHP_VERSION" "$TARGET" optimize
+fi
+
+FISCAL_RUNNING=0 SCHEDULE_RUNNING=0 MAINTENANCE=0 SWITCHED=0
+cleanup() {
+  local code="$?"
+  if ((code!=0 && SWITCHED)); then
+    lm_atomic_current "$BASE" "$CURRENT" || true
+    systemctl reload "php$PHP_VERSION-fpm" || true
+    echo '[ERRO] Código retornou ao release anterior. Banco pode ter migrations aplicadas; avalie compatibilidade.' >&2
+  fi
+  if ((MAINTENANCE)); then
+    lm_tenant_php "$ID" "$PHP_VERSION" "$BASE/current" up || true
+  fi
+  if ((FISCAL_RUNNING)); then systemctl start "lumeron-fiscal-$ID.timer" || true; fi
+  if ((SCHEDULE_RUNNING)); then systemctl start "lumeron-schedule-$ID.timer" || true; fi
 }
 trap cleanup EXIT
-if systemctl is-active --quiet "lumeron-fiscal-$ID"; then
-  WAS_RUNNING=1
-  systemctl stop "lumeron-fiscal-$ID"
+if systemctl is-active --quiet "lumeron-fiscal-$ID.timer"; then
+  FISCAL_RUNNING=1; systemctl stop "lumeron-fiscal-$ID.timer"
 fi
 if systemctl is-active --quiet "lumeron-schedule-$ID.timer"; then
-  WAS_SCHEDULE=1
-  systemctl stop "lumeron-schedule-$ID.timer"
+  SCHEDULE_RUNNING=1; systemctl stop "lumeron-schedule-$ID.timer"
 fi
-# Do not migrate while a scheduled task is still modifying this database.
-if systemctl is-active --quiet "lumeron-schedule-$ID.service"; then
-  echo "Agendador ainda executando; tente após a finalização da tarefa." >&2
-  exit 1
+# Don't interrupt an ongoing SEFAZ transmission. Operator must retry when idle.
+if systemctl is-active --quiet "lumeron-fiscal-$ID.service" ||
+   systemctl is-active --quiet "lumeron-schedule-$ID.service"; then
+  lm_die 'Fiscal ou agendador ainda executando. Aguarde conclusão; nenhum processo será morto.'
 fi
-runuser -u "$USER" -- "/usr/bin/php$PHP_VERSION" "$APP/artisan" down --retry=30
+lm_tenant_php "$ID" "$PHP_VERSION" "$CURRENT" down --retry=30
 MAINTENANCE=1
-# Snapshot database before applying irreversible migrations.
 BACKUPS="/var/backups/lumeron/$ID"
 install -d -m 700 "$BACKUPS"
-mysqldump --defaults-extra-file="$MYSQL_CNF" --single-transaction --quick --routines --triggers "lum_$ID" | gzip > "$BACKUPS/$STAMP.sql.gz"
-test -s "$BACKUPS/$STAMP.sql.gz" || { echo "Backup vazio; atualização bloqueada." >&2; exit 1; }
-echo "Backup criado: $BACKUPS/$STAMP.sql.gz (somente root)."
-# Laravel migration must be backward compatible with the old version during rollout.
-runuser -u "$USER" -- "/usr/bin/php$PHP_VERSION" artisan migrate --force
-runuser -u "$USER" -- "/usr/bin/php$PHP_VERSION" artisan optimize
-
-# Opcional: operador de deploy vincula a instância no Control ANTES
-# de trocar o symlink. CNPJ do ERP e cadastro no Control já devem existir.
-# Nada é feito automaticamente apenas com um CNPJ informado na internet.
-if [[ -n "$CONTROL_PATH" ]]; then
-  (cd "$CONTROL_PATH" && "/usr/bin/php$PHP_VERSION" artisan control:bind-local "$RELEASE" \
-    --url="$CONTROL_URL" --file-owner="$USER")
-  # Revalidar como o usuário efetivo do PHP-FPM, não apenas como root.
-  runuser -u "$USER" -- "/usr/bin/php$PHP_VERSION" "$RELEASE/artisan" lumeron:license-sync
+STAMP="$(date -u +%Y%m%d%H%M%S)-$(openssl rand -hex 3)"
+mysqldump --defaults-extra-file="/root/lumeron/$ID.mysql.cnf" --single-transaction \
+  --quick --routines --triggers "lum_$ID" | gzip > "$BACKUPS/$STAMP.sql.gz"
+[[ -s "$BACKUPS/$STAMP.sql.gz" ]] || lm_die 'Backup vazio; operação bloqueada.'
+chmod 600 "$BACKUPS/$STAMP.sql.gz"
+if ((!ROLLBACK)); then
+  # All migrations run using the tenant's own .env and MySQL user.
+  # Schema changes must be backward-compatible for a code-only rollback.
+  lm_tenant_php "$ID" "$PHP_VERSION" "$TARGET" migrate --force
+  if [[ -n "$CONTROL_PATH" ]]; then
+    (cd "$CONTROL_PATH" && "/usr/bin/php$PHP_VERSION" artisan control:bind-local \
+      "$TARGET" --url="$CONTROL_URL" --file-owner="$USER")
+    lm_tenant_php "$ID" "$PHP_VERSION" "$TARGET" lumeron:license-sync
+  fi
 fi
-ln -s "$RELEASE" "$BASE/.current-next"
-mv -Tf "$BASE/.current-next" "$APP"
+ln -s "releases/$(basename "$CURRENT")" "$BASE/.previous-next"
+mv -Tf "$BASE/.previous-next" "$BASE/previous"
+lm_atomic_current "$BASE" "$TARGET"
+SWITCHED=1
 systemctl reload "php$PHP_VERSION-fpm"
-runuser -u "$USER" -- "/usr/bin/php$PHP_VERSION" "$APP/artisan" up
+lm_tenant_php "$ID" "$PHP_VERSION" "$BASE/current" up
 MAINTENANCE=0
-if ((WAS_RUNNING)); then systemctl start "lumeron-fiscal-$ID"; WAS_RUNNING=0; fi
-if ((WAS_SCHEDULE)); then systemctl start "lumeron-schedule-$ID.timer"; WAS_SCHEDULE=0; fi
+SWITCHED=0
+if ((FISCAL_RUNNING)); then
+  systemctl start "lumeron-fiscal-$ID.timer"; FISCAL_RUNNING=0
+fi
+if ((SCHEDULE_RUNNING)); then
+  systemctl start "lumeron-schedule-$ID.timer"; SCHEDULE_RUNNING=0
+fi
 trap - EXIT
-echo "Atualizado $ID. Release anterior preservado para reversão de CÓDIGO; restauração do banco exige plano próprio."
-echo "Não reutilize o backup em outra empresa; configure cópia externa cifrada e política de retenção."
+echo "Código de $ID agora usa $SHA. Banco, APP_KEY, dados fiscais e filas preservados."
+echo "Backup individual preservado em /var/backups/lumeron/$ID (não substitui backup externo)."
+if ((ROLLBACK)); then echo 'Rollback apenas de código: confira migrações e compatibilidade do schema.'; fi

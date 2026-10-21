@@ -1,0 +1,26 @@
+# Install ONCE as /etc/logrotate.d/lumeron (operator approval).
+# Only operational logs, never fiscal XML, DB backups, CSC, A1 or uploads.
+/var/log/nginx/lumeron-*.access.log /var/log/nginx/lumeron-*.error.log {
+    daily
+    rotate 14
+    maxsize 50M
+    missingok
+    notifempty
+    compress
+    delaycompress
+    sharedscripts
+    create 0640 www-data adm
+    postrotate
+        /usr/sbin/nginx -s reopen >/dev/null 2>&1 || true
+    endscript
+}
+/srv/lumeron/instances/*/shared/storage/logs/php-fpm.log {
+    daily
+    rotate 14
+    maxsize 50M
+    missingok
+    notifempty
+    compress
+    delaycompress
+    copytruncate
+}

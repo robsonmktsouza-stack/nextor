@@ -1,19 +1,22 @@
 #!/usr/bin/env bash
-# One CNPJ = one dedicated MySQL schema/user, Linux user, PHP-FPM pool and worker.
-# Never mutates the server unless --apply is supplied.
+# One CNPJ -> one MySQL database, Linux user, private state; shared immutable code.
+# The existing Lumeron Control --managed arguments remain supported.
 set -Eeuo pipefail
 umask 077
-
-ID="" CNPJ="" DOMAIN="" SOURCE="" BASE_DOMAIN="lumeron.com.br" APPLY=0 PHP_VERSION="8.3" MYSQL_CNF="/root/.my.cnf"
-MANAGED=0 COMPANY_NAME="" ADMIN_NAME="" ADMIN_EMAIL="" ADMIN_LOGIN="" CONTROL_PATH="" CONTROL_URL="" TLS_CERT_NAME=""
-usage() { echo "Uso: bash deploy/instances/provision.sh --id academia_ba --cnpj 00000000000000 --domain academia.exemplo.com.br --source /opt/lumeron/source [--base-domain lumeron.com.br] [--php-version 8.3] [--mysql-admin-cnf /root/.my.cnf] [--apply]"; }
+SELF="$(cd -- "$(dirname -- "$0")" && pwd)"
+source "$SELF/lib.sh"
+ID= CNPJ= DOMAIN= SOURCE= BASE_DOMAIN=lumeron.com.br PHP_VERSION=8.3 MYSQL_CNF=/root/.my.cnf
+RELEASE_SHA= TLS_CERT_NAME= COMPANY_NAME= ADMIN_NAME= ADMIN_EMAIL= ADMIN_LOGIN=
+CONTROL_PATH= CONTROL_URL= MANAGED=0 APPLY=0
+usage() { echo 'Uso: provision.sh --id c_2 --cnpj 00000000000000 --domain empresa.lumeron.com.br --source /opt/lumeron/source [--release SHA] [--managed ...] [--apply]'; }
 while (($#)); do
   case "$1" in
-    --id|--cnpj|--domain|--source|--base-domain|--php-version|--mysql-admin-cnf|--company-name|--admin-name|--admin-email|--admin-login|--control-path|--control-url|--tls-cert-name)
-      option="$1"; (($# >= 2)) || { usage; exit 2; }
+    --id|--cnpj|--domain|--source|--release|--base-domain|--php-version|--mysql-admin-cnf|--company-name|--admin-name|--admin-email|--admin-login|--control-path|--control-url|--tls-cert-name)
+      option="$1"; (($#>=2)) || { usage; exit 2; }
       case "$option" in
         --id) ID="$2";; --cnpj) CNPJ="$2";; --domain) DOMAIN="$2";;
-        --source) SOURCE="$2";; --base-domain) BASE_DOMAIN="$2";; --php-version) PHP_VERSION="$2";;
+        --source) SOURCE="$2";; --release) RELEASE_SHA="$2";;
+        --base-domain) BASE_DOMAIN="$2";; --php-version) PHP_VERSION="$2";;
         --mysql-admin-cnf) MYSQL_CNF="$2";;
         --company-name) COMPANY_NAME="$2";; --admin-name) ADMIN_NAME="$2";;
         --admin-email) ADMIN_EMAIL="$2";; --admin-login) ADMIN_LOGIN="$2";;
@@ -26,94 +29,96 @@ while (($#)); do
     *) usage; exit 2;;
   esac
 done
-[[ "$ID" =~ ^[a-z][a-z0-9_]{1,18}$ ]] || { echo "ID inválido." >&2; exit 2; }
-[[ "$CNPJ" =~ ^[0-9]{14}$ ]] || { echo "CNPJ deve ter 14 dígitos." >&2; exit 2; }
-[[ "$DOMAIN" =~ ^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$ && "$DOMAIN" == *.* ]] || { echo "Domínio inválido." >&2; exit 2; }
-[[ "$BASE_DOMAIN" =~ ^[a-z0-9]+([.-][a-z0-9]+)*\.[a-z]{2,}$ ]] || { echo "Domínio base inválido." >&2; exit 2; }
-[[ "$DOMAIN" == *."$BASE_DOMAIN" ]] || { echo "A URL deve ser subdomínio do domínio base configurado." >&2; exit 2; }
-SUBDOMAIN="${DOMAIN%.$BASE_DOMAIN}"
-[[ "$SUBDOMAIN" =~ ^[a-z][a-z0-9-]{1,38}$ && "$SUBDOMAIN" != *--* ]] || { echo "Subdomínio da instalação inválido." >&2; exit 2; }
-[[ "$SUBDOMAIN" != "login" && "$SUBDOMAIN" != "www" && "$SUBDOMAIN" != "admin" && "$SUBDOMAIN" != "api" ]] || { echo "Subdomínio reservado." >&2; exit 2; }
-[[ "$PHP_VERSION" =~ ^8\.[34]$ ]] || { echo "Versão PHP inválida." >&2; exit 2; }
-[[ -f "$SOURCE/composer.json" ]] || { echo "Source não contém Laravel." >&2; exit 2; }
-[[ -f "$SOURCE/composer.lock" ]] || { echo "Falta composer.lock versionado: provisionamento bloqueado para segurança." >&2; exit 2; }
+lm_valid_id "$ID" || { echo 'ID inválido.' >&2; exit 2; }
+[[ "$CNPJ" =~ ^[0-9]{14}$ ]] || { echo 'CNPJ deve ter 14 dígitos.' >&2; exit 2; }
+[[ "$DOMAIN" =~ ^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$ && "$DOMAIN" == *.* ]] ||
+  { echo 'Domínio inválido.' >&2; exit 2; }
+[[ "$BASE_DOMAIN" =~ ^[a-z0-9]+([.-][a-z0-9]+)*\.[a-z]{2,}$ ]] ||
+  { echo 'Domínio base inválido.' >&2; exit 2; }
+[[ "$DOMAIN" == *."$BASE_DOMAIN" ]] || { echo 'Fora do domínio contratado.' >&2; exit 2; }
+SUBDOMAIN="$(printf '%s' "$DOMAIN" | sed "s/\.$BASE_DOMAIN$//")"
+[[ "$SUBDOMAIN" =~ ^[a-z][a-z0-9-]{1,38}$ && "$SUBDOMAIN" != *--* ]] ||
+  { echo 'Subdomínio inválido.' >&2; exit 2; }
+[[ ! "$SUBDOMAIN" =~ ^(www|login|admin|api)$ ]] || { echo 'Subdomínio reservado.' >&2; exit 2; }
+[[ "$PHP_VERSION" =~ ^8\.[34]$ ]] || { echo 'PHP inválido.' >&2; exit 2; }
+[[ -f "$SOURCE/composer.lock" ]] || { echo 'Fonte sem composer.lock.' >&2; exit 2; }
+[[ -z "$TLS_CERT_NAME" || "$TLS_CERT_NAME" =~ ^[a-zA-Z0-9_.-]{1,100}$ ]] ||
+  { echo 'Nome de certificado inválido.' >&2; exit 2; }
 if ((MANAGED)); then
-  [[ -n "$COMPANY_NAME" && -n "$ADMIN_NAME" && "$ADMIN_EMAIL" == *@* && -n "$ADMIN_LOGIN" ]] || {
-    echo "Dados de primeiro acesso incompletos." >&2; exit 2;
-  }
-  [[ "$ADMIN_LOGIN" =~ ^[a-z][a-z0-9._-]{2,49}$ ]] || { echo "Login inválido." >&2; exit 2; }
-  [[ "$CONTROL_URL" == https://* && -f "$CONTROL_PATH/artisan" ]] || {
-    echo "O provisionamento gerenciado exige Control local e URL HTTPS." >&2; exit 2;
-  }
-  [[ -f "$SOURCE/app/Console/Commands/BootstrapManagedAccount.php" ]] || {
-    echo "A release não possui criação de primeiro acesso gerenciado." >&2; exit 2;
-  }
+  [[ -n "$COMPANY_NAME" && -n "$ADMIN_NAME" && "$ADMIN_EMAIL" == *@* &&
+     "$ADMIN_LOGIN" =~ ^[a-z][a-z0-9._-]{2,49}$ &&
+     "$CONTROL_URL" == https://* && -f "$CONTROL_PATH/artisan" ]] ||
+     { echo 'Identidade gerenciada ou URL Control inválida.' >&2; exit 2; }
 fi
-[[ -z "$TLS_CERT_NAME" || "$TLS_CERT_NAME" =~ ^[a-zA-Z0-9_.-]{1,100}$ ]] || {
-  echo "Nome do certificado inválido." >&2; exit 2;
-}
-BASE="/srv/lumeron/instances/$ID"; USER="lum_$ID"; DB="lum_$ID"
-STAMP="$(date -u +%Y%m%d%H%M%S)-$(openssl rand -hex 3)"
-RELEASE="$BASE/releases/$STAMP"
+BASE="$LM_INSTANCES/$ID"; USER="lum_$ID"; DB="$USER"
 POOL="/etc/php/$PHP_VERSION/fpm/pool.d/lumeron-$ID.conf"
 SITE="/etc/nginx/sites-available/lumeron-$ID.conf"
-WORKER="/etc/systemd/system/lumeron-fiscal-$ID.service"
+FISCAL="/etc/systemd/system/lumeron-fiscal-$ID.service"
+FISCAL_TIMER="/etc/systemd/system/lumeron-fiscal-$ID.timer"
 SCHEDULE="/etc/systemd/system/lumeron-schedule-$ID.service"
 TIMER="/etc/systemd/system/lumeron-schedule-$ID.timer"
-TLS_DIR="${TLS_CERT_NAME:-$DOMAIN}"
+TLS_DIR="$DOMAIN"
+[[ -z "$TLS_CERT_NAME" ]] || TLS_DIR="$TLS_CERT_NAME"
 CERT="/etc/letsencrypt/live/$TLS_DIR/fullchain.pem"
 CERTKEY="/etc/letsencrypt/live/$TLS_DIR/privkey.pem"
-echo "Instalação $ID | CNPJ $CNPJ | https://$DOMAIN | Banco $DB | PHP $PHP_VERSION"
-if ((APPLY==0)); then echo "Simulação: nada foi alterado. Acrescente --apply quando aprovado."; exit 0; fi
-((EUID==0)) || { echo "Somente root na VPS." >&2; exit 1; }
-[[ ! -e "$BASE" && ! -L "$BASE" ]] || { echo "Instalação existente. Use update.sh." >&2; exit 1; }
-! id "$USER" &>/dev/null || { echo "Usuário já existente." >&2; exit 1; }
-[[ -r "$CERT" && -r "$CERTKEY" ]] || { echo "TLS ausente. Obtenha certificado antes." >&2; exit 1; }
-[[ -r "$MYSQL_CNF" ]] || { echo "Credenciais administrativas MySQL ausentes." >&2; exit 1; }
-[[ -x "/usr/bin/php$PHP_VERSION" && -d "/etc/php/$PHP_VERSION/fpm/pool.d" ]] || { echo "PHP CLI/FPM não instalado." >&2; exit 1; }
-for binary in mysql rsync composer nginx runuser; do command -v "$binary" >/dev/null || { echo "Falta $binary." >&2; exit 1; }; done
-[[ ! -e "$POOL" && ! -e "$SITE" && ! -e "$WORKER" && ! -e "$SCHEDULE" && ! -e "$TIMER" ]] || { echo "Configuração da instância já existe." >&2; exit 1; }
-mysql --defaults-extra-file="$MYSQL_CNF" -N -e "SELECT 1" >/dev/null
-[[ -z "$(mysql --defaults-extra-file="$MYSQL_CNF" -N -e "SHOW DATABASES LIKE '$DB'")" ]] || { echo "Banco já existe." >&2; exit 1; }
-
-install -d -m 755 /srv/lumeron /srv/lumeron/instances "$BASE" "$BASE/releases"
-install -d -m 700 "$BASE/shared" "$BASE/shared/storage"
-install -d -m 755 "$BASE/uploads"
-install -d -m 700 "$BASE/shared/storage/app/private"
-install -d -m 700 "$BASE/shared/storage/framework/cache/data" "$BASE/shared/storage/framework/sessions"
-install -d -m 700 "$BASE/shared/storage/framework/views" "$BASE/shared/storage/logs" "$BASE/shared/acbr"
+echo "Instalação $ID | CNPJ $CNPJ | https://$DOMAIN | Banco MySQL $DB"
+if ((APPLY==0)); then
+  echo 'Simulação: nada foi alterado. É exigido um release previamente aprovado.'
+  exit 0
+fi
+lm_root
+lm_require mysql git cp runuser systemctl nginx openssl flock
+exec 8>/run/lumeron-code.lock
+flock -s 8
+[[ -d "$SOURCE" ]] || lm_die 'Fonte inexistente.'
+SHA="$(lm_selected_sha "$RELEASE_SHA")"
+CODE="$(lm_code_path "$SHA")"
+[[ ! -e "$BASE" && ! -L "$BASE" ]] || lm_die 'Instalação existente. Use update.sh.'
+! id "$USER" >/dev/null 2>&1 || lm_die 'Usuário Unix já existe.'
+[[ -r "$CERT" && -r "$CERTKEY" && -r "$MYSQL_CNF" ]] || lm_die 'TLS ou MySQL administrativo indisponível.'
+[[ -x "/usr/bin/php$PHP_VERSION" && -d "/etc/php/$PHP_VERSION/fpm/pool.d" ]] ||
+  lm_die 'PHP CLI/FPM indisponível.'
+[[ ! -e "$POOL" && ! -e "$SITE" && ! -e "$FISCAL" && ! -e "$FISCAL_TIMER" && ! -e "$SCHEDULE" && ! -e "$TIMER" ]] ||
+  lm_die 'Configuração pré-existente. Abortado.'
+mysql --defaults-extra-file="$MYSQL_CNF" -N -e 'SELECT 1' >/dev/null
+[[ -z "$(mysql --defaults-extra-file="$MYSQL_CNF" -N -e "SHOW DATABASES LIKE '$DB'")" ]] ||
+  lm_die 'Banco já existente; abortado.'
+if ((MANAGED)); then
+  [[ -f "$CODE/app/Console/Commands/BootstrapManagedAccount.php" ]] ||
+    lm_die 'Release não oferece primeiro acesso gerenciado.'
+fi
+install -d -m 755 "$LM_INSTANCES"
+# Per instance lock; never run concurrent provisioning and updates.
+exec 9>"/run/lumeron-provision-$ID.lock"
+flock -n 9 || lm_die 'Já existe operação de instalação em andamento.'
 useradd --system --user-group --home-dir "$BASE/shared" --shell /usr/sbin/nologin "$USER"
-chown -R "$USER:$USER" "$BASE/shared" "$BASE/uploads"
-install -d -m 755 "$RELEASE"
-rsync -a --delete --exclude='/.env' --exclude='/.git/' --exclude='/storage/' --exclude='/vendor/' --exclude='/public/uploads/' "$SOURCE/" "$RELEASE/"
-install -d -m 755 "$RELEASE/public" "$RELEASE/bootstrap/cache"
-ln -s "$BASE/shared/storage" "$RELEASE/storage"
-ln -s "$BASE/uploads" "$RELEASE/public/uploads"
-chown -R "$USER:$USER" "$RELEASE"
-
-DB_PASSWORD="$(openssl rand -hex 32)"
-APP_KEY="base64:$(openssl rand -base64 32 | tr -d '\n')"
+lm_init_storage "$ID"
+STAMP="$(date -u +%Y%m%d%H%M%S)-$(openssl rand -hex 3)"
+RUNTIME="$BASE/releases/$STAMP"
+PASSWORD="$(openssl rand -hex 32)"
+KEY="base64:$(openssl rand -base64 32 | tr -d '\n')"
 mysql --defaults-extra-file="$MYSQL_CNF" <<SQL
 CREATE DATABASE \`$DB\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER '$USER'@'127.0.0.1' IDENTIFIED BY '$DB_PASSWORD';
+CREATE USER '$USER'@'127.0.0.1' IDENTIFIED BY '$PASSWORD';
 GRANT ALL PRIVILEGES ON \`$DB\`.* TO '$USER'@'127.0.0.1';
 SQL
 cat >"$BASE/shared/.env" <<ENV
 APP_NAME=Lumeron-$ID
 APP_ENV=production
 APP_DEBUG=false
-APP_KEY=$APP_KEY
+APP_KEY=$KEY
 APP_URL=https://$DOMAIN
 APP_TIMEZONE=America/Sao_Paulo
 APP_LOCALE=pt_BR
-LOG_CHANNEL=stack
+LOG_CHANNEL=daily
 LOG_LEVEL=warning
+LOG_DAILY_DAYS=14
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=$DB
 DB_USERNAME=$USER
-DB_PASSWORD=$DB_PASSWORD
+DB_PASSWORD=$PASSWORD
 SESSION_DRIVER=file
 SESSION_ENCRYPT=true
 SESSION_SECURE_COOKIE=true
@@ -136,32 +141,28 @@ ACBr_NFE_CONFIG_PATH=$BASE/shared/acbr/config.ini
 ENV
 chown "$USER:$USER" "$BASE/shared/.env"
 chmod 600 "$BASE/shared/.env"
-ln -s "$BASE/shared/.env" "$RELEASE/.env"
 install -d -m 700 /root/lumeron
 cat >"/root/lumeron/$ID.mysql.cnf" <<ENV
 [client]
 host=127.0.0.1
 user=$USER
-password=$DB_PASSWORD
+password=$PASSWORD
 ENV
 chmod 600 "/root/lumeron/$ID.mysql.cnf"
-unset DB_PASSWORD APP_KEY
-
-cd "$RELEASE"
-runuser -u "$USER" -- composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
-runuser -u "$USER" -- "/usr/bin/php$PHP_VERSION" artisan migrate --force
+unset KEY PASSWORD
+lm_stage_runtime "$SHA" "$BASE" "$ID" "$RUNTIME"
+lm_tenant_php "$ID" "$PHP_VERSION" "$RUNTIME" package:discover --ansi
+lm_tenant_php "$ID" "$PHP_VERSION" "$RUNTIME" migrate --force
 if ((MANAGED)); then
-  runuser -u "$USER" -- "/usr/bin/php$PHP_VERSION" artisan erp:bootstrap-managed \
-    --cnpj="$CNPJ" --company-name="$COMPANY_NAME" \
-    --admin-name="$ADMIN_NAME" --admin-email="$ADMIN_EMAIL" --admin-login="$ADMIN_LOGIN"
-  # Execute binding only from trusted infrastructure with CNPJ verified
-  # against the ERP's own settings. Never print HMAC credentials.
-  (cd "$CONTROL_PATH" && "/usr/bin/php$PHP_VERSION" artisan control:bind-local "$RELEASE" \
+  lm_tenant_php "$ID" "$PHP_VERSION" "$RUNTIME" erp:bootstrap-managed \
+    --cnpj="$CNPJ" --company-name="$COMPANY_NAME" --admin-name="$ADMIN_NAME" \
+    --admin-email="$ADMIN_EMAIL" --admin-login="$ADMIN_LOGIN"
+  (cd "$CONTROL_PATH" && "/usr/bin/php$PHP_VERSION" artisan control:bind-local "$RUNTIME" \
     --url="$CONTROL_URL" --file-owner="$USER")
+  lm_tenant_php "$ID" "$PHP_VERSION" "$RUNTIME" lumeron:license-sync
 fi
-runuser -u "$USER" -- "/usr/bin/php$PHP_VERSION" artisan optimize
-ln -s "$RELEASE" "$BASE/current"
-
+lm_tenant_php "$ID" "$PHP_VERSION" "$RUNTIME" optimize
+lm_atomic_current "$BASE" "$RUNTIME"
 cat >"$POOL" <<ENV
 [lumeron_$ID]
 user = $USER
@@ -170,10 +171,13 @@ listen = /run/php/php$PHP_VERSION-fpm-lumeron-$ID.sock
 listen.owner = www-data
 listen.group = www-data
 listen.mode = 0660
+clear_env = yes
 pm = ondemand
-pm.max_children = 6
-pm.process_idle_timeout = 15s
+pm.max_children = 3
+pm.process_idle_timeout = 10s
 pm.max_requests = 500
+php_admin_flag[log_errors] = on
+php_admin_value[error_log] = $BASE/shared/storage/logs/php-fpm.log
 ENV
 cat >"$SITE" <<ENV
 server {
@@ -196,38 +200,48 @@ server {
         fastcgi_param HTTPS on;
         fastcgi_pass unix:/run/php/php$PHP_VERSION-fpm-lumeron-$ID.sock;
     }
+    location ^~ /uploads/ {
+        add_header Content-Disposition attachment always;
+        add_header X-Content-Type-Options nosniff always;
+        try_files \$uri =404;
+    }
     location ~ \.php$ { return 404; }
     location ~ /\.(?!well-known).* { deny all; }
     access_log /var/log/nginx/lumeron-$ID.access.log;
     error_log /var/log/nginx/lumeron-$ID.error.log;
 }
 ENV
-cat >"$WORKER" <<ENV
+cat >"$FISCAL" <<ENV
 [Unit]
-Description=Lumeron $ID - fiscal queue
+Description=Lumeron $ID - fiscal queue (batch)
 After=network-online.target
-Wants=network-online.target
 [Service]
-Type=simple
+Type=oneshot
 User=$USER
 Group=$USER
 WorkingDirectory=$BASE/current
-ExecStart=/usr/bin/php$PHP_VERSION $BASE/current/artisan queue:work database --queue=fiscal,default --sleep=2 --tries=1 --timeout=180 --max-time=3600
-Restart=always
-RestartSec=5
-TimeoutStopSec=240
-KillSignal=SIGTERM
+ExecStart=/usr/bin/php$PHP_VERSION $BASE/current/artisan queue:work database --queue=fiscal,default --stop-when-empty --sleep=1 --tries=1 --timeout=180 --max-time=240
+TimeoutStartSec=300
 UMask=0077
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=$BASE/shared $BASE/uploads $BASE/releases
+ENV
+cat >"$FISCAL_TIMER" <<ENV
+[Unit]
+Description=Lumeron $ID - fiscal queue wakeup (opt-in)
+[Timer]
+OnBootSec=30s
+OnUnitInactiveSec=10s
+Unit=lumeron-fiscal-$ID.service
 [Install]
-WantedBy=multi-user.target
+WantedBy=timers.target
 ENV
 cat >"$SCHEDULE" <<ENV
 [Unit]
-Description=Lumeron $ID - Laravel scheduler
-After=network-online.target
+Description=Lumeron $ID - scheduler (per-tenant database)
 [Service]
 Type=oneshot
 User=$USER
@@ -238,12 +252,12 @@ UMask=0077
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectHome=true
-[Install]
-WantedBy=multi-user.target
+ProtectSystem=strict
+ReadWritePaths=$BASE/shared $BASE/uploads $BASE/releases
 ENV
 cat >"$TIMER" <<ENV
 [Unit]
-Description=Lumeron $ID - scheduler por minuto
+Description=Lumeron $ID - scheduler timer
 [Timer]
 OnCalendar=*-*-* *:*:00
 AccuracySec=1s
@@ -258,14 +272,6 @@ systemctl daemon-reload
 nginx -t
 systemctl reload "php$PHP_VERSION-fpm"
 systemctl reload nginx
-echo "Instância criada: https://$DOMAIN"
-if ((MANAGED)); then
-  echo "Administrador criado com convite privado; envie o link pelo Control antes de liberar o acesso."
-else
-  echo "Crie o administrador: cd $BASE/current && runuser -u $USER -- /usr/bin/php$PHP_VERSION artisan erp:make-admin"
-fi
-echo "Cadastre exatamente o CNPJ contratado, configure certificado A1, CSC e a biblioteca ACBr Linux."
-echo "Verifique: cd $BASE/current && runuser -u $USER -- /usr/bin/php$PHP_VERSION artisan lumeron:instance-check --fiscal"
-echo "Após validar: systemctl enable --now lumeron-fiscal-$ID"
-echo "Depois de conferir recorrências e integrações: systemctl enable --now lumeron-schedule-$ID.timer"
-echo "Worker fiscal e agendador ficam DESLIGADOS até a configuração de cada cliente."
+echo "Instalação preparada: https://$DOMAIN | code=$SHA"
+echo 'Fiscal timer e scheduler permanecem desativados até configuração/validação.'
+echo 'Não habilite NFC-e sem ACBr Linux/A1/CSC e validação fiscal real.'
