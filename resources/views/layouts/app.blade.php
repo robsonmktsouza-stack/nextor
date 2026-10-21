@@ -51,7 +51,7 @@
           @if(auth()->user()->canAccess('products') && $hasModule('products'))<a href="{{ route('products.index') }}">Produtos</a>@endif
           @if(auth()->user()->canAccess('services') && $hasModule('services'))<a href="{{ route('services.index') }}">Serviços</a>@endif
           @if(auth()->user()->canAccess('stock') && $hasModule('products'))<a href="{{ route('stock.index') }}">Movimentações de estoque</a>@endif
-          @if(auth()->user()->canAccess('customers') && $hasModule('pdv'))<a href="{{ route('customers.index') }}">Clientes</a>@endif
+          @if(auth()->user()->canAccess('customers'))<a href="{{ route('customers.index') }}">Clientes</a>@endif
           @if(auth()->user()->canAccess('pdv') && $hasModule('pdv'))<a data-company-required href="{{ route('pdv.index') }}">PDV</a>@endif
           @if(auth()->user()->canAccess('sales') && $hasModule('pdv'))
             <a data-company-required href="{{ route('sales.index') }}">Vendas</a>
@@ -121,7 +121,7 @@
     <a href="{{ route('services.index') }}" class="sidebar-link {{ request()->routeIs('services.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'services'])<span>Serviços</span></a>
     @endif
-    @if(auth()->user()->canAccess('customers') && $hasModule('pdv'))
+    @if(auth()->user()->canAccess('customers'))
     <a href="{{ route('customers.index') }}" class="sidebar-link {{ request()->routeIs('customers.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'customers'])<span>Clientes</span></a>
     @endif
