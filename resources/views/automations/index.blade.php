@@ -149,7 +149,7 @@
 </section>
 
 <section class="panel license-grid automation-history" data-admin-list data-grid-filename="automacoes-emails">
-    <div class="panel-heading admin-grid-heading"><h2>Avisos enviados aos clientes</h2></div>
+    <div class="panel-heading admin-grid-heading"><h2>E-mails para clientes</h2></div>
     @include('partials.listing.toolbar', ['showFilters' => false])
     <div class="table-scroll">
         <table class="license-data-table" data-grid-table>

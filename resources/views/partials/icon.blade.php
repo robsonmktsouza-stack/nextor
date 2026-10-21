@@ -31,6 +31,7 @@
 @case('copy')<rect x="8" y="8" width="11" height="11" rx="1"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/>@break
 @case('print')<path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/><path d="M18 12h.01"/>@break
 @case('download')<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>@break
+@case('send')<path d="M22 2 11 13"/><path d="m22 2-7.3 20-4.6-9.1L1 8.3 22 2Z"/>@break
 @case('refresh')<path d="M20 6v5h-5M4 18v-5h5"/><path d="M6.1 9A7 7 0 0 1 18.2 6.2L20 11M4 13l1.8 4.8A7 7 0 0 0 17.9 15"/>@break
 @case('return')<path d="M9 7H5l4-4M5 7l4 4"/><path d="M5 7h8a6 6 0 0 1 0 12H7"/>@break
 @case('filter')<path d="M4 5h16l-6 7v5l-4 2v-7L4 5Z"/>@break

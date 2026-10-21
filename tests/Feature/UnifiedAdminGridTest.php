@@ -50,7 +50,7 @@ final class UnifiedAdminGridTest extends TestCase
             '/licenses' => 1,
             '/plans' => 1,
             '/history' => 1,
-            '/automations' => 2,
+            '/automations' => 3,
         ] as $url => $expectedTables) {
             $html = $this->get($url)->assertOk()->getContent();
             $this->assertSame($expectedTables, substr_count($html, 'data-admin-list'), $url);

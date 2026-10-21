@@ -90,3 +90,23 @@ Alterações em autenticação/licença exigem testes e revisão de segurança. 
   de tipo, sem excluir ou recriar regras.
 - Interface usa modal, e mantém GET de criação e edição como alternativa
   sem JS. Não criar ações arbitrárias, mensagens externas, cobranças ou bloqueios.
+
+
+## Avisos por e-mail ao cliente (21/10/2026)
+
+- O proprietário solicitou avisos externos de vencimento. As regras continuam
+  gerando histórico interno; para notificações externas só existem gatilhos
+  `expiry_soon` e `expired`, vinculados a `client_email_deliveries`.
+- `notify_client_email` inicia desativado em toda regra (antiga ou nova).
+  Além do switch da regra, exige `LUMERON_CLIENT_EMAIL_ENABLED=true`,
+  transporte SMTP e remetente válido. Nunca enviar com driver log/array nem
+  supor que atualizar a aplicação autoriza disparos em massa.
+- Criação de aviso é transacional, restrita a ciclos novos e deduplicada por
+  regra/empresa/vencimento. Antes de enviar, validar novamente validade,
+  situação, prazo e opção ativa; renovados/suspensos vão para skipped.
+  Até três tentativas, sem expor senhas nem erros detalhados na UI.
+- O comando externo `control:client-email-send` corre às 08h10 se o
+  scheduler estiver realmente ativo. Rotas administrativas protegidas e
+  throttle. E-mail enviado só comprova aceite pelo transporte.
+- Não implementar WhatsApp fictício nem realizar campanhas: exige integração
+  legítima com provedor e política de mensagens próprias.

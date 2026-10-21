@@ -142,6 +142,6 @@ final class ClientEmailNotificationsTest extends TestCase
             'notify_client_email' => '1',
         ])->assertRedirect(route('automations.index'));
         $this->assertTrue($rule->fresh()->notify_client_email);
-        $this->get(route('automations.index'))->assertSee('Avisos enviados aos clientes');
+        $this->get(route('automations.index'))->assertSee('E-mails para clientes');
     }
 }
