@@ -58,7 +58,7 @@ final class ControlPanelTest extends TestCase
         ]);
         $company = Company::sole();
         $response->assertRedirect(route('clients.show', $company))
-            ->assertSessionHas('new_secret');
+            ->assertSessionMissing('new_secret');
         $this->assertSame('11222333000181', $company->cnpj);
         $this->assertCount(2, $company->modules);
         $this->assertSame(1, $company->events()->count());
@@ -165,13 +165,18 @@ final class ControlPanelTest extends TestCase
         $this->get('/history')->assertOk()->assertSee('Contato realizado');
     }
 
-    public function test_secret_rotation_invalidates_previous_key(): void
+    public function test_license_secrets_are_not_offered_to_panel_users(): void
     {
         $this->actingAs($this->user());
         $company = $this->company();
-        $previous = $company->license_secret;
-        $this->post(route('clients.rotate-secret', $company))
-            ->assertRedirect(route('clients.show', $company))->assertSessionHas('new_secret');
-        $this->assertNotEquals($previous, $company->fresh()->license_secret);
+        $this->get(route('clients.show', $company))
+            ->assertOk()
+            ->assertDontSee($company->license_secret)
+            ->assertDontSee($company->instance_id)
+            ->assertDontSee('Gerar nova chave');
+        $this->get(route('clients.details', $company))
+            ->assertOk()
+            ->assertDontSee($company->license_secret);
+        $this->post('/clients/'.$company->id.'/rotate-secret')->assertNotFound();
     }
 }
