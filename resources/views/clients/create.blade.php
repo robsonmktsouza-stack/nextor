@@ -6,7 +6,6 @@
 <form id="newAccountForm" method="post" action="{{ route('clients.store') }}" data-error-field="{{ $errors->getBag('default')->keys()[0] ?? '' }}">@csrf
 <div class="wizard-progress"><span class="bubble current" data-step-dot="0">1</span><span class="wizard-line"></span><span class="bubble" data-step-dot="1">2</span><span class="wizard-line"></span><span class="bubble" data-step-dot="2">3</span></div>
 <fieldset data-wizard-step="0"><legend>Dados da empresa</legend>
-<p class="field-hint">Identifique a empresa que receberá uma instalação exclusiva do Lumeron.</p>
 <div class="form-grid">
 <label class="span-two">Razão social <strong>*</strong><input type="text" name="legal_name" maxlength="220" value="{{ old('legal_name') }}" required autofocus>@error('legal_name')<small class="field-error">{{ $message }}</small>@enderror</label>
 <label>Nome fantasia <input name="trade_name" maxlength="220" value="{{ old('trade_name') }}"></label>
@@ -16,20 +15,17 @@
 <label>Telefone <input name="phone" maxlength="30" value="{{ old('phone') }}"></label>
 </div></fieldset>
 <fieldset data-wizard-step="1" hidden><legend>Acesso da instalação</legend>
-<p class="field-hint">O cadastro reserva a identidade de uma instalação. Usuários e senhas do ERP são criados dentro da própria instalação, não aqui.</p>
 <div class="form-grid">
 <label>Subdomínio <strong>*</strong><input name="subdomain" maxlength="40" placeholder="empresa-exemplo" value="{{ old('subdomain') }}" pattern="[a-z][a-z0-9-]{1,38}" required><small>Somente letras minúsculas, números e hífens. Ex.: beb-bar-do-dil</small>@error('subdomain')<small class="field-error">{{ $message }}</small>@enderror</label>
-<label>Login do administrador (referência) <input name="admin_login" maxlength="100" pattern="[A-Za-z0-9_.-]{3,100}" value="{{ old('admin_login') }}" placeholder="administrador">@error('admin_login')<small class="field-error">{{ $message }}</small>@enderror</label>
-<label class="span-two">Endereço da instalação (opcional) <input name="installation_url" type="url" placeholder="http://127.0.0.1:8001" value="{{ old('installation_url') }}"><small>Para a instalação local, use http://127.0.0.1:8001 ou deixe vazio. Em produção, use HTTPS.</small>@error('installation_url')<small class="field-error">{{ $message }}</small>@enderror</label>
+<label>Login de referência <input name="admin_login" maxlength="100" pattern="[A-Za-z0-9_.-]{3,100}" value="{{ old('admin_login') }}" placeholder="administrador">@error('admin_login')<small class="field-error">{{ $message }}</small>@enderror</label>
+<label class="span-two">Endereço da instalação <input name="installation_url" type="url" placeholder="http://127.0.0.1:8001" value="{{ old('installation_url') }}">@error('installation_url')<small class="field-error">{{ $message }}</small>@enderror</label>
 </div></fieldset>
 <fieldset data-wizard-step="2" hidden><legend>Plano e liberação</legend>
-<p class="field-hint">Escolha a validade e os módulos que o cliente terá direito a utilizar.</p>
 <div class="form-grid">
 <label>Plano <strong>*</strong><select name="plan" required data-plan-selector>@foreach($plans as $plan)<option value="{{ $plan->code }}" data-modules="{{ implode(',', $plan->modules ?? []) }}" @selected(old('plan',$plans->first()?->code)===$plan->code)>{{ $plan->name }}</option>@endforeach</select>@error('plan')<small class="field-error">{{ $message }}</small>@enderror</label>
-<label>Vencimento <input name="expires_at" type="date" value="{{ old('expires_at') }}"><small>Em branco = sem vencimento automático.</small>@error('expires_at')<small class="field-error">{{ $message }}</small>@enderror</label>
+<label>Vencimento <input name="expires_at" type="date" value="{{ old('expires_at') }}">@error('expires_at')<small class="field-error">{{ $message }}</small>@enderror</label>
 </div>
 <div class="modules"><strong>Módulos liberados</strong><input type="hidden" name="modules_present" value="1"><div class="module-grid">@foreach(config('license.modules') as $code=>$label)<label class="module-switch"><input type="checkbox" role="switch" name="modules[]" value="{{ $code }}" @checked(in_array($code,old('modules',$plans->firstWhere('code',old('plan',$plans->first()?->code))?->modules ?? [])))><span class="switch-track" aria-hidden="true"></span><span>{{ $label }}</span></label>@endforeach</div></div>
-<div class="info-line">Após salvar, a conta estará liberada no painel. A instalação será vinculada automaticamente pelo gerenciador de implantação, sem senha, código ou confirmação do cliente.</div>
 </fieldset>
 <div class="wizard-footer"><button class="btn subtle" type="button" data-wizard-back hidden>Voltar</button><span class="nav-spacer"></span><button class="btn primary" type="button" data-wizard-next>Próximo <svg><use href="#i-arrow"/></svg></button><button class="btn primary" type="submit" data-wizard-submit hidden><svg><use href="#i-check"/></svg>Criar conta</button></div>
 </form>
