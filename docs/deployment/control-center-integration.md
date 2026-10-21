@@ -8,18 +8,29 @@ Uma instalação do Lumeron = um CNPJ. O serviço central recebe só **CNPJ e ve
 
 O agente está **desativado por padrão**. A simples atualização do ERP não muda acessos nem bloqueia clientes. Para testar localmente use configuração de testes sem credenciais reais.
 
-## Configuração por instância (arquivo .env privado, nunca Git)
+## Novo vínculo automático, sem acesso do cliente ao ERP
 
-```ini
-LUMERON_CONTROL_ENABLED=true
-LUMERON_CONTROL_URL=https://admin.seu-dominio-real.com.br
-LUMERON_CONTROL_INSTANCE_ID=<UUID fornecido no painel>
-LUMERON_CONTROL_SECRET=<chave hexadecimal exibida uma vez>
-LUMERON_CONTROL_GRACE_HOURS=72
-LUMERON_INSTANCE_CNPJ=<CNPJ da instalação com 14 dígitos>
+**Decisão permanente de 21/10/2026:** cadastro, ativação, suspensão e renovação são feitos só no Lumeron Control; nenhum cliente precisa confirmar no ERP, copiar UUID/chave ou configurar `.env`.
+
+A empresa existente no ERP é identificada pelo **CNPJ já cadastrado** em `company_settings.document`, confirmado localmente pelo comando read-only:
+
+```bash
+php artisan lumeron:license-identity
 ```
 
-No servidor real, usar HTTPS. Em `APP_ENV=local` é permitido HTTP para testes no Laragon. Após configurar: `php artisan optimize:clear`, `php artisan migrate --force` **somente na instância autorizada**, e `php artisan lumeron:license-sync`.
+O operador do serviço central executa **uma vez por instalação existente** a rotina de infraestrutura:
+
+```powershell
+cd C:\laragon\www\lumeron-control
+php artisan control:bind-local "C:\laragon\www\nextor" --url=http://127.0.0.1:8000
+```
+
+A porta deve ser ajustada para o endereço real do Control. O comando não exibe nem pede credenciais e não acessa a interface do ERP: executa a identidade read-only, compara com a conta CNPJ já cadastrada, grava `storage/app/private/lumeron-control.json` com permissão restrita e registra auditoria. Não sobrescreve vínculo de outra empresa. Para novos deploys, o gerenciador de implantação deve executar essa operação internamente, após instalar/migrar o ERP, quando possuir acesso privilegiado a ambas as aplicações; não há provisionamento remoto automático implementado.
+
+A integração **continua desativada para instalações antigas que não receberam o arquivo**. A instalação passa a aplicar licença central quando seu backend lê o vínculo privado, sem `.env` nem participação do usuário. Os campos `LUMERON_CONTROL_*` legados continuam suportados somente para compatibilidade; não orientar novos clientes a copiá-los manualmente.
+
+Antes do primeiro vínculo, a instalação deve usar uma versão `develop` aprovada para teste, ter o CNPJ empresarial preenchido e a migração `central_license_states` aplicada. Isso é trabalho do operador de deploy, não uma etapa do cadastro do cliente. Instalações `main`/`v1.0.0` ainda não possuem o agente.
+
 
 O comando usa assinatura HMAC por requisição (UUID, timestamp Unix, nonce único e SHA-256 do corpo), confere a assinatura da resposta com o segredo da instância, UUID/CNPJ/status/horário e guarda a última resposta assinada no próprio banco da instalação. Solicitações repetidas são rejeitadas pelo servidor.
 
