@@ -153,8 +153,10 @@ final class PlansAndAutomationsTest extends TestCase
     {
         $company = $this->company([
             'expires_at' => today()->subDay()->toDateString(),
-            'last_seen_at' => now()->subDays(4),
         ]);
+        // Last contact is updated exclusively by the authenticated licensing
+        // endpoint, not via mass assignment from an administrator or web form.
+        $company->forceFill(['last_seen_at' => now()->subDays(4)])->save();
         AutomationRule::query()->where('code', 'expired')->update(['enabled' => true]);
         AutomationRule::query()->where('code', 'offline')->update(['enabled' => true, 'days' => 2]);
 
