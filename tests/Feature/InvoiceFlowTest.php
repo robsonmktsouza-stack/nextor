@@ -201,6 +201,22 @@ final class InvoiceFlowTest extends TestCase
         $this->assertSame($invoice->period_end->toDateString(),
             $company->fresh()->expires_at->toDateString());
         $this->assertTrue($invoice->fresh()->licenseApplicationActive());
+
+        // The existing signed ERP API must reflect this *explicit* Control renewal.
+        $body = json_encode(['cnpj'=>$company->cnpj, 'version'=>'v1.0.0']);
+        $stamp = (string) time();
+        $nonce = bin2hex(random_bytes(16));
+        $canonical = "POST\\n/api/license/check\\n{$stamp}\\n{$nonce}\\n".hash('sha256', $body);
+        $signature = hash_hmac('sha256', $canonical, $company->license_secret);
+        $check = $this->call('POST', '/api/license/check', [], [], [], [
+            'CONTENT_TYPE' => 'application/json',
+            'HTTP_X_LUMERON_INSTANCE' => $company->instance_id,
+            'HTTP_X_LUMERON_TIMESTAMP' => $stamp,
+            'HTTP_X_LUMERON_NONCE' => $nonce,
+            'HTTP_X_LUMERON_SIGNATURE' => $signature,
+        ], $body);
+        $check->assertOk()->assertJsonPath('expires_at', $invoice->period_end->toDateString());
+
         $this->post(route('invoices.apply-license',$invoice))->assertSessionHasErrors('invoice');
 
         $payment = InvoicePayment::query()->sole();
