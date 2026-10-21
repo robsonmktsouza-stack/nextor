@@ -123,8 +123,7 @@ final class CompanyController extends Controller
             return $company;
         });
         return redirect()->route('clients.show', $company)
-            ->with('success', 'Conta cadastrada. Copie a chave de licença exibida abaixo.')
-            ->with('new_secret', $secret);
+            ->with('success', 'Conta cadastrada e acesso liberado no painel. A instalação será sincronizada pelo gerenciador de implantação.');
     }
 
     public function show(Company $company)
@@ -167,15 +166,4 @@ final class CompanyController extends Controller
         return back()->with('success', 'Anotação registrada no histórico.');
     }
 
-    public function rotateSecret(Company $company)
-    {
-        $secret = bin2hex(random_bytes(48));
-        DB::transaction(function () use ($company, $secret): void {
-            $company->update(['license_secret' => $secret]);
-            $company->record('secret_rotated', 'Chave de licença substituída. A chave anterior foi invalidada.');
-        });
-        return redirect()->route('clients.show', $company)
-            ->with('success', 'Nova chave gerada. Atualize a configuração privada da instalação.')
-            ->with('new_secret', $secret);
-    }
 }
