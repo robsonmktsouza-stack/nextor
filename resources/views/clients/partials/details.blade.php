@@ -37,7 +37,7 @@ aria-label="Ativar ou suspender licença de {{ $company->legal_name }}"
 </form>
 <form method="post" action="{{ route('clients.modules',$company) }}">@csrf
 <div class="form-grid"><label>Plano<select name="plan" data-plan-selector>@foreach($plans as $plan)<option value="{{ $plan->code }}" data-modules="{{ implode(',', $plan->modules ?? []) }}" @selected($company->plan===$plan->code)>{{ $plan->name }}{{ $plan->active ? '' : ' (arquivado)' }}</option>@endforeach</select></label><label>Validade<input type="date" name="expires_at" value="{{ $company->expires_at?->format('Y-m-d') }}"></label></div>
-<div class="modules"><strong>Módulos autorizados</strong><input type="hidden" name="modules_present" value="1"><div class="module-grid">@foreach(config('license.modules') as $code=>$label)<label class="module-switch"><input type="checkbox" role="switch" name="modules[]" value="{{ $code }}" @checked(in_array($code,$company->modules??[]))><span class="switch-track" aria-hidden="true"></span><span>{{ $label }}</span></label>@endforeach</div></div>
+<div class="plan-modules-overview"><strong>Inclui</strong><span data-plan-modules-summary>{{ collect($plans->firstWhere('code',$company->plan)?->modules ?? [])->map(fn($code) => config('license.modules')[$code] ?? $code)->join(' · ') ?: 'Nenhum módulo' }}</span></div>
 <button type="submit" class="btn primary small">Salvar licença</button></form>
 </section>
 <section class="detail-box"><h3>Anotações e eventos</h3>
