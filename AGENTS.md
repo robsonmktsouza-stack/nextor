@@ -4,7 +4,7 @@ Esta branch `control-center` contém **um projeto Laravel independente**, não o
 
 Produto aprovado: painel enxuto do proprietário, com Início, Clientes, Licenças e Histórico. Mesmo padrão visual Lumeron (Roboto, azul-petróleo, tabelas densas, sem gráficos ou controles supérfluos). Fluxo de cadastro por etapas, listagem e detalhes com notas/auditoria, inspirado funcionalmente nas capturas do painel eGestor, sem replicar propriedade intelectual.
 
-Cada cliente: um CNPJ, instalação, segredo HMAC próprio, plano, validade e módulos. Nunca armazenar senha do administrador do cliente neste banco. Geração de licenças não executa scripts na VPS. Bloqueios são estados de licença; exigem que o cliente ERP consulte e respeite o estado antes de terem efeito remoto. Não alterar PDV/NFC-e do ERP automaticamente.
+Cada cliente: um CNPJ, instalação, segredo HMAC próprio, plano e validade. Os módulos vêm exclusivamente do catálogo de planos. Nunca armazenar senha do administrador do cliente neste banco. Geração de licenças não executa scripts na VPS. Bloqueios são estados de licença; exigem que o cliente ERP consulte e respeite o estado antes de terem efeito remoto. Não alterar PDV/NFC-e do ERP automaticamente.
 
 Rotas públicas: apenas login e API assinada. Sem auto-registro. Admin criado por CLI com senha forte. `APP_KEY` único; segredos com cast encrypted; CSRF, throttle, validação e trilha de alterações. A API usa HMAC e nonce anti-replay; não revelar segredo em payload ou log.
 
@@ -22,7 +22,7 @@ Alterações em autenticação/licença exigem testes e revisão de segurança. 
 ## Catálogo de planos e regras agendadas (21/10/2026)
 
 - **Nunca** voltar a manter `standard/advanced/full` ou nomes/preços de planos fixos no PHP em tempo de execução. A migration inicial cria valores legados uma única vez, preservando empresas. Gerenciar pelo banco em `plans` com CRUD seguro na aba Planos.
-- **Nunca** mudar o código de um plano usado por empresas, nem alterar módulos/validade de clientes quando a definição comercial muda. Arquivar remove opção para novos cadastros, não cancela assinaturas já emitidas. API HMAC do ERP continua retornando o código de plano e módulos da licença individual.
+- **Nunca** mudar o código de um plano usado por empresas. Os módulos são definidos apenas em `plans.modules`: editar o plano atualiza o acesso de todos os seus clientes na próxima verificação assinada, sem alterar a validade da licença. Arquivar remove novas opções, não cancela contratos. A API HMAC transmite o código do plano e seus módulos, não o JSON antigo de `companies.modules`.
 - As regras da seção Automações pertencem somente ao **Control** (`automation_rules`), começam **desligadas**, são executadas por `control:automations-run` (agenda 08h) e geram apenas avisos de histórico interno via `automation_deliveries` com deduplicação transacional.
 - Não enviar e-mails, WhatsApp, não gerar cobranças, suspender, renovar ou reativar contratos a partir dessas rotinas sem decisão expressa e testes dedicados. Vencimento continua derivado diretamente de `expires_at`; o alerta não altera o status.
 - `php artisan schedule:work` serve para Laragon em janela separada; servidor Linux precisa de cron externo a cada minuto. Sem scheduler ativo, não declarar que monitoramento periódico funciona.
@@ -71,3 +71,10 @@ Alterações em autenticação/licença exigem testes e revisão de segurança. 
 - Os estilos ficam exclusivamente em `public/css/control-tooltip.css`. O layout `resources/views/layouts/main.blade.php` deve carregá-los globalmente com versionamento de cache. Não duplicar tooltip em cada módulo e não incorporar bibliotecas/CDNs.
 - Conteúdo AJAX de modais também tem o `title` migrado automaticamente para `data-tooltip` como fallback. Preferir já entregar `data-tooltip` no HTML. Nunca inserir texto de tooltip via `innerHTML`; usar `textContent`.
 - O tooltip não deve obstruir comandos nem quebrar formulários ou afetar impressão. Testar em listagens, ações da toolbar, switches e modais, inclusive com navegação por Tab.
+
+## Planos comandam módulos do ERP (21/10/2026)
+
+- **Fonte única de verdade**: `plans.modules` no Control. Não oferecer controles duplicados de módulos em `clients/create` ou `clients/partials/details`; essas telas somente exibem o resumo do plano selecionado. Rejeitar payloads `modules` enviados ao endpoint de licenças.
+- `LicenseCheckController` obtém `modules` de `Company::entitledModules()`, consultando `planDefinition`. Plano ausente não pode conceder direitos.
+- A migração `2026_10_22_000001_preserve_legacy_entitlements_as_plans.php` converte clientes com módulos distintos do plano anterior em **planos legados arquivados**, individualizados, sem perder autorizações históricas; nunca desligar módulos de clientes antes de executar essa migração em instalações já cadastradas. Não copiar segredos nem alterar CNPJ, situação ou validade.
+- Novos planos com código válido devem ser aceitos pelo ERP. Alterar módulos de um plano em uso muda o acesso de seus usuários após atualização do cache; a interface do formulário avisa o número de clientes afetados.
