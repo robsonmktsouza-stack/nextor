@@ -2,7 +2,7 @@
 
 namespace App\Services\License;
 
-use App\Support\InstanceIdentity;
+use App\Support\ManagedLicenseConfig;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -11,7 +11,7 @@ final class CentralLicenseService
 {
     public function state(): array
     {
-        if (!config('central_license.enabled')) {
+        if (!ManagedLicenseConfig::enabled()) {
             return ['status' => 'disabled', 'modules' => []];
         }
         return Cache::remember(
@@ -24,14 +24,15 @@ final class CentralLicenseService
     /** Fetch the remotely authorized license; use only signed data for decisions. */
     public function refresh(): array
     {
-        if (!config('central_license.enabled')) {
+        if (!ManagedLicenseConfig::enabled()) {
             return ['status' => 'disabled', 'modules' => []];
         }
         try {
-            $url = (string) config('central_license.url');
-            $id = (string) config('central_license.instance_id');
-            $secret = (string) config('central_license.secret');
-            $cnpj = InstanceIdentity::cnpj();
+            $settings = ManagedLicenseConfig::settings();
+            $url = (string) ($settings['url'] ?? '');
+            $id = (string) ($settings['instance_id'] ?? '');
+            $secret = (string) ($settings['secret'] ?? '');
+            $cnpj = $settings['cnpj'] ?? null;
             if (!preg_match('/^[0-9a-f-]{36}$/i', $id)
                 || !preg_match('/^[0-9a-f]{96}$/i', $secret)
                 || !$cnpj
@@ -105,7 +106,7 @@ final class CentralLicenseService
             // accepted during a bounded grace period.
             $last = DB::table('central_license_states')->where('id', 1)->first();
             if ($last && now()->diffInHours($last->verified_at, true)
-                <= (int) config('central_license.grace_hours', 72)) {
+                <= (int) (ManagedLicenseConfig::settings()['grace_hours'] ?? 72)) {
                 return [
                     'status' => $last->status,
                     'plan' => $last->plan,
