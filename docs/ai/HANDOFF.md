@@ -1,3 +1,11 @@
+## Continuidade — 21/10/2026 — aviso comercial sincronizado com Control
+
+- O endpoint HMAC do Control entrega `notice_days` opcional a partir de regras de vencimento ativas. O ERP valida o campo, o persiste em `central_license_states.notice_days` (nova migration) e mostra chip de vencimento em `app.blade.php` e `pdv.blade.php` via `partials.commercial-readonly`.
+- Somente indicador visual: a assinatura continua autoritativa para operações e os avisos não alteram status nem criam bloqueios. Preservar tolerância offline, data assinada e exceções fiscais.
+- A integração não transmite clientes comerciais, XML, certificados ou endereços de e-mail. Os e-mails partem do próprio Control e são opt-in.
+- Testes novos de prazo assinado, exibição e configuração ausente. Migration do ERP deve preceder sua primeira sincronização com o novo payload; projetos têm bancos separados.
+- A `main` e a tag estável permanecem intocadas.
+
 ## Continuidade — 21/10/2026 — expiração local, cache curto e recorrências agendadas
 
 - Redução do cache de licença central para 60 segundos, sem mudar a tolerância offline.
