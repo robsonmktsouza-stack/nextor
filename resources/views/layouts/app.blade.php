@@ -82,6 +82,7 @@
       </a>
       @endif
       <div class="topbar-spacer"></div>
+      @include('partials.commercial-readonly')
       <span class="topbar-environment">ADMINISTRAÇÃO</span>
       <details class="user-menu"><summary>
         <span class="user-avatar">{{ collect(explode(' ', auth()->user()->name))->filter()->take(2)->map(fn($w) => strtoupper(substr($w,0,1)))->implode('') }}</span>
@@ -145,7 +146,7 @@
   </aside>
   <main class="cms-page-shell @yield('pageShellClass')" id="pageShell">
     <div class="main-content">
-      @include('partials.commercial-readonly')
+
       <div class="page-heading">
         <div class="page-heading-main">
           <div class="page-title-wrap">
