@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Services\License\CentralLicenseService;
+use App\Support\ManagedLicenseConfig;
 use Closure;
 use Illuminate\Http\Request;
 
@@ -10,7 +11,7 @@ final class RequireCentralLicense
 {
     public function handle(Request $request, Closure $next)
     {
-        if (!config('central_license.enabled') || !$request->user()
+        if (!ManagedLicenseConfig::enabled() || !$request->user()
             || $request->routeIs('license.status', 'logout')) {
             return $next($request);
         }
