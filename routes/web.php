@@ -39,5 +39,6 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/automations/{rule}/edit', [AutomationController::class, 'edit'])->name('automations.edit');
     Route::put('/automations/{rule}', [AutomationController::class, 'update'])->name('automations.update');
     Route::post('/automations/run', [AutomationController::class, 'run'])->middleware('throttle:3,1')->name('automations.run');
+    Route::post('/automations/send-emails', [AutomationController::class, 'sendEmails'])->middleware('throttle:3,1')->name('automations.send-emails');
     Route::get('/history', [HistoryController::class, 'index'])->name('history.index');
 });

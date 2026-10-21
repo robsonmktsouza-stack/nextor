@@ -36,7 +36,7 @@
     </div>
     <div class="table-scroll">
         <table class="license-data-table" data-grid-table>
-            <thead><tr><th>Regra</th><th>Descrição</th><th>Tipo</th><th>Prazo</th><th>Última verificação</th><th>Situação</th><th class="license-actions-heading">Ações</th></tr></thead>
+            <thead><tr><th>Regra</th><th>Descrição</th><th>Tipo</th><th>Prazo</th><th>Última verificação</th><th>Situação</th><th>E-mail</th><th class="license-actions-heading">Ações</th></tr></thead>
             <tbody>
                 @forelse($rules as $rule)
                     <tr>
@@ -71,6 +71,7 @@
                                 <span class="status {{ $rule->enabled ? 'active' : 'expired' }}">{{ $rule->enabled ? 'Ativa' : 'Desativada' }}</span>
                             </label>
                         </td>
+                        <td><span class="status {{ $rule->notify_client_email ? 'active' : 'expired' }}">{{ $rule->notify_client_email ? 'Cliente' : 'Desligado' }}</span></td>
                         <td>
                             <div class="license-row-actions">
                                 <button class="license-icon-action" type="submit" form="automation-rule-{{ $rule->id }}"
@@ -84,11 +85,12 @@
                                    data-automation-kind="{{ $rule->kindCode() }}"
                                    data-automation-days="{{ $rule->days }}"
                                    data-automation-enabled="{{ $rule->enabled ? '1' : '0' }}"
+                                   data-automation-notify="{{ $rule->notify_client_email ? '1' : '0' }}"
                                    data-tooltip="Editar automação" aria-label="Editar automação {{ $rule->name }}">@include('partials.icon',['name'=>'edit','size'=>16])</a>
                             </div>
                         </td>
                     </tr>
-                @empty<tr><td colspan="7" class="empty">Nenhuma regra encontrada.</td></tr>
+                @empty<tr><td colspan="8" class="empty">Nenhuma regra encontrada.</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -138,11 +140,45 @@
         'plural' => 'avisos',
     ])
 </section>
+
+<section class="panel license-grid automation-history" data-admin-list data-grid-filename="automacoes-emails">
+    <div class="panel-heading admin-grid-heading"><h2>Avisos enviados aos clientes</h2></div>
+    @include('partials.listing.toolbar', ['showFilters' => false])
+    <div class="table-scroll">
+        <table class="license-data-table" data-grid-table>
+            <thead><tr><th>Data</th><th>Cliente</th><th>Regra</th><th>Envio</th><th class="license-actions-heading">Ações</th></tr></thead>
+            <tbody>
+            @forelse($clientEmails as $clientEmail)
+                <tr>
+                    <td class="license-nowrap">{{ $clientEmail->sent_at?->format('d/m/Y H:i') ?? $clientEmail->created_at?->format('d/m/Y H:i') }}</td>
+                    <td class="license-name-cell">{{ $clientEmail->company?->legal_name ?? 'Conta indisponível' }}</td>
+                    <td>{{ $clientEmail->rule?->name ?? 'Regra indisponível' }}</td>
+                    <td><span class="status {{ $clientEmail->status === 'sent' ? 'active' : 'expired' }}">{{ ['pending'=>'Pendente','processing'=>'Processando','retry'=>'Nova tentativa','sent'=>'Enviado','failed'=>'Falhou','skipped'=>'Cancelado'][$clientEmail->status] ?? 'Indisponível' }}</span></td>
+                    <td><div class="license-row-actions">@if($clientEmail->company)
+                        <a class="license-icon-action" href="{{ route('clients.show', $clientEmail->company) }}" data-tooltip="Ver cliente" aria-label="Ver cliente">
+                            @include('partials.icon',['name'=>'clients','size'=>16])
+                        </a>
+                    @endif</div></td>
+                </tr>
+            @empty
+                <tr><td colspan="5" class="empty">Nenhum aviso por e-mail registrado.</td></tr>
+            @endforelse
+            </tbody>
+        </table>
+    </div>
+    @include('partials.listing.footer', [
+        'paginator' => $clientEmails,
+        'pageName' => 'emails_page',
+        'singular' => 'e-mail',
+        'plural' => 'e-mails',
+    ])
+</section>
 <dialog id="automationEditorDialog" class="account-dialog automation-editor-dialog" aria-labelledby="automationEditorTitle"
     data-reopen-context="{{ $errors->any() ? old('automation_context', '') : '' }}"
     data-old-name="{{ old('name', '') }}" data-old-description="{{ old('description', '') }}"
     data-old-kind="{{ old('kind', '') }}" data-old-days="{{ old('days', '') }}"
-    data-old-enabled="{{ old('enabled', '0') }}">
+    data-old-enabled="{{ old('enabled', '0') }}"
+    data-old-notify="{{ old('notify_client_email', '0') }}">
     <div class="dialog-header">
         <strong id="automationEditorTitle">Nova automação</strong>
         <button class="icon-button" type="button" data-automation-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>16])</button>

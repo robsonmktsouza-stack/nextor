@@ -28,3 +28,10 @@
     <input type="checkbox" name="enabled" value="1" role="switch" @checked((bool) old('enabled', $editing ? $rule->enabled : false))>
     <span class="switch-track" aria-hidden="true"></span><span>Automação ativa</span>
 </label>
+
+<label class="switch-row settings-check" data-automation-email-field>
+    <input type="hidden" name="notify_client_email" value="0">
+    <input type="checkbox" name="notify_client_email" value="1" role="switch"
+        @checked((bool) old('notify_client_email', $editing ? $rule->notify_client_email : false))>
+    <span class="switch-track" aria-hidden="true"></span><span>Avisar cliente por e-mail</span>
+</label>

@@ -6,6 +6,7 @@ use App\Models\AutomationDelivery;
 use App\Models\ClientEmailDelivery;
 use App\Models\AutomationRule;
 use App\Services\AutomationRunner;
+use App\Services\ClientEmailNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -30,6 +31,7 @@ final class AutomationController extends Controller
             'rules' => $rules->orderBy('id')->paginate($perPage, ['*'], 'rules_page')->withQueryString(),
             'deliveries' => AutomationDelivery::query()->with(['company', 'rule'])
                 ->latest('id')->paginate($perPage, ['*'], 'alerts_page')->withQueryString(),
+            'emailReady' => app(ClientEmailNotificationService::class)->enabled(),
             'clientEmails' => ClientEmailDelivery::query()->with(['company', 'rule'])
                 ->latest('id')->paginate($perPage, ['*'], 'emails_page')->withQueryString(),
         ]);
@@ -91,6 +93,16 @@ final class AutomationController extends Controller
     {
         $rule->update($this->validated($request, $rule));
         return redirect()->route('automations.index')->with('success', 'Automação atualizada.');
+    }
+
+    public function sendEmails(ClientEmailNotificationService $sender)
+    {
+        if (!$sender->enabled()) {
+            return back()->with('error', 'Configure o envio de e-mail antes de enviar avisos.');
+        }
+
+        $summary = $sender->sendPending();
+        return back()->with('success', 'E-mails enviados: '.$summary['sent'].'.');
     }
 
     public function run(AutomationRunner $runner)

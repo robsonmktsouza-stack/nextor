@@ -256,6 +256,8 @@
   const kind = field('kind');
   const days = field('days');
   const enabled = form.querySelector('input[type="checkbox"][name="enabled"]');
+  const notify = form.querySelector('input[type="checkbox"][name="notify_client_email"]');
+  const notifyField = dialog.querySelector('[data-automation-email-field]');
   const daysField = dialog.querySelector('[data-automation-days-field]');
   const heading = dialog.querySelector('#automationEditorTitle');
   const method = field('_method');
@@ -268,6 +270,10 @@
     days.required = !expired;
     if (expired) days.value = '0';
     else if (+days.value < +days.min) days.value = days.min;
+    const offline = code === 'offline';
+    notifyField.hidden = offline;
+    notify.disabled = offline;
+    if (offline) notify.checked = false;
   };
 
   const openEditor = (action, data = {}) => {
@@ -282,6 +288,7 @@
     kind.value = data.kind || 'expiry_soon';
     days.value = data.days ?? '7';
     enabled.checked = String(data.enabled) === '1';
+    notify.checked = String(data.notify) === '1';
     heading.textContent = editing ? 'Editar automação' : 'Nova automação';
     updateKind();
     dialog.showModal();
@@ -299,7 +306,8 @@
       description: trigger.dataset.automationDescription,
       kind: trigger.dataset.automationKind,
       days: trigger.dataset.automationDays,
-      enabled: trigger.dataset.automationEnabled
+      enabled: trigger.dataset.automationEnabled,
+      notify: trigger.dataset.automationNotify
     });
   });
   kind.addEventListener('change', updateKind);
@@ -325,7 +333,8 @@
         description: dialog.dataset.oldDescription,
         kind: dialog.dataset.oldKind || data.automationKind,
         days: dialog.dataset.oldDays,
-        enabled: dialog.dataset.oldEnabled
+        enabled: dialog.dataset.oldEnabled,
+        notify: dialog.dataset.oldNotify
       });
     }
   }

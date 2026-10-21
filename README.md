@@ -189,3 +189,41 @@ A migration `2026_10_21_000003_add_kind_to_automation_rules.php` conserva
 os códigos, as regras existentes e a deduplicação dos avisos. Executar
 `php artisan migrate` **somente no Lumeron Control**, nunca no ERP.
 As rotinas não enviam mensagens nem executam comandos arbitrários.
+
+
+### Notificações externas de licenças por e-mail (opcional)
+
+O Lumeron Control registra avisos internos e, se explicitamente configurado,
+também prepara e-mails para clientes sobre **licenças prestes a vencer** ou
+**já vencidas**. O operador marca `Avisar cliente por e-mail` nas regras
+de vencimento; a regra de instalação offline **não** pode mandar mensagem.
+Novas regras e todas as regras existentes começam com a opção desligada.
+
+A migration `2026_10_21_000004_create_client_email_deliveries.php` preserva
+cadastros, regras e histórico. Ela adiciona um switch por regra e uma fila
+individual com status pendente/enviado/falha/cancelado, registro de tentativas,
+até três tentativas com intervalo crescente e prevenção de duplicidade por
+regra + empresa + ciclo de validade. Avisos já registrados antes da opção ser
+habilitada **não** disparam mensagens retroativas. Ao tentar enviar, a central
+verifica novamente a data de vencimento e o estado da licença: renovações ou
+suspensões tornam o aviso pendente cancelado.
+
+**Sem disparo automático após atualizar o código.** Configure um servidor SMTP
+na instalação privada do **Control**, com `MAIL_MAILER=smtp`,
+`MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`,
+`MAIL_FROM_ADDRESS` e `MAIL_FROM_NAME`. Teste o SMTP com um destinatário
+administrativo controlado antes de habilitar `LUMERON_CLIENT_EMAIL_ENABLED=true`.
+O padrão é `MAIL_MAILER=log` e `LUMERON_CLIENT_EMAIL_ENABLED=false`.
+Somente os dois gates (global + switch da regra) permitem envio.
+
+O scheduler existente executa `control:automations-run` às 08:00 e depois
+`control:client-email-send` às 08:10, no fuso do Control. É preciso manter
+o agendador operacional em produção. É possível executar
+`php artisan control:client-email-send` manualmente (o comando respeita as
+mesmas travas). A tela Automações mostra a fila e permite um envio manual
+autenticado apenas quando o transporte está pronto. O marcador **Enviado**
+significa que o transporte SMTP aceitou a mensagem, não leitura pelo
+destinatário.
+
+**WhatsApp não é enviado automaticamente**: requer provedor/Cloud API oficial,
+credenciais e modelos aprovados; nenhum endpoint foi simulado.

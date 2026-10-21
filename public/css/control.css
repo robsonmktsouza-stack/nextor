@@ -245,3 +245,5 @@ svg.nextor-icon{
 .automation-editor-dialog .settings-check{margin:8px 0}
 .automation-editor-dialog .control-form-actions{margin-top:14px;padding-top:14px}
 @media(max-width:720px){.automation-editor-body{padding:14px}}
+
+.automation-editor-dialog [data-automation-email-field][hidden]{display:none!important}
