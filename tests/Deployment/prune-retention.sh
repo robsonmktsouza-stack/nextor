@@ -7,7 +7,7 @@ ROOT="$(mktemp -d)"
 trap 'sudo rm -rf --one-file-system "$ROOT"' EXIT
 mkdir -p "$ROOT/scripts" "$ROOT/code/releases" "$ROOT/instances" "$ROOT/code"
 # Test-only copy of the script whose global root is replaced with a disposable path.
-sed "s@^LM_ROOT=/srv/lumeron$@LM_ROOT=$ROOT@" \
+sed "s@^LM_ROOT=/srv/lumeron\$@LM_ROOT=$ROOT@" \
   "$REPO/deploy/instances/lib.sh" > "$ROOT/scripts/lib.sh"
 cp "$REPO/deploy/instances/prune.sh" "$ROOT/scripts/prune.sh"
 A=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
