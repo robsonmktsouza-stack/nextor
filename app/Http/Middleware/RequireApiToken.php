@@ -28,7 +28,7 @@ class RequireApiToken
             $state = app(\App\Services\License\CentralLicenseService::class)->state();
             $module = match ((string) $request->segment(3)) {
                 'products' => 'products',
-                'customers', 'sales' => 'pdv',
+                'sales' => 'pdv',
                 default => null,
             };
             if ($state['status'] === 'active' && $module !== null
