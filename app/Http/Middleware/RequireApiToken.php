@@ -22,6 +22,24 @@ class RequireApiToken
             return response()->json(['message'=>'Token inválido.'],401);
         }
 
+        // Token API is outside the authenticated web middleware group.
+        // It must respect the same signed commercial licence as the UI.
+        if (\App\Support\ManagedLicenseConfig::enabled()) {
+            $state = app(\App\Services\License\CentralLicenseService::class)->state();
+            $module = match ((string) $request->segment(2)) {
+                'products' => 'products',
+                'customers', 'sales' => 'pdv',
+                default => null,
+            };
+            if ($state['status'] === 'active' && $module !== null
+                && !in_array($module, $state['modules'] ?? [], true)) {
+                return response()->json([
+                    'message' => 'Este módulo não está incluído no plano contratado.',
+                    'code' => 'LUMERON_MODULE_UNAVAILABLE',
+                ], 403);
+            }
+        }
+
         return $next($request);
     }
 }
