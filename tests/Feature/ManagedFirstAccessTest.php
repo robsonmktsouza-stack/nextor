@@ -68,6 +68,28 @@ final class ManagedFirstAccessTest extends TestCase
         }
     }
 
+    public function test_local_laragon_invitation_is_bound_to_its_own_hostname(): void
+    {
+        $this->configureIdentity();
+        config()->set('app.url', 'http://lumeron-equipamentos-piloto.test');
+        $file = storage_path('app/private/managed-first-access.json');
+        @unlink($file);
+        try {
+            $this->artisan('erp:bootstrap-managed',
+                $this->managedArgs() + ['--local' => true])->assertExitCode(0);
+            $invite = json_decode((string) file_get_contents($file), true);
+            $this->assertStringStartsWith(
+                'http://lumeron-equipamentos-piloto.test/reset-password/',
+                $invite['url']
+            );
+            $this->assertSame('11222333000181',
+                CompanySetting::query()->firstOrFail()->document);
+            $this->assertDatabaseCount('users', 1);
+        } finally {
+            @unlink($file);
+        }
+    }
+
     public function test_managed_provision_rejects_wrong_issuer_without_creating_login(): void
     {
         $this->configureIdentity();
