@@ -182,6 +182,20 @@ PHP;
         $this->assertFileDoesNotExist($path.'/storage/app/private/lumeron-control.json');
     }
 
+    public function test_invalid_target_owner_does_not_create_binding(): void
+    {
+        $company = $this->company();
+        $path = $this->fakeLocalErp($company->cnpj);
+        \Illuminate\Support\Facades\Http::fake(['http://127.0.0.1:8000/up' =>
+            \Illuminate\Support\Facades\Http::response('OK', 200)]);
+        $this->artisan('control:bind-local', [
+            'erp-path' => $path,
+            '--url' => 'http://127.0.0.1:8000',
+            '--file-owner' => 'invalid user!',
+        ])->assertExitCode(1);
+        $this->assertFileDoesNotExist($path.'/storage/app/private/lumeron-control.json');
+    }
+
     public function test_untrusted_local_http_endpoint_is_rejected(): void
     {
         $company = $this->company();

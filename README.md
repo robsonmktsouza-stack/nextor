@@ -161,3 +161,17 @@ acidentalmente uma licença com prazo em assinatura sem vencimento.
 Após mudar um plano, o ERP conectado normalmente consulta o resultado na próxima
 requisição depois do cache de 60 segundos; uma instância offline respeita sua
 tolerância assinada, portanto não recebe alterações instantâneas.
+
+### Vínculo opcional na atualização Linux gerenciada
+
+Com o Lumeron Control instalado no mesmo host (ou com acesso local seguro ao
+diretório do ERP), o operador de deploy pode chamar `control:bind-local`
+após cadastrar a empresa no painel e configurar o CNPJ emitente no ERP.
+Em Linux, `--file-owner=lum_<id>` permite que o arquivo privado criado pelo
+operador privilegiado pertença ao usuário PHP da instalação, antes do teste
+de comunicação. Não usar este parâmetro no Laragon/Windows.
+
+O script `deploy/instances/update.sh` do ERP aceita explicitamente
+`--control-path` e `--control-url` para realizar o vínculo ao atualizar uma
+instalação autorizada. Cadastrar um CNPJ no painel sozinho não dá prova de
+posse de um servidor e não o provisiona remotamente.

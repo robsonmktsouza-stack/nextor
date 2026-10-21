@@ -16,7 +16,8 @@ final class BindManagedInstallation extends Command
 {
     protected $signature = 'control:bind-local
         {erp-path : Diretório do Nextor já instalado}
-        {--url= : Endereço interno do Lumeron Control acessível pela instalação}';
+        {--url= : Endereço interno do Lumeron Control acessível pela instalação}
+        {--file-owner= : Usuário Unix proprietário do arquivo privado no ERP}';
 
     protected $description = 'Vincula uma instalação ERP existente automaticamente, sem copiar licença ou alterar .env.';
 
@@ -148,7 +149,14 @@ final class BindManagedInstallation extends Command
             }
         }
 
+        $owner = (string) ($this->option('file-owner') ?? '');
+        if ($owner !== '' && (!preg_match('/^[a-z_][a-z0-9_-]{0,31}$/', $owner)
+            || !function_exists('posix_getpwnam') || posix_getpwnam($owner) === false)) {
+            $this->error('Usuário ERP inválido para a vinculação.');
+            return self::FAILURE;
+        }
         $previous = is_file($target) ? file_get_contents($target) : null;
+        $previousOwner = is_file($target) ? fileowner($target) : false;
         $temp = tempnam($dir, '.lumeron-bind-');
         if ($temp === false) {
             $this->error('Não foi possível preparar vínculo seguro.');
@@ -162,8 +170,18 @@ final class BindManagedInstallation extends Command
                 throw new \RuntimeException('Falha ao salvar o vínculo.');
             }
             chmod($target, 0600);
+            if ($owner !== '' && !chown($target, $owner)) {
+                throw new \RuntimeException('Não foi possível atribuir o vínculo ao ERP.');
+            }
         } catch (\Throwable) {
             @unlink($temp);
+            if ($previous !== null) {
+                @file_put_contents($target, $previous, LOCK_EX);
+                @chmod($target, 0600);
+                if ($previousOwner !== false) @chown($target, $previousOwner);
+            } else {
+                @unlink($target);
+            }
             $this->error('Não foi possível salvar o vínculo da instalação.');
             return self::FAILURE;
         }
@@ -177,6 +195,7 @@ final class BindManagedInstallation extends Command
             if ($previous !== null) {
                 file_put_contents($target, $previous, LOCK_EX);
                 chmod($target, 0600);
+                if ($previousOwner !== false) @chown($target, $previousOwner);
             } else {
                 @unlink($target);
             }
