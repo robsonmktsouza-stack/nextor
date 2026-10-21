@@ -115,20 +115,28 @@ final class CommercialReadOnlyLicenseTest extends TestCase
             ->assertStatus(423);
     }
 
-    public function test_expired_and_unverified_licenses_have_distinct_messages(): void
+    public function test_expired_license_keeps_reports_visible_with_correct_message(): void
     {
         $this->license('expired');
         $this->actingAs($this->user());
         $this->get('/products')->assertOk()->assertSee('Assinatura vencida');
+        $this->postJson('/products')->assertStatus(423)
+            ->assertJsonPath('license_status', 'expired');
+    }
 
+    public function test_unverified_license_displays_technical_not_billing_message(): void
+    {
+        config()->set('central_license.enabled', true);
+        config()->set('central_license.url', 'http://127.0.0.1:8000');
+        config()->set('central_license.instance_id', self::INSTANCE);
+        config()->set('central_license.secret', str_repeat('c', 96));
+        config()->set('instance.cnpj', self::CNPJ);
         Cache::forget('lumeron:central-license:v1');
         Http::fake(['*' => Http::response(['message' => 'indisponível'], 503)]);
-        // No previously signed state; the expired status from this test may
-        // remain in the local database after a GET. Clear to simulate expiry
-        // of offline grace.
-        \Illuminate\Support\Facades\DB::table('central_license_states')->delete();
+        $this->actingAs($this->user());
         $this->get('/products')->assertOk()
-            ->assertSee('Verificação de licença indisponível');
+            ->assertSee('Verificação de licença indisponível')
+            ->assertDontSee('Assinatura vencida');
     }
 
     public function test_reactivated_account_can_write_normally(): void
