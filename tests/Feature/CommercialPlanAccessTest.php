@@ -68,7 +68,8 @@ final class CommercialPlanAccessTest extends TestCase
 
         $this->get('/products')->assertOk();
         $this->get('/stock')->assertOk();
-        foreach (['/finance', '/services', '/sales', '/customers', '/pdv', '/fiscal/nfce/create'] as $path) {
+        $this->get('/customers')->assertOk();
+        foreach (['/finance', '/services', '/sales', '/pdv', '/fiscal/nfce/create'] as $path) {
             $this->get($path)->assertForbidden();
         }
         $this->postJson('/services', ['name' => 'Serviço bloqueado'])
@@ -144,8 +145,7 @@ final class CommercialPlanAccessTest extends TestCase
             $this->withToken('test-token-api-not-for-production')
                 ->getJson('/'.$prefix.'/products')->assertOk();
             $this->withToken('test-token-api-not-for-production')
-                ->getJson('/'.$prefix.'/customers')->assertStatus(403)
-                ->assertJsonPath('code', 'LUMERON_MODULE_UNAVAILABLE');
+                ->getJson('/'.$prefix.'/customers')->assertOk();
             $this->withToken('test-token-api-not-for-production')
                 ->getJson('/'.$prefix.'/sales')->assertStatus(403)
                 ->assertJsonPath('code', 'LUMERON_MODULE_UNAVAILABLE');
