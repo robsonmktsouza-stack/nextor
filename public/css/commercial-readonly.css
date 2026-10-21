@@ -1,23 +1,45 @@
-/* Lumeron - consulta comercial com licença restrita (ERP e PDV). */
-.commercial-readonly-banner{
-  display:flex;align-items:center;gap:13px;min-height:62px;
-  margin:0 0 16px;padding:12px 15px;border:1px solid #d3e3ef;
-  border-left:3px solid #487a9e;border-radius:5px;
-  color:#24465e;background:#f0f6fb;font-family:Roboto,Arial,sans-serif;
-  box-shadow:0 1px 3px rgba(25,65,92,.035);
+/* Licenciamento discreto no cabeçalho do ERP e do PDV. */
+.commercial-license-chip{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  height:29px;min-width:0;flex:0 0 auto;
+  padding:0 10px;border:1px solid #b7c9d5;border-radius:4px;
+  background:#edf2f6;color:#43627a;
+  font:600 11px/1 Roboto,Arial,sans-serif;
+  letter-spacing:.01em;white-space:nowrap;cursor:pointer;
+  box-shadow:none;transition:background-color .12s,border-color .12s;
 }
-.commercial-readonly-mark{
-  width:34px;height:34px;display:grid;place-items:center;flex:0 0 34px;
-  background:#e0edf6;border:1px solid #cbdfea;border-radius:5px;color:#39739a;
+.commercial-license-chip:hover{background:#e1eaf0;border-color:#8faec0;color:#29516c;}
+.commercial-license-chip:focus-visible{outline:2px solid #3279aa;outline-offset:2px;}
+.commercial-license-chip-lock{width:13px;height:13px;flex:0 0 13px;}
+.commercial-license-chip-dot{width:5px;height:5px;border-radius:50%;background:#b58f50;flex:0 0 5px;}
+.commercial-license-chip[data-license-status="unverified"] .commercial-license-chip-dot{background:#71859a;}
+.app-root .cms-topbar .commercial-license-chip{margin:0 9px 0 0;align-self:center;}
+.lumeron-pdv-page .pdv-topbar>.commercial-license-chip{margin-left:auto;}
+.lumeron-pdv-page .pdv-topbar>.commercial-license-chip+.pdv-topbar-actions{margin-left:0;}
+
+/* Botões indisponíveis: aparentam bloqueio, mas recebem clique e abrem modal. */
+body .license-locked-action,
+body .license-locked-action:is(:hover,:focus-visible){
+  background:#e9eef2!important;color:#748390!important;border-color:#cbd5dd!important;
+  box-shadow:none!important;text-shadow:none!important;
+  opacity:1!important;cursor:not-allowed!important;
 }
-.commercial-readonly-mark svg{width:18px;height:18px;}
-.commercial-readonly-text{display:flex;flex-direction:column;min-width:0;gap:3px;flex:1;}
-.commercial-readonly-text strong{font-size:13px;font-weight:700;line-height:1.35;color:#1f4563;}
-.commercial-readonly-text span{font-size:12px;line-height:1.45;color:#58758a;}
-.commercial-readonly-state{
-  align-self:center;flex-shrink:0;padding:5px 9px;border:1px solid #cbdce9;
-  border-radius:4px;font-size:11px;font-weight:700;color:#366c91;background:#fff;
+body .license-locked-action :is(svg,.lucide),
+body .license-locked-action>i{color:#7e8d99!important;opacity:.72;}
+.license-locked-action .license-lock-glyph{
+  width:12px;height:12px;flex:0 0 12px;stroke:#657c8c;fill:none;
+  stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;
+  vertical-align:middle;margin-left:5px;pointer-events:none;
 }
+body .license-locked-action:focus-visible{outline:2px solid #648aa6;outline-offset:2px;}
+.license-locked-action[disabled]{opacity:.64!important;}
+/* Pequenas ações de linha não crescem ou deformam tabelas. */
+.row-actions .license-locked-action .license-lock-glyph,
+.grid-tool-group .license-locked-action .license-lock-glyph{position:absolute;right:0;bottom:0;width:9px;height:9px;margin:0;}
+.row-actions .license-locked-action,
+.grid-tool-group .license-locked-action{position:relative;}
+/* Não alterar aparência de menus e consultas, só ações de escrita. */
+
 .commercial-readonly-dialog{
   width:min(445px,calc(100vw - 30px));max-width:445px;
   max-height:calc(100vh - 40px);overflow:auto;margin:auto;padding:0;
@@ -62,14 +84,10 @@
 .commercial-readonly-understood:hover{background:#286791;}
 .commercial-readonly-understood:focus-visible,
 .commercial-readonly-close:focus-visible{outline:2px solid #2c86bc;outline-offset:2px;}
-/* PDV ocupa a área toda; o aviso não pode empurrar o teclado ou a grade. */
-.pdv-screen>.commercial-readonly-banner{margin:10px 12px 4px;min-height:54px;}
+
 @media(max-width:780px){
-  .commercial-readonly-banner{padding:10px 12px;gap:9px;margin-bottom:10px;align-items:start;}
-  .commercial-readonly-state{display:none;}
-  .commercial-readonly-mark{width:30px;height:30px;flex-basis:30px;}
-  .commercial-readonly-text strong{font-size:12px;}
-  .commercial-readonly-text span{font-size:11px;}
+  .commercial-license-chip{height:27px;padding:0 8px;font-size:10px;gap:5px;}
+  .app-root .cms-topbar .commercial-license-chip{margin:0 5px 0 0;}
   .commercial-readonly-dialog-head{padding:19px 18px 0;}
   .commercial-readonly-dialog-body{padding:15px 18px;}
   .commercial-readonly-dialog-footer{padding:12px 18px;}
