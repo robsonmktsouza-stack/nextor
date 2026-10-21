@@ -65,6 +65,63 @@ final class CentralLicenseGuardTest extends TestCase
             && !str_contains($request->body(), 'xml'));
     }
 
+    public function test_managed_local_binding_activates_without_env_or_user_confirmation(): void
+    {
+        config()->set('central_license.enabled', false);
+        config()->set('instance.cnpj', '');
+        \App\Models\CompanySetting::current()->update(['document' => self::CNPJ]);
+
+        $secret = str_repeat('b', 96);
+        $file = storage_path('framework/testing/license-binding-'.bin2hex(random_bytes(6)).'.json');
+        if (!is_dir(dirname($file))) {
+            mkdir(dirname($file), 0700, true);
+        }
+        config()->set('central_license.managed_file', $file);
+        try {
+            file_put_contents($file, json_encode([
+                'cnpj' => self::CNPJ,
+                'instance_id' => self::INSTANCE,
+                'secret' => $secret,
+                'url' => 'http://127.0.0.1:8000',
+                'grace_hours' => 72,
+            ], JSON_THROW_ON_ERROR));
+
+            $this->assertTrue(\App\Support\ManagedLicenseConfig::enabled());
+            $this->fakeResponse('active', ['pdv', 'fiscal'], $secret);
+            $status = app(CentralLicenseService::class)->refresh();
+            $this->assertSame('active', $status['status']);
+            $this->assertSame('online', $status['source']);
+            $this->assertDatabaseHas('central_license_states', ['id' => 1, 'status' => 'active']);
+
+            unlink($file);
+            // A previously verified company cannot disable licensing by
+            // deleting the private provisioning file.
+            $this->assertTrue(\App\Support\ManagedLicenseConfig::enabled());
+        } finally {
+            @unlink($file);
+        }
+    }
+
+    public function test_managed_binding_refuses_to_attach_different_registered_cnpj(): void
+    {
+        config()->set('central_license.enabled', false);
+        config()->set('instance.cnpj', '');
+        \App\Models\CompanySetting::current()->update(['document' => self::CNPJ]);
+        $file = storage_path('framework/testing/license-mismatch-'.bin2hex(random_bytes(6)).'.json');
+        config()->set('central_license.managed_file', $file);
+        try {
+            file_put_contents($file, json_encode([
+                'cnpj' => '39323356000100',
+                'instance_id' => self::INSTANCE,
+                'secret' => str_repeat('b', 96),
+                'url' => 'http://127.0.0.1:8000',
+            ], JSON_THROW_ON_ERROR));
+            $this->assertNull(\App\Support\ManagedLicenseConfig::credentials());
+        } finally {
+            @unlink($file);
+        }
+    }
+
     public function test_missing_or_invalid_signature_fails_closed_for_business(): void
     {
         $this->setupLicense();
