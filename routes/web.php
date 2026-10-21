@@ -32,7 +32,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     if(!auth()->check()) return redirect()->route('login');
-    return redirect()->route(auth()->user()->homeRouteName());
+    return redirect()->route(auth()->user()->licensedHomeRouteName());
 });
 // Novo endereço público Lumeron; a rota Nextor continua como alias
 // compatível com integrações e clientes existentes.
@@ -66,7 +66,7 @@ Route::get('/license-status', function () {
     // não remove o usuário da aplicação; redireciona ao modo de consulta.
     $license = app(\App\Services\License\CentralLicenseService::class)->state();
     if (\App\Support\CommercialLicensePolicy::isReadOnly($license)) {
-        return redirect()->route(auth()->user()->homeRouteName());
+        return redirect()->route(auth()->user()->licensedHomeRouteName());
     }
     return view('errors.license-blocked');
 })->middleware('auth')->name('license.status');
