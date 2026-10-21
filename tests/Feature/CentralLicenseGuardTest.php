@@ -131,7 +131,7 @@ final class CentralLicenseGuardTest extends TestCase
         $this->assertSame('unverified', $state['status']);
     }
 
-    public function test_suspended_license_blocks_general_access_but_preserves_fiscal_route(): void
+    public function test_suspended_license_keeps_existing_information_readable_and_blocks_writes(): void
     {
         $secret = $this->setupLicense();
         $this->fakeResponse('suspended', ['pdv', 'fiscal'], $secret);
@@ -139,9 +139,17 @@ final class CentralLicenseGuardTest extends TestCase
             'name' => 'Operador', 'username' => 'operadorteste', 'email' => 'operador@teste.com',
             'password' => 'senha-para-teste', 'role' => 'admin', 'is_active' => true,
         ]);
-        Route::middleware(['auth', 'control.license'])->get('/__license-business', fn () => 'permitido')->name('license.business');
+        Route::middleware(['auth', 'control.license'])->get('/__license-business', fn () => 'consulta-permitida')->name('license.business');
+        Route::middleware(['auth', 'control.license'])->post('/__license-business', fn () => 'nao-pode-gravar')->name('license.business.save');
         Route::middleware(['auth', 'control.license'])->get('/__license-fiscal', fn () => 'fiscal-permitido')->name('fiscal.license-legal');
-        $this->actingAs($user)->get('/__license-business')->assertRedirect(route('license.status'));
-        $this->actingAs($user)->get('/__license-fiscal')->assertOk()->assertSee('fiscal-permitido');
+
+        $this->actingAs($user)->get('/__license-business')
+            ->assertOk()->assertSee('consulta-permitida');
+        $this->actingAs($user)->get('/__license-fiscal')
+            ->assertOk()->assertSee('fiscal-permitido');
+        $this->actingAs($user)->postJson('/__license-business')
+            ->assertStatus(423)
+            ->assertJsonPath('code', 'LUMERON_LICENSE_READ_ONLY')
+            ->assertDontSee('nao-pode-gravar');
     }
 }
