@@ -43,7 +43,7 @@ aria-label="Ativar ou suspender licença de {{ $company->legal_name }}"
 <section class="detail-box"><h3>Anotações e eventos</h3>
 <div class="events-stream">
 @forelse($company->events as $event)
-<div class="event"><div><strong>{{ $event->user?->name??'Sistema' }}</strong><small>{{ $event->created_at?->format('d/m/Y H:i') }}</small></div><p>{{ $event->description }}</p></div>
+<div class="event"><div><strong>{{ $event->user?->name??'Sistema' }}</strong><small>{{ $event->created_at?->format('d/m/Y H:i') }}</small></div><p>{{ \App\Support\OperatorMessage::event($event->description) }}</p></div>
 @empty<p class="empty">Sem histórico registrado.</p>@endforelse
 </div>
 <form method="post" action="{{ route('clients.note',$company) }}" class="note-form">@csrf<label>Anotação<textarea name="note" rows="2" maxlength="1500" required placeholder="Registrar informação sobre este cliente..."></textarea></label><button class="btn primary small" type="submit">Registrar anotação</button></form>
