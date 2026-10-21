@@ -185,10 +185,109 @@ final class PlansAndAutomationsTest extends TestCase
         $this->assertSame(1, AutomationDelivery::count());
     }
 
+    public function test_admin_can_create_and_edit_custom_automation_without_erasing_history(): void
+    {
+        $this->actingAs($this->user());
+        $company = $this->company();
+        $this->get(route('automations.index'))->assertOk()->assertSee('Nova automação');
+        $this->get(route('automations.create'))->assertOk()->assertSee('Tipo de verificação');
+
+        $this->post(route('automations.store'), [
+            'name' => 'Prazo curto',
+            'description' => 'Aviso interno sete dias antes',
+            'kind' => 'expiry_soon',
+            'days' => 7,
+            'enabled' => '1',
+        ])->assertRedirect(route('automations.index'));
+
+        $custom = AutomationRule::query()->where('name', 'Prazo curto')->firstOrFail();
+        $this->assertStringStartsWith('custom_', $custom->code);
+        $this->assertSame('expiry_soon', $custom->kindCode());
+        $this->assertTrue($custom->enabled);
+        $this->assertSame(7, $custom->days);
+        $this->get(route('automations.edit', $custom))->assertOk()->assertSee('Prazo curto');
+        $this->get(route('automations.index'))->assertSee('Editar automação Prazo curto');
+
+        $result = app(AutomationRunner::class)->run();
+        $this->assertSame(1, $result['new_events']);
+        $this->assertSame(0, app(AutomationRunner::class)->run()['new_events']);
+        $this->assertSame(1, AutomationDelivery::query()->where('automation_rule_id', $custom->id)->count());
+
+        $this->put(route('automations.update', $custom), [
+            'name' => 'Prazo de sete dias',
+            'description' => 'Descrição atualizada',
+            'days' => 5,
+            'enabled' => '0',
+        ])->assertRedirect(route('automations.index'));
+        $custom->refresh();
+        $this->assertSame('Prazo de sete dias', $custom->name);
+        $this->assertSame('Descrição atualizada', $custom->description);
+        $this->assertSame(5, $custom->days);
+        $this->assertFalse($custom->enabled);
+        $this->assertSame('expiry_soon', $custom->kindCode());
+        $this->assertSame(1, $company->fresh()->events()->count());
+        $this->assertDatabaseCount('automation_deliveries', 1);
+    }
+
+    public function test_custom_rules_support_multiple_thresholds_but_not_unrecognized_actions(): void
+    {
+        $this->actingAs($this->user());
+        foreach ([1, 2] as $days) {
+            $this->post(route('automations.store'), [
+                'name' => 'Sem acesso há '.$days.' dias',
+                'description' => 'Verificação '.$days,
+                'kind' => 'offline',
+                'days' => $days,
+                'enabled' => '0',
+            ])->assertRedirect(route('automations.index'));
+        }
+        $this->assertSame(2, AutomationRule::query()->where('kind', 'offline')
+            ->where('code', 'like', 'custom_%')->count());
+
+        $this->post(route('automations.store'), [
+            'name' => 'Comando arbitrário',
+            'description' => 'Não permitir',
+            'kind' => 'shell',
+            'days' => 1,
+            'enabled' => 1,
+        ])->assertSessionHasErrors('kind');
+        $this->post(route('automations.store'), [
+            'name' => 'Prazo inválido',
+            'description' => 'Não permitir',
+            'kind' => 'offline',
+            'days' => 0,
+            'enabled' => 1,
+        ])->assertSessionHasErrors('days');
+        $this->post(route('automations.store'), [
+            'name' => 'Tentativa de código controlado',
+            'description' => 'Código deve ser gerado pelo servidor',
+            'code' => 'expired',
+            'kind' => 'expired',
+            'days' => 10,
+            'enabled' => '0',
+        ])->assertRedirect(route('automations.index'));
+        $rule = AutomationRule::query()->where('name', 'Tentativa de código controlado')->firstOrFail();
+        $this->assertNotSame('expired', $rule->code);
+        $this->assertSame(0, $rule->days);
+
+        $this->put(route('automations.update', $rule), [
+            'name' => 'Alteração indevida',
+            'description' => 'Tipo não deve mudar',
+            'kind' => 'offline',
+            'days' => 1,
+            'enabled' => 1,
+        ])->assertSessionHasErrors('kind');
+        $this->assertSame('expired', $rule->fresh()->kindCode());
+    }
+
     public function test_plan_and_automation_administration_is_private(): void
     {
         $this->get('/plans')->assertRedirect('/login');
         $this->get('/automations')->assertRedirect('/login');
+        $this->get('/automations/create')->assertRedirect('/login');
+        $this->post('/automations', ['name' => 'Teste'])->assertRedirect('/login');
+        $this->get('/automations/1/edit')->assertRedirect('/login');
+        $this->put('/automations/1', ['name' => 'Teste'])->assertRedirect('/login');
         $this->post('/automations/run')->assertRedirect('/login');
     }
 }

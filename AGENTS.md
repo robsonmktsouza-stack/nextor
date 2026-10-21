@@ -78,3 +78,15 @@ Alterações em autenticação/licença exigem testes e revisão de segurança. 
 - `LicenseCheckController` obtém `modules` de `Company::entitledModules()`, consultando `planDefinition`. Plano ausente não pode conceder direitos.
 - A migração `2026_10_22_000001_preserve_legacy_entitlements_as_plans.php` converte clientes com módulos distintos do plano anterior em **planos legados arquivados**, individualizados, sem perder autorizações históricas; nunca desligar módulos de clientes antes de executar essa migração em instalações já cadastradas. Não copiar segredos nem alterar CNPJ, situação ou validade.
 - Novos planos com código válido devem ser aceitos pelo ERP. Alterar módulos de um plano em uso muda o acesso de seus usuários após atualização do cache; a interface do formulário avisa o número de clientes afetados.
+
+## Automações configuráveis (21/10/2026)
+
+- Novos eventos internos podem ser cadastrados com nome, descrição, prazo,
+  switch e `kind` permitido (`expiry_soon`, `expired`, `offline`).
+  O identificador `code` é gerado pelo servidor, nunca recebido do formulário.
+- O tipo da automação é imutável após criação para preservar os eventos no
+  histórico; só o comportamento parametrizado pode ser editado.
+- Preservar avisos antigos e regras do seed; a migration acrescenta uma coluna
+  de tipo, sem excluir ou recriar regras.
+- Interface usa modal, e mantém GET de criação e edição como alternativa
+  sem JS. Não criar ações arbitrárias, mensagens externas, cobranças ou bloqueios.

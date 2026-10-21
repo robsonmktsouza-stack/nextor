@@ -246,3 +246,87 @@
   });
 
 })();
+
+/* Cadastro e edição de regras, preservando a página GET sem JavaScript. */
+(() => {
+  const dialog = document.getElementById('automationEditorDialog');
+  const form = dialog?.querySelector('[data-automation-editor-form]');
+  if (!dialog || !form || typeof dialog.showModal !== 'function') return;
+  const field = name => form.elements.namedItem(name);
+  const kind = field('kind');
+  const days = field('days');
+  const enabled = form.querySelector('input[type="checkbox"][name="enabled"]');
+  const daysField = dialog.querySelector('[data-automation-days-field]');
+  const heading = dialog.querySelector('#automationEditorTitle');
+  const method = field('_method');
+
+  const updateKind = () => {
+    const code = kind.value;
+    const expired = code === 'expired';
+    daysField.hidden = expired;
+    days.min = code === 'offline' ? '1' : '0';
+    days.required = !expired;
+    if (expired) days.value = '0';
+    else if (+days.value < +days.min) days.value = days.min;
+  };
+
+  const openEditor = (action, data = {}) => {
+    const editing = action === 'edit';
+    form.reset();
+    form.action = editing ? data.action : form.dataset.storeAction;
+    method.disabled = !editing;
+    field('automation_context').value = editing ? 'edit:' + data.id : 'create';
+    field('name').value = data.name || '';
+    field('description').value = data.description || '';
+    kind.disabled = editing;
+    kind.value = data.kind || 'expiry_soon';
+    days.value = data.days ?? '7';
+    enabled.checked = String(data.enabled) === '1';
+    heading.textContent = editing ? 'Editar automação' : 'Nova automação';
+    updateKind();
+    dialog.showModal();
+    field('name').focus();
+  };
+
+  document.addEventListener('click', event => {
+    const trigger = event.target.closest?.('[data-automation-open]');
+    if (!trigger) return;
+    event.preventDefault();
+    openEditor(trigger.dataset.automationOpen, {
+      action: trigger.dataset.automationAction,
+      id: trigger.dataset.automationRuleId,
+      name: trigger.dataset.automationName,
+      description: trigger.dataset.automationDescription,
+      kind: trigger.dataset.automationKind,
+      days: trigger.dataset.automationDays,
+      enabled: trigger.dataset.automationEnabled
+    });
+  });
+  kind.addEventListener('change', updateKind);
+  dialog.querySelectorAll('[data-automation-close]').forEach(button =>
+    button.addEventListener('click', () => dialog.close()));
+  dialog.addEventListener('click', event => {
+    if (event.target === dialog) dialog.close();
+  });
+
+  // A validação volta à listagem: reabrir o registro e preservar os valores.
+  const context = dialog.dataset.reopenContext;
+  if (context) {
+    const trigger = context.startsWith('edit:')
+      ? [...document.querySelectorAll('[data-automation-open="edit"]')]
+        .find(el => el.dataset.automationRuleId === context.slice(5))
+      : null;
+    if (!context.startsWith('edit:') || trigger) {
+      const data = trigger?.dataset || {};
+      openEditor(trigger ? 'edit' : 'create', {
+        action: data.automationAction,
+        id: data.automationRuleId,
+        name: dialog.dataset.oldName,
+        description: dialog.dataset.oldDescription,
+        kind: dialog.dataset.oldKind || data.automationKind,
+        days: dialog.dataset.oldDays,
+        enabled: dialog.dataset.oldEnabled
+      });
+    }
+  }
+})();

@@ -175,3 +175,17 @@ O script `deploy/instances/update.sh` do ERP aceita explicitamente
 `--control-path` e `--control-url` para realizar o vínculo ao atualizar uma
 instalação autorizada. Cadastrar um CNPJ no painel sozinho não dá prova de
 posse de um servidor e não o provisiona remotamente.
+
+### Cadastro e edição das automações
+
+O Control permite criar automações internas e editar regras no modal da grade,
+incluindo nome, descrição, prazo e switch. Existem apenas três tipos seguros:
+licença próxima do vencimento, licença vencida e instalação sem comunicação.
+A regra é criada desativada, exceto se o administrador optar por ativá-la.
+Após salvar, o tipo fica fixo para não alterar a interpretação do histórico.
+É possível configurar várias regras do mesmo tipo em prazos distintos.
+
+A migration `2026_10_21_000003_add_kind_to_automation_rules.php` conserva
+os códigos, as regras existentes e a deduplicação dos avisos. Executar
+`php artisan migrate` **somente no Lumeron Control**, nunca no ERP.
+As rotinas não enviam mensagens nem executam comandos arbitrários.

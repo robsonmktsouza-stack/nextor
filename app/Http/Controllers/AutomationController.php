@@ -45,8 +45,8 @@ final class AutomationController extends Controller
     private function validated(Request $request, ?AutomationRule $rule = null): array
     {
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:100'],
-            'description' => ['required', 'string', 'max:255'],
+            'name' => [$rule ? 'sometimes' : 'required', 'required', 'string', 'max:100'],
+            'description' => [$rule ? 'sometimes' : 'required', 'required', 'string', 'max:255'],
             'kind' => [$rule ? 'prohibited' : 'required', Rule::in(array_keys(AutomationRule::KINDS))],
             'days' => ['required', 'integer', 'min:0', 'max:365'],
             'enabled' => ['required', 'boolean'],
