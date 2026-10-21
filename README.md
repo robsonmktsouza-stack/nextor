@@ -228,3 +228,33 @@ destinatário.
 
 **WhatsApp não é enviado automaticamente**: requer provedor/Cloud API oficial,
 credenciais e modelos aprovados; nenhum endpoint foi simulado.
+
+## Vencimentos integrados entre Control e ERP
+
+O **Control é a autoridade comercial**: administra a validade da assinatura,
+a suspensão/renovação, as regras de aviso e a entrega de e-mails.
+A cada consulta HMAC assinada no endpoint `POST /api/license/check`, além de
+plano/módulos/status/data, envia o campo opcional `notice_days`, correspondente
+à maior antecedência das regras **ativas** do tipo `expiry_soon`. O campo
+é coberto pela assinatura da resposta; não há transmissão do e-mail do
+cliente nem de dados fiscais.
+
+O ERP valida e armazena a configuração assinada e a exibe discretamente em
+seu próprio cabeçalho/PDV quando está prestes a vencer. Sem regra ativa,
+`notice_days=null`: nada é mostrado na instalação. Uma alteração de
+validade no Control passa para o ERP na próxima checagem (cache de 60s
+quando online); após falha de comunicação, segue a tolerância offline já
+estabelecida, e não se promete sincronização imediata.
+
+O monitor da central acompanha `last_seen_at` atualizado somente após
+uma chamada HMAC legítima: cadastro de CNPJ sem vínculo seguro não
+representa uma instalação conectada. Em Automações, resumo de situações
+comerciais, uma única área de rolagem e históricos em abas substituem
+a exibição de três grades longas ao mesmo tempo.
+
+O **envio externo de e-mail** usa o cadastro de contato do próprio Control,
+exige SMTP real + a configuração global de opt-in + o switch da regra,
+e possui trilha de entrega independente. Avisos exibidos no ERP não
+dependem do SMTP e não garantem que uma mensagem foi entregue ou lida.
+Não executar migrations/atualizações cruzadas: banco do Control e bancos
+dos ERPs são distintos.
