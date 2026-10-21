@@ -34,7 +34,7 @@
                         </td>
                         <td>{{ $event->user?->name ?? 'Sistema' }}</td>
                         <td>{{ ucfirst(str_replace('_',' ',$event->event_type)) }}</td>
-                        <td>{{ $event->description }}</td>
+                        <td>{{ \App\Support\OperatorMessage::event($event->description) }}</td>
                         <td>
                             <div class="license-row-actions">
                                 @if($event->company)
