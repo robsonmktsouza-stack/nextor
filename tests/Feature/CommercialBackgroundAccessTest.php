@@ -29,6 +29,9 @@ final class CommercialBackgroundAccessTest extends TestCase
         config()->set('central_license.secret', $secret);
         config()->set('instance.cnpj', self::CNPJ);
         Cache::forget('lumeron:central-license:v1');
+        // Replace the HTTP factory: chained Http::fake() calls retain earlier
+        // wildcard stubs and would keep returning the first license response.
+        Http::swap(new \Illuminate\Http\Client\Factory());
 
         $body = json_encode([
             'instance_id' => self::INSTANCE,
