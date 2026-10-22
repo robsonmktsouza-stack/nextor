@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class PdvCashSession extends Model
 {
     protected $fillable=[
-        'user_id','opening_amount','closing_amount','expected_amount','difference_amount','closing_breakdown','opening_notes','closing_notes','opened_at','closed_at','closed_by','reviewed_by','reviewed_at','review_notes',
+        'user_id','opening_amount','closing_amount','expected_amount','difference_amount','closing_breakdown','opening_notes','closing_notes','opened_at','closed_at','closed_by','reviewed_by','reviewed_at','review_notes','register_id','previous_session_id','handover_to',
     ];
 
     protected function casts(): array
@@ -25,6 +25,10 @@ class PdvCashSession extends Model
             'closed_at'=>'datetime',
         ];
     }
+
+    public function register(): BelongsTo { return $this->belongsTo(PdvCashRegister::class,'register_id'); }
+    public function previousSession(): BelongsTo { return $this->belongsTo(self::class,'previous_session_id'); }
+    public function incomingOperator(): BelongsTo { return $this->belongsTo(User::class,'handover_to'); }
 
     public function user(): BelongsTo
     {
