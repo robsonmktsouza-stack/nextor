@@ -6,6 +6,13 @@
 *{box-sizing:border-box}
 body{font:12px/1.45 Arial,Helvetica,sans-serif;background:#eceff1;color:#26343d;margin:0}
 main{width:210mm;max-width:100%;margin:15px auto;background:white;padding:18mm;border:1px solid #c6ced3}
+@if(request()->boolean('embed'))
+@media screen{
+  body{background:#f0f3f5}
+  main{width:min(100%,860px);margin:0 auto;padding:28px 32px;border:0;min-height:100%}
+  @media(max-width:640px){main{padding:17px 14px}.meta{flex-wrap:wrap;gap:12px}.meta div{min-width:40%}}
+}
+@endif
 nav{display:flex;gap:12px;justify-content:flex-end;margin-bottom:15px}
 a,button{color:#17566e}button{cursor:pointer}h1{font-size:22px;margin:0}
 h2{font-size:13px;text-transform:uppercase;margin:21px 0 7px;padding-bottom:5px;border-bottom:1px solid #b7c3c9}
@@ -18,7 +25,9 @@ section{break-inside:avoid}p{white-space:pre-wrap;overflow-wrap:anywhere}
 footer{margin-top:24px;border-top:1px solid #aab7c0;padding-top:10px;color:#5e6a71}
 @media print{body{background:white}main{width:auto;margin:0;padding:0;border:0}nav,form{display:none!important}}
 </style></head><body><main>
+@unless(request()->boolean('embed'))
 <nav><a href="{{ route('pdv.cash.history') }}">Histórico</a><a href="{{ route('pdv.index') }}">PDV</a><button onclick="window.print()">Imprimir / Salvar PDF</button></nav>
+@endunless
 <h1>Fechamento de caixa #{{ $session->id }}</h1>
 <div class="meta">
 <div><span>Caixa</span><strong>{{ $session->register?->name ?? 'Histórico' }}</strong></div>
@@ -69,7 +78,7 @@ footer{margin-top:24px;border-top:1px solid #aab7c0;padding-top:10px;color:#5e6a
 @if($session->reviewed_at)
 <p>Conferido por {{ $session->reviewer?->name }} em {{ $session->reviewed_at->format('d/m/Y H:i') }}.</p><p>{{ $session->review_notes }}</p>
 @elseif(in_array(auth()->user()->role,['admin','manager'],true) && auth()->user()->canAccess('pdv'))
-<form method="post" action="{{ route('pdv.cash.review',$session) }}">@csrf
+<form method="post" action="{{ route('pdv.cash.review',$session) }}{{ request()->boolean('embed') ? '?embed=1' : '' }}">@csrf
 <label for="review_notes">Observação do responsável</label>
 <textarea id="review_notes" name="review_notes" required minlength="5" maxlength="1000" rows="3" style="width:100%"></textarea>
 <label for="credential">Senha ou PIN do administrador</label>
