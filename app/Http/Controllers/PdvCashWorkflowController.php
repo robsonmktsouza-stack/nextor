@@ -82,7 +82,8 @@ final class PdvCashWorkflowController extends Controller
             (string)$data['counted_amount'],
             $data['reason'],
         );
-        return redirect()->route('pdv.cash.report',$session)
+        return redirect()->route('pdv.index')
+            ->with('pdv_cash_report_id',$session->id)
             ->with('success','Caixa do dia anterior regularizado. Confira o relatório do fechamento.');
     }
 
