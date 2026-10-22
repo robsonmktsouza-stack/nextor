@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="{{ asset('css/ui-refinement.css') }}?v={{ filemtime(public_path('css/ui-refinement.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/branding.css') }}?v={{ filemtime(public_path('css/branding.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/pdv-lumeron.css') }}?v={{ filemtime(public_path('css/pdv-lumeron.css')) }}">
+<link rel="stylesheet" href="{{ asset('css/pdv-cash-report-modal.css') }}?v={{ filemtime(public_path('css/pdv-cash-report-modal.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/desktop-polish.css') }}?v={{ filemtime(public_path('css/desktop-polish.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/erp-typography.css') }}?v={{ filemtime(public_path('css/erp-typography.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/commercial-readonly.css') }}?v={{ filemtime(public_path('css/commercial-readonly.css')) }}">
