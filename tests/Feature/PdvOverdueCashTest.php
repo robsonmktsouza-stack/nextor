@@ -75,7 +75,8 @@ final class PdvOverdueCashTest extends TestCase
         $shift=$this->yesterdayShift($maria);
         $this->actingAs($maria)->post(route('pdv.cash.close'),[
             'closing_amount'=>'150.00','credential'=>'SenhaTeste123',
-        ])->assertRedirect(route('pdv.cash.report',$shift));
+        ])->assertRedirect(route('pdv.index'))
+            ->assertSessionHas('pdv_cash_report_id',$shift->id);
 
         $shift->refresh();
         self::assertNotNull($shift->closed_at);
@@ -138,7 +139,8 @@ final class PdvOverdueCashTest extends TestCase
             ->assertSee(route('pdv.cash.overdue.close'),false);
         $payload['credential']='SenhaTeste123';
         $this->post(route('pdv.cash.overdue.close'),$payload)
-            ->assertRedirect(route('pdv.cash.report',$shift));
+            ->assertRedirect(route('pdv.index'))
+            ->assertSessionHas('pdv_cash_report_id',$shift->id);
 
         $shift->refresh();
         self::assertSame($maria->id,$shift->user_id);
@@ -174,7 +176,8 @@ final class PdvOverdueCashTest extends TestCase
         Carbon::setTestNow('2026-10-23 08:00:00');
         $payload['cash_session_id']=$today->id;
         $this->post(route('pdv.cash.overdue.close'),$payload)
-            ->assertRedirect(route('pdv.cash.report',$today));
+            ->assertRedirect(route('pdv.index'))
+            ->assertSessionHas('pdv_cash_report_id',$today->id);
         $this->post(route('pdv.cash.overdue.close'),$payload)
             ->assertSessionHasErrors('cash_session');
 
