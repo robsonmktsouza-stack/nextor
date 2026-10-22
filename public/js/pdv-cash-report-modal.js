@@ -13,7 +13,7 @@
     const frameUrl=url=>{
       try{
         const target=new URL(url,window.location.href);
-        if(target.origin!==window.location.origin || !/^\\/pdv\\/cash\\/\\d+\\/report$/.test(target.pathname)) return null;
+        if(target.origin!==window.location.origin || !/^\/pdv\/cash\/\d+\/report$/.test(target.pathname)) return null;
         target.searchParams.set('embed','1');
         return target.href;
       }catch{return null;}
