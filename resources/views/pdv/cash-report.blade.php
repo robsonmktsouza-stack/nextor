@@ -21,10 +21,17 @@ footer{margin-top:24px;border-top:1px solid #aab7c0;padding-top:10px;color:#5e6a
 <nav><a href="{{ route('pdv.cash.history') }}">Histórico</a><a href="{{ route('pdv.index') }}">PDV</a><button onclick="window.print()">Imprimir / Salvar PDF</button></nav>
 <h1>Fechamento de caixa #{{ $session->id }}</h1>
 <div class="meta">
-<div><span>Operador</span><strong>{{ $session->user?->name }}</strong></div>
+<div><span>Caixa</span><strong>{{ $session->register?->name ?? 'Histórico' }}</strong></div>
+<div><span>Operador responsável</span><strong>{{ $session->user?->name }}</strong></div>
 <div><span>Aberto em</span><strong>{{ $session->opened_at?->format('d/m/Y H:i') }}</strong></div>
 <div><span>Fechado em</span><strong>{{ $session->closed_at?->format('d/m/Y H:i') ?? 'Em operação' }}</strong></div>
 </div>
+@if($session->previous_session_id)
+<p>Turno recebido do fechamento #{{ $session->previous_session_id }}.</p>
+@endif
+@if($session->handover_to)
+<p>Turno transferido para {{ $session->incomingOperator?->name }}.</p>
+@endif
 <section><h2>Apuração do dinheiro</h2>
 <table>
 <tr><td>Fundo de abertura</td><td class="number">R$ {{ number_format(($breakdown['opening'] ?? 0)/100,2,',','.') }}</td></tr>
@@ -64,6 +71,8 @@ footer{margin-top:24px;border-top:1px solid #aab7c0;padding-top:10px;color:#5e6a
 <form method="post" action="{{ route('pdv.cash.review',$session) }}">@csrf
 <label for="review_notes">Observação do responsável</label>
 <textarea id="review_notes" name="review_notes" required minlength="5" maxlength="1000" rows="3" style="width:100%"></textarea>
+<label for="credential">Senha ou PIN do administrador</label>
+<input id="credential" type="password" name="credential" required autocomplete="off">
 <button type="submit">Registrar conferência</button></form>
 @else<p>Aguardando conferência administrativa.</p>@endif
 </section>
