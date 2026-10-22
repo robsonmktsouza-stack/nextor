@@ -808,33 +808,38 @@ class PdvController extends Controller
 
     public function resumeSale(Request $request, PdvSuspendedSale $suspendedSale)
     {
-        if($suspendedSale->resumed_at) {
-            return response()->json(['message'=>'Esta venda suspensa já foi recuperada.'],409);
-        }
-
-        $snapshot=$this->refreshSuspendedSnapshot($suspendedSale->payload ?? []);
-
-        if(empty($snapshot['items'])) {
-            return response()->json(['message'=>'Nenhum item da venda suspensa está disponível atualmente.'],422);
-        }
-
-        $suspendedSale->update(['resumed_at'=>now()]);
-
-        return response()->json([
-            'message'=>'Venda recuperada.',
-            'snapshot'=>$snapshot,
-        ]);
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($request,$suspendedSale) {
+            $locked=PdvSuspendedSale::query()->lockForUpdate()->findOrFail($suspendedSale->id);
+            if($locked->resumed_at) {
+                return response()->json(['message'=>'Esta venda suspensa já foi recuperada.'],409);
+            }
+            if($locked->user_id!==$request->user()->id
+                && !in_array($request->user()->role,['manager','admin'],true)) {
+                abort(403,'Venda suspensa pertencente a outro operador.');
+            }
+            $snapshot=$this->refreshSuspendedSnapshot($locked->payload ?? []);
+            if(empty($snapshot['items'])) {
+                return response()->json(['message'=>'Nenhum item da venda suspensa está disponível atualmente.'],422);
+            }
+            $locked->update(['resumed_at'=>now()]);
+            return response()->json(['message'=>'Venda recuperada.','snapshot'=>$snapshot]);
+        },3);
     }
 
-    public function discardSuspendedSale(PdvSuspendedSale $suspendedSale)
+    public function discardSuspendedSale(Request $request, PdvSuspendedSale $suspendedSale)
     {
-        if($suspendedSale->resumed_at) {
-            return response()->json(['message'=>'A venda já foi recuperada.'],409);
-        }
-
-        $suspendedSale->delete();
-
-        return response()->json(['message'=>'Venda suspensa descartada.']);
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($request,$suspendedSale) {
+            $locked=PdvSuspendedSale::query()->lockForUpdate()->findOrFail($suspendedSale->id);
+            if($locked->resumed_at) {
+                return response()->json(['message'=>'A venda já foi recuperada.'],409);
+            }
+            if($locked->user_id!==$request->user()->id
+                && !in_array($request->user()->role,['manager','admin'],true)) {
+                abort(403,'Venda suspensa pertencente a outro operador.');
+            }
+            $locked->delete();
+            return response()->json(['message'=>'Venda suspensa descartada.']);
+        },3);
     }
 
     public function setNfceContingency(Request $request)
