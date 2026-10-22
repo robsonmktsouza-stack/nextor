@@ -1733,7 +1733,13 @@
         case 'electronic': operationsModal?.close(); openElectronicPaymentModal(); break;
         case 'contingency': openContingencyModal(); break;
         case 'cancel-nfce': openCancelNfceModal(); break;
-        case 'open-cash': operationsModal?.close(); cashOpenDialog?.showModal(); break;
+        case 'open-cash':
+          operationsModal?.close();
+          if(cashOpenDialog && !cashOpenDialog.open){
+            cashOpenDialog.showModal();
+            requestAnimationFrame(()=>cashOpenDialog.querySelector('input[name="opening_amount"]')?.focus({preventScroll:true}));
+          }
+          break;
         case 'close-cash': operationsModal?.close(); cashCloseDialog?.showModal(); break;
         case 'overdue-cash':
           operationsModal?.close();
