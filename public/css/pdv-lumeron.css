@@ -699,118 +699,121 @@
 @media(max-width:650px){.lumeron-pdv-page .pdv-sales-modal{width:calc(100vw - 12px);height:calc(100dvh - 16px);max-height:calc(100dvh - 16px)}.lumeron-pdv-page .pdv-sales-filters{grid-template-columns:repeat(2,minmax(0,1fr));padding:9px}.lumeron-pdv-page .pdv-sales-filter-wide,.lumeron-pdv-page .pdv-sales-filter-actions{grid-column:1/-1}}
 
 
-/* Resumo pós-venda: documento de leitura confortável, sem iframe visível. */
+/* Confirmação do PDV: ações do caixa fixas e cupom visual compacto.
+   A impressão continua exclusivamente no iframe térmico oculto. */
 .pdv-body .pdv-receipt-modal{
-  width:min(650px,calc(100vw - 26px));
-  max-width:650px;
-  height:min(820px,calc(100dvh - 30px));
-  max-height:calc(100dvh - 30px);
+  width:min(620px,calc(100vw - 24px));
+  max-width:620px;
+  height:min(820px,calc(100dvh - 26px));
+  max-height:calc(100dvh - 26px);
   padding:0;
   overflow:hidden;
-  color:#253f51;
   background:#fff;
-  border:1px solid #ccdae4;
-  border-radius:7px;
+  border:1px solid #cbd8e2;
+  border-radius:6px;
+  color:#29475b;
   box-shadow:0 22px 75px #10233255;
 }
 .pdv-body .pdv-receipt-modal[open]{display:flex;flex-direction:column}
 .pdv-body .pdv-receipt-modal:not([open]){display:none!important}
 .pdv-body .pdv-receipt-modal::backdrop{background:rgba(16,33,48,.58)}
 .pdv-body .pdv-receipt-header{
-  flex-shrink:0;
   display:flex;
-  justify-content:space-between;
   align-items:center;
-  gap:14px;
-  min-height:68px;
-  padding:12px 18px;
+  justify-content:space-between;
+  gap:12px;
+  flex-shrink:0;
+  min-height:66px;
+  padding:11px 17px;
+  border-bottom:1px solid #e0e7ed;
   background:#fff;
-  border-bottom:1px solid #e0e8ee;
 }
-.pdv-body .pdv-receipt-title{display:flex;align-items:center;gap:12px;min-width:0}
+.pdv-body .pdv-receipt-title{display:flex;align-items:center;gap:11px;min-width:0}
 .pdv-body .pdv-receipt-title-icon{
   display:grid;
   place-items:center;
   flex:0 0 36px;
   width:36px;
   height:36px;
-  border-radius:6px;
-  color:#237d59;
-  background:#e6f3ea;
   border:1px solid #cae6d3;
+  border-radius:5px;
+  background:#e6f3ea;
+  color:#237d59;
 }
 .pdv-body .pdv-receipt-title>div>span{
   display:block;
+  margin-bottom:3px;
   color:#778b99;
-  font-size:10px;
+  font-size:11px;
   font-weight:700;
   letter-spacing:.3px;
-  margin-bottom:3px;
   text-transform:uppercase;
 }
 .pdv-body .pdv-receipt-title h2{
   margin:0;
+  color:#29495e;
   font-size:17px;
   font-weight:750;
   line-height:1.25;
-  color:#29495e;
 }
 .pdv-body .pdv-receipt-header .pdv-modal-close{
-  flex:0 0 auto;
+  flex-shrink:0;
   border:1px solid #d6e1e9;
+  border-radius:4px;
   background:#f9fbfc;
   color:#5a7487;
-  border-radius:5px;
 }
-.pdv-body .pdv-receipt-content{
-  flex:1 1 auto;
-  min-height:0;
-  overflow-y:auto;
-  overscroll-behavior:contain;
-  scrollbar-width:thin;
-  padding:16px 20px 18px;
+.pdv-body .pdv-receipt-toolbar{
+  flex:0 0 auto;
+  padding:12px 17px 13px;
+  border-bottom:1px solid #dfe6ec;
   background:#fff;
 }
 .pdv-body .pdv-receipt-success{
   display:flex;
   align-items:center;
-  gap:9px;
-  min-height:43px;
-  padding:10px 12px;
-  background:#e7f4e9;
-  color:#296c44;
+  gap:8px;
+  min-height:34px;
+  padding:7px 10px;
   border:1px solid #cde6d0;
   border-radius:4px;
+  background:#e7f4e9;
+  color:#296c44;
   font-size:12px;
   font-weight:700;
 }
 .pdv-body .pdv-receipt-success svg{flex-shrink:0}
 .pdv-body .pdv-receipt-success-actions{
   display:flex;
-  flex-direction:column;
-  gap:6px;
-  max-width:540px;
-  margin:13px auto 21px;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-top:10px;
 }
-.pdv-body .pdv-receipt-success-actions form{margin:0;width:100%}
+.pdv-body .pdv-receipt-success-actions>button,
+.pdv-body .pdv-receipt-success-actions>a,
+.pdv-body .pdv-receipt-success-actions>form{
+  flex:1 1 152px;
+  min-width:0;
+  margin:0;
+}
 .pdv-body .pdv-receipt-action,
 .pdv-body .pdv-receipt-success-actions .pdv-receipt-action{
   display:flex;
   justify-content:center;
   align-items:center;
+  gap:7px;
   width:100%;
   min-height:38px;
-  padding:8px 12px;
+  padding:8px 10px;
   border:1px solid transparent;
   border-radius:4px;
   font-family:inherit;
   font-size:12px;
   font-weight:700;
-  line-height:1.2;
+  line-height:1.25;
   text-align:center;
   text-decoration:none;
   cursor:pointer;
-  gap:9px;
   box-shadow:none;
   transition:filter .15s ease;
 }
@@ -820,8 +823,8 @@
 .pdv-body .pdv-receipt-action-back,
 .pdv-body .pdv-receipt-success-actions .pdv-receipt-action-back{
   color:#fff;
-  background:#de9b3c;
-  border-color:#cc8b2f;
+  background:#cf8c35;
+  border-color:#bf7b2a;
 }
 .pdv-body .pdv-receipt-action-print,
 .pdv-body .pdv-receipt-success-actions .pdv-receipt-action-print{
@@ -832,162 +835,216 @@
 .pdv-body .pdv-receipt-action-fiscal,
 .pdv-body .pdv-receipt-success-actions .pdv-receipt-action-fiscal{
   color:#fff;
-  background:#37a367;
+  background:#339c61;
   border-color:#2d935b;
 }
 .pdv-body .pdv-receipt-action:disabled{opacity:.55;cursor:not-allowed}
+.pdv-body .pdv-receipt-content{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  scrollbar-width:thin;
+  padding:20px 16px 34px;
+  background:#edf0f2;
+}
 .pdv-body .pdv-receipt-document{
-  max-width:100%;
-  margin:0;
-  padding:18px 0 3px;
-  border-top:1px solid #dce6eb;
-  color:#263e4e;
+  position:relative;
+  width:100%;
+  max-width:342px;
+  margin:0 auto 8px;
+  padding:22px 18px 18px;
+  border:1px solid #e0e2e5;
+  border-radius:0;
+  box-shadow:0 3px 17px rgba(24,39,52,.10);
+  background:#fff;
+  color:#262b31;
+  font-family:Roboto,Arial,Helvetica,sans-serif;
+  font-size:12px;
+}
+.pdv-body .pdv-receipt-document::after{
+  content:"";
+  position:absolute;
+  left:-1px;
+  right:-1px;
+  bottom:-10px;
+  height:10px;
+  background:linear-gradient(135deg,#fff 50%,transparent 50%) 0 0/12px 12px repeat-x,
+             linear-gradient(225deg,#fff 50%,transparent 50%) 0 0/12px 12px repeat-x;
+  pointer-events:none;
 }
 .pdv-body .pdv-receipt-company{
   display:flex;
   flex-direction:column;
-  gap:4px;
   align-items:center;
+  gap:3px;
   text-align:center;
-  margin:0 0 17px;
+  margin:0 0 10px;
 }
 .pdv-body .pdv-receipt-company-logo{
   display:block;
-  max-width:min(215px,80%);
-  max-height:75px;
-  margin-bottom:5px;
+  max-width:75%;
+  max-height:66px;
+  margin-bottom:4px;
   object-fit:contain;
 }
 .pdv-body .pdv-receipt-company>strong{
-  font-size:16px;
-  line-height:1.25;
+  color:#222;
+  font-size:14px;
   font-weight:800;
+  line-height:1.3;
   text-transform:uppercase;
   overflow-wrap:anywhere;
 }
-.pdv-body .pdv-receipt-company>span{font-size:11px;color:#697f8e}
+.pdv-body .pdv-receipt-company>span{color:#515860;font-size:11px}
 .pdv-body .pdv-receipt-meta{
-  margin-top:6px;
   display:flex;
-  flex-wrap:wrap;
-  justify-content:center;
-  align-items:center;
-  gap:6px 15px;
+  align-self:stretch;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:3px;
+  width:100%;
+  margin-top:11px;
+  padding-top:11px;
+  border-top:1px dashed #9ba4aa;
+  color:#454c54;
   font-size:11px;
-  line-height:1.45;
-  color:#516a7a;
+  line-height:1.4;
+  text-align:left;
 }
-.pdv-body .pdv-receipt-meta b{color:#334f61}
-.pdv-body .pdv-receipt-document-heading{
-  display:block;
-  margin:12px 0 0;
-  padding:9px 11px;
+.pdv-body .pdv-receipt-meta>span{overflow-wrap:anywhere}
+.pdv-body .pdv-receipt-meta b{color:#282d31;font-weight:700}
+.pdv-body .pdv-receipt-paper-caption{
+  margin-top:12px;
+  border-top:1px dashed #9ba4aa;
+  padding-top:11px;
+  color:#222;
+  font-size:13px;
+  font-weight:800;
+  text-align:center;
+  text-transform:uppercase;
+  letter-spacing:.3px;
+}
+.pdv-body .pdv-receipt-paper-warning{
+  margin:7px 0 11px;
+  padding:5px;
+  border:1px solid #666;
+  color:#303030;
   font-size:11px;
   font-weight:750;
-  line-height:1.2;
+  text-align:center;
   text-transform:uppercase;
-  letter-spacing:.2px;
-  border-top:1px solid #dbe5ec;
-  border-bottom:1px solid #dbe5ec;
-  background:#f4f7f9;
-  color:#405e73;
 }
-.pdv-body .pdv-receipt-table-scroll{width:100%;overflow-x:auto}
+.pdv-body .pdv-receipt-document-heading{
+  margin-top:13px;
+  padding:10px 0 5px;
+  border-top:1px dashed #939da4;
+  color:#343a40;
+  background:transparent;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.2px;
+  text-transform:uppercase;
+}
+.pdv-body .pdv-receipt-table-scroll{width:100%;overflow-x:visible}
 .pdv-body .pdv-receipt-items{
+  width:100%;
+  min-width:0;
+  margin:0;
   border-collapse:collapse;
   table-layout:fixed;
-  width:100%;
-  min-width:370px;
-  margin:0;
-  color:#2d475b;
+  color:#30353a;
 }
 .pdv-body .pdv-receipt-items th{
-  padding:10px 8px;
-  text-align:right;
-  font-size:10.5px;
-  font-weight:750;
-  color:#597487;
-  border-bottom:1px solid #dce5eb;
+  padding:7px 0 6px;
+  border-bottom:1px solid #959da4;
+  color:#525960;
   background:#fff;
+  font-size:11px;
+  font-weight:700;
+  text-align:right;
 }
 .pdv-body .pdv-receipt-items th:first-child,
-.pdv-body .pdv-receipt-items td:first-child{text-align:left;width:46%}
-.pdv-body .pdv-receipt-items th:nth-child(2){width:12%}
-.pdv-body .pdv-receipt-items th:nth-child(3),
-.pdv-body .pdv-receipt-items th:nth-child(4){width:21%}
+.pdv-body .pdv-receipt-items td:first-child{width:70%;text-align:left}
+.pdv-body .pdv-receipt-items th:last-child,
+.pdv-body .pdv-receipt-items td:last-child{width:30%;text-align:right}
 .pdv-body .pdv-receipt-items td{
-  padding:11px 8px;
-  text-align:right;
-  vertical-align:top;
+  padding:10px 0 9px;
+  border-bottom:1px dotted #aeb4b8;
   font-size:11.5px;
-  line-height:1.35;
-  border-bottom:1px solid #e4eaee;
+  line-height:1.4;
   font-variant-numeric:tabular-nums;
+  vertical-align:top;
   overflow-wrap:anywhere;
 }
-.pdv-body .pdv-receipt-items td:first-child>span{display:block;font-weight:650}
+.pdv-body .pdv-receipt-items td:last-child{padding-left:6px;font-weight:700}
+.pdv-body .pdv-receipt-items td:first-child>span{display:block;font-weight:700}
 .pdv-body .pdv-receipt-items td:first-child>small{
   display:block;
   margin-top:2px;
-  font-size:10px;
-  color:#8899a5;
+  color:#67717a;
+  font-size:11px;
+}
+.pdv-body .pdv-receipt-items .pdv-receipt-item-detail{
+  color:#42494f;
+  font-variant-numeric:tabular-nums;
 }
 .pdv-body .pdv-receipt-totals>div,
 .pdv-body .pdv-receipt-payments>div{
   display:flex;
-  align-items:center;
   justify-content:space-between;
-  gap:12px;
-  padding:9px 10px;
-  border-bottom:1px solid #e6edf1;
-  color:#526b7d;
+  align-items:baseline;
+  gap:10px;
+  padding:6px 0;
+  border-bottom:1px dotted #c0c6ca;
+  color:#393f45;
   font-size:11.5px;
 }
 .pdv-body .pdv-receipt-totals strong,
 .pdv-body .pdv-receipt-payments strong{
-  color:#2c465a;
-  white-space:nowrap;
-  font-weight:750;
+  color:#242a2e;
+  font-weight:700;
   font-variant-numeric:tabular-nums;
+  white-space:nowrap;
 }
-.pdv-body .pdv-receipt-totals>div:nth-child(odd),
-.pdv-body .pdv-receipt-payments>div:nth-child(even){background:#f8fafb}
 .pdv-body .pdv-receipt-totals>.pdv-receipt-total{
-  padding:12px 10px;
-  background:#edf5fa;
-  color:#245d82;
+  margin-top:5px;
+  padding:11px 0 8px;
+  border-top:1px dashed #7d888e;
+  border-bottom:1px dashed #7d888e;
+  color:#242a2e;
+  background:transparent;
   font-size:13px;
-  font-weight:750;
-  border-top:1px solid #d5e4ee;
-  border-bottom:1px solid #d5e4ee;
+  font-weight:800;
 }
-.pdv-body .pdv-receipt-totals>.pdv-receipt-total strong{
-  color:#1c5d88;
-  font-size:17px;
-}
+.pdv-body .pdv-receipt-totals>.pdv-receipt-total strong{font-size:18px;font-weight:800}
 .pdv-body .pdv-receipt-document-fiscal{
   display:flex;
-  align-items:center;
   justify-content:space-between;
   flex-wrap:wrap;
-  gap:8px;
-  margin-top:14px;
-  padding:9px 10px;
-  border:1px solid #dce6ee;
-  border-radius:4px;
-  background:#f7f9fa;
-  color:#5e7482;
+  gap:5px 9px;
+  margin-top:13px;
+  padding:10px 0;
+  border-top:1px dashed #9ba4aa;
+  border-bottom:1px dashed #9ba4aa;
+  color:#414b54;
   font-size:11px;
 }
-.pdv-body .pdv-receipt-document-fiscal strong{color:#315d78}
-.pdv-body .pdv-receipt-note{margin:12px 2px 0;color:#647d8e;font-size:11px;overflow-wrap:anywhere}
+.pdv-body .pdv-receipt-document-fiscal strong{color:#343a40;font-weight:700;text-align:right}
+.pdv-body .pdv-receipt-note{
+  margin:12px 0 0;
+  color:#414b54;
+  font-size:11px;
+  overflow-wrap:anywhere;
+}
 .pdv-body .pdv-receipt-internal-notice{
   margin:15px 0 0;
-  padding:9px 2px 0;
-  border-top:1px dashed #b9cad5;
+  padding-top:10px;
+  border-top:1px dashed #9ba4aa;
+  color:#555f66;
+  font-size:10.5px;
+  line-height:1.45;
   text-align:center;
-  color:#8898a5;
-  font-size:10px;
 }
 .pdv-body .pdv-receipt-print-frame{
   position:fixed!important;
@@ -1007,12 +1064,13 @@
     max-height:calc(100dvh - 12px);
   }
   .pdv-body .pdv-receipt-header{padding:10px 12px}
-  .pdv-body .pdv-receipt-content{padding:11px 11px 16px}
-  .pdv-body .pdv-receipt-meta{gap:5px 10px}
-  .pdv-body .pdv-receipt-company>strong{font-size:14px}
-  .pdv-body .pdv-receipt-success-actions{margin:11px auto 16px}
+  .pdv-body .pdv-receipt-toolbar{padding:10px 12px}
+  .pdv-body .pdv-receipt-content{padding:14px 12px 30px}
+  .pdv-body .pdv-receipt-document{padding:18px 14px 15px}
   .pdv-body .pdv-receipt-action{min-height:42px}
-  .pdv-body .pdv-receipt-items td{padding:9px 6px;font-size:11px}
+  .pdv-body .pdv-receipt-success-actions>button,
+  .pdv-body .pdv-receipt-success-actions>a,
+  .pdv-body .pdv-receipt-success-actions>form{flex-basis:125px}
 }
 @media(prefers-reduced-motion:reduce){
   .pdv-body .pdv-receipt-action{transition:none}
