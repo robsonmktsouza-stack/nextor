@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="pt-BR"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="../../public/css/erp.css">
+<link rel="stylesheet" href="../../public/css/ui-refinement.css">
+<script defer src="../../public/js/erp.js"></script>
+<style>body{padding:16px} dialog{width:min(560px,90vw)} .nextor-modal-layer{z-index:6000}</style>
+</head><body><div class="app-root">
+<select id="alwaysVisible"><option value="1">Primeiro</option><option value="2">Segundo</option></select>
+<dialog id="lazyDialog"><form id="lazyForm" method="dialog"><div id="lazyFields"></div><button type="button" id="closeLazy">Fechar</button></form></dialog>
+<div class="nextor-modal-layer" id="customLayer" hidden><div class="nextor-modal-window"><div id="customFields"></div></div></div>
+<div class="nextor-confirm-backdrop" id="confirmBackdrop" style="position:static"></div>
+<div class="nextor-loading" id="loadingOverlay" hidden></div>
+<strong id="result">AGUARDANDO</strong>
+</div>
+<script>
+const populate=(id,prefix,total)=>{
+ const holder=document.getElementById(id);
+ const fragment=document.createDocumentFragment();
+ for(let i=0;i<total;i++){
+  const label=document.createElement('label');
+  const select=document.createElement('select');
+  select.name=prefix+'_select_'+i;
+  select.innerHTML='<option value="">Selecione</option><option value="a">Ação</option><option value="b">Básico</option><option value="c">Comercial</option><option value="d">Dinheiro</option>';
+  label.appendChild(select);
+  const number=document.createElement('input');
+  number.type='number'; number.name=prefix+'_quantity_'+i; number.value='1';
+  label.appendChild(number);
+  fragment.appendChild(label);
+ }
+ holder.appendChild(fragment);
+};
+populate('lazyFields','lazy',90);
+populate('customFields','custom',40);
+window.addEventListener('load',()=>{
+ setTimeout(()=>{
+  const result=document.getElementById('result');
+  const assert=(value,message)=>{if(!value)throw Error(message)};
+  const native=document.getElementById('lazyDialog');
+  const custom=document.getElementById('customLayer');
+  try{
+   assert(document.getElementById('alwaysVisible').dataset.uiSelectReady==='1','select visible nao foi preparado');
+   assert(!document.querySelector('#lazyFields select').dataset.uiSelectReady,'campos de modal fechado foram inicializados antes de abrir');
+   assert(!document.querySelector('#customFields select').dataset.uiSelectReady,'campos de layer fechada foram inicializados antes de abrir');
+   assert(getComputedStyle(document.getElementById('confirmBackdrop')).backdropFilter==='none','camada de confirmacao ainda aplica blur');
+   const start=performance.now();
+   native.showModal();
+   setTimeout(()=>{
+    try {
+     assert(document.querySelector('#lazyFields select').dataset.uiSelectReady==='1','select do dialog nao inicializou ao abrir');
+     assert(document.querySelector('#lazyFields input').dataset.numberReady==='1','numero do dialog nao inicializou ao abrir');
+     assert(document.querySelectorAll('#lazyFields .ui-select').length===90,'quantidade de seletores no dialog incorreta');
+     const one=document.querySelector('#lazyFields select');
+     one.value='b';
+     one.dispatchEvent(new Event('change',{bubbles:true}));
+     assert(new FormData(document.getElementById('lazyForm')).get(one.name)==='b','valor nativo do select nao preservado');
+     const dialogMs=Math.round(performance.now()-start);
+     native.close();
+     const customStart=performance.now();
+     custom.hidden=false;
+     custom.classList.add('is-open');
+     setTimeout(()=>{
+       try {
+        assert(document.querySelectorAll('#customFields .ui-select').length===40,'selectores de layer nao inicializaram');
+        assert(document.querySelector('#customFields input').dataset.numberReady==='1','numero de layer nao foi preparado');
+        const layerMs=Math.round(performance.now()-customStart);
+        custom.classList.remove('is-open');custom.hidden=true;
+        assert(document.querySelectorAll('#lazyFields .ui-select').length===90,'modais foram inicializados em duplicidade');
+        result.textContent='PASS: modal nativo '+dialogMs+'ms; camada '+layerMs+'ms';
+        document.body.dataset.modalLifecycleTest='passed';
+       }catch(e){result.textContent='FAIL: '+e.message;document.body.dataset.modalLifecycleTest='failed'}
+     },120);
+    }catch(e){result.textContent='FAIL: '+e.message;document.body.dataset.modalLifecycleTest='failed'}
+   },120);
+  }catch(e){result.textContent='FAIL: '+e.message;document.body.dataset.modalLifecycleTest='failed'}
+ },150);
+});
+</script>
+</body></html>
