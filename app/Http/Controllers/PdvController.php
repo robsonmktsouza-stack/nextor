@@ -42,6 +42,9 @@ class PdvController extends Controller
             'receipt_copies'=>1,
         ]);
 
+        $pdvSettings['require_cash_opening']=true;
+        $pdvSettings['supervisor_movement_min']=(float)($pdvSettings['supervisor_movement_min'] ?? 200);
+
         $cashSession=PdvCashSession::query()
             ->where('user_id',$request->user()->id)
             ->open()
@@ -139,7 +142,7 @@ class PdvController extends Controller
 
         $cashRegisters=PdvCashRegister::query()->where('is_active',true)->orderBy('id')->get();
         $shiftOperators=User::query()->where('is_active',true)
-            ->whereKeyNot($request->user()->id)->orderBy('name')->get(['id','name','role','permissions']);
+            ->where('id','!=',$request->user()->id)->orderBy('name')->get(['id','name','role','permissions']);
         $shiftOperators=$shiftOperators->filter(fn($operator)=>$operator->canAccess('pdv'));
         $cashSupervisors=User::query()->where('is_active',true)
             ->whereIn('role',['admin','manager'])->orderBy('name')->get(['id','name','role']);
