@@ -1,4 +1,4 @@
-{{-- Modal de cupom único para conclusão e histórico; impressão em iframe oculto. --}}
+{{-- Mesmo cupom visual para pós-venda e histórico; impressão abre o PDF térmico nativo. --}}
 @php
     $receiptModalIsHistory=(bool)($receiptModalIsHistory ?? false);
     $receiptModalIsCancelled=$receiptModalSale->status==='cancelled';
@@ -7,7 +7,6 @@
     $receiptCloseId=$receiptModalIsHistory ? 'pdvHistoryReceiptCloseTop' : 'pdvReceiptCloseTop';
     $receiptDoneId=$receiptModalIsHistory ? 'pdvHistoryReceiptDone' : 'pdvReceiptDone';
     $receiptPrintId=$receiptModalIsHistory ? 'pdvHistoryReceiptPrint' : 'pdvReceiptPrint';
-    $receiptFrameId=$receiptModalIsHistory ? 'pdvHistoryReceiptFrame' : 'pdvReceiptFrame';
     $receiptModalCompanyName=$receiptModalCompany->trade_name
       ?: ($receiptModalCompany->legal_name ?: config('app.name','Lumeron'));
     $receiptModalHasCash=$receiptModalSale->payments->contains(
