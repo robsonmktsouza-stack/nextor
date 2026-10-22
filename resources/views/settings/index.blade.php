@@ -7,6 +7,7 @@
     $mailEnabled = old('email_enabled', $s?->email_enabled ?? false);
     $billEnabled = old('recurring_invoices_enabled', $s?->recurring_invoices_enabled ?? true);
     $invoiceMailEnabled = old('invoice_email_enabled', $s?->invoice_email_enabled ?? false);
+    $licenseMailEnabled = old('license_email_enabled', $s?->license_email_enabled ?? false);
 @endphp
 <div class="control-settings-overview" aria-label="Resumo das configurações">
     <div class="control-settings-indicator"><span class="control-settings-indicator-title">E-mail</span>
@@ -15,6 +16,8 @@
         <strong class="{{ ($s?->recurring_invoices_enabled ?? true) ? 'is-on' : 'is-off' }}">{{ ($s?->recurring_invoices_enabled ?? true) ? 'Ativas' : 'Desativadas' }}</strong></div>
     <div class="control-settings-indicator"><span class="control-settings-indicator-title">Envio de faturas</span>
         <strong class="{{ ($s?->invoice_email_enabled ?? false) && $emailReady ? 'is-on' : 'is-off' }}">{{ ($s?->invoice_email_enabled ?? false) && $emailReady ? 'Ativo' : 'Desativado' }}</strong></div>
+    <div class="control-settings-indicator"><span class="control-settings-indicator-title">Avisos de licença</span>
+        <strong class="{{ ($s?->license_email_enabled ?? false) && $emailReady ? 'is-on' : 'is-off' }}">{{ ($s?->license_email_enabled ?? false) && $emailReady ? 'Ativos' : 'Desativados' }}</strong></div>
 </div>
 
 <div class="control-settings-layout">
@@ -76,10 +79,15 @@
                         <input type="checkbox" role="switch" name="invoice_email_enabled" value="1" @checked((bool)$invoiceMailEnabled)>
                         <span class="switch-track"></span><span>Enviar faturas emitidas por e-mail</span>
                     </label>
+                    <label class="switch-row control-settings-switch">
+                        <input type="hidden" name="license_email_enabled" value="0">
+                        <input type="checkbox" role="switch" name="license_email_enabled" value="1" @checked((bool)$licenseMailEnabled)>
+                        <span class="switch-track"></span><span>Avisar vencimento de licenças por e-mail</span>
+                    </label>
                     <label class="control-settings-interval">Preparar com antecedência
                         <span class="control-settings-number"><input name="invoice_days_ahead" type="number" min="0" max="30" value="{{ old('invoice_days_ahead', $s?->invoice_days_ahead ?? 7) }}" required> dias</span>
                     </label>
-                    <p class="control-settings-small-note">A preparação gera rascunhos. Faturas emitidas podem ser enviadas quando o e-mail estiver ativo.</p>
+                    <p class="control-settings-small-note">A preparação gera rascunhos. Para avisos de licença, escolha os prazos em <a href="{{ route('automations.index') }}">Automações</a>.</p>
                 </div>
                 <div class="control-settings-actions">
                     <button class="btn primary" type="submit">@include('partials.icon',['name'=>'check','size'=>16]) Salvar faturamento</button>
