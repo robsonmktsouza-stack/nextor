@@ -63,6 +63,7 @@ final class ControlSettingsController extends Controller
         }
         if (!$settings->email_enabled) {
             $settings->invoice_email_enabled = false;
+            $settings->license_email_enabled = false;
         }
         $settings->save();
         return redirect()->route('settings.index', ['#' => 'email'])
@@ -93,6 +94,7 @@ final class ControlSettingsController extends Controller
         $data = $request->validate([
             'recurring_invoices_enabled' => ['required', 'boolean'],
             'invoice_email_enabled' => ['required', 'boolean'],
+            'license_email_enabled' => ['sometimes', 'boolean'],
             'invoice_days_ahead' => ['required', 'integer', 'between:0,30'],
         ]);
 
@@ -106,6 +108,7 @@ final class ControlSettingsController extends Controller
         $settings->fill([
             'recurring_invoices_enabled' => (bool) $data['recurring_invoices_enabled'],
             'invoice_email_enabled' => (bool) $data['invoice_email_enabled'],
+            'license_email_enabled' => (bool) ($data['license_email_enabled'] ?? false),
             'invoice_days_ahead' => (int) $data['invoice_days_ahead'],
         ]);
         $settings->save();
