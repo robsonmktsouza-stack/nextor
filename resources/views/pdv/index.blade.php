@@ -493,6 +493,68 @@
 </dialog>
 </form>
 
+{{-- Comprovante da venda recém-finalizada: abre aqui, sem sair do caixa.
+     A NFC-e continua com seu próprio ciclo e não depende da impressão. --}}
+@if($receiptModalSale)
+<dialog class="pdv-quick-modal pdv-receipt-modal" id="pdvReceiptModal"
+        aria-labelledby="pdvReceiptModalTitle" aria-modal="true"
+        data-receipt-after-checkout="1">
+  <div class="pdv-modal-head pdv-receipt-modal-head">
+    <div>
+      <span>VENDA CONCLUÍDA</span>
+      <h2 id="pdvReceiptModalTitle">Comprovante da venda #{{ $receiptModalSale->id }}</h2>
+    </div>
+    <button type="button" class="pdv-modal-close" id="pdvReceiptCloseTop" aria-label="Fechar comprovante">
+      @include('partials.icon',['name'=>'x','size'=>18])
+    </button>
+  </div>
+  <div class="pdv-receipt-modal-summary">
+    <div><small>Valor da venda</small><strong>R$ {{ number_format((float)$receiptModalSale->total,2,',','.') }}</strong></div>
+    <div class="pdv-receipt-modal-fiscal">
+      <small>NFC-e</small>
+      <span>
+        @if($receiptModalNfceDocument)
+          {{ match($receiptModalNfceDocument->status) {
+            'authorized' => 'Autorizada',
+            'prepared' => 'Preparada para revisão',
+            'processing' => 'Em processamento',
+            'pending' => 'Aguardando consulta',
+            'rejected' => 'Rejeitada — revisar',
+            'offline_signed', 'offline_sending' => 'Contingência — autorização pendente',
+            'offline_print_pending' => 'Contingência — DANFE pendente',
+            'cancelled' => 'Cancelada',
+            default => 'Consultar situação fiscal',
+          } }}
+        @else
+          Ainda não preparada
+        @endif
+      </span>
+    </div>
+    @if($receiptModalNfceDocument && auth()->user()->canAccess('fiscal'))
+      <a class="pdv-receipt-fiscal-link" href="{{ route('fiscal.show',$receiptModalNfceDocument) }}"
+         target="_blank" rel="noopener noreferrer">Consultar NFC-e</a>
+    @endif
+  </div>
+  <div class="pdv-receipt-preview-shell">
+    <iframe id="pdvReceiptFrame"
+            title="Prévia do comprovante interno da venda #{{ $receiptModalSale->id }}"
+            src="{{ route('pdv.receipt',['sale'=>$receiptModalSale->id,'embed'=>1]) }}"
+            loading="eager" referrerpolicy="same-origin"></iframe>
+  </div>
+  <div class="pdv-receipt-modal-footer">
+    <span>Comprovante interno · Sem valor fiscal</span>
+    <div class="pdv-receipt-modal-buttons">
+      <button type="button" class="pdv-receipt-print-button" id="pdvReceiptPrint" disabled>
+        @include('partials.icon',['name'=>'print','size'=>17]) Imprimir comprovante
+      </button>
+      <button type="button" class="pdv-receipt-done-button" id="pdvReceiptDone">
+        @include('partials.icon',['name'=>'check','size'=>17]) Nova venda
+      </button>
+    </div>
+  </div>
+</dialog>
+@endif
+
 <dialog class="pdv-quick-modal pdv-sales-modal" id="pdvSalesModal" aria-labelledby="pdvSalesTitle" data-sales-url="{{ route('pdv.sales.history') }}">
   <div class="pdv-modal-head">
     <div>
@@ -786,4 +848,5 @@
 @push('scripts')
 <script defer src="{{ asset('js/pdv.js') }}?v={{ filemtime(public_path('js/pdv.js')) }}"></script>
 <script defer src="{{ asset('js/pdv-sales.js') }}?v={{ filemtime(public_path('js/pdv-sales.js')) }}"></script>
+<script defer src="{{ asset('js/pdv-receipt-modal.js') }}?v={{ filemtime(public_path('js/pdv-receipt-modal.js')) }}"></script>
 @endpush
