@@ -55,54 +55,54 @@ final class ThermalReceiptPdfWriter
             $this->operations[] = ['kind' => 'image', 'x' => ($this->width - $w) / 2, 'y' => $this->y, 'w' => $w, 'h' => $h];
             $this->y += $h + 2;
         }
-        $this->paragraph((string) ($d['company'] ?? ''), $this->width === 58 ? 9 : 10, true, 'center', 0.9);
+        $this->paragraph((string) ($d['company'] ?? ''), $this->width === 58 ? 9.5 : 11, true, 'center', 0.9);
         foreach (['document', 'address', 'contact', 'print_header'] as $key) {
             if (trim((string) ($d[$key] ?? '')) !== '') {
-                $this->paragraph((string) $d[$key], $key === 'print_header' ? 6.1 : 6.0, false, 'center', 0.7);
+                $this->paragraph((string) $d[$key], $key === 'print_header' ? 7.4 : 7.3, false, 'center', 0.7);
             }
         }
         $this->y += 1.2;
-        $this->paragraph('COMPROVANTE DE VENDA', 9, true, 'center', 0.7);
+        $this->paragraph('COMPROVANTE DE VENDA', 9.7, true, 'center', 0.7);
         $this->outlineTitle('SEM VALOR FISCAL');
         $this->y += 1;
-        $this->paragraph('Venda nº ' . str_pad((string) ($d['sale_id'] ?? '0'), 9, '0', STR_PAD_LEFT), 6.8, false, 'center', 0.4);
-        if (!empty($d['date'])) $this->paragraph((string) $d['date'], 6.3, false, 'center', 0.4);
-        if (!empty($d['operator'])) $this->paragraph('Operador: ' . (string) $d['operator'], 6.3, false, 'center', 0.4);
-        if ($copies > 1) $this->paragraph('Via ' . $copy . '/' . $copies, 6.2, false, 'center', 0.4);
+        $this->paragraph('Venda nº ' . str_pad((string) ($d['sale_id'] ?? '0'), 9, '0', STR_PAD_LEFT), 7.9, false, 'center', 0.4);
+        if (!empty($d['date'])) $this->paragraph((string) $d['date'], 7.5, false, 'center', 0.4);
+        if (!empty($d['operator'])) $this->paragraph('Operador: ' . (string) $d['operator'], 7.5, false, 'center', 0.4);
+        if ($copies > 1) $this->paragraph('Via ' . $copy . '/' . $copies, 7.2, false, 'center', 0.4);
         $this->y += 1;
 
         $this->rule();
         $this->items((array) ($d['items'] ?? []));
         $this->rule();
-        $this->twoColumns('Subtotal', (string) ($d['subtotal'] ?? '0,00'), 7.3);
-        if (!empty($d['discount'])) $this->twoColumns('Desconto', '- ' . (string) $d['discount'], 7.2);
-        $this->twoColumns('Total', (string) ($d['total'] ?? '0,00'), 9.4, true);
+        $this->twoColumns('Subtotal', (string) ($d['subtotal'] ?? '0,00'), 8.5);
+        if (!empty($d['discount'])) $this->twoColumns('Desconto', '- ' . (string) $d['discount'], 8.3);
+        $this->twoColumns('Total', (string) ($d['total'] ?? '0,00'), 11, true);
         $this->rule();
         foreach ((array) ($d['payments'] ?? []) as $payment) {
-            $this->twoColumns((string) ($payment['name'] ?? 'Outro'), (string) ($payment['amount'] ?? ''), 7.1);
+            $this->twoColumns((string) ($payment['name'] ?? 'Outro'), (string) ($payment['amount'] ?? ''), 8.2);
         }
         if (!empty($d['cash_payment'])) {
-            $this->twoColumns('Recebido em dinheiro', (string) ($d['cash_received'] ?? ''), 6.8);
-            $this->twoColumns('Troco', (string) ($d['change'] ?? ''), 6.8);
+            $this->twoColumns('Recebido em dinheiro', (string) ($d['cash_received'] ?? ''), 7.8);
+            $this->twoColumns('Troco', (string) ($d['change'] ?? ''), 7.8);
         }
         $this->rule();
-        $this->twoColumns('Cliente', (string) ($d['customer'] ?? 'Consumidor não identificado'), 6.7);
-        $this->twoColumns('CPF/CNPJ na nota', (string) ($d['consumer_document'] ?? 'Não informado'), 6.5);
-        if (!empty($d['consumer_name'])) $this->twoColumns('Consumidor', (string) $d['consumer_name'], 6.3);
+        $this->twoColumns('Cliente', (string) ($d['customer'] ?? 'Consumidor não identificado'), 7.8);
+        $this->twoColumns('CPF/CNPJ na nota', (string) ($d['consumer_document'] ?? 'Não informado'), 7.7);
+        if (!empty($d['consumer_name'])) $this->twoColumns('Consumidor', (string) $d['consumer_name'], 7.7);
         if (!empty($d['notes'])) {
             $this->rule();
-            $this->paragraph((string) $d['notes'], 6.6, false, 'center');
+            $this->paragraph((string) $d['notes'], 7.6, false, 'center');
         }
         $this->rule();
-        if (!empty($d['print_footer'])) $this->paragraph((string) $d['print_footer'], 6.2, false, 'center', 0.7);
-        $this->paragraph('Comprovante interno de venda. Não substitui documento fiscal.', 5.9, false, 'center', 0.6);
+        if (!empty($d['print_footer'])) $this->paragraph((string) $d['print_footer'], 7.3, false, 'center', 0.7);
+        $this->paragraph('Comprovante interno de venda. Não substitui documento fiscal.', 7.2, false, 'center', 0.6);
     }
 
     private function outlineTitle(string $title): void
     {
-        $h = 5.4;
+        $h = 6.0;
         $this->operations[] = ['kind' => 'rect', 'x' => $this->margin, 'y' => $this->y, 'w' => $this->inner, 'h' => $h];
-        $this->write($title, $this->width / 2, $this->y + 1, 7.2, true, 'center');
+        $this->write($title, $this->width / 2, $this->y + 1, 8.2, true, 'center');
         $this->y += $h + 1;
     }
 
@@ -113,46 +113,52 @@ final class ThermalReceiptPdfWriter
         $this->y += 2.0;
     }
 
+    /**
+     * Formato compacto e legível para papel térmico de 58 ou 80 mm:
+     * nome do produto acima, quantidade x valor unitário e subtotal abaixo.
+     */
     private function items(array $items): void
     {
-        $p = $this->inner;
-        $columnWidths = $this->width === 58
-            ? [.13 * $p, .35 * $p, .12 * $p, .17 * $p, .23 * $p]
-            : [.14 * $p, .36 * $p, .12 * $p, .17 * $p, .21 * $p];
-        $x = [$this->margin];
-        foreach ($columnWidths as $w) $x[] = end($x) + $w;
-        $headers = ['Cód.', 'Descrição', 'Qtde', 'Vl.Unit', 'Total'];
-        foreach ($headers as $i => $head) {
-            $align = $i < 2 ? 'left' : 'right';
-            $this->write($head, $align === 'left' ? $x[$i] + 0.2 : $x[$i + 1] - 0.2, $this->y, 5.4, true, $align);
-        }
-        $this->y += 3.5;
-        $this->operations[] = ['kind' => 'rule', 'y' => $this->y, 'x1' => $this->margin, 'x2' => $this->width - $this->margin];
-        $this->y += 1.2;
+        $nameSize = $this->width === 58 ? 8.3 : 9.2;
+        $detailSize = $this->width === 58 ? 7.4 : 8.0;
+        $valueSize = $this->width === 58 ? 8.0 : 8.8;
+        $this->paragraph('ITENS DA VENDA', 8.8, true, 'left', .2);
         foreach ($items as $item) {
-            $size = $this->width === 58 ? 5.8 : 6.3;
-            $fields = [
-                (string) ($item['code'] ?? '-'), (string) ($item['description'] ?? ''),
-                (string) ($item['quantity'] ?? ''), (string) ($item['unit'] ?? ''), (string) ($item['amount'] ?? ''),
-            ];
-            $lines = [];
-            foreach ($fields as $i => $field) $lines[] = $this->wrap($field, $columnWidths[$i] - 0.7, $size);
-            $rowLines = max(array_map('count', $lines));
-            $step = $size * 0.39 + 0.75;
-            foreach ($lines as $i => $fieldLines) {
-                $align = $i < 2 ? 'left' : 'right';
-                foreach ($fieldLines as $line => $content) {
-                    $this->write(
-                        $content,
-                        $align === 'left' ? $x[$i] + 0.25 : $x[$i + 1] - 0.25,
-                        $this->y + $line * $step, $size, false, $align
-                    );
+            $this->y += 1.5;
+            $name = (string) ($item['description'] ?? '');
+            foreach ($this->wrap($name, $this->inner - 1, $nameSize) as $line) {
+                $this->write($line, $this->margin, $this->y, $nameSize, true);
+                $this->y += $nameSize * .39 + .9;
+            }
+            $code = trim((string) ($item['code'] ?? '-'));
+            if ($code !== '' && $code !== '-') {
+                foreach ($this->wrap('Cod.: ' . $code, $this->inner - 1, $detailSize) as $line) {
+                    $this->write($line, $this->margin, $this->y, $detailSize);
+                    $this->y += $detailSize * .39 + .8;
                 }
             }
-            $this->y += $rowLines * $step + 1;
-            if (!empty($item['discount'])) $this->twoColumns('Desconto do item', '- ' . (string) $item['discount'], 5.8);
-            $this->operations[] = ['kind' => 'rule', 'y' => $this->y, 'x1' => $this->margin, 'x2' => $this->width - $this->margin, 'gray' => 0.7];
-            $this->y += 1.4;
+            $quantity = (string) ($item['quantity'] ?? '1');
+            $unit = (string) ($item['unit'] ?? '0,00');
+            $amount = (string) ($item['amount'] ?? '0,00');
+            $left = $this->wrap($quantity . ' x R$ ' . $unit, $this->inner * .60, $detailSize);
+            $right = $this->wrap('R$ ' . $amount, $this->inner * .37, $valueSize);
+            $step = max($detailSize, $valueSize) * .39 + .9;
+            foreach ($left as $i => $line) {
+                $this->write($line, $this->margin, $this->y + $i * $step, $detailSize);
+            }
+            foreach ($right as $i => $line) {
+                $this->write($line, $this->width - $this->margin,
+                    $this->y + $i * $step, $valueSize, true, 'right');
+            }
+            $this->y += max(count($left), count($right)) * $step + 1.2;
+            if (!empty($item['discount'])) {
+                $this->twoColumns('Desconto do item', '- R$ ' . (string) $item['discount'], $detailSize);
+            }
+            $this->operations[] = [
+                'kind' => 'rule', 'y' => $this->y,
+                'x1' => $this->margin, 'x2' => $this->width - $this->margin, 'gray' => .7,
+            ];
+            $this->y += 1.6;
         }
     }
 
