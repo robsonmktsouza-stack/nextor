@@ -46,11 +46,11 @@ final class PdvCashService
             if ($this->current($userId,true)) {
                 throw ValidationException::withMessages(['opening_amount'=>'Você já possui um turno aberto. Encerre-o antes de abrir outro.']);
             }
-            if (PdvCashSession::query()->where('register_id',$register->id)->open()->exists()) {
+            if ($register && PdvCashSession::query()->where('register_id',$register->id)->open()->exists()) {
                 throw ValidationException::withMessages(['register_id'=>'Este caixa já está aberto por outro operador.']);
             }
             return PdvCashSession::query()->create([
-                'register_id'=>$register->id,
+                'register_id'=>$register?->id,
                 'user_id'=>$userId,'opening_amount'=>$amount,
                 'opening_notes'=>$notes,'opened_at'=>now(),
             ]);
