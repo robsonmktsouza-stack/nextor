@@ -555,6 +555,28 @@
     </div>
   </form>
 
+  <div class="pdv-sales-cancel-sheet" id="pdvSalesCancelSheet" hidden>
+    <form class="pdv-sales-cancel-panel" id="pdvSalesCancelForm" novalidate>
+      <div class="pdv-sales-cancel-head">
+        <h3>Cancelar venda <span id="pdvSalesCancelNumber"></span></h3>
+        <button type="button" class="pdv-modal-close" id="pdvSalesCancelClose" aria-label="Voltar sem cancelar">
+          @include('partials.icon',['name'=>'x','size'=>17])
+        </button>
+      </div>
+      <div class="pdv-sales-cancel-body">
+        <p id="pdvSalesCancelSummary"></p>
+        <label for="pdvSalesCancelReason">Motivo do cancelamento *</label>
+        <textarea id="pdvSalesCancelReason" rows="3" minlength="5" maxlength="255" required
+                  placeholder="Descreva por que esta venda será cancelada"></textarea>
+        <p class="pdv-sales-cancel-hint">Os produtos voltarão ao estoque e os lançamentos financeiros serão estornados. A devolução do pagamento ao cliente deve ser realizada separadamente.</p>
+        <p class="pdv-sales-cancel-error" id="pdvSalesCancelError" role="alert" hidden></p>
+      </div>
+      <div class="pdv-sales-cancel-footer">
+        <button type="button" id="pdvSalesCancelBack">Voltar</button>
+        <button type="submit" class="pdv-sales-cancel-submit" id="pdvSalesCancelConfirm">Confirmar cancelamento</button>
+      </div>
+    </form>
+  </div>
   <div class="pdv-sales-list-scroll">
     <table class="pdv-sales-table" aria-label="Vendas do período">
       <thead>
@@ -576,6 +598,7 @@
   </div>
 
   <div class="pdv-sales-footer">
+    <span id="pdvSalesActionStatus" class="pdv-sales-action-status" role="status" aria-live="polite" hidden></span>
     <span id="pdvSalesCount" aria-live="polite">Vendas de hoje</span>
     <div class="pdv-sales-pages">
       <button type="button" id="pdvSalesPrevious" disabled aria-label="Página anterior">Anterior</button>
