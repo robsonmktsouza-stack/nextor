@@ -1,6 +1,18 @@
 @extends('layouts.pdv')
 
 @section('content')
+<dialog class="pdv-quick-modal" id="pdvCashPinDialog">
+  <form method="post" action="{{ route('pdv.cash.pin') }}">@csrf
+    <div class="pdv-modal-head"><div><h2>Meu PIN de caixa</h2><p>PIN individual com seis dígitos.</p></div>
+    <button type="button" class="pdv-modal-close" onclick="this.closest('dialog').close()" aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button></div>
+    <div class="pdv-cash-modal-body">
+      <label><span>Senha de acesso *</span><input type="password" name="current_password" autocomplete="current-password" required></label>
+      <label><span>Novo PIN *</span><input type="password" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" name="pin" required autocomplete="new-password"></label>
+      <label><span>Confirmar PIN *</span><input type="password" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" name="pin_confirmation" required autocomplete="new-password"></label>
+      <button class="pdv-modal-primary" type="submit">Salvar PIN</button>
+    </div>
+  </form>
+</dialog>
 @if($pdvSettings['require_cash_opening'])
 @if(!$cashSession)
 <dialog class="pdv-quick-modal" id="pdvCashOpenDialog">
@@ -11,7 +23,10 @@
       <button type="button" class="pdv-modal-close" onclick="this.closest('dialog').close()" aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
     </div>
     <div class="pdv-cash-modal-body">
+      <label><span>Caixa físico *</span><select name="register_id" required>@foreach($cashRegisters as $register)<option value="{{ $register->id }}">{{ $register->name }} ({{ $register->code }})</option>@endforeach</select></label>
+      <label><span>Operador responsável</span><input value="{{ auth()->user()->name }}" readonly></label>
       <label><span>Valor de abertura</span><input type="number" step="0.01" min="0" name="opening_amount" value="{{ old('opening_amount','0.00') }}" required autofocus></label>
+      <label><span>Senha ou PIN *</span><input type="password" name="credential" autocomplete="off" required></label>
       <label><span>Observação</span><textarea name="opening_notes" rows="3" maxlength="1000" placeholder="Opcional"></textarea></label>
       <button class="pdv-modal-primary" type="submit">@include('partials.icon',['name'=>'check','size'=>18]) Abrir caixa</button>
     </div>
@@ -26,13 +41,31 @@
       <button type="button" class="pdv-modal-close" onclick="this.closest('dialog').close()" aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
     </div>
     <div class="pdv-cash-modal-body">
-      @if($cashExpected!==null)
-        <div class="pdv-cash-total"><span>Saldo esperado (conferência)</span><strong>R$ {{ number_format((float)$cashExpected,2,',','.') }}</strong></div>
-      @endif
+      <p class="pdv-cash-blind-notice">Fechamento cego: conte primeiro o dinheiro físico. O saldo esperado e as diferenças serão revelados no relatório após confirmar.</p>
       <label><span>Saldo contado</span><input type="number" step="0.01" min="0" name="closing_amount" value="{{ old('closing_amount','') }}" required autofocus></label>
       <p style="margin:4px 0;font-size:12px">Conte o dinheiro físico antes de informar o valor. Divergências exigem justificativa e ficam registradas para conferência.</p>
-      <label><span>Observação</span><textarea name="closing_notes" rows="3" maxlength="1000" placeholder="Opcional"></textarea></label>
+      <label><span>Observação</span><textarea name="closing_notes" rows="3" maxlength="1000" placeholder="Obrigatória se houver diferença"></textarea></label>
+      <label><span>Senha ou PIN *</span><input name="credential" type="password" autocomplete="off" required></label>
       <button class="pdv-modal-primary" type="submit">@include('partials.icon',['name'=>'check','size'=>18]) Fechar caixa</button>
+    </div>
+  </form>
+</dialog>
+<dialog class="pdv-quick-modal pdv-cash-handover-modal" id="pdvCashHandoverDialog">
+  <form method="post" action="{{ route('pdv.cash.handover') }}">@csrf
+    <div class="pdv-modal-head">
+      <div><h2>Trocar turno</h2><p>{{ $cashSession->register?->name ?? 'Caixa' }} · {{ auth()->user()->name }}</p></div>
+      <button type="button" class="pdv-modal-close" onclick="this.closest('dialog').close()" aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+    </div>
+    <div class="pdv-cash-modal-body">
+      <p class="pdv-cash-blind-notice">Conte o dinheiro antes de transferir. O turno anterior é fechado e o novo aberto na mesma operação.</p>
+      <label><span>Dinheiro contado *</span><input type="number" name="counted_amount" step="0.01" min="0" required></label>
+      <label><span>Operador que assume *</span><select name="incoming_user_id" required><option value="">Selecione</option>
+        @foreach($shiftOperators as $operator)<option value="{{ $operator->id }}">{{ $operator->name }}</option>@endforeach
+      </select></label>
+      <label><span>Senha ou PIN do operador atual *</span><input type="password" name="outgoing_credential" autocomplete="off" required></label>
+      <label><span>Senha ou PIN do próximo operador *</span><input type="password" name="incoming_credential" autocomplete="off" required></label>
+      <label><span>Observação</span><textarea name="notes" rows="2" maxlength="1000" placeholder="Obrigatória se houver diferença"></textarea></label>
+      <button class="pdv-modal-primary" type="submit">Confirmar passagem de turno</button>
     </div>
   </form>
 </dialog>
@@ -51,12 +84,16 @@
       <button type="button" class="pdv-modal-close" onclick="this.closest('dialog').close()" aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
     </div>
     <div class="pdv-cash-modal-body">
-      <div class="pdv-cash-total">
-        <span>Saldo esperado agora</span>
-        <strong>R$ {{ number_format((float)($cashExpected ?? 0),2,',','.') }}</strong>
-      </div>
+      <div class="pdv-cash-total"><span>Conferência</span><strong>Valor apurado no fechamento</strong></div>
       <label><span>Valor</span><input type="number" step="0.01" min="0.01" name="amount" id="pdvCashMovementAmount" required></label>
       <label><span>Motivo</span><input type="text" name="reason" maxlength="255" id="pdvCashMovementReason" placeholder="Ex.: troco adicional, depósito no cofre..." required></label>
+      <div id="pdvCashSupervisorFields" class="pdv-cash-supervisor" hidden data-approval-threshold="{{ $pdvSettings['supervisor_movement_min'] ?? 200 }}">
+        <p>Operação sensível: autorização de um supervisor.</p>
+        <label><span>Supervisor</span><select name="supervisor_user_id" id="pdvCashSupervisorUser"><option value="">Selecione</option>
+          @foreach($cashSupervisors as $supervisor)<option value="{{ $supervisor->id }}">{{ $supervisor->name }}</option>@endforeach
+        </select></label>
+        <label><span>Senha ou PIN do supervisor</span><input type="password" name="supervisor_credential" id="pdvCashSupervisorCredential" autocomplete="off"></label>
+      </div>
       <div id="pdvCashRefundFields" hidden>
         <label><span>Devolução concluída (se aplicável)</span>
           <input type="number" min="1" step="1" name="sale_return_id" id="pdvCashRefundReturn" list="pdvCashRefundReturnOptions" placeholder="Número da devolução">
@@ -626,9 +663,7 @@
             <div class="pdv-operations-overview-values">
               <span>Aberto às <strong>{{ $cashSession->opened_at->format('H:i') }}</strong></span>
               <span>Abertura <strong>R$ {{ number_format((float)$cashSession->opening_amount,2,',','.') }}</strong></span>
-              @if($cashExpected!==null)
-                <span>Saldo esperado <strong>R$ {{ number_format((float)$cashExpected,2,',','.') }}</strong></span>
-              @endif
+              
             </div>
           @else
             <p class="pdv-operations-overview-note">Caixa fechado. Abra o caixa para finalizar vendas.</p>
@@ -680,6 +715,7 @@
     <button type="button" data-pdv-operation="cancel-nfce"><span><strong>Cancelamento NFC-e</strong><small>Coloca uma NFC-e autorizada na fila de cancelamento fiscal.</small></span><kbd>Alt+X</kbd></button>
     @if($pdvSettings['require_cash_opening'])
       @if($cashSession)
+        <button type="button" data-pdv-operation="handover"><span><strong>Trocar turno</strong><small>Passar o caixa ao próximo operador após conferência e identificação de ambos.</small></span><kbd>—</kbd></button>
         <button type="button" data-pdv-operation="close-cash"><span><strong>Fechar caixa</strong><small>Encerra o turno atual.</small></span><kbd>Alt+K</kbd></button>
         <a href="{{ route('pdv.cash.report',$cashSession) }}" target="_blank" rel="noopener noreferrer" style="display:block;padding:10px 14px;color:inherit">Resumo do turno atual</a>
         @if($pdvSettings['allow_cash_movements'])
@@ -692,7 +728,11 @@
       @endif
     @endif
   </div>
-  <p style="margin:12px 16px"><a href="{{ route('pdv.cash.history') }}" target="_blank" rel="noopener noreferrer">Histórico e relatórios de caixa</a></p>
+  <p class="pdv-cash-operation-links">
+    <a href="{{ route('pdv.cash.history') }}" target="_blank" rel="noopener noreferrer">Histórico e relatórios de caixa</a>
+    @if(auth()->user()->role==='admin')<a href="{{ route('pdv.cash.registers') }}">Administrar caixas físicos</a>@endif
+    <button type="button" data-pdv-operation="set-pin" class="pdv-cash-text-action">Configurar meu PIN</button>
+  </p>
   <div class="pdv-modal-help"><span><kbd>↑</kbd><kbd>↓</kbd> Navegar</span><span><kbd>Enter</kbd> Abrir</span><span><kbd>Esc</kbd> Fechar</span></div>
 </dialog>
 
