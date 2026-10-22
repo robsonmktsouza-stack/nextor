@@ -1297,3 +1297,124 @@
   .pdv-body #pdvSalesCancelSheet .pdv-sales-cancel-panel{max-height:calc(100dvh - 28px)}
   .pdv-body #pdvSalesCancelSheet .pdv-sales-cancel-body{padding:12px}
 }
+
+/* Caixa em aberto de dia anterior: aviso de conferência obrigatória. */
+.pdv-body .pdv-overdue-cash-dialog{
+  box-sizing:border-box;
+  width:min(520px,calc(100vw - 24px));
+  max-width:100%;
+  max-height:calc(100dvh - 32px);
+  overflow-y:auto;
+}
+.pdv-body .pdv-overdue-cash-body{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  padding:15px 17px 17px;
+}
+.pdv-body .pdv-overdue-cash-notice{
+  margin:0;
+  padding:11px 12px;
+  color:#6b4924;
+  border:1px solid #efd5b7;
+  border-left:3px solid #d49042;
+  background:#fff8ed;
+  border-radius:4px;
+  font:600 12px/1.5 Roboto,Arial,sans-serif;
+}
+.pdv-body .pdv-overdue-cash-group{
+  padding:12px;
+  border:1px solid #d8e2e9;
+  border-radius:5px;
+  background:#fff;
+}
+.pdv-body .pdv-overdue-cash-group h3{
+  margin:0 0 12px;
+  color:#344b5d;
+  font:700 13px/1.3 Roboto,Arial,sans-serif;
+}
+.pdv-body .pdv-overdue-cash-details{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  padding-bottom:10px;
+  font-size:12px;
+  color:#617588;
+}
+.pdv-body .pdv-overdue-cash-details strong{
+  color:#314b60;
+  font-weight:700;
+}
+.pdv-body .pdv-overdue-cash-form{
+  display:flex;
+  flex-direction:column;
+  gap:11px;
+  min-width:0;
+}
+.pdv-body .pdv-overdue-cash-form>label{
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  width:100%;
+  min-width:0;
+}
+.pdv-body .pdv-overdue-cash-form>label>span{
+  color:#385168;
+  font:650 12px/1.4 Roboto,Arial,sans-serif;
+}
+.pdv-body .pdv-overdue-cash-form input,
+.pdv-body .pdv-overdue-cash-form select,
+.pdv-body .pdv-overdue-cash-form textarea{
+  box-sizing:border-box;
+  display:block;
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  margin:0;
+  padding:9px 11px;
+  border:1px solid #c6d5e1;
+  border-radius:4px;
+  background:white;
+  color:#29445a;
+  font:12px/1.4 Roboto,Arial,sans-serif;
+}
+.pdv-body .pdv-overdue-cash-form input,
+.pdv-body .pdv-overdue-cash-form select{min-height:38px}
+.pdv-body .pdv-overdue-cash-form textarea{min-height:64px;max-height:140px;resize:vertical}
+.pdv-body .pdv-overdue-cash-form .ui-select{
+  box-sizing:border-box;
+  width:100%;
+  min-width:0;
+  max-width:100%;
+}
+.pdv-body .pdv-overdue-cash-form .ui-select-trigger{width:100%;min-height:38px}
+.pdv-body .pdv-overdue-cash-form .pdv-modal-primary{
+  width:100%;
+  min-height:40px;
+  margin-top:2px;
+}
+.pdv-body .pdv-overdue-cash-error{
+  margin:0;
+  padding:8px 10px;
+  color:#a53535;
+  background:#fff1f1;
+  border:1px solid #f0c4c4;
+  font:600 12px/1.4 Roboto,Arial,sans-serif;
+}
+.pdv-body .pdv-overdue-cash-help{margin:0;color:#536a7d;font-size:12px;line-height:1.5}
+.pdv-body .pdv-overdue-cash-logout{
+  display:flex;
+  justify-content:flex-end;
+  padding-top:7px;
+  border-top:1px solid #dce5ed;
+}
+.pdv-body .pdv-overdue-cash-logout button{
+  border:1px solid #bfd1de;
+  border-radius:4px;
+  background:#fff;
+  color:#3d627e;
+  padding:8px 11px;
+  font:650 12px Roboto,Arial,sans-serif;
+  cursor:pointer;
+}
