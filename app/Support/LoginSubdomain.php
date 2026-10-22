@@ -6,10 +6,17 @@ use Illuminate\Http\Request;
 
 final class LoginSubdomain
 {
+    public const RESERVED = [
+        'admin', 'api', 'app', 'assets', 'auth', 'billing', 'control',
+        'dev', 'ftp', 'help', 'login', 'mail', 'portal', 'smtp',
+        'static', 'status', 'support', 'suporte', 'www',
+    ];
+
     public static function valid(string $slug): bool
     {
-        return preg_match('/^[a-z][a-z0-9-]{1,38}$/', $slug) === 1
-            && !str_contains($slug, '--');
+        return preg_match('/^[a-z0-9][a-z0-9-]{0,37}[a-z0-9]$/', $slug) === 1
+            && !str_contains($slug, '--')
+            && !in_array($slug, self::RESERVED, true);
     }
 
     public static function current(): string
@@ -25,13 +32,13 @@ final class LoginSubdomain
 
     public static function portalOrigin(): string
     {
-        return 'https://'.(string)config('instance.login_portal_host', 'login.lumeron.com.br');
+        return 'https://'.(string)config('instance.login_portal_host', 'lumeron.com.br');
     }
 
     public static function tenantUrl(string $slug): ?string
     {
         $slug=strtolower(trim($slug));
-        if (!self::valid($slug) || in_array($slug, ['www','login','admin','api'], true)) return null;
+        if (!self::valid($slug)) return null;
         $domain=strtolower(trim((string)config('instance.base_domain', 'lumeron.com.br')));
         if (!preg_match('/^[a-z0-9]+(?:[.-][a-z0-9]+)*\.[a-z]{2,}$/', $domain)) return null;
         return 'https://'.$slug.'.'.$domain;
