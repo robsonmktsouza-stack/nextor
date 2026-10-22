@@ -885,6 +885,7 @@ class PdvController extends Controller
             'supervisor_user_id'=>['nullable','integer','exists:users,id'],
             'supervisor_credential'=>['nullable','string'],
         ]);
+        $approvedBy=null;
         $minimum=(float)AppSetting::value('pdv','supervisor_movement_min',200);
         if(in_array($data['type'],['withdrawal','refund'],true)
             && (float)$data['amount'] >= max(0,$minimum)) {
@@ -898,6 +899,7 @@ class PdvController extends Controller
             }
             app(PdvOperatorAuthorization::class)->verify($supervisor,
                 (string)($data['supervisor_credential'] ?? ''),$request->ip());
+            $approvedBy=$supervisor->id;
         }
         if(!(bool)AppSetting::value('pdv','allow_cash_movements',true)) {
             abort(403,'Movimentações de caixa estão desativadas.');
@@ -905,7 +907,7 @@ class PdvController extends Controller
         $type=$data['type'];
         $cash->movement((int)$request->user()->id,$type,(string)$data['amount'],$data['reason'],
             isset($data['sale_id'])?(int)$data['sale_id']:null,
-            isset($data['sale_return_id'])?(int)$data['sale_return_id']:null);
+            isset($data['sale_return_id'])?(int)$data['sale_return_id']:null,$approvedBy);
         return redirect()->route('pdv.index')->with('success',match($type) {
             'supply'=>'Suprimento registrado.',
             'withdrawal'=>'Sangria registrada.',
