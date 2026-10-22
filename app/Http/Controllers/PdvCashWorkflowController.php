@@ -38,7 +38,19 @@ final class PdvCashWorkflowController extends Controller
             throw ValidationException::withMessages(['incoming_user_id'=>'Selecione outro operador habilitado para o PDV.']);
         }
         $authorization->verify($outgoing,$data['outgoing_credential'],$request->ip());
-        $authorization->verify($incoming,$data['incoming_credential'],$request->ip());
+        // A six-digit PIN may unlock only an account limited to the PDV.
+        // Administrator, manager, or multi-module accounts must enter full password.
+        $credentials=$data['incoming_credential'];
+        $cashierOnly=$incoming->role==='operator'
+            && !array_diff($incoming->permissions ?? [],['pdv']);
+        if (!$cashierOnly && !\Illuminate\Support\Facades\Hash::check(
+            $credentials,(string)$incoming->password
+        )) {
+            throw ValidationException::withMessages([
+                'incoming_credential'=>'Este perfil exige a senha completa para assumir o turno.',
+            ]);
+        }
+        $authorization->verify($incoming,$credentials,$request->ip());
         $cash->handover($outgoing->id,$incoming->id,(string)$data['counted_amount'],$data['notes'] ?? null);
 
         // Replaces the authenticated operator only AFTER the DB transaction commits.
@@ -59,6 +71,7 @@ final class PdvCashWorkflowController extends Controller
     public function createRegister(Request $request,PdvOperatorAuthorization $authorization)
     {
         abort_unless($request->user()->role==='admin',403);
+        $request->merge(['code'=>strtoupper(trim((string)$request->input('code')))]);
         $data=$request->validate([
             'code'=>['required','string','max:30','regex:/^[A-Za-z0-9_-]+$/','unique:pdv_cash_registers,code'],
             'name'=>['required','string','min:3','max:100'],
