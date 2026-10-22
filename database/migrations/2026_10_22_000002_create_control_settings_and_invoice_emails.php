@@ -18,6 +18,7 @@ return new class extends Migration {
             $table->string('smtp_from_name', 100)->default('Lumeron');
             $table->boolean('email_enabled')->default(false);
             $table->boolean('invoice_email_enabled')->default(false);
+            $table->boolean('license_email_enabled')->default(false);
             $table->boolean('recurring_invoices_enabled')->default(true);
             $table->unsignedTinyInteger('invoice_days_ahead')->default(7);
             $table->string('automations_at', 5)->default('08:00');
