@@ -19,4 +19,11 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // Never retain operator/supervisor credentials or PINs in old form
+        // input after a validation error.
+        $exceptions->dontFlash([
+            'credential','supervisor_credential','discount_credential',
+            'incoming_credential','outgoing_credential',
+            'current_password','pin','pin_confirmation',
+        ]);
     })->create();
