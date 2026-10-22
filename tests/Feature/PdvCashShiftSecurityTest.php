@@ -69,7 +69,7 @@ final class PdvCashShiftSecurityTest extends TestCase
         $first=$this->operator();
         $next=$this->operator('next@example.test');
         $cash=app(PdvCashService::class);
-        $old=$cash->open($first->id,'120.00',null);
+        $old=$cash->open($first->id,'120.00',null,PdvCashRegister::query()->firstOrFail()->id);
         $this->actingAs($first)->post(route('pdv.cash.handover'),[
             'incoming_user_id'=>$next->id,
             'outgoing_credential'=>'SenhaTeste123',
@@ -99,7 +99,7 @@ final class PdvCashShiftSecurityTest extends TestCase
     {
         $first=$this->operator();
         $second=$this->operator('second@example.test');
-        $original=app(PdvCashService::class)->open($first->id,'100.00',null);
+        $original=app(PdvCashService::class)->open($first->id,'100.00',null,PdvCashRegister::query()->firstOrFail()->id);
         $this->actingAs($first)->post(route('pdv.cash.handover'),[
             'incoming_user_id'=>$second->id,
             'outgoing_credential'=>'SenhaTeste123',
