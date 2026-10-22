@@ -635,6 +635,26 @@ class OperationalSettingsTest extends TestCase
         ]);
     }
 
+    public function test_discount_supervisor_credential_is_not_kept_in_session_after_validation_error(): void
+    {
+        $user=$this->user();
+        $product=$this->product(10);
+        $this->actingAs($user)->post(route('pdv.store'),[
+            'checkout_key'=>(string)\Illuminate\Support\Str::uuid(),
+            'discount_authorizer_id'=>$user->id,
+            'discount_credential'=>'senhaSegura123',
+            'items'=>[[
+                'item_type'=>'product',
+                'product_id'=>$product->id,
+                'quantity'=>'1.000',
+                'discount'=>'20.00',
+            ]],
+            // Missing payment fails validation after approval.
+        ])->assertSessionHasErrors('payment_method')
+          ->assertSessionMissing('_old_input.discount_credential');
+        self::assertSame(0,Sale::query()->count());
+    }
+
     public function test_pdv_discount_within_limit_does_not_require_supervisor(): void
     {
         $user=$this->user();
