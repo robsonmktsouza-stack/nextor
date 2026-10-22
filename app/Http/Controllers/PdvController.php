@@ -465,6 +465,7 @@ class PdvController extends Controller
     public function store(Request $request, SalesService $sales)
     {
         $data=$request->validate([
+            'checkout_key'=>['required','uuid'],
             'customer_id'=>['nullable','integer','exists:customers,id'],
             'consumer_document'=>['nullable','string','max:20'],
             'consumer_name'=>['nullable','string','max:190'],
@@ -491,6 +492,18 @@ class PdvController extends Controller
             'items.*.quantity'=>['required','numeric','gt:0','max:9999999999','decimal:0,3'],
             'items.*.discount'=>['nullable','numeric','min:0','max:9999999999.99','decimal:0,2'],
         ]);
+
+        // Idempotency is verified before recalculating the cart against mutable
+        // catalog data: a retry MUST return its original committed sale.
+        $checkoutKey=$data['checkout_key'];
+        $checkoutHash=hash('sha256',json_encode($data,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_THROW_ON_ERROR));
+        $previousSale=Sale::query()->where('pdv_checkout_key',$checkoutKey)->first();
+        if($previousSale) {
+            $this->assertPdvRetryMatches($previousSale,$checkoutHash,(int)$request->user()->id);
+            return redirect()->route('pdv.index')
+                ->with('pdv_receipt_sale',$previousSale->id)
+                ->with('pdv_last_sale',$previousSale->id);
+        }
 
         $pdvSettings=AppSetting::groupValues('pdv',[
             'require_customer'=>false,
@@ -710,7 +723,10 @@ class PdvController extends Controller
             ? max(0,$cashReceived-$cashPaymentTotal)
             : 0;
 
-        $sale=$sales->create([
+        try {
+            $sale=$sales->create([
+            'pdv_checkout_key'=>$checkoutKey,
+            'pdv_checkout_hash'=>$checkoutHash,
             'customer_id'=>$data['customer_id'] ?? null,
             'consumer_document'=>$consumerDocument,
             'consumer_name'=>$consumerDocument ? (trim((string)($data['consumer_name'] ?? '')) ?: null) : null,
@@ -725,6 +741,13 @@ class PdvController extends Controller
             'items'=>$rows,
             'payments'=>$payments,
         ],(int)$request->user()->id);
+        } catch (\Illuminate\Database\QueryException $error) {
+            // Concurrent POST with the same unique checkout key: the winning
+            // request already finalized the sale. Never create a replacement.
+            $sale=Sale::query()->where('pdv_checkout_key',$checkoutKey)->first();
+            if(!$sale) throw $error;
+            $this->assertPdvRetryMatches($sale,$checkoutHash,(int)$request->user()->id);
+        }
 
         return redirect()
             ->route('pdv.index')
@@ -732,6 +755,16 @@ class PdvController extends Controller
             ->with('pdv_last_sale',$sale->id)
             ->with('pdv_cash_received',$cashPaymentTotal>0 ? $cashReceived : $total)
             ->with('pdv_change',$change);
+    }
+
+    private function assertPdvRetryMatches(Sale $sale,string $hash,int $operatorId): void
+    {
+        if($sale->source!=='pdv' || (int)$sale->user_id!==$operatorId
+            || !hash_equals((string)$sale->pdv_checkout_hash,$hash)) {
+            throw ValidationException::withMessages([
+                'checkout_key'=>'Esta confirmação já foi utilizada por outra operação. Reabra a venda.',
+            ]);
+        }
     }
 
     public function suspendSale(Request $request)
