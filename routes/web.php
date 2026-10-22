@@ -103,6 +103,7 @@ Route::middleware(['auth','control.license'])->group(function () {
     Route::get('/pdv',[PdvController::class,'index'])->name('pdv.index')->middleware(['permission:pdv','company.configured']);
     Route::get('/pdv/search',[PdvController::class,'search'])->name('pdv.search')->middleware(['permission:pdv','company.configured']);
     Route::get('/pdv/sales/history',[PdvController::class,'salesHistory'])->name('pdv.sales.history')->middleware(['permission:pdv','company.configured']);
+    Route::get('/pdv/company/logo',[PdvController::class,'companyLogo'])->name('pdv.company.logo')->middleware(['permission:pdv','company.configured']);
     Route::get('/pdv/sales/{sale}/receipt-preview',[PdvController::class,'salesReceiptPreview'])->name('pdv.sales.receipt.preview')->middleware(['permission:pdv','company.configured']);
     Route::post('/pdv/cash/open',[PdvController::class,'openCash'])->name('pdv.cash.open')->middleware(['permission:pdv','company.configured']);
     Route::post('/pdv/cash/close',[PdvController::class,'closeCash'])->name('pdv.cash.close')->middleware(['permission:pdv','company.configured']);
