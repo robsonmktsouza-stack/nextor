@@ -1159,3 +1159,9 @@
    Desativado para Vendas e Comprovante: a hierarquia continua com sobreposição. */
 .pdv-body .pdv-sales-modal::backdrop,
 .pdv-body .pdv-receipt-modal::backdrop{backdrop-filter:none}
+
+/* Confirmacao de cancelamento dentro do modal de vendas. */
+.lumeron-pdv-page .pdv-sales-modal{position:relative}
+.lumeron-pdv-page .pdv-sales-cancel-sheet[hidden],.lumeron-pdv-page .pdv-sales-cancel-error[hidden],.lumeron-pdv-page .pdv-sales-action-status[hidden]{display:none!important}
+.lumeron-pdv-page .pdv-sales-cancel-sheet:not([hidden]){position:absolute;inset:0;z-index:5;display:grid;place-items:center;padding:16px;background:rgba(17,32,44,.44)}
+.lumeron-pdv-page .pdv-sales-cancel-panel{width:min(450px,100%);margin:auto;background:#fff;border:1px solid #cbd9e4;border-radius:5px;color:#344c5b;box-shadow:0 12px 30px rgba(12,30,43,.2)}
