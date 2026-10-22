@@ -273,6 +273,8 @@
       else if(value==='month')from.value=today.slice(0,7)+'-01';
     };
     const reset=()=>{
+      actionStatus.hidden=true;
+      actionStatus.textContent='';
       search.value='';
       period.value='today';
       status.value='all';
