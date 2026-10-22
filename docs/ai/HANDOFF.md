@@ -1,3 +1,13 @@
+## 22/10/2026 — Integridade e autorização do PDV (em validação)
+
+- Proteções comerciais implementadas SOMENTE na branch develop: chave única `sales.pdv_checkout_key` + hash para checkout idempotente, confirmação duplicada reaproveita a venda já registrada sem movimentar estoque/financeiro novamente, `public/js/pdv.js` impede duplo envio.
+- `PdvController::cancelSale` exige gerente/admin e senha ou PIN, usa `PdvActionAuthorization`, e `SalesService::cancel` registra aprovação na mesma transação comercial. Valida situação fiscal/devoluções existentes. Novo `pdv_action_approvals` com executor, autorizador, venda e motivo.
+- Desconto acima de `discount_approval_percent` (padrão 10%) é verificado no servidor, exige supervisor com credencial, usa modal em tela e registra autorização de desconto dentro da criação da venda. Mudanças no carrinho limpam as credenciais de autorização anterior.
+- Recuperação e descarte de vendas suspensas usam `lockForUpdate()` dentro de transação e verificam o operador proprietário; manager/admin pode intervir. NFC-e contingência/cancelamento exigem supervisor (rota do PDV). Credenciais sensíveis adicionadas a `bootstrap/app.php::$exceptions->dontFlash` para nunca aparecerem em old input.
+- Migration nova: `2026_10_22_170000_pdv_transaction_integrity.php`, com campos em `sales` e nova tabela de aprovações. `php artisan migrate` obrigatório antes de usar estas rotas. Não aplicar migração em produção sem CI.
+- A CI anterior `39836747389` falhou pois os testes fiscais tentavam iniciar contingência/cancelamento sem novas credenciais; testes corrigidos. CI `39837119641` e `39837288364` passaram; execuções dos commits posteriores ainda em andamento neste registro.
+- Testes adicionados em `OperationalSettingsTest`: reenvio idempotente, negação de alteração da mesma chave, desconto acima do limite sem credencial, aprovação válida com auditoria, desconto no limite sem aprovação, segredo ausente do `old_input` após erro. Teste de cancelamento de venda com reautenticação em `PdvSalesHistoryTest`. Verificar os resultados MAIS RECENTES antes de liberar.
+- PENDENTES PARA CERTIFICAR USO COMERCIAL: rodar MySQL real, transações concorrentes, testes em Chrome com impressora física, TEF/PIX adquirente e homologação NFC-e por UF. Não afirmar PDV 100% pronto sem testes. Não alterar main, control-center ou VPS.
 ## 22/10/2026 — Correção visual das configurações do PDV
 
 - A aba `Ajustes > PDV` tinha textos sobrepostos e cartões estreitos. Causa: o `label.field.col-6` do limite de supervisor tinha sido inserido na `settings-switch-grid` (grade de 2 colunas), forçando o CSS Grid a criar trilhas implícitas e esmagando os switches.
