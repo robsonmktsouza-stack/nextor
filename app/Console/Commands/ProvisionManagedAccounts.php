@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Company;
+use App\Support\Subdomain;
 use App\Models\ManagedProvisioningJob;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -107,7 +108,7 @@ final class ProvisionManagedAccounts extends Command
         $email = strtolower(trim((string) $company->email));
         $login = strtolower(trim((string) ($company->admin_login ?: 'admin')));
         $adminName = trim((string) ($company->contact_name ?: $company->legal_name));
-        if (!preg_match('/^[a-z][a-z0-9-]{1,38}$/', $slug)
+        if (!Subdomain::valid($slug)
             || !preg_match('/^[a-z][a-z0-9._-]{2,49}$/', $login)
             || !preg_match('/^\d{14}$/', (string) $company->cnpj)
             || filter_var($email, FILTER_VALIDATE_EMAIL) === false

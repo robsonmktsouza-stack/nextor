@@ -6,9 +6,28 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
+use App\Support\Subdomain;
+use Illuminate\Validation\ValidationException;
 
 final class Company extends Model
 {
+    public function setSubdomainAttribute(mixed $value): void
+    {
+        $this->attributes['subdomain'] = Subdomain::normalize((string) $value);
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (self $company): void {
+            if (!Subdomain::valid((string) $company->subdomain)) {
+                throw ValidationException::withMessages(['subdomain' => 'Identificador inválido ou reservado.']);
+            }
+            if ($company->exists && $company->isDirty('subdomain')) {
+                throw ValidationException::withMessages(['subdomain' => 'O identificador da empresa não pode ser alterado.']);
+            }
+        });
+    }
+
     protected $fillable = [
         'instance_id', 'legal_name', 'trade_name', 'cnpj', 'contact_name', 'email',
         'phone', 'subdomain', 'installation_url', 'admin_login', 'plan',

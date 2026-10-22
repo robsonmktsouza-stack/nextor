@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Company;
+use App\Support\Subdomain;
 use Illuminate\Support\Facades\Http;
 use Symfony\Component\Process\Process;
 
@@ -19,8 +20,7 @@ final class LocalErpProvisioner
             throw new \RuntimeException('O provisionamento local não está disponível neste ambiente.');
         }
         $slug = $company->subdomain;
-        if (!is_string($slug) || !preg_match('/^[a-z][a-z0-9-]{1,38}$/', $slug)
-            || str_contains($slug, '--')
+        if (!is_string($slug) || !Subdomain::valid($slug)
             || !preg_match('/^\d{14}$/', (string) $company->cnpj)) {
             throw new \RuntimeException('Identificação da empresa inválida.');
         }

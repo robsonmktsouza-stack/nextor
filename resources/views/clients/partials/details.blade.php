@@ -30,7 +30,7 @@
     <span><a href="{{ route('clients.first-access',$company) }}" target="_blank" rel="noopener noreferrer">Primeiro acesso ao ERP</a></span>
 @endif
 @endif
-<strong>Subdomínio</strong><span>{{ $company->subdomain }}</span><strong>Conexão</strong><span><span class="status {{ $company->last_seen_at ? 'active' : 'expired' }}">{{ $company->last_seen_at ? 'Conectada anteriormente' : 'Aguardando instalação' }}</span></span><strong>Último contato</strong><span>{{ $company->last_seen_at?->format('d/m/Y H:i')??'Ainda não conectada' }}</span></div>
+<strong>Identificador de acesso</strong><span>{{ $company->subdomain }} <small>(exclusivo e permanente)</small></span><strong>Conexão</strong><span><span class="status {{ $company->last_seen_at ? 'active' : 'expired' }}">{{ $company->last_seen_at ? 'Conectada anteriormente' : 'Aguardando instalação' }}</span></span><strong>Último contato</strong><span>{{ $company->last_seen_at?->format('d/m/Y H:i')??'Ainda não conectada' }}</span></div>
 </section>
 <section class="detail-box"><h3>Licença e acesso</h3>
 <div class="invoice-client-shortcuts">

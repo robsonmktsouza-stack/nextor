@@ -7,6 +7,7 @@ use App\Models\Plan;
 use App\Models\ManagedProvisioningJob;
 use App\Services\InvoiceCycleService;
 use App\Support\Cnpj;
+use App\Support\Subdomain;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -38,7 +39,7 @@ final class CompanyController extends Controller
                 if ($scheme === 'http' && app()->environment('local', 'testing')
                     && (in_array($host, ['localhost', '127.0.0.1', '::1'], true)
                         || (app()->environment('local')
-                            && preg_match('/^lumeron-[a-z][a-z0-9-]{1,38}\.test$/', $host)))) {
+                            && preg_match('/^lumeron-[a-z0-9][a-z0-9-]{0,37}[a-z0-9]\.test$/', $host)))) {
                     return;
                 }
 
@@ -96,7 +97,7 @@ final class CompanyController extends Controller
     {
         $request->merge([
             'cnpj' => Cnpj::digits($request->input('cnpj')),
-            'subdomain' => strtolower(trim((string) $request->input('subdomain'))),
+            'subdomain' => Subdomain::normalize((string) $request->input('subdomain')),
         ]);
         $data = $request->validate([
             'legal_name' => ['required', 'string', 'min:3', 'max:220'],
@@ -106,8 +107,10 @@ final class CompanyController extends Controller
             'contact_name' => ['nullable', 'string', 'max:160'],
             'email' => ['required', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:30'],
-            'subdomain' => ['required', 'regex:/^[a-z][a-z0-9-]{1,38}$/',
-                Rule::notIn(['admin', 'api', 'login', 'www']), Rule::unique('companies', 'subdomain')],
+            'subdomain' => ['required', 'string', 'max:39',
+                fn ($field, $value, $fail) => Subdomain::valid((string) $value)
+                    ?: $fail('Identificador inválido ou reservado.'),
+                Rule::unique('companies', 'subdomain')],
             'installation_url' => $this->installationUrlRules(),
             'admin_login' => ['nullable', 'string', 'regex:/^[a-zA-Z0-9_.-]{3,100}$/'],
             'plan' => ['required', Rule::exists('plans', 'code')->where('active', true)],
