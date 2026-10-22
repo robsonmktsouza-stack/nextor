@@ -219,8 +219,9 @@ final class SaleReceiptReuseTest extends TestCase
             ->assertSee('SEM VALOR FISCAL')
             ->assertSee('R$ 65,00')
             ->assertSee('Comprovante interno de venda')
-            ->assertSee('Venda nº 000000001')
+            ->assertSee('Venda nº '.str_pad((string)$sale->id,9,'0',STR_PAD_LEFT))
             ->assertDontSee('@IF(')
+            ->assertDontSee('@if(')
             ->assertDontSee('@ENDIF')
             ->assertDontSee('class="pdv-receipt-print-frame"',false)
             ->assertDontSee('class="pdv-receipt-preview-shell"',false);
