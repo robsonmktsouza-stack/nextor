@@ -12,7 +12,7 @@ final class ControlSettingsController extends Controller
 {
     public function index(OutboundMailSettings $outbound)
     {
-        $settings = ControlSetting::saved();
+        $settings = ControlSetting::stored();
         return view('settings.index', [
             'settings' => $settings,
             'emailReady' => $outbound->enabled(),
