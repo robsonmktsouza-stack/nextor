@@ -6,10 +6,10 @@
         @include('partials.icon',['name'=>'check','size'=>18])Executar verificação
     </button>
 </form>
-@if(app(\App\Services\ClientEmailNotificationService::class)->enabled())
+@if(app(\App\Services\ClientEmailNotificationService::class)->enabled() || app(\App\Services\InvoiceEmailNotificationService::class)->automaticEnabled())
 <form method="post" action="{{ route('automations.send-emails') }}">@csrf
     <button class="btn subtle" type="submit" data-confirm="Enviar agora os avisos por e-mail que estão pendentes?">
-        @include('partials.icon',['name'=>'send','size'=>18])Enviar avisos
+        @include('partials.icon',['name'=>'send','size'=>18])Enviar e-mails pendentes
     </button>
 </form>
 @endif
