@@ -34,6 +34,84 @@
     <button class="pdv-modal-primary" type="button" id="pdvDiscountApprovalConfirm">Autorizar e concluir venda</button>
   </div>
 </dialog>
+@if($overdueCashSessions->isNotEmpty())
+<dialog class="pdv-quick-modal pdv-overdue-cash-dialog" id="pdvOverdueCashDialog"
+        data-must-resolve="{{ $cashOverdueMustResolve ? '1' : '0' }}"
+        aria-labelledby="pdvOverdueCashTitle">
+  <div class="pdv-modal-head">
+    <div>
+      <h2 id="pdvOverdueCashTitle">Caixa do dia anterior aberto</h2>
+      <p>{{ $overdueCashSessions->count() }} {{ $overdueCashSessions->count()===1 ? 'turno pendente' : 'turnos pendentes' }} de conferência</p>
+    </div>
+    @unless($cashOverdueMustResolve)
+      <button type="button" class="pdv-modal-close" data-pdv-overdue-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+    @endunless
+  </div>
+  <div class="pdv-cash-modal-body pdv-overdue-cash-body">
+    <p class="pdv-overdue-cash-notice">O turno anterior permanece aberto. É necessário conferir e fechar o caixa antes de iniciar o movimento de hoje.</p>
+    @if($errors->any())
+      <p class="pdv-overdue-cash-error" role="alert">{{ $errors->first() }}</p>
+    @endif
+    @if($overdueOwnCash)
+      <section class="pdv-overdue-cash-group">
+        <div class="pdv-overdue-cash-details">
+          <strong>{{ $overdueOwnCash->register?->name ?? 'Caixa anterior' }}</strong>
+          <span>Aberto em {{ $overdueOwnCash->opened_at->format('d/m/Y \à\s H:i') }} · {{ auth()->user()->name }}</span>
+        </div>
+        <form method="post" action="{{ route('pdv.cash.close') }}" class="pdv-overdue-cash-form">
+          @csrf
+          <label><span>Dinheiro contado no caixa *</span>
+            <input type="number" name="closing_amount" min="0" step="0.01" value="{{ old('closing_amount') }}" required>
+          </label>
+          <label><span>Motivo ou observação</span>
+            <textarea name="closing_notes" rows="2" maxlength="1000" placeholder="Obrigatório se houver diferença"></textarea>
+          </label>
+          <label><span>Sua senha ou PIN *</span>
+            <input type="password" name="credential" autocomplete="off" required>
+          </label>
+          <button type="submit" class="pdv-modal-primary">Conferir e fechar meu caixa</button>
+        </form>
+      </section>
+    @endif
+    @if($cashCanSupervise && $overdueOtherCashSessions->isNotEmpty())
+      <section class="pdv-overdue-cash-group">
+        <h3>Regularização pelo responsável</h3>
+        <form method="post" action="{{ route('pdv.cash.overdue.close') }}" class="pdv-overdue-cash-form">
+          @csrf
+          <label><span>Caixa e operador ausente *</span>
+            <select name="cash_session_id" required>
+              @foreach($overdueOtherCashSessions as $pending)
+                <option value="{{ $pending->id }}" @selected(old('cash_session_id')==$pending->id)>
+                  {{ $pending->register?->name ?? 'Caixa sem terminal' }} · {{ $pending->user?->name ?? 'Operador' }} · {{ $pending->opened_at->format('d/m/Y H:i') }}
+                </option>
+              @endforeach
+            </select>
+          </label>
+          <label><span>Dinheiro contado no caixa *</span>
+            <input type="number" name="counted_amount" step="0.01" min="0" value="{{ old('counted_amount') }}" required>
+          </label>
+          <label><span>Motivo da regularização *</span>
+            <textarea name="reason" rows="2" minlength="5" maxlength="1000" placeholder="Informe o motivo da ausência e a conferência realizada" required></textarea>
+          </label>
+          <label><span>Sua senha ou PIN de supervisor *</span>
+            <input type="password" name="credential" autocomplete="off" required>
+          </label>
+          <button type="submit" class="pdv-modal-primary">Confirmar regularização</button>
+        </form>
+      </section>
+    @endif
+    @if(!$overdueOwnCash && (!$cashCanSupervise || $overdueOtherCashSessions->isEmpty()))
+      <p class="pdv-overdue-cash-help">Peça ao responsável pelo turno ou a um gerente que regularize o caixa para liberar as vendas.</p>
+    @endif
+    @if($cashOverdueMustResolve)
+      <form method="post" action="{{ route('logout') }}" class="pdv-overdue-cash-logout">
+        @csrf
+        <button type="submit">Sair / trocar usuário</button>
+      </form>
+    @endif
+  </div>
+</dialog>
+@endif
 @if(!$cashSession)
 <dialog class="pdv-quick-modal" id="pdvCashOpenDialog">
   <form method="post" action="{{ route('pdv.cash.open') }}">
@@ -746,6 +824,11 @@
     </div>
   @endif
   <div class="pdv-operations-list">
+    @if($cashCanSupervise && $overdueOtherCashSessions->isNotEmpty())
+      <button type="button" data-pdv-operation="overdue-cash">
+        <span><strong>Caixas de dias anteriores</strong><small>Regularizar turnos sem fechamento.</small></span><kbd>—</kbd>
+      </button>
+    @endif
     <button type="button" data-pdv-operation="suspend"><span><strong>Suspender venda</strong><small>Guarda o carrinho para atender depois.</small></span><kbd>Alt+0</kbd></button>
     <button type="button" data-pdv-operation="resume"><span><strong>Recuperar venda</strong><small>Retoma uma venda suspensa sem movimentar estoque antes da conclusão.</small></span><kbd>Alt+R</kbd></button>
     <button type="button" data-pdv-operation="electronic"><span><strong>Dados de cartão e PIX</strong><small>Integração, autorização e dados da instituição de pagamento.</small></span><kbd>Alt+T</kbd></button>
