@@ -652,7 +652,7 @@ class SettingsController extends Controller
             ],
             'pdv'=>[
                 'default_payment_method'=>null,'require_customer'=>false,'allow_discount'=>true,
-                'require_cash_opening'=>true,'ask_consumer_document'=>true,'allow_split_payment'=>true,'allow_cash_movements'=>true,
+                'require_cash_opening'=>true,'ask_consumer_document'=>true,'allow_split_payment'=>true,'allow_cash_movements'=>true,'supervisor_movement_min'=>200,
                 'auto_nfce'=>false,'show_stock'=>true,'receipt_width'=>'80','receipt_copies'=>1,
             ],
             'billing'=>[
