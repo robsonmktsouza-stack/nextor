@@ -52,12 +52,12 @@ final class ControlSetting extends Model
 
     public static function recurringEnabled(): bool
     {
-        return self::saved()?->recurring_invoices_enabled ?? true;
+        return self::safeSaved()?->recurring_invoices_enabled ?? true;
     }
 
     public static function invoiceDays(): int
     {
-        return max(0, min(30, (int) (self::saved()?->invoice_days_ahead ?? 7)));
+        return max(0, min(30, (int) (self::safeSaved()?->invoice_days_ahead ?? 7)));
     }
 
     public function smtpReady(): bool
