@@ -2056,7 +2056,8 @@
         cancelNfceModal?.open ||
         cashOpenDialog?.open ||
         cashCloseDialog?.open ||
-        salesModal?.open;
+        salesModal?.open ||
+        document.getElementById('pdvReceiptModal')?.open;
 
       if(modalOpen) return;
 
