@@ -25,7 +25,7 @@ final class PdvCashService
     public function forSale(int $userId): ?PdvCashSession
     {
         $session=$this->current($userId,true);
-        if(!$session && (bool)AppSetting::value('pdv','require_cash_opening',true)) {
+        if(!$session) {
             throw ValidationException::withMessages([
                 'cash_session'=>'Abra o caixa antes de concluir uma venda no PDV.',
             ]);
