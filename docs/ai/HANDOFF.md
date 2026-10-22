@@ -1,3 +1,14 @@
+## 22/10/2026 — Performance dos modais em todo o ERP (develop)
+
+- Relato: travamentos/abertura lenta em vários modais, NÃO somente PDV. Causa potencial confirmada no código global: blur em overlays de carregamento/confirmar, sombras grandes e três `MutationObserver` globais que varriam simultaneamente o mesmo DOM em cada criação de linha/campo.
+- CSS ajustado em `public/css/erp.css` e `public/css/pdv.css`: overlays não aplicam `backdrop-filter:blur`; sombras de janelas ERP/NF-e foram reduzidas sem mudar paleta, conteúdo ou geometria. Não interferir nos PDFs/impressoras.
+- `public/js/erp.js`: campos `select`, numéricos e máscaras de diálogo nativo fechado ou layer customizada `.nextor-modal-layer` fechada só são aprimorados na abertura. Um observer para nós novos substitui os três observadores globais; observer isolado acompanha mudança open/is-open dos modais. Guarda de idempotência evita reprocessamento de modais com múltiplas alterações no mesmo ciclo.
+- Dropdowns mantêm `<select>` nativo e sincronização de formulário, lista construída somente na abertura, agora por `DocumentFragment`. Busca normalizada e cacheada por opção, mantém regra exata de quatro opções válidas e reposiciona lista no máximo uma vez por frame.
+- Nova prova no Chromium `tests/browser/modal-lifecycle.html`: 90 selects em dialog e 40 em layer; exige estado sem aprimoramento quando fechado, abertura e alteração funcional de campos, ausência de blur e ausência de duplicação. Integrada ao workflow `.github/workflows/acbr-integration-checks.yml`. Adicionado `tests/Feature/ModalPerformanceTest.php` para proteções estáticas.
+- A primeira execução do teste novo falhou porque a própria prova selecionava o input de busca de um dropdown em vez do campo numérico; o seletor do teste foi corrigido. A execução Chromium subsequente passou; verificar CI do HEAD mais recente antes de promover.
+- Sem mudanças em main, Lumeron Control ou VPS. Para atualizar ambiente local: `git pull origin develop`, `php artisan optimize:clear`, Ctrl+F5. Sem migração de banco nesta correção específica.
+- Ainda não é benchmark medido no Chrome do cliente: comparar abertura, rolagem, troca de abas e edição de formulários longos nos módulos Produtos, Clientes, Vendas, Financeiro, Fiscal e Ajustes. Inspecionar Chrome Performance para confirmar duração e reflows, sem supor velocidade numérica.
+
 ## 22/10/2026 — Integridade e autorização do PDV (em validação)
 
 - Proteções comerciais implementadas SOMENTE na branch develop: chave única `sales.pdv_checkout_key` + hash para checkout idempotente, confirmação duplicada reaproveita a venda já registrada sem movimentar estoque/financeiro novamente, `public/js/pdv.js` impede duplo envio.
