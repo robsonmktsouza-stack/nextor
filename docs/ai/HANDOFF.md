@@ -1,3 +1,14 @@
+## 22/10/2026 — Caixa físico e troca de turnos, PIN e conferência (develop)
+
+- Migration: adiciona caixas físicos (Caixa 01 padrão), PIN individual hash para usuário, vinculação do turno anterior, novo responsável, e identidade do supervisor que aprova retirada. Dados e turnos antigos permanecem preservados, sem reatribuição automática.
+- PdvCashService: abertura bloqueada se terminal físico já estiver ocupado; um turno aberto por usuário; passagem de turno em uma única transação, com contagem, diferença com justificativa, fechamento do turno anterior e abertura do novo com valor físico entregue.
+- Autenticação: abertura, fechamento e passagem exigem credenciais. Configuração de PIN individual de 6 dígitos exige senha completa; senhas e PINs armazenados por hash, tentativas limitadas. PIN para assumir a sessão só está disponível a operadores exclusivamente do PDV; gerente, admin e usuários de múltiplos módulos exigem senha completa.
+- Blind closing: saldo esperado não aparece no formulário, nem no resumo aberto do operador; relatório detalhado de caixa aberto só aparece a gerentes/admins. Relatório final guarda contado/esperado/diferença e identificação de pessoas/terminais.
+- Autorização: sangria/reembolso a partir de R$ 200 ou limite configurado em Ajustes > PDV exige autenticação de gestor autorizado e grava sua identidade na movimentação. Revisão exige reautenticação de gestor e é independente quando há outro gestor habilitado; caso único é identificada como exceção.
+- UI: caixa selecionável na abertura, trocar turno com assinatura dos dois operadores, encerramento cego e senha, cadastro de PIN individual, administração de terminais pelo admin; novo JS integrado a Operações do PDV.
+- Implantação gradativa: ativar Ajustes > PDV > Exigir abertura de caixa por empresa depois de configurar operadores/terminais. Legado sem obrigatoriedade mantém operação compatível. Não altera NFC-e, finalização, vendas existentes, main, Control ou produção.
+- Testes adicionados em tests/Feature/PdvCashShiftSecurityTest.php; teste histórico de fechamento ajustado. Requer validação PHP/MySQL real; fluxo e migração não foram executados no Laragon por este conector.
+- Para testar: git pull origin develop; php artisan migrate; php artisan optimize:clear; php artisan test --filter=PdvCashShiftSecurityTest; php artisan test --filter=PdvCashReconciliationTest. Em seguida, simular dois usuários e verificar os relatórios.
 ## Continuidade — 22/10/2026 — cancelamento de vendas pelo histórico do PDV (develop)
 
 - Pedido: opção **Cancelar** em `PDV > Vendas` junto ao comprovante. Mantida a tabela e os filtros; cancelamento pede confirmação com motivo obrigatório de 5–255 caracteres em painel próprio DENTRO do mesmo dialog (sem empilhar dialogs).
