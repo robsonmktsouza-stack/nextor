@@ -210,7 +210,7 @@ final class ControlSettingsTest extends TestCase
         $this->get(route('settings.index'))
             ->assertOk()
             ->assertSee('O servidor rejeitou a autenticação.')
-            ->assertDontSee('financeiro@example.test');
+            ->assertDontSee('Failed to authenticate on SMTP server with username');
     }
 
     public function test_smtp_diagnostic_distinguishes_ssl_dns_and_network_failures(): void
