@@ -210,9 +210,9 @@ final class PdvCashService
     }
 
     public function movement(int $userId, string $type, string $amount, string $reason,
-        ?int $saleId = null, ?int $returnId = null): PdvCashMovement
+        ?int $saleId = null, ?int $returnId = null, ?int $approvedBy = null): PdvCashMovement
     {
-        return DB::transaction(function () use ($userId,$type,$amount,$reason,$saleId,$returnId) {
+        return DB::transaction(function () use ($userId,$type,$amount,$reason,$saleId,$returnId,$approvedBy) {
             User::query()->whereKey($userId)->lockForUpdate()->firstOrFail();
             $session=$this->current($userId,true);
             if(!$session) {
@@ -277,6 +277,7 @@ final class PdvCashService
                 'type'=>$type,'amount'=>self::currency($cents),
                 'reason'=>trim($reason),'sale_id'=>$type==='refund'?$saleId:null,
                 'sale_return_id'=>$type==='refund'?$returnId:null,
+                'approved_by'=>$approvedBy,
             ]);
         },3);
     }
