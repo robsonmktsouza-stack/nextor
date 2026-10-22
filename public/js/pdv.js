@@ -85,6 +85,14 @@
     const cashSupervisorUser=document.getElementById('pdvCashSupervisorUser');
     const cashSupervisorCredential=document.getElementById('pdvCashSupervisorCredential');
 
+    const discountApprovalModal=document.getElementById('pdvDiscountApprovalDialog');
+    const discountApprover=document.getElementById('pdvDiscountApprover');
+    const discountApproverCredential=document.getElementById('pdvDiscountApproverCredential');
+    const discountApprovalConfirm=document.getElementById('pdvDiscountApprovalConfirm');
+    const discountApprovalError=document.getElementById('pdvDiscountApprovalError');
+    const discountAuthorizedBy=document.getElementById('pdvDiscountAuthorizedBy');
+    const discountAuthorizedCredential=document.getElementById('pdvDiscountAuthorizedCredential');
+    const discountLimit=Math.max(0,Math.min(100,Number(app.dataset.discountApprovalPercent)||0));
     const discountModal=document.getElementById('pdvDiscountModal');
     const discountModalInput=document.getElementById('pdvDiscountModalInput');
     const discountItemName=document.getElementById('pdvDiscountItemName');
@@ -631,6 +639,9 @@
     };
 
     const renderCart=()=>{
+      // Any change to the cart invalidates a previous one-time approval.
+      if(discountAuthorizedBy)discountAuthorizedBy.value='';
+      if(discountAuthorizedCredential)discountAuthorizedCredential.value='';
       cart.innerHTML='';
 
       if(!state.size){
@@ -1817,12 +1828,39 @@
         return;
       }
 
+      const overLimit=[...state.values()].some(item=>{
+        const gross=Number(item.price)*Number(item.quantity);
+        return gross>0 && ((Number(item.discount)||0)*100)>gross*discountLimit+0.00001;
+      });
+      if(overLimit && (!discountAuthorizedBy?.value || !discountAuthorizedCredential?.value)){
+        finishFlowPending=true;
+        if(discountApprovalError)discountApprovalError.hidden=true;
+        if(!discountApprovalModal?.open)discountApprovalModal?.showModal();
+        discountApproverCredential?.focus();
+        return;
+      }
       finishFlowPending=false;
       syncPayload();
       syncPaymentPayload();
       bypassFinalizeValidation=true;
       form.requestSubmit();
     };
+
+    discountApprovalConfirm?.addEventListener('click',()=>{
+      if(!discountApprover?.value || !discountApproverCredential?.value.trim()){
+        discountApprovalError.textContent='Selecione o responsável e informe a senha ou PIN.';
+        discountApprovalError.hidden=false;
+        return;
+      }
+      discountAuthorizedBy.value=discountApprover.value;
+      discountAuthorizedCredential.value=discountApproverCredential.value;
+      discountApproverCredential.value='';
+      discountApprovalModal.close();
+      requestFinalize();
+    });
+    discountApprovalModal?.addEventListener('close',()=>{
+      if(!checkoutSubmitting)finishFlowPending=false;
+    });
 
     const runCommand=command=>{
       switch(command){
@@ -1969,7 +2007,8 @@
     [
       customerModal,paymentModal,discountModal,cashModal,notesModal,consumerModal,
       electronicModal,operationsModal,suspendModal,recoverModal,contingencyModal,
-      cancelNfceModal,cashMovementModal,cashOpenDialog,cashCloseDialog,cashHandoverDialog,cashPinDialog
+      cancelNfceModal,cashMovementModal,cashOpenDialog,cashCloseDialog,cashHandoverDialog,cashPinDialog,
+      discountApprovalModal
     ].forEach(modal=>{
       modal?.addEventListener('close',()=>{
         setTimeout(()=>search.focus(),0);
@@ -2083,6 +2122,7 @@
         cashCloseDialog?.open ||
         cashHandoverDialog?.open ||
         cashPinDialog?.open ||
+        discountApprovalModal?.open ||
         salesModal?.open ||
         document.getElementById('pdvReceiptModal')?.open;
 
