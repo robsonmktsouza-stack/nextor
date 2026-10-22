@@ -466,6 +466,8 @@ class PdvController extends Controller
     {
         $data=$request->validate([
             'checkout_key'=>['required','uuid'],
+            'discount_authorizer_id'=>['nullable','integer','exists:users,id'],
+            'discount_credential'=>['nullable','string'],
             'customer_id'=>['nullable','integer','exists:customers,id'],
             'consumer_document'=>['nullable','string','max:20'],
             'consumer_name'=>['nullable','string','max:190'],
@@ -547,6 +549,8 @@ class PdvController extends Controller
 
         $rows=[];
         $totalCents=0;
+        $approvalLimit=min(100,max(0,(float)AppSetting::value('pdv','discount_approval_percent',10)));
+        $requiresDiscountApproval=false;
 
         foreach($data['items'] as $index=>$row) {
             $quantity=(float)$row['quantity'];
@@ -565,6 +569,9 @@ class PdvController extends Controller
             }
 
             $totalCents += $grossCents-$discountCents;
+            if($grossCents>0 && $discountCents*100>$grossCents*$approvalLimit) {
+                $requiresDiscountApproval=true;
+            }
 
             $rows[]=[
                 'item_type'=>'product',
@@ -576,6 +583,16 @@ class PdvController extends Controller
                 'discount'=>number_format($discountCents/100,2,'.',''),
                 'notes'=>null,
             ];
+        }
+
+        $discountApprovedBy=null;
+        if($requiresDiscountApproval) {
+            $supervisor=app(\App\Services\PdvActionAuthorization::class)->approve(
+                $request->user(),isset($data['discount_authorizer_id'])
+                    ? (int)$data['discount_authorizer_id'] : null,
+                (string)($data['discount_credential'] ?? ''),$request->ip()
+            );
+            $discountApprovedBy=$supervisor->id;
         }
 
         $total=$totalCents/100;
@@ -727,6 +744,7 @@ class PdvController extends Controller
             $sale=$sales->create([
             'pdv_checkout_key'=>$checkoutKey,
             'pdv_checkout_hash'=>$checkoutHash,
+            'pdv_discount_approved_by'=>$discountApprovedBy,
             'customer_id'=>$data['customer_id'] ?? null,
             'consumer_document'=>$consumerDocument,
             'consumer_name'=>$consumerDocument ? (trim((string)($data['consumer_name'] ?? '')) ?: null) : null,
