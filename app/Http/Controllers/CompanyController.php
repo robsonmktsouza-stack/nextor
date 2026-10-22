@@ -108,6 +108,7 @@ final class CompanyController extends Controller
             'email' => ['required', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:30'],
             'subdomain' => ['required', 'string', 'max:39',
+                'regex:/^[a-z0-9][a-z0-9-]{0,37}[a-z0-9]$/',
                 fn ($field, $value, $fail) => Subdomain::valid((string) $value)
                     ?: $fail('Identificador inválido ou reservado.'),
                 Rule::unique('companies', 'subdomain')],
