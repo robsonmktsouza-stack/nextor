@@ -238,6 +238,8 @@ class SettingsController extends Controller
             $data[$key]=$request->boolean($key);
         }
 
+        if ($group==='pdv') $data['require_cash_opening']=true;
+
         foreach($rules as $key=>$_rules) {
             if(in_array($key,$booleanKeys,true)) continue;
             if(!array_key_exists($key,$data)) $data[$key]=null;
