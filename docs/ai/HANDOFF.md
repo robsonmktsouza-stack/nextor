@@ -1,3 +1,13 @@
+## 22/10/2026 — Relatório de fechamento de caixa dentro de modal
+
+- Relato: após fechar caixa, o PDV redirecionava para página isolada `/pdv/cash/{id}/report`, exigindo navegação manual para voltar, mesmo com botão Histórico/PDV. O proprietário quer o relatório em janela/modal, incluindo a navegação pelo histórico.
+- Fluxo de fechamento normal em `PdvController::closeCash()` e regularização de caixa de dia anterior em `PdvCashWorkflowController::closeOverdue()` agora redirecionam para `pdv.index` com flash `pdv_cash_report_id`. O diálogo `resources/views/pdv/partials/cash-report-modal.blade.php` aparece automaticamente sobre a tela original, com Voltar às vendas, Histórico, Imprimir/Salvar PDF e Fechar.
+- `PdvCashReportController::show()` mantém autorização de acesso e valores originais. Relatório `resources/views/pdv/cash-report.blade.php` aceita `?embed=1` para exibição responsiva em iframe (sem nav duplicado, porém impressão @page A4 preservada). A URL direta sem embed ainda funciona como fallback e para acesso externo.
+- `public/js/pdv-cash-report-modal.js`: carrega iframe apenas ao abrir modal, valida que URL é same-origin `/pdv/cash/{id}/report`, informa carregamento, permite imprimir o iframe sem imprimir a página inteira, restaura foco e limpa iframe no fechamento. CSS encapsulado em `public/css/pdv-cash-report-modal.css`, carregado em `layouts/pdv.blade.php` e `pdv/cash-history.blade.php`.
+- `resources/views/pdv/cash-history.blade.php`: os números de cada turno abrem o mesmo modal sem deixar a listagem (href direto permanece fallback sem JS). `PdvCashReportController::review()` preserva `embed=1` depois da confirmação administrativa; os formulários e dados não foram simplificados ou removidos.
+- Testes adicionados `tests/Feature/PdvCashReportModalTest.php` (5 casos de modal automático, conteúdo e impressão, navegação/histórico, revisão no iframe) e corrigidas expectativas de redirecionamento em `tests/Feature/PdvOverdueCashTest.php`. Não requer migração e não altera main, control-center ou VPS. Confirmar o workflow do último commit em develop antes de declarar aprovado.
+- Validação local: `git switch develop && git pull origin develop && php artisan optimize:clear`, Ctrl+F5. Fechar caixa, conferir popup, imprimir, fechar, verificar histórico, realizar revisão administrativa sem trocar de tela e atestar comportamento no Chrome real.
+
 ## 22/10/2026 — Turnos de caixa pendentes ao virar o dia (develop)
 
 - Solicitação: caixa aberto por Maria em um dia não deve ser reutilizado silenciosamente no dia seguinte. Não encerrar automaticamente. Impedir que vendas de dias diferentes sejam acumuladas sem conferência. Permitir regularização pelo proprietário do turno ou gerente na ausência, com senha/PIN e rastreabilidade.
