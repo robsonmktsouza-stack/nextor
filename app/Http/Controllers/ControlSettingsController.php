@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 use App\Mail\SettingsTestMail;
 use App\Models\ControlSetting;
 use App\Services\OutboundMailSettings;
+use App\Support\EmailConnectionFeedback;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -83,9 +85,14 @@ final class ControlSettingsController extends Controller
             );
             return back()->with('success',
                 'Mensagem de teste enviada ao servidor de e-mail. Confira sua caixa de entrada.');
-        } catch (\Throwable) {
-            return back()->with('error',
-                'Não foi possível enviar o teste. Confira as configurações de e-mail.');
+        } catch (\Throwable $error) {
+            // Do not log the transport transcript or raw exception: some
+            // SMTP exceptions contain account data or authentication traces.
+            Log::warning('control.smtp_test_failed', [
+                'category' => EmailConnectionFeedback::category($error),
+                'exception_type' => get_class($error),
+            ]);
+            return back()->with('error', EmailConnectionFeedback::message($error));
         }
     }
 
