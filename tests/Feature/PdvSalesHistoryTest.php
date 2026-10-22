@@ -171,6 +171,7 @@ final class PdvSalesHistoryTest extends TestCase
             ->assertSee('VENDA CANCELADA')
             ->assertSee('Venda cancelada')
             ->assertDontSee('@IF(')
+            ->assertDontSee('@if(')
             ->assertDontSee('@ENDIF')
             ->assertDontSee('Venda efetuada com sucesso')
             ->assertDontSee('Preparar NFC-e');
@@ -225,6 +226,18 @@ final class PdvSalesHistoryTest extends TestCase
             'from'=>today()->toDateString(),
             'to'=>today()->subDay()->toDateString(),
         ]))->assertUnprocessable()->assertJsonValidationErrors('from');
+    }
+
+    public function test_receipt_history_uses_one_active_dialog_and_light_backdrop(): void
+    {
+        $salesJs=file_get_contents(public_path('js/pdv-sales.js'));
+        $receiptJs=file_get_contents(public_path('js/pdv-receipt-modal.js'));
+        $stylesheet=file_get_contents(public_path('css/pdv-lumeron.css'));
+        self::assertStringContainsString('suppressSalesClose=true',$salesJs);
+        self::assertStringContainsString('modal.close()',$salesJs);
+        self::assertStringContainsString('restoreSales?.()',$receiptJs);
+        self::assertStringContainsString('.pdv-body .pdv-sales-modal::backdrop',$stylesheet);
+        self::assertStringContainsString('backdrop-filter:none',$stylesheet);
     }
 
     public function test_sales_history_is_unavailable_to_users_without_pdv_permission(): void
