@@ -11,16 +11,20 @@ final class PdvCashReportController extends Controller
     public function index(Request $request)
     {
         $query=PdvCashSession::query()->with(['user:id,name','register:id,name,code'])->latest('opened_at');
-        if($request->user()->role!=='admin') $query->where('user_id',$request->user()->id);
+        if(!in_array($request->user()->role,['admin','manager'],true)
+            || !$request->user()->canAccess('pdv')) {
+            $query->where('user_id',$request->user()->id);
+        }
         return view('pdv.cash-history',['sessions'=>$query->paginate(30)]);
     }
 
     public function show(Request $request, PdvCashSession $cashSession, PdvCashService $cash)
     {
-        abort_unless($request->user()->role==='admin'
-            || $cashSession->user_id===$request->user()->id,403);
+        $supervisor=in_array($request->user()->role,['admin','manager'],true)
+            && $request->user()->canAccess('pdv');
+        abort_unless($supervisor || $cashSession->user_id===$request->user()->id,403);
 
-        if (!$cashSession->closed_at && $request->user()->role!=='admin') {
+        if (!$cashSession->closed_at && !$supervisor) {
             return redirect()->route('pdv.index')->with('error',
                 'A apuração detalhada será disponibilizada após o fechamento do turno.');
         }
@@ -38,15 +42,20 @@ final class PdvCashReportController extends Controller
 
     public function review(Request $request, PdvCashSession $cashSession, PdvCashService $cash)
     {
-        abort_unless($request->user()->role==='admin',403);
+        abort_unless(in_array($request->user()->role,['admin','manager'],true)
+            && $request->user()->canAccess('pdv'),403);
         $data=$request->validate([
             'review_notes'=>['required','string','min:5','max:1000'],
             'credential'=>['required','string'],
         ]);
         app(\App\Services\PdvOperatorAuthorization::class)->verify(
             $request->user(),$data['credential'],$request->ip());
-        $independent=\App\Models\User::query()->where('role','admin')
-            ->where('is_active',true)->where('id','!=',$cashSession->user_id)->exists();
+        $independent=\App\Models\User::query()
+            ->where('is_active',true)
+            ->whereIn('role',['admin','manager'])
+            ->where('id','!=',$cashSession->user_id)
+            ->get(['id','role','permissions'])
+            ->contains(fn($user)=>$user->canAccess('pdv'));
         if ($independent && $request->user()->id===$cashSession->user_id) {
             throw \Illuminate\Validation\ValidationException::withMessages([
                 'review_notes'=>'Este fechamento precisa ser conferido por outro administrador.',
