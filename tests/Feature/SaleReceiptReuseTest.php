@@ -206,8 +206,8 @@ final class SaleReceiptReuseTest extends TestCase
             ->assertOk()
             ->assertSee('id="pdvReceiptModal"',false)
             ->assertSee('data-receipt-after-checkout="1"',false)
-            ->assertSee('id="pdvReceiptFrame"',false)
-            ->assertSee('embed=1',false)
+            ->assertSee('id="pdvReceiptPrint"',false)
+            ->assertSee(route('pdv.receipt',['sale'=>$sale,'print'=>0]),false)
             ->assertSee('Venda efetuada com sucesso')
             ->assertSee('Voltar ao PDV')
             ->assertSee('Imprimir comprovante')
@@ -219,7 +219,7 @@ final class SaleReceiptReuseTest extends TestCase
             ->assertSee('Sem valor fiscal')
             ->assertSee('R$ 65,00')
             ->assertSee('Comprovante interno de venda')
-            ->assertSee('class="pdv-receipt-print-frame"',false)
+            ->assertDontSee('class="pdv-receipt-print-frame"',false)
             ->assertDontSee('class="pdv-receipt-preview-shell"',false);
 
         $this->get(route('pdv.receipt',['sale'=>$sale,'embed'=>1]))
@@ -234,10 +234,10 @@ final class SaleReceiptReuseTest extends TestCase
 
         self::assertStringContainsString('dialog.showModal()',
             file_get_contents(public_path('js/pdv-receipt-modal.js')));
-        self::assertStringContainsString('frame.contentWindow.print()',
+        self::assertStringNotContainsString('frame.contentWindow.print()',
             file_get_contents(public_path('js/pdv-receipt-modal.js')));
-        self::assertStringContainsString("left:-10000px!important",
-            file_get_contents(public_path('css/pdv-lumeron.css')));
+        self::assertStringNotContainsString('window.print()',
+            file_get_contents(public_path('js/pdv-receipt-modal.js')));
         self::assertStringContainsString("max-width:342px",
             file_get_contents(public_path('css/pdv-lumeron.css')));
         self::assertStringContainsString("pdv-receipt-toolbar",
