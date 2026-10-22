@@ -12,7 +12,7 @@ final class SendClientEmailNotifications extends Command
 
     public function handle(ClientEmailNotificationService $service, InvoiceEmailNotificationService $invoices): int
     {
-        if (!$service->enabled()) {
+        if (!$service->enabled() && !$invoices->automaticEnabled()) {
             $this->warn('Envio de e-mail desativado ou não configurado.');
             return self::SUCCESS;
         }
