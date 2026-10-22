@@ -372,6 +372,8 @@ class OperationalSettingsTest extends TestCase
 
         $this->actingAs($user)->post(route('pdv.nfce.contingency'),[
             'action'=>'start',
+            'authorizer_id'=>$user->id,
+            'credential'=>'senhaSegura123',
             'reason'=>'Indisponibilidade de comunicação com o autorizador da NFC-e.',
         ])->assertSessionHasNoErrors();
 
@@ -427,6 +429,8 @@ class OperationalSettingsTest extends TestCase
         \Illuminate\Support\Facades\Queue::fake();
         $this->actingAs($user)->post(route('pdv.nfce.cancel',$job),[
             'reason'=>'Venda cancelada antes da saída da mercadoria do estabelecimento.',
+            'authorizer_id'=>$user->id,
+            'credential'=>'senhaSegura123',
             'no_circulation'=>'1',
         ])->assertSessionHasNoErrors();
 
