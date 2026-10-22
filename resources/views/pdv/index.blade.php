@@ -835,6 +835,14 @@
       <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
     </div>
     <div class="pdv-operation-body">
+      <label><span>Gerente ou administrador que autoriza *</span>
+        <select name="authorizer_id" required><option value="">Selecione</option>
+          @foreach($cashSupervisors as $supervisor)
+            <option value="{{ $supervisor->id }}" @selected($supervisor->id===auth()->id())>{{ $supervisor->name }}</option>
+          @endforeach
+        </select>
+      </label>
+      <label><span>Senha ou PIN do responsável *</span><input type="password" name="credential" required autocomplete="off"></label>
       @if($nfceContingencyActive)
         <div class="pdv-contingency-active">
           <strong>Contingência offline ativa</strong>
@@ -860,6 +868,14 @@
       <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
     </div>
     <div class="pdv-operation-body">
+      <label><span>Gerente ou administrador que autoriza *</span>
+        <select name="authorizer_id" required><option value="">Selecione</option>
+          @foreach($cashSupervisors as $supervisor)
+            <option value="{{ $supervisor->id }}" @selected($supervisor->id===auth()->id())>{{ $supervisor->name }}</option>
+          @endforeach
+        </select>
+      </label>
+      <label><span>Senha ou PIN do responsável *</span><input type="password" name="credential" required autocomplete="off"></label>
       @if($cancelableNfceJobs->isNotEmpty())
         <label><span>NFC-e autorizada</span>
           <select id="pdvCancelNfceJob" required>
@@ -872,7 +888,7 @@
         </label>
         <label><span>Justificativa *</span><textarea name="reason" id="pdvCancelNfceReason" rows="4" minlength="15" maxlength="255" required></textarea></label>
         <label class="pdv-operation-note"><input type="checkbox" name="no_circulation" value="1" required> Confirmo que a mercadoria não circulou e a operação não foi concluída fisicamente.</label>
-        <div class="pdv-operation-note">Cancelamento normal na BA: até 30 minutos da autorização. A situação só mudará após resposta oficial da SEFAZ.</div>
+        <div class="pdv-operation-note">Solicitação de cancelamento normal: verifique o prazo aplicável à UF. A situação só mudará após resposta oficial da SEFAZ.</div>
         <button class="pdv-modal-primary" type="submit">Colocar cancelamento na fila <kbd>Ctrl+Enter</kbd></button>
       @else
         <div class="pdv-operation-empty">Nenhuma NFC-e autorizada disponível para cancelamento.</div>
