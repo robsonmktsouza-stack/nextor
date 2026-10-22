@@ -64,6 +64,26 @@ final class PdvSalesHistoryTest extends TestCase
             ->assertDontSee('id="pdvSalesLink" href="'.route('sales.index').'"',false);
     }
 
+    public function test_sale_cancellation_modal_has_complete_stacked_fields_and_scoped_styles(): void
+    {
+        $cashier=$this->operator();
+        $response=$this->actingAs($cashier)->get(route('pdv.index'))->assertOk()
+            ->assertSee('id="pdvSalesCancelSheet"',false)
+            ->assertSee('id="pdvSalesCancelForm"',false)
+            ->assertSee('id="pdvSalesCancelReason"',false)
+            ->assertSee('id="pdvSalesCancelAuthorizer"',false)
+            ->assertSee('id="pdvSalesCancelCredential"',false);
+
+        $html=$response->getContent();
+        self::assertSame(3,substr_count($html,'class="pdv-sales-cancel-field"'));
+        $css=file_get_contents(public_path('css/pdv-lumeron.css'));
+        self::assertStringContainsString('#pdvSalesCancelSheet .pdv-sales-cancel-field > input',$css);
+        self::assertStringContainsString('#pdvSalesCancelSheet .pdv-sales-cancel-field > select',$css);
+        self::assertStringContainsString('#pdvSalesCancelSheet .pdv-sales-cancel-field > textarea',$css);
+        self::assertStringContainsString('#pdvSalesCancelSheet .pdv-sales-cancel-field > .ui-select .ui-select-trigger',$css);
+        self::assertStringContainsString('max-height:calc(100dvh - 56px)',$css);
+    }
+
     public function test_api_defaults_to_only_today_pdv_sales(): void
     {
         $cashier=$this->operator();
