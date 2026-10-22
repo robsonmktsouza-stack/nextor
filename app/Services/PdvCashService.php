@@ -21,10 +21,47 @@ final class PdvCashService
         return $lock ? $query->lockForUpdate()->first() : $query->first();
     }
 
+    /**
+     * An open shift belongs to its opening calendar day in the application's
+     * timezone. Never silently roll it forward at midnight.
+     */
+    public function isOverdue(PdvCashSession $session): bool
+    {
+        return !$session->closed_at && $session->opened_at !== null
+            && $session->opened_at->startOfDay()->lt(now()->startOfDay());
+    }
+
+    public function overdueSessions()
+    {
+        return PdvCashSession::query()->open()
+            ->where('opened_at','<',now()->startOfDay())
+            ->with(['user:id,name','register:id,name,code'])
+            ->orderBy('opened_at')
+            ->get();
+    }
+
+    private function guardFreshShift(PdvCashSession $session): void
+    {
+        if($this->isOverdue($session)) {
+            throw ValidationException::withMessages([
+                'cash_session'=>'O caixa foi aberto em dia anterior. Confira e feche o turno antes de continuar.',
+            ]);
+        }
+    }
+
     /** Called within SalesService's transaction before writing the sale. */
     public function forSale(int $userId): ?PdvCashSession
     {
         $session=$this->current($userId,true);
+        if($session) {
+            $this->guardFreshShift($session);
+        } elseif(PdvCashSession::query()->open()->where('opened_at','<',now()->startOfDay())->exists()) {
+            // Optional cash opening must not become a bypass when a physical
+            // register was abandoned across midnight.
+            throw ValidationException::withMessages([
+                'cash_session'=>'Há um caixa de dia anterior pendente de fechamento. Solicite a conferência antes de vender.',
+            ]);
+        }
         if(!$session && (bool)AppSetting::value('pdv','require_cash_opening',false)) {
             throw ValidationException::withMessages([
                 'cash_session'=>'Abra o caixa antes de concluir uma venda no PDV.',
@@ -79,6 +116,7 @@ final class PdvCashService
             }
             $register=PdvCashRegister::query()->whereKey($existing->register_id)->lockForUpdate()->firstOrFail();
             $session=PdvCashSession::query()->whereKey($existing->id)->lockForUpdate()->firstOrFail();
+            $this->guardFreshShift($session);
             if ($session->closed_at || $session->user_id!==$outgoingId) {
                 throw ValidationException::withMessages(['cash_session'=>'Este turno já foi encerrado.']);
             }
@@ -208,6 +246,52 @@ final class PdvCashService
         },3);
     }
 
+    /**
+     * Emergency, supervised blind close when yesterday's operator is absent.
+     * Uses the original session, stocks/cash history untouched; closed_by
+     * identifies the supervisor, and the reason remains on the report.
+     */
+    public function closeOverdueBySupervisor(int $sessionId, int $supervisorId, string $counted, string $reason): PdvCashSession
+    {
+        return DB::transaction(function () use ($sessionId,$supervisorId,$counted,$reason) {
+            $reference=PdvCashSession::query()->findOrFail($sessionId);
+            // Keep the same locking order as normal close(): owner, session.
+            User::query()->whereKey($reference->user_id)->lockForUpdate()->firstOrFail();
+            $session=PdvCashSession::query()->whereKey($sessionId)->lockForUpdate()->firstOrFail();
+            if(!$this->isOverdue($session) || (int)$session->user_id===$supervisorId) {
+                throw ValidationException::withMessages([
+                    'cash_session'=>'Selecione um caixa de dia anterior pertencente a outro operador.',
+                ]);
+            }
+            $supervisor=User::query()->findOrFail($supervisorId);
+            if(!$supervisor->is_active || !in_array($supervisor->role,['admin','manager'],true)
+                || !$supervisor->canAccess('pdv')) {
+                throw ValidationException::withMessages([
+                    'cash_session'=>'A regularização exige gerente ou administrador autorizado.',
+                ]);
+            }
+            $reason=trim($reason);
+            if(mb_strlen($reason)<5) {
+                throw ValidationException::withMessages([
+                    'reason'=>'Informe o motivo da regularização do caixa.',
+                ]);
+            }
+            $breakdown=$this->breakdown($session);
+            $cents=(int)round((float)$counted*100);
+            $difference=$cents-$breakdown['expected'];
+            $session->update([
+                'closing_amount'=>self::currency($cents),
+                'expected_amount'=>self::currency($breakdown['expected']),
+                'difference_amount'=>self::currency($difference),
+                'closing_breakdown'=>$breakdown,
+                'closing_notes'=>'Regularização supervisionada: '.$reason,
+                'closed_by'=>$supervisorId,
+                'closed_at'=>now(),
+            ]);
+            return $session->refresh();
+        },3);
+    }
+
     public function movement(int $userId, string $type, string $amount, string $reason,
         ?int $saleId = null, ?int $returnId = null, ?int $approvedBy = null): PdvCashMovement
     {
@@ -219,6 +303,7 @@ final class PdvCashService
                     'amount'=>'Abra o caixa antes de movimentar dinheiro.',
                 ]);
             }
+            $this->guardFreshShift($session);
             $cents=(int)round((float)$amount*100);
             if($cents<=0) {
                 throw ValidationException::withMessages(['amount'=>'Informe um valor positivo.']);
