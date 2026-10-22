@@ -146,6 +146,7 @@ class OperationalSettingsTest extends TestCase
         $product=$this->product();
 
         $response=$this->actingAs($user)->post(route('pdv.store'),[
+            'checkout_key'=>(string)\Illuminate\Support\Str::uuid(),
             'payment_method'=>'cash',
             'cash_received'=>'100.00',
             'items'=>[[
@@ -164,6 +165,7 @@ class OperationalSettingsTest extends TestCase
         $user=$this->user();
 
         $this->actingAs($user)->post(route('pdv.store'),[
+            'checkout_key'=>(string)\Illuminate\Support\Str::uuid(),
             'payment_method'=>'pix',
             'items'=>[[
                 'item_type'=>'service',
@@ -184,6 +186,7 @@ class OperationalSettingsTest extends TestCase
         $product=$this->product();
 
         $response=$this->actingAs($user)->post(route('pdv.store'),[
+            'checkout_key'=>(string)\Illuminate\Support\Str::uuid(),
             'consumer_document'=>'529.982.247-25',
             'cash_received'=>'50.00',
             'payments'=>[
@@ -215,6 +218,7 @@ class OperationalSettingsTest extends TestCase
         $product=$this->product();
 
         $this->actingAs($user)->post(route('pdv.store'),[
+            'checkout_key'=>(string)\Illuminate\Support\Str::uuid(),
             'consumer_document'=>'111.111.111-11',
             'payment_method'=>'pix',
             'items'=>[[
@@ -267,6 +271,7 @@ class OperationalSettingsTest extends TestCase
         $product=$this->product();
 
         $this->actingAs($user)->post(route('pdv.store'),[
+            'checkout_key'=>(string)\Illuminate\Support\Str::uuid(),
             'consumer_document'=>'00.000.000/E08G-12',
             'payment_method'=>'pix',
             'items'=>[[
@@ -321,6 +326,7 @@ class OperationalSettingsTest extends TestCase
         $product=$this->product();
 
         $this->actingAs($user)->post(route('pdv.store'),[
+            'checkout_key'=>(string)\Illuminate\Support\Str::uuid(),
             'payments'=>[[
                 'payment_method'=>'credit_card',
                 'amount'=>'100.00',
@@ -372,6 +378,7 @@ class OperationalSettingsTest extends TestCase
         $product=$this->product();
 
         $this->actingAs($user)->post(route('pdv.store'),[
+            'checkout_key'=>(string)\Illuminate\Support\Str::uuid(),
             'payment_method'=>'pix',
             'items'=>[[
                 'item_type'=>'product',
@@ -398,6 +405,7 @@ class OperationalSettingsTest extends TestCase
         $product=$this->product();
 
         $this->actingAs($user)->post(route('pdv.store'),[
+            'checkout_key'=>(string)\Illuminate\Support\Str::uuid(),
             'payment_method'=>'pix',
             'items'=>[[
                 'item_type'=>'product',
