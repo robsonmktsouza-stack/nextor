@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AutomationDelivery;
 use App\Models\ClientEmailDelivery;
+use App\Models\InvoiceEmailDelivery;
 use App\Models\Company;
 use App\Models\AutomationRule;
 use App\Services\AutomationRunner;
@@ -40,7 +41,8 @@ final class AutomationController extends Controller
                     ->orWhere(fn ($q) => $q->whereNull('last_seen_at')
                         ->where('created_at', '<', $cutoff));
             })->count(),
-            'pendingEmails' => ClientEmailDelivery::query()->whereIn('status', ['pending', 'retry', 'processing'])->count(),
+            'pendingEmails' => ClientEmailDelivery::query()->whereIn('status', ['pending', 'retry', 'processing'])->count()
+                + InvoiceEmailDelivery::query()->whereIn('status', ['pending', 'retry', 'processing'])->count(),
             'rules' => $rules->orderBy('id')->paginate($perPage, ['*'], 'rules_page')->withQueryString(),
             'deliveries' => AutomationDelivery::query()->with(['company', 'rule'])
                 ->latest('id')->paginate($perPage, ['*'], 'alerts_page')->withQueryString(),
