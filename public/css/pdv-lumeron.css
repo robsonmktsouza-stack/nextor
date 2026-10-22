@@ -703,8 +703,7 @@
 @media(max-width:650px){.lumeron-pdv-page .pdv-sales-modal{width:calc(100vw - 12px);height:calc(100dvh - 16px);max-height:calc(100dvh - 16px)}.lumeron-pdv-page .pdv-sales-filters{grid-template-columns:repeat(2,minmax(0,1fr));padding:9px}.lumeron-pdv-page .pdv-sales-filter-wide,.lumeron-pdv-page .pdv-sales-filter-actions{grid-column:1/-1}}
 
 
-/* Confirmação do PDV: ações do caixa fixas e cupom visual compacto.
-   A impressão continua exclusivamente no iframe térmico oculto. */
+/* Confirmação e histórico: cupom visual sincronizado ao PDF térmico nativo. */
 .pdv-body .pdv-receipt-modal{
   width:min(620px,calc(100vw - 24px));
   max-width:620px;
@@ -1070,3 +1069,85 @@
 @media(prefers-reduced-motion:reduce){
   .pdv-body .pdv-receipt-action{transition:none}
 }
+
+/* O recibo em tela acompanha a mesma hierarquia e ordem do PDF térmico. */
+.pdv-body .pdv-receipt-document{
+  box-shadow:0 1px 5px rgba(24,39,52,.08);
+}
+.pdv-body .pdv-receipt-document::after{display:none}
+.pdv-body .pdv-receipt-company{margin-bottom:6px}
+.pdv-body .pdv-receipt-company-logo{
+  max-width:175px;
+  max-height:72px;
+  margin:0 auto 8px;
+}
+.pdv-body .pdv-receipt-company>strong{font-size:13px;white-space:normal}
+.pdv-body .pdv-receipt-company>span{
+  font-size:10px;line-height:1.4;overflow-wrap:anywhere;
+}
+.pdv-body .pdv-receipt-custom-header{
+  margin-top:6px;white-space:pre-line;font-size:10px;line-height:1.4;
+}
+.pdv-body .pdv-receipt-paper-caption{
+  border-top:0;margin-top:9px;padding-top:0;font-size:13px;
+}
+.pdv-body .pdv-receipt-meta{
+  width:auto;margin:10px 0 12px;padding:0;
+  border-top:0;text-align:center;align-self:center;align-items:center;gap:2px;
+  font-size:10.5px;
+}
+.pdv-body .pdv-receipt-paper-warning{
+  margin:8px 0 4px; padding:5px 3px;font-size:11px;
+}
+.pdv-body .pdv-receipt-cancelled-note{
+  padding:3px 0;color:#992f2f;font-weight:800;
+  font-size:11px;text-align:center;letter-spacing:.2px;
+}
+.pdv-body .pdv-receipt-document-heading{
+  border-top:1px solid #495159;
+  padding-top:10px;margin-top:6px;
+  font-size:11px;
+}
+.pdv-body .pdv-receipt-items td{
+  padding:9px 0;
+  border-bottom:1px solid #aeb4b8;
+}
+.pdv-body .pdv-receipt-items td:first-child{width:69%}
+.pdv-body .pdv-receipt-items td:last-child{width:31%;font-size:11px}
+.pdv-body .pdv-receipt-items td:first-child>small{line-height:1.45}
+.pdv-body .pdv-receipt-totals{margin-top:6px}
+.pdv-body .pdv-receipt-totals>div,
+.pdv-body .pdv-receipt-payments>div,
+.pdv-body .pdv-receipt-customer-info>div{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  gap:12px;padding:4px 0;border-bottom:0;
+  color:#30353a;font-size:11.5px;background:transparent!important;
+}
+.pdv-body .pdv-receipt-totals>.pdv-receipt-total{
+  border-top:0;border-bottom:1px solid #60666a;
+  margin:2px 0 5px;padding:7px 0;
+}
+.pdv-body .pdv-receipt-payments,
+.pdv-body .pdv-receipt-customer-info{
+  border-top:1px solid #60666a;
+  margin-top:8px;padding-top:7px;
+}
+.pdv-body .pdv-receipt-customer-info strong{
+  color:#242a2e;font-weight:600;text-align:right;
+  overflow-wrap:anywhere;max-width:60%;
+}
+.pdv-body .pdv-receipt-fiscal-inline{
+  display:flex;justify-content:space-between;gap:12px;
+  font-size:11px;color:#5a7081;margin-top:8px;
+}
+.pdv-body .pdv-receipt-fiscal-inline strong{color:#315d78;font-weight:700}
+.pdv-body .pdv-receipt-internal-notice{
+  border-top:1px solid #60666a;
+  font-size:10px;margin-top:13px;
+}
+.pdv-body .pdv-receipt-custom-footer{white-space:pre-line;text-align:center}
+/* Duas superfícies grandes e sombras compostas não precisam de filtros de desfoque. */
+.pdv-body .pdv-receipt-modal{
+  box-shadow:0 12px 35px rgba(16,35,50,.2);
+}
+.pdv-body .pdv-receipt-content{scrollbar-gutter:stable}
