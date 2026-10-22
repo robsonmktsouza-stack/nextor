@@ -417,8 +417,9 @@ foreach($primaryTabs as $key=>$item){
       <div class="settings-switch-grid">
         <label class="settings-switch"><input type="checkbox" name="require_customer" value="1" @checked($pdv['require_customer'])><span><strong>Exigir cliente</strong><small>Impede concluir o PDV sem cliente selecionado.</small></span></label>
         <label class="settings-switch"><input type="checkbox" name="allow_discount" value="1" @checked($pdv['allow_discount'])><span><strong>Permitir desconto</strong><small>Libera desconto por item no PDV.</small></span></label>
-        <input type="hidden" name="require_cash_opening" value="1">
-        <p class="settings-note"><strong>Abertura obrigatória:</strong> todas as vendas ficam associadas ao operador e ao turno do caixa físico.</p>
+        <label class="settings-switch"><input type="checkbox" name="require_cash_opening" value="1" @checked($pdv['require_cash_opening'])>
+          <span><strong>Exigir abertura de caixa</strong><small>Ative para exigir um turno de caixa físico antes de cada venda. Operadores usam senha ou PIN na abertura, fechamento e passagem.</small></span>
+        </label>
         <label class="settings-switch"><input type="checkbox" name="ask_consumer_document" value="1" @checked($pdv['ask_consumer_document'])><span><strong>Perguntar CPF/CNPJ na nota</strong><small>Antes de finalizar, pergunta se o consumidor deseja ser identificado no documento fiscal.</small></span></label>
         <label class="settings-switch"><input type="checkbox" name="allow_split_payment" value="1" @checked($pdv['allow_split_payment'])><span><strong>Permitir pagamento dividido</strong><small>Permite combinar dinheiro, PIX, cartão e outras formas na mesma venda.</small></span></label>
         <label class="settings-switch"><input type="checkbox" name="allow_cash_movements" value="1" @checked($pdv['allow_cash_movements'])><span><strong>Permitir retiradas e reforços no caixa</strong><small>Habilita sangrias, suprimentos e reembolsos em dinheiro vinculados à operação.</small></span></label>
