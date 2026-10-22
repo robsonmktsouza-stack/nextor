@@ -235,6 +235,8 @@ class OperationalSettingsTest extends TestCase
         $user=$this->user();
 
         $this->actingAs($user)->post(route('pdv.cash.open'),[
+            'register_id'=>\App\Models\PdvCashRegister::query()->firstOrFail()->id,
+            'credential'=>'senhaSegura123',
             'opening_amount'=>'100.00',
         ])->assertSessionHasNoErrors();
 
