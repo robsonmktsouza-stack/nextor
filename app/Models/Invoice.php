@@ -29,6 +29,11 @@ final class Invoice extends Model
 
     public function company(): BelongsTo { return $this->belongsTo(Company::class); }
 
+    public function emailDelivery()
+    {
+        return $this->hasOne(InvoiceEmailDelivery::class);
+    }
+
     public function payments(): HasMany
     {
         return $this->hasMany(InvoicePayment::class)->orderBy('id');
