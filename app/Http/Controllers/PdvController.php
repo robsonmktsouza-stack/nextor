@@ -95,6 +95,25 @@ class PdvController extends Controller
                 ->first()
             : null;
 
+        // A confirmação da venda é exibida dentro do PDV, apenas na primeira
+        // visita após a finalização. Nunca consulta outra venda por engano.
+        $receiptModalSaleId=(int)$request->session()->get('pdv_receipt_sale',0);
+        $receiptModalSale=$receiptModalSaleId>0
+            ? Sale::query()
+                ->whereKey($receiptModalSaleId)
+                ->where('source','pdv')
+                ->where('operation_type','sale')
+                ->where('status','completed')
+                ->where('user_id',$request->user()->id)
+                ->first(['id','total','completed_at'])
+            : null;
+        $receiptModalNfceDocument=$receiptModalSale
+            ? FiscalDocumentJob::query()
+                ->where('sale_id',$receiptModalSale->id)
+                ->where('document_type','nfce')
+                ->latest('id')->first()
+            : null;
+
         $lastPdvNfceStatusLabel=$lastPdvNfceDocument ? match($lastPdvNfceDocument->status) {
             'prepared'=>'preparada',
             'processing'=>'processando',
@@ -112,6 +131,8 @@ class PdvController extends Controller
             'lastCompletedPdvSale'=>$lastCompletedPdvSale,
             'lastPdvNfceDocument'=>$lastPdvNfceDocument,
             'lastPdvNfceStatusLabel'=>$lastPdvNfceStatusLabel,
+            'receiptModalSale'=>$receiptModalSale,
+            'receiptModalNfceDocument'=>$receiptModalNfceDocument,
             'customers'=>Customer::query()
                 ->where('is_customer',true)
                 ->orderBy('name')
@@ -582,7 +603,8 @@ class PdvController extends Controller
         ],(int)$request->user()->id);
 
         return redirect()
-            ->route('pdv.receipt',$sale)
+            ->route('pdv.index')
+            ->with('pdv_receipt_sale',$sale->id)
             ->with('pdv_last_sale',$sale->id)
             ->with('pdv_cash_received',$cashPaymentTotal>0 ? $cashReceived : $total)
             ->with('pdv_change',$change);
