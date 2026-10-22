@@ -12,7 +12,9 @@ final class ClientEmailNotificationService
 
     public function enabled(): bool
     {
-        return $this->outbound->enabled();
+        $settings = \App\Models\ControlSetting::stored();
+        return $this->outbound->enabled()
+            && ($settings?->license_email_enabled ?? true);
     }
 
     public function sendPending(int $limit = 50): array
