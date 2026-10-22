@@ -12,12 +12,13 @@ th,td{border-bottom:1px solid #d9dee1;padding:10px 8px}
 small{color:#667982}nav{padding:16px 0}
 </style></head><body><main>
 <header><h1>Histórico de caixas</h1><a href="{{ route('pdv.index') }}">Voltar ao PDV</a></header>
-<table><thead><tr><th>Caixa</th><th>Operador</th><th>Abertura</th><th>Fechamento</th>
+<table><thead><tr><th>Turno</th><th>Caixa físico</th><th>Operador</th><th>Abertura</th><th>Fechamento</th>
 <th class="num">Esperado</th><th class="num">Contado</th><th class="num">Diferença</th><th>Situação</th></tr></thead>
 <tbody>
 @forelse($sessions as $session)
 <tr>
 <td><a href="{{ route('pdv.cash.report',$session) }}">#{{ $session->id }}</a></td>
+<td>{{ $session->register?->name ?? 'Legado' }}</td>
 <td>{{ $session->user?->name ?? '—' }}</td><td>{{ $session->opened_at?->format('d/m/Y H:i') }}</td>
 <td>{{ $session->closed_at?->format('d/m/Y H:i') ?? 'Aberto' }}</td>
 <td class="num">{{ $session->expected_amount===null ? '—' : number_format((float)$session->expected_amount,2,',','.') }}</td>
@@ -26,7 +27,7 @@ small{color:#667982}nav{padding:16px 0}
 <td>{{ !$session->closed_at ? 'Em operação' : ($session->reviewed_at ? 'Conferido' : ((float)$session->difference_amount!==0.0 ? 'Aguardando conferência' : 'Fechado')) }}</td>
 </tr>
 @empty
-<tr><td colspan="8">Nenhum turno registrado.</td></tr>
+<tr><td colspan="9">Nenhum turno registrado.</td></tr>
 @endforelse
 </tbody></table><nav>{{ $sessions->links() }}</nav>
 <small>Os fechamentos novos preservam o resumo calculado na hora da conferência. Movimentações posteriores pertencem ao turno em que foram efetivamente realizadas.</small>
