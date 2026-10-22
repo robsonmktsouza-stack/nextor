@@ -64,6 +64,69 @@
       row.appendChild(td);
       return td;
     };
+    let previewController=null;
+    let previewSequence=0;
+    const showPreviewError=(container,message)=>{
+      container.querySelector('.pdv-sales-receipt-error')?.remove();
+      const messageElement=document.createElement('span');
+      messageElement.className='pdv-sales-receipt-error';
+      messageElement.setAttribute('role','alert');
+      messageElement.textContent=message;
+      container.appendChild(messageElement);
+    };
+    const openReceipt=async(button,url)=>{
+      if(!url || button.disabled)return;
+      if(document.getElementById('pdvHistoryReceiptModal')?.open)return;
+      previewController?.abort();
+      previewController=new AbortController();
+      const request=++previewSequence;
+      const oldText=button.textContent;
+      button.disabled=true;
+      button.textContent='Abrindo...';
+      button.parentElement?.querySelector('.pdv-sales-receipt-error')?.remove();
+      try{
+        const response=await fetch(url,{
+          credentials:'same-origin',cache:'no-store',
+          headers:{Accept:'text/html','X-Requested-With':'XMLHttpRequest'},
+          signal:previewController.signal
+        });
+        if(!response.ok)throw new Error([401,403].includes(response.status)
+          ? 'Você não tem permissão para consultar este comprovante.'
+          : 'Não foi possível abrir o comprovante. Tente novamente.');
+        const html=await response.text();
+        if(request!==previewSequence || !modal.open || !button.isConnected)return;
+        const template=document.createElement('template');
+        template.innerHTML=html.trim();
+        const dialog=template.content.querySelector('dialog#pdvHistoryReceiptModal');
+        if(!dialog || !window.LumeronPdvReceipt?.openHistory)
+          throw new Error('Não foi possível exibir o comprovante.');
+        document.getElementById('pdvHistoryReceiptModal')?.remove();
+        document.body.appendChild(dialog);
+        try{
+          window.LumeronPdvReceipt.openHistory(dialog,button);
+        }catch(error){
+          dialog.remove();
+          throw error;
+        }
+      }catch(error){
+        if(error.name!=='AbortError' && request===previewSequence && button.isConnected)
+          showPreviewError(button.parentElement,error.message||'Não foi possível abrir o comprovante.');
+      }finally{
+        if(request===previewSequence && button.isConnected){
+          button.disabled=false;
+          button.textContent=oldText;
+        }
+      }
+    };
+    const addPreviewAction=(container,label,url)=>{
+      if(!url)return;
+      const button=document.createElement('button');
+      button.type='button';
+      button.textContent=label;
+      button.setAttribute('aria-label','Ver comprovante desta venda');
+      button.addEventListener('click',()=>openReceipt(button,url));
+      container.appendChild(button);
+    };
     const addLink=(cell,label,url)=>{
       if(!url)return;
       const anchor=document.createElement('a');
@@ -95,7 +158,7 @@
         const actions=createCell(tr,'','pdv-sales-actions-col');
         const links=document.createElement('div');
         links.className='pdv-sales-row-actions';
-        addLink(links,'Comprovante',sale.receipt_url);
+        addPreviewAction(links,'Comprovante',sale.receipt_preview_url);
         addLink(links,'DANFE',sale.danfe_url);
         actions.appendChild(links);
         rows.appendChild(tr);
@@ -196,6 +259,8 @@
     previous.addEventListener('click',()=>{if(currentPage>1)load(currentPage-1);});
     next.addEventListener('click',()=>{if(currentPage<pageCount)load(currentPage+1);});
     modal.addEventListener('close',()=>{
+      previewSequence++;
+      previewController?.abort();
       sequence++;
       controller?.abort();
       clearTimeout(searchTimer);
