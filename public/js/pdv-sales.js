@@ -21,6 +21,8 @@
     const cancelSheet=document.getElementById('pdvSalesCancelSheet');
     const cancelForm=document.getElementById('pdvSalesCancelForm');
     const cancelReason=document.getElementById('pdvSalesCancelReason');
+    const cancelAuthorizer=document.getElementById('pdvSalesCancelAuthorizer');
+    const cancelCredential=document.getElementById('pdvSalesCancelCredential');
     const cancelNumber=document.getElementById('pdvSalesCancelNumber');
     const cancelSummary=document.getElementById('pdvSalesCancelSummary');
     const cancelError=document.getElementById('pdvSalesCancelError');
@@ -156,6 +158,7 @@
       cancelNumber.textContent='#'+sale.number;
       cancelSummary.textContent='Venda #'+sale.number+' · '+money.format(Number(sale.total)||0);
       cancelReason.value='';
+      if(cancelCredential)cancelCredential.value='';
       cancelError.hidden=true;
       cancelError.textContent='';
       cancelSheet.hidden=false;
@@ -164,6 +167,7 @@
     const closeCancelSheet=()=>{
       if(cancelBusy)return;
       cancelSheet.hidden=true;
+      if(cancelCredential)cancelCredential.value='';
       cancelError.hidden=true;
       if(cancelTarget?.button?.isConnected)cancelTarget.button.focus();
       cancelTarget=null;
@@ -308,6 +312,12 @@
         cancelReason.focus();
         return;
       }
+      if(!cancelAuthorizer?.value || !cancelCredential?.value.trim()){
+        cancelError.textContent='Selecione um supervisor e informe a senha ou PIN.';
+        cancelError.hidden=false;
+        (cancelAuthorizer?.value?cancelCredential:cancelAuthorizer)?.focus();
+        return;
+      }
       cancelBusy=true;
       cancelConfirm.disabled=true;
       cancelConfirm.textContent='Cancelando...';
@@ -319,7 +329,7 @@
             Accept:'application/json','Content-Type':'application/json',
             'X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN':csrf
           },
-          body:JSON.stringify({reason})
+          body:JSON.stringify({reason,authorizer_id:Number(cancelAuthorizer.value),credential:cancelCredential.value})
         });
         const result=await response.json().catch(()=>({}));
         if(!response.ok){
@@ -328,6 +338,7 @@
         }
         cancelSheet.hidden=true;
         cancelTarget=null;
+        cancelCredential.value='';
         actionStatus.textContent=result.message||'Venda cancelada.';
         actionStatus.hidden=false;
         load(currentPage);
