@@ -8,6 +8,7 @@ use App\Models\Company;
 use App\Models\AutomationRule;
 use App\Services\AutomationRunner;
 use App\Services\ClientEmailNotificationService;
+use App\Services\InvoiceEmailNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -107,14 +108,16 @@ final class AutomationController extends Controller
         return redirect()->route('automations.index')->with('success', 'Automação atualizada.');
     }
 
-    public function sendEmails(ClientEmailNotificationService $sender)
+    public function sendEmails(ClientEmailNotificationService $sender, InvoiceEmailNotificationService $invoices)
     {
         if (!$sender->enabled()) {
             return back()->with('error', 'Configure o envio de e-mail antes de enviar avisos.');
         }
 
         $summary = $sender->sendPending();
-        return back()->with('success', 'E-mails enviados: '.$summary['sent'].'.');
+        $bills = $invoices->sendPending();
+        return back()->with('success',
+            'E-mails enviados: '.($summary['sent'] + $bills['sent']).'.');
     }
 
     public function run(AutomationRunner $runner)
