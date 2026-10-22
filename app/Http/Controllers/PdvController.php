@@ -307,6 +307,25 @@ class PdvController extends Controller
         ])->header('Cache-Control','no-store, private');
     }
 
+    /** Logo da empresa por rota privada; funciona sem link simbólico do Laragon. */
+    public function companyLogo()
+    {
+        $path=CompanySetting::current()->logo_path;
+        $disk=Storage::disk('public');
+        if (!$path || !$disk->exists($path)) abort(404);
+        $size=$disk->size($path);
+        $mime=$disk->mimeType($path);
+        abort_unless($size>0 && $size<=4*1024*1024
+            && in_array($mime,['image/png','image/jpeg','image/webp'],true),404);
+
+        return response($disk->get($path),200,[
+            'Content-Type'=>$mime,
+            'Content-Length'=>(string)$size,
+            'Cache-Control'=>'private, max-age=300',
+            'X-Content-Type-Options'=>'nosniff',
+        ]);
+    }
+
     /** Retorna o mesmo cupom do pós-venda para o histórico, sem alterar a venda. */
     public function salesReceiptPreview(Sale $sale)
     {
