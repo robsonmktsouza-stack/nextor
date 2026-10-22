@@ -1,3 +1,10 @@
+## 22/10/2026 — Correção visual das configurações do PDV
+
+- A aba `Ajustes > PDV` tinha textos sobrepostos e cartões estreitos. Causa: o `label.field.col-6` do limite de supervisor tinha sido inserido na `settings-switch-grid` (grade de 2 colunas), forçando o CSS Grid a criar trilhas implícitas e esmagando os switches.
+- A aba foi reorganizada em 3 seções: Atendimento e vendas; Caixa e segurança; Emissão fiscal. Cada switch ocupa uma célula da classe `pdv-settings-options-grid` de 3 colunas no desktop, 2 no tablet e 1 no celular. Campo de supervisor tem contêiner independente `pdv-settings-limit`, SEM `.col-6` dentro da grade.
+- CSS próprio `public/css/pdv-settings.css` carregado somente nessa aba via `@push('styles')`. Sem CSS global ou alterações em outras abas. Preservados nomes, valores e fluxo de salvamento de todos os 12 campos.
+- Testes em `tests/Feature/PdvSettingsLayoutTest.php` verificam estrutura da grade, ausência de col spans e gravação de configurações. Verificação estática de selectors, CSS e nomes de campos passou; testes PHP e renderização no navegador ainda pendentes.
+- Atualização em Laragon: `git pull origin develop`, `php artisan optimize:clear`, Ctrl+F5. Não requer migration nessa correção e não altera main, VPS ou Lumeron Control.
 ## 22/10/2026 — Caixa físico e troca de turnos, PIN e conferência (develop)
 
 - Migration: adiciona caixas físicos (Caixa 01 padrão), PIN individual hash para usuário, vinculação do turno anterior, novo responsável, e identidade do supervisor que aprova retirada. Dados e turnos antigos permanecem preservados, sem reatribuição automática.
