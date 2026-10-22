@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\AppSetting;
 use App\Models\PaymentMethod;
 use App\Models\PdvCashMovement;
+use App\Models\PdvCashRegister;
 use App\Models\PdvCashSession;
 use App\Models\Sale;
 use App\Models\SaleReturn;
@@ -32,19 +33,80 @@ final class PdvCashService
         return $session;
     }
 
-    public function open(int $userId, string $amount, ?string $notes): PdvCashSession
+    public function open(int $userId, string $amount, ?string $notes, ?int $registerId=null): PdvCashSession
     {
-        return DB::transaction(function () use ($userId,$amount,$notes) {
-            // Serialize openings even when no session row exists yet.
+        return DB::transaction(function () use ($userId,$amount,$notes,$registerId) {
+            // Lock the physical register before checking for an open shift.
+            $register=PdvCashRegister::query()
+                ->when($registerId,fn($q)=>$q->whereKey($registerId))
+                ->orderBy('id')->lockForUpdate()->firstOrFail();
+            if (!$register->is_active) {
+                throw ValidationException::withMessages(['register_id'=>'Este caixa está desativado.']);
+            }
             User::query()->whereKey($userId)->lockForUpdate()->firstOrFail();
-            if($this->current($userId,true)) {
-                throw ValidationException::withMessages([
-                    'opening_amount'=>'Já existe um caixa aberto para este usuário.',
-                ]);
+            if ($this->current($userId,true)) {
+                throw ValidationException::withMessages(['opening_amount'=>'Você já possui um turno aberto. Encerre-o antes de abrir outro.']);
+            }
+            if (PdvCashSession::query()->where('register_id',$register->id)->open()->exists()) {
+                throw ValidationException::withMessages(['register_id'=>'Este caixa já está aberto por outro operador.']);
             }
             return PdvCashSession::query()->create([
+                'register_id'=>$register->id,
                 'user_id'=>$userId,'opening_amount'=>$amount,
                 'opening_notes'=>$notes,'opened_at'=>now(),
+            ]);
+        },3);
+    }
+
+    /**
+     * Transfer physical cash between two distinct, authenticated operators.
+     * Both the previous close and new opening commit atomically.
+     */
+    public function handover(int $outgoingId,int $incomingId,string $counted,?string $notes): PdvCashSession
+    {
+        if ($incomingId===$outgoingId) {
+            throw ValidationException::withMessages(['incoming_user_id'=>'Escolha outro operador para receber o turno.']);
+        }
+        return DB::transaction(function () use ($outgoingId,$incomingId,$counted,$notes) {
+            $users=User::query()->whereIn('id',[$outgoingId,$incomingId])
+                ->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+            $incoming=$users->get($incomingId);
+            if (!$incoming || !$incoming->is_active || !$incoming->canAccess('pdv')) {
+                throw ValidationException::withMessages(['incoming_user_id'=>'O próximo operador não está autorizado a usar o PDV.']);
+            }
+            $existing=$this->current($outgoingId,true);
+            if (!$existing || !$existing->register_id) {
+                throw ValidationException::withMessages(['cash_session'=>'Abra um caixa físico antes de transferir o turno.']);
+            }
+            $register=PdvCashRegister::query()->whereKey($existing->register_id)->lockForUpdate()->firstOrFail();
+            $session=PdvCashSession::query()->whereKey($existing->id)->lockForUpdate()->firstOrFail();
+            if ($session->closed_at || $session->user_id!==$outgoingId) {
+                throw ValidationException::withMessages(['cash_session'=>'Este turno já foi encerrado.']);
+            }
+            if ($this->current($incomingId,true)) {
+                throw ValidationException::withMessages(['incoming_user_id'=>'O próximo operador já possui caixa aberto.']);
+            }
+            $breakdown=$this->breakdown($session);
+            $cents=(int)round((float)$counted*100);
+            $difference=$cents-$breakdown['expected'];
+            if ($difference!==0 && trim((string)$notes)==='') {
+                throw ValidationException::withMessages(['notes'=>'Justifique a diferença antes de transferir o caixa.']);
+            }
+            $session->update([
+                'closing_amount'=>self::currency($cents),
+                'expected_amount'=>self::currency($breakdown['expected']),
+                'difference_amount'=>self::currency($difference),
+                'closing_breakdown'=>$breakdown,
+                'closing_notes'=>$notes,
+                'closed_by'=>$outgoingId,
+                'closed_at'=>now(),
+                'handover_to'=>$incomingId,
+            ]);
+            return PdvCashSession::query()->create([
+                'register_id'=>$register->id,'previous_session_id'=>$session->id,
+                'user_id'=>$incomingId,'opening_amount'=>self::currency($cents),
+                'opening_notes'=>'Recebido do turno #'.$session->id.($notes ? ' · '.trim($notes) : ''),
+                'opened_at'=>now(),
             ]);
         },3);
     }
