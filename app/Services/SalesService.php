@@ -181,6 +181,8 @@ class SalesService
                 'operation_type'=>$operationType,
                 'source'=>$data['source'] ?? 'manual',
                 'pdv_cash_session_id'=>$cashSession?->id,
+                'pdv_checkout_key'=>$data['pdv_checkout_key'] ?? null,
+                'pdv_checkout_hash'=>$data['pdv_checkout_hash'] ?? null,
                 'source_quote_id'=>$sourceQuote?->id,
                 'operation_date'=>$data['operation_date'] ?? now()->toDateString(),
                 'quote_expires_at'=>$operationType==='quote'
@@ -390,9 +392,9 @@ class SalesService
             && $document->cancelled_at!==null;
     }
 
-    public function cancel(Sale $sale, int $userId, ?string $pdvReason=null): void
+    public function cancel(Sale $sale, int $userId, ?string $pdvReason=null, ?int $approvedBy=null): void
     {
-        DB::transaction(function () use ($sale, $userId, $pdvReason) {
+        DB::transaction(function () use ($sale, $userId, $pdvReason, $approvedBy) {
             $locked=Sale::query()->lockForUpdate()->findOrFail($sale->id);
 
             if($locked->status!=='completed') {
@@ -466,6 +468,11 @@ class SalesService
                 'cancelled_at'=>now(),
                 'notes'=>$newNotes,
             ]);
+            if($pdvReason!==null && $approvedBy!==null) {
+                app(\App\Services\PdvActionAuthorization::class)->record(
+                    'sale_cancel',$userId,$approvedBy,$pdvReason,$locked->id
+                );
+            }
         },3);
 
         \App\Models\FiscalDocumentJob::query()
