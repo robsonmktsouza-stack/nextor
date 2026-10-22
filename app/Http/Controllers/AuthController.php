@@ -36,8 +36,11 @@ final class AuthController extends Controller
     {
         abort_if(LoginSubdomain::isPortal(),403);
 
+        $request->merge(['subdomain'=>strtolower(trim((string) $request->input('subdomain')))]);
         $data=$request->validate([
-            'subdomain'=>['required','string','regex:/^[a-z][a-z0-9-]{1,38}$/'],
+            'subdomain'=>['required','string',
+                fn ($field, $value, $fail) => LoginSubdomain::valid((string) $value)
+                    ?: $fail('Identificador de empresa inválido.')],
             'username'=>['required','string','max:255'],
             'password'=>['required','string'],
         ]);
