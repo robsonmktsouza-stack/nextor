@@ -277,6 +277,37 @@ final class PdvSalesHistoryTest extends TestCase
             ->assertSee('id="pdvSalesCancelReason"',false);
     }
 
+    public function test_cashier_cannot_cancel_sale_without_real_supervisor_authorization(): void
+    {
+        $cashier=$this->operator();
+        $sale=$this->sale($cashier);
+        $this->actingAs($cashier)->postJson(route('pdv.sales.cancel',$sale),[
+            'reason'=>'Registro duplicado',
+            'authorizer_id'=>$cashier->id,
+            'credential'=>'SenhaTeste123',
+        ])->assertUnprocessable()->assertJsonValidationErrors('authorizer_id');
+        self::assertSame('completed',$sale->fresh()->status);
+
+        $manager=$this->approval();
+        $this->postJson(route('pdv.sales.cancel',$sale),[
+            'reason'=>'Registro duplicado',
+            'authorizer_id'=>$manager['authorizer_id'],
+            'credential'=>'SenhaIncorreta',
+        ])->assertUnprocessable()->assertJsonValidationErrors('credential');
+        self::assertSame('completed',$sale->fresh()->status);
+
+        $this->postJson(route('pdv.sales.cancel',$sale),[
+            'reason'=>'Registro duplicado',
+            ...$manager,
+        ])->assertOk()->assertJsonPath('success',true);
+        self::assertSame('cancelled',$sale->fresh()->status);
+        $this->assertDatabaseHas('pdv_action_approvals',[
+            'action'=>'sale_cancel','sale_id'=>$sale->id,
+            'performed_by'=>$cashier->id,
+            'approved_by'=>$manager['authorizer_id'],
+        ]);
+    }
+
     public function test_cancel_sale_requires_reason_and_saves_audit_in_existing_notes(): void
     {
         $cashier=$this->operator();
