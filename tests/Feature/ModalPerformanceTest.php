@@ -43,7 +43,7 @@ final class ModalPerformanceTest extends TestCase
         $workflow=file_get_contents(base_path('.github/workflows/acbr-integration-checks.yml'));
         self::assertIsString($fixture);
         self::assertIsString($workflow);
-        self::assertStringContainsString('data-modalLifecycleTest',$fixture);
+        self::assertStringContainsString('document.body.dataset.modalLifecycleTest',$fixture);
         self::assertStringContainsString("native.showModal()",$fixture);
         self::assertStringContainsString("custom.classList.add('is-open')",$fixture);
         self::assertStringContainsString("modal-lifecycle) marker=",$workflow);
