@@ -1,3 +1,10 @@
+## Continuidade — 22/10/2026 — comprovante do histórico no mesmo modal térmico
+
+- Botão Comprovante em Vendas do PDV (Alt+V) agora carrega HTML autenticado em um modal sobre a lista, em vez de navegar para PDF em nova aba. Mesmo partial `pdv.partials.receipt-modal` atende venda recém-finalizada e histórico; a indicação no histórico não simula nova finalização, e vendas canceladas mostram estado correto.
+- O histórico permanece aberto com filtros, paginação e foco. Impressão no iframe térmico oculto continua sob clique do usuário; PDF público do sistema NÃO, rota autenticada `pdv.receipt?print=0` preservada para links existentes.
+- Endpoint GET restrito a PDV/empresa, origem pdv/operação sale/status concluída ou cancelada. Extração de dados de venda, itens, pagamentos e NFC-e para método `receiptModalDetails`. Nenhuma alteração em banco, emissão fiscal, estoque, financeiro, `main`, Control ou VPS.
+- Revisar no Laragon: `php artisan test --filter=PdvSalesHistoryTest` e `php artisan test --filter=SaleReceiptReuseTest`. Conferência estrutural apenas neste ambiente: teste PHP/browser não foi executado.
+
 ## Continuidade — 22/10/2026 — cupom térmico visual no modal pós-venda (develop)
 
 - Pedido: modal de venda concluída mantinha cara de relatório/tabulação larga, apesar de impressão térmica separada. Redesenho somente de visualização: cupom estreito (máx. 342 px), papel branco centralizado, cortes, separadores pontilhados e linhas de item “quantidade × unitário / valor”.
