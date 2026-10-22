@@ -562,4 +562,96 @@ class OperationalSettingsTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.0.sku','SET001');
     }
+    public function test_pdv_checkout_retry_returns_original_sale_without_new_stock_movements(): void
+    {
+        $user=$this->user();
+        $product=$this->product(10);
+        $checkout=(string)\Illuminate\Support\Str::uuid();
+        $payload=[
+            'checkout_key'=>$checkout,
+            'payment_method'=>'pix',
+            'items'=>[[
+                'item_type'=>'product',
+                'product_id'=>$product->id,
+                'quantity'=>'1.000',
+                'discount'=>'0.00',
+            ]],
+        ];
+        $this->actingAs($user)->post(route('pdv.store'),$payload)
+            ->assertSessionHasNoErrors();
+        $sale=Sale::query()->firstOrFail();
+        self::assertSame($checkout,$sale->pdv_checkout_key);
+        self::assertSame('9.000',$product->fresh()->stock_quantity);
+
+        $this->post(route('pdv.store'),$payload)
+            ->assertSessionHasNoErrors();
+        self::assertSame(1,Sale::query()->count());
+        self::assertSame('9.000',$product->fresh()->stock_quantity);
+        self::assertSame(1,$sale->payments()->count());
+
+        $payload['items'][0]['quantity']='2.000';
+        $this->post(route('pdv.store'),$payload)
+            ->assertSessionHasErrors('checkout_key');
+        self::assertSame(1,Sale::query()->count());
+        self::assertSame('9.000',$product->fresh()->stock_quantity);
+    }
+
+    public function test_pdv_high_discount_requires_real_supervisor_credential_and_audits_approval(): void
+    {
+        $user=$this->user();
+        $product=$this->product(10);
+        AppSetting::put('pdv','discount_approval_percent',10);
+        $payload=[
+            'checkout_key'=>(string)\Illuminate\Support\Str::uuid(),
+            'payment_method'=>'pix',
+            'items'=>[[
+                'item_type'=>'product',
+                'product_id'=>$product->id,
+                'quantity'=>'1.000',
+                'discount'=>'20.00',
+            ]],
+        ];
+        $this->actingAs($user)->post(route('pdv.store'),$payload)
+            ->assertSessionHasErrors('authorizer_id');
+        self::assertSame(0,Sale::query()->count());
+
+        $payload['discount_authorizer_id']=$user->id;
+        $payload['discount_credential']='SenhaIncorreta';
+        $this->post(route('pdv.store'),$payload)
+            ->assertSessionHasErrors('credential');
+        self::assertSame(0,Sale::query()->count());
+
+        $payload['discount_credential']='senhaSegura123';
+        $this->post(route('pdv.store'),$payload)
+            ->assertSessionHasNoErrors();
+        $sale=Sale::query()->firstOrFail();
+        self::assertSame('80.00',$sale->total);
+        self::assertSame('9.000',$product->fresh()->stock_quantity);
+        self::assertDatabaseHas('pdv_action_approvals',[
+            'action'=>'discount_approved',
+            'sale_id'=>$sale->id,
+            'performed_by'=>$user->id,
+            'approved_by'=>$user->id,
+        ]);
+    }
+
+    public function test_pdv_discount_within_limit_does_not_require_supervisor(): void
+    {
+        $user=$this->user();
+        $product=$this->product(10);
+        AppSetting::put('pdv','discount_approval_percent',10);
+        $this->actingAs($user)->post(route('pdv.store'),[
+            'checkout_key'=>(string)\Illuminate\Support\Str::uuid(),
+            'payment_method'=>'pix',
+            'items'=>[[
+                'item_type'=>'product',
+                'product_id'=>$product->id,
+                'quantity'=>'1.000',
+                'discount'=>'10.00',
+            ]],
+        ])->assertSessionHasNoErrors();
+        self::assertSame(1,Sale::query()->count());
+        self::assertSame(0,\Illuminate\Support\Facades\DB::table('pdv_action_approvals')->count());
+    }
+
 }
