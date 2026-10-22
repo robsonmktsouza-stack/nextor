@@ -27,7 +27,7 @@ final class ControlSetting extends Model
     }
 
     /** Missing record keeps existing projects' legacy defaults unchanged. */
-    public static function saved(): ?self
+    public static function stored(): ?self
     {
         return static::query()->find(1);
     }
@@ -37,7 +37,7 @@ final class ControlSetting extends Model
     {
         try {
             if (!\Illuminate\Support\Facades\Schema::hasTable('control_settings')) return null;
-            return self::saved();
+            return self::stored();
         } catch (\Throwable) {
             return null;
         }
