@@ -18,6 +18,17 @@
     const previous=document.getElementById('pdvSalesPrevious');
     const next=document.getElementById('pdvSalesNext');
     const todayButton=document.getElementById('pdvSalesToday');
+    const cancelSheet=document.getElementById('pdvSalesCancelSheet');
+    const cancelForm=document.getElementById('pdvSalesCancelForm');
+    const cancelReason=document.getElementById('pdvSalesCancelReason');
+    const cancelNumber=document.getElementById('pdvSalesCancelNumber');
+    const cancelSummary=document.getElementById('pdvSalesCancelSummary');
+    const cancelError=document.getElementById('pdvSalesCancelError');
+    const cancelConfirm=document.getElementById('pdvSalesCancelConfirm');
+    const actionStatus=document.getElementById('pdvSalesActionStatus');
+    const csrf=document.querySelector('meta[name="csrf-token"]')?.content || '';
+    let cancelTarget=null;
+    let cancelBusy=false;
     const money=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'});
     const today=from.value;
     let currentPage=1;
@@ -139,6 +150,34 @@
       button.addEventListener('click',()=>openReceipt(button,url));
       container.appendChild(button);
     };
+    const openCancelSheet=(button,sale)=>{
+      if(cancelBusy || !sale.cancel_url)return;
+      cancelTarget={url:sale.cancel_url,button};
+      cancelNumber.textContent='#'+sale.number;
+      cancelSummary.textContent='Venda #'+sale.number+' · '+money.format(Number(sale.total)||0);
+      cancelReason.value='';
+      cancelError.hidden=true;
+      cancelError.textContent='';
+      cancelSheet.hidden=false;
+      requestAnimationFrame(()=>cancelReason.focus());
+    };
+    const closeCancelSheet=()=>{
+      if(cancelBusy)return;
+      cancelSheet.hidden=true;
+      cancelError.hidden=true;
+      if(cancelTarget?.button?.isConnected)cancelTarget.button.focus();
+      cancelTarget=null;
+    };
+    const addCancelAction=(container,sale)=>{
+      if(!sale.can_cancel || !sale.cancel_url)return;
+      const button=document.createElement('button');
+      button.type='button';
+      button.className='pdv-sales-cancel-action';
+      button.textContent='Cancelar';
+      button.setAttribute('aria-label','Cancelar venda #'+sale.number);
+      button.addEventListener('click',()=>openCancelSheet(button,sale));
+      container.appendChild(button);
+    };
     const addLink=(cell,label,url)=>{
       if(!url)return;
       const anchor=document.createElement('a');
@@ -171,6 +210,7 @@
         const links=document.createElement('div');
         links.className='pdv-sales-row-actions';
         addPreviewAction(links,'Comprovante',sale.receipt_preview_url);
+        addCancelAction(links,sale);
         addLink(links,'DANFE',sale.danfe_url);
         actions.appendChild(links);
         rows.appendChild(tr);
@@ -248,6 +288,56 @@
       requestAnimationFrame(()=>search.focus());
     };
 
+    document.getElementById('pdvSalesCancelClose')?.addEventListener('click',closeCancelSheet);
+    document.getElementById('pdvSalesCancelBack')?.addEventListener('click',closeCancelSheet);
+    modal.addEventListener('cancel',event=>{
+      if(cancelSheet && !cancelSheet.hidden){
+        event.preventDefault();
+        closeCancelSheet();
+      }
+    });
+    cancelForm?.addEventListener('submit',async event=>{
+      event.preventDefault();
+      if(cancelBusy || !cancelTarget)return;
+      const reason=cancelReason.value.trim();
+      if(reason.length<5){
+        cancelError.textContent='Informe um motivo com pelo menos 5 caracteres.';
+        cancelError.hidden=false;
+        cancelReason.focus();
+        return;
+      }
+      cancelBusy=true;
+      cancelConfirm.disabled=true;
+      cancelConfirm.textContent='Cancelando...';
+      cancelError.hidden=true;
+      try{
+        const response=await fetch(cancelTarget.url,{
+          method:'POST',credentials:'same-origin',cache:'no-store',
+          headers:{
+            Accept:'application/json','Content-Type':'application/json',
+            'X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN':csrf
+          },
+          body:JSON.stringify({reason})
+        });
+        const result=await response.json().catch(()=>({}));
+        if(!response.ok){
+          const first=Object.values(result.errors||{}).flat()[0];
+          throw new Error(first||result.message||'Não foi possível cancelar a venda.');
+        }
+        cancelSheet.hidden=true;
+        cancelTarget=null;
+        actionStatus.textContent=result.message||'Venda cancelada.';
+        actionStatus.hidden=false;
+        load(currentPage);
+      }catch(error){
+        cancelError.textContent=error.message||'Não foi possível cancelar a venda.';
+        cancelError.hidden=false;
+      }finally{
+        cancelBusy=false;
+        cancelConfirm.disabled=false;
+        cancelConfirm.textContent='Confirmar cancelamento';
+      }
+    });
     trigger.addEventListener('click',event=>{event.preventDefault();open();});
     form.addEventListener('submit',event=>{event.preventDefault();load(1);});
     period.addEventListener('change',()=>{
@@ -271,6 +361,10 @@
     previous.addEventListener('click',()=>{if(currentPage>1)load(currentPage-1);});
     next.addEventListener('click',()=>{if(currentPage<pageCount)load(currentPage+1);});
     modal.addEventListener('close',()=>{
+      if(!cancelBusy){
+        cancelSheet.hidden=true;
+        cancelTarget=null;
+      }
       if(suppressSalesClose){
         suppressSalesClose=false;
         return;
