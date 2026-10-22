@@ -1,17 +1,20 @@
 <?php
 
 use App\Models\User;
+use App\Models\ControlSetting;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Schedule;
 
-Schedule::command('control:automations-run')->dailyAt('08:00')->withoutOverlapping();
+Schedule::command('control:automations-run')->dailyAt(ControlSetting::schedule('automations_at','08:00'))->withoutOverlapping();
 if (app()->environment('local') && config('managed_provisioning.local_enabled')) {
     Schedule::command('control:provision-local --all')->everyMinute()->withoutOverlapping();
 }
-Schedule::command('control:invoices-prepare')->dailyAt('08:05')->withoutOverlapping();
-Schedule::command('control:client-email-send')->everyTenMinutes()->between('08:10', '18:00')->withoutOverlapping();
+Schedule::command('control:invoices-prepare')->dailyAt(ControlSetting::schedule('invoices_at','08:05'))->withoutOverlapping();
+Schedule::command('control:client-email-send')->everyTenMinutes()
+    ->between(ControlSetting::schedule('emails_start_at','08:10'),
+        ControlSetting::schedule('emails_end_at','18:00'))->withoutOverlapping();
 
 Artisan::command('control:admin {email} {--name=Administrador}', function (): int {
     $email = strtolower(trim((string) $this->argument('email')));
