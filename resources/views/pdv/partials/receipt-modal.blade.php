@@ -64,9 +64,12 @@
         <button type="button" class="pdv-receipt-action pdv-receipt-action-back" id="{{ $receiptDoneId }}" data-pdv-receipt-done>
           @include('partials.icon',['name'=>'arrow-left','size'=>17]) {{ $receiptModalIsHistory ? 'Voltar às vendas' : 'Voltar ao PDV' }}
         </button>
-        <button type="button" class="pdv-receipt-action pdv-receipt-action-print" id="{{ $receiptPrintId }}" data-pdv-receipt-print disabled>
+        <a class="pdv-receipt-action pdv-receipt-action-print" id="{{ $receiptPrintId }}"
+           href="{{ route('pdv.receipt',['sale'=>$receiptModalSale->id,'print'=>0]) }}"
+           target="_blank" rel="noopener noreferrer" data-pdv-receipt-print
+           title="Abrir PDF térmico para impressão">
           @include('partials.icon',['name'=>'print','size'=>17]) Imprimir comprovante
-        </button>
+        </a>
         @if($receiptModalNfceDocument && auth()->user()->canAccess('fiscal'))
           <a class="pdv-receipt-action pdv-receipt-action-fiscal"
              href="{{ route('fiscal.show',$receiptModalNfceDocument) }}"
@@ -163,10 +166,6 @@
         <p class="pdv-receipt-internal-notice">Comprovante interno de venda · Não substitui documento fiscal.</p>
       </section>
     </div>
-    {{-- O modelo térmico original é mantido somente para imprimir ao clicar. --}}
-    <iframe id="{{ $receiptFrameId }}" data-pdv-receipt-frame class="pdv-receipt-print-frame"
-            title="Documento para impressão da venda #{{ $receiptModalSale->id }}"
-            src="{{ route('pdv.receipt',['sale'=>$receiptModalSale->id,'embed'=>1]) }}"
-            loading="eager" referrerpolicy="same-origin" tabindex="-1" aria-hidden="true"></iframe>
+    {{-- O PDF de 58/80 mm é aberto no leitor nativo do navegador, não em um iframe oculto. --}}
   </dialog>
 
