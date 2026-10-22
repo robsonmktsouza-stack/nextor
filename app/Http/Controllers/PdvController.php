@@ -971,7 +971,8 @@ class PdvController extends Controller
         ]);
         $authorization->verify($request->user(),$data['credential'],$request->ip());
         $session=$cash->close((int)$request->user()->id,(string)$data['closing_amount'],$data['closing_notes'] ?? null);
-        return redirect()->route('pdv.cash.report',$session)
+        return redirect()->route('pdv.index')
+            ->with('pdv_cash_report_id',$session->id)
             ->with('success','Caixa fechado. Confira a diferença apurada.');
     }
 
