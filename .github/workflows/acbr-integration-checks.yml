@@ -106,6 +106,7 @@ jobs:
       - name: Validate JavaScript syntax
         run: |
           node --check public/js/erp.js
+          node --check public/js/login.js
           node --check public/js/fiscal-codes.js
           node --check public/js/nfce-editor.js
           test -s public/css/ui-refinement.css
