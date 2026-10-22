@@ -7,6 +7,18 @@
     $receiptCloseId=$receiptModalIsHistory ? 'pdvHistoryReceiptCloseTop' : 'pdvReceiptCloseTop';
     $receiptDoneId=$receiptModalIsHistory ? 'pdvHistoryReceiptDone' : 'pdvReceiptDone';
     $receiptPrintId=$receiptModalIsHistory ? 'pdvHistoryReceiptPrint' : 'pdvReceiptPrint';
+    $receiptCompanyAddress=collect([
+      $receiptModalCompany->address,
+      $receiptModalCompany->address_number,
+      $receiptModalCompany->district,
+      $receiptModalCompany->city
+        ? $receiptModalCompany->city.($receiptModalCompany->state ? '/'.$receiptModalCompany->state : '')
+        : null,
+    ])->filter()->implode(' · ');
+    $receiptCompanyContact=collect([
+      $receiptModalCompany->phone,
+      $receiptModalCompany->email,
+    ])->filter()->implode(' · ');
     $receiptModalCompanyName=$receiptModalCompany->trade_name
       ?: ($receiptModalCompany->legal_name ?: config('app.name','Lumeron'));
     $receiptModalHasCash=$receiptModalSale->payments->contains(
@@ -85,48 +97,62 @@
           </form>
         @endif
       </div>
+      <div class="pdv-receipt-fiscal-inline">
+        <span>NFC-e</span>
+        <strong>{{ $receiptModalFiscalLabel }}</strong>
+      </div>
     </div>
 
     <div class="pdv-receipt-content">
       <section class="pdv-receipt-document" aria-label="Comprovante da venda">
         <div class="pdv-receipt-company">
           @if($receiptModalCompany->logo_path)
-            <img src="{{ asset('storage/'.$receiptModalCompany->logo_path) }}"
-                 alt="" class="pdv-receipt-company-logo">
+            <img src="{{ route('pdv.company.logo') }}"
+                 alt="" loading="lazy" decoding="async" class="pdv-receipt-company-logo">
           @endif
           <strong>{{ $receiptModalCompanyName }}</strong>
           @if($receiptModalCompany->document)
             <span>{{ $receiptModalCompany->document }}</span>
           @endif
-          <div class="pdv-receipt-meta">
-            <span><b>Venda:</b> {{ str_pad((string)$receiptModalSale->id,5,'0',STR_PAD_LEFT) }}</span>
-            <span><b>Data:</b> {{ ($receiptModalSale->completed_at ?? $receiptModalSale->created_at)?->format(\App\Models\AppSetting::dateFormat().' H:i') }}</span>
-            <span><b>Operador:</b> {{ $receiptModalSale->user?->name ?? '—' }}</span>
-            <span><b>Cliente:</b> {{ $receiptModalSale->customer?->name ?? ($receiptModalSale->consumer_name ?: 'Consumidor não identificado') }}</span>
-          </div>
+          @if($receiptCompanyAddress)
+            <span>{{ $receiptCompanyAddress }}</span>
+          @endif
+          @if($receiptCompanyContact)
+            <span>{{ $receiptCompanyContact }}</span>
+          @endif
+          @if($receiptModalCompany->print_header)
+            <div class="pdv-receipt-custom-header">{{ $receiptModalCompany->print_header }}</div>
+          @endif
         </div>
 
-        <div class="pdv-receipt-paper-caption">Comprovante de venda</div>
-        <div class="pdv-receipt-paper-warning">Sem valor fiscal@if($receiptModalIsCancelled) · Venda cancelada@endif</div>
+        <div class="pdv-receipt-paper-caption">COMPROVANTE DE VENDA</div>
+        <div class="pdv-receipt-paper-warning">SEM VALOR FISCAL</div>
+        @if($receiptModalIsCancelled)
+          <div class="pdv-receipt-cancelled-note">VENDA CANCELADA</div>
+        @endif
+        <div class="pdv-receipt-meta">
+          <span>Venda nº {{ str_pad((string)$receiptModalSale->id,9,'0',STR_PAD_LEFT) }}</span>
+          <span>{{ ($receiptModalSale->completed_at ?? $receiptModalSale->created_at)?->format(\App\Models\AppSetting::dateFormat().' H:i:s') }}</span>
+          <span>Operador: {{ $receiptModalSale->user?->name ?? '—' }}</span>
+        </div>
 
         <div class="pdv-receipt-document-heading">Itens da venda</div>
         <div class="pdv-receipt-table-scroll">
           <table class="pdv-receipt-items">
-            <thead>
-              <tr>
-                <th scope="col">Produto / quantidade</th>
-                <th scope="col">Valor</th>
-              </tr>
-            </thead>
             <tbody>
               @foreach($receiptModalSale->items as $item)
                 <tr>
                   <td>
                     <span>{{ $item->product_name }}</span>
-                    @if($item->product_sku)<small>{{ $item->product_sku }}</small>@endif
+                    @if($item->product_sku)
+                      <small>Cod.: {{ $item->product_sku }}</small>
+                    @endif
                     <small class="pdv-receipt-item-detail">{{ rtrim(rtrim(number_format((float)$item->quantity,3,',','.'),'0'),',') }} × R$ {{ number_format((float)$item->unit_price,2,',','.') }}</small>
+                    @if((float)$item->discount>0)
+                      <small>Desconto do item: - R$ {{ number_format((float)$item->discount,2,',','.') }}</small>
+                    @endif
                   </td>
-                  <td>R$ {{ number_format((float)$item->line_total,2,',','.') }}</td>
+                  <td>R$ {{ number_format((float)$item->line_total + (float)$item->discount,2,',','.') }}</td>
                 </tr>
               @endforeach
             </tbody>
@@ -134,19 +160,17 @@
         </div>
 
         <div class="pdv-receipt-totals">
-          <div><span>Quantidade total de itens</span><strong>{{ rtrim(rtrim(number_format((float)$receiptModalSale->items->sum('quantity'),3,',','.'),'0'),',') }}</strong></div>
           <div><span>Subtotal</span><strong>R$ {{ number_format((float)$receiptModalSale->subtotal,2,',','.') }}</strong></div>
           @if((float)$receiptModalSale->discount_total>0)
-            <div><span>Descontos</span><strong>- R$ {{ number_format((float)$receiptModalSale->discount_total,2,',','.') }}</strong></div>
+            <div><span>Desconto</span><strong>- R$ {{ number_format((float)$receiptModalSale->discount_total,2,',','.') }}</strong></div>
           @endif
-          <div class="pdv-receipt-total"><span>Total da venda</span><strong>R$ {{ number_format((float)$receiptModalSale->total,2,',','.') }}</strong></div>
+          <div class="pdv-receipt-total"><span>Total</span><strong>R$ {{ number_format((float)$receiptModalSale->total,2,',','.') }}</strong></div>
         </div>
 
-        <div class="pdv-receipt-document-heading">Formas de pagamento</div>
         <div class="pdv-receipt-payments">
           @foreach($receiptModalSale->payments as $payment)
             <div>
-              <span>{{ $receiptModalPaymentLabels[$payment->payment_method] ?? 'Outra forma de pagamento' }}</span>
+              <span>{{ $receiptModalPaymentLabels[$payment->payment_method] ?? 'Outro' }}</span>
               <strong>R$ {{ number_format((float)$payment->amount,2,',','.') }}</strong>
             </div>
           @endforeach
@@ -155,15 +179,22 @@
             <div><span>Troco</span><strong>R$ {{ number_format((float)$receiptModalSale->change_amount,2,',','.') }}</strong></div>
           @endif
         </div>
-        <div class="pdv-receipt-document-fiscal">
-          <span>NFC-e</span>
-          <strong>{{ $receiptModalFiscalLabel }}</strong>
+
+        <div class="pdv-receipt-customer-info">
+          <div><span>Cliente</span><strong>{{ $receiptModalSale->customer?->name ?? 'Consumidor não identificado' }}</strong></div>
+          <div><span>CPF/CNPJ na nota</span><strong>{{ $receiptModalSale->consumer_document ?: 'Não informado' }}</strong></div>
+          @if($receiptModalSale->consumer_name)
+            <div><span>Consumidor</span><strong>{{ $receiptModalSale->consumer_name }}</strong></div>
+          @endif
         </div>
         @if($receiptModalSale->notes)
           <p class="pdv-receipt-note">{{ $receiptModalSale->notes }}</p>
         @endif
-        <p class="pdv-receipt-internal-notice">Comprovante interno de venda · Não substitui documento fiscal.</p>
-      </section>
+        @if($receiptModalCompany->print_footer)
+          <p class="pdv-receipt-note pdv-receipt-custom-footer">{{ $receiptModalCompany->print_footer }}</p>
+        @endif
+        <p class="pdv-receipt-internal-notice">Comprovante interno de venda. Não substitui documento fiscal.</p>
+      </section>>
     </div>
     {{-- O PDF de 58/80 mm é aberto no leitor nativo do navegador, não em um iframe oculto. --}}
   </dialog>
