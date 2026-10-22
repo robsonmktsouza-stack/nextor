@@ -20,7 +20,7 @@ final class PdvCashReportController extends Controller
         abort_unless($request->user()->role==='admin'
             || $cashSession->user_id===$request->user()->id,403);
 
-        $cashSession->load(['user:id,name','closer:id,name','reviewer:id,name','register:id,name,code','previousSession:id,user_id,closed_at','incomingOperator:id,name','movements.user:id,name']);
+        $cashSession->load(['user:id,name','closer:id,name','reviewer:id,name','register:id,name,code','previousSession:id,user_id,closed_at','incomingOperator:id,name','movements.user:id,name','movements.approver:id,name']);
         $breakdown=$cashSession->closed_at && is_array($cashSession->closing_breakdown)
             ? $cashSession->closing_breakdown
             : $cash->breakdown($cashSession);
