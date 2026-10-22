@@ -405,36 +405,113 @@ foreach($primaryTabs as $key=>$item){
   </section>
 
 @elseif($tab==='pdv')
-  <form method="post" action="{{ route('settings.group.update','pdv') }}" class="settings-editor">
+  @push('styles')
+    <link rel="stylesheet" href="{{ asset('css/pdv-settings.css') }}?v={{ filemtime(public_path('css/pdv-settings.css')) }}">
+  @endpush
+  <form method="post" action="{{ route('settings.group.update','pdv') }}" class="settings-editor pdv-settings-editor">
     @csrf
-    <section class="editor-panel settings-panel">
-      <div class="settings-panel-head"><div><h2>Frente de caixa (PDV)</h2></div></div>
-      <div class="editor-grid cols-12 settings-grid">
-        <label class="field col-6"><span>Forma de pagamento padrão</span><select name="default_payment_method"><option value="">Sem padrão</option>@foreach($paymentMethods->where('is_active',true)->where('pdv_enabled',true) as $m)<option value="{{ $m->code }}" @selected($pdv['default_payment_method']===$m->code)>{{ $m->name }}</option>@endforeach</select></label>
-        <label class="field col-3"><span>Largura do cupom</span><select name="receipt_width"><option value="58" @selected((string)$pdv['receipt_width']==='58')>58 mm</option><option value="80" @selected((string)$pdv['receipt_width']==='80')>80 mm</option></select></label>
-        <label class="field col-3"><span>Cópias</span><input type="number" min="1" max="5" name="receipt_copies" value="{{ $pdv['receipt_copies'] }}"></label>
+    <section class="editor-panel settings-panel pdv-settings-panel">
+      <div class="settings-panel-head">
+        <div>
+          <h2>Frente de caixa (PDV)</h2>
+        </div>
       </div>
-      <div class="settings-switch-grid">
-        <label class="settings-switch"><input type="checkbox" name="require_customer" value="1" @checked($pdv['require_customer'])><span><strong>Exigir cliente</strong><small>Impede concluir o PDV sem cliente selecionado.</small></span></label>
-        <label class="settings-switch"><input type="checkbox" name="allow_discount" value="1" @checked($pdv['allow_discount'])><span><strong>Permitir desconto</strong><small>Libera desconto por item no PDV.</small></span></label>
-        <label class="settings-switch"><input type="checkbox" name="require_cash_opening" value="1" @checked($pdv['require_cash_opening'])>
-          <span><strong>Exigir abertura de caixa</strong><small>Ative para exigir um turno de caixa físico antes de cada venda. Operadores usam senha ou PIN na abertura, fechamento e passagem.</small></span>
+
+      <div class="editor-grid cols-12 settings-grid pdv-settings-general">
+        <label class="field col-6">
+          <span>Forma de pagamento padrão</span>
+          <select name="default_payment_method">
+            <option value="">Sem padrão</option>
+            @foreach($paymentMethods->where('is_active',true)->where('pdv_enabled',true) as $m)
+              <option value="{{ $m->code }}" @selected($pdv['default_payment_method']===$m->code)>{{ $m->name }}</option>
+            @endforeach
+          </select>
         </label>
-        <label class="settings-switch"><input type="checkbox" name="ask_consumer_document" value="1" @checked($pdv['ask_consumer_document'])><span><strong>Perguntar CPF/CNPJ na nota</strong><small>Antes de finalizar, pergunta se o consumidor deseja ser identificado no documento fiscal.</small></span></label>
-        <label class="settings-switch"><input type="checkbox" name="allow_split_payment" value="1" @checked($pdv['allow_split_payment'])><span><strong>Permitir pagamento dividido</strong><small>Permite combinar dinheiro, PIX, cartão e outras formas na mesma venda.</small></span></label>
-        <label class="settings-switch"><input type="checkbox" name="allow_cash_movements" value="1" @checked($pdv['allow_cash_movements'])><span><strong>Permitir retiradas e reforços no caixa</strong><small>Habilita sangrias, suprimentos e reembolsos em dinheiro vinculados à operação.</small></span></label>
-        <label class="field col-6"><span>Exigir aprovação de supervisor para saídas a partir de (R$)</span>
-          <input type="number" step="0.01" min="0" name="supervisor_movement_min"
-                 value="{{ $pdv['supervisor_movement_min'] ?? 200 }}"></label>
-        <label class="settings-switch"><input type="checkbox" name="show_stock" value="1" @checked($pdv['show_stock'])><span><strong>Mostrar estoque</strong><small>Exibe saldo disponível na busca de produtos.</small></span></label>
-        <label class="settings-switch"><input type="checkbox" name="auto_nfce" value="1" @checked($pdv['auto_nfce'])><span><strong>Transmitir NFC-e automaticamente</strong><small>Com esta opção desativada, a nota fica preparada para revisão e emissão manual após a venda.</small></span></label>
+        <label class="field col-3">
+          <span>Largura do cupom</span>
+          <select name="receipt_width">
+            <option value="58" @selected((string)$pdv['receipt_width']==='58')>58 mm</option>
+            <option value="80" @selected((string)$pdv['receipt_width']==='80')>80 mm</option>
+          </select>
+        </label>
+        <label class="field col-3">
+          <span>Cópias</span>
+          <input type="number" min="1" max="5" name="receipt_copies" value="{{ $pdv['receipt_copies'] }}">
+        </label>
+      </div>
+
+      <div class="pdv-settings-section">
+        <div class="pdv-settings-section-head">
+          <h3>Atendimento e vendas</h3>
+          <p>Configure o comportamento do PDV durante o atendimento.</p>
+        </div>
+        <div class="pdv-settings-options-grid">
+          <label class="settings-switch">
+            <input type="checkbox" name="require_customer" value="1" @checked($pdv['require_customer'])>
+            <span><strong>Exigir cliente</strong><small>Impede concluir a venda sem identificar o cliente.</small></span>
+          </label>
+          <label class="settings-switch">
+            <input type="checkbox" name="allow_discount" value="1" @checked($pdv['allow_discount'])>
+            <span><strong>Permitir descontos</strong><small>Habilita descontos nos itens do PDV.</small></span>
+          </label>
+          <label class="settings-switch">
+            <input type="checkbox" name="ask_consumer_document" value="1" @checked($pdv['ask_consumer_document'])>
+            <span><strong>Perguntar CPF/CNPJ na nota</strong><small>Consulta o consumidor antes de finalizar a venda.</small></span>
+          </label>
+          <label class="settings-switch">
+            <input type="checkbox" name="allow_split_payment" value="1" @checked($pdv['allow_split_payment'])>
+            <span><strong>Permitir pagamento dividido</strong><small>Combina dinheiro, PIX, cartão e outras formas.</small></span>
+          </label>
+          <label class="settings-switch">
+            <input type="checkbox" name="show_stock" value="1" @checked($pdv['show_stock'])>
+            <span><strong>Mostrar estoque</strong><small>Exibe a quantidade disponível na busca de produtos.</small></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="pdv-settings-section">
+        <div class="pdv-settings-section-head">
+          <h3>Caixa e segurança</h3>
+          <p>Controle a responsabilidade pelos turnos e pelas movimentações em dinheiro.</p>
+        </div>
+        <div class="pdv-settings-options-grid">
+          <label class="settings-switch">
+            <input type="checkbox" name="require_cash_opening" value="1" @checked($pdv['require_cash_opening'])>
+            <span><strong>Exigir abertura de caixa</strong><small>Obriga um turno aberto antes de concluir vendas, com identificação do operador.</small></span>
+          </label>
+          <label class="settings-switch">
+            <input type="checkbox" name="allow_cash_movements" value="1" @checked($pdv['allow_cash_movements'])>
+            <span><strong>Permitir movimentações de caixa</strong><small>Habilita sangrias, suprimentos e reembolsos.</small></span>
+          </label>
+          <div class="pdv-settings-limit">
+            <label class="field" for="pdvSupervisorLimit">
+              <span>Aprovação de supervisor a partir de (R$)</span>
+              <input id="pdvSupervisorLimit" type="number" step="0.01" min="0" max="99999999" name="supervisor_movement_min"
+                     value="{{ $pdv['supervisor_movement_min'] ?? 200 }}">
+            </label>
+            <p>Para retiradas e reembolsos nesse valor ou acima.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="pdv-settings-section">
+        <div class="pdv-settings-section-head">
+          <h3>Emissão fiscal</h3>
+          <p>Defina como o PDV deve preparar a NFC-e após a venda.</p>
+        </div>
+        <div class="pdv-settings-options-grid">
+          <label class="settings-switch">
+            <input type="checkbox" name="auto_nfce" value="1" @checked($pdv['auto_nfce'])>
+            <span><strong>Transmitir NFC-e automaticamente</strong><small>Se desativado, o documento fica preparado para revisão e emissão manual.</small></span>
+          </label>
+        </div>
       </div>
     </section>
-  
-  <div class="editor-savebar settings-savebar">
-    <button class="btn btn-success" type="submit">@include('partials.icon',['name'=>'check','size'=>15]) Salvar</button>
-  </div>
-</form>
+
+    <div class="editor-savebar settings-savebar">
+      <button class="btn btn-success" type="submit">@include('partials.icon',['name'=>'check','size'=>15]) Salvar</button>
+    </div>
+  </form>
 
 @elseif($tab==='billing')
   <form method="post" action="{{ route('settings.group.update','billing') }}" class="settings-editor">
