@@ -63,7 +63,9 @@ final class PdvCashReportController extends Controller
         }
         $notes=($independent ? '' : '[Conferência do único administrador] ').$data['review_notes'];
         $cash->review($cashSession,(int)$request->user()->id,$notes);
-        return redirect()->route('pdv.cash.report',$cashSession)
-            ->with('success','Conferência administrativa registrada.');
+        return redirect()->route('pdv.cash.report',[
+            'cashSession'=>$cashSession,
+            ...($request->boolean('embed') ? ['embed'=>1] : []),
+        ])->with('success','Conferência administrativa registrada.');
     }
 }
