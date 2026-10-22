@@ -1165,3 +1165,13 @@
 .lumeron-pdv-page .pdv-sales-cancel-sheet[hidden],.lumeron-pdv-page .pdv-sales-cancel-error[hidden],.lumeron-pdv-page .pdv-sales-action-status[hidden]{display:none!important}
 .lumeron-pdv-page .pdv-sales-cancel-sheet:not([hidden]){position:absolute;inset:0;z-index:5;display:grid;place-items:center;padding:16px;background:rgba(17,32,44,.44)}
 .lumeron-pdv-page .pdv-sales-cancel-panel{width:min(450px,100%);margin:auto;background:#fff;border:1px solid #cbd9e4;border-radius:5px;color:#344c5b;box-shadow:0 12px 30px rgba(12,30,43,.2)}
+
+.lumeron-pdv-page .pdv-sales-cancel-head{display:flex;align-items:center;justify-content:space-between;padding:12px 15px;border-bottom:1px solid #e0e8ef}
+.lumeron-pdv-page .pdv-sales-cancel-head h3{margin:0;font-size:15px;font-weight:700;color:#2a4153}
+.lumeron-pdv-page .pdv-sales-cancel-body{padding:16px 15px 12px}
+.lumeron-pdv-page .pdv-sales-cancel-body>p:first-child{margin:0 0 15px;font-size:12px;font-weight:650}
+.lumeron-pdv-page .pdv-sales-cancel-body label{display:block;margin-bottom:6px;font-size:11px;font-weight:700}
+.lumeron-pdv-page .pdv-sales-cancel-body textarea{box-sizing:border-box;display:block;width:100%;min-height:85px;max-height:170px;padding:9px 10px;resize:vertical;border:1px solid #c6d5e1;border-radius:4px;color:#29445a;font:12px Roboto,Arial,sans-serif}
+.lumeron-pdv-page .pdv-sales-cancel-body textarea:focus{border-color:#3681b8;outline:2px solid #3681b825}
+.lumeron-pdv-page .pdv-sales-cancel-hint{margin:12px 0 0;font-size:11px;line-height:1.5;color:#667987}
+.lumeron-pdv-page .pdv-sales-cancel-error{margin:12px 0 0;font-size:11px;font-weight:650;color:#a7383a}
