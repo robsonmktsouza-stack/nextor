@@ -15,10 +15,10 @@ use Throwable;
 
 final class NFCeCancellationService
 {
-    public function request(FiscalDocumentJob $job,string $reason): FiscalDocumentJob
+    public function request(FiscalDocumentJob $job,string $reason,?int $approvedBy=null,?int $performedBy=null): FiscalDocumentJob
     {
         $reason=trim($reason);
-        return DB::transaction(function () use($job,$reason) {
+        return DB::transaction(function () use($job,$reason,$approvedBy,$performedBy) {
             $document=FiscalDocumentJob::query()->lockForUpdate()->findOrFail($job->id);
             app(NFCeProductionGate::class)->assertAllowed((string)$document->environment);
             if ($document->document_type!=='nfce'||$document->status!=='authorized'
@@ -36,13 +36,19 @@ final class NFCeCancellationService
             // desde que a mercadoria não tenha circulado.
             if (!$document->authorized_at || $document->authorized_at->isFuture()
                 || $document->authorized_at->copy()->addMinutes(30)->isPast()) {
-                throw ValidationException::withMessages(['reason'=>'Prazo de 30 minutos para cancelamento comum na Bahia encerrado. Verifique a regularização cabível.']);
+                throw ValidationException::withMessages(['reason'=>'Prazo de 30 minutos para cancelamento normal encerrado. Consulte o procedimento de sua UF para regularização extemporânea.']);
             }
             $document->update([
                 'cancellation_status'=>'pending',
                 'cancellation_reason'=>$reason,
                 'cancellation_requested_at'=>now(),
             ]);
+            if($approvedBy!==null && $performedBy!==null) {
+                app(\App\Services\PdvActionAuthorization::class)->record(
+                    'nfce_cancel_request',$performedBy,$approvedBy,$reason,
+                    $document->sale_id,$document->id
+                );
+            }
             return $document->refresh();
         },3);
     }
