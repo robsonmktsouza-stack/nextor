@@ -38,7 +38,8 @@ final class NFCeFiscalEventsController extends Controller
         return back()->with('success','Transmissão do XML original iniciada. Acompanhe a autorização pela chave.');
     }
 
-    public function cancel(Request $request,FiscalDocumentJob $fiscalDocumentJob,NFCeCancellationService $service)
+    public function cancel(Request $request,FiscalDocumentJob $fiscalDocumentJob,NFCeCancellationService $service,
+        ?int $approvedBy=null, ?int $performedBy=null)
     {
         $data=$request->validate([
             'reason'=>['required','string','min:15','max:255'],
@@ -48,7 +49,7 @@ final class NFCeFiscalEventsController extends Controller
         if (in_array($connection,['','sync','null'],true)) {
             throw ValidationException::withMessages(['reason'=>'Configure a fila fiscal antes do cancelamento.']);
         }
-        $job=$service->request($fiscalDocumentJob,$data['reason']);
+        $job=$service->request($fiscalDocumentJob,$data['reason'],$approvedBy,$performedBy);
         try {
             CancelNFCeJob::dispatch($job->id)->onConnection($connection);
         } catch(\Throwable $e) {
