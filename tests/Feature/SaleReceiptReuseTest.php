@@ -216,9 +216,12 @@ final class SaleReceiptReuseTest extends TestCase
             ->assertSee('class="pdv-receipt-paper-warning"',false)
             ->assertSee('class="pdv-receipt-item-detail"',false)
             ->assertSee('Produto para balcão')
-            ->assertSee('Sem valor fiscal')
+            ->assertSee('SEM VALOR FISCAL')
             ->assertSee('R$ 65,00')
             ->assertSee('Comprovante interno de venda')
+            ->assertSee('Venda nº 000000001')
+            ->assertDontSee('@IF(')
+            ->assertDontSee('@ENDIF')
             ->assertDontSee('class="pdv-receipt-print-frame"',false)
             ->assertDontSee('class="pdv-receipt-preview-shell"',false);
 
