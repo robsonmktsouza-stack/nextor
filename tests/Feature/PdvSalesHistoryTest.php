@@ -150,7 +150,11 @@ final class PdvSalesHistoryTest extends TestCase
             ->assertSee('pdv-receipt-paper-caption')
             ->assertSee('Camiseta de teste')
             ->assertSee('R$ 29,90')
+            ->assertSee('COMPROVANTE DE VENDA')
+            ->assertSee('SEM VALOR FISCAL')
             ->assertSee('Comprovante da venda')
+            ->assertDontSee('@IF(')
+            ->assertDontSee('@ENDIF')
             ->assertSee('Voltar às vendas')
             ->assertDontSee('Venda efetuada com sucesso')
             ->assertDontSee('window.print()',false);
@@ -164,7 +168,10 @@ final class PdvSalesHistoryTest extends TestCase
         $this->actingAs($cashier)
             ->get(route('pdv.sales.receipt.preview',$sale))
             ->assertOk()
+            ->assertSee('VENDA CANCELADA')
             ->assertSee('Venda cancelada')
+            ->assertDontSee('@IF(')
+            ->assertDontSee('@ENDIF')
             ->assertDontSee('Venda efetuada com sucesso')
             ->assertDontSee('Preparar NFC-e');
     }
@@ -185,6 +192,22 @@ final class PdvSalesHistoryTest extends TestCase
         ]);
         $this->actingAs($stock)
             ->get(route('pdv.sales.receipt.preview',$sale))->assertForbidden();
+    }
+
+    public function test_receipt_logo_is_served_privately_even_without_public_storage_symlink(): void
+    {
+        $cashier=$this->operator();
+        $this->actingAs($cashier);
+        \Illuminate\Support\Facades\Storage::fake('public');
+        \Illuminate\Support\Facades\Storage::disk('public')->put('company/receipt.png',
+            base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/3KkAAAAASUVORK5CYII='));
+        \App\Models\CompanySetting::current()->update(['logo_path'=>'company/receipt.png']);
+        $this->get(route('pdv.company.logo'))
+            ->assertOk()
+            ->assertHeader('Content-Type','image/png')
+            ->assertHeader('Cache-Control','private, max-age=300');
+        $page=$this->get(route('pdv.sales.receipt.preview',$this->sale($cashier)));
+        $page->assertOk()->assertSee(route('pdv.company.logo'),false);
     }
 
     public function test_empty_results_and_invalid_date_range_are_handled(): void
