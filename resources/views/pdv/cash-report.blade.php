@@ -58,7 +58,8 @@ footer{margin-top:24px;border-top:1px solid #aab7c0;padding-top:10px;color:#5e6a
 <td>{{ match($movement->type){'supply'=>'Suprimento','withdrawal'=>'Sangria','refund'=>'Reembolso',default=>$movement->type} }}
 @if($movement->sale_id) · Venda #{{ $movement->sale_id }}@endif
 @if($movement->sale_return_id) · Devolução #{{ $movement->sale_return_id }}@endif</td>
-<td>{{ $movement->user?->name }} · {{ $movement->reason }}</td>
+<td>{{ $movement->user?->name }} · {{ $movement->reason }}
+@if($movement->approved_by)<small> · Aprovado por {{ $movement->approver?->name }}</small>@endif</td>
 <td class="number">R$ {{ number_format((float)$movement->amount,2,',','.') }}</td></tr>
 @empty<tr><td colspan="4">Sem movimentações manuais.</td></tr>@endforelse
 </tbody></table></section>
