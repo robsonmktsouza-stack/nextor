@@ -94,20 +94,23 @@ body{font-size:9px}
    A impressão continua usando exatamente a largura térmica do PDV. */
 @media screen {
   .sales-receipt-preview .screen-actions,
-  .sales-receipt-preview .receipt { width:min(460px,calc(100vw - 24px)); }
-  .sales-receipt-preview .receipt { max-width:calc(100vw - 24px);padding:20px;box-shadow:0 2px 14px rgba(24,36,46,.12); }
-  .sales-receipt-preview .company-logo { max-height:86px; }
-  .sales-receipt-preview .brand { font-size:17px; }
-  .sales-receipt-preview .subtitle { font-size:13px; }
-  .sales-receipt-preview .warning { font-size:11px; }
+  .sales-receipt-preview .receipt,
+  .pdv-receipt-embedded .receipt { width:min(460px,calc(100vw - 24px)); }
+  .sales-receipt-preview .receipt,
+  .pdv-receipt-embedded .receipt { max-width:calc(100vw - 24px);padding:20px;box-shadow:0 2px 14px rgba(24,36,46,.12); }
+  .sales-receipt-preview .company-logo,.pdv-receipt-embedded .company-logo { max-height:86px; }
+  .sales-receipt-preview .brand,.pdv-receipt-embedded .brand { font-size:17px; }
+  .sales-receipt-preview .subtitle,.pdv-receipt-embedded .subtitle { font-size:13px; }
+  .sales-receipt-preview .warning,.pdv-receipt-embedded .warning { font-size:11px; }
   .sales-receipt-preview .meta,
-  .sales-receipt-preview .custom-header { font-size:11px; }
-  .sales-receipt-preview .items th { font-size:11px; }
-  .sales-receipt-preview .items td { font-size:11px; }
-  .sales-receipt-preview .row { font-size:12px; }
-  .sales-receipt-preview .total { font-size:15px; }
-  .sales-receipt-preview .footer { font-size:10px; }
-  .sales-receipt-preview .copy-label { font-size:10px; }
+  .sales-receipt-preview .custom-header,
+  .pdv-receipt-embedded .meta,.pdv-receipt-embedded .custom-header { font-size:11px; }
+  .sales-receipt-preview .items th,.pdv-receipt-embedded .items th { font-size:11px; }
+  .sales-receipt-preview .items td,.pdv-receipt-embedded .items td { font-size:11px; }
+  .sales-receipt-preview .row,.pdv-receipt-embedded .row { font-size:12px; }
+  .sales-receipt-preview .total,.pdv-receipt-embedded .total { font-size:15px; }
+  .sales-receipt-preview .footer,.pdv-receipt-embedded .footer { font-size:10px; }
+  .sales-receipt-preview .copy-label,.pdv-receipt-embedded .copy-label { font-size:10px; }
 }
 @media print{
   html,body{width:{{ $receiptWidth }}mm!important;min-width:{{ $receiptWidth }}mm!important;max-width:{{ $receiptWidth }}mm!important;background:#fff!important}
@@ -132,8 +135,8 @@ body.receipt-pdf-source .receipt-copy+.receipt-copy{margin-top:0!important}
 @endif
 </style>
 </head>
-<body class="{{ $receiptOrigin==='sales' ? 'sales-receipt-preview' : '' }}{{ ($receiptPdfMode ?? false) ? ' receipt-pdf-source' : '' }}">
-@if(!($receiptPdfMode ?? false))
+<body class="{{ $receiptOrigin==='sales' ? 'sales-receipt-preview' : '' }}{{ request()->boolean('embed') ? ' pdv-receipt-embedded' : '' }}{{ ($receiptPdfMode ?? false) ? ' receipt-pdf-source' : '' }}">
+@if(!($receiptPdfMode ?? false) && !request()->boolean('embed'))
 <div class="screen-actions">
   @if($receiptOrigin==='sales')
     <a href="{{ route('sales.show',$sale) }}">Voltar à venda</a>
@@ -316,7 +319,7 @@ body.receipt-pdf-source .receipt-copy+.receipt-copy{margin-top:0!important}
 </script>
 @endif
 
-@if(!($receiptPdfMode ?? false))
+@if(!($receiptPdfMode ?? false) && !request()->boolean('embed'))
 <script>
 (()=>{
   // Venda comum: sempre visualizar primeiro no Chrome. Apenas o clique
