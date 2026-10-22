@@ -10,7 +10,7 @@ final class ControlSetting extends Model
     protected $fillable = [
         'smtp_host', 'smtp_port', 'smtp_security', 'smtp_username',
         'smtp_password', 'smtp_from_address', 'smtp_from_name',
-        'email_enabled', 'invoice_email_enabled', 'recurring_invoices_enabled',
+        'email_enabled', 'invoice_email_enabled', 'license_email_enabled', 'recurring_invoices_enabled',
         'invoice_days_ahead', 'automations_at', 'invoices_at',
         'emails_start_at', 'emails_end_at',
     ];
@@ -21,6 +21,7 @@ final class ControlSetting extends Model
         return [
             'smtp_username' => 'encrypted', 'smtp_password' => 'encrypted',
             'email_enabled' => 'boolean', 'invoice_email_enabled' => 'boolean',
+            'license_email_enabled' => 'boolean',
             'recurring_invoices_enabled' => 'boolean', 'smtp_port' => 'integer',
             'invoice_days_ahead' => 'integer',
         ];
