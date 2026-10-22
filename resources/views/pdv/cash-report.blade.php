@@ -10,7 +10,11 @@ main{width:210mm;max-width:100%;margin:15px auto;background:white;padding:18mm;b
 @media screen{
   body{background:#f0f3f5}
   main{width:min(100%,860px);margin:0 auto;padding:28px 32px;border:0;min-height:100%}
-  @media(max-width:640px){main{padding:17px 14px}.meta{flex-wrap:wrap;gap:12px}.meta div{min-width:40%}}
+}
+@media screen and (max-width:640px){
+  main{padding:17px 14px}
+  .meta{flex-wrap:wrap;gap:12px}
+  .meta div{min-width:40%}
 }
 @endif
 nav{display:flex;gap:12px;justify-content:flex-end;margin-bottom:15px}
