@@ -9,6 +9,9 @@ use App\Models\FiscalDocumentJob;
 use App\Models\PaymentMethod;
 use App\Models\PdvCashMovement;
 use App\Models\PdvCashSession;
+use App\Models\PdvCashRegister;
+use App\Models\User;
+use App\Services\PdvOperatorAuthorization;
 use App\Models\PdvSuspendedSale;
 use App\Models\SalePayment;
 use App\Models\Product;
@@ -30,7 +33,7 @@ class PdvController extends Controller
             'default_payment_method'=>null,
             'require_customer'=>false,
             'allow_discount'=>true,
-            'require_cash_opening'=>false,
+            'require_cash_opening'=>true,
             'ask_consumer_document'=>true,
             'allow_split_payment'=>true,
             'allow_cash_movements'=>true,
@@ -134,6 +137,13 @@ class PdvController extends Controller
             default=>'verificar',
         } : 'ainda não preparada';
 
+        $cashRegisters=PdvCashRegister::query()->where('is_active',true)->orderBy('id')->get();
+        $shiftOperators=User::query()->where('is_active',true)
+            ->whereKeyNot($request->user()->id)->orderBy('name')->get(['id','name','role','permissions']);
+        $shiftOperators=$shiftOperators->filter(fn($operator)=>$operator->canAccess('pdv'));
+        $cashSupervisors=User::query()->where('is_active',true)
+            ->whereIn('role',['admin','manager'])->orderBy('name')->get(['id','name','role']);
+
         return view('pdv.index',[
             'lastCompletedPdvSale'=>$lastCompletedPdvSale,
             'lastPdvNfceDocument'=>$lastPdvNfceDocument,
@@ -158,6 +168,9 @@ class PdvController extends Controller
                 ->get(),
             'pdvSettings'=>$pdvSettings,
             'cashSession'=>$cashSession,
+            'cashRegisters'=>$cashRegisters,
+            'shiftOperators'=>$shiftOperators,
+            'cashSupervisors'=>$cashSupervisors,
             'cashExpected'=>$cashExpected,
             'cashMovements'=>$cashMovements,
             'refundReturns'=>$cashSession ? SaleReturn::query()
@@ -831,25 +844,31 @@ class PdvController extends Controller
         );
     }
 
-    public function openCash(Request $request, PdvCashService $cash)
+    public function openCash(Request $request,PdvCashService $cash,PdvOperatorAuthorization $authorization)
     {
         $data=$request->validate([
+            'register_id'=>['required','integer','exists:pdv_cash_registers,id'],
             'opening_amount'=>['required','numeric','min:0','max:9999999999.99','decimal:0,2'],
             'opening_notes'=>['nullable','string','max:1000'],
+            'credential'=>['required','string'],
         ]);
-        $cash->open((int)$request->user()->id,(string)$data['opening_amount'],$data['opening_notes'] ?? null);
-        return redirect()->route('pdv.index')->with('success','Caixa aberto.');
+        $authorization->verify($request->user(),$data['credential'],$request->ip());
+        $cash->open((int)$request->user()->id,(string)$data['opening_amount'],
+            $data['opening_notes'] ?? null,(int)$data['register_id']);
+        return redirect()->route('pdv.index')->with('success','Caixa aberto e operador identificado.');
     }
 
-    public function closeCash(Request $request, PdvCashService $cash)
+    public function closeCash(Request $request,PdvCashService $cash,PdvOperatorAuthorization $authorization)
     {
         $data=$request->validate([
             'closing_amount'=>['required','numeric','min:0','max:9999999999.99','decimal:0,2'],
             'closing_notes'=>['nullable','string','max:1000'],
+            'credential'=>['required','string'],
         ]);
+        $authorization->verify($request->user(),$data['credential'],$request->ip());
         $session=$cash->close((int)$request->user()->id,(string)$data['closing_amount'],$data['closing_notes'] ?? null);
         return redirect()->route('pdv.cash.report',$session)
-            ->with('success','Caixa fechado. Confira o relatório do turno.');
+            ->with('success','Caixa fechado. Confira a diferença apurada.');
     }
 
     public function cashMovement(Request $request, PdvCashService $cash)
@@ -860,7 +879,23 @@ class PdvController extends Controller
             'reason'=>['required','string','max:255'],
             'sale_id'=>['nullable','integer','exists:sales,id'],
             'sale_return_id'=>['nullable','integer','exists:sale_returns,id'],
+            'supervisor_user_id'=>['nullable','integer','exists:users,id'],
+            'supervisor_credential'=>['nullable','string'],
         ]);
+        $minimum=(float)AppSetting::value('pdv','supervisor_movement_min',200);
+        if(in_array($data['type'],['withdrawal','refund'],true)
+            && (float)$data['amount'] >= max(0,$minimum)) {
+            $supervisor=User::query()->find($data['supervisor_user_id'] ?? 0);
+            if(!$supervisor || !$supervisor->is_active
+                || !in_array($supervisor->role,['admin','manager'],true)
+                || ($request->user()->role!=='admin' && $supervisor->id===$request->user()->id)) {
+                throw ValidationException::withMessages([
+                    'supervisor_user_id'=>'Selecione um supervisor habilitado.',
+                ]);
+            }
+            app(PdvOperatorAuthorization::class)->verify($supervisor,
+                (string)($data['supervisor_credential'] ?? ''),$request->ip());
+        }
         if(!(bool)AppSetting::value('pdv','allow_cash_movements',true)) {
             abort(403,'Movimentações de caixa estão desativadas.');
         }
