@@ -687,8 +687,12 @@
 .lumeron-pdv-page .pdv-sales-fiscal[data-status="authorized"]{color:#238047}
 .lumeron-pdv-page .pdv-sales-fiscal[data-status="rejected"]{color:#b44f51}
 .lumeron-pdv-page .pdv-sales-row-actions{display:flex;gap:5px;justify-content:flex-end;flex-wrap:wrap}
-.lumeron-pdv-page .pdv-sales-row-actions a{display:inline-flex;align-items:center;min-height:26px;padding:0 7px;border:1px solid #cad9e4;border-radius:4px;background:#fff;color:#267ab1;text-decoration:none;font-size:10px;font-weight:650}
-.lumeron-pdv-page .pdv-sales-row-actions a:hover{background:#ebf6fd;border-color:#99bbd3}
+.lumeron-pdv-page .pdv-sales-row-actions a,
+.lumeron-pdv-page .pdv-sales-row-actions button{display:inline-flex;align-items:center;min-height:26px;padding:0 7px;border:1px solid #cad9e4;border-radius:4px;background:#fff;color:#267ab1;text-decoration:none;font:650 11px Roboto,Arial,sans-serif;cursor:pointer}
+.lumeron-pdv-page .pdv-sales-row-actions a:hover,
+.lumeron-pdv-page .pdv-sales-row-actions button:hover{background:#ebf6fd;border-color:#99bbd3}
+.lumeron-pdv-page .pdv-sales-row-actions button:disabled{opacity:.65;cursor:wait}
+.lumeron-pdv-page .pdv-sales-receipt-error{display:block;color:#9a4646;font-size:11px}
 .lumeron-pdv-page .pdv-sales-message{padding:32px 12px!important;text-align:center;color:#8090a0}
 .lumeron-pdv-page .pdv-sales-message.is-error{color:#b44f51}
 .lumeron-pdv-page .pdv-sales-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px 12px;background:#f7f9fb;border-top:1px solid #dce5ec;color:#60788a;font-size:11px;flex-shrink:0}
@@ -783,6 +787,8 @@
   font-weight:700;
 }
 .pdv-body .pdv-receipt-success svg{flex-shrink:0}
+.pdv-body .pdv-receipt-history-state{background:#eff5f8;border-color:#d4e3ed;color:#3d637c}
+.pdv-body .pdv-receipt-history-state.is-cancelled{background:#fff1ed;border-color:#f0cec2;color:#934b36}
 .pdv-body .pdv-receipt-success-actions{
   display:flex;
   flex-wrap:wrap;
