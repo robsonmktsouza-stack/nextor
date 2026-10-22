@@ -1,3 +1,11 @@
+## Continuidade — 22/10/2026 — modal do comprovante alinhado ao PDF e histórico mais leve
+
+- Capturas mostraram diferenças entre o PDF 80 mm e o cupom em tela, além de expressão Blade literal `@IF($RECEIPTMODALISCANCELLED) ... @ENDIF` em venda concluída. A condição concatenada à string não era interpretada corretamente. Movida para diretivas Blade próprias, com testes para impedir a regressão.
+- Cupom do modal usa agora a mesma ordem do PDF: logo, razão social, CNPJ, endereço/contato, cabeçalho personalizado, título, 'SEM VALOR FISCAL', número com 9 dígitos, data com segundos, operador, itens/quantidade/preço, subtotal, desconto, total, pagamentos, cliente/documento, rodapé. Estado fiscal fica na barra do modal, fora do comprovante não fiscal; venda cancelada identificada sem misturar marcadores.
+- Logo do comprovante no PDF era carregada direto de Storage; o navegador depende do link simbólico público do Laragon. Rota `pdv.company.logo` com permissão PDV, MIME validado e cache privado mostra a mesma logo, sem symlink e sem base64 pesado no HTML.
+- Histórico mostrava dois diálogos modais simultaneamente: agora recolhe o de Vendas temporariamente enquanto o comprovante abre, restaura a mesma lista e foco ao fechar. Redução de sombreamento do cupom; nenhuma chamada à geração de PDF ao abrir o modal.
+- Alterações limitadas a develop. Não afetam venda, estoque, fiscal, permissões do ERP, geração/impressão PDF 58/80 mm, main, Control ou VPS. Validação manual no Laragon ainda necessária; CI/Chrome não executados neste conector. Rodar `php artisan test --filter=SaleReceiptReuseTest` e `--filter=PdvSalesHistoryTest`.
+
 ## Continuidade — 22/10/2026 — impressão correta: PDF térmico em vez de HTML escondido
 
 - Erro informado: prévia de impressão A4 com cupom minúsculo centralizado e cabeçalho/rodapé Chrome, destino Epson L3110. O botão `Imprimir comprovante` chamava `print()` no iframe HTML oculto; Chrome adotava o papel do driver A4, não a bobina.
