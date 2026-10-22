@@ -22,15 +22,15 @@ Os usuários são cadastrados em **Configurações → Usuários**. Usuários an
 6. Para criar administrador novo por CLI: `php artisan erp:make-admin` — o comando solicitará nome, e-mail, usuário e senha.
 7. Teste `php artisan test --filter=LumeronLoginTest`.
 
-## Portal central futuro
+## Portal central em lumeron.com.br/login
 
 Na configuração desejada para a VPS:
 
-- `https://login.seudominio.com.br`: portal central de apresentação do formulário (com `LUMERON_LOGIN_PORTAL=true`).
+- `https://seudominio.com.br`: portal central de apresentação do formulário (com `LUMERON_LOGIN_PORTAL=true`).
 - `https://autonunes.seudominio.com.br`: instalação da empresa A, com `LUMERON_INSTANCE_SUBDOMAIN=autonunes` e `LUMERON_BASE_DOMAIN=seudominio.com.br`.
 - `https://academia.seudominio.com.br`: outra instalação, com banco e credenciais diferentes.
 
-O portal **não autentica diretamente** e **não recebe senhas**: seu JavaScript obtém um CSRF de curta duração da instalação escolhida (`GET /login/bootstrap`), envia o login com sessão própria e `credentials: include` apenas a esse host e, em caso de sucesso, redireciona para o sistema daquela empresa. A CORS permite exclusivamente a origem `https://login.seudominio.com.br`; não há curinga para outras origens. As sessões são cookies próprios de cada endereço.
+O portal **não autentica diretamente** e **não recebe senhas**: seu JavaScript obtém um CSRF de curta duração da instalação escolhida (`GET /login/bootstrap`), envia o login com sessão própria e `credentials: include` apenas a esse host e, em caso de sucesso, redireciona para o sistema daquela empresa. A CORS permite exclusivamente a origem `https://seudominio.com.br`; não há curinga para outras origens. As sessões são cookies próprios de cada endereço.
 
 `LUMERON_BASE_DOMAIN` e `LUMERON_LOGIN_PORTAL_HOST` devem refletir **domínios realmente registrados**, não uma suposição de disponibilidade. Este repositório inclui o fluxo de autenticação, mas **não instala automaticamente o portal, o DNS ou o certificado HTTPS**. Essa fase só ocorrerá quando o proprietário autorizar a implantação.
 
@@ -43,3 +43,5 @@ O portal **não autentica diretamente** e **não recebe senhas**: seu JavaScript
 - A opção de não lembrar dados remove somente subdomínio/usuário armazenados pelo próprio Lumeron; não pode desabilitar, por garantia, recursos de preenchimento automático do navegador.
 - Cada ambiente deve ter `SESSION_COOKIE` distinto e `SESSION_DOMAIN` vazio, sem cookies compartilhados entre os CNPJs.
 - O nome do usuário pode ser alterado na administração, mas e-mail permanece para identificação e recuperação.
+
+A partir desta implementação, o identificador também pode ser numérico (como CNPJ de 14 dígitos). O Control mantém a lista de identificadores reservados e o índice único por empresa. O endereço público esperado é https://lumeron.com.br/login; o portal deve ter LUMERON_LOGIN_PORTAL=true e LUMERON_LOGIN_PORTAL_HOST=lumeron.com.br (host sem barra). Não é uma implantação automática: publicar DNS, TLS e um proxy reverso para servir /login e os assets a partir de uma aplicação de portal dedicada. Instalações existentes precisam de atualização individual do ERP.
