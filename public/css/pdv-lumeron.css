@@ -1271,7 +1271,7 @@
   padding:0;
   min-height:38px;
 }
-.pdv-body #pdvSalesCancelSheet .pdv-sales-cancel-field > .ui-select .ui-select-toggle{
+.pdv-body #pdvSalesCancelSheet .pdv-sales-cancel-field > .ui-select .ui-select-trigger{
   box-sizing:border-box;
   width:100%;
   min-height:36px;
