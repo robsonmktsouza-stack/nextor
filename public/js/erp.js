@@ -1018,9 +1018,13 @@
   };
   const watchedModals=new WeakSet();
   const modalOpenObserver=new MutationObserver(records=>{
+    const opened=new Set();
     for(const record of records){
       const modal=record.target;
-      if(modal.matches('dialog[open],.nextor-modal-layer.is-open')) enhanceContainer(modal);
+      if(!opened.has(modal) && modal.matches('dialog[open],.nextor-modal-layer.is-open')){
+        opened.add(modal);
+        enhanceContainer(modal);
+      }
     }
   });
   const watchModal=modal=>{
