@@ -60,6 +60,32 @@ final class PdvCashWorkflowController extends Controller
             ->with('success','Turno transferido. Caixa conferido e novo operador identificado.');
     }
 
+    /**
+     * The original cashier is unavailable. A separately authenticated manager
+     * performs the blind count and closes exactly that overdue session.
+     */
+    public function closeOverdue(Request $request,PdvCashService $cash,PdvOperatorAuthorization $authorization)
+    {
+        abort_unless(in_array($request->user()->role,['admin','manager'],true)
+            && $request->user()->canAccess('pdv'),403);
+
+        $data=$request->validate([
+            'cash_session_id'=>['required','integer','exists:pdv_cash_sessions,id'],
+            'counted_amount'=>['required','numeric','min:0','max:9999999999.99','decimal:0,2'],
+            'reason'=>['required','string','min:5','max:1000'],
+            'credential'=>['required','string'],
+        ]);
+        $authorization->verify($request->user(),$data['credential'],$request->ip());
+        $session=$cash->closeOverdueBySupervisor(
+            (int)$data['cash_session_id'],
+            (int)$request->user()->id,
+            (string)$data['counted_amount'],
+            $data['reason'],
+        );
+        return redirect()->route('pdv.cash.report',$session)
+            ->with('success','Caixa do dia anterior regularizado. Confira o relatório do fechamento.');
+    }
+
     public function registers(Request $request)
     {
         abort_unless($request->user()->role==='admin',403);
