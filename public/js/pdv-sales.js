@@ -66,6 +66,8 @@
     };
     let previewController=null;
     let previewSequence=0;
+    let returningFromReceipt=false;
+    let suppressSalesClose=false;
     const showPreviewError=(container,message)=>{
       container.querySelector('.pdv-sales-receipt-error')?.remove();
       const messageElement=document.createElement('span');
@@ -101,11 +103,21 @@
         if(!dialog || !window.LumeronPdvReceipt?.openHistory)
           throw new Error('Não foi possível exibir o comprovante.');
         document.getElementById('pdvHistoryReceiptModal')?.remove();
+        // Evita dois <dialog> modais e dois backdrops grandes na GPU.
+        // A listagem e os filtros permanecem no DOM e serão restaurados ao fechar.
+        returningFromReceipt=true;
+        suppressSalesClose=true;
+        modal.close();
         document.body.appendChild(dialog);
+        const restoreSales=()=>{
+          returningFromReceipt=false;
+          if(!modal.open)modal.showModal();
+        };
         try{
-          window.LumeronPdvReceipt.openHistory(dialog,button);
+          window.LumeronPdvReceipt.openHistory(dialog,button,restoreSales);
         }catch(error){
           dialog.remove();
+          restoreSales();
           throw error;
         }
       }catch(error){
@@ -259,6 +271,11 @@
     previous.addEventListener('click',()=>{if(currentPage>1)load(currentPage-1);});
     next.addEventListener('click',()=>{if(currentPage<pageCount)load(currentPage+1);});
     modal.addEventListener('close',()=>{
+      if(suppressSalesClose){
+        suppressSalesClose=false;
+        return;
+      }
+      if(returningFromReceipt)return;
       previewSequence++;
       previewController?.abort();
       sequence++;
