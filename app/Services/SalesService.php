@@ -370,9 +370,29 @@ class SalesService
         ],$userId);
     }
 
-    public function cancel(Sale $sale, int $userId): void
+    /**
+     * A venda só pode ser estornada se todos os documentos fiscais tiverem
+     * resultado conhecido e não houver emissão ou evento em andamento.
+     */
+    public static function fiscalDocumentAllowsSaleCancellation(\App\Models\FiscalDocumentJob $document): bool
     {
-        DB::transaction(function () use ($sale, $userId) {
+        if (in_array($document->status,['prepared','rejected'],true)) {
+            return !$document->authorized_at && !$document->protocol
+                && !$document->cancellation_status;
+        }
+        if ($document->status!=='cancelled') return false;
+        // Documento administrativo cancelado antes da autorização.
+        if (!$document->authorized_at && !$document->protocol) {
+            return !$document->cancellation_status;
+        }
+        // Nota previamente autorizada: exige confirmação da SEFAZ.
+        return $document->cancellation_status==='authorized'
+            && $document->cancelled_at!==null;
+    }
+
+    public function cancel(Sale $sale, int $userId, ?string $pdvReason=null): void
+    {
+        DB::transaction(function () use ($sale, $userId, $pdvReason) {
             $locked=Sale::query()->lockForUpdate()->findOrFail($sale->id);
 
             if($locked->status!=='completed') {
@@ -381,15 +401,15 @@ class SalesService
                 ]);
             }
 
-            $authorizedFiscal=\App\Models\FiscalDocumentJob::query()
+            $fiscalDocuments=\App\Models\FiscalDocumentJob::query()
                 ->where('sale_id',$locked->id)
-                ->whereIn('status',['authorized','processing','pending'])
-                ->whereNull('cancelled_at')
-                ->first();
-
-            if($authorizedFiscal) {
+                ->lockForUpdate()
+                ->get();
+            if($fiscalDocuments->contains(
+                fn($document)=>!self::fiscalDocumentAllowsSaleCancellation($document)
+            )) {
                 throw ValidationException::withMessages([
-                    'sale'=>'A venda possui documento fiscal autorizado ou pendente. Resolva a situação fiscal antes de cancelar a venda.'
+                    'sale'=>'Esta venda possui documento fiscal pendente ou autorizado. Conclua a regularização da NFC-e antes de cancelar a venda.'
                 ]);
             }
 
@@ -432,9 +452,19 @@ class SalesService
                 $this->financial->cancelSale($locked);
             }
 
+            $newNotes=$locked->notes;
+            if($pdvReason!==null) {
+                $pdvReason=trim(preg_replace('/\s+/u',' ',$pdvReason) ?? $pdvReason);
+                $record='Cancelamento PDV em '.now()->format('d/m/Y H:i')
+                    .' (operador #'.$userId.'): '.$pdvReason;
+                $existing=trim((string)$newNotes);
+                $newNotes=($existing!==''?$existing."\n":'').$record;
+            }
+
             $locked->update([
                 'status'=>'cancelled',
                 'cancelled_at'=>now(),
+                'notes'=>$newNotes,
             ]);
         },3);
 
