@@ -42,7 +42,7 @@ final class PdvCashReportController extends Controller
         app(\App\Services\PdvOperatorAuthorization::class)->verify(
             $request->user(),$data['credential'],$request->ip());
         $independent=\App\Models\User::query()->where('role','admin')
-            ->where('is_active',true)->whereKeyNot($cashSession->user_id)->exists();
+            ->where('is_active',true)->where('id','!=',$cashSession->user_id)->exists();
         if ($independent && $request->user()->id===$cashSession->user_id) {
             throw \Illuminate\Validation\ValidationException::withMessages([
                 'review_notes'=>'Este fechamento precisa ser conferido por outro administrador.',
