@@ -36,14 +36,19 @@ final class PdvOperatorAuthorization
 
     public function setPin(User $user, string $password, string $pin, string $ip): void
     {
+        $key='pdv:pin-setup:'.$user->id.':'.hash('sha256',$ip);
+        if (RateLimiter::tooManyAttempts($key,5)) {
+            throw ValidationException::withMessages([
+                'current_password'=>'Muitas tentativas. Tente novamente em instantes.',
+            ]);
+        }
         if (!Hash::check($password,(string)$user->password)) {
-            $key='pdv:pin-setup:'.$user->id.':'.hash('sha256',$ip);
             RateLimiter::hit($key,120);
             throw ValidationException::withMessages([
                 'current_password'=>'Senha atual incorreta.',
             ]);
         }
-        RateLimiter::clear('pdv:pin-setup:'.$user->id.':'.hash('sha256',$ip));
+        RateLimiter::clear($key);
         if (!preg_match('/^\d{6}$/D',$pin) || preg_match('/^(\d)\1{5}$/D',$pin)
             || in_array($pin,['123456','654321','012345','111111','000000'],true)) {
             throw ValidationException::withMessages([
