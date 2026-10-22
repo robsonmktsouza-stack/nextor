@@ -416,16 +416,17 @@
       wrapper._nextorReset?.();
     });
   };
+  // Delay enhanced fields in closed dialogs until the dialog is opened.
+  const inClosedModal=element=>!!element?.closest?.('dialog:not([open]), .nextor-modal-layer:not(.is-open)');
   const enhanceSelect=select=>{
-    if(!select || select.dataset.uiSelectReady==='1' || select.multiple) return;
+    if(!select || select.dataset.uiSelectReady==='1' || select.multiple || inClosedModal(select)) return;
     select.dataset.uiSelectReady='1';
     select.classList.add('ui-select-native');
     const catalogField=/(product|service|customer|supplier|vendor|provider|transport|category|account|city|municip|cfop|cst|csosn|ncm|natureza|cliente|produto|fornecedor|conta|categoria)/i
       .test((select.name||'')+' '+(select.id||''));
     const searchable=!select.hasAttribute('data-no-search') &&
       !select.closest('.bulk-actions,.table-page-size-form') &&
-      (select.hasAttribute('data-searchable') || catalogField ||
-       [...select.options].filter(option=>!option.disabled && option.value!=='').length>=4);
+      (select.hasAttribute('data-searchable') || catalogField || select.options.length>=5);
 
     const wrapper=document.createElement('div');
     wrapper.className='ui-select'+(searchable?' ui-searchable':'');
@@ -470,12 +471,12 @@
       if(!searchable) return;
       const q=normalize(query);
       menu.querySelectorAll('.ui-select-option').forEach(item=>{
-        const label=normalize(item.dataset.searchValue||item.textContent);
+        const label=item._nextorNormalizedSearch;
         item.hidden=!!q && !label.includes(q);
       });
     };
     const buildOptions=()=>{
-      menu.innerHTML='';
+      const fragment=document.createDocumentFragment();
       [...select.options].forEach(option=>{
         const item=document.createElement('button');
         item.type='button';
@@ -484,6 +485,7 @@
         item.dataset.value=option.value;
         setUiSelectOptionContent(item,option);
         item.dataset.searchValue=[option.textContent,option.value,option.dataset.subtitle,option.dataset.subtext,option.dataset.description,option.dataset.search].filter(Boolean).join(' ');
+        item._nextorNormalizedSearch=normalize(item.dataset.searchValue);
         item.disabled=option.disabled;
         if(option.selected){
           item.classList.add('selected');
@@ -497,8 +499,9 @@
           closeUiSelects();
           trigger.focus();
         });
-        menu.appendChild(item);
+        fragment.appendChild(item);
       });
+      menu.replaceChildren(fragment);
       optionsBuilt=true;
       filterOptions();
     };
@@ -709,8 +712,14 @@
   };
 
   // Reflow dropdowns on viewport changes, zoom and nested-container scroll.
+  let selectLayoutScheduled=false;
   const repositionOpenSelects=()=>{
-    document.querySelectorAll('.ui-select.open').forEach(wrapper=>wrapper._nextorLayout?.());
+    if(selectLayoutScheduled)return;
+    selectLayoutScheduled=true;
+    requestAnimationFrame(()=>{
+      selectLayoutScheduled=false;
+      document.querySelectorAll('.ui-select.open').forEach(wrapper=>wrapper._nextorLayout?.());
+    });
   };
   window.addEventListener('resize',repositionOpenSelects);
   window.visualViewport?.addEventListener('resize',repositionOpenSelects);
@@ -727,17 +736,7 @@
   });
   document.querySelectorAll('select').forEach(enhanceSelect);
   window.NextorEnhanceSelect=enhanceSelect;
-  // Includes select fields created dynamically by sales and NFC-e forms.
-  const dynamicSelectObserver=new MutationObserver(records=>{
-    const found=[];
-    records.forEach(record=>record.addedNodes.forEach(node=>{
-      if(node.nodeType!==1)return;
-      if(node.matches?.('select'))found.push(node);
-      node.querySelectorAll?.('select').forEach(select=>found.push(select));
-    }));
-    found.forEach(enhanceSelect);
-  });
-  dynamicSelectObserver.observe(document.body,{childList:true,subtree:true});
+  // New fields are initialized by the consolidated observer below.
 
   // Campos numéricos e monetários padronizados do Nextor
   const numberIconSvg='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 6h10M10 12h10M10 18h10M4 6h1M4 12h1M4 18h1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
@@ -842,7 +841,7 @@
   };
 
   const enhanceNumberInput=input=>{
-    if(!input || input.dataset.numberReady==='1') return;
+    if(!input || input.dataset.numberReady==='1' || inClosedModal(input)) return;
     if(input.type!=='number' && input.dataset.numberKind!=='money') return;
 
     const kind=numberKind(input);
@@ -865,17 +864,6 @@
   };
 
   document.querySelectorAll('input[type="number"],input[data-number-kind="money"]').forEach(enhanceNumberInput);
-
-  const numberObserver=new MutationObserver(mutations=>{
-    mutations.forEach(mutation=>{
-      mutation.addedNodes.forEach(node=>{
-        if(!(node instanceof Element)) return;
-        if(node.matches?.('input[type="number"],input[data-number-kind="money"]')) enhanceNumberInput(node);
-        node.querySelectorAll?.('input[type="number"],input[data-number-kind="money"]').forEach(enhanceNumberInput);
-      });
-    });
-  });
-  numberObserver.observe(document.body,{childList:true,subtree:true});
 
   // Máscaras de texto padronizadas do Nextor
   const onlyDigits=(value,max=Infinity)=>String(value||'').replace(/\D/g,'').slice(0,max);
@@ -986,7 +974,7 @@
   };
 
   const enhanceTextMask=input=>{
-    if(!(input instanceof HTMLInputElement) || input.dataset.maskReady==='1') return;
+    if(!(input instanceof HTMLInputElement) || input.dataset.maskReady==='1' || inClosedModal(input)) return;
     const maskName=inferTextMask(input);
     const formatter=textMasks[maskName];
     if(!formatter) return;
@@ -1009,16 +997,43 @@
 
   document.querySelectorAll('input').forEach(enhanceTextMask);
 
-  const textMaskObserver=new MutationObserver(mutations=>{
-    mutations.forEach(mutation=>{
-      mutation.addedNodes.forEach(node=>{
-        if(!(node instanceof Element)) return;
-        if(node.matches?.('input')) enhanceTextMask(node);
-        node.querySelectorAll?.('input').forEach(enhanceTextMask);
-      });
-    });
+  // One observer for all inserted select, numeric and masked fields.
+  const enhanceContainer=root=>{
+    if(!(root instanceof Element) || inClosedModal(root)) return;
+    if(root.matches('select')) enhanceSelect(root);
+    if(root.matches('input[type="number"],input[data-number-kind="money"]')) enhanceNumberInput(root);
+    if(root.matches('input')) enhanceTextMask(root);
+    root.querySelectorAll('select').forEach(enhanceSelect);
+    root.querySelectorAll('input[type="number"],input[data-number-kind="money"]').forEach(enhanceNumberInput);
+    root.querySelectorAll('input').forEach(enhanceTextMask);
+  };
+  const watchedModals=new WeakSet();
+  const modalOpenObserver=new MutationObserver(records=>{
+    for(const record of records){
+      const modal=record.target;
+      if(modal.matches('dialog[open],.nextor-modal-layer.is-open')) enhanceContainer(modal);
+    }
   });
-  textMaskObserver.observe(document.body,{childList:true,subtree:true});
+  const watchModal=modal=>{
+    if(watchedModals.has(modal))return;
+    watchedModals.add(modal);
+    modalOpenObserver.observe(modal,{attributes:true,attributeFilter:['open','class','hidden']});
+  };
+  document.querySelectorAll('dialog,.nextor-modal-layer').forEach(watchModal);
+  const dynamicSelectObserver=new MutationObserver(records=>{
+    const roots=new Set();
+    for(const record of records){
+      for(const node of record.addedNodes){
+        if(node instanceof Element)roots.add(node);
+      }
+    }
+    for(const root of roots){
+      if(root.matches('dialog,.nextor-modal-layer'))watchModal(root);
+      root.querySelectorAll('dialog,.nextor-modal-layer').forEach(watchModal);
+      enhanceContainer(root);
+    }
+  });
+  dynamicSelectObserver.observe(document.body,{childList:true,subtree:true});
 
   window.NextorUI={enhanceSelect,enhanceNumberInput,enhanceMoneyInput,enhanceTextMask};
 
