@@ -5,15 +5,14 @@ namespace App\Services;
 use App\Mail\LicenseExpiryNotice;
 use App\Models\ClientEmailDelivery;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 
 final class ClientEmailNotificationService
 {
+    public function __construct(private readonly OutboundMailSettings $outbound) {}
+
     public function enabled(): bool
     {
-        return (bool) config('client_notifications.email_enabled', false)
-            && config('mail.default') === 'smtp'
-            && filter_var(config('mail.from.address'), FILTER_VALIDATE_EMAIL) !== false;
+        return $this->outbound->enabled();
     }
 
     public function sendPending(int $limit = 50): array
@@ -60,7 +59,7 @@ final class ClientEmailNotificationService
             }
 
             try {
-                Mail::to($company->email)->send(new LicenseExpiryNotice(
+                $this->outbound->send($company->email, new LicenseExpiryNotice(
                     $company->legal_name,
                     $company->expires_at->format('d/m/Y'),
                     $kind === 'expired',
