@@ -68,7 +68,7 @@ footer{margin-top:24px;border-top:1px solid #aab7c0;padding-top:10px;color:#5e6a
 <section><h2>Conferência administrativa</h2>
 @if($session->reviewed_at)
 <p>Conferido por {{ $session->reviewer?->name }} em {{ $session->reviewed_at->format('d/m/Y H:i') }}.</p><p>{{ $session->review_notes }}</p>
-@elseif(auth()->user()->role==='admin')
+@elseif(in_array(auth()->user()->role,['admin','manager'],true) && auth()->user()->canAccess('pdv'))
 <form method="post" action="{{ route('pdv.cash.review',$session) }}">@csrf
 <label for="review_notes">Observação do responsável</label>
 <textarea id="review_notes" name="review_notes" required minlength="5" maxlength="1000" rows="3" style="width:100%"></textarea>
