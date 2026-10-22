@@ -486,6 +486,7 @@ class SettingsController extends Controller
                 'default_payment_method'=>['nullable','string','exists:payment_methods,code'],
                 'require_customer'=>['nullable','boolean'],
                 'allow_discount'=>['nullable','boolean'],
+                'discount_approval_percent'=>['nullable','numeric','min:0','max:100','decimal:0,2'],
                 'require_cash_opening'=>['nullable','boolean'],
                 'ask_consumer_document'=>['nullable','boolean'],
                 'allow_split_payment'=>['nullable','boolean'],
@@ -651,7 +652,7 @@ class SettingsController extends Controller
                 'default_financial_account_id'=>null,'default_income_category_id'=>null,'default_expense_category_id'=>null,
             ],
             'pdv'=>[
-                'default_payment_method'=>null,'require_customer'=>false,'allow_discount'=>true,
+                'default_payment_method'=>null,'require_customer'=>false,'allow_discount'=>true,'discount_approval_percent'=>10,
                 'require_cash_opening'=>false,'ask_consumer_document'=>true,'allow_split_payment'=>true,'allow_cash_movements'=>true,'supervisor_movement_min'=>200,
                 'auto_nfce'=>false,'show_stock'=>true,'receipt_width'=>'80','receipt_copies'=>1,
             ],
