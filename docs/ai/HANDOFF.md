@@ -4,7 +4,7 @@
 - Cupom do modal usa agora a mesma ordem do PDF: logo, razão social, CNPJ, endereço/contato, cabeçalho personalizado, título, 'SEM VALOR FISCAL', número com 9 dígitos, data com segundos, operador, itens/quantidade/preço, subtotal, desconto, total, pagamentos, cliente/documento, rodapé. Estado fiscal fica na barra do modal, fora do comprovante não fiscal; venda cancelada identificada sem misturar marcadores.
 - Logo do comprovante no PDF era carregada direto de Storage; o navegador depende do link simbólico público do Laragon. Rota `pdv.company.logo` com permissão PDV, MIME validado e cache privado mostra a mesma logo, sem symlink e sem base64 pesado no HTML.
 - Histórico mostrava dois diálogos modais simultaneamente: agora recolhe o de Vendas temporariamente enquanto o comprovante abre, restaura a mesma lista e foco ao fechar. Redução de sombreamento do cupom; nenhuma chamada à geração de PDF ao abrir o modal.
-- Alterações limitadas a develop. Não afetam venda, estoque, fiscal, permissões do ERP, geração/impressão PDF 58/80 mm, main, Control ou VPS. Validação manual no Laragon ainda necessária; CI/Chrome não executados neste conector. Rodar `php artisan test --filter=SaleReceiptReuseTest` e `--filter=PdvSalesHistoryTest`.
+- Alterações limitadas a develop. Não afetam venda, estoque, fiscal, permissões do ERP, geração/impressão PDF 58/80 mm, main, Control ou VPS. Os dois scripts JS foram analisados sintaticamente no V8 sem erros; testes PHP/Blade e interação no Chrome do cliente ainda não puderam ser executados. Rodar `php artisan test --filter=SaleReceiptReuseTest` e `--filter=PdvSalesHistoryTest`.
 
 ## Continuidade — 22/10/2026 — impressão correta: PDF térmico em vez de HTML escondido
 
