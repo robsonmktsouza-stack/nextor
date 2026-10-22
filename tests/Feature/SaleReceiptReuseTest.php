@@ -315,6 +315,13 @@ final class SaleReceiptReuseTest extends TestCase
             self::assertStringContainsString('/Subtype /Image',$pdf,'Logo cadastrada preservada.');
             preg_match_all('/\/Type \/Page\b/',$pdf,$pages);
             self::assertCount($copies,$pages[0],$paper.'mm deve conter somente as vias configuradas.');
+            preg_match_all('/\/MediaBox \[0 0 ([0-9.]+) ([0-9.]+)\]/',$pdf,$pageSizes);
+            self::assertCount($copies,$pageSizes[0],$paper.'mm deve ter página térmica por via.');
+            foreach ($pageSizes[1] as $widthPoints) {
+                self::assertEqualsWithDelta(((int)$paper) * 72 / 25.4,(float)$widthPoints,0.02);
+            }
+            self::assertStringContainsString('ITENS DA VENDA',$pdf);
+            self::assertStringContainsString(' x R$ ',$pdf);
         }
 
         $service=file_get_contents(app_path('Services/SaleReceiptPdfService.php'));
