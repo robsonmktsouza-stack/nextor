@@ -9,7 +9,7 @@ final class OutboundMailSettings
 {
     public function settings(): ?ControlSetting
     {
-        return ControlSetting::saved();
+        return ControlSetting::stored();
     }
 
     public function configured(): bool
