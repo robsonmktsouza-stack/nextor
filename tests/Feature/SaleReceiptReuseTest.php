@@ -193,6 +193,41 @@ final class SaleReceiptReuseTest extends TestCase
             ->assertSee('NFC-e ainda não preparada');
     }
 
+    public function test_checkout_receipt_opens_inside_pdv_and_printing_requires_operator_action(): void
+    {
+        $cashier=$this->operator(['pdv']);
+        $sale=$this->sale($cashier,'sale','pdv');
+        $this->actingAs($cashier);
+
+        $this->withSession([
+            'pdv_receipt_sale'=>$sale->id,
+            'pdv_last_sale'=>$sale->id,
+        ])->get(route('pdv.index'))
+            ->assertOk()
+            ->assertSee('id="pdvReceiptModal"',false)
+            ->assertSee('data-receipt-after-checkout="1"',false)
+            ->assertSee('id="pdvReceiptFrame"',false)
+            ->assertSee('embed=1',false)
+            ->assertSee('Imprimir comprovante')
+            ->assertSee('Nova venda');
+
+        $this->get(route('pdv.receipt',['sale'=>$sale,'embed'=>1]))
+            ->assertOk()
+            ->assertViewIs('pdv.receipt')
+            ->assertSee('pdv-receipt-embedded')
+            ->assertSee('SEM VALOR FISCAL')
+            ->assertDontSee('Voltar ao PDV')
+            ->assertDontSee('Imprimir comprovante interno')
+            ->assertDontSee('let automatic=')
+            ->assertDontSee('window.print()');
+
+        self::assertStringContainsString('dialog.showModal()',
+            file_get_contents(public_path('js/pdv-receipt-modal.js')));
+        self::assertStringContainsString('frame.contentWindow.print()',
+            file_get_contents(public_path('js/pdv-receipt-modal.js')));
+        self::assertSame(1,Sale::count());
+    }
+
     public function test_sales_receipt_pdf_does_not_use_cash_values_from_previous_session(): void
     {
         $seller=$this->operator(['sales']);
