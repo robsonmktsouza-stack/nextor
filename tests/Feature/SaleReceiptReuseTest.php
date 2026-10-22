@@ -212,7 +212,11 @@ final class SaleReceiptReuseTest extends TestCase
             ->assertSee('Voltar ao PDV')
             ->assertSee('Imprimir comprovante')
             ->assertSee('class="pdv-receipt-items"',false)
+            ->assertSee('class="pdv-receipt-paper-caption"',false)
+            ->assertSee('class="pdv-receipt-paper-warning"',false)
+            ->assertSee('class="pdv-receipt-item-detail"',false)
             ->assertSee('Produto para balcão')
+            ->assertSee('Sem valor fiscal')
             ->assertSee('R$ 65,00')
             ->assertSee('Comprovante interno de venda')
             ->assertSee('class="pdv-receipt-print-frame"',false)
@@ -233,6 +237,10 @@ final class SaleReceiptReuseTest extends TestCase
         self::assertStringContainsString('frame.contentWindow.print()',
             file_get_contents(public_path('js/pdv-receipt-modal.js')));
         self::assertStringContainsString("left:-10000px!important",
+            file_get_contents(public_path('css/pdv-lumeron.css')));
+        self::assertStringContainsString("max-width:342px",
+            file_get_contents(public_path('css/pdv-lumeron.css')));
+        self::assertStringContainsString("pdv-receipt-toolbar",
             file_get_contents(public_path('css/pdv-lumeron.css')));
         self::assertSame(1,Sale::count());
     }
