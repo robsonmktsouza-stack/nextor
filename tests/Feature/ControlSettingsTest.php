@@ -71,7 +71,7 @@ final class ControlSettingsTest extends TestCase
     {
         $this->actingAs($this->admin());
         $this->put(route('settings.mail'), $this->mailData())->assertRedirect();
-        $settings = ControlSetting::saved();
+        $settings = ControlSetting::stored();
         $this->assertTrue($settings->smtpReady());
         $this->assertTrue($settings->email_enabled);
         $this->assertSame('SegredoSMTP-de-Teste-2026', $settings->smtp_password);
@@ -87,9 +87,9 @@ final class ControlSettingsTest extends TestCase
             'password' => '', 'smtp_from_name' => 'Remetente Alterado',
         ]))->assertRedirect();
         $this->assertSame('SegredoSMTP-de-Teste-2026',
-            ControlSetting::saved()->smtp_password);
+            ControlSetting::stored()->smtp_password);
         $this->assertSame('Remetente Alterado',
-            ControlSetting::saved()->smtp_from_name);
+            ControlSetting::stored()->smtp_from_name);
     }
 
     public function test_email_cannot_be_enabled_without_credentials(): void
