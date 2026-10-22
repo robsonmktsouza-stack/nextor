@@ -16,6 +16,9 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
+        Schema::table('pdv_cash_movements', function (Blueprint $table) {
+            $table->foreignId('approved_by')->nullable()->index();
+        });
         Schema::table('users', function (Blueprint $table) {
             $table->string('pdv_pin_hash', 255)->nullable();
         });
@@ -39,6 +42,9 @@ return new class extends Migration
     {
         Schema::table('pdv_cash_sessions', function (Blueprint $table) {
             $table->dropColumn(['register_id', 'previous_session_id', 'handover_to']);
+        });
+        Schema::table('pdv_cash_movements', function (Blueprint $table) {
+            $table->dropColumn('approved_by');
         });
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('pdv_pin_hash');
