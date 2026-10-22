@@ -109,24 +109,17 @@ class PdvController extends Controller
                 ->first([
                     'id','customer_id','user_id','subtotal','discount_total','total',
                     'cash_received','change_amount','consumer_document','consumer_name',
-                    'notes','completed_at',
+                    'notes','completed_at','status',
                 ])
             : null;
-        $receiptModalCompany=$receiptModalSale ? CompanySetting::current() : null;
-        $receiptModalPaymentMethods=$receiptModalSale
-            ? PaymentMethod::query()->whereIn(
-                'code',$receiptModalSale->payments->pluck('payment_method')->all()
-              )->get(['code','name','kind'])
-            : collect();
-        $receiptModalPaymentLabels=$receiptModalPaymentMethods->pluck('name','code')->all();
-        $receiptModalPaymentKinds=$receiptModalPaymentMethods->pluck('kind','code')->all();
-
-        $receiptModalNfceDocument=$receiptModalSale
-            ? FiscalDocumentJob::query()
-                ->where('sale_id',$receiptModalSale->id)
-                ->where('document_type','nfce')
-                ->latest('id')->first()
-            : null;
+        $receiptModalDetails=$receiptModalSale
+            ? $this->receiptModalDetails($receiptModalSale)
+            : [
+                'receiptModalCompany'=>null,
+                'receiptModalPaymentLabels'=>[],
+                'receiptModalPaymentKinds'=>[],
+                'receiptModalNfceDocument'=>null,
+            ];
 
         $lastPdvNfceStatusLabel=$lastPdvNfceDocument ? match($lastPdvNfceDocument->status) {
             'prepared'=>'preparada',
@@ -146,10 +139,7 @@ class PdvController extends Controller
             'lastPdvNfceDocument'=>$lastPdvNfceDocument,
             'lastPdvNfceStatusLabel'=>$lastPdvNfceStatusLabel,
             'receiptModalSale'=>$receiptModalSale,
-            'receiptModalCompany'=>$receiptModalCompany,
-            'receiptModalPaymentLabels'=>$receiptModalPaymentLabels,
-            'receiptModalPaymentKinds'=>$receiptModalPaymentKinds,
-            'receiptModalNfceDocument'=>$receiptModalNfceDocument,
+            ...$receiptModalDetails,
             'customers'=>Customer::query()
                 ->where('is_customer',true)
                 ->orderBy('name')
@@ -290,6 +280,7 @@ class PdvController extends Controller
                 'fiscal_status'=>$fiscalStatus,
                 'fiscal_code'=>$document?->status ?: 'none',
                 'receipt_url'=>route('pdv.receipt',['sale'=>$sale->id,'print'=>0]),
+                'receipt_preview_url'=>route('pdv.sales.receipt.preview',$sale),
                 'danfe_url'=>$document && (
                     ($document->status==='authorized'
                         && in_array((string)$document->xml_path,[
@@ -314,6 +305,43 @@ class PdvController extends Controller
                 'to'=>$page->lastItem(),
             ],
         ])->header('Cache-Control','no-store, private');
+    }
+
+    /** Retorna o mesmo cupom do pós-venda para o histórico, sem alterar a venda. */
+    public function salesReceiptPreview(Sale $sale)
+    {
+        $receiptModalSale=Sale::query()
+            ->whereKey($sale->id)
+            ->where('source','pdv')
+            ->where('operation_type','sale')
+            ->whereIn('status',['completed','cancelled'])
+            ->with(['items','payments','customer:id,name','user:id,name'])
+            ->firstOrFail();
+
+        return response()->view('pdv.partials.receipt-modal',[
+            'receiptModalSale'=>$receiptModalSale,
+            'receiptModalIsHistory'=>true,
+            ...$this->receiptModalDetails($receiptModalSale),
+        ])->header('Cache-Control','no-store, private')
+          ->header('X-Content-Type-Options','nosniff');
+    }
+
+    /** Fonte única dos dados do cupom no PDV e no histórico. */
+    private function receiptModalDetails(Sale $sale): array
+    {
+        $paymentMethods=PaymentMethod::query()
+            ->whereIn('code',$sale->payments->pluck('payment_method')->all())
+            ->get(['code','name','kind']);
+
+        return [
+            'receiptModalCompany'=>CompanySetting::current(),
+            'receiptModalPaymentLabels'=>$paymentMethods->pluck('name','code')->all(),
+            'receiptModalPaymentKinds'=>$paymentMethods->pluck('kind','code')->all(),
+            'receiptModalNfceDocument'=>FiscalDocumentJob::query()
+                ->where('sale_id',$sale->id)
+                ->where('document_type','nfce')
+                ->latest('id')->first(),
+        ];
     }
 
     public function search(Request $request)
