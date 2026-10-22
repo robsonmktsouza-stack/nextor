@@ -110,7 +110,7 @@ final class AutomationController extends Controller
 
     public function sendEmails(ClientEmailNotificationService $sender, InvoiceEmailNotificationService $invoices)
     {
-        if (!$sender->enabled()) {
+        if (!$sender->enabled() && !$invoices->automaticEnabled()) {
             return back()->with('error', 'Configure o envio de e-mail antes de enviar avisos.');
         }
 
