@@ -19,7 +19,7 @@ final class Company extends Model
     protected static function booted(): void
     {
         static::saving(function (self $company): void {
-            if (!Subdomain::valid((string) $company->subdomain)) {
+            if (!$company->exists && !Subdomain::valid((string) $company->subdomain)) {
                 throw ValidationException::withMessages(['subdomain' => 'Identificador inválido ou reservado.']);
             }
             if ($company->exists && $company->isDirty('subdomain')) {
