@@ -42,7 +42,8 @@ final class EmailConnectionFeedback
         ])) {
             return 'connection';
         }
-        if (self::has($message, [
+        if (preg_match('/\b(?:550|553|554)\b/', $message) === 1
+            || self::has($message, [
             'sender address rejected', 'sender verify failed',
             'relay access denied', 'relay denied', '550 ', '553 ', '554 ',
             'domain not verified',
