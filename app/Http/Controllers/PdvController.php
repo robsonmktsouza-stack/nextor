@@ -50,7 +50,17 @@ class PdvController extends Controller
             ->latest('opened_at')
             ->first();
 
-        $cashExpected=$cashSession ? PdvCashService::currency(app(PdvCashService::class)->breakdown($cashSession)['expected']) : null;
+        $cashService=app(PdvCashService::class);
+        $overdueCashSessions=$cashService->overdueSessions();
+        $overdueOwnCash=$cashSession && $cashService->isOverdue($cashSession)
+            ? $cashSession : null;
+        $cashCanSupervise=in_array($request->user()->role,['admin','manager'],true)
+            && $request->user()->canAccess('pdv');
+        $cashOverdueMustResolve=(bool)$overdueOwnCash
+            || (!$cashSession && $overdueCashSessions->isNotEmpty());
+
+        $cashExpected=$cashSession && !$overdueOwnCash
+            ? PdvCashService::currency($cashService->breakdown($cashSession)['expected']) : null;
         $cashMovements=$cashSession
             ? PdvCashMovement::query()
                 ->where('cash_session_id',$cashSession->id)
@@ -170,6 +180,10 @@ class PdvController extends Controller
                 ->get(),
             'pdvSettings'=>$pdvSettings,
             'cashSession'=>$cashSession,
+            'overdueCashSessions'=>$overdueCashSessions,
+            'overdueOwnCash'=>$overdueOwnCash,
+            'cashCanSupervise'=>$cashCanSupervise,
+            'cashOverdueMustResolve'=>$cashOverdueMustResolve,
             'cashRegisters'=>$cashRegisters,
             'shiftOperators'=>$shiftOperators,
             'cashSupervisors'=>$cashSupervisors,
