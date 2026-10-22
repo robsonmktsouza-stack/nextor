@@ -1,3 +1,10 @@
+## Continuidade — 22/10/2026 — cupom térmico visual no modal pós-venda (develop)
+
+- Pedido: modal de venda concluída mantinha cara de relatório/tabulação larga, apesar de impressão térmica separada. Redesenho somente de visualização: cupom estreito (máx. 342 px), papel branco centralizado, cortes, separadores pontilhados e linhas de item “quantidade × unitário / valor”.
+- Cabeçalho, mensagem de sucesso e ações de retorno, impressão e NFC-e permanecem no alto; a rolagem agora fica apenas no comprovante visual. Campos de CNPJ, venda, cliente, itens, descontos, pagamentos, troco e estado real da NFC-e continuam presentes; indicação explícita “sem valor fiscal”.
+- Arquivos: `resources/views/pdv/index.blade.php`, `public/css/pdv-lumeron.css`, `tests/Feature/SaleReceiptReuseTest.php`. `public/js/pdv-receipt-modal.js`, rota de comprovante térmico e impressão/PDF **não alterados**. Sem mudanças em `main`, `control-center`, deploy ou SEFAZ.
+- Validação: conferência estática de alterações e asserts acrescidos ao teste existente; não foi possível executar PHP/browser no computador do cliente nem CI por este conector. Confirmar no Laragon com `php artisan test --filter=SaleReceiptReuseTest` e uma venda de teste, sem duplicar venda para checar impressão.
+
 ## Continuidade — 21/10/2026 — hospedagem SaaS deduplicada por versão (somente develop)
 
 - Pedido do proprietário: reduzir a duplicação de vendor/código na VPS
