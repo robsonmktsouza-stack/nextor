@@ -41,6 +41,16 @@ final class PdvSalesHistoryTest extends TestCase
         ],$attrs));
     }
 
+    private function approval(): array
+    {
+        $manager=User::query()->firstOrCreate(
+            ['email'=>'pdv-manager@example.test'],
+            ['name'=>'Gerente','password'=>'SenhaTeste123',
+             'role'=>'manager','permissions'=>['pdv'],'is_active'=>true]
+        );
+        return ['authorizer_id'=>$manager->id,'credential'=>'SenhaTeste123'];
+    }
+
     public function test_sales_button_opens_local_modal_without_navigating_to_admin_sales(): void
     {
         $cashier=$this->operator();
@@ -206,7 +216,7 @@ final class PdvSalesHistoryTest extends TestCase
         $this->get(route('pdv.company.logo'))
             ->assertOk()
             ->assertHeader('Content-Type','image/png')
-            ->assertHeader('Cache-Control','private, max-age=300');
+            ->assertHeader('Cache-Control','max-age=300, private');
         $page=$this->get(route('pdv.sales.receipt.preview',$this->sale($cashier)));
         $page->assertOk()->assertSee(route('pdv.company.logo'),false);
     }
@@ -279,6 +289,7 @@ final class PdvSalesHistoryTest extends TestCase
 
         $this->postJson(route('pdv.sales.cancel',$sale),[
             'reason'=>'Produto registrado em duplicidade',
+        ...$this->approval(),
         ])->assertOk()->assertJsonPath('success',true);
 
         $sale->refresh();
@@ -290,6 +301,7 @@ final class PdvSalesHistoryTest extends TestCase
 
         $this->postJson(route('pdv.sales.cancel',$sale),[
             'reason'=>'Tentativa de repetir cancelamento',
+        ...$this->approval(),
         ])->assertUnprocessable();
         self::assertSame(1,substr_count($sale->fresh()->notes,'Cancelamento PDV em'));
     }
@@ -307,6 +319,7 @@ final class PdvSalesHistoryTest extends TestCase
             ]);
             $this->postJson(route('pdv.sales.cancel',$sale),[
                 'reason'=>'Cancelamento sem confirmação fiscal',
+            ...$this->approval(),
             ])->assertUnprocessable()->assertJsonValidationErrors('sale');
             self::assertSame('completed',$sale->fresh()->status);
         }
@@ -324,6 +337,7 @@ final class PdvSalesHistoryTest extends TestCase
         ]);
         $this->postJson(route('pdv.sales.cancel',$prepared),[
             'reason'=>'Pedido desistido antes da emissão',
+        ...$this->approval(),
         ])->assertOk();
         self::assertSame('cancelled',$prepared->fresh()->status);
         self::assertSame('cancelled',$job->fresh()->status);
@@ -339,6 +353,7 @@ final class PdvSalesHistoryTest extends TestCase
         ]);
         $this->postJson(route('pdv.sales.cancel',$confirmed),[
             'reason'=>'Cancelamento fiscal confirmado pela SEFAZ',
+        ...$this->approval(),
         ])->assertOk();
         self::assertSame('cancelled',$confirmed->fresh()->status);
 
@@ -352,6 +367,7 @@ final class PdvSalesHistoryTest extends TestCase
         ]);
         $this->postJson(route('pdv.sales.cancel',$incomplete),[
             'reason'=>'Cancelamento ainda não aprovado',
+        ...$this->approval(),
         ])->assertUnprocessable();
         self::assertSame('completed',$incomplete->fresh()->status);
     }
@@ -376,6 +392,7 @@ final class PdvSalesHistoryTest extends TestCase
         $this->actingAs($stock)
             ->postJson(route('pdv.sales.cancel',$sale),[
                 'reason'=>'Operador sem permissão',
+            ...$this->approval(),
             ])->assertForbidden();
         self::assertSame('completed',$sale->fresh()->status);
     }
