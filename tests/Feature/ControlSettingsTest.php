@@ -189,4 +189,40 @@ final class ControlSettingsTest extends TestCase
             'emails_end_at' => '08:00',
         ])->assertSessionHasErrors('emails_end_at');
     }
+    public function test_smtp_diagnostic_reports_authentication_failure_without_leaking_details(): void
+    {
+        $this->actingAs($this->admin());
+        $this->put(route('settings.mail'), $this->mailData([
+            'email_enabled' => '0',
+        ]))->assertRedirect();
+
+        \Illuminate\Support\Facades\Mail::shouldReceive('mailer')->once()
+            ->andThrow(new \RuntimeException(
+                'Failed to authenticate on SMTP server with username financeiro@example.test'
+            ));
+
+        $this->post(route('settings.mail-test'))
+            ->assertRedirect()
+            ->assertSessionHas('error', \App\Support\EmailConnectionFeedback::message(
+                new \RuntimeException('Failed to authenticate on SMTP server')
+            ));
+
+        $this->get(route('settings.index'))
+            ->assertOk()
+            ->assertSee('O servidor rejeitou a autenticação.')
+            ->assertDontSee('financeiro@example.test');
+    }
+
+    public function test_smtp_diagnostic_distinguishes_ssl_dns_and_network_failures(): void
+    {
+        $diagnostics = \App\Support\EmailConnectionFeedback::class;
+        $this->assertSame('certificate',
+            $diagnostics::category(new \RuntimeException('SSL operation failed: certificate verify failed')));
+        $this->assertSame('dns',
+            $diagnostics::category(new \RuntimeException('php_network_getaddresses: getaddrinfo failed')));
+        $this->assertSame('connection',
+            $diagnostics::category(new \RuntimeException('Connection timed out')));
+        $this->assertSame('rejected',
+            $diagnostics::category(new \RuntimeException('Expected code 250 but got 550')));
+    }
 }
