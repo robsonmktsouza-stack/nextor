@@ -91,7 +91,7 @@ final class PdvCashReconciliationTest extends TestCase
         $this->actingAs($user)->get(route('pdv.cash.report',$closed))
             ->assertOk()->assertSee('Fechamento de caixa')
             ->assertSee('Diferença (sobra + / falta');
-        $this->post(route('pdv.cash.review',$closed),['review_notes'=>'Conferido com o operador e registrado'])
+        $this->post(route('pdv.cash.review',$closed),['review_notes'=>'Conferido com o operador e registrado','credential'=>'senha123segura'])
             ->assertRedirect();
         self::assertNotNull($closed->fresh()->reviewed_at);
 
