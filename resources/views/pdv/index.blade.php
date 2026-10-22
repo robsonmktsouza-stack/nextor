@@ -13,6 +13,27 @@
     </div>
   </form>
 </dialog>
+<dialog class="pdv-quick-modal" id="pdvDiscountApprovalDialog">
+  <div class="pdv-modal-head">
+    <div><h2>Autorizar desconto</h2><p>Desconto acima do limite definido para o PDV.</p></div>
+    <button type="button" class="pdv-modal-close" onclick="this.closest('dialog').close()" aria-label="Voltar sem autorizar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+  </div>
+  <div class="pdv-cash-modal-body">
+    <p class="pdv-cash-blind-notice">O gerente ou administrador precisa autorizar esta venda. A autorização será registrada.</p>
+    <label><span>Gerente ou administrador *</span>
+      <select id="pdvDiscountApprover" required><option value="">Selecione</option>
+        @foreach($cashSupervisors as $supervisor)
+          <option value="{{ $supervisor->id }}" @selected($supervisor->id===auth()->id())>{{ $supervisor->name }}</option>
+        @endforeach
+      </select>
+    </label>
+    <label><span>Senha ou PIN do responsável *</span>
+      <input type="password" id="pdvDiscountApproverCredential" autocomplete="off" required>
+    </label>
+    <p id="pdvDiscountApprovalError" role="alert" hidden></p>
+    <button class="pdv-modal-primary" type="button" id="pdvDiscountApprovalConfirm">Autorizar e concluir venda</button>
+  </div>
+</dialog>
 @if(!$cashSession)
 <dialog class="pdv-quick-modal" id="pdvCashOpenDialog">
   <form method="post" action="{{ route('pdv.cash.open') }}">
@@ -163,7 +184,10 @@
   </div>
 @endif
 
-<form id="pdvForm" method="post" action="{{ route('pdv.store') }}"><input type="hidden" name="checkout_key" value="{{ (string) \Illuminate\Support\Str::uuid() }}">
+<form id="pdvForm" method="post" action="{{ route('pdv.store') }}">
+<input type="hidden" name="checkout_key" value="{{ (string) \Illuminate\Support\Str::uuid() }}">
+<input type="hidden" name="discount_authorizer_id" id="pdvDiscountAuthorizedBy" value="">
+<input type="hidden" name="discount_credential" id="pdvDiscountAuthorizedCredential" value="">
 @csrf
 
 
@@ -172,6 +196,7 @@
      data-allow-negative-stock="{{ $allowNegativeStock ? '1' : '0' }}"
      data-require-customer="{{ $pdvSettings['require_customer'] ? '1' : '0' }}"
      data-allow-discount="{{ $pdvSettings['allow_discount'] ? '1' : '0' }}"
+     data-discount-approval-percent="{{ $pdvSettings['discount_approval_percent'] ?? 10 }}"
      data-show-stock="{{ $pdvSettings['show_stock'] ? '1' : '0' }}"
      data-cash-required="{{ $pdvSettings['require_cash_opening'] ? '1' : '0' }}"
      data-cash-open="{{ $cashSession ? '1' : '0' }}"
