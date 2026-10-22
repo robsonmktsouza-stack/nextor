@@ -37,7 +37,13 @@ final class OutboundMailSettings
             }
             // Isolated mailer: never mutate .env or the application's default.
             // Laravel resolves it only when actually sending.
-            config()->set('mail.mailers.lumeron_smtp', [
+            // A new mailer identity ensures long-running workers pick up changed credentials.
+            $version = substr(hash_hmac('sha256', json_encode([
+                $record->smtp_host, $record->smtp_port, $record->smtp_security,
+                $record->smtp_username, $record->smtp_password,
+            ]), (string) config('app.key')), 0, 16);
+            $name = 'lumeron_smtp_'.$version;
+            config()->set('mail.mailers.'.$name, [
                 'transport' => 'smtp',
                 'scheme' => $record->smtp_security === 'ssl' ? 'smtps' : 'smtp',
                 'host' => $record->smtp_host,
@@ -47,7 +53,7 @@ final class OutboundMailSettings
                 'timeout' => 10,
             ]);
             $message->from($record->smtp_from_address, $record->smtp_from_name);
-            Mail::mailer('lumeron_smtp')->to($to)->send($message);
+            Mail::mailer($name)->to($to)->send($message);
             return;
         }
         // Existing tests and legacy configured SMTP keep working until migrated.
