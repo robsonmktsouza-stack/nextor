@@ -543,7 +543,7 @@
       </button>
     </div>
 
-    <div class="pdv-receipt-content">
+    <div class="pdv-receipt-toolbar">
       <div class="pdv-receipt-success" role="status">
         @include('partials.icon',['name'=>'check','size'=>18])
         <span>Venda efetuada com sucesso</span>
@@ -572,7 +572,9 @@
           </form>
         @endif
       </div>
+    </div>
 
+    <div class="pdv-receipt-content">
       <section class="pdv-receipt-document" aria-label="Resumo da venda concluída">
         <div class="pdv-receipt-company">
           @if($receiptModalCompany->logo_path)
@@ -591,15 +593,16 @@
           </div>
         </div>
 
+        <div class="pdv-receipt-paper-caption">Comprovante de venda</div>
+        <div class="pdv-receipt-paper-warning">Sem valor fiscal</div>
+
         <div class="pdv-receipt-document-heading">Itens da venda</div>
         <div class="pdv-receipt-table-scroll">
           <table class="pdv-receipt-items">
             <thead>
               <tr>
-                <th>Descrição</th>
-                <th>Qtd.</th>
-                <th>Preço</th>
-                <th>Subtotal</th>
+                <th scope="col">Produto / quantidade</th>
+                <th scope="col">Valor</th>
               </tr>
             </thead>
             <tbody>
@@ -608,9 +611,8 @@
                   <td>
                     <span>{{ $item->product_name }}</span>
                     @if($item->product_sku)<small>{{ $item->product_sku }}</small>@endif
+                    <small class="pdv-receipt-item-detail">{{ rtrim(rtrim(number_format((float)$item->quantity,3,',','.'),'0'),',') }} × R$ {{ number_format((float)$item->unit_price,2,',','.') }}</small>
                   </td>
-                  <td>{{ rtrim(rtrim(number_format((float)$item->quantity,3,',','.'),'0'),',') }}</td>
-                  <td>R$ {{ number_format((float)$item->unit_price,2,',','.') }}</td>
                   <td>R$ {{ number_format((float)$item->line_total,2,',','.') }}</td>
                 </tr>
               @endforeach
