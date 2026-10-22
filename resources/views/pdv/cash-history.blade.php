@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Histórico de caixa — Lumeron</title>
+<link rel="stylesheet" href="{{ asset('css/pdv-cash-report-modal.css') }}?v={{ filemtime(public_path('css/pdv-cash-report-modal.css')) }}">
 <style>
 body{font:14px Arial,Helvetica,sans-serif;background:#e9ecef;color:#2c383e;margin:0}
 main{max-width:1080px;margin:30px auto;background:white;padding:24px;border:1px solid #cbd2d6}
@@ -17,7 +18,8 @@ small{color:#667982}nav{padding:16px 0}
 <tbody>
 @forelse($sessions as $session)
 <tr>
-<td><a href="{{ route('pdv.cash.report',$session) }}">#{{ $session->id }}</a></td>
+<td><a href="{{ route('pdv.cash.report',$session) }}" data-cash-report-open
+    data-cash-report-url="{{ route('pdv.cash.report',['cashSession'=>$session,'embed'=>1]) }}">#{{ $session->id }}</a></td>
 <td>{{ $session->register?->name ?? 'Legado' }}</td>
 <td>{{ $session->user?->name ?? '—' }}</td><td>{{ $session->opened_at?->format('d/m/Y H:i') }}</td>
 <td>{{ $session->closed_at?->format('d/m/Y H:i') ?? 'Aberto' }}</td>
@@ -31,4 +33,10 @@ small{color:#667982}nav{padding:16px 0}
 @endforelse
 </tbody></table><nav>{{ $sessions->links() }}</nav>
 <small>Os fechamentos novos preservam o resumo calculado na hora da conferência. Movimentações posteriores pertencem ao turno em que foram efetivamente realizadas.</small>
-</main></body></html>
+</main>
+@include('pdv.partials.cash-report-modal', [
+  'autoCashReportId'=>0,
+  'cashReportBackLabel'=>'Voltar ao histórico',
+])
+<script defer src="{{ asset('js/pdv-cash-report-modal.js') }}?v={{ filemtime(public_path('js/pdv-cash-report-modal.js')) }}"></script>
+</body></html>
