@@ -14,7 +14,8 @@
   const forgot = document.getElementById('loginForgot');
   const portal = form.dataset.portal === '1';
   const baseDomain = form.dataset.baseDomain || 'lumeron.com.br';
-  const slugPattern = /^[a-z][a-z0-9-]{1,38}$/;
+  const slugPattern = /^[a-z0-9][a-z0-9-]{0,37}[a-z0-9]$/;
+  const reserved = ['admin', 'api', 'app', 'assets', 'auth', 'billing', 'control', 'dev', 'ftp', 'help', 'login', 'mail', 'portal', 'smtp', 'static', 'status', 'support', 'suporte', 'www'];
   const storageKey = 'lumeron:last-login-identity';
   let busy = false;
 
@@ -33,7 +34,7 @@
   };
   const tenantOrigin = slug => {
     const clean = normalizeSlug(slug);
-    if (!slugPattern.test(clean) || clean.includes('--') || ['admin', 'api', 'login', 'www'].includes(clean)) {
+    if (!slugPattern.test(clean) || clean.includes('--') || reserved.includes(clean)) {
       return null;
     }
     // Only a subdomain of the configured base domain. Never arbitrary URLs.
