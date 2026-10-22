@@ -35,6 +35,8 @@ final class ModalPerformanceTest extends TestCase
         self::assertStringContainsString('document.createDocumentFragment()',$js);
         self::assertStringContainsString('menu.replaceChildren(fragment)',$js);
         self::assertStringContainsString('let selectLayoutScheduled=false',$js);
+        self::assertStringContainsString('watchedModals.get(modal)?.disconnect()',$js);
+        self::assertStringContainsString('watchedModals.delete(modal)',$js);
     }
 
     public function test_browser_regression_covers_both_types_of_modals(): void
