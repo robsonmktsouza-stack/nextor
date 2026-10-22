@@ -1016,34 +1016,45 @@
     root.querySelectorAll('input[type="number"],input[data-number-kind="money"]').forEach(enhanceNumberInput);
     root.querySelectorAll('input').forEach(enhanceTextMask);
   };
-  const watchedModals=new WeakSet();
-  const modalOpenObserver=new MutationObserver(records=>{
-    const opened=new Set();
-    for(const record of records){
-      const modal=record.target;
-      if(!opened.has(modal) && modal.matches('dialog[open],.nextor-modal-layer.is-open')){
-        opened.add(modal);
-        enhanceContainer(modal);
-      }
-    }
-  });
+  // Attach observers only to connected dialogs; discard them when dynamic
+  // receipts or fiscal windows are removed to avoid a long-session memory leak.
+  const watchedModals=new Map();
   const watchModal=modal=>{
     if(watchedModals.has(modal))return;
-    watchedModals.add(modal);
+    const modalOpenObserver=new MutationObserver(records=>{
+      if(records.length && modal.matches('dialog[open],.nextor-modal-layer.is-open')){
+        enhanceContainer(modal);
+      }
+    });
     modalOpenObserver.observe(modal,{attributes:true,attributeFilter:['open','class','hidden']});
+    watchedModals.set(modal,modalOpenObserver);
   };
   document.querySelectorAll('dialog,.nextor-modal-layer').forEach(watchModal);
   const dynamicSelectObserver=new MutationObserver(records=>{
     const roots=new Set();
+    const removed=[];
     for(const record of records){
       for(const node of record.addedNodes){
         if(node instanceof Element)roots.add(node);
+      }
+      for(const node of record.removedNodes){
+        if(node instanceof Element)removed.push(node);
       }
     }
     for(const root of roots){
       if(root.matches('dialog,.nextor-modal-layer'))watchModal(root);
       root.querySelectorAll('dialog,.nextor-modal-layer').forEach(watchModal);
       enhanceContainer(root);
+    }
+    for(const root of removed){
+      const detached=[];
+      if(root.matches('dialog,.nextor-modal-layer'))detached.push(root);
+      root.querySelectorAll('dialog,.nextor-modal-layer').forEach(modal=>detached.push(modal));
+      for(const modal of detached){
+        if(modal.isConnected)continue;
+        watchedModals.get(modal)?.disconnect();
+        watchedModals.delete(modal);
+      }
     }
   });
   dynamicSelectObserver.observe(document.body,{childList:true,subtree:true});
