@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Sale extends Model {
     protected $fillable=[
         'customer_id','consumer_document','consumer_name','cash_received','change_amount','user_id','operation_type','source','pdv_cash_session_id','operation_date','quote_expires_at','final_consumer','keyword',
-        'status','subtotal','discount_total','total','notes','completed_at','cancelled_at','source_quote_id'
+        'status','subtotal','discount_total','total','notes','completed_at','cancelled_at','source_quote_id','pdv_checkout_key','pdv_checkout_hash'
     ];
 
     protected function casts(): array {
