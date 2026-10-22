@@ -103,6 +103,11 @@ final class ControlSettingsController extends Controller
                 'invoice_email_enabled' => 'Ative e configure o envio de e-mails primeiro.',
             ]);
         }
+        if (($data['license_email_enabled'] ?? false) && !$outbound->enabled()) {
+            throw ValidationException::withMessages([
+                'license_email_enabled' => 'Ative e configure o envio de e-mails primeiro.',
+            ]);
+        }
 
         $settings = $this->record();
         $settings->fill([
