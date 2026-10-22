@@ -11,10 +11,17 @@
     const closeButton = document.getElementById('pdvReceiptCloseTop');
     let ready = false;
 
-    frame?.addEventListener('load', () => {
-      ready = true;
-      if (printButton) printButton.disabled = false;
-    });
+    const updatePrintReady = () => {
+      try {
+        ready = Boolean(frame?.contentDocument?.querySelector('main.receipt'));
+      } catch (_) {
+        ready = false;
+      }
+      if (printButton) printButton.disabled = !ready;
+    };
+    frame?.addEventListener('load', updatePrintReady);
+    // The print document might load before the deferred script starts.
+    if (frame?.contentDocument?.readyState === 'complete') updatePrintReady();
 
     const close = () => {
       if (dialog.open) dialog.close();
@@ -46,6 +53,6 @@
     // showModal keeps focus and Escape handling native. It overlays the
     // existing cashier screen; there is no redirect to a receipt page.
     dialog.showModal();
-    closeButton?.focus();
+    doneButton?.focus();
   });
 })();
