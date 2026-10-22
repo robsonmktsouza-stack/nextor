@@ -987,10 +987,15 @@
   </form>
 </dialog>
 
+@include('pdv.partials.cash-report-modal', [
+  'autoCashReportId'=>(int) session('pdv_cash_report_id',0),
+  'cashReportBackLabel'=>'Voltar às vendas',
+])
 @endsection
 
 @push('scripts')
 <script defer src="{{ asset('js/pdv.js') }}?v={{ filemtime(public_path('js/pdv.js')) }}"></script>
 <script defer src="{{ asset('js/pdv-sales.js') }}?v={{ filemtime(public_path('js/pdv-sales.js')) }}"></script>
 <script defer src="{{ asset('js/pdv-receipt-modal.js') }}?v={{ filemtime(public_path('js/pdv-receipt-modal.js')) }}"></script>
+<script defer src="{{ asset('js/pdv-cash-report-modal.js') }}?v={{ filemtime(public_path('js/pdv-cash-report-modal.js')) }}"></script>
 @endpush
