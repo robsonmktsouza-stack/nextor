@@ -33,7 +33,7 @@ class PdvController extends Controller
             'default_payment_method'=>null,
             'require_customer'=>false,
             'allow_discount'=>true,
-            'require_cash_opening'=>true,
+            'require_cash_opening'=>false,
             'ask_consumer_document'=>true,
             'allow_split_payment'=>true,
             'allow_cash_movements'=>true,
@@ -42,7 +42,6 @@ class PdvController extends Controller
             'receipt_copies'=>1,
         ]);
 
-        $pdvSettings['require_cash_opening']=true;
         $pdvSettings['supervisor_movement_min']=(float)($pdvSettings['supervisor_movement_min'] ?? 200);
 
         $cashSession=PdvCashSession::query()
