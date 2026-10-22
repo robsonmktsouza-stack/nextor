@@ -37,10 +37,9 @@ final class PdvCashService
     {
         return DB::transaction(function () use ($userId,$amount,$notes,$registerId) {
             // Lock the physical register before checking for an open shift.
-            $register=PdvCashRegister::query()
-                ->when($registerId,fn($q)=>$q->whereKey($registerId))
-                ->orderBy('id')->lockForUpdate()->firstOrFail();
-            if (!$register->is_active) {
+            $register=$registerId===null
+                ? null : PdvCashRegister::query()->whereKey($registerId)->lockForUpdate()->firstOrFail();
+            if ($register && !$register->is_active) {
                 throw ValidationException::withMessages(['register_id'=>'Este caixa está desativado.']);
             }
             User::query()->whereKey($userId)->lockForUpdate()->firstOrFail();
