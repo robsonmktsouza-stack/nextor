@@ -79,6 +79,11 @@
 
     const cashOpenDialog=document.getElementById('pdvCashOpenDialog');
     const cashCloseDialog=document.getElementById('pdvCashCloseDialog');
+    const cashHandoverDialog=document.getElementById('pdvCashHandoverDialog');
+    const cashPinDialog=document.getElementById('pdvCashPinDialog');
+    const cashSupervisorFields=document.getElementById('pdvCashSupervisorFields');
+    const cashSupervisorUser=document.getElementById('pdvCashSupervisorUser');
+    const cashSupervisorCredential=document.getElementById('pdvCashSupervisorCredential');
 
     const discountModal=document.getElementById('pdvDiscountModal');
     const discountModalInput=document.getElementById('pdvDiscountModalInput');
@@ -1672,6 +1677,17 @@
       requestAnimationFrame(()=>cancelNfceJob?.focus()||cancelNfceReason?.focus());
     };
 
+    const updateCashSupervisor=()=>{
+      if(!cashSupervisorFields)return;
+      const threshold=Number(cashSupervisorFields.dataset.approvalThreshold??200);
+      const needed=['withdrawal','refund'].includes(cashMovementType?.value)
+        && (parseDecimal(cashMovementAmount?.value)||0)>=Math.max(0,threshold);
+      cashSupervisorFields.hidden=!needed;
+      if(cashSupervisorUser) cashSupervisorUser.required=needed;
+      if(cashSupervisorCredential) cashSupervisorCredential.required=needed;
+      if(!needed && cashSupervisorCredential)cashSupervisorCredential.value='';
+    };
+    cashMovementAmount?.addEventListener('input',updateCashSupervisor);
     const openCashMovementModal=type=>{
       if(!cashMovementModal || !cashSessionOpen) return;
       const kind=['withdrawal','refund'].includes(type)?type:'supply';
@@ -1688,6 +1704,9 @@
       if(cashRefundSale) cashRefundSale.value='';
       if(cashMovementAmount) cashMovementAmount.value='';
       if(cashMovementReason) cashMovementReason.value='';
+      if(cashSupervisorUser)cashSupervisorUser.value='';
+      if(cashSupervisorCredential)cashSupervisorCredential.value='';
+      updateCashSupervisor();
       operationsModal?.close();
       if(!cashMovementModal.open) cashMovementModal.showModal();
       requestAnimationFrame(()=>cashMovementAmount?.focus());
@@ -1702,12 +1721,17 @@
         case 'cancel-nfce': openCancelNfceModal(); break;
         case 'open-cash': operationsModal?.close(); cashOpenDialog?.showModal(); break;
         case 'close-cash': operationsModal?.close(); cashCloseDialog?.showModal(); break;
+        case 'handover': operationsModal?.close(); cashHandoverDialog?.showModal(); break;
+        case 'set-pin': operationsModal?.close(); cashPinDialog?.showModal(); break;
         case 'supply': openCashMovementModal('supply'); break;
         case 'withdrawal': openCashMovementModal('withdrawal'); break;
         case 'refund': openCashMovementModal('refund'); break;
       }
     };
 
+    document.querySelectorAll('.pdv-cash-text-action[data-pdv-operation]').forEach(button=>{
+      button.addEventListener('click',()=>runAdvancedOperation(button.dataset.pdvOperation));
+    });
     operationsButton?.addEventListener('click',openOperationsModal);
     operationsModal?.addEventListener('click',event=>{
       const button=event.target.closest('[data-pdv-operation]');
@@ -1944,7 +1968,7 @@
     [
       customerModal,paymentModal,discountModal,cashModal,notesModal,consumerModal,
       electronicModal,operationsModal,suspendModal,recoverModal,contingencyModal,
-      cancelNfceModal,cashMovementModal,cashOpenDialog,cashCloseDialog
+      cancelNfceModal,cashMovementModal,cashOpenDialog,cashCloseDialog,cashHandoverDialog,cashPinDialog
     ].forEach(modal=>{
       modal?.addEventListener('close',()=>{
         setTimeout(()=>search.focus(),0);
@@ -2056,6 +2080,8 @@
         cancelNfceModal?.open ||
         cashOpenDialog?.open ||
         cashCloseDialog?.open ||
+        cashHandoverDialog?.open ||
+        cashPinDialog?.open ||
         salesModal?.open ||
         document.getElementById('pdvReceiptModal')?.open;
 
