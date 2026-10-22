@@ -1,3 +1,11 @@
+## Continuidade — 22/10/2026 — impressão correta: PDF térmico em vez de HTML escondido
+
+- Erro informado: prévia de impressão A4 com cupom minúsculo centralizado e cabeçalho/rodapé Chrome, destino Epson L3110. O botão `Imprimir comprovante` chamava `print()` no iframe HTML oculto; Chrome adotava o papel do driver A4, não a bobina.
+- Modal de pós-venda e histórico continuam iguais para consulta, mas impressão é **link explícito** para o PDF térmico autenticado já existente em `/pdv/receipt/{sale}?print=0` (nova aba). No leitor do PDF o operador clica imprimir; nada é disparado automaticamente. Removidos iframe e JS de impressão ocultos.
+- O gerador nativo `ThermalReceiptPdfWriter` mantém MediaBox de 58/80 mm e uma página por via, agora com fonte legível e layout de produtos com descrição em linha própria, quantidade × unitário e total, sem cinco colunas minúsculas. Teste de dimensões e conteúdo reforçado; HTML legado e rotas de PDF preservados.
+- A impressora Epson L3110 exibida na captura é A4: não imprime fisicamente em bobina por uma opção do ERP. Para impressão térmica física, selecionar uma impressora com bobina de 58/80 mm e papel correspondente no sistema/Chrome.
+- Não mexer em checkout, estoque, financeiro, NFC-e, main, Control ou VPS. Ainda pendem execução local dos testes `SaleReceiptReuseTest` e `PdvSalesHistoryTest` e inspeção visual do Chrome/driver real.
+
 ## Continuidade — 22/10/2026 — comprovante do histórico no mesmo modal térmico
 
 - Botão Comprovante em Vendas do PDV (Alt+V) agora carrega HTML autenticado em um modal sobre a lista, em vez de navegar para PDF em nova aba. Mesmo partial `pdv.partials.receipt-modal` atende venda recém-finalizada e histórico; a indicação no histórico não simula nova finalização, e vendas canceladas mostram estado correto.
