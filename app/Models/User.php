@@ -4,8 +4,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable {
     use Notifiable;
-    protected $fillable = ['name','username','email','password','role','is_active','permissions'];
-    protected $hidden = ['password','remember_token'];
+    protected $fillable = ['name','username','email','password','role','is_active','permissions','pdv_pin_hash'];
+    protected $hidden = ['password','remember_token','pdv_pin_hash'];
 
     protected $attributes = [
         'role'=>'admin',
