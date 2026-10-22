@@ -113,7 +113,8 @@ final class PdvFiscalCheckoutFlowTest extends TestCase
 
         self::assertStringContainsString("ProcessNFCeJob::dispatch(\$fiscalJob->id)->onConnection('database')", $service);
         self::assertStringNotContainsString("config('queue.default') === 'database'", $service);
-        self::assertStringContainsString("->route('pdv.receipt',\$sale)", $controller);
+        self::assertStringContainsString("->route('pdv.index')", $controller);
+        self::assertStringContainsString("->with('pdv_receipt_sale',\$sale->id)", $controller);
     }
 
     public function test_pdv_card_editor_checks_integration_and_transaction_uf_before_submit(): void
