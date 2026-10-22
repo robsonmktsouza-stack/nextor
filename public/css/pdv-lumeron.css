@@ -719,7 +719,10 @@
 }
 .pdv-body .pdv-receipt-modal[open]{display:flex;flex-direction:column}
 .pdv-body .pdv-receipt-modal:not([open]){display:none!important}
-.pdv-body .pdv-receipt-modal::backdrop{background:rgba(16,33,48,.58)}
+.pdv-body .pdv-receipt-modal::backdrop{
+  background:rgba(16,33,48,.50);
+  backdrop-filter:none;
+}
 .pdv-body .pdv-receipt-header{
   display:flex;
   align-items:center;
@@ -1151,3 +1154,8 @@
   box-shadow:0 12px 35px rgba(16,35,50,.2);
 }
 .pdv-body .pdv-receipt-content{scrollbar-gutter:stable}
+
+/* O backdrop-filter:blur(2px) do modal genérico repinta todo o PDV.
+   Desativado para Vendas e Comprovante: a hierarquia continua com sobreposição. */
+.pdv-body .pdv-sales-modal::backdrop,
+.pdv-body .pdv-receipt-modal::backdrop{backdrop-filter:none}
