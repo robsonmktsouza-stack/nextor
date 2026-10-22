@@ -625,17 +625,24 @@
       </div>
       <div class="pdv-sales-cancel-body">
         <p id="pdvSalesCancelSummary"></p>
-        <label for="pdvSalesCancelReason">Motivo do cancelamento *</label>
-        <textarea id="pdvSalesCancelReason" rows="3" minlength="5" maxlength="255" required
-                  placeholder="Descreva por que esta venda será cancelada"></textarea>
-        <label for="pdvSalesCancelAuthorizer">Gerente ou administrador que autoriza *</label>
-        <select id="pdvSalesCancelAuthorizer" required><option value="">Selecione</option>
-          @foreach($cashSupervisors as $supervisor)
-            <option value="{{ $supervisor->id }}" @selected($supervisor->id===auth()->id())>{{ $supervisor->name }}</option>
-          @endforeach
-        </select>
-        <label for="pdvSalesCancelCredential">Senha ou PIN do responsável *</label>
-        <input type="password" id="pdvSalesCancelCredential" autocomplete="off" required>
+        <div class="pdv-sales-cancel-field">
+          <label for="pdvSalesCancelReason">Motivo do cancelamento *</label>
+          <textarea id="pdvSalesCancelReason" rows="3" minlength="5" maxlength="255" required
+                    placeholder="Descreva por que esta venda será cancelada"></textarea>
+        </div>
+        <div class="pdv-sales-cancel-field">
+          <label for="pdvSalesCancelAuthorizer">Gerente ou administrador que autoriza *</label>
+          <select id="pdvSalesCancelAuthorizer" required>
+            <option value="">Selecione</option>
+            @foreach($cashSupervisors as $supervisor)
+              <option value="{{ $supervisor->id }}" @selected($supervisor->id===auth()->id())>{{ $supervisor->name }}</option>
+            @endforeach
+          </select>
+        </div>
+        <div class="pdv-sales-cancel-field">
+          <label for="pdvSalesCancelCredential">Senha ou PIN do responsável *</label>
+          <input type="password" id="pdvSalesCancelCredential" autocomplete="off" required>
+        </div>
         <p class="pdv-sales-cancel-hint">Os produtos voltarão ao estoque e os lançamentos financeiros serão estornados. A devolução do pagamento ao cliente deve ser realizada separadamente.</p>
         <p class="pdv-sales-cancel-error" id="pdvSalesCancelError" role="alert" hidden></p>
       </div>
