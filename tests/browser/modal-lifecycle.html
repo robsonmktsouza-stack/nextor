@@ -48,7 +48,7 @@ window.addEventListener('load',()=>{
    setTimeout(()=>{
     try {
      assert(document.querySelector('#lazyFields select').dataset.uiSelectReady==='1','select do dialog nao inicializou ao abrir');
-     assert(document.querySelector('#lazyFields input').dataset.numberReady==='1','numero do dialog nao inicializou ao abrir');
+     assert(document.querySelector('#lazyFields input[name^="lazy_quantity_"]').dataset.numberReady==='1','numero do dialog nao inicializou ao abrir');
      assert(document.querySelectorAll('#lazyFields .ui-select').length===90,'quantidade de seletores no dialog incorreta');
      const one=document.querySelector('#lazyFields select');
      one.value='b';
@@ -62,7 +62,7 @@ window.addEventListener('load',()=>{
      setTimeout(()=>{
        try {
         assert(document.querySelectorAll('#customFields .ui-select').length===40,'selectores de layer nao inicializaram');
-        assert(document.querySelector('#customFields input').dataset.numberReady==='1','numero de layer nao foi preparado');
+        assert(document.querySelector('#customFields input[name^="custom_quantity_"]').dataset.numberReady==='1','numero de layer nao foi preparado');
         const layerMs=Math.round(performance.now()-customStart);
         custom.classList.remove('is-open');custom.hidden=true;
         assert(document.querySelectorAll('#lazyFields .ui-select').length===90,'modais foram inicializados em duplicidade');
