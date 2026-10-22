@@ -146,6 +146,7 @@
     let searchTimer=null;
     let searchController=null;
     let finishFlowPending=false;
+    let checkoutSubmitting=false;
     let bypassFinalizeValidation=false;
     let splitMode=false;
     let splitApplied=false;
@@ -2170,11 +2171,14 @@
 
     window.addEventListener('keydown',shortcutHandler,true);
 
+    window.addEventListener('pageshow',()=>{checkoutSubmitting=false;});
     form.addEventListener('submit',event=>{
+      if(checkoutSubmitting){event.preventDefault();return;}
       if(bypassFinalizeValidation){
         bypassFinalizeValidation=false;
         syncPayload();
         syncPaymentPayload();
+        checkoutSubmitting=true;
         return;
       }
 
