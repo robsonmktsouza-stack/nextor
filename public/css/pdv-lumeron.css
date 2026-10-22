@@ -1418,3 +1418,111 @@
   font:650 12px Roboto,Arial,sans-serif;
   cursor:pointer;
 }
+
+/* Abertura de caixa: janela operacional compacta e identificação não editável. */
+.pdv-body #pdvCashOpenDialog.pdv-cash-open-modal{
+  box-sizing:border-box;
+  width:min(500px,calc(100vw - 24px));
+  max-width:calc(100vw - 12px);
+  max-height:calc(100dvh - 24px);
+  overflow-y:auto;
+}
+.pdv-body #pdvCashOpenDialog .pdv-modal-head{
+  min-height:62px;
+  padding:12px 16px;
+}
+.pdv-body #pdvCashOpenDialog .pdv-modal-head h2{font-size:17px}
+.pdv-body #pdvCashOpenDialog .pdv-cash-open-body{
+  display:flex;
+  flex-direction:column;
+  gap:13px;
+  min-width:0;
+  padding:16px 18px;
+}
+.pdv-body #pdvCashOpenDialog .pdv-cash-open-body > label{
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  margin:0;
+  min-width:0;
+  width:100%;
+}
+.pdv-body #pdvCashOpenDialog .pdv-cash-open-body label > span,
+.pdv-body #pdvCashOpenDialog .pdv-cash-open-identity > span{
+  color:#4a6579;
+  font:650 12px/1.35 Roboto,Arial,sans-serif;
+}
+.pdv-body #pdvCashOpenDialog .pdv-cash-open-body label > :is(input,select,textarea),
+.pdv-body #pdvCashOpenDialog .pdv-cash-open-body label > .ui-select{
+  box-sizing:border-box;
+  display:block;
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  margin:0;
+  border:1px solid #c9d7e3;
+  border-radius:4px;
+  background:#fff;
+  font:12.5px/1.45 Roboto,Arial,sans-serif;
+}
+.pdv-body #pdvCashOpenDialog .pdv-cash-open-body label > :is(input,select){
+  min-height:38px;
+  padding:8px 10px;
+}
+.pdv-body #pdvCashOpenDialog .pdv-cash-open-body label > textarea{
+  min-height:54px;
+  max-height:130px;
+  padding:8px 10px;
+  resize:vertical;
+}
+.pdv-body #pdvCashOpenDialog .pdv-cash-open-body label > .ui-select{padding:0}
+.pdv-body #pdvCashOpenDialog .pdv-cash-open-body .ui-select-trigger{
+  width:100%;
+  min-height:36px;
+}
+.pdv-body #pdvCashOpenDialog .pdv-cash-open-identity{
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  margin:0;
+  padding:0;
+  min-width:0;
+}
+.pdv-body #pdvCashOpenDialog .pdv-cash-open-identity strong{
+  display:block;
+  min-width:0;
+  color:#2d485e;
+  font:700 13px/1.4 Roboto,Arial,sans-serif;
+  overflow-wrap:anywhere;
+}
+.pdv-body #pdvCashOpenDialog .pdv-cash-open-actions{
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:9px;
+  padding:12px 18px 15px;
+  border-top:1px solid #e0e8ee;
+  background:#f9fbfd;
+}
+.pdv-body #pdvCashOpenDialog .pdv-cash-open-actions > button{
+  min-height:38px;
+  padding:7px 14px;
+  border-radius:4px;
+  font:650 12px/1.4 Roboto,Arial,sans-serif;
+  cursor:pointer;
+}
+.pdv-body #pdvCashOpenDialog .pdv-cash-open-actions .pdv-cash-open-cancel{
+  border:1px solid #c7d7e2;
+  background:#fff;
+  color:#45657d;
+}
+.pdv-body #pdvCashOpenDialog .pdv-cash-open-actions .pdv-modal-primary{
+  border:1px solid #2877c7;
+}
+@media(max-width:560px){
+  .pdv-body #pdvCashOpenDialog .pdv-cash-open-body{padding:12px;gap:11px}
+  .pdv-body #pdvCashOpenDialog .pdv-cash-open-actions{padding:11px 12px}
+}
