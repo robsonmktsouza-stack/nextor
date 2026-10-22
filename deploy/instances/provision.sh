@@ -37,9 +37,9 @@ lm_valid_id "$ID" || { echo 'ID inválido.' >&2; exit 2; }
   { echo 'Domínio base inválido.' >&2; exit 2; }
 [[ "$DOMAIN" == *."$BASE_DOMAIN" ]] || { echo 'Fora do domínio contratado.' >&2; exit 2; }
 SUBDOMAIN="${DOMAIN%.$BASE_DOMAIN}"
-[[ "$SUBDOMAIN" =~ ^[a-z][a-z0-9-]{1,38}$ && "$SUBDOMAIN" != *--* ]] ||
+[[ "$SUBDOMAIN" =~ ^[a-z0-9][a-z0-9-]{0,37}[a-z0-9]$ && "$SUBDOMAIN" != *--* ]] ||
   { echo 'Subdomínio inválido.' >&2; exit 2; }
-[[ ! "$SUBDOMAIN" =~ ^(www|login|admin|api)$ ]] || { echo 'Subdomínio reservado.' >&2; exit 2; }
+[[ ! "$SUBDOMAIN" =~ ^(admin|api|app|assets|auth|billing|control|dev|ftp|help|login|mail|portal|smtp|static|status|support|suporte|www)$ ]] || { echo 'Subdomínio reservado.' >&2; exit 2; }
 [[ "$PHP_VERSION" =~ ^8\.[34]$ ]] || { echo 'PHP inválido.' >&2; exit 2; }
 [[ -f "$SOURCE/composer.lock" ]] || { echo 'Fonte sem composer.lock.' >&2; exit 2; }
 [[ -z "$TLS_CERT_NAME" || "$TLS_CERT_NAME" =~ ^[a-zA-Z0-9_.-]{1,100}$ ]] ||
@@ -139,7 +139,7 @@ LUMERON_INSTANCE_ID=$ID
 LUMERON_INSTANCE_SUBDOMAIN=$SUBDOMAIN
 LUMERON_INSTANCE_CNPJ=$CNPJ
 LUMERON_BASE_DOMAIN=$BASE_DOMAIN
-LUMERON_LOGIN_PORTAL_HOST=login.$BASE_DOMAIN
+LUMERON_LOGIN_PORTAL_HOST=$BASE_DOMAIN
 LUMERON_LOGIN_PORTAL=false
 MAIL_MAILER=log
 ACBr_NFE_LIBRARY_PATH=
