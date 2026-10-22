@@ -1175,3 +1175,11 @@
 .lumeron-pdv-page .pdv-sales-cancel-body textarea:focus{border-color:#3681b8;outline:2px solid #3681b825}
 .lumeron-pdv-page .pdv-sales-cancel-hint{margin:12px 0 0;font-size:11px;line-height:1.5;color:#667987}
 .lumeron-pdv-page .pdv-sales-cancel-error{margin:12px 0 0;font-size:11px;font-weight:650;color:#a7383a}
+
+.lumeron-pdv-page .pdv-sales-cancel-footer{display:flex;justify-content:flex-end;gap:8px;padding:12px 15px;border-top:1px solid #e3e9ef;background:#f8fafb}
+.lumeron-pdv-page .pdv-sales-cancel-footer button{min-height:35px;padding:7px 12px;border:1px solid #bfccd8;border-radius:4px;background:#fff;color:#3c5567;font:650 12px Roboto,Arial,sans-serif;cursor:pointer}
+.lumeron-pdv-page .pdv-sales-cancel-footer .pdv-sales-cancel-submit{background:#b94248;color:#fff;border-color:#a8383d}
+.lumeron-pdv-page .pdv-sales-cancel-footer button:disabled{opacity:.55;cursor:wait}
+.lumeron-pdv-page .pdv-sales-row-actions .pdv-sales-cancel-action{color:#a84449;border-color:#e2bbc0}
+.lumeron-pdv-page .pdv-sales-row-actions .pdv-sales-cancel-action:hover{background:#fff1f1;color:#922e34;border-color:#d79da5}
+.lumeron-pdv-page .pdv-sales-action-status{font-size:11px;color:#226c4b}
