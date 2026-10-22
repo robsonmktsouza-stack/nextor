@@ -64,6 +64,15 @@
             <div><span>Recebido</span><strong>{{ \App\Support\InvoiceMoney::brl($paid) }}</strong></div>
             <div><span>Saldo</span><strong>{{ \App\Support\InvoiceMoney::brl($balance) }}</strong></div>
         </div>
+        @if($invoice->emailDelivery)
+            <div class="invoice-license-note">E-mail da fatura:
+                {{ match($invoice->emailDelivery->status) {
+                    'sent' => 'Enviado', 'pending' => 'Aguardando envio',
+                    'processing' => 'Enviando', 'retry' => 'Nova tentativa',
+                    'failed' => 'Não enviado', default => 'Cancelado'
+                } }}
+            </div>
+        @endif
         @if($invoice->licenseApplicationActive())
             <div class="invoice-license-note">Validade aplicada à licença em {{ $invoice->license_applied_at->format('d/m/Y H:i') }}.</div>
         @elseif($invoice->license_application_reversed_at)
