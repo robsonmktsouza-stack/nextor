@@ -240,6 +240,146 @@ final class PdvSalesHistoryTest extends TestCase
         self::assertStringContainsString('backdrop-filter:none',$stylesheet);
     }
 
+
+    public function test_cancel_option_appears_only_on_eligible_completed_sales(): void
+    {
+        $cashier=$this->operator();
+        $eligible=$this->sale($cashier);
+        $cancelled=$this->sale($cashier,['status'=>'cancelled']);
+        $authorized=$this->sale($cashier);
+        FiscalDocumentJob::query()->create([
+            'document_type'=>'nfce','sale_id'=>$authorized->id,
+            'status'=>'authorized','environment'=>'homologation',
+            'series'=>1,'document_number'=>100,
+        ]);
+
+        $response=$this->actingAs($cashier)->getJson(route('pdv.sales.history'))->assertOk();
+        $items=collect($response->json('items'))->keyBy('id');
+        self::assertTrue($items[$eligible->id]['can_cancel']);
+        self::assertSame(route('pdv.sales.cancel',$eligible),$items[$eligible->id]['cancel_url']);
+        self::assertFalse($items[$cancelled->id]['can_cancel']);
+        self::assertNull($items[$cancelled->id]['cancel_url']);
+        self::assertFalse($items[$authorized->id]['can_cancel']);
+        self::assertNull($items[$authorized->id]['cancel_url']);
+        $this->get(route('pdv.index'))
+            ->assertOk()
+            ->assertSee('id="pdvSalesCancelSheet"',false)
+            ->assertSee('id="pdvSalesCancelReason"',false);
+    }
+
+    public function test_cancel_sale_requires_reason_and_saves_audit_in_existing_notes(): void
+    {
+        $cashier=$this->operator();
+        $sale=$this->sale($cashier,['notes'=>'Cliente solicitou conferência']);
+        $this->actingAs($cashier)
+            ->postJson(route('pdv.sales.cancel',$sale),[])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('reason');
+        self::assertSame('completed',$sale->fresh()->status);
+
+        $this->postJson(route('pdv.sales.cancel',$sale),[
+            'reason'=>'Produto registrado em duplicidade',
+        ])->assertOk()->assertJsonPath('success',true);
+
+        $sale->refresh();
+        self::assertSame('cancelled',$sale->status);
+        self::assertNotNull($sale->cancelled_at);
+        self::assertStringContainsString('Cliente solicitou conferência',$sale->notes);
+        self::assertStringContainsString('Produto registrado em duplicidade',$sale->notes);
+        self::assertStringContainsString('operador #'.$cashier->id,$sale->notes);
+
+        $this->postJson(route('pdv.sales.cancel',$sale),[
+            'reason'=>'Tentativa de repetir cancelamento',
+        ])->assertUnprocessable();
+        self::assertSame(1,substr_count($sale->fresh()->notes,'Cancelamento PDV em'));
+    }
+
+    public function test_cancel_sale_rejects_pending_and_authorized_fiscal_documents(): void
+    {
+        $cashier=$this->operator();
+        $this->actingAs($cashier);
+        foreach(['authorized','pending','processing','offline_signed','offline_sending'] as $i=>$status) {
+            $sale=$this->sale($cashier);
+            FiscalDocumentJob::query()->create([
+                'document_type'=>'nfce','sale_id'=>$sale->id,
+                'status'=>$status,'environment'=>'homologation',
+                'series'=>1,'document_number'=>200+$i,
+            ]);
+            $this->postJson(route('pdv.sales.cancel',$sale),[
+                'reason'=>'Cancelamento sem confirmação fiscal',
+            ])->assertUnprocessable()->assertJsonValidationErrors('sale');
+            self::assertSame('completed',$sale->fresh()->status);
+        }
+    }
+
+    public function test_cancel_sale_allows_prepared_document_but_requires_confirmed_fiscal_cancellation(): void
+    {
+        $cashier=$this->operator();
+        $this->actingAs($cashier);
+        $prepared=$this->sale($cashier);
+        $job=FiscalDocumentJob::query()->create([
+            'document_type'=>'nfce','sale_id'=>$prepared->id,
+            'status'=>'prepared','environment'=>'homologation',
+            'series'=>1,'document_number'=>300,
+        ]);
+        $this->postJson(route('pdv.sales.cancel',$prepared),[
+            'reason'=>'Pedido desistido antes da emissão',
+        ])->assertOk();
+        self::assertSame('cancelled',$prepared->fresh()->status);
+        self::assertSame('cancelled',$job->fresh()->status);
+
+        $confirmed=$this->sale($cashier);
+        FiscalDocumentJob::query()->create([
+            'document_type'=>'nfce','sale_id'=>$confirmed->id,
+            'status'=>'cancelled','environment'=>'homologation',
+            'series'=>1,'document_number'=>301,
+            'authorized_at'=>now()->subMinutes(4),
+            'cancellation_status'=>'authorized',
+            'cancelled_at'=>now(),
+        ]);
+        $this->postJson(route('pdv.sales.cancel',$confirmed),[
+            'reason'=>'Cancelamento fiscal confirmado pela SEFAZ',
+        ])->assertOk();
+        self::assertSame('cancelled',$confirmed->fresh()->status);
+
+        $incomplete=$this->sale($cashier);
+        FiscalDocumentJob::query()->create([
+            'document_type'=>'nfce','sale_id'=>$incomplete->id,
+            'status'=>'cancelled','environment'=>'homologation',
+            'series'=>1,'document_number'=>302,
+            'authorized_at'=>now()->subMinutes(5),
+            'cancellation_status'=>'pending',
+        ]);
+        $this->postJson(route('pdv.sales.cancel',$incomplete),[
+            'reason'=>'Cancelamento ainda não aprovado',
+        ])->assertUnprocessable();
+        self::assertSame('completed',$incomplete->fresh()->status);
+    }
+
+    public function test_cancel_sale_rejects_other_modules_and_unauthorized_cashiers(): void
+    {
+        $cashier=$this->operator();
+        $sale=$this->sale($cashier);
+        $office=$this->sale($cashier,['source'=>'sales']);
+        $quote=$this->sale($cashier,['operation_type'=>'quote']);
+        $this->actingAs($cashier);
+        $this->postJson(route('pdv.sales.cancel',$office),['reason'=>'Teste de proteção'])
+            ->assertNotFound();
+        $this->postJson(route('pdv.sales.cancel',$quote),['reason'=>'Teste de proteção'])
+            ->assertNotFound();
+
+        $stock=User::query()->create([
+            'name'=>'Estoque','email'=>'stock-cancel@example.test',
+            'password'=>'SenhaTeste123','role'=>'operator',
+            'permissions'=>['products'],'is_active'=>true,
+        ]);
+        $this->actingAs($stock)
+            ->postJson(route('pdv.sales.cancel',$sale),[
+                'reason'=>'Operador sem permissão',
+            ])->assertForbidden();
+        self::assertSame('completed',$sale->fresh()->status);
+    }
+
     public function test_sales_history_is_unavailable_to_users_without_pdv_permission(): void
     {
         $user=User::query()->create([
