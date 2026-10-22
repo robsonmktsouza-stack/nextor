@@ -454,6 +454,15 @@ foreach($primaryTabs as $key=>$item){
             <input type="checkbox" name="allow_discount" value="1" @checked($pdv['allow_discount'])>
             <span><strong>Permitir descontos</strong><small>Habilita descontos nos itens do PDV.</small></span>
           </label>
+          <div class="pdv-settings-limit">
+            <label class="field" for="pdvDiscountApprovalPercent">
+              <span>Limite de desconto sem supervisor (%)</span>
+              <input id="pdvDiscountApprovalPercent" name="discount_approval_percent"
+                     type="number" step="0.01" min="0" max="100"
+                     value="{{ $pdv['discount_approval_percent'] ?? 10 }}">
+            </label>
+            <p>Acima desse percentual em qualquer item, exige autorização.</p>
+          </div>
           <label class="settings-switch">
             <input type="checkbox" name="ask_consumer_document" value="1" @checked($pdv['ask_consumer_document'])>
             <span><strong>Perguntar CPF/CNPJ na nota</strong><small>Consulta o consumidor antes de finalizar a venda.</small></span>
