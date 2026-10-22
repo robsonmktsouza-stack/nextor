@@ -346,6 +346,8 @@ class PdvController extends Controller
         abort_unless($sale->source==='pdv' && $sale->operation_type==='sale',404);
         $data=$request->validate([
             'reason'=>['required','string','min:5','max:255'],
+            'authorizer_id'=>['required','integer','exists:users,id'],
+            'credential'=>['required','string'],
         ]);
         $reason=trim(preg_replace('/\s+/u',' ',$data['reason']) ?? $data['reason']);
         if(mb_strlen($reason)<5) {
@@ -354,7 +356,10 @@ class PdvController extends Controller
             ]);
         }
 
-        $sales->cancel($sale,(int)$request->user()->id,$reason);
+        $supervisor=app(\App\Services\PdvActionAuthorization::class)->approve(
+            $request->user(),(int)$data['authorizer_id'],$data['credential'],$request->ip()
+        );
+        $sales->cancel($sale,(int)$request->user()->id,$reason,$supervisor->id);
 
         return response()->json([
             'success'=>true,
