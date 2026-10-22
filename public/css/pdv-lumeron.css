@@ -698,160 +698,322 @@
 @media(max-width:1160px){.lumeron-pdv-page .pdv-sales-filters{grid-template-columns:repeat(3,minmax(0,1fr))}.lumeron-pdv-page .pdv-sales-filter-wide,.lumeron-pdv-page .pdv-sales-filter-actions{grid-column:1/-1}.lumeron-pdv-page .pdv-sales-filter-actions{flex-direction:row}.lumeron-pdv-page .pdv-sales-table{min-width:880px}}
 @media(max-width:650px){.lumeron-pdv-page .pdv-sales-modal{width:calc(100vw - 12px);height:calc(100dvh - 16px);max-height:calc(100dvh - 16px)}.lumeron-pdv-page .pdv-sales-filters{grid-template-columns:repeat(2,minmax(0,1fr));padding:9px}.lumeron-pdv-page .pdv-sales-filter-wide,.lumeron-pdv-page .pdv-sales-filter-actions{grid-column:1/-1}}
 
-/* Pós-venda: comprovante no PDV, sem página de impressão intermediária. */
+
+/* Resumo pós-venda: documento de leitura confortável, sem iframe visível. */
 .pdv-body .pdv-receipt-modal{
-  width:min(760px,calc(100vw - 28px));
-  max-width:760px;
-  height:min(790px,calc(100dvh - 32px));
-  max-height:calc(100dvh - 32px);
+  width:min(650px,calc(100vw - 26px));
+  max-width:650px;
+  height:min(820px,calc(100dvh - 30px));
+  max-height:calc(100dvh - 30px);
   padding:0;
   overflow:hidden;
-  background:#f3f6f8;
-  border:1px solid #cfdbe3;
+  color:#253f51;
+  background:#fff;
+  border:1px solid #ccdae4;
   border-radius:7px;
-  color:#344d61;
+  box-shadow:0 22px 75px #10233255;
 }
-.pdv-body .pdv-receipt-modal[open]{
-  display:flex;
-  flex-direction:column;
-}
+.pdv-body .pdv-receipt-modal[open]{display:flex;flex-direction:column}
 .pdv-body .pdv-receipt-modal:not([open]){display:none!important}
-.pdv-body .pdv-receipt-modal::backdrop{background:rgba(12,29,43,.55)}
-.pdv-body .pdv-receipt-modal-head{
-  flex:0 0 auto;
-  background:#fff;
-  border-bottom:1px solid #dce6ec;
-}
-.pdv-body .pdv-receipt-modal-head h2{font-size:17px;line-height:1.35}
-.pdv-body .pdv-receipt-modal-summary{
+.pdv-body .pdv-receipt-modal::backdrop{background:rgba(16,33,48,.58)}
+.pdv-body .pdv-receipt-header{
+  flex-shrink:0;
   display:flex;
-  flex:0 0 auto;
+  justify-content:space-between;
   align-items:center;
-  flex-wrap:wrap;
-  gap:14px 25px;
+  gap:14px;
+  min-height:68px;
   padding:12px 18px;
-  border-bottom:1px solid #dce6ec;
   background:#fff;
+  border-bottom:1px solid #e0e8ee;
 }
-.pdv-body .pdv-receipt-modal-summary>div{
+.pdv-body .pdv-receipt-title{display:flex;align-items:center;gap:12px;min-width:0}
+.pdv-body .pdv-receipt-title-icon{
   display:grid;
-  align-content:center;
-  gap:3px;
+  place-items:center;
+  flex:0 0 36px;
+  width:36px;
+  height:36px;
+  border-radius:6px;
+  color:#237d59;
+  background:#e6f3ea;
+  border:1px solid #cae6d3;
 }
-.pdv-body .pdv-receipt-modal-summary small{
+.pdv-body .pdv-receipt-title>div>span{
   display:block;
+  color:#778b99;
   font-size:10px;
   font-weight:700;
-  color:#8596a6;
+  letter-spacing:.3px;
+  margin-bottom:3px;
   text-transform:uppercase;
 }
-.pdv-body .pdv-receipt-modal-summary strong{
-  font-size:20px;
-  font-variant-numeric:tabular-nums;
-  color:#215e7f;
+.pdv-body .pdv-receipt-title h2{
+  margin:0;
+  font-size:17px;
+  font-weight:750;
+  line-height:1.25;
+  color:#29495e;
 }
-.pdv-body .pdv-receipt-modal-fiscal span{
-  font-size:12px;
-  font-weight:650;
-  color:#48687c;
+.pdv-body .pdv-receipt-header .pdv-modal-close{
+  flex:0 0 auto;
+  border:1px solid #d6e1e9;
+  background:#f9fbfc;
+  color:#5a7487;
+  border-radius:5px;
 }
-.pdv-body .pdv-receipt-fiscal-link{
-  margin-left:auto;
-  display:inline-flex;
-  align-items:center;
-  min-height:33px;
-  padding:0 10px;
-  text-decoration:none;
-  color:#2c74a5;
-  border:1px solid #c1d4e1;
-  border-radius:4px;
-  background:#f8fbfd;
-  font-size:11px;
-  font-weight:700;
-}
-.pdv-body .pdv-receipt-fiscal-link:hover{background:#eaf5fb}
-.pdv-body .pdv-receipt-preview-shell{
+.pdv-body .pdv-receipt-content{
   flex:1 1 auto;
   min-height:0;
-  overflow:hidden;
-  padding:9px;
-  background:#eaf0f4;
-}
-.pdv-body .pdv-receipt-preview-shell iframe{
-  display:block;
-  width:100%;
-  height:100%;
-  min-height:0;
-  border:1px solid #d6e0e7;
-  border-radius:4px;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  scrollbar-width:thin;
+  padding:16px 20px 18px;
   background:#fff;
 }
-.pdv-body .pdv-receipt-modal-footer{
-  flex:0 0 auto;
+.pdv-body .pdv-receipt-success{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  min-height:43px;
+  padding:10px 12px;
+  background:#e7f4e9;
+  color:#296c44;
+  border:1px solid #cde6d0;
+  border-radius:4px;
+  font-size:12px;
+  font-weight:700;
+}
+.pdv-body .pdv-receipt-success svg{flex-shrink:0}
+.pdv-body .pdv-receipt-success-actions{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  max-width:540px;
+  margin:13px auto 21px;
+}
+.pdv-body .pdv-receipt-success-actions form{margin:0;width:100%}
+.pdv-body .pdv-receipt-action,
+.pdv-body .pdv-receipt-success-actions .pdv-receipt-action{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  width:100%;
+  min-height:38px;
+  padding:8px 12px;
+  border:1px solid transparent;
+  border-radius:4px;
+  font-family:inherit;
+  font-size:12px;
+  font-weight:700;
+  line-height:1.2;
+  text-align:center;
+  text-decoration:none;
+  cursor:pointer;
+  gap:9px;
+  box-shadow:none;
+  transition:filter .15s ease;
+}
+.pdv-body .pdv-receipt-action svg{flex-shrink:0}
+.pdv-body .pdv-receipt-action:hover:not(:disabled){filter:brightness(.95)}
+.pdv-body .pdv-receipt-action:focus-visible{outline:3px solid #16578455;outline-offset:2px}
+.pdv-body .pdv-receipt-action-back,
+.pdv-body .pdv-receipt-success-actions .pdv-receipt-action-back{
+  color:#fff;
+  background:#de9b3c;
+  border-color:#cc8b2f;
+}
+.pdv-body .pdv-receipt-action-print,
+.pdv-body .pdv-receipt-success-actions .pdv-receipt-action-print{
+  color:#fff;
+  background:#2d78ae;
+  border-color:#226b9f;
+}
+.pdv-body .pdv-receipt-action-fiscal,
+.pdv-body .pdv-receipt-success-actions .pdv-receipt-action-fiscal{
+  color:#fff;
+  background:#37a367;
+  border-color:#2d935b;
+}
+.pdv-body .pdv-receipt-action:disabled{opacity:.55;cursor:not-allowed}
+.pdv-body .pdv-receipt-document{
+  max-width:100%;
+  margin:0;
+  padding:18px 0 3px;
+  border-top:1px solid #dce6eb;
+  color:#263e4e;
+}
+.pdv-body .pdv-receipt-company{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  align-items:center;
+  text-align:center;
+  margin:0 0 17px;
+}
+.pdv-body .pdv-receipt-company-logo{
+  display:block;
+  max-width:min(215px,80%);
+  max-height:75px;
+  margin-bottom:5px;
+  object-fit:contain;
+}
+.pdv-body .pdv-receipt-company>strong{
+  font-size:16px;
+  line-height:1.25;
+  font-weight:800;
+  text-transform:uppercase;
+  overflow-wrap:anywhere;
+}
+.pdv-body .pdv-receipt-company>span{font-size:11px;color:#697f8e}
+.pdv-body .pdv-receipt-meta{
+  margin-top:6px;
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  align-items:center;
+  gap:6px 15px;
+  font-size:11px;
+  line-height:1.45;
+  color:#516a7a;
+}
+.pdv-body .pdv-receipt-meta b{color:#334f61}
+.pdv-body .pdv-receipt-document-heading{
+  display:block;
+  margin:12px 0 0;
+  padding:9px 11px;
+  font-size:11px;
+  font-weight:750;
+  line-height:1.2;
+  text-transform:uppercase;
+  letter-spacing:.2px;
+  border-top:1px solid #dbe5ec;
+  border-bottom:1px solid #dbe5ec;
+  background:#f4f7f9;
+  color:#405e73;
+}
+.pdv-body .pdv-receipt-table-scroll{width:100%;overflow-x:auto}
+.pdv-body .pdv-receipt-items{
+  border-collapse:collapse;
+  table-layout:fixed;
+  width:100%;
+  min-width:370px;
+  margin:0;
+  color:#2d475b;
+}
+.pdv-body .pdv-receipt-items th{
+  padding:10px 8px;
+  text-align:right;
+  font-size:10.5px;
+  font-weight:750;
+  color:#597487;
+  border-bottom:1px solid #dce5eb;
+  background:#fff;
+}
+.pdv-body .pdv-receipt-items th:first-child,
+.pdv-body .pdv-receipt-items td:first-child{text-align:left;width:46%}
+.pdv-body .pdv-receipt-items th:nth-child(2){width:12%}
+.pdv-body .pdv-receipt-items th:nth-child(3),
+.pdv-body .pdv-receipt-items th:nth-child(4){width:21%}
+.pdv-body .pdv-receipt-items td{
+  padding:11px 8px;
+  text-align:right;
+  vertical-align:top;
+  font-size:11.5px;
+  line-height:1.35;
+  border-bottom:1px solid #e4eaee;
+  font-variant-numeric:tabular-nums;
+  overflow-wrap:anywhere;
+}
+.pdv-body .pdv-receipt-items td:first-child>span{display:block;font-weight:650}
+.pdv-body .pdv-receipt-items td:first-child>small{
+  display:block;
+  margin-top:2px;
+  font-size:10px;
+  color:#8899a5;
+}
+.pdv-body .pdv-receipt-totals>div,
+.pdv-body .pdv-receipt-payments>div{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:9px 10px;
+  border-bottom:1px solid #e6edf1;
+  color:#526b7d;
+  font-size:11.5px;
+}
+.pdv-body .pdv-receipt-totals strong,
+.pdv-body .pdv-receipt-payments strong{
+  color:#2c465a;
+  white-space:nowrap;
+  font-weight:750;
+  font-variant-numeric:tabular-nums;
+}
+.pdv-body .pdv-receipt-totals>div:nth-child(odd),
+.pdv-body .pdv-receipt-payments>div:nth-child(even){background:#f8fafb}
+.pdv-body .pdv-receipt-totals>.pdv-receipt-total{
+  padding:12px 10px;
+  background:#edf5fa;
+  color:#245d82;
+  font-size:13px;
+  font-weight:750;
+  border-top:1px solid #d5e4ee;
+  border-bottom:1px solid #d5e4ee;
+}
+.pdv-body .pdv-receipt-totals>.pdv-receipt-total strong{
+  color:#1c5d88;
+  font-size:17px;
+}
+.pdv-body .pdv-receipt-document-fiscal{
   display:flex;
   align-items:center;
   justify-content:space-between;
   flex-wrap:wrap;
-  gap:10px;
-  padding:12px 17px;
-  border-top:1px solid #d6e0e7;
-  background:#fff;
-}
-.pdv-body .pdv-receipt-modal-footer>span{
-  font-size:11px;
-  color:#788d9c;
-}
-.pdv-body .pdv-receipt-modal-buttons{
-  display:flex;
   gap:8px;
-  align-items:center;
-  flex-wrap:wrap;
-}
-.pdv-body .pdv-receipt-modal-buttons>button{
-  min-height:36px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:7px;
-  padding:0 13px;
-  font-size:12px;
-  font-weight:700;
-  border:1px solid #c9d7e1;
+  margin-top:14px;
+  padding:9px 10px;
+  border:1px solid #dce6ee;
   border-radius:4px;
-  background:#fff;
-  color:#38617b;
-  cursor:pointer;
-}
-.pdv-body .pdv-receipt-modal-buttons>.pdv-receipt-done-button{
-  background:#2782b9;
-  border-color:#2782b9;
-  color:#fff;
-}
-.pdv-body .pdv-receipt-modal-buttons>button:hover:not(:disabled){
-  background:#eff7fb;
-}
-.pdv-body .pdv-receipt-modal-buttons>.pdv-receipt-done-button:hover:not(:disabled){
-  background:#206f9e;
-}
-.pdv-body .pdv-receipt-modal-buttons>button:disabled{
-  opacity:.5;
-  cursor:not-allowed;
-}
-.pdv-body .pdv-receipt-print-error{
-  color:#b64c4b;
+  background:#f7f9fa;
+  color:#5e7482;
   font-size:11px;
-  max-width:220px;
+}
+.pdv-body .pdv-receipt-document-fiscal strong{color:#315d78}
+.pdv-body .pdv-receipt-note{margin:12px 2px 0;color:#647d8e;font-size:11px;overflow-wrap:anywhere}
+.pdv-body .pdv-receipt-internal-notice{
+  margin:15px 0 0;
+  padding:9px 2px 0;
+  border-top:1px dashed #b9cad5;
+  text-align:center;
+  color:#8898a5;
+  font-size:10px;
+}
+.pdv-body .pdv-receipt-print-frame{
+  position:fixed!important;
+  left:-10000px!important;
+  top:0!important;
+  width:320px!important;
+  height:1100px!important;
+  overflow:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+  border:0!important;
 }
 @media(max-width:580px){
   .pdv-body .pdv-receipt-modal{
     width:calc(100vw - 12px);
-    height:calc(100dvh - 16px);
-    max-height:calc(100dvh - 16px);
+    height:calc(100dvh - 12px);
+    max-height:calc(100dvh - 12px);
   }
-  .pdv-body .pdv-receipt-modal-summary{padding:10px 12px;gap:8px 16px}
-  .pdv-body .pdv-receipt-modal-summary strong{font-size:17px}
-  .pdv-body .pdv-receipt-fiscal-link{margin-left:0}
-  .pdv-body .pdv-receipt-modal-footer{padding:10px 12px}
-  .pdv-body .pdv-receipt-modal-buttons{width:100%}
-  .pdv-body .pdv-receipt-modal-buttons>button{flex:1}
+  .pdv-body .pdv-receipt-header{padding:10px 12px}
+  .pdv-body .pdv-receipt-content{padding:11px 11px 16px}
+  .pdv-body .pdv-receipt-meta{gap:5px 10px}
+  .pdv-body .pdv-receipt-company>strong{font-size:14px}
+  .pdv-body .pdv-receipt-success-actions{margin:11px auto 16px}
+  .pdv-body .pdv-receipt-action{min-height:42px}
+  .pdv-body .pdv-receipt-items td{padding:9px 6px;font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){
+  .pdv-body .pdv-receipt-action{transition:none}
 }
