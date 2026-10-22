@@ -123,7 +123,67 @@ final class PdvSalesHistoryTest extends TestCase
             ->assertOk()
             ->assertJsonPath('items.0.fiscal_status','Autorizada')
             ->assertJsonPath('items.0.receipt_url',route('pdv.receipt',['sale'=>$sale->id,'print'=>0]))
+            ->assertJsonPath('items.0.receipt_preview_url',route('pdv.sales.receipt.preview',$sale))
             ->assertJsonPath('items.0.danfe_url',route('pdv.nfce.danfe',$job));
+    }
+
+    public function test_history_receipt_uses_the_same_thermal_modal_without_repeating_checkout(): void
+    {
+        $cashier=$this->operator();
+        $sale=$this->sale($cashier);
+        $sale->items()->create([
+            'item_type'=>'product','product_name'=>'Camiseta de teste',
+            'product_sku'=>'TESTE-1','quantity'=>'1.000',
+            'unit_price'=>'29.90','discount'=>'0.00','line_total'=>'29.90',
+        ]);
+
+        $this->actingAs($cashier)
+            ->get(route('pdv.sales.receipt.preview',$sale))
+            ->assertOk()
+            ->assertViewIs('pdv.partials.receipt-modal')
+            ->assertHeader('Cache-Control','no-store, private')
+            ->assertSee('id="pdvHistoryReceiptModal"',false)
+            ->assertSee('data-receipt-after-checkout="0"',false)
+            ->assertSee('data-pdv-receipt-print',false)
+            ->assertSee('id="pdvHistoryReceiptFrame"',false)
+            ->assertSee('pdv-receipt-paper-caption')
+            ->assertSee('Camiseta de teste')
+            ->assertSee('R$ 29,90')
+            ->assertSee('Comprovante da venda')
+            ->assertSee('Voltar às vendas')
+            ->assertDontSee('Venda efetuada com sucesso')
+            ->assertDontSee('window.print()',false);
+        self::assertSame(1,Sale::count());
+    }
+
+    public function test_history_cancelled_sale_does_not_display_a_success_message(): void
+    {
+        $cashier=$this->operator();
+        $sale=$this->sale($cashier,['status'=>'cancelled']);
+        $this->actingAs($cashier)
+            ->get(route('pdv.sales.receipt.preview',$sale))
+            ->assertOk()
+            ->assertSee('Venda cancelada')
+            ->assertDontSee('Venda efetuada com sucesso')
+            ->assertDontSee('Preparar NFC-e');
+    }
+
+    public function test_preview_rejects_non_pdv_sales_quotes_and_unauthorized_users(): void
+    {
+        $cashier=$this->operator();
+        $sale=$this->sale($cashier);
+        $differentSource=$this->sale($cashier,['source'=>'sales']);
+        $quote=$this->sale($cashier,['operation_type'=>'quote']);
+        $this->actingAs($cashier);
+        $this->get(route('pdv.sales.receipt.preview',$differentSource))->assertNotFound();
+        $this->get(route('pdv.sales.receipt.preview',$quote))->assertNotFound();
+        $stock=User::query()->create([
+            'name'=>'Estoque','email'=>'stock-preview@example.test',
+            'password'=>'SenhaTeste123','role'=>'operator',
+            'permissions'=>['products'],'is_active'=>true,
+        ]);
+        $this->actingAs($stock)
+            ->get(route('pdv.sales.receipt.preview',$sale))->assertForbidden();
     }
 
     public function test_empty_results_and_invalid_date_range_are_handled(): void
