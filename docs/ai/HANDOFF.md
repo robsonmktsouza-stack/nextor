@@ -1,3 +1,11 @@
+## 22/10/2026 — Ajuste do modal de abertura de caixa
+
+- Proprietário enviou captura de `Abrir caixa` no PDV: janela muito larga e campo "Operador responsável" com aparência de input, incluindo foco azul. Código anterior já usava `readonly`, mas continuava parecendo editável e competia com o fluxo de digitação do valor.
+- Corrigido apenas modal `#pdvCashOpenDialog` em `resources/views/pdv/index.blade.php`: largura compacta de 500 px, operador exibido por `<strong>{{ auth()->user()->name }}</strong>`, sem campo de entrada nem `user_id` controlável, campos em coluna e rodapé com Cancelar/Abrir caixa. Identidade autenticada continua sendo obtida exclusivamente no servidor.
+- CSS isolado em `public/css/pdv-lumeron.css` com responsividade, alinhamento, legibilidade e altura controlada da janela. `public/js/pdv.js` foca `opening_amount` após a abertura, em vez de mostrar foco em campo somente leitura.
+- Criado `tests/Feature/PdvCashOpeningLayoutTest.php` (2 testes) para proteger aparência do modal, identidade não editável, campos obrigatórios e foco. Não houve mudança em lógica financeira, banco, autorização PIN, NFC-e, `main`, Lumeron Control ou VPS.
+- Atualização local após CI: `git pull origin develop && php artisan optimize:clear` e Ctrl+F5. Teste no Chrome local ainda necessário.
+
 ## 22/10/2026 — Relatório de fechamento de caixa dentro de modal
 
 - Relato: após fechar caixa, o PDV redirecionava para página isolada `/pdv/cash/{id}/report`, exigindo navegação manual para voltar, mesmo com botão Histórico/PDV. O proprietário quer o relatório em janela/modal, incluindo a navegação pelo histórico.
