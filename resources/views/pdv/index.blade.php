@@ -113,19 +113,25 @@
 </dialog>
 @endif
 @if(!$cashSession)
-<dialog class="pdv-quick-modal" id="pdvCashOpenDialog">
+<dialog class="pdv-quick-modal pdv-cash-open-modal" id="pdvCashOpenDialog" aria-labelledby="pdvCashOpenTitle">
   <form method="post" action="{{ route('pdv.cash.open') }}">
     @csrf
     <div class="pdv-modal-head">
-      <div><h2>Abrir caixa</h2></div>
+      <div><h2 id="pdvCashOpenTitle">Abrir caixa</h2></div>
       <button type="button" class="pdv-modal-close" onclick="this.closest('dialog').close()" aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
     </div>
-    <div class="pdv-cash-modal-body">
+    <div class="pdv-cash-modal-body pdv-cash-open-body">
       <label><span>Caixa físico *</span><select name="register_id" required>@foreach($cashRegisters as $register)<option value="{{ $register->id }}">{{ $register->name }} ({{ $register->code }})</option>@endforeach</select></label>
-      <label><span>Operador responsável</span><input value="{{ auth()->user()->name }}" readonly></label>
-      <label><span>Valor de abertura</span><input type="number" step="0.01" min="0" name="opening_amount" value="{{ old('opening_amount','0.00') }}" required autofocus></label>
+      <div class="pdv-cash-open-identity">
+        <span>Operador responsável</span>
+        <strong>{{ auth()->user()->name }}</strong>
+      </div>
+      <label><span>Valor de abertura</span><input type="number" step="0.01" min="0" name="opening_amount" value="{{ old('opening_amount','0.00') }}" required></label>
       <label><span>Senha ou PIN *</span><input type="password" name="credential" autocomplete="off" required></label>
-      <label><span>Observação</span><textarea name="opening_notes" rows="3" maxlength="1000" placeholder="Opcional"></textarea></label>
+      <label><span>Observação</span><textarea name="opening_notes" rows="2" maxlength="1000" placeholder="Opcional">{{ old('opening_notes') }}</textarea></label>
+    </div>
+    <div class="pdv-cash-open-actions">
+      <button type="button" class="pdv-cash-open-cancel" onclick="this.closest('dialog').close()">Cancelar</button>
       <button class="pdv-modal-primary" type="submit">@include('partials.icon',['name'=>'check','size'=>18]) Abrir caixa</button>
     </div>
   </form>
