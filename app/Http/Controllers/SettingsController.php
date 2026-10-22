@@ -490,6 +490,7 @@ class SettingsController extends Controller
                 'ask_consumer_document'=>['nullable','boolean'],
                 'allow_split_payment'=>['nullable','boolean'],
                 'allow_cash_movements'=>['nullable','boolean'],
+                'supervisor_movement_min'=>['nullable','numeric','min:0','max:99999999','decimal:0,2'],
                 'auto_nfce'=>['nullable','boolean'],
                 'show_stock'=>['nullable','boolean'],
                 'receipt_width'=>['required',Rule::in(['58','80'])],
@@ -651,7 +652,7 @@ class SettingsController extends Controller
             ],
             'pdv'=>[
                 'default_payment_method'=>null,'require_customer'=>false,'allow_discount'=>true,
-                'require_cash_opening'=>false,'ask_consumer_document'=>true,'allow_split_payment'=>true,'allow_cash_movements'=>true,
+                'require_cash_opening'=>true,'ask_consumer_document'=>true,'allow_split_payment'=>true,'allow_cash_movements'=>true,
                 'auto_nfce'=>false,'show_stock'=>true,'receipt_width'=>'80','receipt_copies'=>1,
             ],
             'billing'=>[
