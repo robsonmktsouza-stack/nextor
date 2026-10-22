@@ -1,7 +1,7 @@
 (()=>{
   'use strict';
   // Visualização do cupom no modal; impressão fica no PDF nativo autenticado.
-  const openReceipt=(dialog,restoreFocus=null)=>{
+  const openReceipt=(dialog,restoreFocus=null,restoreSales=null)=>{
     if(!dialog || dialog.dataset.receiptInitialized==='1')return;
     dialog.dataset.receiptInitialized='1';
     const history=dialog.dataset.receiptAfterCheckout==='0';
@@ -13,6 +13,7 @@
     dialog.addEventListener('close',()=>{
       if(history){
         dialog.remove();
+        restoreSales?.();
         if(restoreFocus?.isConnected)restoreFocus.focus();
         else document.getElementById('pdvSalesSearch')?.focus();
       }else document.getElementById('pdvSearch')?.focus();
@@ -21,8 +22,8 @@
     done?.focus();
   };
   window.LumeronPdvReceipt={
-    openHistory(dialog,restoreFocus){
-      if(dialog?.dataset.receiptAfterCheckout==='0')openReceipt(dialog,restoreFocus);
+    openHistory(dialog,restoreFocus,restoreSales){
+      if(dialog?.dataset.receiptAfterCheckout==='0')openReceipt(dialog,restoreFocus,restoreSales);
     }
   };
   document.addEventListener('DOMContentLoaded',()=>{
