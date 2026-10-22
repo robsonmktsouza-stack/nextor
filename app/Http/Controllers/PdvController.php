@@ -56,6 +56,8 @@ class PdvController extends Controller
             ? $cashSession : null;
         $cashCanSupervise=in_array($request->user()->role,['admin','manager'],true)
             && $request->user()->canAccess('pdv');
+        $overdueOtherCashSessions=$overdueCashSessions
+            ->filter(fn($pending)=>(int)$pending->user_id!==(int)$request->user()->id);
         $cashOverdueMustResolve=(bool)$overdueOwnCash
             || (!$cashSession && $overdueCashSessions->isNotEmpty());
 
@@ -181,6 +183,7 @@ class PdvController extends Controller
             'pdvSettings'=>$pdvSettings,
             'cashSession'=>$cashSession,
             'overdueCashSessions'=>$overdueCashSessions,
+            'overdueOtherCashSessions'=>$overdueOtherCashSessions,
             'overdueOwnCash'=>$overdueOwnCash,
             'cashCanSupervise'=>$cashCanSupervise,
             'cashOverdueMustResolve'=>$cashOverdueMustResolve,
