@@ -105,8 +105,22 @@ class PdvController extends Controller
                 ->where('operation_type','sale')
                 ->where('status','completed')
                 ->where('user_id',$request->user()->id)
-                ->first(['id','total','completed_at'])
+                ->with(['items','payments','customer:id,name','user:id,name'])
+                ->first([
+                    'id','customer_id','user_id','subtotal','discount_total','total',
+                    'cash_received','change_amount','consumer_document','consumer_name',
+                    'notes','completed_at',
+                ])
             : null;
+        $receiptModalCompany=$receiptModalSale ? CompanySetting::current() : null;
+        $receiptModalPaymentMethods=$receiptModalSale
+            ? PaymentMethod::query()->whereIn(
+                'code',$receiptModalSale->payments->pluck('payment_method')->all()
+              )->get(['code','name','kind'])
+            : collect();
+        $receiptModalPaymentLabels=$receiptModalPaymentMethods->pluck('name','code')->all();
+        $receiptModalPaymentKinds=$receiptModalPaymentMethods->pluck('kind','code')->all();
+
         $receiptModalNfceDocument=$receiptModalSale
             ? FiscalDocumentJob::query()
                 ->where('sale_id',$receiptModalSale->id)
@@ -132,6 +146,9 @@ class PdvController extends Controller
             'lastPdvNfceDocument'=>$lastPdvNfceDocument,
             'lastPdvNfceStatusLabel'=>$lastPdvNfceStatusLabel,
             'receiptModalSale'=>$receiptModalSale,
+            'receiptModalCompany'=>$receiptModalCompany,
+            'receiptModalPaymentLabels'=>$receiptModalPaymentLabels,
+            'receiptModalPaymentKinds'=>$receiptModalPaymentKinds,
             'receiptModalNfceDocument'=>$receiptModalNfceDocument,
             'customers'=>Customer::query()
                 ->where('is_customer',true)
