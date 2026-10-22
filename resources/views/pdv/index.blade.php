@@ -13,7 +13,6 @@
     </div>
   </form>
 </dialog>
-@if($pdvSettings['require_cash_opening'])
 @if(!$cashSession)
 <dialog class="pdv-quick-modal" id="pdvCashOpenDialog">
   <form method="post" action="{{ route('pdv.cash.open') }}">
@@ -129,7 +128,6 @@
     </div>
   </form>
 </dialog>
-@endif
 @endif
 
 {{-- Esta confirmação aparece somente ao voltar da impressão da venda atual.
