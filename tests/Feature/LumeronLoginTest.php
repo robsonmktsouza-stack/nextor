@@ -154,6 +154,25 @@ final class LumeronLoginTest extends TestCase
         }
     }
 
+    public function test_public_portal_uses_tenant_session_and_returns_tenant_redirect(): void
+    {
+        $user = $this->user();
+        $result = $this->withHeaders([
+            'Origin' => 'https://lumeron.com.br',
+            'Accept' => 'application/json',
+        ])->postJson('https://autonunes.lumeron.com.br/login', [
+            'subdomain' => 'autonunes',
+            'username' => 'caixa01',
+            'password' => 'SenhaTesteSegura123',
+        ]);
+        $result->assertOk()
+            ->assertJsonStructure(['redirect'])
+            ->assertHeader('Access-Control-Allow-Origin', 'https://lumeron.com.br');
+        $this->assertAuthenticatedAs($user);
+        $this->assertStringStartsWith('https://autonunes.lumeron.com.br/',
+            $result->json('redirect'));
+    }
+
     public function test_portal_cors_preflight_accepts_only_the_root_domain(): void
     {
         $this->withHeaders(['Origin'=>'https://lumeron.com.br'])
