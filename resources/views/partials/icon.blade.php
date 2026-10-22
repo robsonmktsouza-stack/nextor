@@ -38,6 +38,7 @@
 @case('chevron-left')<path d="m15 18-6-6 6-6"/>@break
 @case('edit')<path d="m16 4 4 4M3 17l-.5 4.5L7 21 20 8a2.8 2.8 0 0 0-4-4L3 17Z"/>@break
 @case('clock')<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>@break
+@case('mail')<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 7 9-7"/>@break
 @case('settings')<path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/><circle cx="12" cy="12" r="5"/>@break
 @case('shield')<path d="m12 22-7-4V5l7-3 7 3v13l-7 4ZM9 12l2 2 4-4"/>@break
 @case('file-minus')<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 15h8"/>@break

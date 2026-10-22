@@ -36,6 +36,8 @@
     <a class="nav-link {{ request()->routeIs('plans.*')?'active':'' }}" href="{{ route('plans.index') }}">@include('partials.icon',['name'=>'plan','size'=>19])Planos</a>
     <a class="nav-link {{ request()->routeIs('automations.*')?'active':'' }}" href="{{ route('automations.index') }}">@include('partials.icon',['name'=>'automations','size'=>19])Automações</a>
     <a class="nav-link {{ request()->routeIs('history.*')?'active':'' }}" href="{{ route('history.index') }}">@include('partials.icon',['name'=>'history','size'=>19])Histórico</a>
+    <div class="nav-heading">ADMINISTRAÇÃO</div>
+    <a class="nav-link {{ request()->routeIs('settings.*')?'active':'' }}" href="{{ route('settings.index') }}">@include('partials.icon',['name'=>'settings','size'=>19])Configurações</a>
     <div class="nav-fill"></div><div class="sidebar-version">Lumeron Control <span>Administração</span></div>
 </aside>
 <main class="page">

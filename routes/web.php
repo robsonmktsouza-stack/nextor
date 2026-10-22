@@ -8,6 +8,7 @@ use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\AutomationController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\ControlSettingsController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard');
@@ -55,5 +56,11 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/invoices/{invoice}/cancel', [InvoiceController::class, 'cancel'])->name('invoices.cancel');
     Route::post('/invoices/{invoice}/apply-license', [InvoiceController::class, 'applyLicense'])->name('invoices.apply-license');
     Route::post('/invoices/{invoice}/undo-license', [InvoiceController::class, 'undoLicense'])->name('invoices.undo-license');
+    Route::get('/settings', [ControlSettingsController::class, 'index'])->name('settings.index');
+    Route::put('/settings/mail', [ControlSettingsController::class, 'saveMail'])->name('settings.mail');
+    Route::post('/settings/mail/test', [ControlSettingsController::class, 'testMail'])
+        ->middleware('throttle:2,1')->name('settings.mail-test');
+    Route::put('/settings/billing', [ControlSettingsController::class, 'saveBilling'])->name('settings.billing');
+    Route::put('/settings/schedules', [ControlSettingsController::class, 'saveSchedules'])->name('settings.schedules');
     Route::get('/history', [HistoryController::class, 'index'])->name('history.index');
 });

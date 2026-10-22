@@ -300,3 +300,31 @@ svg.nextor-icon{
   .invoice-document-grid{grid-template-columns:1.5fr 1fr 1fr}
   .invoice-control-panel,.invoice-payment-history,.invoice-danger-zone,.page-header,.sidebar,.topbar{display:none!important}
 }
+
+/* Configurações do Control — compactas, compatíveis com formulários atuais. */
+.control-settings-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:13px}
+.control-settings-indicator{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0;border:1px solid #d7e3eb;border-radius:4px;background:#fff;padding:12px 15px}
+.control-settings-indicator-title{font-size:12px;color:#647f8e}
+.control-settings-indicator strong{font-size:11px;white-space:nowrap}
+.control-settings-indicator .is-on{color:#2d8068}
+.control-settings-indicator .is-off{color:#81919b}
+.control-settings-layout{display:grid;grid-template-columns:minmax(380px,1.08fr) minmax(320px,1fr);gap:13px;align-items:start}
+.control-settings-side{display:grid;gap:13px;min-width:0}
+.control-settings-panel{margin:0;min-width:0}
+.control-settings-panel .panel-heading h2{display:flex;align-items:center;gap:8px}
+.control-settings-body{padding:17px 19px 14px}
+.control-settings-panel .form-grid{margin-bottom:12px;gap:12px}
+.control-settings-panel .form-grid label{min-width:0}
+.control-settings-panel .form-grid input,.control-settings-panel .form-grid select{width:100%;min-width:0}
+.control-settings-switch{display:flex;align-items:center;padding:12px 0;border-top:1px solid #edf2f5;color:#3d6276;font-size:12px;min-height:44px}
+.control-settings-switch:first-of-type{border-top:0}
+.control-settings-actions{display:flex;justify-content:flex-end;gap:8px;padding:12px 19px;border-top:1px solid #e3ebf0;background:#fafcfd}
+.control-settings-test{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 19px;border-top:1px solid #e8eef2;font-size:11px;color:#718896}
+.control-settings-test strong{color:#42677a}
+.control-settings-test .btn[disabled]{opacity:.55;cursor:not-allowed}
+.control-settings-interval{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;color:#486d82;font-size:12px}
+.control-settings-number{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.control-settings-number input{width:66px;height:34px;border:1px solid #c7d6df;border-radius:3px;padding:6px 8px;text-align:center;color:#31566d}
+.control-settings-small-note{margin:6px 0 0;font-size:11px;line-height:1.5;color:#8499a6}
+@media(max-width:1040px){.control-settings-layout{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:680px){.control-settings-overview{grid-template-columns:1fr}.control-settings-body{padding:13px}.control-settings-actions,.control-settings-test{padding:11px 13px}}
