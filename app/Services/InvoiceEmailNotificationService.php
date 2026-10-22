@@ -13,7 +13,7 @@ final class InvoiceEmailNotificationService
 
     public function automaticEnabled(): bool
     {
-        return ($setting = ControlSetting::saved()) !== null
+        return ($setting = ControlSetting::stored()) !== null
             && $setting->invoice_email_enabled && $this->mail->enabled();
     }
 
