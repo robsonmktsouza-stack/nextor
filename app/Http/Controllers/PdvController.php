@@ -245,15 +245,24 @@ class PdvController extends Controller
             ->orderByDesc('id');
 
         $page=$query->paginate(20,['id','customer_id','consumer_name','user_id','total','status','operation_date','completed_at','created_at']);
-        $documents=FiscalDocumentJob::query()
-            ->where('document_type','nfce')
-            ->whereIn('sale_id',$page->getCollection()->pluck('id')->all())
+        $saleIds=$page->getCollection()->pluck('id')->all();
+        $allDocuments=FiscalDocumentJob::query()
+            ->whereIn('sale_id',$saleIds)
             ->orderByDesc('id')
-            ->get(['id','sale_id','status','emission_mode','xml_path'])
-            ->unique('sale_id')
-            ->keyBy('sale_id');
+            ->get([
+                'id','sale_id','document_type','status','emission_mode','xml_path',
+                'authorized_at','protocol','cancellation_status','cancelled_at',
+            ]);
+        $documents=$allDocuments->where('document_type','nfce')->unique('sale_id')->keyBy('sale_id');
+        $blockedSaleIds=$allDocuments
+            ->filter(fn($doc)=>!SalesService::fiscalDocumentAllowsSaleCancellation($doc))
+            ->pluck('sale_id')->flip();
+        $returnedSaleIds=SaleReturn::query()
+            ->whereIn('sale_id',$saleIds)
+            ->where('status','completed')
+            ->pluck('sale_id')->flip();
 
-        $items=$page->getCollection()->map(function(Sale $sale) use($documents){
+        $items=$page->getCollection()->map(function(Sale $sale) use($documents,$blockedSaleIds,$returnedSaleIds){
             $document=$documents->get($sale->id);
             $fiscalStatus=$document ? match($document->status) {
                 'authorized'=>'Autorizada',
@@ -265,6 +274,10 @@ class PdvController extends Controller
                 'prepared'=>'Preparada',
                 default=>'A verificar',
             } : 'Não preparada';
+
+            $canCancel=$sale->status==='completed'
+                && !$blockedSaleIds->has($sale->id)
+                && !$returnedSaleIds->has($sale->id);
 
             return [
                 'id'=>$sale->id,
@@ -281,6 +294,8 @@ class PdvController extends Controller
                 'fiscal_code'=>$document?->status ?: 'none',
                 'receipt_url'=>route('pdv.receipt',['sale'=>$sale->id,'print'=>0]),
                 'receipt_preview_url'=>route('pdv.sales.receipt.preview',$sale),
+                'can_cancel'=>$canCancel,
+                'cancel_url'=>$canCancel?route('pdv.sales.cancel',$sale):null,
                 'danfe_url'=>$document && (
                     ($document->status==='authorized'
                         && in_array((string)$document->xml_path,[
@@ -304,6 +319,31 @@ class PdvController extends Controller
                 'from'=>$page->firstItem(),
                 'to'=>$page->lastItem(),
             ],
+        ])->header('Cache-Control','no-store, private');
+    }
+
+    /**
+     * Cancela a venda comercial via rotina transacional existente.
+     * Estorno bancário ou devolução de dinheiro exigem operação separada.
+     */
+    public function cancelSale(Request $request, Sale $sale, SalesService $sales)
+    {
+        abort_unless($sale->source==='pdv' && $sale->operation_type==='sale',404);
+        $data=$request->validate([
+            'reason'=>['required','string','min:5','max:255'],
+        ]);
+        $reason=trim(preg_replace('/\s+/u',' ',$data['reason']) ?? $data['reason']);
+        if(mb_strlen($reason)<5) {
+            throw ValidationException::withMessages([
+                'reason'=>'Descreva o motivo do cancelamento com pelo menos 5 caracteres.',
+            ]);
+        }
+
+        $sales->cancel($sale,(int)$request->user()->id,$reason);
+
+        return response()->json([
+            'success'=>true,
+            'message'=>'Venda cancelada; estoque e financeiro atualizados. Se houve pagamento, registre o reembolso separadamente.',
         ])->header('Cache-Control','no-store, private');
     }
 
