@@ -108,6 +108,7 @@ Route::middleware(['auth','control.license'])->group(function () {
     Route::get('/pdv/sales/{sale}/receipt-preview',[PdvController::class,'salesReceiptPreview'])->name('pdv.sales.receipt.preview')->middleware(['permission:pdv','company.configured']);
     Route::post('/pdv/cash/pin',[\App\Http\Controllers\PdvCashWorkflowController::class,'setPin'])->name('pdv.cash.pin')->middleware(['permission:pdv','company.configured']);
     Route::post('/pdv/cash/handover',[\App\Http\Controllers\PdvCashWorkflowController::class,'handover'])->name('pdv.cash.handover')->middleware(['permission:pdv','company.configured','throttle:10,1']);
+    Route::post('/pdv/cash/overdue/close',[\App\Http\Controllers\PdvCashWorkflowController::class,'closeOverdue'])->name('pdv.cash.overdue.close')->middleware(['permission:pdv','company.configured','throttle:10,1']);
     Route::get('/pdv/cash/registers',[\App\Http\Controllers\PdvCashWorkflowController::class,'registers'])->name('pdv.cash.registers')->middleware(['permission:pdv','company.configured']);
     Route::post('/pdv/cash/registers',[\App\Http\Controllers\PdvCashWorkflowController::class,'createRegister'])->name('pdv.cash.registers.store')->middleware(['permission:pdv','company.configured']);
     Route::put('/pdv/cash/registers/{register}',[\App\Http\Controllers\PdvCashWorkflowController::class,'updateRegister'])->name('pdv.cash.registers.update')->middleware(['permission:pdv','company.configured']);
