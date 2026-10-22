@@ -493,9 +493,8 @@
 </dialog>
 </form>
 
-{{-- Pós-venda: confirmação e comprovante consultável no próprio caixa.
-     A visualização é HTML nativo; o iframe serve exclusivamente à impressão
-     térmica existente e nunca é mostrado como "página dentro da página". --}}
+{{-- Pós-venda: o comprovante é consultado no próprio caixa.
+     Imprimir abre somente o PDF térmico existente, sem imprimir o modal. --}}
 @if($receiptModalSale)
   @include('pdv.partials.receipt-modal', ['receiptModalIsHistory'=>false])
 @endif
