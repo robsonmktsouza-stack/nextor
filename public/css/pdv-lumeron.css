@@ -1052,17 +1052,6 @@
   line-height:1.45;
   text-align:center;
 }
-.pdv-body .pdv-receipt-print-frame{
-  position:fixed!important;
-  left:-10000px!important;
-  top:0!important;
-  width:320px!important;
-  height:1100px!important;
-  overflow:hidden!important;
-  opacity:0!important;
-  pointer-events:none!important;
-  border:0!important;
-}
 @media(max-width:580px){
   .pdv-body .pdv-receipt-modal{
     width:calc(100vw - 12px);
