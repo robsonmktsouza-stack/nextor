@@ -1061,7 +1061,8 @@
 
 .pdv-quick-modal::backdrop{
   background:#0b1725b8;
-  backdrop-filter:blur(2px);
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
 }
 
 .pdv-modal-head{
