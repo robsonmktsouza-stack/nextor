@@ -1194,3 +1194,106 @@
 .pdv-body .pdv-cash-handover-modal{width:min(520px,calc(100vw - 20px));max-height:calc(100dvh - 25px);overflow-y:auto}
 .pdv-body .pdv-cash-modal-body select,.pdv-body .pdv-cash-modal-body input[type="password"]{width:100%;min-height:36px;border:1px solid #c6d6e2;background:#fff;color:#29465e;border-radius:4px;padding:7px 10px;font:12px Roboto,Arial,sans-serif}
 .pdv-body .pdv-cash-modal-body select:focus,.pdv-body .pdv-cash-modal-body input[type="password"]:focus{outline:2px solid #317eb52b;border-color:#438dc0}
+
+/* Modal de cancelamento: formulario de coluna unica, sem heranca das grades do PDV. */
+.pdv-body #pdvSalesCancelSheet .pdv-sales-cancel-panel{
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  width:min(480px,100%);
+  max-width:100%;
+  max-height:calc(100dvh - 56px);
+  overflow:hidden;
+}
+.pdv-body #pdvSalesCancelSheet .pdv-sales-cancel-head,
+.pdv-body #pdvSalesCancelSheet .pdv-sales-cancel-footer{
+  flex:none;
+}
+.pdv-body #pdvSalesCancelSheet .pdv-sales-cancel-body{
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  gap:13px;
+  min-width:0;
+  min-height:0;
+  padding:15px 16px;
+  overflow-y:auto;
+}
+.pdv-body #pdvSalesCancelSheet .pdv-sales-cancel-body > p:first-child{
+  margin:0;
+  line-height:1.4;
+}
+.pdv-body #pdvSalesCancelSheet .pdv-sales-cancel-field{
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  width:100%;
+  min-width:0;
+  margin:0;
+  padding:0;
+}
+.pdv-body #pdvSalesCancelSheet .pdv-sales-cancel-field > label{
+  display:block;
+  width:100%;
+  min-width:0;
+  margin:0;
+  color:#385168;
+  font:650 11.5px/1.4 Roboto,Arial,sans-serif;
+}
+.pdv-body #pdvSalesCancelSheet .pdv-sales-cancel-field > textarea,
+.pdv-body #pdvSalesCancelSheet .pdv-sales-cancel-field > input,
+.pdv-body #pdvSalesCancelSheet .pdv-sales-cancel-field > select,
+.pdv-body #pdvSalesCancelSheet .pdv-sales-cancel-field > .ui-select{
+  box-sizing:border-box;
+  display:block;
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  margin:0;
+  padding:9px 11px;
+  border:1px solid #c6d5e1;
+  border-radius:4px;
+  background:#fff;
+  color:#29445a;
+  font:12px/1.4 Roboto,Arial,sans-serif;
+}
+.pdv-body #pdvSalesCancelSheet .pdv-sales-cancel-field > textarea{
+  min-height:92px;
+  max-height:155px;
+  resize:vertical;
+}
+.pdv-body #pdvSalesCancelSheet .pdv-sales-cancel-field > input,
+.pdv-body #pdvSalesCancelSheet .pdv-sales-cancel-field > select{
+  min-height:38px;
+}
+.pdv-body #pdvSalesCancelSheet .pdv-sales-cancel-field > .ui-select{
+  padding:0;
+  min-height:38px;
+}
+.pdv-body #pdvSalesCancelSheet .pdv-sales-cancel-field > .ui-select .ui-select-toggle{
+  box-sizing:border-box;
+  width:100%;
+  min-height:36px;
+}
+.pdv-body #pdvSalesCancelSheet .pdv-sales-cancel-field > :is(textarea,input,select,.ui-select):focus-visible,
+.pdv-body #pdvSalesCancelSheet .pdv-sales-cancel-field > .ui-select:focus-within{
+  border-color:#478ec3;
+  outline:2px solid #478ec32e;
+}
+.pdv-body #pdvSalesCancelSheet .pdv-sales-cancel-hint{
+  margin:0;
+  font-size:11px;
+  line-height:1.5;
+}
+.pdv-body #pdvSalesCancelSheet .pdv-sales-cancel-error{
+  margin:0;
+}
+.pdv-body #pdvSalesCancelSheet .pdv-sales-cancel-footer{
+  flex-wrap:wrap;
+}
+@media(max-width:560px){
+  .pdv-body #pdvSalesCancelSheet:not([hidden]){padding:8px}
+  .pdv-body #pdvSalesCancelSheet .pdv-sales-cancel-panel{max-height:calc(100dvh - 28px)}
+  .pdv-body #pdvSalesCancelSheet .pdv-sales-cancel-body{padding:12px}
+}
