@@ -42,8 +42,8 @@
         <label class="login-label" for="loginSubdomain">Subdomínio (link de acesso)</label>
         <div class="login-subdomain-field">
           <input id="loginSubdomain" name="subdomain" type="text" value="{{ old('subdomain', $loginPortal ? '' : $loginSubdomain) }}"
-            placeholder="suaempresa" inputmode="url" autocapitalize="none" spellcheck="false"
-            pattern="[a-z][a-z0-9-]{1,38}" maxlength="39" autocomplete="off" required autofocus>
+            placeholder="suaempresa ou 11222333000181" inputmode="url" autocapitalize="none" spellcheck="false"
+            pattern="[a-z0-9][a-z0-9-]{0,37}[a-z0-9]" maxlength="39" autocomplete="off" required autofocus>
           <span class="login-subdomain-suffix">.{{ $loginBaseDomain }}</span>
         </div>
         <label class="login-label" for="loginUsername">Nome de usuário</label>
