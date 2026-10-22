@@ -18,6 +18,7 @@ final class LumeronLoginTest extends TestCase
         config()->set('instance.id','autonunes');
         config()->set('instance.base_domain','lumeron.com.br');
         config()->set('instance.login_portal',false);
+        config()->set('instance.login_portal_host','lumeron.com.br');
     }
 
     private function user(): User
@@ -121,14 +122,47 @@ final class LumeronLoginTest extends TestCase
     {
         // A URL absoluta define o host e o esquema efetivos vistos por
         // Request::getSchemeAndHttpHost(), sem afrouxar a checagem de origem.
-        $this->withHeaders(['Origin'=>'https://login.lumeron.com.br'])
+        $this->withHeaders(['Origin'=>'https://lumeron.com.br'])
             ->get('https://autonunes.lumeron.com.br/login/bootstrap')
             ->assertOk()
             ->assertJsonStructure(['csrf_token'])
-            ->assertHeader('Access-Control-Allow-Origin','https://login.lumeron.com.br');
+            ->assertHeader('Access-Control-Allow-Origin','https://lumeron.com.br');
 
         $this->withHeaders(['Origin'=>'https://evil.example'])
             ->get('/login/bootstrap')->assertForbidden();
+    }
+
+    public function test_numeric_company_identifier_is_accepted(): void
+    {
+        config()->set('instance.subdomain', '11222333000181');
+        $user = $this->user();
+        $this->post('/login', [
+            'subdomain'=>'11222333000181',
+            'username'=>'caixa01',
+            'password'=>'SenhaTesteSegura123',
+        ])->assertRedirect(route('dashboard'));
+        $this->assertAuthenticatedAs($user);
+        $this->assertSame('https://11222333000181.lumeron.com.br',
+            \App\Support\LoginSubdomain::tenantUrl('11222333000181'));
+    }
+
+    public function test_reserved_and_unsafe_identifiers_are_rejected(): void
+    {
+        foreach (['control','www','login','api','a--b','-abc','abc-','x'] as $slug) {
+            $this->assertFalse(\App\Support\LoginSubdomain::valid($slug));
+            $this->assertNull(\App\Support\LoginSubdomain::tenantUrl($slug));
+        }
+    }
+
+    public function test_portal_cors_preflight_accepts_only_the_root_domain(): void
+    {
+        $this->withHeaders(['Origin'=>'https://lumeron.com.br'])
+            ->options('https://autonunes.lumeron.com.br/login')
+            ->assertNoContent()
+            ->assertHeader('Access-Control-Allow-Origin','https://lumeron.com.br');
+        $this->withHeaders(['Origin'=>'https://evil.example'])
+            ->options('https://autonunes.lumeron.com.br/login')
+            ->assertForbidden();
     }
 
     public function test_password_reset_is_scoped_to_this_installation(): void
