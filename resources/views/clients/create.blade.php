@@ -16,7 +16,7 @@
 </div></fieldset>
 <fieldset data-wizard-step="1" hidden><legend>Acesso da instalação</legend>
 <div class="form-grid">
-<label>Subdomínio <strong>*</strong><input name="subdomain" maxlength="40" placeholder="martinscontabilidade ou 11222333000181" value="{{ old('subdomain') }}" pattern="[a-z0-9][a-z0-9-]{0,37}[a-z0-9]" required><small>Identificador exclusivo: nome, código ou CNPJ (14 dígitos). Não pode ser repetido nem alterado após o cadastro.</small>@error('subdomain')<small class="field-error">{{ $message }}</small>@enderror</label>
+<label>Subdomínio <strong>*</strong><input name="subdomain" maxlength="40" placeholder="martinscontabilidade ou 11222333000181" value="{{ old('subdomain') }}" pattern="([A-Za-z0-9](?:[A-Za-z0-9]|-){0,37}[A-Za-z0-9]|[0-9]{2}\.[0-9]{3}\.[0-9]{3}/[0-9]{4}-[0-9]{2})" required><small>Identificador exclusivo: nome, código ou CNPJ (14 dígitos). Não pode ser repetido nem alterado após o cadastro.</small>@error('subdomain')<small class="field-error">{{ $message }}</small>@enderror</label>
 <label>Login de referência <input name="admin_login" maxlength="100" pattern="[A-Za-z0-9_.-]{3,100}" value="{{ old('admin_login') }}" placeholder="administrador">@error('admin_login')<small class="field-error">{{ $message }}</small>@enderror</label>
 <label class="span-two">Endereço da instalação <input name="installation_url" type="url"  value="{{ old('installation_url') }}">@error('installation_url')<small class="field-error">{{ $message }}</small>@enderror</label>
 </div></fieldset>
