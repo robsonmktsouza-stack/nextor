@@ -865,7 +865,12 @@ class PdvController extends Controller
         $data=$request->validate([
             'action'=>['required',Rule::in(['start','stop'])],
             'reason'=>['nullable','string','max:255'],
+            'authorizer_id'=>['required','integer','exists:users,id'],
+            'credential'=>['required','string'],
         ]);
+        $supervisor=app(\App\Services\PdvActionAuthorization::class)->approve(
+            $request->user(),(int)$data['authorizer_id'],$data['credential'],$request->ip()
+        );
 
         if(!(bool)AppSetting::value('fiscal','enabled',false) || !(bool)AppSetting::value('nfce','enabled',false)) {
             throw ValidationException::withMessages([
@@ -885,16 +890,27 @@ class PdvController extends Controller
                 ]);
             }
 
-            AppSetting::put('nfce','offline_contingency_active',true);
-            AppSetting::put('nfce','offline_contingency_reason',$reason);
-            AppSetting::put('nfce','offline_contingency_started_at',now()->toIso8601String());
+            \Illuminate\Support\Facades\DB::transaction(function () use ($reason,$request,$supervisor) {
+                AppSetting::put('nfce','offline_contingency_active',true);
+                AppSetting::put('nfce','offline_contingency_reason',$reason);
+                AppSetting::put('nfce','offline_contingency_started_at',now()->toIso8601String());
+                app(\App\Services\PdvActionAuthorization::class)->record(
+                    'nfce_contingency_start',$request->user()->id,$supervisor->id,$reason
+                );
+            });
 
             return redirect()->route('pdv.index')->with('warning','Contingência offline NFC-e ativada para novas vendas.');
         }
 
-        AppSetting::put('nfce','offline_contingency_active',false);
-        AppSetting::put('nfce','offline_contingency_reason',null);
-        AppSetting::put('nfce','offline_contingency_started_at',null);
+        \Illuminate\Support\Facades\DB::transaction(function () use ($request,$supervisor) {
+            AppSetting::put('nfce','offline_contingency_active',false);
+            AppSetting::put('nfce','offline_contingency_reason',null);
+            AppSetting::put('nfce','offline_contingency_started_at',null);
+            app(\App\Services\PdvActionAuthorization::class)->record(
+                'nfce_contingency_stop',$request->user()->id,$supervisor->id,
+                'Contingência encerrada pelo supervisor.'
+            );
+        });
 
         return redirect()->route('pdv.index')->with('success','Contingência NFC-e encerrada para novas vendas.');
     }
@@ -902,8 +918,16 @@ class PdvController extends Controller
     public function requestNfceCancellation(Request $request,FiscalDocumentJob $fiscalJob)
     {
         abort_unless($fiscalJob->document_type==='nfce',404);
+        $approval=$request->validate([
+            'authorizer_id'=>['required','integer','exists:users,id'],
+            'credential'=>['required','string'],
+        ]);
+        $supervisor=app(\App\Services\PdvActionAuthorization::class)->approve(
+            $request->user(),(int)$approval['authorizer_id'],$approval['credential'],$request->ip()
+        );
         return app(\App\Http\Controllers\NFCeFiscalEventsController::class)->cancel(
-            $request,$fiscalJob,app(\App\Services\Fiscal\NFCeCancellationService::class)
+            $request,$fiscalJob,app(\App\Services\Fiscal\NFCeCancellationService::class),
+            $supervisor->id,$request->user()->id
         );
     }
 
