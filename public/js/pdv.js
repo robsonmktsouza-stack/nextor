@@ -79,6 +79,8 @@
 
     const cashOpenDialog=document.getElementById('pdvCashOpenDialog');
     const cashCloseDialog=document.getElementById('pdvCashCloseDialog');
+    const overdueCashDialog=document.getElementById('pdvOverdueCashDialog');
+    const overdueCashRequired=overdueCashDialog?.dataset.mustResolve==='1';
     const cashHandoverDialog=document.getElementById('pdvCashHandoverDialog');
     const cashPinDialog=document.getElementById('pdvCashPinDialog');
     const cashSupervisorFields=document.getElementById('pdvCashSupervisorFields');
@@ -1733,6 +1735,10 @@
         case 'cancel-nfce': openCancelNfceModal(); break;
         case 'open-cash': operationsModal?.close(); cashOpenDialog?.showModal(); break;
         case 'close-cash': operationsModal?.close(); cashCloseDialog?.showModal(); break;
+        case 'overdue-cash':
+          operationsModal?.close();
+          if(overdueCashDialog && !overdueCashDialog.open)overdueCashDialog.showModal();
+          break;
         case 'handover': operationsModal?.close(); cashHandoverDialog?.showModal(); break;
         case 'set-pin': operationsModal?.close(); cashPinDialog?.showModal(); break;
         case 'supply': openCashMovementModal('supply'); break;
@@ -1745,6 +1751,18 @@
       button.addEventListener('click',()=>runAdvancedOperation(button.dataset.pdvOperation));
     });
     operationsButton?.addEventListener('click',openOperationsModal);
+    overdueCashDialog?.querySelector('[data-pdv-overdue-close]')?.addEventListener('click',()=>{
+      if(!overdueCashRequired)overdueCashDialog.close();
+    });
+    overdueCashDialog?.addEventListener('cancel',event=>{
+      if(overdueCashRequired)event.preventDefault();
+    });
+    if(overdueCashDialog && overdueCashRequired){
+      requestAnimationFrame(()=>{
+        if(!overdueCashDialog.open)overdueCashDialog.showModal();
+        overdueCashDialog.querySelector('input:not([type="hidden"]),select')?.focus();
+      });
+    }
     operationsModal?.addEventListener('click',event=>{
       const button=event.target.closest('[data-pdv-operation]');
       if(button) runAdvancedOperation(button.dataset.pdvOperation);
@@ -2120,6 +2138,7 @@
         cancelNfceModal?.open ||
         cashOpenDialog?.open ||
         cashCloseDialog?.open ||
+        overdueCashDialog?.open ||
         cashHandoverDialog?.open ||
         cashPinDialog?.open ||
         discountApprovalModal?.open ||
