@@ -85,6 +85,7 @@ final class InvoiceService
             $invoice = Invoice::query()->lockForUpdate()->findOrFail($invoice->id);
             $this->assertDraft($invoice);
             $invoice->forceFill(['status' => 'issued', 'issued_at' => now()])->save();
+            app(InvoiceEmailNotificationService::class)->enqueue($invoice);
             $invoice->company->record('invoice_issued',
                 'Fatura '.$invoice->number.' emitida.', ['invoice_id' => $invoice->id]);
         });
