@@ -279,6 +279,12 @@ class SalesService
             if($sourceQuote) {
                 $sourceQuote->update(['status'=>'converted']);
             }
+            if($sale->source==='pdv' && !empty($data['pdv_discount_approved_by'])) {
+                app(\App\Services\PdvActionAuthorization::class)->record(
+                    'discount_approved',$userId,(int)$data['pdv_discount_approved_by'],
+                    'Desconto acima do limite permitido ao operador.',$sale->id
+                );
+            }
 
             return $sale->refresh();
         },3);
