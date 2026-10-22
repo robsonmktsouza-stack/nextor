@@ -424,9 +424,18 @@
     select.classList.add('ui-select-native');
     const catalogField=/(product|service|customer|supplier|vendor|provider|transport|category|account|city|municip|cfop|cst|csosn|ncm|natureza|cliente|produto|fornecedor|conta|categoria)/i
       .test((select.name||'')+' '+(select.id||''));
+    // Preserve the original searchability rule without allocating an array
+    // or scanning all options in large product/customer lists.
+    const hasFourEnabledChoices=()=>{
+      let valid=0;
+      for(const option of select.options){
+        if(!option.disabled && option.value!=='' && ++valid>=4) return true;
+      }
+      return false;
+    };
     const searchable=!select.hasAttribute('data-no-search') &&
       !select.closest('.bulk-actions,.table-page-size-form') &&
-      (select.hasAttribute('data-searchable') || catalogField || select.options.length>=5);
+      (select.hasAttribute('data-searchable') || catalogField || hasFourEnabledChoices());
 
     const wrapper=document.createElement('div');
     wrapper.className='ui-select'+(searchable?' ui-searchable':'');
