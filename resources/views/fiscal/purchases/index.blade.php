@@ -95,6 +95,7 @@
           <select class="fiscal-manifest-select" data-no-search data-manifest-select
             data-manifest-url="{{ route('fiscal.purchases.manifest',$invoice) }}"
             data-invoice-key="{{ $invoice->access_key }}"
+            data-issued-date="{{ $invoice->issued_at?->format('Y-m-d') }}"
             aria-label="Manifestação da nota {{ $invoice->access_key }}"
             @disabled($needsReview)
             @if($needsReview) title="Envio anterior sem confirmação; consulte a SEFAZ" @endif>

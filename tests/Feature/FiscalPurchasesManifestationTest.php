@@ -309,6 +309,72 @@ final class FiscalPurchasesManifestationTest extends TestCase
             ->assertForbidden();
     }
 
+
+    public function test_sefaz_596_exposes_actual_deadline_motive_and_records_rejection(): void
+    {
+        $this->ready();
+        $invoice=$this->invoice();
+        $fake=$this->fakeGateway("[Evento]\nidLote=1\nCStat=128\n".
+            "[EVENTO001]\nTpAmb=1\nCStat=596\n".
+            "XMotivo=Rejeição: Evento apresentado após o prazo permitido para o evento: [10 dias]\n");
+        $this->actingAs($this->user())
+            ->post(route('fiscal.purchases.manifest',$invoice),['event_type'=>'210210'])
+            ->assertRedirect()
+            ->assertSessionHas('error',function($error) {
+                return str_contains($error,'596') && str_contains($error,'[10 dias]');
+            });
+        self::assertSame(1,$fake->calls);
+        self::assertNull($invoice->fresh()->manifestation);
+        $this->assertDatabaseHas('incoming_nfe_manifestation_attempts',[
+            'incoming_nfe_id'=>$invoice->id,'status'=>'rejected',
+            'sefaz_status'=>'596','protocol'=>null,
+        ]);
+        $this->get(route('fiscal.purchases.show',$invoice))
+            ->assertOk()->assertSee('[10 dias]');
+    }
+
+    public function test_unsafe_native_reason_is_never_echoed_or_persisted(): void
+    {
+        $evidence=app(\App\Services\Fiscal\IncomingNfeManifestationEvidence::class);
+        $raw="[EVENTO001]\nCStat=641\nXMotivo=senha=segredo C:\\\\certificado.pfx\n";
+        $result=$evidence->sent($raw,$this->key(),'210210');
+        self::assertSame('rejected',$result['status']);
+        self::assertSame('641',$result['code']);
+        self::assertStringNotContainsString('segredo',$result['message']);
+        self::assertStringNotContainsString('certificado',$result['message']);
+    }
+
+    public function test_local_acbr_load_failure_remains_retryable_because_sefaz_was_not_contacted(): void
+    {
+        $this->ready();
+        $invoice=$this->invoice();
+        $fake=new class($this->acceptedResponse()) extends IncomingNfeManifestationGateway {
+            public int $calls=0;
+            public function __construct(private string $response) {}
+            public function send(CompanySetting $company,string $cnpj,string $key,string $event,?string $reason): string
+            {
+                $this->calls++;
+                if ($this->calls===1) {
+                    throw new \App\Services\Fiscal\ACBr\RecipientEventPreparationException(
+                        'ACBr NFE_CarregarEventoINI falhou (-10): dados privados');
+                }
+                return $this->response;
+            }
+        };
+        app()->instance(IncomingNfeManifestationGateway::class,$fake);
+        $this->actingAs($this->user())
+            ->post(route('fiscal.purchases.manifest',$invoice),['event_type'=>'210210'])
+            ->assertSessionHas('error');
+        $this->assertDatabaseHas('incoming_nfe_manifestation_attempts',[
+            'incoming_nfe_id'=>$invoice->id,'status'=>'failed',
+        ]);
+        self::assertNull($invoice->fresh()->manifestation);
+        $this->post(route('fiscal.purchases.manifest',$invoice),['event_type'=>'210210'])
+            ->assertSessionHas('success');
+        self::assertSame(2,$fake->calls);
+        self::assertSame('210210',$invoice->fresh()->manifestation);
+    }
+
     public function test_unprivileged_users_cannot_send_recipient_events(): void
     {
         $invoice=$this->invoice();

@@ -55,3 +55,5 @@
 .fiscal-manifest-verify-button:focus-visible{outline:2px solid #2b85b9}
 .fiscal-purchases-alert form{margin-top:9px}
 .fiscal-purchases-alert p{margin:5px 0}
+
+.fiscal-manifest-response{display:block;max-width:390px;color:#708498;font-size:11px;line-height:1.35;margin-top:3px;white-space:normal;overflow-wrap:anywhere}

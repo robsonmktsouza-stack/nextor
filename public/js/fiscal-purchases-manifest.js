@@ -25,7 +25,13 @@ document.addEventListener('DOMContentLoaded', () => {
     reasonBox.hidden = !requiresReason;
     reason.required = requiresReason;
     reason.value = '';
-    warning.textContent = code === '210200'
+    const issued = select.dataset.issuedDate;
+    const issuedMs = issued ? Date.parse(issued + 'T12:00:00') : NaN;
+    const olderThanTenDays = Number.isFinite(issuedMs) &&
+      (Date.now() - issuedMs) > 10 * 24 * 60 * 60 * 1000;
+    warning.textContent = code === '210210' && olderThanTenDays
+      ? 'A nota foi emitida há mais de 10 dias. A Ciência da Operação pode ser rejeitada por prazo vencido (contado da autorização).'
+      : code === '210200'
       ? 'Confirme somente após a operação realmente ocorrer. O evento impede o cancelamento da NF-e pelo emitente.'
       : 'O evento será transmitido ao ambiente de produção da SEFAZ.';
     select.value = '';

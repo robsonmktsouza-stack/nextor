@@ -55,9 +55,14 @@
                 <td class="nowrap">{{ $attempt->created_at?->format('d/m/Y H:i') }}</td>
                 <td>{{ $manifestationEvents[$attempt->event_code] ?? '—' }}</td>
                 <td>{{ match($attempt->status) {
-                  'accepted'=>'Registrado','rejected'=>'Rejeitado','uncertain'=>'Não comprovado',
+                  'accepted'=>'Registrado','rejected'=>'Rejeitado',
+                  'uncertain'=>'Não comprovado','failed'=>'Não transmitido',
                   default=>'Pendente',
-                } }}</td>
+                } }}
+                  @if($attempt->response_message)
+                    <small class="fiscal-manifest-response">{{ $attempt->response_message }}</small>
+                  @endif
+                </td>
                 <td>{{ $attempt->sefaz_status ?: '—' }}</td>
                 <td>{{ $attempt->protocol ?: '—' }}</td>
                 <td>{{ $attempt->verification_checked_at?->format('d/m/Y H:i') ?? '—' }}</td>
