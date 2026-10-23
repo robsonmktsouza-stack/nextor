@@ -283,6 +283,13 @@ final class ACBrNFeService
         return FFI::string($buffer);
     }
 
+    private function hasIndividualRejection(string $raw): bool
+    {
+        if (!str_contains(strtoupper($raw),'[EVENTO001]')) return false;
+        if (!preg_match('/(?mi)^CStat[ \\t]*=[ \\t]*([0-9]{3})[ \\t]*$/',$raw,$match)) return false;
+        return !in_array($match[1], ['135','136','573'],true);
+    }
+
     /** Evento da manifestação: carregar, assinar e transmitir apenas uma vez. */
     public function sendRecipientEvent(string $eventIni): string
     {
