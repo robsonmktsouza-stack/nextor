@@ -356,6 +356,7 @@ class NfeDraftController extends Controller
             'payment_type'=>['required',Rule::in(array_keys(self::PAYMENT_TYPES))],
             'payment_condition'=>['required',Rule::in(['a_vista','30_dias','personalizado'])],
             'payment_other_description'=>['nullable','string','max:120'],
+            'card_integration_type'=>['nullable',Rule::in(['1','2'])],
             'card_brand'=>['nullable',Rule::in(array_keys(self::CARD_BRANDS))],
             'card_acquirer_document'=>['nullable','string','max:20'],
             'card_authorization_code'=>['nullable','string','max:40'],
@@ -771,14 +772,11 @@ class NfeDraftController extends Controller
             if($type==='99' && ($description===''||mb_strlen($description)>120)){
                 throw ValidationException::withMessages(['payments_json'=>'Informe a descrição do pagamento Outros.']);
             }
-            $normalized[]=[
+            $normalized[]=array_merge([
                 'type'=>$type,'condition'=>$payment['condition']??'a_vista',
                 'amount'=>$cents/100,
                 'other_description'=>$type==='99'?$description:null,
-                'card_brand'=>in_array($type,['03','04'],true)?($payment['card_brand']??null):null,
-                'acquirer_document'=>in_array($type,['03','04'],true)?($payment['acquirer_document']??null):null,
-                'authorization_code'=>in_array($type,['03','04'],true)?($payment['authorization_code']??null):null,
-            ];
+            ],$this->cardPaymentFields($type,$payment,'payments_json'));
         }
         if($additionalCents>$totalCents){
             throw ValidationException::withMessages(['payments_json'=>'Os pagamentos adicionais superam o total da NF-e.']);
@@ -787,18 +785,52 @@ class NfeDraftController extends Controller
         if($paymentType!=='90' && $main<=0){
             throw ValidationException::withMessages(['payment_type'=>'O pagamento principal deve possuir valor positivo.']);
         }
-        $first=[
+        $first=array_merge([
             'type'=>$paymentType,'condition'=>$data['payment_condition'],
             'amount'=>$main/100,
             'other_description'=>$paymentType==='99'?($data['payment_other_description']??null):null,
-            'card_brand'=>in_array($paymentType,['03','04'],true)?($data['card_brand']??null):null,
-            'acquirer_document'=>in_array($paymentType,['03','04'],true)?($data['card_acquirer_document']??null):null,
-            'authorization_code'=>in_array($paymentType,['03','04'],true)?($data['card_authorization_code']??null):null,
-        ];
+        ],$this->cardPaymentFields($paymentType,[
+            'integration_type'=>$data['card_integration_type']??null,
+            'card_brand'=>$data['card_brand']??null,
+            'acquirer_document'=>$data['card_acquirer_document']??null,
+            'authorization_code'=>$data['card_authorization_code']??null,
+        ],'card_integration_type'));
         if($paymentType==='99' && trim((string)$first['other_description'])===''){
             throw ValidationException::withMessages(['payment_other_description'=>'Informe a descrição do pagamento Outros.']);
         }
         return array_merge([$first],$normalized);
+    }
+
+    private function cardPaymentFields(string $type,array $payment,string $field): array
+    {
+        $empty=[
+            'integration_type'=>null,'card_brand'=>null,
+            'acquirer_document'=>null,'authorization_code'=>null,
+        ];
+        if(!in_array($type,['03','04'],true))return $empty;
+        $integration=(string)($payment['integration_type']??'');
+        $brand=(string)($payment['card_brand']??'');
+        $cnpj=preg_replace('/\D/','',(string)($payment['acquirer_document']??''));
+        $authorization=trim((string)($payment['authorization_code']??''));
+        $brandCodes=array_map('strval',array_keys(self::CARD_BRANDS));
+        if(!in_array($integration,['1','2'],true)){
+            throw ValidationException::withMessages([$field=>'Selecione se o pagamento com cartão é integrado (TEF) ou não integrado (POS).']);
+        }
+        if($brand!==''&&!in_array($brand,$brandCodes,true)){
+            throw ValidationException::withMessages([$field=>'Bandeira do cartão inválida.']);
+        }
+        if(($cnpj!==''&&strlen($cnpj)!==14)||mb_strlen($authorization)>40){
+            throw ValidationException::withMessages([$field=>'Confira o CNPJ da credenciadora e o código da autorização.']);
+        }
+        if($integration==='1'&&($cnpj===''||$authorization==='')){
+            throw ValidationException::withMessages([$field=>'Pagamento integrado exige CNPJ da credenciadora e autorização da transação.']);
+        }
+        return [
+            'integration_type'=>$integration,
+            'card_brand'=>$brand?:null,
+            'acquirer_document'=>$cnpj?:null,
+            'authorization_code'=>$authorization?:null,
+        ];
     }
 
     private function validatedDuplicates(?string $json,array $totals): array
