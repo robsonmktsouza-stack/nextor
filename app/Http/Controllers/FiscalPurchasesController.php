@@ -43,7 +43,7 @@ final class FiscalPurchasesController extends Controller
             ->orderByDesc('issued_at')->orderByDesc('id');
         $filteredTotal=(clone $query)->reorder()->sum('total');
         $filteredCount=(clone $query)->reorder()->count();
-        $invoices=$query->with('latestManifestationAttempt')->paginate(25)->withQueryString();
+        $invoices=$query->with(['latestManifestationAttempt','purchase'])->paginate(25)->withQueryString();
         $counts=['total'=>$filteredCount];
         return view('fiscal.purchases.index',[
             'invoices'=>$invoices,'state'=>$state,'counts'=>$counts,
@@ -162,18 +162,34 @@ final class FiscalPurchasesController extends Controller
         return back()->with($result['status']==='accepted'?'success':'warning',$message);
     }
 
-    public function importXml(Request $request,IncomingNfeSyncService $sync)
+    public function importXml(Request $request,IncomingNfeSyncService $sync,
+        \App\Services\Fiscal\IncomingNfeParser $parser)
     {
-        $file=$request->validate([
+        $data=$request->validate([
             'xml'=>['required','file','max:6144',
                 'mimetypes:application/xml,text/xml,text/plain,application/octet-stream'],
-        ])['xml'];
+            'incoming_nfe_id'=>['nullable','integer','exists:incoming_nfes,id'],
+        ]);
+        $file=$data['xml'];
+        $raw=(string)file_get_contents($file->getRealPath());
         try {
-            $incoming=$sync->importXml((string)file_get_contents($file->getRealPath()));
+            $target=!empty($data['incoming_nfe_id'])
+                ? IncomingNfe::query()->findOrFail($data['incoming_nfe_id'])
+                : null;
+            if($target) {
+                $detail=$parser->details($raw,$sync->companyCnpj());
+                if($detail['access_key']!==$target->access_key) {
+                    return back()->withErrors(['xml'=>'O XML não corresponde à NF-e selecionada.']);
+                }
+            }
+            $incoming=$sync->importXml($raw);
         } catch(InvalidArgumentException $error) {
             return back()->withErrors(['xml'=>$error->getMessage()]);
         }
+        if($target){
+            return redirect()->route('purchases.import-from-nfe',$incoming);
+        }
         return redirect()->route('fiscal.purchases.show',$incoming)
-            ->with('success','NF-e importada para conferência, sem movimentar estoque ou financeiro.');
+            ->with('success','XML importado.');
     }
 }
