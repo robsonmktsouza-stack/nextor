@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="{{ asset('css/branding.css') }}?v={{ filemtime(public_path('css/branding.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/desktop-polish.css') }}?v={{ filemtime(public_path('css/desktop-polish.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/erp-typography.css') }}?v={{ filemtime(public_path('css/erp-typography.css')) }}">
+<link rel="stylesheet" href="{{ asset('css/quick-catalog.css') }}?v={{ filemtime(public_path('css/quick-catalog.css')) }}">
 @stack('styles')
 <link rel="stylesheet" href="{{ asset('css/commercial-readonly.css') }}?v={{ filemtime(public_path('css/commercial-readonly.css')) }}">
 <script defer src="{{ asset('js/commercial-readonly.js') }}?v={{ filemtime(public_path('js/commercial-readonly.js')) }}"></script>
@@ -193,5 +194,7 @@
     </div>
   </main>
 </div>
+@include('partials.quick-catalog')
+<script defer src="{{ asset('js/quick-catalog.js') }}?v={{ filemtime(public_path('js/quick-catalog.js')) }}"></script>
 @stack('scripts')
 </body></html>
