@@ -307,7 +307,11 @@ final class ACBrNFeService
             || !str_contains($eventIni,"[EVENTO001]\n")) {
             throw new RecipientEventPreparationException('INI de manifestação inválido.');
         }
-        $this->initialize();
+        try {
+            $this->initialize();
+        } catch (Throwable $error) {
+            throw new RecipientEventPreparationException($error->getMessage(),0,$error);
+        }
         $folder=dirname($this->configPath ?: (string)config('services.acbr_nfe.config_path',''));
         if (!is_dir($folder) || !is_writable($folder)) {
             throw new RecipientEventPreparationException('Diretório de eventos indisponível.');
