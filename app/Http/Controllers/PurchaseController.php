@@ -8,6 +8,7 @@ use App\Models\IncomingNfe;
 use App\Models\Product;
 use App\Models\Purchase;
 use App\Services\PurchaseService;
+use App\Services\Fiscal\IncomingNfePurchasePrefill;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -56,6 +57,29 @@ class PurchaseController extends Controller
             'operation_date'=>today(),'due_date'=>today()->addDays(30),
             'freight'=>'0.00','discount'=>'0.00','other_expenses'=>'0.00','generate_payable'=>true,
         ]),false,$request));
+    }
+
+    public function importFromNfe(Request $request,IncomingNfe $incomingNfe,IncomingNfePurchasePrefill $prefill)
+    {
+        $existing=$incomingNfe->purchase;
+        if($existing) {
+            return redirect()->route('purchases.show',$existing)
+                ->with('success','Esta NF-e já está vinculada a uma compra.');
+        }
+        try {
+            $defaults=$prefill->fromInvoice($incomingNfe);
+        } catch (ValidationException $error) {
+            return redirect()->route('fiscal.purchases.index',[
+                'month'=>$incomingNfe->issued_at?->format('Y-m')??now()->format('Y-m'),
+            ])->withErrors($error->errors());
+        }
+        $purchase=new Purchase(array_merge([
+            'due_date'=>null,'generate_payable'=>false,
+        ],array_diff_key($defaults,['items'=>true])));
+        return view('purchases.form',array_merge(
+            $this->formData($purchase,false,$request),
+            ['importItems'=>$defaults['items'],'sourceInvoice'=>$incomingNfe],
+        ));
     }
 
     public function edit(Request $request,Purchase $purchase)
