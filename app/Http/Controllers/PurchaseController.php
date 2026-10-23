@@ -72,6 +72,10 @@ class PurchaseController extends Controller
             return redirect()->route('fiscal.purchases.index',[
                 'month'=>$incomingNfe->issued_at?->format('Y-m')??now()->format('Y-m'),
             ])->withErrors($error->errors());
+        } catch (\InvalidArgumentException | \RuntimeException $error) {
+            return redirect()->route('fiscal.purchases.index',[
+                'month'=>$incomingNfe->issued_at?->format('Y-m')??now()->format('Y-m'),
+            ])->withErrors(['xml'=>'Não foi possível conferir o XML desta NF-e.']);
         }
         $purchase=new Purchase(array_merge([
             'due_date'=>null,'generate_payable'=>false,
