@@ -104,32 +104,42 @@ final class IncomingNfeParser
                 $sections[$current][trim($key)]=trim($value);
             }
         }
-        $header=$sections['DistribuicaoDFe']??$sections['DISTRIBUICAODFE']??[];
-        if(!isset($header['cStat'])) {
+        $header=array_change_key_case($sections['DistribuicaoDFe']
+            ?? $sections['DISTRIBUICAODFE'] ?? [],CASE_LOWER);
+        if(!isset($header['cstat'])) {
             throw new InvalidArgumentException('O retorno da distribuição DF-e não contém situação válida.');
         }
-        $status=(string)$header['cStat'];
-        $last=(string)($header['ultNSU']??'');
-        $maximum=(string)($header['maxNSU']??'');
-        if(!preg_match('/^\d{1,15}$/',$last) || !preg_match('/^\d{1,15}$/',$maximum)) {
+        $status=(string)$header['cstat'];
+        $last=(string)($header['ultnsu']??'');
+        $maximum=(string)($header['maxnsu']??'');
+        // In cStat 656 the SEFAZ can omit NSU completely. Rate-limit must
+        // still be honored without advancing the previous saved cursor.
+        if($status!=='656' && (!preg_match('/^\d{1,15}$/',$last)
+            || !preg_match('/^\d{1,15}$/',$maximum))) {
             throw new InvalidArgumentException('O retorno da SEFAZ não contém um NSU válido.');
         }
         $docs=[];
         foreach($sections as $name=>$values) {
-            if(preg_match('/^(ResNFe|NFe)\d+$/i',$name)!==1) continue;
-            $key=(string)($values['chNFe']??$values['chDFe']??'');
-            $xml=$values['XML']??'';
+            // Real ACBr responses may use ResDFe, ResNFe, NFe or ProcNFe.
+            if(preg_match('/^(ResDFe|ResNFe|ProcNFe|NFe)\d+$/i',$name)!==1) continue;
+            $entry=array_change_key_case($values,CASE_LOWER);
+            $key=(string)($entry['chnfe']??$entry['chdfe']??'');
+            // The distribution service also handles other DF-e models: only
+            // model 55 belongs to NF-e purchases.
+            if($key!=='' && (preg_match('/^\d{44}$/',$key)!==1
+                || substr($key,20,2)!=='55'))continue;
+            $xml=(string)($entry['xml']??'');
             if(str_starts_with($xml,'<')) {
-                $docs[]=['nsu'=>$values['NSU']??null,'access_key'=>$key,'xml'=>$xml,'values'=>$values];
+                $docs[]=['nsu'=>$entry['nsu']??null,'access_key'=>$key,'xml'=>$xml,'values'=>$values];
             } else {
-                $docs[]=['nsu'=>$values['NSU']??null,'access_key'=>$key,'xml'=>null,'values'=>$values];
+                $docs[]=['nsu'=>$entry['nsu']??null,'access_key'=>$key,'xml'=>null,'values'=>$values];
             }
         }
         return [
             'status'=>$status,
-            'reason'=>mb_substr((string)($header['xMotivo']??''),0,255),
-            'last_nsu'=>str_pad($last,15,'0',STR_PAD_LEFT),
-            'max_nsu'=>str_pad($maximum,15,'0',STR_PAD_LEFT),
+            'reason'=>mb_substr((string)($header['xmotivo']??''),0,255),
+            'last_nsu'=>preg_match('/^\d{1,15}$/',$last) ? str_pad($last,15,'0',STR_PAD_LEFT) : null,
+            'max_nsu'=>preg_match('/^\d{1,15}$/',$maximum) ? str_pad($maximum,15,'0',STR_PAD_LEFT) : null,
             'documents'=>$docs,
         ];
     }
