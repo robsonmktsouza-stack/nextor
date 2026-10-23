@@ -1,0 +1,36 @@
+name: Cadastro rápido - modais e permissões
+on:
+  push:
+    branches: [develop]
+    paths:
+      - 'app/Http/Controllers/QuickCatalogController.php'
+      - 'routes/web.php'
+      - 'resources/views/partials/quick-catalog.blade.php'
+      - 'resources/views/layouts/app.blade.php'
+      - 'public/js/quick-catalog.js'
+      - 'public/js/erp.js'
+      - 'public/js/nfe-editor.js'
+      - 'public/js/purchases.js'
+      - 'public/css/quick-catalog.css'
+      - 'tests/Feature/QuickCatalogTest.php'
+      - '.github/workflows/quick-catalog.yml'
+  workflow_dispatch:
+jobs:
+  catalog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      DB_CONNECTION: sqlite
+      DB_DATABASE: ':memory:'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: curl, dom, libxml, openssl, pdo_sqlite, sqlite3
+          coverage: none
+      - run: composer install --no-interaction --prefer-dist --no-progress
+      - run: cp .env.example .env && php artisan key:generate && php artisan optimize:clear
+      - run: php artisan view:cache && php artisan route:list --path=quick-catalog
+      - run: php -l app/Http/Controllers/QuickCatalogController.php && node --check public/js/quick-catalog.js && node --check public/js/erp.js && node --check public/js/nfe-editor.js && node --check public/js/purchases.js
+      - run: php -d memory_limit=1024M vendor/bin/phpunit --filter=QuickCatalogTest --display-errors --display-warnings
