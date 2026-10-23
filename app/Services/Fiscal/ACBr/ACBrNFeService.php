@@ -64,6 +64,7 @@ final class ACBrNFeService
             int NFE_ObterXml(void *libHandle, int AIndex, char *sResposta, int *esTamanho);
             int NFE_Enviar(void *libHandle, int ALote, _Bool AImprimir, _Bool ASincrono, _Bool AZipado, char *sResposta, int *esTamanho);
             int NFE_Consultar(void *libHandle, const char *eChaveOuNFe, _Bool AExtrairEventos, char *sResposta, int *esTamanho);
+            int NFE_DistribuicaoDFePorUltNSU(void *libHandle, int AcUFAutor, const char *eCNPJCPF, const char *eUltNSU, char *sResposta, int *esTamanho);
             int NFE_Cancelar(void *libHandle, const char *eChave, const char *eJustificativa, const char *eCNPJ, int ALote, char *sResposta, int *esTamanho);
             int NFE_Inutilizar(void *libHandle, const char *ACNPJ, const char *AJustificativa, int Ano, int Modelo, int Serie, int NumeroInicial, int NumeroFinal, char *sResposta, int *esTamanho);
         CDEF;
@@ -286,6 +287,20 @@ final class ACBrNFeService
         }
         // Manual ACBr: Ano usa dois dígitos, Modelo NFC-e é 65.
         return $this->fiscalEventOnce('NFE_Inutilizar',[$cnpj,$reason,$year%100,65,$series,$first,$last]);
+    }
+
+    /**
+     * Consulta em leitura; aceita somente o último NSU persistido da própria empresa.
+     * O método ACBr pode acessar a SEFAZ, portanto não executar em loop apertado.
+     */
+    public function distributeLastNsu(int $ufCode,string $cnpj,string $lastNsu): string
+    {
+        if($ufCode<11 || $ufCode>53 || !preg_match('/^\d{14}$/',$cnpj)
+            || !preg_match('/^\d{1,15}$/',$lastNsu)) {
+            throw new RuntimeException('UF, CNPJ ou NSU inválido para distribuição de NF-e.');
+        }
+        return $this->response('NFE_DistribuicaoDFePorUltNSU',
+            [$ufCode,$cnpj,str_pad($lastNsu,15,'0',STR_PAD_LEFT)]);
     }
 
     public function consultByKey(string $accessKey): string
