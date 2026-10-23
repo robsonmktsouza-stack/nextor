@@ -4,6 +4,10 @@ on:
     branches: [develop]
     paths:
       - 'app/Models/Purchase*.php'
+      - 'app/Models/IncomingNfe.php'
+      - 'app/Models/FinancialEntry.php'
+      - 'routes/web.php'
+      - 'app/Support/CommercialModuleAccess.php'
       - 'app/Services/PurchaseService.php'
       - 'app/Services/InventoryService.php'
       - 'app/Http/Controllers/PurchaseController.php'
