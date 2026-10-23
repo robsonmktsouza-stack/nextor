@@ -30,3 +30,8 @@
 .erp-catalog-footer{display:flex;justify-content:flex-end;gap:9px;border-top:1px solid #e4ebf0;margin-top:18px;padding-top:14px}
 .erp-catalog-dialog [hidden]{display:none!important}
 @media(max-width:480px){.erp-catalog-main{padding:13px}.erp-catalog-header{padding:13px}.erp-catalog-fields{grid-template-columns:1fr}}
+
+/* Ação de novo cadastro na pesquisa nativa do ERP. */
+.ui-select-catalog-create{display:block;width:100%;text-align:left;padding:11px 12px;border:0;border-top:1px solid #dbe6ee;color:#136d9f;background:#ecf6fc;font:600 12px inherit;cursor:pointer}
+.ui-select-catalog-create:hover,.ui-select-catalog-create:focus-visible{background:#deeff9}
+.ui-select-catalog-create[hidden]{display:none!important}

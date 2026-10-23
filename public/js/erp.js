@@ -476,13 +476,21 @@
 
     let optionsBuilt=false;
     const normalize=text=>String(text||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').trim();
+    const quickKind=select.dataset.quickCreate || '';
     const filterOptions=(query='')=>{
       if(!searchable) return;
       const q=normalize(query);
+      let exact=false;
       menu.querySelectorAll('.ui-select-option').forEach(item=>{
         const label=item._nextorNormalizedSearch;
         item.hidden=!!q && !label.includes(q);
+        if(q && normalize(item.dataset.optionName||'')===q)exact=true;
       });
+      const add=menu.querySelector('.ui-select-catalog-create');
+      if(add){
+        add.hidden=exact;
+        add.textContent=query.trim() ? 'Cadastrar "'+query.trim().slice(0,90)+'"' : 'Cadastrar novo';
+      }
     };
     const buildOptions=()=>{
       const fragment=document.createDocumentFragment();
@@ -492,6 +500,7 @@
         item.className='ui-select-option';
         item.setAttribute('role','option');
         item.dataset.value=option.value;
+        item.dataset.optionName=option.dataset.name || option.textContent.trim().split(' — ')[0];
         setUiSelectOptionContent(item,option);
         item.dataset.searchValue=[option.textContent,option.value,option.dataset.subtitle,option.dataset.subtext,option.dataset.description,option.dataset.search].filter(Boolean).join(' ');
         item._nextorNormalizedSearch=normalize(item.dataset.searchValue);
@@ -510,6 +519,29 @@
         });
         fragment.appendChild(item);
       });
+      if(quickKind && searchable){
+        const create=document.createElement('button');
+        create.type='button';
+        create.className='ui-select-catalog-create';
+        create.textContent='Cadastrar novo';
+        create.addEventListener('click',()=>{
+          const term=trigger.value.trim();
+          closeUiSelects();
+          window.LumeronCatalog?.create(quickKind,{
+            initial:term,
+            onSelect:item=>{
+              const text=item.sku && quickKind==='products'
+                ? item.sku+' — '+item.name : item.name+(item.document?' — '+item.document:'');
+              const option=new Option(text,String(item.id),false,true);
+              option.dataset.name=item.name;
+              select.add(option);
+              select.value=String(item.id);
+              select.dispatchEvent(new Event('change',{bubbles:true}));
+            },
+          });
+        });
+        fragment.appendChild(create);
+      }
       menu.replaceChildren(fragment);
       optionsBuilt=true;
       filterOptions();
