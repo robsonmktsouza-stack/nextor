@@ -33,11 +33,6 @@ final class Nfe55IniBuilder
             ||$draft->items->isEmpty()||$draft->items->count()>80) {
             throw new RuntimeException('Operação especial ou quantidade de itens ainda não homologada.');
         }
-        if((float)$draft->surcharge!==0.0
-            ||(float)data_get($draft->transport_data,'freight_value',0)!==0.0
-            ||(float)$draft->discount!==0.0) {
-            throw new RuntimeException('Rateio de frete, descontos ou acréscimos exige tratamento fiscal específico.');
-        }
         if($draft->has_referenced_document && !$draft->references) {
             throw new RuntimeException('O documento referenciado não foi informado.');
         }
@@ -134,10 +129,40 @@ final class Nfe55IniBuilder
                 'PaisCod'=>'1058','Pais'=>'BRASIL',
             ]);
         }
+        // Allocate document-level amounts to the items before emitting the INI.
+        // Values are kept in integer cents so the XML item sums always match vNF.
+        $items=$draft->items->values();
+        $grossWeights=$items->map(fn($item)=>(int)round(
+            (float)$item->quantity*(float)$item->dimension_quantity*(float)$item->unit_price*100,
+            0,PHP_ROUND_HALF_UP
+        ))->all();
+        $globalFreight=$this->cents(data_get($draft->transport_data,'freight_value',0));
+        $globalSurcharge=$this->cents($draft->surcharge);
+        $globalDiscount=$this->cents($draft->discount);
+        if($globalFreight<0||$globalSurcharge<0||$globalDiscount<0){
+            throw new RuntimeException('Frete, desconto ou acréscimo geral inválido.');
+        }
+        $freightShares=$this->proportionalShares($globalFreight,$grossWeights);
+        $otherShares=$this->proportionalShares($globalSurcharge,$grossWeights);
+        $discountWeights=[];
+        foreach($items as $index=>$item){
+            $available=$grossWeights[$index]+$freightShares[$index]+$otherShares[$index]
+                +$this->cents($item->freight)+$this->cents($item->insurance)
+                +$this->cents($item->other_expenses)-$this->cents($item->discount);
+            if($available<0){
+                throw new RuntimeException('O desconto de um item supera seu valor.');
+            }
+            $discountWeights[]=$available;
+        }
+        if($globalDiscount>array_sum($discountWeights)){
+            throw new RuntimeException('O desconto geral supera o valor da NF-e.');
+        }
+        $discountShares=$this->proportionalShares($globalDiscount,$discountWeights);
+
         $totalProduct=0;$totalPis=0;$totalCofins=0;$totalIpi=0;
         $totalFreight=0;$totalInsurance=0;$totalOther=0;$totalDiscount=0;
         $rtcTotal=['bc'=>0,'uf'=>0,'mun'=>0,'cbs'=>0];$rtcCount=0;
-        foreach($draft->items as $index=>$item) {
+        foreach($items as $index=>$item) {
             $tax=$item->tax_data??[];
             // Normalize legacy editor keys into the RTC engine's canonical fields.
             $ibsCst=trim((string)($tax['ibs_cst']??''));
@@ -177,10 +202,10 @@ final class Nfe55IniBuilder
                     throw new RuntimeException('Tributação federal deste item exige cálculo ainda não homologado.');
                 }
             }
-            $freight=(float)$item->freight;
-            $insurance=(float)$item->insurance;
-            $other=(float)$item->other_expenses;
-            $discount=(float)$item->discount;
+            $freight=($this->cents($item->freight)+$freightShares[$index])/100;
+            $insurance=$this->cents($item->insurance)/100;
+            $other=($this->cents($item->other_expenses)+$otherShares[$index])/100;
+            $discount=($this->cents($item->discount)+$discountShares[$index])/100;
             if($freight<0||$insurance<0||$other<0||$discount<0
                 ||$discount>$gross+$freight+$insurance+$other){
                 throw new RuntimeException('Valores adicionais de item inconsistentes.');
@@ -340,6 +365,38 @@ final class Nfe55IniBuilder
         }
         if($draft->additional_info)$add('DadosAdicionais',['infCpl'=>$draft->additional_info]);
         return implode("\r\n\r\n",$sections)."\r\n";
+    }
+
+    /**
+     * Cent-exact proportional allocation. Cumulative rounding assigns every
+     * residual cent exactly once, without modifying stored draft item values.
+     *
+     * @param array<int,int> $weights Nonnegative item weights expressed in cents
+     * @return array<int,int>
+     */
+    private function proportionalShares(int $amount,array $weights): array
+    {
+        $shares=array_fill(0,count($weights),0);
+        if($amount===0)return $shares;
+        $totalWeight=array_sum($weights);
+        if($amount<0||$totalWeight<=0){
+            throw new RuntimeException('Não é possível ratear valores sem produtos válidos.');
+        }
+        $cumulativeWeight=0;
+        $distributed=0;
+        foreach($weights as $index=>$weight){
+            if($weight<0)throw new RuntimeException('Peso de rateio inválido.');
+            $cumulativeWeight+=$weight;
+            $next=(int)round($amount*$cumulativeWeight/$totalWeight,0,PHP_ROUND_HALF_UP);
+            $shares[$index]=$next-$distributed;
+            $distributed=$next;
+        }
+        return $shares;
+    }
+
+    private function cents(mixed $value): int
+    {
+        return (int)round((float)$value*100,0,PHP_ROUND_HALF_UP);
     }
 
     private function digits(mixed $value): string
