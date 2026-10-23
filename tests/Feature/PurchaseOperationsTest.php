@@ -124,7 +124,7 @@ final class PurchaseOperationsTest extends TestCase
         self::assertSame('received',$purchase->fresh()->status);
         self::assertSame('7.500',$product->fresh()->stock_quantity);
         $payable->settlements()->delete();
-        app(InventoryService::class)->adjust($product->id,'exit','7.000','Saída posterior',$this->admin()->id);
+        app(InventoryService::class)->adjust($product->id,'exit','7.000','Saída posterior',(int)auth()->id());
         $this->post(route('purchases.cancel',$purchase))->assertSessionHasErrors('items');
         self::assertSame('received',$purchase->fresh()->status);
         self::assertSame('0.500',$product->fresh()->stock_quantity);
