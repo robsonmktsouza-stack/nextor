@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   const picker=el('erpCatalogPicker'),form=el('erpCatalogCreate'),list=el('erpCatalogResults');
   const search=el('erpCatalogSearch'),title=el('erpCatalogTitle'),subtitle=el('erpCatalogSubtitle');
   const newButton=el('erpCatalogNew'),newLabel=el('erpCatalogNewLabel');
-  const fields=el('erpCatalogFields'),error=el('erpCatalogError'),hint=el('erpCatalogHint');
+  const fields=el('erpCatalogFields'),error=el('erpCatalogError');
   const save=el('erpCatalogSave');
   const singular={products:'produto',customers:'cliente',suppliers:'fornecedor'};
   const labels={products:'Produtos',customers:'Clientes',suppliers:'Fornecedores'};
@@ -54,7 +54,6 @@ document.addEventListener('DOMContentLoaded',()=>{
         input('usage_type','Finalidade *','select',{options:[['resale','Revenda'],['consumption','Consumo'],['raw_material','Matéria-prima'],['fixed_asset','Ativo imobilizado'],['packaging','Embalagem'],['other','Outros']]}),
         checkbox('control_stock','Controlar estoque',true)
       );
-      hint.textContent='Cadastro rápido salva o produto de verdade. Complete os demais dados fiscais em Produtos antes de emitir a NF-e.';
     }else{
       fields.append(
         input('name','Nome / razão social *','text',{required:true,wide:true,maxLength:190,value:selectedQuery}),
@@ -69,7 +68,6 @@ document.addEventListener('DOMContentLoaded',()=>{
         input('address','Endereço','text',{maxLength:190}),
         input('address_number','Número','text',{maxLength:30})
       );
-      hint.textContent='O cadastro será salvo em Clientes e poderá ser complementado depois. Antes de emitir NF-e, confira endereço, inscrição estadual e identificação fiscal.';
     }
   };
   const close=()=>{abortController?.abort();clearTimeout(searchTimer);if(dialog.open)dialog.close();returnFocus?.focus?.();onSelect=null;};

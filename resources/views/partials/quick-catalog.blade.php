@@ -22,7 +22,6 @@ $quickCanCustomers=$quickCanWrite && auth()->user()->canAccess('customers');
       </button>
     </div>
     <form id="erpCatalogCreate" class="erp-catalog-form" novalidate hidden>
-      <p class="erp-catalog-hint" id="erpCatalogHint"></p>
       <div id="erpCatalogFields" class="erp-catalog-fields"></div>
       <div class="erp-catalog-error" role="alert" id="erpCatalogError" hidden></div>
       <div class="erp-catalog-footer">

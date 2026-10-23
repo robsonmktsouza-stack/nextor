@@ -19,7 +19,6 @@
 .erp-catalog-new{display:flex;align-items:center;gap:7px;width:100%;padding:10px 12px;border:1px solid #bfdaec;border-radius:4px;color:#1972a9;background:#edf7fd;font-weight:600;font-size:12px;text-align:left;cursor:pointer}
 .erp-catalog-new:hover{background:#dcedf9}
 .erp-catalog-new:disabled{cursor:not-allowed;color:#8193a0;background:#f4f7f9;border-color:#e1e6ea}
-.erp-catalog-hint{font-size:12px;line-height:1.5;color:#708294;margin:0 0 16px}
 .erp-catalog-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
 .erp-catalog-fields label{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600;min-width:0}
 .erp-catalog-fields label.catalog-wide{grid-column:1/-1}
