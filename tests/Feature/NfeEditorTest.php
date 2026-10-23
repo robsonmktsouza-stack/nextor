@@ -158,7 +158,7 @@ class NfeEditorTest extends TestCase
             ->assertSee('nextor-modal-window',false)
             ->assertSee('nfe-fixed-shell',false)
             ->assertSee('data-nfe-modal',false)
-            ->assertDontSee('<dialog',false)
+            ->assertSee('id="erpCatalogDialog"',false)
             ->assertSee('dialog-header',false)
             ->assertSee('editor-tabs',false)
             ->assertSee('editor-panel',false)

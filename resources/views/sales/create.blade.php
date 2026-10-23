@@ -10,7 +10,7 @@
   <div class="editor-grid cols-12">
     <label class="field col-6">
       <span>Nome do cliente</span>
-      <select name="customer_id" id="saleCustomer">
+      <select name="customer_id" id="saleCustomer" data-quick-create="customers">
         <option value="">Consumidor não identificado</option>
         @foreach($customers as $customer)
           <option value="{{ $customer->id }}"

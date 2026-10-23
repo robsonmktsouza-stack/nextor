@@ -1793,6 +1793,10 @@
   const services=JSON.parse(document.getElementById('sale-services')?.textContent||'[]');
   const oldRows=JSON.parse(document.getElementById('sale-old-items')?.textContent||'[]');
   const oldPayments=JSON.parse(document.getElementById('sale-old-payments')?.textContent||'[]');
+  document.addEventListener('lumeron:catalog-created',event=>{
+    const {kind,item}=event.detail||{};
+    if(kind==='products'&&item&&!products.some(p=>String(p.id)===String(item.id)))products.push(item);
+  });
   const salePaymentMethods=JSON.parse(document.getElementById('sale-payment-methods')?.textContent||'{}');
   const saleDefaultDueDays=Number(JSON.parse(document.getElementById('sale-default-due-days')?.textContent||'0'))||0;
   const paymentBody=document.getElementById('salePayments');
@@ -1959,7 +1963,7 @@
     const renderSuggestions=()=>{
       const typeNow=kind.value;
       const source=itemSource(typeNow);
-      if(!source.length){
+      if(!source.length && typeNow!=='product'){
         suggestions.hidden=true;
         return;
       }
@@ -1997,6 +2001,24 @@
         });
       }
 
+      if(typeNow==='product'){
+        const quick=document.createElement('button');
+        quick.type='button';
+        quick.className='sale-suggestion sale-suggestion-register';
+        quick.textContent=term?'Cadastrar "'+search.value.trim().slice(0,90)+'" como produto':'Cadastrar novo produto';
+        quick.addEventListener('mousedown',event=>{
+          event.preventDefault();
+          suggestions.hidden=true;
+          window.LumeronCatalog?.create('products',{
+            initial:search.value.trim(),
+            onSelect:item=>{
+              if(!products.some(p=>String(p.id)===String(item.id)))products.push(item);
+              chooseItem(item);
+            },
+          });
+        });
+        suggestions.appendChild(quick);
+      }
       closeSaleSuggestions(suggestions);
       suggestions.hidden=false;
     };
@@ -2288,7 +2310,15 @@
     if(!event.target.closest('.sale-item-search-wrap')) closeSaleSuggestions();
   });
 
-  document.getElementById('addSaleItem')?.addEventListener('click',()=>addSaleRow());
+  document.getElementById('addSaleItem')?.addEventListener('click',()=>{
+    window.LumeronCatalog?.pick('products',{
+      items:products,
+      onSelect:item=>{
+        if(!products.some(p=>String(p.id)===String(item.id)))products.push(item);
+        addSaleRow({item_type:'product',product_id:item.id,unit_price:item.sale_price,quantity:1});
+      }
+    });
+  });
 
   document.getElementById('addSalePayment')?.addEventListener('click',()=>{
     addPayment({amount:0,due_date:operationDate?.value||''},true);
