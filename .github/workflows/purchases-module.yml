@@ -1,0 +1,32 @@
+name: Compras - regressão operacional
+on:
+  push:
+    branches: [develop]
+    paths:
+      - 'app/Models/Purchase*.php'
+      - 'app/Services/PurchaseService.php'
+      - 'app/Services/InventoryService.php'
+      - 'app/Http/Controllers/PurchaseController.php'
+      - 'resources/views/purchases/**'
+      - 'public/js/purchases.js'
+      - 'database/migrations/*purchases*'
+      - 'tests/Feature/PurchaseOperationsTest.php'
+      - '.github/workflows/purchases-module.yml'
+  workflow_dispatch:
+jobs:
+  purchases:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      DB_CONNECTION: sqlite
+      DB_DATABASE: ':memory:'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: curl, dom, libxml, openssl, pdo_sqlite, sqlite3
+          coverage: none
+      - run: composer install --no-interaction --prefer-dist --no-progress
+      - run: cp .env.example .env && php artisan key:generate && php artisan optimize:clear
+      - run: php vendor/bin/phpunit --filter=PurchaseOperationsTest --display-errors --display-warnings
