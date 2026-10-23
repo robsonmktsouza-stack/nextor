@@ -92,6 +92,23 @@ final class QuickCatalogTest extends TestCase
         $this->assertDatabaseHas('customers',['name'=>'Nova Loja','is_customer'=>1,'is_supplier'=>0]);
     }
 
+    public function test_carrier_is_independent_of_customer_and_visible_to_nfe_transport_selector(): void
+    {
+        $this->actingAs($this->admin());
+        $result=$this->postJson(route('quick-catalog.store',['kind'=>'carriers']),[
+            'name'=>'Transportes NF-e','document'=>'11777888000190',
+            'ie_indicator'=>'contributor','state'=>'BA','city'=>'Salvador',
+        ])->assertCreated()->assertJsonPath('item.name','Transportes NF-e');
+        $this->assertDatabaseHas('customers',[
+            'id'=>$result->json('item.id'),'is_carrier'=>1,'is_customer'=>0,'is_supplier'=>0,
+        ]);
+        $this->getJson(route('quick-catalog.search',['kind'=>'carriers','q'=>'Transportes']))
+            ->assertOk()->assertJsonCount(1,'items');
+        $this->get(route('fiscal.nfe.create'))->assertOk()
+            ->assertSee('data-quick-create="carriers"',false)
+            ->assertSee('Transportes NF-e');
+    }
+
     public function test_employee_may_search_but_cannot_create_catalog_without_permission(): void
     {
         $user=User::query()->create([
