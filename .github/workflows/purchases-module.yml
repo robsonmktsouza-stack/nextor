@@ -33,4 +33,6 @@ jobs:
           coverage: none
       - run: composer install --no-interaction --prefer-dist --no-progress
       - run: cp .env.example .env && php artisan key:generate && php artisan optimize:clear
+      - run: php artisan view:cache && php -l app/Services/PurchaseService.php && php -l app/Http/Controllers/PurchaseController.php
+      - run: node --check public/js/purchases.js
       - run: php -d memory_limit=1024M -d display_errors=1 vendor/bin/phpunit --filter=PurchaseOperationsTest --debug --display-errors --display-warnings
