@@ -244,6 +244,39 @@ final class FiscalPurchasesTest extends TestCase
         self::assertSame(1,$fake->calls);
     }
 
+
+    public function test_acbr_resdfe_envelope_and_case_variants_are_recognized(): void
+    {
+        $parsed=app(IncomingNfeParser::class)->envelope(
+            "[DistribuicaoDFe]\nCStat=138\nultNSU=7\nmaxNSU=7\n".
+            "[ResDFe001]\nNSU=7\nchDFe=".$this->key()."\n".
+            "CNPJ=99887766000122\nxNome=Fornecedor de Teste\nvNF=60,00\n"
+        );
+        self::assertSame('138',$parsed['status']);
+        self::assertSame('000000000000007',$parsed['last_nsu']);
+        self::assertCount(1,$parsed['documents']);
+        self::assertSame($this->key(),$parsed['documents'][0]['access_key']);
+
+        $cteKey=substr_replace($this->key(),'57',20,2);
+        $other=app(IncomingNfeParser::class)->envelope(
+            "[DistribuicaoDFe]\ncStat=138\nultNSU=8\nmaxNSU=8\n".
+            "[ResDFe001]\nNSU=8\nchDFe=".$cteKey."\n"
+        );
+        self::assertCount(0,$other['documents']);
+    }
+
+    public function test_sefaz_656_without_nsu_still_applies_cooldown_without_advancing_cursor(): void
+    {
+        $this->ready();
+        $fake=$this->gateway("[DistribuicaoDFe]\ncStat=656\nxMotivo=Consumo indevido");
+        $service=app(IncomingNfeSyncService::class);
+        self::assertSame('error',$service->synchronize()['status']);
+        self::assertSame('000000000000000',$service->state()->last_nsu);
+        self::assertTrue($service->state()->next_check_at->isFuture());
+        self::assertSame('cooldown',$service->synchronize()['status']);
+        self::assertSame(1,$fake->calls);
+    }
+
     public function test_xml_download_and_sync_are_protected_by_fiscal_permission(): void
     {
         $user=User::query()->create([
