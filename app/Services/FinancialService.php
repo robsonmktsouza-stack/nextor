@@ -155,7 +155,7 @@ class FinancialService
         DB::transaction(function () use ($entry) {
             $locked=FinancialEntry::query()->lockForUpdate()->findOrFail($entry->id);
 
-            if($locked->sale_id!==null) {
+            if($locked->sale_id!==null || $locked->purchase_id!==null) {
                 throw ValidationException::withMessages([
                     'entry'=>'Lançamentos originados de venda devem ser tratados pelo cancelamento da própria venda.'
                 ]);
@@ -184,7 +184,7 @@ class FinancialService
         DB::transaction(function () use ($entry) {
             $locked=FinancialEntry::query()->lockForUpdate()->findOrFail($entry->id);
 
-            if($locked->sale_id!==null) {
+            if($locked->sale_id!==null || $locked->purchase_id!==null) {
                 throw ValidationException::withMessages([
                     'entry'=>'Lançamentos originados de venda não podem ser reabertos diretamente.'
                 ]);
