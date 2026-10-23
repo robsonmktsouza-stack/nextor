@@ -60,6 +60,10 @@ final class IncomingNfeParser
                     'quantity'=>$get('qCom'),
                     'unit_price'=>$get('vUnCom'),
                     'total'=>$get('vProd'),
+                    'discount'=>$text('./*[local-name()="prod"]/*[local-name()="vDesc"]',$det),
+                    'other_costs'=>$text('./*[local-name()="prod"]/*[local-name()="vOutro"]',$det),
+                    'ipi'=>$text('./*[local-name()="imposto"]/*[local-name()="IPI"]//*[local-name()="vIPI"]',$det),
+                    'icms_st'=>$text('./*[local-name()="imposto"]/*[local-name()="ICMS"]//*[local-name()="vICMSST"]',$det),
                 ];
             }
             $issued=$text('./*[local-name()="ide"]/*[local-name()="dhEmi"]');
@@ -74,6 +78,9 @@ final class IncomingNfeParser
                     'number'=>$text('./*[local-name()="ide"]/*[local-name()="nNF"]'),
                     'series'=>$text('./*[local-name()="ide"]/*[local-name()="serie"]'),
                     'recipient_cnpj'=>$cnpj,
+                    'freight'=>$text('./*[local-name()="total"]/*[local-name()="ICMSTot"]/*[local-name()="vFrete"]'),
+                    'other_expenses'=>$text('./*[local-name()="total"]/*[local-name()="ICMSTot"]/*[local-name()="vOutro"]'),
+                    'discount'=>$text('./*[local-name()="total"]/*[local-name()="ICMSTot"]/*[local-name()="vDesc"]'),
                 ],
             ];
         } finally {
