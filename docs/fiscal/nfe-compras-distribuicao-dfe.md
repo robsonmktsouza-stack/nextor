@@ -1,8 +1,8 @@
-# Fiscal → Compras: recepção automática de NF-e (modelo 55)
+# Fiscal → Recebidas: recepção automática de NF-e (modelo 55)
 
 ## Entrega na branch `develop` (23/10/2026)
 
-- Nova aba **Compras** na navegação Fiscal, com lista de NF-e emitidas para o CNPJ configurado, consulta manual, chave/fornecedor/valor, resumo ou XML completo, filtros, detalhes e download privado.
+- Nova aba **Recebidas** na navegação Fiscal, com lista de NF-e emitidas para o CNPJ configurado, consulta manual, chave/fornecedor/valor, resumo ou XML completo, filtros, detalhes e download privado.
 - Serviço ACBrLibNFe MT/Cdecl `NFE_DistribuicaoDFePorUltNSU` documentado, com UF e CNPJ do destinatário, certificado A1 da própria instância (mesma configuração de Ajustes → Fiscal), schemas configurados e INI temporário privado por execução.
 - Cursor NSU persistido na tabela `incoming_nfe_sync_states`. Uma chamada não é repetida para redimensionar buffer da ACBr. Bloqueio compartilhado por CNPJ entre consultas manual/programada. `cStat=137` e NSU alcançado exigem intervalo mínimo de 65 minutos; `cStat=656` impõe 24 horas. Havendo backlog, próximo lote após 5 minutos, não em loop.
 - `incoming_nfes` armazena notas por chave de acesso exclusiva: resumos não apagam XML completo importado anteriormente; XML de NF-e modelo 55 só é aceito quando CNPJ do destinatário confere exatamente com o da empresa. XML em `Storage::disk('local')`, pasta `fiscal/incoming-nfe/<chave>.xml` não pública, download exige `permission:fiscal`. Sem segredos de certificado em erros exibidos ou registrados.
@@ -17,7 +17,7 @@
 1. `git switch develop && git pull origin develop && php artisan migrate && php artisan optimize:clear`.
 2. Confirmar CNPJ e UF da empresa em Ajustes. Enviar seu certificado digital A1 (.pfx) em **Ajustes → Fiscal**, com senha; o sistema guarda senha criptografada.
 3. Certificar que `ACBr_NFE_LIBRARY_PATH`, `ACBr_NFE_SCHEMAS_PATH` e bibliotecas nativas/dependências da ACBr estão configurados para o processo PHP. O worker pode ser Windows em desenvolvimento; Linux exige lib Linux.
-4. Abrir **Fiscal → Compras**, clicar **Buscar notas** ou **Ativar busca automática**.
+4. Abrir **Fiscal → Recebidas**, clicar **Buscar notas** ou **Ativar busca automática**.
 5. Em um terminal separado, `php artisan schedule:work` para disparo periódico. Em produção, habilitar o cron do Laravel por instalação apenas após homologação e consentimento.
 6. Verificar as notas com XML/resumo; nunca pressupor que o documento completo chegou sem manifestação.
 
@@ -32,3 +32,5 @@ Não há chamada real à SEFAZ em CI: gateway simulado. Portanto funcionamento r
 - https://acbr.sourceforge.io/ACBrLib/NFE_DistribuicaoDFePorUltNSU.html
 - https://www.nfe.fazenda.gov.br/portal/perguntasFrequentes.aspx
 - https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=155Wx5%2FJB5A%3D
+
+> **Compatibilidade:** a interface agora usa **Recebidas**; os caminhos internos `/fiscal/purchases`, nomes de rotas e tabelas foram preservados para não quebrar instalações existentes.

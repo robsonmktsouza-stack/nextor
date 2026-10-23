@@ -164,7 +164,7 @@
       <tr><td colspan="8" class="empty-cell">
         <div class="fiscal-empty-state" role="status">
           @include('partials.icon',['name'=>'receipt','size'=>23])
-          <strong>Nenhuma NF-e de entrada encontrada</strong>
+          <strong>Nenhuma NF-e recebida encontrada</strong>
           <span>Nenhuma nota emitida em {{ $monthLabel }} para os filtros selecionados. Escolha outro mês ou ajuste a pesquisa.</span>
         </div>
       </td></tr>
@@ -179,7 +179,7 @@
   <form method="post" action="{{ route('fiscal.purchases.import') }}" enctype="multipart/form-data">
     @csrf
     <div class="dialog-header">
-      <div><h2 id="purchasesImportTitle">Importar XML de compra</h2></div>
+      <div><h2 id="purchasesImportTitle">Importar XML de NF-e recebida</h2></div>
       <button class="close-dialog" type="button" data-dialog-close aria-label="Fechar">×</button>
     </div>
     <div class="dialog-body">

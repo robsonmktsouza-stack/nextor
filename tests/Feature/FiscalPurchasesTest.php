@@ -91,7 +91,8 @@ final class FiscalPurchasesTest extends TestCase
         $this->actingAs($this->accountant())
             ->get(route('fiscal.index'))
             ->assertOk()
-            ->assertSee('Compras');
+            ->assertSee('Recebidas')
+            ->assertDontSee('>Compras</span>',false);
         $this->get(route('fiscal.purchases.index'))
             ->assertOk()
             ->assertSee('Buscar notas')
@@ -100,6 +101,30 @@ final class FiscalPurchasesTest extends TestCase
         $this->assertDatabaseCount('incoming_nfes',0);
     }
 
+
+    public function test_received_invoices_ui_uses_correct_naming_while_keeping_legacy_routes(): void
+    {
+        $user=$this->accountant();
+        $this->actingAs($user)
+            ->get(route('fiscal.purchases.index'))
+            ->assertOk()
+            ->assertSee('Recebidas')
+            ->assertDontSee('>Compras</span>',false);
+
+        $invoice=IncomingNfe::query()->create([
+            'access_key'=>'29261099887766000122550010000001231000001234',
+            'status'=>'summary',
+        ]);
+        $this->get(route('fiscal.purchases.show',$invoice))
+            ->assertOk()
+            ->assertSee('NF-e recebida')
+            ->assertSee('Voltar às recebidas')
+            ->assertDontSee('Conferência de compra');
+
+        self::assertSame('/fiscal/purchases',route('fiscal.purchases.index',[],false));
+        self::assertStringContainsString("@case('inbox')",
+            file_get_contents(resource_path('views/partials/icon.blade.php')));
+    }
 
     public function test_purchases_uses_fiscal_table_layout_and_has_no_missing_icons(): void
     {

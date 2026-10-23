@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title','Conferência de compra')
+@section('title','NF-e recebida')
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/fiscal-purchases.css') }}?v={{ filemtime(public_path('css/fiscal-purchases.css')) }}">
 @endpush
@@ -9,7 +9,7 @@
   <div class="grid-actionbar">
     <div class="grid-actions-left">
       <a href="{{ route('fiscal.purchases.index') }}" class="grid-tool grid-tool-wide">
-        @include('partials.icon',['name'=>'arrow-left','size'=>17]) <span>Voltar às compras</span>
+        @include('partials.icon',['name'=>'arrow-left','size'=>17]) <span>Voltar às recebidas</span>
       </a>
       @if($invoice->xml_path)
       <a class="grid-primary-action" href="{{ route('fiscal.purchases.xml',$invoice) }}">
@@ -25,7 +25,7 @@
     </div>
   </div>
   <div class="fiscal-purchases-detail">
-    <h2>NF-e de entrada</h2>
+    <h2>NF-e recebida</h2>
     <div class="fiscal-purchases-info">
       <div><span>Fornecedor</span><strong>{{ $invoice->supplier_name ?: 'Não informado' }}</strong></div>
       <div><span>CNPJ</span><strong>{{ $invoice->supplier_cnpj ?: '—' }}</strong></div>
