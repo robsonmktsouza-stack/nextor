@@ -104,7 +104,9 @@ class IncomingNfeManifestationGateway
             throw new RuntimeException('Justificativa inválida para operação não realizada.');
         }
         $ini="[EVENTO]\nidLote=1\n\n[EVENTO001]\ncOrgao=91\nCNPJ={$cnpj}\nchNFe={$key}\n";
-        $ini.="dhEvento=".now()->format('Y-m-d\TH:i:sP')."\n";
+        // A leitura de evento da ACBrLib usa data/hora local no formato
+        // dd/mm/aaaa hh:mm:ss; a biblioteca gera o timestamp XML com fuso.
+        $ini.="dhEvento=".now()->format('d/m/Y H:i:s')."\n";
         $ini.="tpEvento={$event}\nnSeqEvento=1\nversaoEvento=1.00\n";
         if ($event==='210240') $ini.="xJust={$reason}\n";
         return $ini;
