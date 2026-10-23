@@ -42,3 +42,8 @@
 .fiscal-manifest-key{font-size:11px;color:#728295;overflow-wrap:anywhere}
 .fiscal-manifest-confirmation{margin:10px 0 0;font-size:12px;color:#516579}
 #purchaseManifestReasonBox[hidden]{display:none}
+
+.fiscal-manifest-cell .ui-select{display:block;width:100%;min-width:155px;max-width:195px}
+.fiscal-manifest-cell .ui-select .ui-select-trigger{box-sizing:border-box;min-height:30px;height:30px;width:100%;padding:0 23px 0 9px;border-radius:3px;font-size:11px;text-align:left}
+.fiscal-manifest-cell .ui-select .ui-select-value{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fiscal-manifest-cell .ui-select.disabled .ui-select-trigger{color:#8d6b37;background:#f4f6f8}
