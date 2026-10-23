@@ -45,25 +45,29 @@ try {
         -not ([IO.File]::ReadAllText($tipos)).Contains('name="TTribNFe"')) {
         throw 'Schemas incompativeis com a NF-e RTC.'
     }
-    $destDll = Join-Path $Destino 'ACBrNFe64.dll'
-    $destSchema = Join-Path $Destino 'dep\Schemas\NFe'
+    # Manter o mesmo caminho que o Lumeron ja utiliza no Laragon.
+    $destDll = Join-Path $Destino 'Windows\MT\Cdecl\ACBrNFe64.dll'
+    # Pasta exclusiva por versao: nao misturar XSDs antigos com novos.
+    $destSchema = Join-Path $Destino 'releases\1.5.0.490\dep\Schemas\NFe'
     $destDeps = Join-Path $Destino 'deps\x64'
-    foreach ($d in @($Destino,$destSchema,$destDeps)) {
+    foreach ($d in @((Split-Path -Parent $destDll),$destSchema,$destDeps)) {
         New-Item -ItemType Directory -Path $d -Force | Out-Null
     }
     if (Test-Path $destDll) {
         Copy-Item -LiteralPath $destDll -Destination ($destDll + '.backup-' + (Get-Date -Format 'yyyyMMddHHmmss')) -Force
     }
     Copy-Item -LiteralPath $dll -Destination $destDll -Force
+    $hashInstalado = (Get-FileHash -LiteralPath $destDll -Algorithm SHA256).Hash
+    if ($hashInstalado -ne $hash) { throw 'DLL instalada nao corresponde ao pacote validado.' }
     Copy-Item -Path (Join-Path $schemas '*') -Destination $destSchema -Recurse -Force
     Copy-Item -Path (Join-Path $depsXml '*.dll') -Destination $destDeps -Force
     Copy-Item -Path (Join-Path $depsSsl '*.dll') -Destination $destDeps -Force
 
     # PATH para este processo: o PHP worker tambem precisara localizar estas dependencias.
-    $env:Path = $destDeps + ';' + $Destino + ';' + $env:Path
+    $env:Path = $destDeps + ';' + (Split-Path -Parent $destDll) + ';' + $env:Path
     if ($PersistirPath) {
         $partes = @([Environment]::GetEnvironmentVariable('Path','User') -split ';' | Where-Object { $_ })
-        foreach ($pasta in @($Destino,$destDeps)) {
+        foreach ($pasta in @((Split-Path -Parent $destDll),$destDeps)) {
             if (-not ($partes | Where-Object { $_.TrimEnd('\') -ieq $pasta.TrimEnd('\') })) {
                 $partes += $pasta
             }
@@ -79,9 +83,8 @@ try {
         $variaveis = @{
             ACBr_NFE_LIBRARY_PATH = ($destDll -replace '\\','/')
             ACBr_NFE_SCHEMAS_PATH = ($destSchema -replace '\\','/')
-            ACBr_NFE_CONFIG_PATH = ((Join-Path $Destino 'acbr-nfe-diagnostico.ini') -replace '\\','/')
         }
-        foreach ($nome in @('ACBr_NFE_LIBRARY_PATH','ACBr_NFE_SCHEMAS_PATH','ACBr_NFE_CONFIG_PATH')) {
+        foreach ($nome in @('ACBr_NFE_LIBRARY_PATH','ACBr_NFE_SCHEMAS_PATH')) {
             $linha = $nome + '="' + $variaveis[$nome] + '"'
             $regex = '(?m)^' + [regex]::Escape($nome) + '=.*$'
             if ([regex]::IsMatch($texto,$regex)) {
@@ -95,6 +98,7 @@ try {
     Write-Host 'ACBrLibNFe MT/Cdecl x64 verificada e instalada.' -ForegroundColor Green
     Write-Host ('DLL: ' + $destDll)
     Write-Host ('Schemas: ' + $destSchema)
+    Write-Host 'INI ACBr existente preservado; nenhuma senha ou certificado foi alterado.'
     Write-Host 'No ERP: php artisan config:clear; php artisan acbr:nfe-doctor'
     if (-not $PersistirPath) { Write-Warning 'Dependencias no PATH apenas desta sessao; use -PersistirPath e reinicie Laragon/worker.' }
     Write-Warning 'Instalacao local NAO significa NF-e homologada pela SEFAZ. Producao continua bloqueada.'
