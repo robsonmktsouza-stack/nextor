@@ -294,7 +294,7 @@ $origins=[
         <div class="editor-grid cols-12">
           <label class="field col-8">
             <span>Destinatário *</span>
-            <select name="customer_id" id="nfeCustomer" required>
+            <select name="customer_id" id="nfeCustomer" data-quick-create="customers" required>
               <option value="">Selecione o cliente</option>
               @foreach($customers as $customer)
                 <option value="{{ $customer->id }}" @selected(old('customer_id',$draft->customer_id)===$customer->id)>
@@ -525,9 +525,9 @@ $origins=[
           </div>
           <div class="field col-4">
             <span>Cadastro de produtos</span>
-            <a class="btn btn-light nfe-product-register" href="{{ route('products.create') }}" target="_blank" rel="noopener">
+            <button type="button" class="btn btn-light nfe-product-register" id="nfeQuickCreateProduct">
               @include('partials.icon',['name'=>'plus','size'=>15]) Cadastrar produto
-            </a>
+            </button>
           </div>
 
           <label class="field col-8"><span>Descrição do item *</span><input id="nfeItemName" maxlength="190" placeholder="Descrição que será enviada na NF-e"></label>

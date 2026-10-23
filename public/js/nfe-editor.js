@@ -59,6 +59,12 @@
     try{return JSON.parse(byId('nfe-emitter-state')?.textContent||'null')||'';}catch(_){return '';}
   })();
 
+  document.addEventListener('lumeron:catalog-created',event=>{
+    const {kind,item}=event.detail||{};
+    if(!item)return;
+    if(kind==='products'&&!products.some(p=>String(p.id)===String(item.id)))products.push(item);
+    if(kind==='customers'&&!customers.some(c=>String(c.id)===String(item.id)))customers.push(item);
+  });
   const productById=id=>products.find(item=>String(item.id)===String(id));
   const customerById=id=>customers.find(item=>String(item.id)===String(id));
   const natureById=id=>natures.find(item=>String(item.id)===String(id));
@@ -665,6 +671,22 @@
         menu.appendChild(empty);
       }
 
+      const create=document.createElement('button');
+      create.type='button';
+      create.className='sale-suggestion nfe-catalog-create';
+      create.textContent=raw ? 'Cadastrar "'+raw.slice(0,90)+'" como produto' : 'Cadastrar novo produto';
+      create.addEventListener('mousedown',event=>{
+        event.preventDefault();
+        menu.hidden=true;
+        window.LumeronCatalog?.create('products',{
+          initial:raw,
+          onSelect:product=>{
+            if(!products.some(p=>String(p.id)===String(product.id)))products.push(product);
+            selectProduct(product);
+          }
+        });
+      });
+      menu.appendChild(create);
       closeProductSuggestions(menu);
       menu.hidden=false;
     };
@@ -708,6 +730,16 @@
   });
 
   byId('nfeAddProduct')?.addEventListener('click',openNewItem);
+  byId('nfeQuickCreateProduct')?.addEventListener('click',()=>{
+    window.LumeronCatalog?.create('products',{
+      initial:byId('nfeItemProductSearch')?.value||'',
+      onSelect:product=>{
+        if(!products.some(p=>String(p.id)===String(product.id)))products.push(product);
+        itemSearchControl?.setProduct(product);
+        applyProductToItemDialog(product);
+      }
+    });
+  });
 
   byId('nfeSaveItem')?.addEventListener('click',()=>{
     const product=productById(getField('nfeItemProduct'));
