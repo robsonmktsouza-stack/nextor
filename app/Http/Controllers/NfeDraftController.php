@@ -533,9 +533,10 @@ class NfeDraftController extends Controller
             }
 
             foreach(['quantity','dimension_quantity','unit_price'] as $valueField){
-                if(!is_numeric($item[$valueField]??null)
-                    ||($valueField!=='unit_price'&&(float)$item[$valueField]<=0)
-                    ||($valueField==='unit_price'&&(float)$item[$valueField]<0)){
+                $numeric=$item[$valueField]??($valueField==='dimension_quantity'?1:null);
+                if(!is_numeric($numeric)
+                    ||($valueField!=='unit_price'&&(float)$numeric<=0)
+                    ||($valueField==='unit_price'&&(float)$numeric<0)){
                     throw ValidationException::withMessages([
                         'items_json'=>'Confira quantidade, fator e valor unitário dos produtos.',
                     ]);
