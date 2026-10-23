@@ -478,17 +478,32 @@ $origins=[
 
   <div class="dialog-footer nfe-dialog-footer">
     <div class="nfe-dialog-status">
-      <span class="status {{ $draft->validated_at?'status-ok':'status-muted' }}">{{ $draft->validated_at?'Validado':'Rascunho' }}</span>
+      <span class="status {{ $draft->status==='authorized'?'status-ok':'status-muted' }}">
+        {{ match($draft->status){'authorized'=>'Autorizada','pending'=>'Consultando SEFAZ','queued'=>'Na fila',
+          'processing'=>'Processando','prepared'=>'Preparação pendente','rejected'=>'Rejeitada',default=>$draft->validated_at?'Validada':'Rascunho'} }}
+      </span>
       <strong id="nfeFooterTotal">R$ 0,00</strong>
     </div>
     <div>
       <a class="btn btn-secondary" href="{{ route('fiscal.index',['tab'=>'nfe']) }}">Cancelar <kbd data-tutorial>Esc</kbd></a>
       <button class="btn btn-primary" type="submit">Apenas salvar <kbd data-tutorial>Ctrl+S</kbd></button>
       <button class="btn btn-secondary" type="submit" name="after_save" value="validate" id="nfeValidateCurrent">Validar <kbd data-tutorial>F8</kbd></button>
-      <button class="btn btn-success" type="button" disabled data-tooltip="Emissão indisponível">Emitir NF-e</button>
+      @if($isEditing && $draft->status==='draft')
+        <button class="btn btn-success" type="submit" form="nfeEmitForm" id="nfeSubmitEmission"
+          @disabled(!$draft->validated_at)>Emitir NF-e</button>
+      @elseif($isEditing && in_array($draft->status,['pending','rejected','authorized'],true))
+        <button class="btn btn-secondary" type="submit" form="nfeConsultForm">Consultar SEFAZ</button>
+        @if($draft->xml_path)
+          <a class="btn btn-secondary" href="{{ route('fiscal.nfe.xml',$draft) }}">Baixar XML</a>
+        @endif
+      @endif
     </div>
   </div>
 </form>
+@if($isEditing)
+  <form id="nfeEmitForm" method="post" action="{{ route('fiscal.nfe.emit',$draft) }}">@csrf</form>
+  <form id="nfeConsultForm" method="post" action="{{ route('fiscal.nfe.consult',$draft) }}">@csrf</form>
+@endif
   </div>
 </div>
 
@@ -730,5 +745,22 @@ $origins=[
 
 @push('scripts')
 <script src="{{ asset('js/nfe-editor.js') }}"></script>
+@if($isEditing)
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+  const editor=document.getElementById('nfeDraftForm');
+  const emission=document.getElementById('nfeSubmitEmission');
+  if(!editor)return;
+  @if($draft->status!=='draft')
+    editor.querySelectorAll('input,select,textarea,button[type="submit"]').forEach(node=>{
+      node.disabled=true;
+    });
+  @else
+    editor.addEventListener('input',()=>{if(emission)emission.disabled=true;});
+    editor.addEventListener('change',()=>{if(emission)emission.disabled=true;});
+  @endif
+});
+</script>
+@endif
 
 @endpush

@@ -16,6 +16,7 @@ use App\Http\Controllers\FiscalTaxGroupController;
 use App\Http\Controllers\FiscalFcpRuleController;
 use App\Http\Controllers\NFCeDanfeController;
 use App\Http\Controllers\NfeDraftController;
+use App\Http\Controllers\Nfe55EmissionController;
 use App\Http\Controllers\OperationNatureController;
 use App\Http\Controllers\FinancialReconciliationController;
 use App\Http\Controllers\FinancialReceiptController;
@@ -194,6 +195,12 @@ Route::middleware(['auth','control.license'])->group(function () {
     Route::post('/fiscal/nfe/drafts',[NfeDraftController::class,'store'])->name('fiscal.nfe.store')->middleware(['permission:fiscal','company.configured']);
     Route::get('/fiscal/nfe/drafts/{nfeDraft}/edit',[NfeDraftController::class,'edit'])->name('fiscal.nfe.edit')->middleware(['permission:fiscal','company.configured']);
     Route::put('/fiscal/nfe/drafts/{nfeDraft}',[NfeDraftController::class,'update'])->name('fiscal.nfe.update')->middleware(['permission:fiscal','company.configured']);
+    Route::post('/fiscal/nfe/drafts/{nfeDraft}/emit',[Nfe55EmissionController::class,'emit'])
+        ->name('fiscal.nfe.emit')->middleware(['permission:fiscal','company.configured','throttle:3,1']);
+    Route::post('/fiscal/nfe/drafts/{nfeDraft}/consult',[Nfe55EmissionController::class,'consult'])
+        ->name('fiscal.nfe.consult')->middleware(['permission:fiscal','company.configured','throttle:6,1']);
+    Route::get('/fiscal/nfe/drafts/{nfeDraft}/xml',[Nfe55EmissionController::class,'xml'])
+        ->name('fiscal.nfe.xml')->middleware(['permission:fiscal','company.configured']);
     Route::post('/fiscal/nfe/drafts/{nfeDraft}/validate',[NfeDraftController::class,'validateDraft'])->name('fiscal.nfe.validate')->middleware(['permission:fiscal','company.configured']);
     Route::delete('/fiscal/nfe/drafts/{nfeDraft}',[NfeDraftController::class,'destroy'])->name('fiscal.nfe.destroy')->middleware(['permission:fiscal','company.configured']);
 

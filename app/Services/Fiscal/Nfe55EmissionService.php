@@ -30,6 +30,7 @@ final class Nfe55EmissionService
     public function queue(NfeDraft $draft): NfeDraft
     {
         $company=CompanySetting::current();
+        if(!$draft->validated_at)throw ValidationException::withMessages(['nfe'=>'Valide a NF-e antes de emitir.']);
         $this->readiness($draft,$company);
         $this->builder->build($draft,$company,1,12345678); // preflight without reserving a number
         $updated=DB::transaction(function()use($draft){

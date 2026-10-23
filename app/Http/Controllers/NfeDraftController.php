@@ -114,6 +114,7 @@ class NfeDraftController extends Controller
     public function update(Request $request, NfeDraft $nfeDraft)
     {
         DB::transaction(function() use($request,$nfeDraft) {
+            if($nfeDraft->status!=='draft')abort(409,'NF-e já encaminhada ao processamento fiscal.');
             $nfeDraft->update($this->draftData($request)+['validated_at'=>null]);
             $this->replaceItems($nfeDraft,$request);
         });
@@ -127,17 +128,20 @@ class NfeDraftController extends Controller
 
     public function validateDraft(NfeDraft $nfeDraft)
     {
+        abort_unless($nfeDraft->status==='draft',409);
         return $this->validateAndRedirect($nfeDraft);
     }
 
     public function destroy(NfeDraft $nfeDraft)
     {
+        abort_unless($nfeDraft->status==='draft',409);
         $nfeDraft->delete();
         return redirect()->route('fiscal.nfe.drafts.index')->with('success','Rascunho da NF-e excluído.');
     }
 
     private function validateAndRedirect(NfeDraft $draft)
     {
+        abort_unless($draft->status==='draft',409);
         $draft->load(['items','customer','operationNature']);
         $errors=[];
 
