@@ -51,8 +51,10 @@ final class DiagnoseRecipientManifestation extends Command
             $message=$error->getMessage();
             if (preg_match('/NFE_CarregarEventoINI falhou \((-?\d+)\)/',$message,$matches)) {
                 $this->error('A ACBrLib não carregou o INI do evento (código '.$matches[1].').');
-                if (preg_match('/data|date|hora|time/i',$message)) {
-                    $this->warn('A DLL indicou formato de data/hora incompatível.');
+                // Só atribuir erro ao formato de data quando a DLL trouxer
+                // uma mensagem explícita. Termos genéricos não comprovam a causa.
+                if (preg_match('/not a valid date format|invalid date(?:time)?|formato (?:de )?data|data(?:\/hora)? inv[aá]lida/iu',$message)) {
+                    $this->warn('Detalhe da ACBr: formato de data/hora inválido.');
                 }
             } elseif (preg_match('/NFE_([A-Za-z]+) falhou \((-?\d+)\)/',$message,$matches)) {
                 $this->error('Falha da ACBrLib no método NFE_'.$matches[1].' (código '.$matches[2].').');
