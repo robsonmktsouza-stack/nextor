@@ -30,7 +30,7 @@ final class IncomingNfeManifestationEvidence
             }
             if (!in_array($code,['135','136','573'],true)) {
                 return ['status'=>'rejected','code'=>$code,'protocol'=>null,
-                    'message'=>'Evento rejeitado pela SEFAZ (cStat '.$code.').'];
+                    'message'=>$this->rejectionMessage($code, (string)($fields['xmotivo']??''))];
             }
             return ['status'=>'uncertain','code'=>$code,'protocol'=>null,
                 'message'=>'A SEFAZ não forneceu confirmação individual suficiente (cStat '.$code.').'];
@@ -38,6 +38,28 @@ final class IncomingNfeManifestationEvidence
 
         return ['status'=>'uncertain','code'=>null,'protocol'=>null,
             'message'=>'ACBr não apresentou resultado individual verificável.'];
+    }
+
+    /**
+     * Exibe somente o motivo individual da SEFAZ, nunca dumps da ACBrLib ou
+     * arquivos privados. Não assumir que o status do lote autoriza o evento.
+     */
+    private function rejectionMessage(string $code, string $reason): string
+    {
+        if ($code==='596') {
+            return 'Rejeição 596: Evento apresentado após o prazo permitido para a manifestação.';
+        }
+        if (!mb_check_encoding($reason,'UTF-8')) {
+            return 'Rejeição '.$code.' informada pela SEFAZ.';
+        }
+        $reason=trim(preg_replace('/[\x00-\x1f\x7f]/u',' ',strip_tags($reason)) ?? '');
+        if ($reason!=='' && !preg_match('/senha|password|pfx|\.pem|\.ini|\\\\|\/[A-Za-z0-9_-]+\/|BEGIN |https?:\/\//iu',$reason)) {
+            $reason=trim(preg_replace('/[^\p{L}\p{N}\s.,:;()\[\]\/\-]/u','',$reason) ?? '');
+            if ($reason!=='') {
+                return 'Rejeição '.$code.': '.mb_substr($reason,0,170);
+            }
+        }
+        return 'Rejeição '.$code.' informada pela SEFAZ.';
     }
 
     /**
