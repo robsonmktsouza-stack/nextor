@@ -399,11 +399,12 @@
     body.innerHTML=references.length
       ? references.map((ref,index)=>`
           <tr>
+            <td>${esc(String(ref.type||'NFE').toUpperCase()==='CTE'?'CT-e':'NF-e')}</td>
             <td><span class="code-tag">${esc(ref.key||'')}</span></td>
             <td class="action-cell"><button type="button" class="btn-icon row-action-danger" data-nfe-remove-reference="${index}" data-tooltip="Remover referência" aria-label="Remover referência">${removeTrashIcon}</button></td>
           </tr>
         `).join('')
-      : '<tr><td colspan="2" class="empty-cell">Nenhuma NF-e referenciada.</td></tr>';
+      : '<tr><td colspan="3" class="empty-cell">Nenhum documento referenciado.</td></tr>';
     syncHidden();
   };
 
@@ -922,12 +923,17 @@
 
   byId('nfeSaveReference')?.addEventListener('click',()=>{
     const key=getField('nfeReferenceKey').replace(/\D/g,'');
-    if(key.length!==44){
+    const type=getField('nfeReferenceType')||'NFE';
+    if(key.length!==44||!['NFE','CTE'].includes(type)){
       byId('nfeReferenceKey')?.focus();
-      window.NextorNotify?.('A chave da NF-e referenciada deve possuir 44 dígitos.',{type:'warning',title:'NF-e referenciada'});
+      window.NextorNotify?.('Informe uma chave fiscal de 44 dígitos.',{type:'warning',title:'Documento referenciado'});
       return;
     }
-    references.push({key});
+    if(references.some(ref=>(ref.type||'NFE')===type&&ref.key===key)){
+      byId('nfeReferenceKey')?.focus();
+      return;
+    }
+    references.push({key,type});
     const referenceToggle=byId('nfeHasReferencedDocument');
     if(referenceToggle){
       referenceToggle.checked=true;
