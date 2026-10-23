@@ -333,6 +333,15 @@ final class ACBrNFeService
         return FFI::string($buffer);
     }
 
+    /** Consulta somente leitura com extração de eventos, sem alterar NSU. */
+    public function consultByKeyWithEvents(string $accessKey): string
+    {
+        if (preg_match('/^\d{44}$/',$accessKey)!==1) {
+            throw new RuntimeException('Chave inválida para consultar eventos.');
+        }
+        return $this->response('NFE_Consultar',[$accessKey,true]);
+    }
+
     public function consultByKey(string $accessKey): string
     {
         if (preg_match('/^\d{44}$/', $accessKey) !== 1) {

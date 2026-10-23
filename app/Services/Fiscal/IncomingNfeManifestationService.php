@@ -23,6 +23,7 @@ final class IncomingNfeManifestationService
     public function __construct(
         private readonly IncomingNfeSyncService $sync,
         private readonly IncomingNfeManifestationGateway $gateway,
+        private readonly IncomingNfeManifestationEvidence $evidence,
     ) {}
 
     public function manifest(IncomingNfe $invoice, string $event, ?string $reason, ?int $userId): array
@@ -58,7 +59,7 @@ final class IncomingNfeManifestationService
             $code=null;
             $protocol=null;
             $resultStatus='uncertain';
-            $responseMessage='Retorno não confirmado. Confira o protocolo na SEFAZ antes de reenviar.';
+            $responseMessage='Não foi possível comprovar o registro. Utilize Conferir na SEFAZ.';
             try {
                 $raw=$this->gateway->send(CompanySetting::current(),$cnpj,
                     $invoice->access_key,$event,$reason);
@@ -68,6 +69,7 @@ final class IncomingNfeManifestationService
                 $resultStatus=$parsed['status'];
                 $responseMessage=$parsed['message'];
             } catch (Throwable $error) {
+                $responseMessage=$this->safeError($error);
                 // Never expose ACBr raw diagnostics: they may contain private certificate data.
                 Log::warning('Manifestação NF-e: retorno inconclusivo',[
                     'kind'=>get_class($error),'invoice_id'=>$invoice->id,
@@ -85,47 +87,100 @@ final class IncomingNfeManifestationService
                     ]);
                 }
             },3);
-            return ['status'=>$resultStatus,'code'=>$code];
+            return ['status'=>$resultStatus,'code'=>$code,'message'=>$responseMessage];
         } finally {
             $lock->release();
         }
     }
 
-    /** Somente cStat individual 135, chave, tipo, ambiente e protocolo coerentes confirmam o envio. */
+    /** Reconsulta expressa de uma tentativa indeterminada: nenhum reenvio. */
+    public function verify(IncomingNfe $invoice): array
+    {
+        if (!$this->sync->isReady()) return ['status'=>'not_ready'];
+        $cnpj=$this->sync->companyCnpj();
+        $lock=Cache::lock('incoming-manifest:'.$cnpj.':'.$invoice->access_key,180);
+        if(!$lock->get()) return ['status'=>'busy'];
+        try {
+            $attempt=DB::transaction(function () use ($invoice) {
+                $locked=IncomingNfe::query()->whereKey($invoice->id)->lockForUpdate()->firstOrFail();
+                $pending=$locked->manifestationAttempts()
+                    ->whereIn('status',['pending','uncertain'])
+                    ->orderBy('id')->lockForUpdate()->first();
+                if(!$pending) return null;
+                if($pending->verification_checked_at
+                    && $pending->verification_checked_at->gt(now()->subMinutes(65))) {
+                    return 'cooldown';
+                }
+                // Reserve the interval before contacting the service.
+                $pending->update(['verification_checked_at'=>now()]);
+                return $pending;
+            },3);
+            if($attempt===null) return ['status'=>'no_pending'];
+            if($attempt==='cooldown') return ['status'=>'cooldown'];
+            $message='Consulta sem comprovante correspondente. Envio continua bloqueado.';
+            try {
+                $raw=$this->gateway->consult(CompanySetting::current(),$cnpj,$invoice->access_key);
+                $proof=$this->evidence->consulted($raw,$invoice->access_key,$attempt->event_code,$cnpj);
+                if($proof!==null) {
+                    DB::transaction(function () use ($attempt,$invoice,$proof): void {
+                        $locked=IncomingNfeManifestationAttempt::query()
+                            ->whereKey($attempt->id)->lockForUpdate()->firstOrFail();
+                        if(!in_array($locked->status,['pending','uncertain'],true)) return;
+                        $locked->update([
+                            'status'=>'accepted','sefaz_status'=>'135',
+                            'protocol'=>$proof['protocol'],
+                            'response_message'=>'Protocolo localizado na consulta de eventos.',
+                        ]);
+                        IncomingNfe::query()->whereKey($invoice->id)->update([
+                            'manifestation'=>$locked->event_code,
+                            'manifestation_protocol'=>$proof['protocol'],'manifested_at'=>now(),
+                        ]);
+                    },3);
+                    return ['status'=>'accepted','protocol'=>$proof['protocol']];
+                }
+            } catch(Throwable $error) {
+                $message=$this->safeError($error);
+                Log::warning('Conferência NF-e não comprovada',[
+                    'kind'=>get_class($error),'invoice_id'=>$invoice->id,
+                ]);
+            }
+            IncomingNfeManifestationAttempt::query()
+                ->whereKey($attempt->id)->whereIn('status',['pending','uncertain'])
+                ->update(['status'=>'uncertain','response_message'=>$message]);
+            return ['status'=>'unconfirmed','message'=>$message];
+        } finally {
+            $lock->release();
+        }
+    }
+
+    /**
+     * Erros da DLL podem conter caminhos e dados do INI. Mostrar somente a
+     * etapa da API e o código numérico, nunca a mensagem bruta.
+     */
+    private function safeError(Throwable $error): string
+    {
+        $message=$error->getMessage();
+        if (preg_match('/ACBr (NFE_[A-Za-z]+) falhou \\((-?\\d+)\\)/',$message,$match)) {
+            return 'Falha da ACBr em '.$match[1].' (código '.$match[2].').';
+        }
+        if(str_contains($message,'Certificado A1 indisponível')) {
+            return 'Certificado A1 indisponível ou vencido.';
+        }
+        if(str_contains($message,'Schemas fiscais não configurados')) {
+            return 'Schemas fiscais não configurados.';
+        }
+        if(str_contains($message,'Call to undefined C function')
+            || str_contains($message,'symbol not found')) {
+            return 'Biblioteca ACBrLib incompatível com o método solicitado.';
+        }
+        if(str_contains($message,'Timeout') || str_contains($message,'TimeOut')) {
+            return 'A SEFAZ não respondeu dentro do prazo; confira antes de reenviar.';
+        }
+        return 'Retorno da ACBr inconclusivo. Confira o evento antes de reenviar.';
+    }
+
     public function parseResponse(string $raw,string $key,string $event): array
     {
-        $section='';
-        $fields=[];
-        foreach (preg_split('/\r\n|\r|\n/',$raw) as $line) {
-            $line=trim($line);
-            if (preg_match('/^\[([^\]]+)\]$/',$line,$match)) {
-                $section=strtolower($match[1]);
-                continue;
-            }
-            if ($section!=='evento001' || !str_contains($line,'=')) continue;
-            [$name,$value]=explode('=',$line,2);
-            $fields[strtolower(trim($name))]=trim($value);
-        }
-        $code=(string)($fields['cstat']??'');
-        if (!preg_match('/^\d{3}$/',$code)) {
-            return ['status'=>'uncertain','code'=>null,'protocol'=>null,
-                'message'=>'Sem retorno individual verificável da SEFAZ.'];
-        }
-        $protocol=trim((string)($fields['nprot']??''));
-        $matches=hash_equals($key,(string)($fields['chdfe']??$fields['chnfe']??''))
-            && hash_equals($event,(string)($fields['tpevento']??''))
-            && ($fields['tpamb']??'')==='1'
-            && (!isset($fields['nseqevento']) || $fields['nseqevento']==='1');
-        if ($code==='135' && $matches && preg_match('/^\d{15}$/',$protocol)) {
-            return ['status'=>'accepted','code'=>$code,'protocol'=>$protocol,
-                'message'=>'Manifestação registrada na SEFAZ.'];
-        }
-        // 573=duplicate; 136=registered but not linked. Neither proves this request.
-        if (!in_array($code,['135','136','573'],true)) {
-            return ['status'=>'rejected','code'=>$code,'protocol'=>null,
-                'message'=>'SEFAZ rejeitou o evento (cStat '.$code.').'];
-        }
-        return ['status'=>'uncertain','code'=>$code,'protocol'=>null,
-            'message'=>'Evento sem confirmação individual válida. Confira na SEFAZ.'];
+        return $this->evidence->sent($raw,$key,$event);
     }
 }

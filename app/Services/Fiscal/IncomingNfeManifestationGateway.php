@@ -16,6 +16,23 @@ class IncomingNfeManifestationGateway
 {
     public function send(CompanySetting $company, string $cnpj, string $key, string $event, ?string $reason): string
     {
+        return $this->withConfiguredAcbr($company,$cnpj,
+            fn(ACBrNFeService $acbr): string =>
+                $acbr->sendRecipientEvent($this->eventIni($cnpj,$key,$event,$reason)));
+    }
+
+    /** Consulta somente leitura; nunca retransmite um evento pendente. */
+    public function consult(CompanySetting $company, string $cnpj, string $key): string
+    {
+        if(!preg_match('/^\d{44}$/',$key)) {
+            throw new RuntimeException('Chave inválida para conferência da manifestação.');
+        }
+        return $this->withConfiguredAcbr($company,$cnpj,
+            fn(ACBrNFeService $acbr): string => $acbr->consultByKeyWithEvents($key));
+    }
+
+    private function withConfiguredAcbr(CompanySetting $company,string $cnpj,callable $operation): string
+    {
         if (!InstanceIdentity::matches($cnpj)) {
             throw new RuntimeException('CNPJ da instalação divergente.');
         }
@@ -53,7 +70,7 @@ class IncomingNfeManifestationGateway
             ] as [$group,$field,$value]) {
                 $acbr->setConfig($group,$field,$value);
             }
-            return $acbr->sendRecipientEvent($this->eventIni($cnpj, $key, $event, $reason));
+            return $operation($acbr);
         } finally {
             try { $acbr->close(); }
             finally { if (is_file($ini)) @unlink($ini); }
