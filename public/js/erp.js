@@ -476,7 +476,12 @@
 
     let optionsBuilt=false;
     const normalize=text=>String(text||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').trim();
-    const quickKind=select.dataset.quickCreate || '';
+    const requestedKind=select.dataset.quickCreate || '';
+    const catalogDialog=document.getElementById('erpCatalogDialog');
+    const mayCreate=requestedKind==='products'
+      ? catalogDialog?.dataset.catalogProducts==='1'
+      : catalogDialog?.dataset.catalogCustomers==='1';
+    const quickKind=mayCreate?requestedKind:'';
     const filterOptions=(query='')=>{
       if(!searchable) return;
       const q=normalize(query);
@@ -706,7 +711,11 @@
         }
       }
       const items=[...menu.querySelectorAll('.ui-select-option:not([hidden]):not(:disabled)')];
-      if(!items.length)return;
+      if(!items.length){
+        if(searchable && key==='Enter' && trigger.value.trim())
+          menu.querySelector('.ui-select-catalog-create:not([hidden])')?.click();
+        return;
+      }
       if(key==='Enter'||(!searchable&&key===' ')){
         (menu.querySelector('.ui-select-option.focused:not([hidden])')||items[0]).click();
         return;

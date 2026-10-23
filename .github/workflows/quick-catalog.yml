@@ -10,6 +10,9 @@ on:
       - 'public/js/quick-catalog.js'
       - 'public/js/erp.js'
       - 'public/js/nfe-editor.js'
+      - 'public/js/nfce-editor.js'
+      - 'resources/views/fiscal/nfe/editor.blade.php'
+      - 'resources/views/sales/create.blade.php'
       - 'public/js/purchases.js'
       - 'public/css/quick-catalog.css'
       - 'tests/Feature/QuickCatalogTest.php'
@@ -32,5 +35,5 @@ jobs:
       - run: composer install --no-interaction --prefer-dist --no-progress
       - run: cp .env.example .env && php artisan key:generate && php artisan optimize:clear
       - run: php artisan view:cache && php artisan route:list --path=quick-catalog
-      - run: php -l app/Http/Controllers/QuickCatalogController.php && node --check public/js/quick-catalog.js && node --check public/js/erp.js && node --check public/js/nfe-editor.js && node --check public/js/purchases.js
+      - run: php -l app/Http/Controllers/QuickCatalogController.php && node --check public/js/quick-catalog.js && node --check public/js/erp.js && node --check public/js/nfe-editor.js && node --check public/js/nfce-editor.js && node --check public/js/purchases.js
       - run: php -d memory_limit=1024M vendor/bin/phpunit --filter=QuickCatalogTest --display-errors --display-warnings
