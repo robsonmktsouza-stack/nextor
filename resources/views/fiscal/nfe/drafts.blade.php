@@ -41,10 +41,16 @@
           <td>{{ $draft->operationNature?->name ?? '—' }}</td>
           <td class="nowrap">{{ $draft->issue_date?->format(\App\Models\AppSetting::dateFormat()) ?? '—' }}</td>
           <td class="price-strong nowrap">R$ {{ number_format((float)data_get($draft->totals,'total',0),2,',','.') }}</td>
-          <td><span class="status {{ $draft->status==='authorized'?'status-ok':'status-muted' }}">
-            {{ match($draft->status){'authorized'=>'Autorizada','pending'=>'Pendente SEFAZ',
-                'queued'=>'Na fila','processing'=>'Processando','rejected'=>'Rejeitada',
-                'prepared'=>'Preparação pendente',default=>$draft->validated_at?'Validada':'Rascunho'} }}
+          <td><span class="status {{ $draft->status==='authorized' && !$draft->cancellation_status?'status-ok':'status-muted' }}">
+            {{ $draft->cancellation_status
+                ? match($draft->cancellation_status){
+                    'pending'=>'Cancelamento na fila','processing'=>'Cancelamento em processamento',
+                    'uncertain'=>'Cancelamento a conferir','rejected'=>'Cancelamento rejeitado',
+                    'authorized'=>'Cancelada',default=>'Cancelamento em análise'}
+                : match($draft->status){'authorized'=>'Autorizada','cancelled'=>'Cancelada',
+                    'pending'=>'Pendente SEFAZ','queued'=>'Na fila','processing'=>'Processando',
+                    'rejected'=>'Rejeitada','prepared'=>'Preparação pendente',
+                    default=>$draft->validated_at?'Validada':'Rascunho'} }}
           </span></td>
           <td>{{ $draft->user?->name ?? '—' }}</td>
           <td class="action-cell">
