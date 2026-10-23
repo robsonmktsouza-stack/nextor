@@ -65,7 +65,17 @@
   </div>
 </form>
 <script id="purchaseProductsJson" type="application/json">@json($products)</script>
-<script id="purchaseItemsJson" type="application/json">@json(old('items',$editing?$purchase->items->map(fn($item)=>['product_id'=>$item->product_id,'quantity'=>$item->quantity,'unit_cost'=>$item->unit_cost])->all():[]))</script>
+@php
+$previousPurchaseItems=$editing
+    ? $purchase->items->map(fn($item)=>[
+        'product_id'=>$item->product_id,
+        'quantity'=>$item->quantity,
+        'unit_cost'=>$item->unit_cost,
+      ])->all()
+    : [];
+$previousPurchaseItems=old('items',$previousPurchaseItems);
+@endphp
+<script id="purchaseItemsJson" type="application/json">@json($previousPurchaseItems)</script>
 @push('styles')<link rel="stylesheet" href="{{ asset('css/purchases.css') }}?v={{ filemtime(public_path('css/purchases.css')) }}">@endpush
 @push('scripts')<script defer src="{{ asset('js/purchases.js') }}?v={{ filemtime(public_path('js/purchases.js')) }}"></script>@endpush
 @endsection
