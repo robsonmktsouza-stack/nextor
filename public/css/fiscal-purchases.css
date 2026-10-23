@@ -47,3 +47,11 @@
 .fiscal-manifest-cell .ui-select .ui-select-trigger{box-sizing:border-box;min-height:30px;height:30px;width:100%;padding:0 23px 0 9px;border-radius:3px;font-size:11px;text-align:left}
 .fiscal-manifest-cell .ui-select .ui-select-value{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fiscal-manifest-cell .ui-select.disabled .ui-select-trigger{color:#8d6b37;background:#f4f6f8}
+
+/* Consulta de evento sem reenvio */
+.fiscal-manifest-verify{margin:5px 0 0}
+.fiscal-manifest-verify-button{display:inline-flex;align-items:center;gap:4px;min-height:25px;padding:2px 7px;border:1px solid #c5d6e4;border-radius:3px;background:#f8fafc;color:#376b8d;font-size:11px;font-weight:600;cursor:pointer}
+.fiscal-manifest-verify-button:hover{background:#eaf2f8}
+.fiscal-manifest-verify-button:focus-visible{outline:2px solid #2b85b9}
+.fiscal-purchases-alert form{margin-top:9px}
+.fiscal-purchases-alert p{margin:5px 0}

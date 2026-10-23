@@ -33,7 +33,39 @@
       <div><span>Protocolo de manifestação</span><strong>{{ $invoice->manifestation_protocol ?: '—' }}</strong></div>
     </div>
     @if($invoice->latestManifestationAttempt && in_array($invoice->latestManifestationAttempt->status,['pending','uncertain'],true))
-      <p class="fiscal-purchases-alert">A última manifestação precisa de conferência na SEFAZ. Não reenvie antes de verificar o evento.</p>
+      <div class="fiscal-purchases-alert" role="status">
+        <strong>Manifestação não comprovada</strong>
+        <p>{{ $invoice->latestManifestationAttempt->response_message ?: 'O evento está pendente de conferência.' }}</p>
+        <form method="post" action="{{ route('fiscal.purchases.manifest.verify',$invoice) }}">
+          @csrf
+          <button type="submit" class="btn btn-secondary">
+            @include('partials.icon',['name'=>'search','size'=>16]) Conferir na SEFAZ
+          </button>
+        </form>
+      </div>
+    @endif
+    @if($invoice->manifestationAttempts->isNotEmpty())
+      <h3>Histórico de manifestações</h3>
+      <div class="table-scroll">
+        <table class="cms-table">
+          <thead><tr><th>Data</th><th>Evento</th><th>Resultado</th><th>cStat</th><th>Protocolo</th><th>Conferência</th></tr></thead>
+          <tbody>
+            @foreach($invoice->manifestationAttempts->sortByDesc('id') as $attempt)
+              <tr>
+                <td class="nowrap">{{ $attempt->created_at?->format('d/m/Y H:i') }}</td>
+                <td>{{ $manifestationEvents[$attempt->event_code] ?? '—' }}</td>
+                <td>{{ match($attempt->status) {
+                  'accepted'=>'Registrado','rejected'=>'Rejeitado','uncertain'=>'Não comprovado',
+                  default=>'Pendente',
+                } }}</td>
+                <td>{{ $attempt->sefaz_status ?: '—' }}</td>
+                <td>{{ $attempt->protocol ?: '—' }}</td>
+                <td>{{ $attempt->verification_checked_at?->format('d/m/Y H:i') ?? '—' }}</td>
+              </tr>
+            @endforeach
+          </tbody>
+        </table>
+      </div>
     @endif
     @if(!$invoice->xml_path)
       <p class="fiscal-purchases-alert">A SEFAZ disponibilizou o resumo. O XML completo pode depender da manifestação do destinatário. Não registre entrada no estoque com base apenas neste resumo.</p>

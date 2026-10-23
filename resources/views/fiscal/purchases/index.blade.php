@@ -105,6 +105,14 @@
               @endforeach
             @endunless
           </select>
+          @if($needsReview)
+            <form method="post" action="{{ route('fiscal.purchases.manifest.verify',$invoice) }}" class="fiscal-manifest-verify">
+              @csrf
+              <button type="submit" class="fiscal-manifest-verify-button" data-tooltip="Consulta fiscal sem reenviar o evento">
+                @include('partials.icon',['name'=>'search','size'=>13]) <span>Conferir</span>
+              </button>
+            </form>
+          @endif
           @if($invoice->manifestation_protocol)
             <span class="fiscal-manifest-protocol" title="Protocolo de manifestação">Prot. {{ $invoice->manifestation_protocol }}</span>
           @endif

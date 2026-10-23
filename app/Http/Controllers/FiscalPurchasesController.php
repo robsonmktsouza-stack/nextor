@@ -97,8 +97,8 @@ final class FiscalPurchasesController extends Controller
         $result=$service->manifest($incomingNfe,$input['event_type'],$input['reason']??null,$request->user()?->id);
         $message=match($result['status']) {
             'accepted'=>'Manifestação registrada na SEFAZ (protocolo confirmado).',
-            'rejected'=>'SEFAZ rejeitou a manifestação (cStat '.($result['code']??'não informado').').',
-            'uncertain'=>'Retorno inconclusivo. Confira o evento na SEFAZ antes de tentar novamente.',
+            'rejected'=>$result['message'] ?? 'SEFAZ rejeitou a manifestação.',
+            'uncertain'=>$result['message'] ?? 'Retorno inconclusivo; consulte na SEFAZ.',
             'review'=>'Já existe um envio pendente de conferência para esta NF-e.',
             'already'=>'Esta manifestação já foi registrada para a NF-e.',
             'busy'=>'Já existe uma manifestação desta nota em andamento.',
@@ -106,6 +106,21 @@ final class FiscalPurchasesController extends Controller
             default=>'Não foi possível confirmar o evento fiscal.',
         };
         return back()->with(in_array($result['status'],['accepted','already'],true)?'success':'error',$message);
+    }
+
+    /** Consulta fiscal somente leitura; não faz uma segunda manifestação. */
+    public function verifyManifestation(IncomingNfe $incomingNfe, IncomingNfeManifestationService $service)
+    {
+        $result=$service->verify($incomingNfe);
+        $message=match($result['status']) {
+            'accepted'=>'Manifestação confirmada na SEFAZ. Protocolo: '.$result['protocol'].'.',
+            'cooldown'=>'Consulta recente. Aguarde o intervalo de segurança antes de conferir novamente.',
+            'no_pending'=>'Não existe manifestação pendente para conferir.',
+            'not_ready'=>'Certificado digital A1 não está disponível.',
+            'busy'=>'Já existe uma operação fiscal em andamento para esta nota.',
+            default=>$result['message'] ?? 'Não foi possível confirmar o evento. O reenvio permanece bloqueado.',
+        };
+        return back()->with($result['status']==='accepted'?'success':'warning',$message);
     }
 
     public function importXml(Request $request,IncomingNfeSyncService $sync)
