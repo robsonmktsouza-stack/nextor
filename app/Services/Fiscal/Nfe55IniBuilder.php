@@ -385,10 +385,16 @@ final class Nfe55IniBuilder
             $refs=$draft->references??[];
             if(!$refs)throw new RuntimeException('Documento referenciado não informado.');
             foreach($refs as $i=>$reference){
-                if(!preg_match('/^\d{44}$/',(string)($reference['key']??''))){
-                    throw new RuntimeException('Chave da NF-e referenciada inválida.');
+                $type=strtoupper((string)($reference['type']??'NFE'));
+                $key=(string)($reference['key']??'');
+                if(!in_array($type,['NFE','CTE'],true)||!preg_match('/^\d{44}$/',$key)){
+                    throw new RuntimeException('Documento fiscal referenciado inválido.');
                 }
-                $add('NFRef'.sprintf('%03d',$i+1),['Tipo'=>'NFE','refNFe'=>$reference['key']]);
+                $add('NFRef'.sprintf('%03d',$i+1),[
+                    'Tipo'=>$type,
+                    'refNFe'=>$type==='NFE'?$key:null,
+                    'refCTe'=>$type==='CTE'?$key:null,
+                ]);
             }
         }
         if($draft->additional_info)$add('DadosAdicionais',['infCpl'=>$draft->additional_info]);
