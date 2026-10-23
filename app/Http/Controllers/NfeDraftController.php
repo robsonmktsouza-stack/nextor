@@ -532,6 +532,15 @@ class NfeDraftController extends Controller
                 ]);
             }
 
+            foreach(['quantity','dimension_quantity','unit_price'] as $valueField){
+                if(!is_numeric($item[$valueField]??null)
+                    ||($valueField!=='unit_price'&&(float)$item[$valueField]<=0)
+                    ||($valueField==='unit_price'&&(float)$item[$valueField]<0)){
+                    throw ValidationException::withMessages([
+                        'items_json'=>'Confira quantidade, fator e valor unitário dos produtos.',
+                    ]);
+                }
+            }
             $quantity=max(0,(float)($item['quantity'] ?? 0));
             $dimensionQuantity=max(0,(float)($item['dimension_quantity'] ?? 1));
             if($dimensionQuantity<=0) $dimensionQuantity=1;
