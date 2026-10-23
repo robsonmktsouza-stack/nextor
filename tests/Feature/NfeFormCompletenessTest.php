@@ -229,6 +229,11 @@ final class NfeFormCompletenessTest extends TestCase
         $data['duplicates_json']=json_encode([[
             'number'=>'001','due_date'=>'2026-12-05','value'=>210,
         ]],JSON_THROW_ON_ERROR);
+        $this->post(route('fiscal.nfe.store'),$data)->assertSessionHasErrors('duplicates_json');
+        self::assertSame(0,NfeDraft::query()->count());
+
+        $data['payment_type']='14';
+        $data['payments_json']='[]';
         $this->post(route('fiscal.nfe.store'),$data)->assertSessionHasNoErrors();
         $draft=NfeDraft::query()->firstOrFail();
         self::assertSame('001',$draft->duplicates[0]['number']);
@@ -237,5 +242,21 @@ final class NfeFormCompletenessTest extends TestCase
             'nDup=001','dVenc=05/12/2026','vDup=210.00'] as $expected){
             self::assertStringContainsString($expected,$ini);
         }
+    }
+
+    public function test_mercantile_payment_requires_invoices_with_sequential_due_dates(): void
+    {
+        [, $nature,$customer]=$this->init();
+        $data=$this->data($nature,$customer);
+        $data['payment_type']='14';
+        $data['payments_json']='[]';
+        $this->post(route('fiscal.nfe.store'),$data)->assertSessionHasErrors('duplicates_json');
+
+        $data['duplicates_json']=json_encode([
+            ['number'=>'001','due_date'=>'2026-12-30','value'=>100],
+            ['number'=>'002','due_date'=>'2026-12-05','value'=>110],
+        ],JSON_THROW_ON_ERROR);
+        $this->post(route('fiscal.nfe.store'),$data)->assertSessionHasErrors('duplicates_json');
+        self::assertSame(0,NfeDraft::query()->count());
     }
 }
