@@ -559,7 +559,7 @@ $origins=[
   <div class="dialog-footer nfe-dialog-footer">
     <div class="nfe-dialog-status">
       <span class="status {{ $draft->status==='authorized'?'status-ok':'status-muted' }}">
-        {{ match($draft->status){'authorized'=>'Autorizada','pending'=>'Consultando SEFAZ','queued'=>'Na fila',
+        {{ match($draft->status){'authorized'=>'Autorizada','cancelled'=>'Cancelada','pending'=>'Consultando SEFAZ','queued'=>'Na fila',
           'processing'=>'Processando','prepared'=>'Preparação pendente','rejected'=>'Rejeitada',default=>$draft->validated_at?'Validada':'Rascunho'} }}
       </span>
       <strong id="nfeFooterTotal">R$ 0,00</strong>
@@ -571,6 +571,10 @@ $origins=[
       @if($isEditing && $draft->status==='draft')
         <button class="btn btn-success" type="submit" form="nfeEmitForm" id="nfeSubmitEmission"
           @disabled(!$draft->validated_at)>Emitir NF-e</button>
+      @if($isEditing && $draft->status==='authorized' && !$draft->cancellation_status && auth()->user()->canAccess('settings'))
+        <button class="btn btn-secondary" type="button" data-nfe-modal-open="nfeCancelDialog"
+          data-nfe-allow-readonly>Solicitar cancelamento</button>
+      @endif
       @elseif($isEditing && $draft->status==='prepared')
         <button class="btn btn-secondary" type="submit" form="nfeRetryForm">Preparar novamente</button>
       @elseif($isEditing && in_array($draft->status,['pending','processing','rejected','authorized'],true))
@@ -585,6 +589,14 @@ $origins=[
     </div>
   </div>
 </form>
+@if($isEditing && $draft->cancellation_status)
+  <div class="nfe-dialog-status" role="status">
+    Cancelamento: {{ match($draft->cancellation_status){
+      'pending'=>'Aguardando fila fiscal','processing'=>'Aguardando SEFAZ',
+      'authorized'=>'Autorizado','rejected'=>'Rejeitado',
+      'uncertain'=>'Conferência necessária',default=>'Em análise'} }}
+  </div>
+@endif
 @if($isEditing)
   <form id="nfeEmitForm" method="post" action="{{ route('fiscal.nfe.emit',$draft) }}">@csrf</form>
   <form id="nfeConsultForm" method="post" action="{{ route('fiscal.nfe.consult',$draft) }}">@csrf</form>
@@ -592,6 +604,38 @@ $origins=[
 @endif
   </div>
 </div>
+
+@if($isEditing && $draft->status==='authorized' && !$draft->cancellation_status && auth()->user()->canAccess('settings'))
+<div class="nextor-modal-layer nfe-modal-layer" id="nfeCancelDialog" data-nfe-modal aria-hidden="true" hidden>
+  <div class="erp-dialog small-dialog nextor-modal-window nfe-small-modal-window" role="dialog"
+       aria-modal="true" aria-labelledby="nfeCancelDialogTitle">
+    <div class="dialog-header">
+      <h2 id="nfeCancelDialogTitle">Solicitar cancelamento da NF-e</h2>
+      <button type="button" data-nfe-modal-close class="close-dialog" aria-label="Fechar">@include('partials.icon',['name'=>'x'])</button>
+    </div>
+    <form method="post" action="{{ route('fiscal.nfe.cancel',$draft) }}">
+      @csrf
+      <div class="dialog-body">
+        <p>O pedido será transmitido à SEFAZ. A nota permanecerá autorizada até a confirmação fiscal.</p>
+        <label class="field"><span>Justificativa *</span>
+          <textarea name="reason" rows="3" minlength="15" maxlength="255" required></textarea>
+        </label>
+        <label class="field"><span>Senha de confirmação *</span>
+          <input type="password" name="current_password" autocomplete="current-password" required>
+        </label>
+        <label class="field">
+          <span><input type="checkbox" name="operation_not_completed" value="1" required>
+            Confirmo que a operação não ocorreu e que posso solicitar o cancelamento.</span>
+        </label>
+      </div>
+      <div class="dialog-footer">
+        <button type="button" data-nfe-modal-close class="btn btn-secondary">Voltar</button>
+        <button type="submit" class="btn btn-danger">Solicitar cancelamento</button>
+      </div>
+    </form>
+  </div>
+</div>
+@endif
 
 <div class="nextor-modal-layer nfe-modal-layer" id="nfeItemDialog" data-nfe-modal aria-hidden="true" hidden>
   <div class="erp-dialog nfe-item-dialog nextor-modal-window" role="dialog" aria-modal="true" aria-labelledby="nfeItemTitle">
