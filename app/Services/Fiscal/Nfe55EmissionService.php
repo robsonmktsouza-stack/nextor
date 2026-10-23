@@ -266,7 +266,8 @@ final class Nfe55EmissionService
         }
     }
 
-    private function configure(ACBrNFeService $service,CompanySetting $company,NfeDraft $draft,string $password): void
+    /** Shared model 55 ACBr configuration for emission and fiscal events. */
+    public function configure(ACBrNFeService $service,CompanySetting $company,NfeDraft $draft,string $password): void
     {
         $schemas=(string)config('services.acbr_nfe.schemas_path','');
         if(!is_dir($schemas)){
