@@ -107,6 +107,8 @@ Route::middleware(['auth','control.license'])->group(function () {
     Route::post('/customers/bulk-duplicate',[CustomerController::class,'bulkDuplicate'])->name('customers.bulk-duplicate')->middleware('permission:customers');
     Route::delete('/customers/bulk-delete',[CustomerController::class,'bulkDelete'])->name('customers.bulk-delete')->middleware('permission:customers');
     Route::get('/purchases',[PurchaseController::class,'index'])->name('purchases.index')->middleware('permission:purchases');
+    Route::get('/purchases/import-nfe/{incomingNfe}',[PurchaseController::class,'importFromNfe'])
+        ->name('purchases.import-from-nfe')->middleware(['permission:purchases','permission:fiscal','company.configured']);
     Route::get('/purchases/create',[PurchaseController::class,'create'])->name('purchases.create')->middleware(['permission:purchases','company.configured']);
     Route::post('/purchases',[PurchaseController::class,'store'])->name('purchases.store')->middleware(['permission:purchases','company.configured']);
     Route::get('/purchases/{purchase}',[PurchaseController::class,'show'])->name('purchases.show')->middleware('permission:purchases');
