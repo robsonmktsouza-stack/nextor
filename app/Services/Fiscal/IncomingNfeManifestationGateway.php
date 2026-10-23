@@ -21,6 +21,20 @@ class IncomingNfeManifestationGateway
                 $acbr->sendRecipientEvent($this->eventIni($cnpj,$key,$event,$reason)));
     }
 
+    /**
+     * Diagnóstico offline da configuração e do carregamento do INI.
+     * Em nenhuma hipótese chama NFE_EnviarEvento nem registra tentativa.
+     */
+    public function diagnose(CompanySetting $company,string $cnpj,string $key,string $event): void
+    {
+        $payload=$this->eventIni($cnpj,$key,$event,null);
+        $this->withConfiguredAcbr($company,$cnpj,
+            function (ACBrNFeService $acbr) use ($payload): string {
+                $acbr->prepareRecipientEvent($payload);
+                return 'prepared';
+            });
+    }
+
     /** Consulta somente leitura; nunca retransmite um evento pendente. */
     public function consult(CompanySetting $company, string $cnpj, string $key): string
     {
