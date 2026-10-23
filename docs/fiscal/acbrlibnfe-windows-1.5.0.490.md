@@ -15,9 +15,17 @@ Pacote examinado: `ACBrLibNFe-Windows-1.5.0.490.7z` (fornecido pelo proprietári
 - **Não há compilação Linux nem pacote de exemplos PHP neste arquivo**. O `LEIA-ME.pdf` indica links separados para demos e arquivos Linux.
 - Inspeção estática em Linux: **a DLL Windows não foi carregada nem executada**. Ter o símbolo exportado NÃO valida a assinatura FFI em tempo de execução, a geração fiscal, a vigência dos schemas nem a autorização SEFAZ.
 
+### Incompatibilidade encontrada no Laragon e corrigida no instalador
+
+- Em 23/10/2026 o `php artisan acbr:nfe-doctor` localizou uma DLL existente em `C:/laragon/acbr/Windows/MT/Cdecl/ACBrNFe64.dll` e informou a versão interna `1.5.0.489`, com FFI inicializada e 0 falhas.
+- O SHA-256 da DLL ativa informado pelo usuário foi `391B8E7FC1BE92FFF81A6D37428484DF98DDCA2777DF8EAE8BD47AC1CD3B58A1`, diferente da DLL do pacote fornecido (`A5C355C67913253DBCE28C7F4157C4460321440A0E73CDC66FCE28D938BE47BA`). **São binários diferentes; não é seguro afirmar que a instalação usa o pacote recebido.**
+- Instalador corrigido para substituir **a DLL que o ERP efetivamente carrega** no caminho `Windows/MT/Cdecl/ACBrNFe64.dll`, gerando backup da anterior e verificando o hash após cópia.
+- O instalador preserva `ACBr_NFE_CONFIG_PATH` existente (no Laragon era `C:/laragon/acbr/config/acbr-nfe.ini`) e atualiza apenas `ACBr_NFE_LIBRARY_PATH` e `ACBr_NFE_SCHEMAS_PATH`. Os schemas são instalados em pasta isolada `releases/1.5.0.490/dep/Schemas/NFe` para evitar mistura com versões antigas.
+- Antes de substituir a DLL, encerre o worker fiscal e o Laragon para evitar arquivos bloqueados. Reinicie Laragon e o worker após instalar. Não copie DLL para `System32`.
+- Revalide com `Get-FileHash "C:\\laragon\\acbr\\Windows\\MT\\Cdecl\\ACBrNFe64.dll" -Algorithm SHA256` e com `php artisan acbr:nfe-doctor`. Compare o hash **completo**; a string de versão interna pode não coincidir com a versão do arquivo compactado.
 ## Instalação no Laragon (Windows)
 
-Use o instalador versionado, que extrai seu próprio `.7z`, confere o hash da DLL MT/Cdecl x64, valida os schemas, cria backup do `.env`, copia somente a biblioteca adequada e as dependências x64:
+Use o instalador versionado, que extrai seu próprio `.7z`, confere o hash da DLL MT/Cdecl x64, valida os schemas, cria backup do `.env`, copia a biblioteca MT/Cdecl x64 no mesmo caminho já utilizado pelo PHP, preserva o INI existente, isola os schemas por versão e instala as dependências x64:
 
 ```powershell
 cd C:\laragon\www\nextor
