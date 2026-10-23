@@ -112,7 +112,7 @@ final class IncomingNfeToPurchaseTest extends TestCase
             ->assertDontSee('aria-label="Importar NF-e para Compras"',false);
     }
 
-    public function test_summary_requests_matching_xml_and_opens_import_after_upload(): void
+    public function test_import_action_is_disabled_until_sefaz_xml_is_available(): void
     {
         Carbon::setTestNow('2026-10-23 13:00:00');
         Storage::fake('local');
@@ -121,24 +121,30 @@ final class IncomingNfeToPurchaseTest extends TestCase
             'access_key'=>$this->key(),'status'=>'summary','total'=>'68.00',
             'issued_at'=>'2026-10-23 09:00:00',
         ]);
-        $this->get(route('fiscal.purchases.index',['month'=>'2026-10']))
-            ->assertSee('data-import-purchase-invoice="'.$invoice->id.'"',false)
-            ->assertSee('aria-label="Importar NF-e para Compras"',false);
+        $listing=fn()=> $this->get(route('fiscal.purchases.index',['month'=>'2026-10']));
+        $listing()->assertOk()
+            ->assertSee('aria-label="Importar para Compras indisponível"',false)
+            ->assertSee('XML ainda não recebido')
+            ->assertDontSee('data-import-purchase-invoice',false)
+            ->assertDontSee('aria-label="Importar NF-e para Compras"',false);
         $this->get(route('purchases.import-from-nfe',$invoice))
             ->assertRedirect()->assertSessionHasErrors('xml');
 
-        $wrong=str_replace($this->key(),'29261099887766000122550010000001231000009999',$this->xml($this->key()));
-        $this->post(route('fiscal.purchases.import'),[
-            'incoming_nfe_id'=>$invoice->id,
-            'xml'=>UploadedFile::fake()->createWithContent('outra.xml',$wrong),
-        ])->assertRedirect()->assertSessionHasErrors('xml');
-        self::assertSame('summary',$invoice->fresh()->status);
+        // A row marked as complete is still unavailable when its XML is missing.
+        $invoice->update([
+            'status'=>'xml_received',
+            'xml_path'=>'fiscal/incoming-nfe/'.$this->key().'.xml',
+        ]);
+        $listing()->assertOk()
+            ->assertSee('aria-label="Importar para Compras indisponível"',false)
+            ->assertDontSee('aria-label="Importar NF-e para Compras"',false);
 
-        $this->post(route('fiscal.purchases.import'),[
-            'incoming_nfe_id'=>$invoice->id,
-            'xml'=>UploadedFile::fake()->createWithContent('entrada.xml',$this->xml($this->key())),
-        ])->assertRedirect(route('purchases.import-from-nfe',$invoice))->assertSessionHasNoErrors();
-        self::assertSame('xml_received',$invoice->fresh()->status);
+        // When synchronization delivers the full XML, the action becomes usable.
+        $invoice=app(IncomingNfeSyncService::class)->importXml($this->xml($this->key()));
+        $listing()->assertOk()
+            ->assertSee(route('purchases.import-from-nfe',$invoice),false)
+            ->assertSee('aria-label="Importar NF-e para Compras"',false)
+            ->assertDontSee('aria-label="Importar para Compras indisponível"',false);
         $this->assertDatabaseCount('purchases',0);
     }
 }

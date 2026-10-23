@@ -162,34 +162,17 @@ final class FiscalPurchasesController extends Controller
         return back()->with($result['status']==='accepted'?'success':'warning',$message);
     }
 
-    public function importXml(Request $request,IncomingNfeSyncService $sync,
-        \App\Services\Fiscal\IncomingNfeParser $parser)
+    public function importXml(Request $request,IncomingNfeSyncService $sync)
     {
-        $data=$request->validate([
+        $file=$request->validate([
             'xml'=>['required','file','max:6144',
                 'mimetypes:application/xml,text/xml,text/plain,application/octet-stream'],
-            'incoming_nfe_id'=>['nullable','integer','exists:incoming_nfes,id'],
-        ]);
-        $file=$data['xml'];
-        $raw=(string)file_get_contents($file->getRealPath());
+        ])['xml'];
         try {
-            $target=!empty($data['incoming_nfe_id'])
-                ? IncomingNfe::query()->findOrFail($data['incoming_nfe_id'])
-                : null;
-            if($target) {
-                $detail=$parser->details($raw,$sync->companyCnpj());
-                if($detail['access_key']!==$target->access_key) {
-                    return back()->withErrors(['xml'=>'O XML não corresponde à NF-e selecionada.']);
-                }
-            }
-            $incoming=$sync->importXml($raw);
+            $incoming=$sync->importXml((string)file_get_contents($file->getRealPath()));
         } catch(InvalidArgumentException $error) {
             return back()->withErrors(['xml'=>$error->getMessage()]);
         }
-        if($target){
-            return redirect()->route('purchases.import-from-nfe',$incoming);
-        }
-        return redirect()->route('fiscal.purchases.show',$incoming)
-            ->with('success','XML importado.');
+        return redirect()->route('fiscal.purchases.show',$incoming)->with('success','XML importado.');
     }
 }
