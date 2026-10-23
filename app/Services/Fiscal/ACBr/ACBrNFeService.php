@@ -319,6 +319,33 @@ final class ACBrNFeService
         return FFI::string($buffer);
     }
 
+    /**
+     * Read-only NF-e distribution. ONE FFI call: a buffer error must not
+     * cause another SEFAZ request (consumo indevido / 656).
+     */
+    public function distributeByLastNsu(int $ufCode,string $cnpj,string $lastNsu): string
+    {
+        if($ufCode<11 || $ufCode>53 || preg_match('/^\d{14}$/',$cnpj)!==1
+            || preg_match('/^\d{15}$/',$lastNsu)!==1) {
+            throw new RuntimeException('UF, CNPJ ou último NSU inválidos para distribuição.');
+        }
+        $this->initialize();
+        $capacity=8388608;
+        $buffer=FFI::new("char[{$capacity}]");
+        $size=FFI::new('int');
+        $size->cdata=$capacity;
+        $status=$this->lib->NFE_DistribuicaoDFePorUltNSU(
+            $this->handle,$ufCode,$cnpj,$lastNsu,$buffer,FFI::addr($size)
+        );
+        if($size->cdata >= $capacity) {
+            throw new RuntimeException('Resposta da distribuição excedeu 8 MB; resultado indeterminado. Não tentar novamente imediatamente.');
+        }
+        if($status!==0) {
+            throw new RuntimeException("Consulta de NF-e destinadas falhou ({$status}): ".$this->lastReturn());
+        }
+        return FFI::string($buffer);
+    }
+
     public function consultByKey(string $accessKey): string
     {
         if (preg_match('/^\d{44}$/', $accessKey) !== 1) {
