@@ -5,7 +5,12 @@
   @csrf
   @if($editing) @method('PUT') @endif
   <section class="editor-panel purchase-header-panel">
-    <div class="purchase-section-heading"><h2>Dados da compra</h2></div>
+    <div class="purchase-section-heading">
+      <h2>Dados da compra</h2>
+      @if(isset($sourceInvoice))
+        <span class="purchase-import-origin">NF-e {{ $sourceInvoice->summary['number']??substr($sourceInvoice->access_key,-9) }} · R$ {{ number_format((float)$sourceInvoice->total,2,',','.') }}</span>
+      @endif
+    </div>
     <div class="purchase-head-grid">
       <label class="field purchase-col-5"><span>Fornecedor *</span>
         <select name="supplier_id" data-quick-create="suppliers" required autofocus>
@@ -90,7 +95,7 @@ $previousPurchaseItems=$editing
         'icms_st'=>$item->icms_st,
       ])->all()
     : [];
-$previousPurchaseItems=old('items',$previousPurchaseItems);
+$previousPurchaseItems=old('items',$importItems??$previousPurchaseItems);
 @endphp
 <script id="purchaseProductsJson" type="application/json">@json($products)</script>
 <script id="purchaseItemsJson" type="application/json">@json($previousPurchaseItems)</script>
