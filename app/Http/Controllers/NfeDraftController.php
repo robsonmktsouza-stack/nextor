@@ -493,7 +493,7 @@ class NfeDraftController extends Controller
                 'discount'=>$totals['discount'],
                 'net_value'=>$totals['total'],
             ],
-            'duplicates'=>$this->decodeArray($data['duplicates_json'] ?? null,'duplicatas'),
+            'duplicates'=>$this->validatedDuplicates($data['duplicates_json'] ?? null,$totals),
             'payments'=>$payments,
             'references'=>$references,
             'custom_fields'=>[],
@@ -787,6 +787,47 @@ class NfeDraftController extends Controller
             throw ValidationException::withMessages(['payment_other_description'=>'Informe a descrição do pagamento Outros.']);
         }
         return array_merge([$first],$normalized);
+    }
+
+    private function validatedDuplicates(?string $json,array $totals): array
+    {
+        $duplicates=$this->decodeArray($json,'duplicatas');
+        if(count($duplicates)>120){
+            throw ValidationException::withMessages([
+                'duplicates_json'=>'Uma NF-e permite no máximo 120 duplicatas.',
+            ]);
+        }
+        $normalized=[];$sum=0;
+        foreach($duplicates as $index=>$duplicate){
+            if(!is_array($duplicate)||!is_numeric($duplicate['value']??null)){
+                throw ValidationException::withMessages(['duplicates_json'=>'Confira os valores das duplicatas.']);
+            }
+            $value=(float)$duplicate['value'];
+            if(!is_finite($value)||$value<=0||$value>999999999){
+                throw ValidationException::withMessages(['duplicates_json'=>'O valor de cada duplicata deve ser positivo.']);
+            }
+            $due=(string)($duplicate['due_date']??'');
+            $date=\DateTimeImmutable::createFromFormat('!Y-m-d',$due);
+            if(!$date||$date->format('Y-m-d')!==$due){
+                throw ValidationException::withMessages(['duplicates_json'=>'Informe uma data de vencimento válida em cada duplicata.']);
+            }
+            $number=trim((string)($duplicate['number']??''));
+            if($number!==''&&(mb_strlen($number)>3||!preg_match('/^[A-Za-z0-9]{1,3}$/',$number))){
+                throw ValidationException::withMessages(['duplicates_json'=>'Confira o número da duplicata (até 3 letras ou números).']);
+            }
+            $cents=(int)round($value*100,0,PHP_ROUND_HALF_UP);
+            $sum+=$cents;
+            $normalized[]=[
+                'number'=>$number!==''?$number:str_pad((string)($index+1),3,'0',STR_PAD_LEFT),
+                'due_date'=>$due,'value'=>$cents/100,
+            ];
+        }
+        if($normalized&&$sum!==(int)round((float)$totals['total']*100,0,PHP_ROUND_HALF_UP)){
+            throw ValidationException::withMessages([
+                'duplicates_json'=>'O total das duplicatas precisa conferir com o valor da NF-e.',
+            ]);
+        }
+        return $normalized;
     }
 
     private function validatedReferences(?string $json): array
