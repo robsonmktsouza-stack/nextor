@@ -60,7 +60,7 @@ final class IncomingNfeManifestationService
             $code=null;
             $protocol=null;
             $resultStatus='uncertain';
-            $responseMessage='Não foi possível comprovar o registro. Utilize Conferir na SEFAZ.';
+            $responseMessage='Registro não comprovado. A consulta de confirmação será feita automaticamente.';
             try {
                 $raw=$this->gateway->send(CompanySetting::current(),$cnpj,
                     $invoice->access_key,$event,$reason);
@@ -121,7 +121,7 @@ final class IncomingNfeManifestationService
             },3);
             if($attempt===null) return ['status'=>'no_pending'];
             if($attempt==='cooldown') return ['status'=>'cooldown'];
-            $message='Consulta sem comprovante correspondente. Envio continua bloqueado.';
+            $message='Nenhum comprovante correspondente encontrado. Nova conferência automática será agendada; o reenvio continua bloqueado.';
             try {
                 $raw=$this->gateway->consult(CompanySetting::current(),$cnpj,$invoice->access_key);
                 $proof=$this->evidence->consulted($raw,$invoice->access_key,$attempt->event_code,$cnpj);
@@ -182,9 +182,9 @@ final class IncomingNfeManifestationService
             return 'Biblioteca ACBrLib incompatível com o método solicitado.';
         }
         if(str_contains($message,'Timeout') || str_contains($message,'TimeOut')) {
-            return 'A SEFAZ não respondeu dentro do prazo; confira antes de reenviar.';
+            return 'A SEFAZ não respondeu dentro do prazo; uma conferência automática será realizada sem reenviar.';
         }
-        return 'Retorno da ACBr inconclusivo. Confira o evento antes de reenviar.';
+        return 'Retorno da ACBr inconclusivo; o sistema verificará automaticamente antes de permitir outro envio.';
     }
 
     public function parseResponse(string $raw,string $key,string $event): array
