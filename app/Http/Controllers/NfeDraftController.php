@@ -697,10 +697,19 @@ class NfeDraftController extends Controller
             if($dimension<=0) $dimension=1;
             $value=$quantity*$dimension*max(0,(float)($item['unit_price'] ?? 0));
             $totals['products']+=$value;
+            $itemSubtotal=$value;
             foreach(['freight','insurance','other_expenses'] as $field){
-                $totals[$field]+=max(0,(float)($item[$field]??0));
+                $charge=max(0,(float)($item[$field]??0));
+                $totals[$field]+=$charge;
+                $itemSubtotal+=$charge;
             }
-            $totals['discount']+=max(0,(float)($item['discount']??0));
+            $itemDiscount=max(0,(float)($item['discount']??0));
+            if(round($itemSubtotal-$itemDiscount,2)<0){
+                throw ValidationException::withMessages([
+                    'items_json'=>'O desconto do item supera seu valor.',
+                ]);
+            }
+            $totals['discount']+=$itemDiscount;
 
             $tax=is_array($item['tax_data'] ?? null) ? $item['tax_data'] : [];
             $ipiRate=max(0,(float)($tax['ipi_rate'] ?? 0));
