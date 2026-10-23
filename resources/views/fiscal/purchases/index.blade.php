@@ -29,6 +29,7 @@
     </div>
     <div class="grid-actions-right">
       <span class="fiscal-purchases-count">{{ $counts['total'] }} {{ $counts['total'] === 1 ? 'nota' : 'notas' }}</span>
+      <span class="fiscal-purchases-amount" data-tooltip="Soma das notas encontradas pelos filtros, incluindo outras páginas">Total: <strong>R$ {{ number_format((float)$filteredTotal,2,',','.') }}</strong></span>
       <form method="post" action="{{ route('fiscal.purchases.automatic') }}" class="fiscal-purchases-auto-form">
         @csrf
         <input type="hidden" name="auto_sync" value="{{ $state->auto_sync ? '0' : '1' }}">
@@ -73,8 +74,13 @@
   </div>
   <div class="table-scroll">
     <table class="cms-table fiscal-purchases-table">
+      <colgroup>
+        <col class="col-emission"><col class="col-supplier"><col class="col-document">
+        <col class="col-value"><col class="col-status"><col class="col-manifest">
+        <col class="col-xml"><col class="col-actions">
+      </colgroup>
       <thead>
-        <tr><th>Emissão</th><th>Fornecedor</th><th>Documento</th><th class="align-right">Valor</th><th>Situação</th><th>Manifesto</th><th>XML</th><th class="action-cell">Ação</th></tr>
+        <tr><th>Emissão</th><th>Fornecedor</th><th>Documento</th><th class="align-right">Valor total</th><th>Situação</th><th>Manifesto</th><th>XML</th><th class="action-cell">Ações</th></tr>
       </thead>
       <tbody>
       @forelse($invoices as $invoice)
@@ -83,7 +89,8 @@
         <td><strong>{{ $invoice->supplier_name ?: 'Fornecedor não identificado' }}</strong>
           <small>{{ $invoice->supplier_cnpj ?: 'CNPJ não informado' }}</small>
         </td>
-        <td><span class="fiscal-purchases-key">{{ substr($invoice->access_key,0,16) }}…{{ substr($invoice->access_key,-6) }}</span></td>
+        <td><a class="fiscal-purchases-key fiscal-purchases-key-short" href="{{ route('fiscal.purchases.show',$invoice) }}"
+            title="{{ $invoice->access_key }}">{{ substr($invoice->access_key,0,14) }}…{{ substr($invoice->access_key,-6) }}</a></td>
         <td class="price-strong align-right nowrap">{{ $invoice->total!==null ? 'R$ '.number_format((float)$invoice->total,2,',','.') : '—' }}</td>
         <td><span class="status {{ $invoice->status==='xml_received' ? 'status-ok':'status-muted' }}">{{ $invoice->status==='xml_received' ? 'Para conferência':'Resumo recebido' }}</span></td>
         <td class="fiscal-manifest-cell">
@@ -91,6 +98,11 @@
             $lastAttempt=$invoice->latestManifestationAttempt;
             $needsReview=$lastAttempt && in_array($lastAttempt->status,['pending','uncertain'],true);
             $manifestLabel=$manifestationEvents[$invoice->manifestation] ?? 'Sem manifesto';
+            $manifestShort=match($invoice->manifestation) {
+              '210210'=>'Ciência registrada','210200'=>'Confirmada',
+              '210220'=>'Desconhecida','210240'=>'Não realizada',
+              default=>'Sem manifesto',
+            };
           @endphp
           <select class="fiscal-manifest-select" data-no-search data-manifest-select
             data-manifest-url="{{ route('fiscal.purchases.manifest',$invoice) }}"
@@ -98,30 +110,44 @@
             data-issued-date="{{ $invoice->issued_at?->format('Y-m-d') }}"
             aria-label="Manifestação da nota {{ $invoice->access_key }}"
             @disabled($needsReview)
-            @if($needsReview) title="Envio anterior sem confirmação; consulte a SEFAZ" @endif>
-            <option value="">{{ $needsReview ? 'Verificar na SEFAZ' : $manifestLabel }}</option>
+            @if($needsReview) title="Conferência automática em andamento" @endif>
+            <option value="">{{ $needsReview ? 'Em análise' : $manifestShort }}</option>
             @unless($needsReview)
               @foreach($manifestationEvents as $eventCode=>$eventLabel)
                 <option value="{{ $eventCode }}" @disabled($invoice->manifestation===$eventCode)>{{ $eventLabel }}</option>
               @endforeach
             @endunless
           </select>
-          @if($needsReview)
-            <form method="post" action="{{ route('fiscal.purchases.manifest.verify',$invoice) }}" class="fiscal-manifest-verify">
-              @csrf
-              <button type="submit" class="fiscal-manifest-verify-button" data-tooltip="Consulta fiscal sem reenviar o evento">
-                @include('partials.icon',['name'=>'search','size'=>13]) <span>Conferir</span>
-              </button>
-            </form>
-          @endif
           @if($invoice->manifestation_protocol)
             <span class="fiscal-manifest-protocol" title="Protocolo de manifestação">Prot. {{ $invoice->manifestation_protocol }}</span>
           @endif
         </td>
         <td>{{ $invoice->xml_path ? 'Disponível':'Pendente' }}</td>
-        <td class="action-cell"><a class="btn-icon" href="{{ route('fiscal.purchases.show',$invoice) }}" data-tooltip="Conferir nota" aria-label="Conferir nota">
-          @include('partials.icon',['name'=>'eye','size'=>17])
-        </a></td>
+        <td class="action-cell">
+          <div class="fiscal-purchase-actions">
+            <a class="btn-icon" href="{{ route('fiscal.purchases.show',$invoice) }}" data-tooltip="Detalhes da NF-e" aria-label="Detalhes da NF-e">
+              @include('partials.icon',['name'=>'eye','size'=>16])
+            </a>
+            @if($invoice->xml_path)
+              <a class="btn-icon" href="{{ route('fiscal.purchases.xml',$invoice) }}" data-tooltip="Baixar XML da NF-e" aria-label="Baixar XML da NF-e">
+                @include('partials.icon',['name'=>'download','size'=>16])
+              </a>
+              <a class="btn-icon" href="{{ route('fiscal.purchases.danfe',$invoice) }}" target="_blank" rel="noopener"
+                data-tooltip="Abrir DANFE em PDF" aria-label="Imprimir DANFE">
+                @include('partials.icon',['name'=>'print','size'=>16])
+              </a>
+            @else
+              <button type="button" class="btn-icon fiscal-purchase-action-disabled" disabled
+                aria-label="Baixar XML indisponível" title="XML ainda não recebido">
+                @include('partials.icon',['name'=>'download','size'=>16])
+              </button>
+              <button type="button" class="btn-icon fiscal-purchase-action-disabled" disabled
+                aria-label="Imprimir DANFE indisponível" title="DANFE disponível após receber XML autorizado">
+                @include('partials.icon',['name'=>'print','size'=>16])
+              </button>
+            @endif
+          </div>
+        </td>
       </tr>
       @empty
       <tr><td colspan="8" class="empty-cell">

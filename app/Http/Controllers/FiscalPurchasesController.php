@@ -28,6 +28,7 @@ final class FiscalPurchasesController extends Controller
             ->when(in_array($status,['summary','xml_received'],true),
                 fn($q)=>$q->where('status',$status))
             ->orderByDesc('issued_at')->orderByDesc('id');
+        $filteredTotal=(clone $query)->reorder()->sum('total');
         $invoices=$query->with('latestManifestationAttempt')->paginate(25)->withQueryString();
         $counts=[
             'total'=>IncomingNfe::query()->count(),
@@ -36,6 +37,7 @@ final class FiscalPurchasesController extends Controller
         ];
         return view('fiscal.purchases.index',[
             'invoices'=>$invoices,'state'=>$state,'counts'=>$counts,
+            'filteredTotal'=>$filteredTotal,
             'search'=>$term,'status'=>$status,'ready'=>$sync->isReady(),
             'manifestationEvents'=>IncomingNfeManifestationService::EVENTS,
             'tabs'=>FiscalController::TABS,'tab'=>'purchases',
@@ -60,6 +62,28 @@ final class FiscalPurchasesController extends Controller
             ['Content-Type'=>'application/xml','X-Content-Type-Options'=>'nosniff',
              'Cache-Control'=>'private, no-store']
         );
+    }
+
+    /**
+     * DANFE modelo 55: somente XML autorizado, nunca resumo da distribuição.
+     */
+    public function danfe(IncomingNfe $incomingNfe, \App\Services\Fiscal\IncomingNfeDanfeService $service)
+    {
+        abort_unless($incomingNfe->status==='xml_received' && $incomingNfe->xml_path,404);
+        try {
+            $pdf=$service->generate($incomingNfe);
+        } catch (\Throwable $error) {
+            \Illuminate\Support\Facades\Log::warning('DANFE de entrada indisponível',[
+                'invoice_id'=>$incomingNfe->id,'kind'=>get_class($error),
+            ]);
+            abort(409,'DANFE indisponível. Confira o XML autorizado e a configuração fiscal.');
+        }
+        return response($pdf,200,[
+            'Content-Type'=>'application/pdf',
+            'Content-Disposition'=>'inline; filename="DANFE-'.$incomingNfe->access_key.'.pdf"',
+            'Cache-Control'=>'private, no-store, no-cache, must-revalidate',
+            'X-Content-Type-Options'=>'nosniff',
+        ]);
     }
 
     public function synchronize(IncomingNfeSyncService $sync)

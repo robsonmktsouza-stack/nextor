@@ -15,6 +15,9 @@
       <a class="grid-primary-action" href="{{ route('fiscal.purchases.xml',$invoice) }}">
         @include('partials.icon',['name'=>'download','size'=>17]) <span>Baixar XML</span>
       </a>
+      <a class="grid-tool grid-tool-wide" href="{{ route('fiscal.purchases.danfe',$invoice) }}" target="_blank" rel="noopener">
+        @include('partials.icon',['name'=>'print','size'=>17]) <span>Imprimir DANFE</span>
+      </a>
       @endif
     </div>
     <div class="grid-actions-right">
@@ -34,14 +37,9 @@
     </div>
     @if($invoice->latestManifestationAttempt && in_array($invoice->latestManifestationAttempt->status,['pending','uncertain'],true))
       <div class="fiscal-purchases-alert" role="status">
-        <strong>Manifestação não comprovada</strong>
-        <p>{{ $invoice->latestManifestationAttempt->response_message ?: 'O evento está pendente de conferência.' }}</p>
-        <form method="post" action="{{ route('fiscal.purchases.manifest.verify',$invoice) }}">
-          @csrf
-          <button type="submit" class="btn btn-secondary">
-            @include('partials.icon',['name'=>'search','size'=>16]) Conferir na SEFAZ
-          </button>
-        </form>
+        <strong>Manifestação em análise</strong>
+        <p>{{ $invoice->latestManifestationAttempt->response_message ?: 'A confirmação será consultada automaticamente na SEFAZ.' }}</p>
+        <p>O Lumeron verifica periodicamente sem reenviar o evento.</p>
       </div>
     @endif
     @if($invoice->manifestationAttempts->isNotEmpty())

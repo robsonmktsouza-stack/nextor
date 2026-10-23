@@ -57,3 +57,32 @@
 .fiscal-purchases-alert p{margin:5px 0}
 
 .fiscal-manifest-response{display:block;max-width:390px;color:#708498;font-size:11px;line-height:1.35;margin-top:3px;white-space:normal;overflow-wrap:anywhere}
+
+/* Listagem de NF-e de entrada: colunas estáveis, sem quebras em valores e ações. */
+.fiscal-purchases-page .table-scroll{overflow-x:auto}
+.fiscal-purchases-table{width:100%;table-layout:fixed;min-width:950px}
+.fiscal-purchases-table .col-emission{width:8%}
+.fiscal-purchases-table .col-supplier{width:23%}
+.fiscal-purchases-table .col-document{width:15%}
+.fiscal-purchases-table .col-value{width:10%}
+.fiscal-purchases-table .col-status{width:12%}
+.fiscal-purchases-table .col-manifest{width:14%}
+.fiscal-purchases-table .col-xml{width:8%}
+.fiscal-purchases-table .col-actions{width:10%}
+.fiscal-purchases-table td,.fiscal-purchases-table th{min-width:0;padding-left:10px;padding-right:10px}
+.fiscal-purchases-table td strong{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.fiscal-purchases-table td small{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.fiscal-purchases-table .fiscal-purchases-key-short{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;text-decoration:none}
+.fiscal-purchases-table .fiscal-manifest-cell{min-width:0;max-width:none}
+.fiscal-manifest-cell .fiscal-manifest-select{min-width:0;max-width:100%;width:100%}
+.fiscal-manifest-cell .ui-select{display:block;width:100%;min-width:0;max-width:100%}
+.fiscal-manifest-cell .ui-select .ui-select-trigger{width:100%;min-width:0}
+.fiscal-purchases-table .price-strong{font-variant-numeric:tabular-nums}
+.fiscal-purchases-table td.action-cell,.fiscal-purchases-table th.action-cell{width:auto;min-width:0;text-align:center}
+.fiscal-purchase-actions{display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap}
+.fiscal-purchase-actions .btn-icon{display:inline-flex;justify-content:center;align-items:center;flex:0 0 28px;width:28px;height:28px;min-width:0;padding:0}
+.fiscal-purchase-actions .fiscal-purchase-action-disabled{opacity:.38;cursor:not-allowed}
+.fiscal-purchases-amount{font-size:12px;color:#6b7f8d;white-space:nowrap}
+.fiscal-purchases-amount strong{color:#304c62;font-variant-numeric:tabular-nums}
+@media(max-width:1100px){.fiscal-purchases-table td,.fiscal-purchases-table th{padding-left:7px;padding-right:7px}.fiscal-purchases-table .col-supplier{width:22%}.fiscal-purchases-table .col-actions{width:11%}}
+@media(max-width:690px){.fiscal-purchases-table{min-width:950px}.fiscal-purchases-page .grid-actions-right{flex-wrap:wrap}}

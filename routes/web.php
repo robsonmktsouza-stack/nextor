@@ -150,6 +150,7 @@ Route::middleware(['auth','control.license'])->group(function () {
     Route::post('/fiscal/purchases/{incomingNfe}/manifest/verify',[\App\Http\Controllers\FiscalPurchasesController::class,'verifyManifestation'])->name('fiscal.purchases.manifest.verify')->middleware(['permission:fiscal','company.configured','throttle:3,1']);
     Route::post('/fiscal/purchases/{incomingNfe}/manifest',[\App\Http\Controllers\FiscalPurchasesController::class,'manifest'])->name('fiscal.purchases.manifest')->middleware(['permission:fiscal','company.configured','throttle:10,1']);
     Route::post('/fiscal/purchases/import',[\App\Http\Controllers\FiscalPurchasesController::class,'importXml'])->name('fiscal.purchases.import')->middleware(['permission:fiscal','company.configured','throttle:10,1']);
+    Route::get('/fiscal/purchases/{incomingNfe}/danfe',[\App\Http\Controllers\FiscalPurchasesController::class,'danfe'])->name('fiscal.purchases.danfe')->middleware(['permission:fiscal','company.configured']);
     Route::get('/fiscal/purchases/{incomingNfe}/xml',[\App\Http\Controllers\FiscalPurchasesController::class,'download'])->name('fiscal.purchases.xml')->middleware(['permission:fiscal','company.configured']);
     Route::get('/fiscal/purchases/{incomingNfe}',[\App\Http\Controllers\FiscalPurchasesController::class,'show'])->name('fiscal.purchases.show')->middleware(['permission:fiscal','company.configured']);
     Route::post('/fiscal/utilities/xml',[FiscalUtilitiesController::class,'xml'])->name('fiscal.utilities.xml')->middleware(['permission:fiscal','company.configured']);
