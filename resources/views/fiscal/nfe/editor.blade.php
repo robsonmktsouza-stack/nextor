@@ -433,7 +433,7 @@ $origins=[
           <label class="field col-4"><span>Tipo de pagamento *</span>
             <select name="payment_type" id="nfePaymentType">
               @foreach($paymentTypes as $code=>$label)
-                <option value="{{ $code }}" @selected(old('payment_type',$draft->payment_type ?: '01')===$code)>{{ $code }} - {{ $label }}</option>
+                <option value="{{ $code }}" @selected((string)old('payment_type',$draft->payment_type ?: '01')===(string)$code)>{{ $code }} - {{ $label }}</option>
               @endforeach
             </select>
           </label>
@@ -464,7 +464,7 @@ $origins=[
             <select name="card_brand">
               <option value="">Não informada</option>
               @foreach($cardBrands as $code=>$label)
-                <option value="{{ $code }}" @selected(old('card_brand',$draft->card_brand)===$code)>{{ $code }} - {{ $label }}</option>
+                <option value="{{ $code }}" @selected((string)old('card_brand',$draft->card_brand)===(string)$code)>{{ $code }} - {{ $label }}</option>
               @endforeach
             </select>
           </label>
