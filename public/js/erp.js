@@ -546,8 +546,11 @@
         return;
       }
       const toolbar=!!wrapper.closest('.toolbar-filters');
+      const compactManifest=!!wrapper.closest('.fiscal-manifest-cell');
       const maxWidth=Math.max(120,viewportWidth-margin*2);
-      const preferred=toolbar ? rect.width : Math.max(rect.width,Math.min(380,menu.scrollWidth));
+      const preferred=toolbar ? rect.width :
+        compactManifest ? Math.max(rect.width,Math.min(234,menu.scrollWidth)) :
+        Math.max(rect.width,Math.min(380,menu.scrollWidth));
       const width=Math.min(preferred,maxWidth);
       const left=Math.max(margin,Math.min(rect.left,viewportWidth-margin-width));
       menu.style.width=width+'px';
