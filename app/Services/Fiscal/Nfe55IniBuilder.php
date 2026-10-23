@@ -112,6 +112,28 @@ final class Nfe55IniBuilder
             'cPais'=>'1058','xPais'=>'BRASIL','Fone'=>$this->digits($recipient['phone']??null),
             'email'=>$recipient['email']??null,
         ]);
+        if($draft->different_delivery){
+            $delivery=$draft->delivery_snapshot??[];
+            if(!$delivery || strlen($this->digits($delivery['zip_code']??''))!==8
+                || strlen($this->digits($delivery['city_ibge_code']??''))!==7
+                || !($delivery['address']??null)||!($delivery['address_number']??null)
+                || !($delivery['district']??null)||!($delivery['city']??null)
+                || !($delivery['state']??null)){
+                throw new RuntimeException('Local de entrega incompleto.');
+            }
+            $deliveryDoc=$this->digits($delivery['document']??'');
+            $add('Entrega',[
+                'CNPJCPF'=>in_array(strlen($deliveryDoc),[11,14],true)?$deliveryDoc:null,
+                'xNome'=>$delivery['name']??null,
+                'xLgr'=>$delivery['address'],'nro'=>$delivery['address_number'],
+                'xCpl'=>$delivery['address_complement']??null,
+                'xBairro'=>$delivery['district'],
+                'cMun'=>$this->digits($delivery['city_ibge_code']),
+                'xMun'=>$delivery['city'],'UF'=>strtoupper($delivery['state']),
+                'CEP'=>$this->digits($delivery['zip_code']),
+                'PaisCod'=>'1058','Pais'=>'BRASIL',
+            ]);
+        }
         $totalProduct=0;$totalPis=0;$totalCofins=0;$totalIpi=0;
         $rtcTotal=['bc'=>0,'uf'=>0,'mun'=>0,'cbs'=>0];$rtcCount=0;
         foreach($draft->items as $index=>$item) {
