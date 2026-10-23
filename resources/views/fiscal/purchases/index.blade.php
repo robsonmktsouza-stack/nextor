@@ -136,9 +136,23 @@
         <td>{{ $invoice->xml_path ? 'Disponível':'Pendente' }}</td>
         <td class="action-cell">
           <div class="fiscal-purchase-actions">
-            <a class="btn-icon" href="{{ route('fiscal.purchases.show',$invoice) }}" data-tooltip="Detalhes da NF-e" aria-label="Detalhes da NF-e">
-              @include('partials.icon',['name'=>'eye','size'=>16])
-            </a>
+            @if($invoice->purchase)
+              <a class="btn-icon" href="{{ route('purchases.show',$invoice->purchase) }}"
+                data-tooltip="Abrir compra vinculada" aria-label="Abrir compra vinculada">
+                @include('partials.icon',['name'=>'shopping-bag','size'=>16])
+              </a>
+            @elseif($invoice->status==='xml_received' && $invoice->xml_path)
+              <a class="btn-icon" href="{{ route('purchases.import-from-nfe',$invoice) }}"
+                data-tooltip="Importar para Compras" aria-label="Importar NF-e para Compras">
+                @include('partials.icon',['name'=>'shopping-bag','size'=>16])
+              </a>
+            @else
+              <button type="button" class="btn-icon" data-dialog-open="purchaseXmlImport"
+                data-import-purchase-invoice="{{ $invoice->id }}"
+                data-tooltip="Importar para Compras" aria-label="Importar NF-e para Compras">
+                @include('partials.icon',['name'=>'shopping-bag','size'=>16])
+              </button>
+            @endif
             @if($invoice->xml_path)
               <a class="btn-icon" href="{{ route('fiscal.purchases.xml',$invoice) }}" data-tooltip="Baixar XML da NF-e" aria-label="Baixar XML da NF-e">
                 @include('partials.icon',['name'=>'download','size'=>16])
@@ -178,6 +192,7 @@
 <dialog class="erp-dialog small-dialog" id="purchaseXmlImport" aria-labelledby="purchasesImportTitle">
   <form method="post" action="{{ route('fiscal.purchases.import') }}" enctype="multipart/form-data">
     @csrf
+    <input type="hidden" name="incoming_nfe_id" id="purchaseXmlImportInvoice" value="">
     <div class="dialog-header">
       <div><h2 id="purchasesImportTitle">Importar XML de NF-e recebida</h2></div>
       <button class="close-dialog" type="button" data-dialog-close aria-label="Fechar">×</button>
@@ -194,6 +209,17 @@
     </div>
   </form>
 </dialog>
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+  const selected=document.getElementById('purchaseXmlImportInvoice');
+  document.addEventListener('click',event=>{
+    const action=event.target.closest('[data-import-purchase-invoice]');
+    if(action&&selected) selected.value=action.dataset.importPurchaseInvoice||'';
+    const toolbar=event.target.closest('[data-dialog-open="purchaseXmlImport"]:not([data-import-purchase-invoice])');
+    if(toolbar&&selected) selected.value='';
+  });
+});
+</script>
 <dialog class="erp-dialog small-dialog" id="purchaseManifestDialog" aria-labelledby="purchaseManifestTitle">
   <form method="post" id="purchaseManifestForm">
     @csrf
