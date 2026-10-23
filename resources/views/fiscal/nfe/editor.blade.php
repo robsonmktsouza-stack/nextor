@@ -899,6 +899,8 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(!editor)return;
   @if($draft->status!=='draft')
     editor.querySelectorAll('input,select,textarea,button').forEach(node=>{
+      // Fiscal events remain available on an immutable authorized document.
+      if(node.matches('[data-nfe-allow-readonly]'))return;
       node.disabled=true;
     });
   @else
