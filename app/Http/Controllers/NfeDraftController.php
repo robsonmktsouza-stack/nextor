@@ -339,11 +339,11 @@ class NfeDraftController extends Controller
             'delivery_city'=>['nullable','string','max:120'],
             'delivery_state'=>['nullable','string','size:2'],
             'delivery_city_ibge_code'=>['nullable','string','max:7'],
-            'discount'=>['nullable','numeric','min:0'],
-            'surcharge'=>['nullable','numeric','min:0'],
+            'discount'=>['nullable','numeric','min:0','max:99999999'],
+            'surcharge'=>['nullable','numeric','min:0','max:99999999'],
 
             'freight_mode'=>['required',Rule::in(['0','1','2','3','4','9'])],
-            'freight_value'=>['nullable','numeric','min:0'],
+            'freight_value'=>['nullable','numeric','min:0','max:99999999'],
             'carrier_id'=>['nullable','integer',Rule::exists('customers','id')->where('is_carrier',true)],
             'vehicle_plate'=>['nullable','string','max:12'],
             'vehicle_state'=>['nullable','string','size:2'],
@@ -707,11 +707,14 @@ class NfeDraftController extends Controller
             if($ipiRate>0) $totals['ipi']+=$value*($ipiRate/100);
         }
 
-        $totals['total']=max(
-            0,
-            $totals['products']+$totals['freight']+$totals['insurance']+$totals['other_expenses']
-                +$totals['surcharge']+$totals['ipi']-$totals['discount']
-        );
+        $net=$totals['products']+$totals['freight']+$totals['insurance']+$totals['other_expenses']
+            +$totals['surcharge']+$totals['ipi']-$totals['discount'];
+        if(round($net,2)<0){
+            throw ValidationException::withMessages([
+                'discount'=>'O desconto total não pode superar o valor dos produtos e acréscimos.',
+            ]);
+        }
+        $totals['total']=max(0,$net);
 
         return array_map(fn($value)=>round($value,2),$totals);
     }
