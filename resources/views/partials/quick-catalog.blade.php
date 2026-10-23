@@ -1,4 +1,11 @@
-<dialog id="erpCatalogDialog" class="erp-catalog-dialog" aria-labelledby="erpCatalogTitle" data-catalog-products="{{ auth()->user()->canAccess('products')?'1':'0' }}" data-catalog-customers="{{ auth()->user()->canAccess('customers')?'1':'0' }}"
+@php
+$quickLicense=(array)request()->attributes->get('lumeron_commercial_license',[]);
+$quickCanWrite=!(bool)($quickLicense['readonly']??false);
+$quickCanProducts=$quickCanWrite && auth()->user()->canAccess('products')
+    && \App\Support\CommercialModuleAccess::visible($quickLicense,'products');
+$quickCanCustomers=$quickCanWrite && auth()->user()->canAccess('customers');
+@endphp
+<dialog id="erpCatalogDialog" class="erp-catalog-dialog" aria-labelledby="erpCatalogTitle" data-catalog-products="{{ $quickCanProducts?'1':'0' }}" data-catalog-customers="{{ $quickCanCustomers?'1':'0' }}"
  data-search-url="{{ url('/quick-catalog') }}" data-store-url="{{ url('/quick-catalog') }}">
   <div class="erp-catalog-header">
     <div><h2 id="erpCatalogTitle">Selecionar</h2><p id="erpCatalogSubtitle"></p></div>

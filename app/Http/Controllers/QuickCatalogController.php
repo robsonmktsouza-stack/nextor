@@ -98,8 +98,15 @@ class QuickCatalogController extends Controller
 
     private function allowCreate(Request $request,string $permission): void
     {
-        // Viewing a sale or invoice is not permission to create the central catalog.
+        // Consultar um documento não é autorização para criar cadastros,
+        // e o endpoint AJAX não pode contornar o plano do Lumeron Control.
         abort_unless($request->user()?->canAccess($permission),403,'Sem permissão para criar cadastros.');
+        $license=(array)$request->attributes->get('lumeron_commercial_license',[]);
+        abort_if((bool)($license['readonly']??false),423,'Licença em modo consulta.');
+        if($permission==='products') {
+            abort_unless(\App\Support\CommercialModuleAccess::visible($license,'products'),
+                403,'O plano não inclui o cadastro de produtos.');
+        }
     }
 
     private function productData(Product $p): array
