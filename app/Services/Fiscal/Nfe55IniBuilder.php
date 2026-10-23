@@ -311,6 +311,14 @@ final class Nfe55IniBuilder
             ]);
         }
         $duplicates=$draft->duplicates??[];
+        $payments=$draft->payments??[];
+        $hasDuplicatePayment=false;
+        foreach($payments as $payment){
+            if((string)($payment['type']??'')==='14')$hasDuplicatePayment=true;
+        }
+        if((bool)$duplicates!==$hasDuplicatePayment){
+            throw new RuntimeException('Duplicatas exigem forma de pagamento Duplicata Mercantil e vice-versa.');
+        }
         if($duplicates){
             $dueTotal=0;
             foreach($duplicates as $dup)$dueTotal+=(int)round((float)($dup['value']??0)*100);
@@ -320,16 +328,23 @@ final class Nfe55IniBuilder
             $add('Fatura',[
                 'nFat'=>(string)$number,'vOrig'=>$total,'vDesc'=>'0.00','vLiq'=>$total,
             ]);
+            $previousDue=null;
             foreach($duplicates as $index=>$duplicate){
-                $date=\DateTimeImmutable::createFromFormat('!Y-m-d',(string)($duplicate['due_date']??''));
-                if(!$date)throw new RuntimeException('Vencimento de duplicata inválido.');
+                $due=(string)($duplicate['due_date']??'');
+                $date=\DateTimeImmutable::createFromFormat('!Y-m-d',$due);
+                if(!$date||$date->format('Y-m-d')!==$due){
+                    throw new RuntimeException('Vencimento de duplicata inválido.');
+                }
+                if($previousDue!==null&&strcmp($due,$previousDue)<0){
+                    throw new RuntimeException('Duplicatas fora da ordem de vencimento.');
+                }
+                $previousDue=$due;
                 $add('Duplicata'.sprintf('%03d',$index+1),[
                     'nDup'=>$duplicate['number']?:str_pad((string)($index+1),3,'0',STR_PAD_LEFT),
                     'dVenc'=>$date->format('d/m/Y'),'vDup'=>$this->money($duplicate['value']),
                 ]);
             }
         }
-        $payments=$draft->payments??[];
         if(!$payments)throw new RuntimeException('Nenhuma forma de pagamento informada.');
         $totalPaid=0;$hasNoPayment=false;
         foreach($payments as $index=>$payment){
