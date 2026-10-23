@@ -70,6 +70,14 @@ final class IncomingNfeSyncService
             if($state->next_check_at && $state->next_check_at->isFuture()) {
                 return ['status'=>'cooldown','imported'=>0,'next_check_at'=>$state->next_check_at];
             }
+            // Reserve the cooldown before calling the external service.
+            // If PHP/ACBr crashes mid-consultation, the next scheduler tick
+            // must not immediately repeat this request to the same NSU.
+            $state->update([
+                'last_checked_at'=>now(),
+                'last_status'=>'processing',
+                'next_check_at'=>now()->addMinutes(65),
+            ]);
             $raw=$this->gateway->fetch($company,$state->cnpj,(string)$state->last_nsu);
             $envelope=$this->parser->envelope($raw);
             $code=$envelope['status'];
