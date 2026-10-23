@@ -5,6 +5,7 @@ use Illuminate\Database\Eloquent\Model;
 
 final class IncomingNfe extends Model
 {
+    protected $table='incoming_nfes';
     protected $fillable=[
         'access_key','nsu','supplier_cnpj','supplier_name','issued_at','total',
         'status','manifestation','item_count','items','summary','xml_path','received_at',
