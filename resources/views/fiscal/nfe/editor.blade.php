@@ -496,6 +496,9 @@ $origins=[
         @if($draft->xml_path)
           <a class="btn btn-secondary" href="{{ route('fiscal.nfe.xml',$draft) }}">Baixar XML</a>
         @endif
+        @if($draft->status==='authorized' && str_ends_with((string)$draft->xml_path,'/authorized.xml'))
+          <a class="btn btn-secondary" href="{{ route('fiscal.nfe.danfe',$draft) }}" target="_blank" rel="noopener">Imprimir DANFE</a>
+        @endif
       @endif
     </div>
   </div>

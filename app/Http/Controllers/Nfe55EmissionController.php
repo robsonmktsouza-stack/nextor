@@ -23,6 +23,21 @@ final class Nfe55EmissionController extends Controller
             ->with('success','Consulta à SEFAZ concluída.');
     }
 
+    public function danfe(NfeDraft $nfeDraft,\App\Services\Fiscal\Nfe55DanfeService $service)
+    {
+        try {
+            $pdf=$service->generate($nfeDraft);
+        }catch(\RuntimeException $error){
+            abort(409,'DANFE indisponível para esta NF-e.');
+        }
+        return response($pdf,200,[
+            'Content-Type'=>'application/pdf',
+            'Content-Disposition'=>'inline; filename="DANFE-'.$nfeDraft->id.'.pdf"',
+            'Cache-Control'=>'private, no-store',
+            'X-Content-Type-Options'=>'nosniff',
+        ]);
+    }
+
     public function xml(NfeDraft $nfeDraft)
     {
         $path=$nfeDraft->xml_path;

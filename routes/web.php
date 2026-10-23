@@ -199,6 +199,8 @@ Route::middleware(['auth','control.license'])->group(function () {
         ->name('fiscal.nfe.emit')->middleware(['permission:fiscal','company.configured','throttle:3,1']);
     Route::post('/fiscal/nfe/drafts/{nfeDraft}/consult',[Nfe55EmissionController::class,'consult'])
         ->name('fiscal.nfe.consult')->middleware(['permission:fiscal','company.configured','throttle:6,1']);
+    Route::get('/fiscal/nfe/drafts/{nfeDraft}/danfe',[Nfe55EmissionController::class,'danfe'])
+        ->name('fiscal.nfe.danfe')->middleware(['permission:fiscal','company.configured']);
     Route::get('/fiscal/nfe/drafts/{nfeDraft}/xml',[Nfe55EmissionController::class,'xml'])
         ->name('fiscal.nfe.xml')->middleware(['permission:fiscal','company.configured']);
     Route::post('/fiscal/nfe/drafts/{nfeDraft}/validate',[NfeDraftController::class,'validateDraft'])->name('fiscal.nfe.validate')->middleware(['permission:fiscal','company.configured']);
