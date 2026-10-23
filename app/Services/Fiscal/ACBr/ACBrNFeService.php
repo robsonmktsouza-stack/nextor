@@ -280,8 +280,12 @@ final class ACBrNFeService
         if (!str_starts_with($eventIni,"[EVENTO]\n")) {
             throw new RuntimeException('INI de evento inválido.');
         }
-        $this->execute('NFE_LimparListaEventos');
-        $this->execute('NFE_CarregarEventoINI',[$eventIni]);
+        try {
+            $this->execute('NFE_LimparListaEventos');
+            $this->execute('NFE_CarregarEventoINI',[$eventIni]);
+        } catch (Throwable $error) {
+            throw new RecipientEventPreparationException($error->getMessage(),0,$error);
+        }
         return $this->fiscalEventOnce('NFE_EnviarEvento',[1]);
     }
 
