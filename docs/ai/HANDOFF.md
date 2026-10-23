@@ -1,3 +1,15 @@
+## 23/10/2026 — NF-e 55: cancelamento auditável e CT-e referenciado (develop)
+
+- Pedido do proprietário: concluir integralmente NF-e, não somente campos da interface. **Esta entrega é incremental e NÃO representa NF-e 100% pronta ou produção homologada.**
+- Cancelamento modelo 55: migration 2026_10_23_000007, Nfe55CancellationService, ProcessNfe55CancellationJob, rota fiscal.nfe.cancel e modal no editor. Exige acesso fiscal, permissão de configurações, senha atual, justificativa 15-255 e confirmação da não ocorrência. Só NF-e modelo 55 autorizada em homologação, do emitente correto e sem solicitação anterior.
+- Pedido persistido sob lock; worker compartilha lock nfe-55:{id} e reivindica evento ANTES da chamada externa. Nunca reexecutar automaticamente NFE_Cancelar diante de resultado indeterminado. Preserva o XML autorizado. Só marca cancelamento autorizado com prova XML individual coincidente em chave, protocolo e ambiente.
+- ACBr NFE_Inutilizar agora aceita parâmetro opcional model=65, preservando NFC-e e permitindo uso com modelo 55 explicitamente; fluxo de inutilização NF-e completo ainda não existe.
+- Referências: controller aceita NFE e CTE com chave 44 dígitos, legado sem tipo = NFE; builder gera refNFe/refCTe. Editor possui seletor e impede referência duplicada.
+- Listagem mostra status de cancelamento. UI permite evento na NF-e autorizada, enquanto formulário principal permanece bloqueado.
+- Testes Nfe55CancellationTest e NfeFormCompletenessTest ampliados. Workflow de CI atualizado. **Não há confirmação de CI verde nem homologação ACBr/SEFAZ real.**
+- Próximos blocos: ICMS completo/ST/DIFAL/FCP, PIS/COFINS/IPI, IBS/CBS/IS, devolução/complemento/ajuste, referências NF/NFP/ECF, CC-e, inutilização NF-e com faixa segura, conciliação de eventos, estoque/financeiro pós-autorização, distribuição de XML/DANFE, validação real de Windows e Linux.
+- **Preservar main, control-center e VPS.** Solicitar o ZIP da ACBrLibNFe MT Cdecl x64 com exemplos e schemas antes de homologação real. Não solicitar PFX/senha em chat ou versioná-los.
+
 ## 23/10/2026 — Fiscal → Compras / NF-e destinadas (develop)
 
 - Nova entrada "Compras" na navegação Fiscal; lista de NF-e recebidas pelo CNPJ da instalação, busca por fornecedor/chave, visualização dos itens, estados de resumo/XML e download privado. Importação manual XML disponível para quando o fornecedor entrega o arquivo; exige que o destinatário do XML seja exatamente o CNPJ da instalação e modelo 55.
