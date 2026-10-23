@@ -46,9 +46,6 @@ final class IncomingNfeManifestationEvidence
      */
     private function rejectionMessage(string $code, string $reason): string
     {
-        if ($code==='596') {
-            return 'Rejeição 596: Evento apresentado após o prazo permitido para a manifestação.';
-        }
         if (!mb_check_encoding($reason,'UTF-8')) {
             return 'Rejeição '.$code.' informada pela SEFAZ.';
         }
@@ -59,7 +56,9 @@ final class IncomingNfeManifestationEvidence
                 return 'Rejeição '.$code.': '.mb_substr($reason,0,170);
             }
         }
-        return 'Rejeição '.$code.' informada pela SEFAZ.';
+        return $code==='596'
+            ? 'Rejeição 596: Evento apresentado após o prazo permitido.'
+            : 'Rejeição '.$code.' informada pela SEFAZ.';
     }
 
     /**
