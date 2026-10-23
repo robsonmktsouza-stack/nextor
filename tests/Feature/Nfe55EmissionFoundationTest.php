@@ -9,6 +9,7 @@ use App\Models\NfeDraft;
 use App\Models\OperationNature;
 use App\Models\User;
 use App\Services\Fiscal\Nfe55IniBuilder;
+use App\Services\Fiscal\ACBr\ACBrNFeService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\WithConfiguredCompany;
 use Tests\TestCase;
@@ -125,5 +126,18 @@ final class Nfe55EmissionFoundationTest extends TestCase
         $this->actingAs(User::query()->where('email','nfe55@example.test')->firstOrFail());
         $this->delete(route('fiscal.nfe.destroy',$draft))->assertStatus(409);
         $this->put(route('fiscal.nfe.update',$draft),[])->assertStatus(409);
+    }
+
+    public function test_acbr_business_rule_preflight_rejects_errors_in_returned_text(): void
+    {
+        ACBrNFeService::assertBusinessRulesClear('');
+        ACBrNFeService::assertBusinessRulesClear('OK');
+        ACBrNFeService::assertBusinessRulesClear('Sem erros.');
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('226-Rejeição');
+        ACBrNFeService::assertBusinessRulesClear(
+            'Erro(s) nas Regras de negócios da nota: 1 226-Rejeição: UF divergente'
+        );
     }
 }
