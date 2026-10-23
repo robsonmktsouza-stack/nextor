@@ -37,7 +37,7 @@ Operações que excedem esses limites são interrompidas antes da SEFAZ. Não su
 - Rateio global proporcional com arredondamento em centavos para frete, descontos e acréscimos, além dos valores por item; código implementado, mas o XML final depende de homologação na biblioteca ACBr e na SEFAZ
 - Devolução, notas complementares, ajuste, transferência, referências especiais e documentos fiscais correlatos
 - Parametrização abrangente de IBS/CBS/IS conforme NT vigente
-- Eventos de cancelamento, CC-e, inutilização, manifestação aplicável e respectiva conciliação
+- Cancelamento modelo 55: fluxo de solicitação, auditoria, fila fiscal e chamada ACBr implementados apenas em homologação, ainda sem validação de um evento autorizado real; casos de retorno indeterminado exigem conferência manual e nunca reenviam automaticamente. CC-e, inutilização e conciliação abrangente permanecem pendentes.
 - Faturamento/financeiro e saída de estoque na autorização para emissores que não operam pelo PDV
 - Impressão térmica ou A4 na infraestrutura real, envio por e-mail e distribuição
 - Auditoria final de numeração por ambiente, diferenças de fuso/UF e coexistência com documentos anteriores
@@ -70,3 +70,12 @@ O arquivo ZIP da mesma edição da ACBrLibNFe usada localmente (MT Cdecl x64, co
 - Cartões de crédito/débito: o editor pergunta explicitamente integração 1 (TEF) ou 2 (POS), incluindo pagamentos adicionais. Tipo 1 exige CNPJ da credenciadora e autorização; o valor é persistido em payments[*].integration_type e emitido como tpIntegra em cada grupo [pagNNN]. Não é inferido da forma de pagamento. O formulário também preserva códigos numéricos após reabertura.
 - Testes novos em NfeFormCompletenessTest: rateio de centavos e conciliação de total fiscal, sobre-desconto, parcelas inválidas/ordem/forma de pagamento, TEF/POS e round-trip do editor.
 - Ainda pendente: executar CI e homologação fiscal real com a edição instalada da ACBrLibNFe MT Cdecl x64 e schemas atualizados, inclusive regras por UF. Não promover para main nem VPS com base apenas em código/testes adicionados.
+
+## Cancelamento modelo 55 — desenvolvimento controlado
+
+- Migration `2026_10_23_000007_add_nfe55_cancellation_fields.php`: trilha de solicitação, tentativa de envio, protocolo separado e resposta preservada em disco privado.
+- `Nfe55CancellationService` e `ProcessNfe55CancellationJob`: somente documento autorizado de modelo 55 e emitente correspondente; rejeita segundo pedido, restringe ao ambiente de homologação e reivindica o evento em banco ANTES da chamada externa. O job tem uma tentativa e não reenvia automaticamente eventos incertos.
+- A operação exige permissão fiscal para acessar o módulo, permissão de configurações para solicitar o cancelamento, senha atual e confirmação explícita de que a operação não ocorreu. O documento original não é excluído; estoque e financeiro não são revertidos automaticamente.
+- Resposta ACBr aceita como cancelamento comprovado somente quando cStat, chave, ambiente e protocolo conferem e existe prova individual do evento no XML; ausência de prova gera situação indeterminada que deve ser reconciliada na SEFAZ.
+- Testes `Nfe55CancellationTest` verificam fila única, senha/permissão, produção bloqueada, documento imutável e prevenção de reenvio. Integração no workflow `nfe55-homologation.yml`.
+- **Não é homologação real:** envio de evento não foi executado com DLL, certificado ou SEFAZ. Não utilizar para um cliente antes de validar a biblioteca e a prova de retorno em ambiente de testes. Não promover para main/VPS sem CI e validação operacional.
