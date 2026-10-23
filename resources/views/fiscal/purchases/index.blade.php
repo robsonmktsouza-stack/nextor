@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title','Compras')
+@section('title','Fiscal')
 @section('description','Notas fiscais de entrada recebidas pela empresa.')
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/fiscal-purchases.css') }}?v={{ filemtime(public_path('css/fiscal-purchases.css')) }}">
