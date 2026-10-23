@@ -61,3 +61,12 @@ A migração de emissão não altera documentos pré-existentes nem a branch mai
 O editor agora persiste e reabre endereço de entrega, transportadoras independentes, pagamentos parciais e valores individuais por item. A documentação da ACBr confirma os grupos INI utilizados, mas **não há confirmação de execução real de NF-e modelo 55 na SEFAZ de homologação**.
 
 O arquivo ZIP da mesma edição da ACBrLibNFe usada localmente (MT Cdecl x64, com exemplos e schemas) é necessário para validar de ponta a ponta a montagem do XML no Windows e sua equivalência no Linux. Não guardar certificados ou segredos no repositório.
+
+## Ajustes de rateio, cobrança e cartões — 23/10/2026
+
+- Valores gerais informados de frete, desconto e acréscimo são rateados em centavos entre os itens no INI fiscal, mantendo os valores originais no rascunho. Frete proporcional e acréscimo em vOutro usam o valor bruto dos itens; descontos proporcionais usam valor elegível após os acréscimos e descontos individuais. O total das parcelas rateadas confere com os totais da NF-e e valores negativos/incompatíveis são recusados. Não houve homologação SEFAZ real.
+- Descontos individuais ou gerais que ultrapassem o valor da nota são recusados antes do salvamento, em vez de gerar NF-e zerada silenciosamente.
+- Cobrança: até 120 duplicatas; número curto e único, vencimentos válidos e ordenados, valores positivos, soma conciliada. O tipo de pagamento 14 (Duplicata Mercantil) exige duplicatas, e as duplicatas exigem tipo 14 (regras SEFAZ 867/872). Rascunhos anteriores inconsistentes são recusados também no builder.
+- Cartões de crédito/débito: o editor pergunta explicitamente integração 1 (TEF) ou 2 (POS), incluindo pagamentos adicionais. Tipo 1 exige CNPJ da credenciadora e autorização; o valor é persistido em payments[*].integration_type e emitido como tpIntegra em cada grupo [pagNNN]. Não é inferido da forma de pagamento. O formulário também preserva códigos numéricos após reabertura.
+- Testes novos em NfeFormCompletenessTest: rateio de centavos e conciliação de total fiscal, sobre-desconto, parcelas inválidas/ordem/forma de pagamento, TEF/POS e round-trip do editor.
+- Ainda pendente: executar CI e homologação fiscal real com a edição instalada da ACBrLibNFe MT Cdecl x64 e schemas atualizados, inclusive regras por UF. Não promover para main nem VPS com base apenas em código/testes adicionados.
