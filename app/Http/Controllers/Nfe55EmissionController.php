@@ -16,6 +16,13 @@ final class Nfe55EmissionController extends Controller
             ->with('success','NF-e encaminhada à fila fiscal.');
     }
 
+    public function retry(NfeDraft $nfeDraft,Nfe55EmissionService $service)
+    {
+        $service->retryPreparation($nfeDraft);
+        return redirect()->route('fiscal.nfe.edit',$nfeDraft)
+            ->with('success','Preparação fiscal agendada.');
+    }
+
     public function consult(NfeDraft $nfeDraft,Nfe55EmissionService $service)
     {
         $service->consult($nfeDraft);

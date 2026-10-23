@@ -32,18 +32,32 @@
 
   <div class="table-scroll">
     <table class="cms-table">
-      <thead><tr><th>Rascunho</th><th>Destinatário</th><th>Natureza</th><th>Emissão</th><th>Total</th><th>Validação</th><th>Responsável</th><th class="action-cell">Detalhes</th></tr></thead>
+      <thead><tr><th>Rascunho</th><th>Destinatário</th><th>Natureza</th><th>Emissão</th><th>Total</th><th>Situação</th><th>Responsável</th><th class="action-cell">Detalhes</th></tr></thead>
       <tbody>
       @forelse($drafts as $draft)
         <tr>
           <td><a class="table-link" href="{{ route('fiscal.nfe.edit',$draft) }}">#{{ str_pad((string)$draft->id,5,'0',STR_PAD_LEFT) }}</a></td>
           <td>{{ $draft->customer?->name ?? data_get($draft->recipient_snapshot,'name','—') }}</td>
           <td>{{ $draft->operationNature?->name ?? '—' }}</td>
-          <td class="nowrap">{{ $draft->issue_date?->format(AppModelsAppSetting::dateFormat()) ?? '—' }}</td>
+          <td class="nowrap">{{ $draft->issue_date?->format(\App\Models\AppSetting::dateFormat()) ?? '—' }}</td>
           <td class="price-strong nowrap">R$ {{ number_format((float)data_get($draft->totals,'total',0),2,',','.') }}</td>
-          <td><span class="status {{ $draft->validated_at?'status-ok':'status-muted' }}">{{ $draft->validated_at?'Validado':'Pendente' }}</span></td>
+          <td><span class="status {{ $draft->status==='authorized'?'status-ok':'status-muted' }}">
+            {{ match($draft->status){'authorized'=>'Autorizada','pending'=>'Pendente SEFAZ',
+                'queued'=>'Na fila','processing'=>'Processando','rejected'=>'Rejeitada',
+                'prepared'=>'Preparação pendente',default=>$draft->validated_at?'Validada':'Rascunho'} }}
+          </span></td>
           <td>{{ $draft->user?->name ?? '—' }}</td>
-          <td class="action-cell"><a class="btn-icon" href="{{ route('fiscal.nfe.edit',$draft) }}" data-tooltip="Abrir rascunho">@include('partials.icon',['name'=>'chevron','size'=>17])</a></td>
+          <td class="action-cell">
+            <div class="row-actions">
+              <a class="btn-icon" href="{{ route('fiscal.nfe.edit',$draft) }}" data-tooltip="Abrir NF-e" aria-label="Abrir NF-e">@include('partials.icon',['name'=>'chevron','size'=>17])</a>
+              @if($draft->xml_path)
+                <a class="btn-icon" href="{{ route('fiscal.nfe.xml',$draft) }}" data-tooltip="Baixar XML" aria-label="Baixar XML">@include('partials.icon',['name'=>'download','size'=>16])</a>
+              @endif
+              @if($draft->status==='authorized' && str_ends_with((string)$draft->xml_path,'/authorized.xml'))
+                <a class="btn-icon" href="{{ route('fiscal.nfe.danfe',$draft) }}" target="_blank" rel="noopener" data-tooltip="Imprimir DANFE" aria-label="Imprimir DANFE">@include('partials.icon',['name'=>'print','size'=>16])</a>
+              @endif
+            </div>
+          </td>
         </tr>
       @empty
         <tr><td colspan="8" class="empty-cell">Nenhum rascunho de NF-e salvo.</td></tr>

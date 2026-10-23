@@ -491,7 +491,9 @@ $origins=[
       @if($isEditing && $draft->status==='draft')
         <button class="btn btn-success" type="submit" form="nfeEmitForm" id="nfeSubmitEmission"
           @disabled(!$draft->validated_at)>Emitir NF-e</button>
-      @elseif($isEditing && in_array($draft->status,['pending','rejected','authorized'],true))
+      @elseif($isEditing && $draft->status==='prepared')
+        <button class="btn btn-secondary" type="submit" form="nfeRetryForm">Preparar novamente</button>
+      @elseif($isEditing && in_array($draft->status,['pending','processing','rejected','authorized'],true))
         <button class="btn btn-secondary" type="submit" form="nfeConsultForm">Consultar SEFAZ</button>
         @if($draft->xml_path)
           <a class="btn btn-secondary" href="{{ route('fiscal.nfe.xml',$draft) }}">Baixar XML</a>
@@ -506,6 +508,7 @@ $origins=[
 @if($isEditing)
   <form id="nfeEmitForm" method="post" action="{{ route('fiscal.nfe.emit',$draft) }}">@csrf</form>
   <form id="nfeConsultForm" method="post" action="{{ route('fiscal.nfe.consult',$draft) }}">@csrf</form>
+  <form id="nfeRetryForm" method="post" action="{{ route('fiscal.nfe.retry',$draft) }}">@csrf</form>
 @endif
   </div>
 </div>
