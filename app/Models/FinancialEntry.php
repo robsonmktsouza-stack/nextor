@@ -28,6 +28,11 @@ class FinancialEntry extends Model
         ];
     }
 
+    public function purchase(): BelongsTo
+    {
+        return $this->belongsTo(Purchase::class);
+    }
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(FinancialCategory::class,'category_id');
