@@ -32,7 +32,7 @@
     const opener=event.target.closest('[data-nfe-modal-open]');
     if(opener){
       event.preventDefault();
-      if(readOnly())return;
+      if(readOnly()&&!opener.hasAttribute('data-nfe-allow-readonly'))return;
       openModal(byId(opener.getAttribute('data-nfe-modal-open')));
       return;
     }
