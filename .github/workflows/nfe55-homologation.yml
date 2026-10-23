@@ -10,6 +10,7 @@ on:
       - 'app/Models/NfeDraft.php'
       - 'database/migrations/2026_10_23_000006_add_nfe55_transmission_fields.php'
       - 'resources/views/fiscal/nfe/**'
+      - 'public/js/nfe-editor.js'
       - 'routes/web.php'
       - 'tests/Feature/Nfe55EmissionFoundationTest.php'
       - 'tests/Feature/Nfe55DanfeTest.php'
