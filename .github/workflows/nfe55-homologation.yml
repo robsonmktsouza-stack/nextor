@@ -12,6 +12,7 @@ on:
       - 'resources/views/fiscal/nfe/**'
       - 'routes/web.php'
       - 'tests/Feature/Nfe55EmissionFoundationTest.php'
+      - 'tests/Feature/Nfe55DanfeTest.php'
       - '.github/workflows/nfe55-homologation.yml'
   workflow_dispatch:
 jobs:
@@ -32,4 +33,4 @@ jobs:
       - run: cp .env.example .env && php artisan key:generate
       - run: php -l app/Services/Fiscal/Nfe55IniBuilder.php && php -l app/Services/Fiscal/Nfe55EmissionService.php && php -l app/Services/Fiscal/Nfe55DanfeService.php && php -l app/Jobs/ProcessNfe55Job.php && php artisan view:cache
       - run: php artisan route:list --path=fiscal/nfe/drafts
-      - run: php -d memory_limit=1024M vendor/bin/phpunit --filter='Nfe55EmissionFoundationTest|NfeEditorTest' --display-errors --display-warnings
+      - run: php -d memory_limit=1024M vendor/bin/phpunit --filter='Nfe55EmissionFoundationTest|Nfe55DanfeTest|NfeEditorTest' --display-errors --display-warnings
