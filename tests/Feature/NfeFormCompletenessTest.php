@@ -209,4 +209,33 @@ final class NfeFormCompletenessTest extends TestCase
         $this->post(route('fiscal.nfe.store'),$data)->assertSessionHasErrors('discount');
         self::assertSame(0,NfeDraft::query()->count());
     }
+
+    public function test_invoice_installments_are_checked_before_saving_and_mapped_into_ini(): void
+    {
+        [$company,$nature,$customer]=$this->init();
+        $data=$this->data($nature,$customer);
+        $data['duplicates_json']=json_encode([[
+            'number'=>'001','due_date'=>'2026-02-31','value'=>210,
+        ]],JSON_THROW_ON_ERROR);
+        $this->post(route('fiscal.nfe.store'),$data)->assertSessionHasErrors('duplicates_json');
+        self::assertSame(0,NfeDraft::query()->count());
+
+        $data['duplicates_json']=json_encode([[
+            'number'=>'001','due_date'=>'2026-12-05','value'=>209.99,
+        ]],JSON_THROW_ON_ERROR);
+        $this->post(route('fiscal.nfe.store'),$data)->assertSessionHasErrors('duplicates_json');
+        self::assertSame(0,NfeDraft::query()->count());
+
+        $data['duplicates_json']=json_encode([[
+            'number'=>'001','due_date'=>'2026-12-05','value'=>210,
+        ]],JSON_THROW_ON_ERROR);
+        $this->post(route('fiscal.nfe.store'),$data)->assertSessionHasNoErrors();
+        $draft=NfeDraft::query()->firstOrFail();
+        self::assertSame('001',$draft->duplicates[0]['number']);
+        $ini=app(Nfe55IniBuilder::class)->build($draft,$company,42,12345678);
+        foreach(['[Fatura]','vLiq=210.00','[Duplicata001]',
+            'nDup=001','dVenc=05/12/2026','vDup=210.00'] as $expected){
+            self::assertStringContainsString($expected,$ini);
+        }
+    }
 }
