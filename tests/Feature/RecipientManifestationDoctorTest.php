@@ -86,6 +86,26 @@ final class RecipientManifestationDoctorTest extends TestCase
         $this->assertDatabaseCount('incoming_nfe_manifestation_attempts',0);
     }
 
+    public function test_diagnostic_does_not_guess_date_error_from_filename(): void
+    {
+        $this->ready();
+        $invoice=$this->invoice();
+        $gateway=new class extends IncomingNfeManifestationGateway {
+            public function diagnose(CompanySetting $company,string $cnpj,string $key,string $event): void
+            {
+                throw new RecipientEventPreparationException(
+                    'ACBr NFE_CarregarEventoINI falhou (-10): arquivo datafile.ini inválido');
+            }
+        };
+        app()->instance(IncomingNfeManifestationGateway::class,$gateway);
+        self::assertSame(1,Artisan::call('fiscal:manifestation-doctor',['invoice'=>$invoice->id]));
+        $output=Artisan::output();
+        self::assertStringContainsString('código -10',$output);
+        self::assertStringNotContainsString('formato de data/hora',$output);
+        self::assertStringNotContainsString('datafile.ini',$output);
+        $this->assertDatabaseCount('incoming_nfe_manifestation_attempts',0);
+    }
+
     public function test_dry_run_does_not_allow_invalid_event_or_missing_invoice(): void
     {
         $this->ready();
