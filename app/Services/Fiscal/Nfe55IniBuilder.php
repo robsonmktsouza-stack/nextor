@@ -220,13 +220,84 @@ final class Nfe55IniBuilder
             $add('gIBSMunTot',['vIBSMun'=>$m('mun')]);
             $add('gCBSTot',['vCBS'=>$m('cbs')]);
         }
-        $add('Transportador',['modFrete'=>'9']);
-        $add('pag001',[
-            'tPag'=>$draft->payment_type==='90'?'90':$draft->payment_type,
-            'vPag'=>$draft->payment_type==='90'?'0.00':$total,
-            'indPag'=>'0',
-            'xPag'=>$draft->payment_type==='99'?$draft->payment_other_description:null,
+        $transport=$draft->transport_data??[];
+        $freightMode=(string)($transport['freight_mode']??'9');
+        if(!in_array($freightMode,['0','1','2','3','4','9'],true)){
+            throw new RuntimeException('Modalidade de frete inválida.');
+        }
+        $carrier=$transport['carrier']??[];
+        $add('Transportador',[
+            'modFrete'=>$freightMode,
+            'CNPJCPF'=>$this->digits($carrier['document']??null)?:null,
+            'xNome'=>$carrier['name']??null,'IE'=>$this->digits($carrier['state_registration']??null)?:null,
+            'xEnder'=>$carrier['address']??null,'xMun'=>$carrier['city']??null,
+            'UF'=>$carrier['state']??null,
+            'Placa'=>strtoupper(trim((string)($transport['vehicle_plate']??'')))?:null,
+            'UFPlaca'=>$transport['vehicle_state']??null,
+            'RNTC'=>$carrier['rntrc']??null,
         ]);
+        if((float)($transport['volume_quantity']??0)>0){
+            $add('Volume001',[
+                'qVol'=>(int)$transport['volume_quantity'],
+                'esp'=>$transport['volume_species']??null,
+                'nVol'=>$transport['volume_numbering']??null,
+                'pesoL'=>$transport['net_weight']??null,
+                'pesoB'=>$transport['gross_weight']??null,
+            ]);
+        }
+        $duplicates=$draft->duplicates??[];
+        if($duplicates){
+            $dueTotal=0;
+            foreach($duplicates as $dup)$dueTotal+=(int)round((float)($dup['value']??0)*100);
+            if($dueTotal!==(int)round((float)$total*100)){
+                throw new RuntimeException('Somatório das duplicatas difere do valor da NF-e.');
+            }
+            $add('Fatura',[
+                'nFat'=>(string)$number,'vOrig'=>$total,'vDesc'=>'0.00','vLiq'=>$total,
+            ]);
+            foreach($duplicates as $index=>$duplicate){
+                $date=\DateTimeImmutable::createFromFormat('!Y-m-d',(string)($duplicate['due_date']??''));
+                if(!$date)throw new RuntimeException('Vencimento de duplicata inválido.');
+                $add('Duplicata'.sprintf('%03d',$index+1),[
+                    'nDup'=>$duplicate['number']?:str_pad((string)($index+1),3,'0',STR_PAD_LEFT),
+                    'dVenc'=>$date->format('d/m/Y'),'vDup'=>$this->money($duplicate['value']),
+                ]);
+            }
+        }
+        $payments=$draft->payments??[];
+        if(!$payments)throw new RuntimeException('Nenhuma forma de pagamento informada.');
+        $totalPaid=0;$hasNoPayment=false;
+        foreach($payments as $index=>$payment){
+            $type=(string)($payment['type']??'');
+            $amount=(float)($payment['amount']??0);
+            if(!preg_match('/^\d{2}$/',$type)||$amount<0)
+                throw new RuntimeException('Forma de pagamento inválida.');
+            if($type==='90')$hasNoPayment=true;
+            $totalPaid+=(int)round($amount*100,0,PHP_ROUND_HALF_UP);
+            $add('pag'.sprintf('%03d',$index+1),[
+                'tPag'=>$type,'vPag'=>$this->money($amount),
+                'indPag'=>($payment['condition']??'a_vista')==='a_vista'?'0':'1',
+                'xPag'=>$type==='99'?($payment['other_description']??null):null,
+                'tBand'=>in_array($type,['03','04'],true)?($payment['card_brand']??null):null,
+                'CNPJ'=>in_array($type,['03','04'],true)
+                    ?$this->digits($payment['acquirer_document']??null):null,
+                'cAut'=>in_array($type,['03','04'],true)?($payment['authorization_code']??null):null,
+            ]);
+        }
+        if($hasNoPayment ? count($payments)!==1 || $totalPaid!==0
+            : $totalPaid!==(int)round((float)$total*100)){
+            throw new RuntimeException('Os pagamentos não conciliam com o total da NF-e.');
+        }
+        if($draft->has_referenced_document){
+            $refs=$draft->references??[];
+            if(!$refs)throw new RuntimeException('Documento referenciado não informado.');
+            foreach($refs as $i=>$reference){
+                if(!preg_match('/^\d{44}$/',(string)($reference['key']??''))){
+                    throw new RuntimeException('Chave da NF-e referenciada inválida.');
+                }
+                $add('NFRef'.sprintf('%03d',$i+1),['Tipo'=>'NFE','refNFe'=>$reference['key']]);
+            }
+        }
         if($draft->additional_info)$add('DadosAdicionais',['infCpl'=>$draft->additional_info]);
         return implode("\r\n\r\n",$sections)."\r\n";
     }
