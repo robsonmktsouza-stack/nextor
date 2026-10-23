@@ -60,6 +60,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     const line=document.createElement('div');
     line.className='purchase-item-line';
     line.dataset.purchaseItem='1';
+    if(data.source_description)line.dataset.importedSource='1';
     line.innerHTML=
       '<div class="purchase-item-primary">'+
         '<label class="purchase-line-field purchase-product-field"><span>Produto *</span>'+
@@ -79,13 +80,41 @@ document.addEventListener('DOMContentLoaded',()=>{
       '</div>';
 
     const select=line.querySelector('[data-product]');
+    const productLabel=line.querySelector('.purchase-product-field');
+    if(data.source_description){
+      const source=document.createElement('small');
+      source.className='purchase-import-product';
+      source.textContent='NF-e: '+(data.source_code?data.source_code+' — ':'')+data.source_description;
+      productLabel.appendChild(source);
+    }
+    const mapButton=document.createElement('button');
+    mapButton.type='button';mapButton.className='purchase-map-button';
+    mapButton.textContent='Selecionar / cadastrar';
+    mapButton.setAttribute('aria-label','Selecionar ou cadastrar produto');
+    productLabel.appendChild(mapButton);
+    const selectProduct=product=>{
+      if(!productMap.has(String(product.id)))products.push(product);
+      productMap.set(String(product.id),product);
+      if(![...select.options].some(option=>option.value===String(product.id)))
+        select.add(new Option(product.sku+' — '+product.name+' ('+product.unit+')',product.id));
+      select.value=String(product.id);
+      select.dispatchEvent(new Event('change',{bubbles:true}));
+    };
+    mapButton.addEventListener('click',()=>{
+      window.LumeronCatalog?.pick('products',{
+        initial:data.source_description||'',
+        items:products,
+        onSelect:selectProduct,
+      });
+    });
     for(const p of products)select.add(new Option(p.sku+' — '+p.name+' ('+p.unit+')',p.id));
     select.value=String(data.product_id??'');
     line.querySelector('[data-qty]').value=data.quantity??'1';
     line.querySelector('[data-cost]').value=data.unit_cost??(productMap.get(select.value)?.cost_price??'0.00');
 
     select.addEventListener('change',()=>{
-      moneyAssign(line.querySelector('[data-cost]'),productMap.get(select.value)?.cost_price??0);
+      if(!line.dataset.importedSource)
+        moneyAssign(line.querySelector('[data-cost]'),productMap.get(select.value)?.cost_price??0);
       calculate();
     });
     line.querySelector('[data-purchase-remove]').addEventListener('click',()=>{
