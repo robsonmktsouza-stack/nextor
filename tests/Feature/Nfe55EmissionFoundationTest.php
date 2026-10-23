@@ -77,6 +77,8 @@ final class Nfe55EmissionFoundationTest extends TestCase
         foreach([
             'Modelo=55','cUF=29','cNF=12345678','serie=1','nNF=24',
             'tpAmb=2','indFinal=0','CNPJCPF=12345678000100',
+            'dhEmi=23/10/2026 14:00:00',
+            'NOTA FISCAL EMITIDA EM AMBIENTE DE HOMOLOGACAO - SEM VALOR FISCAL',
             'NCM=61091000','CFOP=5102','CSOSN=102','vProd=100.00','vNF=100.00',
             '[Produto001]','[PIS001]','[COFINS001]','[pag001]',
         ] as $piece)self::assertStringContainsString($piece,$ini);
