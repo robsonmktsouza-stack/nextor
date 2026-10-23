@@ -92,7 +92,7 @@
             $needsReview=$lastAttempt && in_array($lastAttempt->status,['pending','uncertain'],true);
             $manifestLabel=$manifestationEvents[$invoice->manifestation] ?? 'Sem manifesto';
           @endphp
-          <select class="fiscal-manifest-select" data-manifest-select
+          <select class="fiscal-manifest-select" data-no-search data-manifest-select
             data-manifest-url="{{ route('fiscal.purchases.manifest',$invoice) }}"
             data-invoice-key="{{ $invoice->access_key }}"
             aria-label="Manifestação da nota {{ $invoice->access_key }}"
