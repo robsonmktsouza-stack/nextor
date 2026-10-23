@@ -64,10 +64,11 @@ final class FiscalPurchasesController extends Controller
             'ok'=>'Consulta concluída. Novas notas recebidas: '.$result['imported'].'.',
             'cooldown'=>'A SEFAZ exige um intervalo entre consultas. A próxima busca será automática.',
             'busy'=>'Já existe uma consulta fiscal em andamento.',
+            'not_ready'=>'Configure o certificado digital A1 em Ajustes → Fiscal para buscar as notas.',
             default=>'A consulta não pôde ser concluída. Confira o certificado e tente mais tarde.',
         };
         return redirect()->route('fiscal.purchases.index')
-            ->with($result['status']==='error'?'error':'success',$message);
+            ->with(in_array($result['status'],['error','not_ready'],true)?'error':'success',$message);
     }
 
     public function automatic(Request $request,IncomingNfeSyncService $sync)
