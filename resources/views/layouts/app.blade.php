@@ -51,6 +51,7 @@
           @if(auth()->user()->canAccess('products') && $hasModule('products'))<a href="{{ route('products.index') }}">Produtos</a>@endif
           @if(auth()->user()->canAccess('services') && $hasModule('services'))<a href="{{ route('services.index') }}">Serviços</a>@endif
           @if(auth()->user()->canAccess('stock') && $hasModule('products'))<a href="{{ route('stock.index') }}">Movimentações de estoque</a>@endif
+          @if(auth()->user()->canAccess('purchases') && $hasModule('products'))<a data-company-required href="{{ route('purchases.index') }}">Compras</a>@endif
           @if(auth()->user()->canAccess('customers'))<a href="{{ route('customers.index') }}">Clientes</a>@endif
           @if(auth()->user()->canAccess('pdv') && $hasModule('pdv'))<a data-company-required href="{{ route('pdv.index') }}">PDV</a>@endif
           @if(auth()->user()->canAccess('sales') && $hasModule('pdv'))
@@ -130,6 +131,10 @@
     @if(auth()->user()->canAccess('sales') && $hasModule('pdv'))
     <a data-company-required href="{{ route('sales.index') }}" class="sidebar-link {{ request()->routeIs('sales.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'sales'])<span>Vendas</span></a>
+    @endif
+    @if(auth()->user()->canAccess('purchases') && $hasModule('products'))
+    <a data-company-required href="{{ route('purchases.index') }}" class="sidebar-link {{ request()->routeIs('purchases.*') ? 'active' : '' }}">
+      @include('partials.icon',['name'=>'shopping-bag'])<span>Compras</span></a>
     @endif
     @if(auth()->user()->canAccess('pdv') && $hasModule('pdv'))
     <a data-company-required href="{{ route('pdv.index') }}" class="sidebar-link {{ request()->routeIs('pdv.*') ? 'active' : '' }}">
