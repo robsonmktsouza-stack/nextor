@@ -404,6 +404,13 @@
         (inSale?' · Na nota: '+text(inSale.quantity)+' (selecionar soma +1)':'')+
         '</small></span><b>'+fmt(cents(product.sale_price))+'</b></button>';
     }).join('') || '<p>Nenhum produto encontrado.</p>';
+    const register=document.createElement('button');
+    register.type='button';register.dataset.nfceRegister='1';
+    register.className='sale-suggestion';
+    register.textContent=search.value.trim()
+      ? 'Cadastrar "'+search.value.trim().slice(0,90)+'" como produto'
+      : 'Cadastrar novo produto';
+    results.appendChild(register);
     toggleResults(true);
   }
   search.addEventListener('input',renderResults);
@@ -428,7 +435,24 @@
   });
   results.addEventListener('click',event=>{
     const button=event.target.closest('[data-pick-product]');
-    if(button)addProduct(button.dataset.pickProduct);
+    if(button){addProduct(button.dataset.pickProduct);return;}
+    if(event.target.closest('[data-nfce-register]')){
+      const name=search.value.trim();
+      toggleResults(false);
+      window.LumeronCatalog?.create('products',{
+        initial:name,
+        onSelect:item=>{
+          if(!productMap.has(String(item.id))){
+            products.push(item);productMap.set(String(item.id),item);
+            searchCatalog.push({
+              product:item,name:normalizeSearch(item.name),
+              sku:normalizeSearch(item.sku),gtin:normalizeSearch(item.ean_gtin)
+            });
+          }
+          addProduct(item.id);
+        }
+      });
+    }
   });
   results.addEventListener('keydown',event=>{
     if(event.key==='Escape'){
@@ -444,8 +468,17 @@
   });
   el('nfceAddProduct').addEventListener('click',()=>{
     activateTab('products');
-    search.focus({preventScroll:true});
-    renderResults();
+    window.LumeronCatalog?.pick('products',{
+      items:products,
+      onSelect:item=>{
+        if(!productMap.has(String(item.id))){
+          products.push(item);productMap.set(String(item.id),item);
+          searchCatalog.push({product:item,name:normalizeSearch(item.name),
+            sku:normalizeSearch(item.sku),gtin:normalizeSearch(item.ean_gtin)});
+        }
+        addProduct(item.id);
+      },
+    });
   });
 
   function paymentInput(index,payment,field,label,placeholder='',length=40){
