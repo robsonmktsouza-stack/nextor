@@ -466,19 +466,12 @@
     // mesmo clique que a abriu (comportamento antigo).
     if(!picker.contains(event.target))toggleResults(false);
   });
+  // Localizar mantém a pesquisa rápida para leitor de código de barras;
+  // cadastrar uma referência desconhecida abre o modal pelo próprio resultado.
   el('nfceAddProduct').addEventListener('click',()=>{
     activateTab('products');
-    window.LumeronCatalog?.pick('products',{
-      items:products,
-      onSelect:item=>{
-        if(!productMap.has(String(item.id))){
-          products.push(item);productMap.set(String(item.id),item);
-          searchCatalog.push({product:item,name:normalizeSearch(item.name),
-            sku:normalizeSearch(item.sku),gtin:normalizeSearch(item.ean_gtin)});
-        }
-        addProduct(item.id);
-      },
-    });
+    search.focus({preventScroll:true});
+    renderResults();
   });
 
   function paymentInput(index,payment,field,label,placeholder='',length=40){
