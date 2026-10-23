@@ -380,6 +380,18 @@ class NfeDraftController extends Controller
         $freight=max(0,(float)($data['freight_value'] ?? 0));
         $totals=$this->calculateTotals($items,$discount,$surcharge,$freight);
         $payments=$this->validatedPayments($request,$data,$totals);
+        $duplicates=$this->validatedDuplicates($data['duplicates_json'] ?? null,$totals);
+        $usesMercantileDuplicate=false;
+        foreach($payments as $payment){
+            if((string)$payment['type']==='14')$usesMercantileDuplicate=true;
+        }
+        if((bool)$duplicates!==$usesMercantileDuplicate){
+            throw ValidationException::withMessages([
+                'duplicates_json'=>$duplicates
+                    ? 'Para emitir duplicatas, selecione Duplicata Mercantil como uma forma de pagamento.'
+                    : 'Para Duplicata Mercantil, informe as parcelas de cobrança.',
+            ]);
+        }
         $destination=$data['destination'] ?? $this->resolveDestination($customer,$company);
         $purpose=$data['purpose'] ?? ($nature->purpose ?: 'normal');
         $hasReferencedDocument=$request->boolean('has_referenced_document');
@@ -493,7 +505,7 @@ class NfeDraftController extends Controller
                 'discount'=>$totals['discount'],
                 'net_value'=>$totals['total'],
             ],
-            'duplicates'=>$this->validatedDuplicates($data['duplicates_json'] ?? null,$totals),
+            'duplicates'=>$duplicates,
             'payments'=>$payments,
             'references'=>$references,
             'custom_fields'=>[],
@@ -797,7 +809,7 @@ class NfeDraftController extends Controller
                 'duplicates_json'=>'Uma NF-e permite no máximo 120 duplicatas.',
             ]);
         }
-        $normalized=[];$sum=0;
+        $normalized=[];$sum=0;$previousDue=null;$numbers=[];
         foreach($duplicates as $index=>$duplicate){
             if(!is_array($duplicate)||!is_numeric($duplicate['value']??null)){
                 throw ValidationException::withMessages(['duplicates_json'=>'Confira os valores das duplicatas.']);
@@ -811,14 +823,23 @@ class NfeDraftController extends Controller
             if(!$date||$date->format('Y-m-d')!==$due){
                 throw ValidationException::withMessages(['duplicates_json'=>'Informe uma data de vencimento válida em cada duplicata.']);
             }
+            if($previousDue!==null&&strcmp($due,$previousDue)<0){
+                throw ValidationException::withMessages(['duplicates_json'=>'Informe as duplicatas em ordem de vencimento.']);
+            }
+            $previousDue=$due;
             $number=trim((string)($duplicate['number']??''));
             if($number!==''&&(mb_strlen($number)>3||!preg_match('/^[A-Za-z0-9]{1,3}$/',$number))){
                 throw ValidationException::withMessages(['duplicates_json'=>'Confira o número da duplicata (até 3 letras ou números).']);
             }
+            $number=$number!==''?$number:str_pad((string)($index+1),3,'0',STR_PAD_LEFT);
+            if(isset($numbers[$number])){
+                throw ValidationException::withMessages(['duplicates_json'=>'Os números das duplicatas não podem se repetir.']);
+            }
+            $numbers[$number]=true;
             $cents=(int)round($value*100,0,PHP_ROUND_HALF_UP);
             $sum+=$cents;
             $normalized[]=[
-                'number'=>$number!==''?$number:str_pad((string)($index+1),3,'0',STR_PAD_LEFT),
+                'number'=>$number,
                 'due_date'=>$due,'value'=>$cents/100,
             ];
         }
