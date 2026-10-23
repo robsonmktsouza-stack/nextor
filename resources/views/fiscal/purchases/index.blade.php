@@ -136,7 +136,9 @@
         <td>{{ $invoice->xml_path ? 'Disponível':'Pendente' }}</td>
         <td class="action-cell">
           <div class="fiscal-purchase-actions">
-            @if($invoice->purchase)
+            @if(!auth()->user()->canAccess('purchases'))
+              <button type="button" class="btn-icon fiscal-purchase-action-disabled" disabled aria-label="Importação indisponível">@include('partials.icon',['name'=>'shopping-bag','size'=>16])</button>
+            @elseif($invoice->purchase)
               <a class="btn-icon" href="{{ route('purchases.show',$invoice->purchase) }}"
                 data-tooltip="Abrir compra vinculada" aria-label="Abrir compra vinculada">
                 @include('partials.icon',['name'=>'shopping-bag','size'=>16])

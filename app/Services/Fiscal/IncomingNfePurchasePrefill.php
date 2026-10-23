@@ -43,7 +43,7 @@ final class IncomingNfePurchasePrefill
             $ean=trim((string)$item['ean']);
             $matching=$products->filter(fn($p)=>
                 ($code!==''&&strcasecmp((string)$p->sku,$code)===0)
-                || ($ean!==''&&!preg_match('/^0+$/',$ean)&&strcasecmp((string)$p->ean_gtin,$ean)===0)
+                || (preg_match('/^\\d{8,14}$/',$ean)===1&&strcasecmp((string)$p->ean_gtin,$ean)===0)
             );
             $match=$matching->count()===1?$matching->first():null;
             $discount=$this->amount($item['discount']??null);

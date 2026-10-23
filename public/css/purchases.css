@@ -118,3 +118,8 @@
  .purchase-readonly-primary .purchase-product-field{grid-column:span 2}
  .purchase-readonly-primary .purchase-item-amount{grid-column:auto}
 }
+
+.purchase-import-origin{font-size:12px;font-weight:600;color:#466d84;white-space:nowrap}
+.purchase-import-product{display:block;margin-top:3px;color:#668399;font-size:11px;line-height:1.4;font-weight:400;overflow-wrap:anywhere}
+.purchase-map-button{align-self:flex-start;padding:3px 0;border:0;background:transparent;color:#237bae;font-size:11px;font-weight:600;cursor:pointer}
+.purchase-map-button:hover{text-decoration:underline}
