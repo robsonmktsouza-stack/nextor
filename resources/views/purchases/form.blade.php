@@ -10,7 +10,7 @@
         <select name="supplier_id" required autofocus>
           <option value="">Selecione um fornecedor</option>
           @foreach($suppliers as $supplier)
-            <option value="{{ $supplier->id }}" @selected(old('supplier_id',$purchase->supplier_id)===$supplier->id)>{{ $supplier->name }}{{ $supplier->document?' — '.$supplier->document:'' }}</option>
+            <option value="{{ $supplier->id }}" @selected((int)old('supplier_id',$purchase->supplier_id)===$supplier->id)>{{ $supplier->name }}{{ $supplier->document?' — '.$supplier->document:'' }}</option>
           @endforeach
         </select>
       </label>
