@@ -291,14 +291,20 @@
   syncDateControl('nfeInformExitDatetime',['nfeExitDate','nfeExitTime']);
   syncDateControl('nfeInformExpectedDeliveryDate',['nfeExpectedDeliveryDate']);
 
-  const itemTotal=item=>number(item.quantity)*Math.max(number(item.dimension_quantity)||1,0)*number(item.unit_price);
+  const itemGross=item=>number(item.quantity)*Math.max(number(item.dimension_quantity)||1,0)*number(item.unit_price);
+  const itemTotal=item=>Math.max(0,itemGross(item)+number(item.freight)+number(item.insurance)
+    +number(item.other_expenses)-number(item.discount));
 
   const totals=()=>{
     let productsTotal=0;
-    let ipi=0;
+    let ipi=0,insurance=0,itemFreight=0,otherExpenses=0,itemDiscount=0;
     items.forEach(item=>{
-      const base=itemTotal(item);
+      const base=itemGross(item);
       productsTotal+=base;
+      insurance+=number(item.insurance);
+      itemFreight+=number(item.freight);
+      otherExpenses+=number(item.other_expenses);
+      itemDiscount+=number(item.discount);
       const tax=normalizeTax(item.tax_data||{});
       const ipiRate=Math.max(0,number(tax.ipi_rate));
       if(ipiRate>0) ipi+=base*(ipiRate/100);
@@ -307,17 +313,19 @@
     const freight=Math.max(0,number(getField('nfeFreightValue')));
     const discount=Math.max(0,number(getField('nfeDiscount')));
     const surcharge=Math.max(0,number(getField('nfeSurcharge')));
-    const total=Math.max(0,productsTotal+freight+surcharge+ipi-discount);
-    return {products:productsTotal,freight,discount,surcharge,ipi,total};
+    const total=Math.max(0,productsTotal+freight+itemFreight+insurance+otherExpenses+surcharge+ipi-discount-itemDiscount);
+    return {products:productsTotal,freight,discount,surcharge,ipi,total,insurance,otherExpenses,itemFreight,itemDiscount};
   };
 
   const renderTotals=()=>{
     const values=totals();
     const targets={
       nfeTotalProducts:values.products,
-      nfeTotalFreight:values.freight,
+      nfeTotalFreight:values.freight+values.itemFreight,
+      nfeTotalInsurance:values.insurance,
+      nfeTotalOtherExpenses:values.otherExpenses,
       nfeTotalIpi:values.ipi,
-      nfeTotalDiscount:values.discount,
+      nfeTotalDiscount:values.discount+values.itemDiscount,
       nfeTotalSurcharge:values.surcharge,
       nfeTotalInvoice:values.total,
       nfeFooterTotal:values.total,
@@ -470,6 +478,8 @@
     quantity:'nfeItemQuantity',
     dimension_quantity:'nfeItemDimensionQuantity',
     unit_price:'nfeItemUnitPrice',
+    freight:'nfeItemFreight',insurance:'nfeItemInsurance',
+    other_expenses:'nfeItemOtherExpenses',discount:'nfeItemDiscount',
     purchase_order:'nfeItemPurchaseOrder',
     purchase_order_item:'nfeItemPurchaseOrderItem',
     notes:'nfeItemNotes',
@@ -564,11 +574,16 @@
     const subtotal=byId('nfeItemSubtotal');
     const quantity=number(getField('nfeItemQuantity'));
     const dimension=Math.max(number(getField('nfeItemDimensionQuantity'))||1,0);
-    if(subtotal) subtotal.textContent=money(quantity*dimension*number(getField('nfeItemUnitPrice')));
+    if(subtotal) subtotal.textContent=money(Math.max(0,
+      quantity*dimension*number(getField('nfeItemUnitPrice'))
+        +number(getField('nfeItemFreight'))+number(getField('nfeItemInsurance'))
+        +number(getField('nfeItemOtherExpenses'))-number(getField('nfeItemDiscount'))));
   };
   byId('nfeItemQuantity')?.addEventListener('input',updateItemSubtotal);
   byId('nfeItemDimensionQuantity')?.addEventListener('input',updateItemSubtotal);
   byId('nfeItemUnitPrice')?.addEventListener('input',updateItemSubtotal);
+  ['nfeItemFreight','nfeItemInsurance','nfeItemOtherExpenses','nfeItemDiscount']
+    .forEach(id=>byId(id)?.addEventListener('input',updateItemSubtotal));
 
   const switchItemTab=target=>{
     document.querySelectorAll('[data-nfe-item-tab]').forEach(button=>{
@@ -641,6 +656,7 @@
       quantity:1,
       dimension_quantity:1,
       unit_price:0,
+      freight:0,insurance:0,other_expenses:0,discount:0,
       cfop:resolveCfop(tax),
       origin:taxDefaults?.icms_origin_default||'0',
       ean_gtin:'',
@@ -856,6 +872,10 @@
       quantity,
       dimension_quantity:Math.max(number(getField('nfeItemDimensionQuantity'))||1,0),
       unit_price:number(getField('nfeItemUnitPrice')),
+      freight:number(getField('nfeItemFreight')),
+      insurance:number(getField('nfeItemInsurance')),
+      other_expenses:number(getField('nfeItemOtherExpenses')),
+      discount:number(getField('nfeItemDiscount')),
       cfop:getField('nfeItemCfop')||resolveCfop(tax),
       origin:getField('nfeItemOrigin'),
       ean_gtin:getField('nfeItemGtin'),
