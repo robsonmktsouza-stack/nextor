@@ -1,0 +1,126 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\AppSetting;
+use App\Models\CompanySetting;
+use App\Models\Customer;
+use App\Models\NfeDraft;
+use App\Models\OperationNature;
+use App\Models\User;
+use App\Services\Fiscal\Nfe55IniBuilder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Concerns\WithConfiguredCompany;
+use Tests\TestCase;
+use RuntimeException;
+
+final class Nfe55EmissionFoundationTest extends TestCase
+{
+    use RefreshDatabase,WithConfiguredCompany;
+
+    private function admin(): User
+    {
+        return User::query()->create([
+            'name'=>'Operador NF-e modelo 55','email'=>'nfe55@example.test',
+            'password'=>'password','role'=>'admin','is_active'=>true,
+        ]);
+    }
+
+    private function draft(): NfeDraft
+    {
+        CompanySetting::current()->update([
+            'document'=>'12345678000100','legal_name'=>'Empresa NF-e Teste',
+            'state_registration'=>'12345678','state'=>'BA','city'=>'Salvador',
+            'city_ibge_code'=>'2927408','address'=>'Rua Emitente',
+            'address_number'=>'10','district'=>'Centro','zip_code'=>'40000000','crt'=>'1',
+        ]);
+        $nature=OperationNature::query()->create([
+            'name'=>'VENDA DE MERCADORIA','operation_type'=>'outbound','purpose'=>'normal',
+            'cfop_internal'=>'5102','is_active'=>true,
+        ]);
+        $customer=Customer::query()->create([
+            'name'=>'Comprador local','document'=>'12345678000190',
+            'is_customer'=>true,'state'=>'BA','city'=>'Salvador',
+            'city_ibge_code'=>'2927408','address'=>'Rua Cliente',
+            'address_number'=>'3','district'=>'Centro','zip_code'=>'40001000',
+            'ie_indicator'=>'non_contributor',
+        ]);
+        $draft=NfeDraft::query()->create([
+            'operation_nature_id'=>$nature->id,'customer_id'=>$customer->id,
+            'user_id'=>$this->admin()->id,'status'=>'draft',
+            'operation_type'=>'outbound','destination'=>'internal',
+            'presence'=>'presential','purpose'=>'normal',
+            'issue_date'=>'2026-10-23','issue_time'=>'14:00',
+            'series'=>1,'environment'=>'homologation',
+            'recipient_snapshot'=>$customer->only([
+                'name','document','state','city','city_ibge_code','address','address_number',
+                'district','zip_code','ie_indicator',
+            ]),
+            'totals'=>['products'=>100,'total'=>100],
+            'payment_type'=>'01','discount'=>0,'surcharge'=>0,
+            'transport_data'=>['freight_value'=>0],
+            'validated_at'=>now(),
+        ]);
+        $draft->items()->create([
+            'item_number'=>1,'product_name'=>'MERCADORIA','product_sku'=>'ITEM-001',
+            'quantity'=>'2.0000','dimension_quantity'=>'1.0000','unit_price'=>'50.0000',
+            'cfop'=>'5102','origin'=>'0','unit'=>'UN','tax_unit'=>'UN','ncm'=>'61091000',
+            'tax_data'=>['icms_csosn'=>'102','pis_cst'=>'49','cofins_cst'=>'49','ipi_cst'=>'53'],
+        ]);
+        return $draft->refresh();
+    }
+
+    public function test_model55_builder_produces_homologation_invoice_with_real_invoice_identification(): void
+    {
+        $draft=$this->draft();
+        $ini=app(Nfe55IniBuilder::class)->build($draft,CompanySetting::current(),24,12345678);
+        foreach([
+            'Modelo=55','cUF=29','cNF=12345678','serie=1','nNF=24',
+            'tpAmb=2','indFinal=0','CNPJCPF=12345678000100',
+            'NCM=61091000','CFOP=5102','CSOSN=102','vProd=100.00','vNF=100.00',
+            '[Produto001]','[PIS001]','[COFINS001]','[pag001]',
+        ] as $piece)self::assertStringContainsString($piece,$ini);
+        self::assertStringNotContainsString('Modelo=65',$ini);
+        self::assertStringNotContainsString('ArquivoPFX',$ini);
+    }
+
+    public function test_unsupported_icms_tax_scenario_is_blocked_before_any_sefaz_transmission(): void
+    {
+        $draft=$this->draft();
+        $draft->items()->first()->update(['tax_data'=>[
+            'icms_csosn'=>'500','pis_cst'=>'49','cofins_cst'=>'49','ipi_cst'=>'53',
+        ]]);
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('CSOSN 500');
+        app(Nfe55IniBuilder::class)->build($draft->fresh(),CompanySetting::current(),24,12345678);
+    }
+
+    public function test_production_is_not_automatically_enabled_by_the_editor(): void
+    {
+        $draft=$this->draft();
+        $draft->update(['environment'=>'production']);
+        $this->actingAs(User::query()->where('email','nfe55@example.test')->firstOrFail());
+        $this->post(route('fiscal.nfe.emit',$draft))
+            ->assertSessionHasErrors('nfe');
+        self::assertSame('draft',$draft->fresh()->status);
+        self::assertNull($draft->fresh()->document_number);
+    }
+
+    public function test_unvalidated_note_cannot_reserve_number(): void
+    {
+        $draft=$this->draft();
+        $draft->update(['validated_at'=>null]);
+        $this->actingAs(User::query()->where('email','nfe55@example.test')->firstOrFail());
+        $this->post(route('fiscal.nfe.emit',$draft))->assertSessionHasErrors('nfe');
+        self::assertNull($draft->fresh()->document_number);
+    }
+
+    public function test_authorized_or_queued_note_cannot_be_edited_or_deleted(): void
+    {
+        $draft=$this->draft();
+        $draft->update(['status'=>'queued','document_number'=>101]);
+        $this->actingAs(User::query()->where('email','nfe55@example.test')->firstOrFail());
+        $this->delete(route('fiscal.nfe.destroy',$draft))->assertStatus(409);
+        $this->put(route('fiscal.nfe.update',$draft),[])->assertStatus(409);
+    }
+}
