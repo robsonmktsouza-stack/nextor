@@ -186,6 +186,64 @@ final class PurchaseOperationsTest extends TestCase
         $this->assertDatabaseCount('financial_entries',0);
     }
 
+    public function test_incidental_costs_taxes_discount_and_keyword_are_saved_and_totalled(): void
+    {
+        $this->actingAs($this->admin());
+        $supplier=$this->supplier();
+        $product=$this->product();
+        $data=$this->payload($supplier,$product,[
+            'keyword'=>'Reposição outubro',
+            'freight'=>'12.00',
+            'other_expenses'=>'3.00',
+            'discount'=>'4.00',
+            'items'=>[[
+                'product_id'=>$product->id,
+                'quantity'=>'2.000',
+                'unit_cost'=>'50.00',
+                'discount'=>'10.00',
+                'other_costs'=>'5.00',
+                'external_costs'=>'7.00',
+                'ipi'=>'8.00',
+                'icms_st'=>'6.00',
+            ]],
+        ]);
+        $this->post(route('purchases.store'),$data)->assertRedirect()->assertSessionHasNoErrors();
+        $purchase=Purchase::firstOrFail();
+        self::assertSame('Reposição outubro',$purchase->keyword);
+        self::assertSame('3.00',$purchase->other_expenses);
+        self::assertSame('116.00',$purchase->subtotal);
+        self::assertSame('127.00',$purchase->total);
+        self::assertSame('8.00',$purchase->items->first()->ipi);
+        self::assertSame('6.00',$purchase->items->first()->icms_st);
+
+        $this->get(route('purchases.show',$purchase))
+            ->assertOk()->assertSee('Reposição outubro')->assertSee('ICMS-ST');
+        $this->get(route('purchases.edit',$purchase))
+            ->assertOk()->assertSee('name="other_expenses"',false)
+            ->assertSee('name="keyword"',false)
+            ->assertSee('purchaseItemsJson');
+
+        $this->post(route('purchases.receive',$purchase))->assertRedirect()->assertSessionHasNoErrors();
+        self::assertSame('127.00',$purchase->fresh()->payable->amount);
+        self::assertSame('7.000',$product->fresh()->stock_quantity);
+    }
+
+    public function test_item_discounts_cannot_create_negative_line_values(): void
+    {
+        $this->actingAs($this->admin());
+        $supplier=$this->supplier();
+        $product=$this->product();
+        $this->post(route('purchases.store'),$this->payload($supplier,$product,[
+            'items'=>[[
+                'product_id'=>$product->id,
+                'quantity'=>'1.000',
+                'unit_cost'=>'10.00',
+                'discount'=>'11.00',
+            ]],
+        ]))->assertSessionHasErrors('items');
+        $this->assertDatabaseCount('purchases',0);
+    }
+
     public function test_permissions_prevent_employee_without_purchases_access(): void
     {
         $user=User::query()->create([
