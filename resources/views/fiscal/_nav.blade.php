@@ -6,4 +6,8 @@
       <span>{{ $item['label'] }}</span>
     </a>
   @endforeach
+  <a href="{{ route('fiscal.purchases.index') }}" class="{{ request()->routeIs('fiscal.purchases.*')?'active':'' }}">
+    @include('partials.icon',['name'=>'shopping-bag','size'=>17])
+    <span>Compras</span>
+  </a>
 </nav>
