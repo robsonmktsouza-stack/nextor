@@ -534,6 +534,7 @@
                 ? item.sku+' — '+item.name : item.name+(item.document?' — '+item.document:'');
               const option=new Option(text,String(item.id),false,true);
               option.dataset.name=item.name;
+              if(quickKind==='customers')option.dataset.finalConsumer=item.final_consumer?'1':'0';
               select.add(option);
               select.value=String(item.id);
               select.dispatchEvent(new Event('change',{bubbles:true}));
