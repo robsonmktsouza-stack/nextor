@@ -453,7 +453,14 @@ $origins=[
       <div class="editor-panel" id="nfeCardPanel">
         <h3>Dados de cartão / pagamento eletrônico</h3>
         <div class="editor-grid cols-12">
-          <label class="field col-4"><span>Bandeira</span>
+          <label class="field col-3"><span>Integração com o sistema *</span>
+            <select name="card_integration_type" id="nfeCardIntegrationType">
+              <option value="">Selecione</option>
+              <option value="1" @selected(old('card_integration_type',data_get($draft->payments,'0.integration_type'))==='1')>Integrado (TEF)</option>
+              <option value="2" @selected(old('card_integration_type',data_get($draft->payments,'0.integration_type'))==='2')>Não integrado (POS)</option>
+            </select>
+          </label>
+          <label class="field col-3"><span>Bandeira</span>
             <select name="card_brand">
               <option value="">Não informada</option>
               @foreach($cardBrands as $code=>$label)
@@ -461,8 +468,8 @@ $origins=[
               @endforeach
             </select>
           </label>
-          <label class="field col-4"><span>CNPJ da credenciadora</span><input name="card_acquirer_document" value="{{ old('card_acquirer_document',$draft->card_acquirer_document) }}" maxlength="20"></label>
-          <label class="field col-4"><span>Código de autorização</span><input name="card_authorization_code" value="{{ old('card_authorization_code',$draft->card_authorization_code) }}" maxlength="40"></label>
+          <label class="field col-3"><span>CNPJ da credenciadora</span><input name="card_acquirer_document" value="{{ old('card_acquirer_document',$draft->card_acquirer_document) }}" maxlength="20"></label>
+          <label class="field col-3"><span>Código de autorização</span><input name="card_authorization_code" value="{{ old('card_authorization_code',$draft->card_authorization_code) }}" maxlength="40"></label>
         </div>
       </div>
 
@@ -493,6 +500,13 @@ $origins=[
           <label class="field col-3"><span>Valor</span><input type="number" id="nfeExtraPaymentAmount" min="0.01" step="0.01" placeholder="0,00"></label>
           <div class="field col-2"><span>&nbsp;</span><button type="button" class="btn btn-secondary" id="nfeAddExtraPayment">@include('partials.icon',['name'=>'plus','size'=>15]) Adicionar</button></div>
           <label class="field col-6" id="nfeExtraPaymentOtherField" hidden><span>Descrição da forma de pagamento</span><input id="nfeExtraPaymentOther" maxlength="120"></label>
+          <label class="field col-3" id="nfeExtraPaymentIntegrationField" hidden><span>Integração com o sistema *</span>
+            <select id="nfeExtraPaymentIntegration">
+              <option value="">Selecione</option>
+              <option value="1">Integrado (TEF)</option>
+              <option value="2">Não integrado (POS)</option>
+            </select>
+          </label>
           <label class="field col-3" id="nfeExtraPaymentBrandField" hidden><span>Bandeira do cartão</span><select id="nfeExtraPaymentBrand">
             <option value="">Não informada</option>@foreach($cardBrands as $code=>$label)<option value="{{ $code }}">{{ $code }} - {{ $label }}</option>@endforeach
           </select></label>
