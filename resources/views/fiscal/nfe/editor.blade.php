@@ -571,10 +571,6 @@ $origins=[
       @if($isEditing && $draft->status==='draft')
         <button class="btn btn-success" type="submit" form="nfeEmitForm" id="nfeSubmitEmission"
           @disabled(!$draft->validated_at)>Emitir NF-e</button>
-      @if($isEditing && $draft->status==='authorized' && !$draft->cancellation_status && auth()->user()->canAccess('settings'))
-        <button class="btn btn-secondary" type="button" data-nfe-modal-open="nfeCancelDialog"
-          data-nfe-allow-readonly>Solicitar cancelamento</button>
-      @endif
       @elseif($isEditing && $draft->status==='prepared')
         <button class="btn btn-secondary" type="submit" form="nfeRetryForm">Preparar novamente</button>
       @elseif($isEditing && in_array($draft->status,['pending','processing','rejected','authorized'],true))
@@ -585,6 +581,10 @@ $origins=[
         @if($draft->status==='authorized' && str_ends_with((string)$draft->xml_path,'/authorized.xml'))
           <a class="btn btn-secondary" href="{{ route('fiscal.nfe.danfe',$draft) }}" target="_blank" rel="noopener">Imprimir DANFE</a>
         @endif
+      @endif
+      @if($isEditing && $draft->status==='authorized' && !$draft->cancellation_status && auth()->user()->canAccess('settings'))
+        <button class="btn btn-secondary" type="button" data-nfe-modal-open="nfeCancelDialog"
+          data-nfe-allow-readonly>Solicitar cancelamento</button>
       @endif
     </div>
   </div>
