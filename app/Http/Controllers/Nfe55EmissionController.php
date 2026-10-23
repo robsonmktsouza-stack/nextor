@@ -30,6 +30,26 @@ final class Nfe55EmissionController extends Controller
             ->with('success','Consulta à SEFAZ concluída.');
     }
 
+    public function cancel(Request $request,NfeDraft $nfeDraft,\App\Services\Fiscal\Nfe55CancellationService $service)
+    {
+        abort_unless(auth()->user()?->canAccess('settings'),403);
+        $data=$request->validate([
+            'reason'=>['required','string','min:15','max:255'],
+            'current_password'=>['required','string'],
+            'operation_not_completed'=>['accepted'],
+        ]);
+        if(!\Illuminate\Support\Facades\Hash::check(
+            $data['current_password'],(string)auth()->user()->password
+        )){
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'current_password'=>'Senha incorreta.',
+            ]);
+        }
+        $service->request($nfeDraft,$data['reason']);
+        return redirect()->route('fiscal.nfe.edit',$nfeDraft)
+            ->with('success','Solicitação de cancelamento encaminhada à fila fiscal.');
+    }
+
     public function danfe(NfeDraft $nfeDraft,\App\Services\Fiscal\Nfe55DanfeService $service)
     {
         try {
