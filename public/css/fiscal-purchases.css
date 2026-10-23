@@ -1,21 +1,24 @@
-/* Lumeron Fiscal / Compras — shared admin table visual language. */
-.fiscal-purchases-page .grid-actionbar form {margin:0}
-.fiscal-purchases-count{font-size:12px;color:#657a8b}
-.fiscal-purchases-sync{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:0 16px 14px;padding:13px 15px;background:#f5f8fa;border:1px solid #d9e3eb;border-radius:4px}
-.fiscal-purchases-sync-main{display:flex;flex-direction:column;gap:5px;min-width:0;color:#586d80;font-size:12px;line-height:1.5}
-.fiscal-purchases-sync-main strong{color:#2b475d;font-size:13px}
-.fiscal-purchases-warning{color:#a45227}
+/* Compras usa a mesma barra, os mesmos filtros e a mesma tabela do Fiscal. */
+.fiscal-purchases-page .grid-actionbar form{margin:0}
+.fiscal-purchases-count{color:#657a8b;font-size:12px;white-space:nowrap}
 .fiscal-purchases-auto-form{flex:none}
-.fiscal-purchases-auto-form button{border:1px solid #c5d8e6;background:white;color:#31688d;border-radius:4px;padding:9px 13px;cursor:pointer;font:600 12px Roboto,Arial,sans-serif}
-.fiscal-purchases-auto-form button.is-on{background:#eaf6ee;border-color:#afd8bd;color:#28764a}
-.fiscal-purchases-filters{margin:0 16px 15px}
-.fiscal-purchases-filters form{display:flex;align-items:end;flex-wrap:wrap;gap:10px}
-.fiscal-purchases-filters label{display:flex;flex:1;min-width:200px;flex-direction:column;gap:5px;color:#466075;font-size:12px;font-weight:600}
-.fiscal-purchases-filters label:nth-child(2){flex:0 0 195px;min-width:150px}
-.fiscal-purchases-filters input,.fiscal-purchases-filters select{box-sizing:border-box;width:100%;min-height:37px;background:#fff;border:1px solid #c8d7e2;border-radius:4px;padding:8px 10px;color:#2c4659;font:13px Roboto,Arial,sans-serif}
+.fiscal-purchases-switch-button{box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:9px;height:36px;min-height:36px;padding:0 10px;border:1px solid #d5dbe2;border-radius:4px;background:#fff;color:#536a7f;font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer}
+.fiscal-purchases-switch-button:hover{background:#f7f9fb;border-color:#bdcdd9}
+.fiscal-purchases-switch-button:focus-visible{outline:2px solid #2b85b9;outline-offset:2px}
+.fiscal-purchases-switch-track{display:inline-flex;align-items:center;width:30px;height:17px;border-radius:20px;background:#b4c1cc;padding:3px;box-sizing:border-box;transition:background .15s}
+.fiscal-purchases-switch-thumb{display:block;width:11px;height:11px;background:#fff;border-radius:50%;box-shadow:0 1px 2px #12263830;transition:transform .15s}
+.fiscal-purchases-switch-button[aria-checked="true"] .fiscal-purchases-switch-track{background:#2c9a55}
+.fiscal-purchases-switch-button[aria-checked="true"] .fiscal-purchases-switch-thumb{transform:translateX(13px)}
+.fiscal-purchases-notice{display:flex;align-items:center;gap:7px;padding:8px 14px;background:#fff8ed;border-bottom:1px solid #ead6bd;color:#865824;font-size:12px}
+.fiscal-purchases-notice svg{flex:none}
+.fiscal-purchases-toolbar-filters .table-search-group{flex:1 1 290px;width:420px}
+.fiscal-purchases-toolbar-filters .input-filter{flex:0 1 195px;min-width:155px}
 .fiscal-purchases-table td strong{display:block;color:#324d61;font-weight:600;font-size:13px}
 .fiscal-purchases-table td small{display:block;margin-top:3px;color:#7a8995;font-size:11px}
 .fiscal-purchases-key{font-size:12px;overflow-wrap:anywhere;color:#586e7e}
+@media(max-width:820px){.fiscal-purchases-page .grid-actionbar .grid-actions-right{justify-content:flex-start;flex-wrap:wrap}}
+@media(max-width:620px){.fiscal-purchases-count{margin-right:auto}.fiscal-purchases-toolbar-filters .table-search-group,.fiscal-purchases-toolbar-filters .input-filter{flex:1 1 100%;width:100%;max-width:none;min-width:0}.fiscal-purchases-switch-label{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.fiscal-purchases-switch-track,.fiscal-purchases-switch-thumb{transition:none}}
 .fiscal-purchases-detail{padding:20px 22px}
 .fiscal-purchases-detail h2{margin:0 0 20px;font-size:21px;color:#2d485d}
 .fiscal-purchases-detail h3{margin:24px 0 12px;font-size:14px;color:#344d60}

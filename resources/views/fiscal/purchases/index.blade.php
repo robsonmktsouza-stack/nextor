@@ -11,61 +11,58 @@
     <div class="grid-actions-left">
       <form method="post" action="{{ route('fiscal.purchases.sync') }}">
         @csrf
-        <button class="grid-primary-action" type="submit">
-          @include('partials.icon',['name'=>'refresh-cw','size'=>17]) <span>Buscar notas</span>
+        <button class="grid-primary-action" type="submit" data-tooltip="Consultar notas recebidas na SEFAZ">
+          @include('partials.icon',['name'=>'refresh','size'=>17]) <span>Buscar notas</span>
         </button>
       </form>
-      <button type="button" class="grid-tool grid-tool-wide" data-dialog-open="purchaseXmlImport">
-        @include('partials.icon',['name'=>'upload','size'=>17]) <span>Importar XML</span>
-      </button>
+      <div class="grid-tool-group">
+        <button type="button" class="grid-tool grid-tool-wide" data-dialog-open="purchaseXmlImport" data-tooltip="Importar XML da NF-e">
+          @include('partials.icon',['name'=>'upload','size'=>17]) <span>Importar XML</span>
+        </button>
+        <button class="grid-tool" type="button" data-refresh-page data-tooltip="Atualizar listagem" aria-label="Atualizar listagem">
+          @include('partials.icon',['name'=>'refresh','size'=>17])
+        </button>
+      </div>
     </div>
     <div class="grid-actions-right">
-      <span class="fiscal-purchases-count">{{ $counts['total'] }} notas encontradas</span>
-    </div>
-  </div>
-  <div class="fiscal-purchases-sync">
-    <div class="fiscal-purchases-sync-main">
-      <strong>Busca automática de notas recebidas</strong>
-      <span>
-        @if(!$ready)
-          Configure o certificado A1 em Ajustes → Fiscal para consultar a SEFAZ.
-        @elseif($state->last_checked_at)
-          Última consulta: {{ $state->last_checked_at->format('d/m/Y H:i') }}.
-          @if($state->next_check_at && $state->next_check_at->isFuture())
-            Próxima consulta a partir de {{ $state->next_check_at->format('d/m H:i') }}.
-          @endif
-        @else
-          Pronto para consultar as NF-e destinadas ao CNPJ cadastrado.
-        @endif
-      </span>
-      @if($state->last_error)
-        <span class="fiscal-purchases-warning">{{ $state->last_error }}</span>
-      @endif
-    </div>
-    <form method="post" action="{{ route('fiscal.purchases.automatic') }}" class="fiscal-purchases-auto-form">
-      @csrf
-      <input type="hidden" name="auto_sync" value="{{ $state->auto_sync ? '0' : '1' }}">
-      <button type="submit" class="{{ $state->auto_sync ? 'is-on':'' }}">
-        {{ $state->auto_sync ? 'Busca automática ligada' : 'Ativar busca automática' }}
+      <span class="fiscal-purchases-count">{{ $counts['total'] }} {{ $counts['total'] === 1 ? 'nota' : 'notas' }}</span>
+      <form method="post" action="{{ route('fiscal.purchases.automatic') }}" class="fiscal-purchases-auto-form">
+        @csrf
+        <input type="hidden" name="auto_sync" value="{{ $state->auto_sync ? '0' : '1' }}">
+        <button type="submit" class="fiscal-purchases-switch-button" role="switch"
+          aria-checked="{{ $state->auto_sync ? 'true' : 'false' }}"
+          aria-label="{{ $state->auto_sync ? 'Desativar busca automática' : 'Ativar busca automática' }}"
+          @if($state->last_checked_at) data-tooltip="Última consulta: {{ $state->last_checked_at->format('d/m/Y H:i') }}" @endif>
+          <span class="fiscal-purchases-switch-label">Busca automática</span>
+          <span class="fiscal-purchases-switch-track" aria-hidden="true"><span class="fiscal-purchases-switch-thumb"></span></span>
+        </button>
+      </form>
+      <button class="grid-filter-button" type="button" data-filter-toggle="purchases-filters" aria-controls="purchases-filters" data-tooltip="Filtrar compras" aria-label="Filtrar compras">
+        @include('partials.icon',['name'=>'search','size'=>18])
       </button>
-    </form>
+    </div>
   </div>
-
-  <div class="fiscal-purchases-filters">
-    <form method="get" action="{{ route('fiscal.purchases.index') }}">
-      <label>
-        <span>Pesquisar nota ou fornecedor</span>
-        <input type="search" name="search" value="{{ $search }}" placeholder="Fornecedor, CNPJ ou chave de acesso">
-      </label>
-      <label>
-        <span>XML</span>
-        <select name="status">
-          <option value="">Todas as notas</option>
-          <option value="summary" @selected($status==='summary')>Aguardando XML</option>
-          <option value="xml_received" @selected($status==='xml_received')>XML disponível</option>
-        </select>
-      </label>
-      <button class="btn btn-primary" type="submit">Filtrar</button>
+  @if($state->last_error)
+    <div class="fiscal-purchases-notice" role="status">
+      @include('partials.icon',['name'=>'alert','size'=>16])
+      <span>{{ $state->last_error }}</span>
+    </div>
+  @endif
+  <div class="grid-filter-panel" id="purchases-filters" @if(!$search && !$status) hidden @endif>
+    <form method="get" action="{{ route('fiscal.purchases.index') }}" class="toolbar-filters fiscal-purchases-toolbar-filters">
+      <div class="table-search-group">
+        <input type="search" name="search" value="{{ $search }}" autocomplete="off"
+          placeholder="Fornecedor, CNPJ ou chave de acesso" aria-label="Pesquisar nota ou fornecedor">
+        <button type="submit" class="table-search-submit" data-tooltip="Pesquisar" aria-label="Pesquisar">
+          @include('partials.icon',['name'=>'search','size'=>17])
+        </button>
+      </div>
+      <select name="status" class="input-filter" aria-label="Filtrar disponibilidade do XML">
+        <option value="">Todas as notas</option>
+        <option value="summary" @selected($status==='summary')>Aguardando XML</option>
+        <option value="xml_received" @selected($status==='xml_received')>XML disponível</option>
+      </select>
+      <button class="btn btn-secondary" type="submit">Filtrar</button>
       @if($search || $status)
         <a class="btn btn-light" href="{{ route('fiscal.purchases.index') }}">Limpar</a>
       @endif
@@ -87,16 +84,16 @@
         <td class="price-strong align-right nowrap">{{ $invoice->total!==null ? 'R$ '.number_format((float)$invoice->total,2,',','.') : '—' }}</td>
         <td><span class="status {{ $invoice->status==='xml_received' ? 'status-ok':'status-muted' }}">{{ $invoice->status==='xml_received' ? 'Para conferência':'Resumo recebido' }}</span></td>
         <td>{{ $invoice->xml_path ? 'Disponível':'Pendente' }}</td>
-        <td class="action-cell"><a class="btn-icon" href="{{ route('fiscal.purchases.show',$invoice) }}" data-tooltip="Conferir nota">
+        <td class="action-cell"><a class="btn-icon" href="{{ route('fiscal.purchases.show',$invoice) }}" data-tooltip="Conferir nota" aria-label="Conferir nota">
           @include('partials.icon',['name'=>'eye','size'=>17])
         </a></td>
       </tr>
       @empty
       <tr><td colspan="7" class="empty-cell">
-        <div class="empty-state compact">
-          @include('partials.icon',['name'=>'file-search','size'=>23])
+        <div class="fiscal-empty-state" role="status">
+          @include('partials.icon',['name'=>'receipt','size'=>23])
           <strong>Nenhuma NF-e de entrada encontrada</strong>
-          <span>Use Buscar notas ou importe um XML recebido do fornecedor.</span>
+          <span>Consulte a SEFAZ ou importe um XML.</span>
         </div>
       </td></tr>
       @endforelse
@@ -118,7 +115,6 @@
         <span>Arquivo XML da NF-e *</span>
         <input type="file" name="xml" accept=".xml,application/xml,text/xml" required>
       </label>
-      <p class="fiscal-purchases-help">O XML será conferido com o CNPJ da empresa. Não haverá movimentação automática de estoque ou financeiro.</p>
     </div>
     <div class="dialog-footer">
       <button class="btn btn-secondary" type="button" data-dialog-close>Cancelar</button>

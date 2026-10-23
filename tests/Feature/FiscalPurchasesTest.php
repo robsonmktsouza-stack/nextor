@@ -100,6 +100,26 @@ final class FiscalPurchasesTest extends TestCase
         $this->assertDatabaseCount('incoming_nfes',0);
     }
 
+
+    public function test_purchases_uses_fiscal_table_layout_and_has_no_missing_icons(): void
+    {
+        $view=file_get_contents(resource_path('views/fiscal/purchases/index.blade.php'));
+        $nav=file_get_contents(resource_path('views/fiscal/_nav.blade.php'));
+        $icons=file_get_contents(resource_path('views/partials/icon.blade.php'));
+
+        self::assertStringContainsString('class="grid-filter-panel"',$view);
+        self::assertStringContainsString('class="toolbar-filters fiscal-purchases-toolbar-filters"',$view);
+        self::assertStringContainsString('class="fiscal-empty-state"',$view);
+        self::assertStringContainsString('role="switch"',$view);
+        self::assertStringNotContainsString('fiscal-purchases-sync-main',$view);
+        self::assertStringNotContainsString("'name'=>'file-search'",$view);
+
+        preg_match_all("/'name'=>'([^']+)'/", $view.$nav, $matches);
+        foreach (array_unique($matches[1]) as $name) {
+            self::assertStringContainsString("@case('".$name."')", $icons, 'Ícone não registrado: '.$name);
+        }
+    }
+
     public function test_parser_reads_model_55_items_and_refuses_another_recipient(): void
     {
         $parser=app(IncomingNfeParser::class);

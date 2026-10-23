@@ -32,6 +32,9 @@
 @case('settings')<path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/><circle cx="12" cy="12" r="5"/>@break
 @case('shield')<path d="m12 22-7-4V5l7-3 7 3v13l-7 4ZM9 12l2 2 4-4"/>@break
 @case('file-minus')<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 15h8"/>@break
+@case('shopping-bag')<path d="M4 8h16l1 13H3L4 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/>@break
+@case('upload')<path d="M12 16V3M7 8l5-5 5 5M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>@break
+@case('eye')<path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.7"/>@break
 @case('receipt')<path d="M5 3h14v18l-3-2-4 2-4-2-3 2V3ZM8 8h8M8 12h8"/>@break
 @case('pdv')<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M7 20h10M12 16v4M7 8h4M7 12h7"/>@break
 @case('barcode')<path d="M3 5v14M6 5v14M9 5v14M13 5v14M16 5v14M20 5v14"/>@break
