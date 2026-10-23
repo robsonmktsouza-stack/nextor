@@ -2,6 +2,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
@@ -22,6 +23,11 @@ final class IncomingNfe extends Model
     public function latestManifestationAttempt(): HasOne
     {
         return $this->hasOne(IncomingNfeManifestationAttempt::class)->latestOfMany();
+    }
+
+    public function purchase(): HasOne
+    {
+        return $this->hasOne(Purchase::class,'incoming_nfe_id');
     }
 
     protected function casts(): array
