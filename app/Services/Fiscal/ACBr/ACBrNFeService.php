@@ -299,8 +299,24 @@ final class ACBrNFeService
             || !preg_match('/^\d{1,15}$/',$lastNsu)) {
             throw new RuntimeException('UF, CNPJ ou NSU inválido para distribuição de NF-e.');
         }
-        return $this->response('NFE_DistribuicaoDFePorUltNSU',
-            [$ufCode,$cnpj,str_pad($lastNsu,15,'0',STR_PAD_LEFT)]);
+        // Uma nova consulta ao DF-e pode ser contada pela SEFAZ mesmo se o
+        // retorno não couber no buffer. Não reexecutar em caso de truncamento.
+        $this->initialize();
+        $capacity=8388608;
+        $buffer=FFI::new("char[{$capacity}]");
+        $length=FFI::new('int');
+        $length->cdata=$capacity;
+        $result=$this->lib->NFE_DistribuicaoDFePorUltNSU(
+            $this->handle,$ufCode,$cnpj,str_pad($lastNsu,15,'0',STR_PAD_LEFT),
+            $buffer,FFI::addr($length)
+        );
+        if($length->cdata>=$capacity) {
+            throw new RuntimeException('Resposta da distribuição excedeu o tamanho permitido; não repetir automaticamente.');
+        }
+        if($result!==0) {
+            throw new RuntimeException('Consulta de documentos recebidos indisponível: '.$this->lastReturn());
+        }
+        return FFI::string($buffer);
     }
 
     public function consultByKey(string $accessKey): string
