@@ -717,7 +717,7 @@ class NfeDraftController extends Controller
         $additionalCents=0;
         $normalized=[];
         foreach($additional as $index=>$payment){
-            if(!is_array($payment)||!in_array((string)($payment['type']??''),array_keys(self::PAYMENT_TYPES),true)
+            if(!is_array($payment)||!in_array((string)($payment['type']??''),array_map('strval',array_keys(self::PAYMENT_TYPES)),true)
                 ||(string)($payment['type']??'')==='90'
                 ||!is_numeric($payment['amount']??null)
                 ||!in_array((string)($payment['condition']??'a_vista'),['a_vista','30_dias','personalizado'],true)){
