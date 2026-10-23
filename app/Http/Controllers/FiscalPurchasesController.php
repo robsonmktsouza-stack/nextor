@@ -99,6 +99,7 @@ final class FiscalPurchasesController extends Controller
             'accepted'=>'Manifestação registrada na SEFAZ (protocolo confirmado).',
             'rejected'=>$result['message'] ?? 'SEFAZ rejeitou a manifestação.',
             'uncertain'=>$result['message'] ?? 'Retorno inconclusivo; consulte na SEFAZ.',
+            'failed'=>$result['message'] ?? 'Falha local. Evento não enviado à SEFAZ.' ,
             'review'=>'Já existe um envio pendente de conferência para esta NF-e.',
             'already'=>'Esta manifestação já foi registrada para a NF-e.',
             'busy'=>'Já existe uma manifestação desta nota em andamento.',
