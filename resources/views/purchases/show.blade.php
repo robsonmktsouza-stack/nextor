@@ -36,23 +36,38 @@
       </strong></div>
     </div>
     <div class="purchase-section-heading"><h2>Produtos ({{ $purchase->items->count() }})</h2></div>
-    <div class="table-scroll"><table class="cms-table">
-      <thead><tr><th>Produto</th><th>SKU</th><th>Quantidade</th><th>Unidade</th><th>Preço de custo</th><th>Desconto</th><th>Outros custos</th><th>Custos externos</th><th>IPI</th><th>ICMS-ST</th><th>Total</th></tr></thead>
-      <tbody>@foreach($purchase->items as $item)
-        <tr>
-          <td><strong class="table-title">{{ $item->product_name }}</strong></td>
-          <td>{{ $item->product_sku }}</td>
-          <td>{{ number_format((float)$item->quantity,3,',','.') }}</td>
-          <td>{{ $item->unit }}</td>
-          <td>R$ {{ number_format((float)$item->unit_cost,2,',','.') }}</td>
-          <td>R$ {{ number_format((float)$item->discount,2,',','.') }}</td>
-          <td>R$ {{ number_format((float)$item->other_costs,2,',','.') }}</td>
-          <td>R$ {{ number_format((float)$item->external_costs,2,',','.') }}</td>
-          <td>R$ {{ number_format((float)$item->ipi,2,',','.') }}</td>
-          <td>R$ {{ number_format((float)$item->icms_st,2,',','.') }}</td>
-          <td class="price-strong">R$ {{ number_format((float)$item->line_total,2,',','.') }}</td>
-        </tr>
-      @endforeach</tbody></table></div>
+    <div class="purchase-items purchase-readonly-items">
+      @foreach($purchase->items as $item)
+      <div class="purchase-item-line">
+        <div class="purchase-item-primary purchase-readonly-primary">
+          <div class="purchase-readonly-data purchase-product-field">
+            <span>Produto</span>
+            <strong>{{ $item->product_name }}</strong>
+            <small>{{ $item->product_sku }} · {{ $item->unit }}</small>
+          </div>
+          <div class="purchase-readonly-data">
+            <span>Quantidade</span>
+            <strong>{{ number_format((float)$item->quantity,3,',','.') }}</strong>
+          </div>
+          <div class="purchase-readonly-data">
+            <span>Custo unitário</span>
+            <strong>R$ {{ number_format((float)$item->unit_cost,2,',','.') }}</strong>
+          </div>
+          <div class="purchase-item-amount">
+            <span>Total do item</span>
+            <strong>R$ {{ number_format((float)$item->line_total,2,',','.') }}</strong>
+          </div>
+        </div>
+        <div class="purchase-item-charges purchase-readonly-charges">
+          <div class="purchase-readonly-data"><span>Desconto</span><strong>R$ {{ number_format((float)$item->discount,2,',','.') }}</strong></div>
+          <div class="purchase-readonly-data"><span>Outros custos</span><strong>R$ {{ number_format((float)$item->other_costs,2,',','.') }}</strong></div>
+          <div class="purchase-readonly-data"><span>Custos externos</span><strong>R$ {{ number_format((float)$item->external_costs,2,',','.') }}</strong></div>
+          <div class="purchase-readonly-data"><span>IPI</span><strong>R$ {{ number_format((float)$item->ipi,2,',','.') }}</strong></div>
+          <div class="purchase-readonly-data"><span>ICMS-ST</span><strong>R$ {{ number_format((float)$item->icms_st,2,',','.') }}</strong></div>
+        </div>
+      </div>
+      @endforeach
+    </div>
     <div class="purchase-detail-totals">
       <span>Itens: R$ {{ number_format((float)$purchase->subtotal,2,',','.') }}</span>
       <span>Frete: R$ {{ number_format((float)$purchase->freight,2,',','.') }}</span>
