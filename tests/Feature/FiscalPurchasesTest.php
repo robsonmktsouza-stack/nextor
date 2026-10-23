@@ -92,7 +92,7 @@ final class FiscalPurchasesTest extends TestCase
             ->get(route('fiscal.index'))
             ->assertOk()
             ->assertSee('Recebidas')
-            ->assertDontSee('>Compras</span>',false);
+            ->assertSee('>Recebidas</span>',false);
         $this->get(route('fiscal.purchases.index'))
             ->assertOk()
             ->assertSee('Buscar notas')
@@ -109,7 +109,7 @@ final class FiscalPurchasesTest extends TestCase
             ->get(route('fiscal.purchases.index'))
             ->assertOk()
             ->assertSee('Recebidas')
-            ->assertDontSee('>Compras</span>',false);
+            ->assertSee('>Recebidas</span>',false);
 
         $invoice=IncomingNfe::query()->create([
             'access_key'=>'29261099887766000122550010000001231000001234',
