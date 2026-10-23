@@ -312,4 +312,42 @@ final class NfeFormCompletenessTest extends TestCase
 
         self::assertSame(0,NfeDraft::query()->count());
     }
+
+    public function test_legacy_nfe_and_new_cte_references_survive_storage_and_ini_generation(): void
+    {
+        [$company,$nature,$customer]=$this->init();
+        $data=$this->data($nature,$customer);
+        $data['has_referenced_document']='1';
+        $nfeKey='2926101234567800010055'.str_repeat('0',22);
+        $cteKey='2926101234567800010057'.str_repeat('0',22);
+        $data['references_json']=json_encode([
+            ['key'=>$nfeKey],
+            ['type'=>'CTE','key'=>$cteKey],
+        ],JSON_THROW_ON_ERROR);
+        $this->post(route('fiscal.nfe.store'),$data)->assertSessionHasNoErrors();
+        $draft=NfeDraft::query()->firstOrFail();
+        self::assertSame('NFE',$draft->references[0]['type']);
+        self::assertSame('CTE',$draft->references[1]['type']);
+        $ini=app(Nfe55IniBuilder::class)->build($draft,$company,42,12345678);
+        self::assertStringContainsString('[NFRef001]',$ini);
+        self::assertStringContainsString('refNFe='.$nfeKey,$ini);
+        self::assertStringContainsString('[NFRef002]',$ini);
+        self::assertStringContainsString('refCTe='.$cteKey,$ini);
+        $this->get(route('fiscal.nfe.edit',$draft))->assertOk()
+            ->assertSee('nfeReferenceType')
+            ->assertSee('Documentos referenciados');
+    }
+
+    public function test_reference_type_validation_rejects_unknown_document_types(): void
+    {
+        [, $nature,$customer]=$this->init();
+        $data=$this->data($nature,$customer);
+        $data['has_referenced_document']='1';
+        $data['references_json']=json_encode([[
+            'type'=>'INVALID','key'=>str_repeat('1',44),
+        ]],JSON_THROW_ON_ERROR);
+        $this->post(route('fiscal.nfe.store'),$data)
+            ->assertSessionHasErrors('references_json');
+        self::assertSame(0,NfeDraft::query()->count());
+    }
 }
