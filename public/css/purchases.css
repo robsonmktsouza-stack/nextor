@@ -50,6 +50,13 @@
 .purchase-savebar{display:flex;gap:10px;align-items:center;justify-content:flex-end;min-width:0}
 .purchase-save-total{margin-right:auto;display:flex;align-items:center;gap:10px;white-space:nowrap}
 .purchase-save-total strong{font-size:18px;color:#234c65;font-variant-numeric:tabular-nums}
+.purchase-readonly-items{margin:0 0 18px}
+.purchase-readonly-primary{grid-template-columns:minmax(220px,2.8fr) minmax(115px,.75fr) minmax(140px,.9fr) minmax(120px,.72fr)}
+.purchase-readonly-data{min-width:0;display:flex;flex-direction:column;gap:6px;justify-content:center}
+.purchase-readonly-data>span{font-size:11px;line-height:15px;font-weight:700;color:#6b8294}
+.purchase-readonly-data>strong{font-size:12px;font-weight:700;color:#2d4f65;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.purchase-readonly-data>small{color:#758a9a;font-size:11px}
+.purchase-readonly-charges{margin-right:0}
 .purchase-detail-wrap{padding:18px 22px}
 .purchase-detail-wrap>h2{font-size:17px;color:#304b61;margin:3px 0 20px}
 .purchase-detail-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px 20px;margin-bottom:24px}
@@ -96,4 +103,10 @@
  .purchase-save-total{width:100%}
  .purchase-detail-grid{grid-template-columns:minmax(0,1fr)}
  .purchases-summary{display:none}
+}
+
+@media(max-width:780px){
+ .purchase-readonly-primary{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .purchase-readonly-primary .purchase-product-field{grid-column:span 2}
+ .purchase-readonly-primary .purchase-item-amount{grid-column:auto}
 }
