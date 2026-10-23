@@ -19,9 +19,10 @@ final class FiscalPurchasesController extends Controller
         $status=(string)$request->query('status','');
         $query=IncomingNfe::query()
             ->when($term,fn($q)=>$q->where(function($w)use($term){
+                $digits=preg_replace('/\D/','',$term);
                 $w->where('access_key','like','%'.$term.'%')
-                    ->orWhere('supplier_name','like','%'.$term.'%')
-                    ->orWhere('supplier_cnpj','like','%'.preg_replace('/\D/','',$term).'%');
+                    ->orWhere('supplier_name','like','%'.$term.'%');
+                if($digits!=='')$w->orWhere('supplier_cnpj','like','%'.$digits.'%');
             }))
             ->when(in_array($status,['summary','xml_received'],true),
                 fn($q)=>$q->where('status',$status))
