@@ -57,6 +57,27 @@ final class Nfe55EmissionService
         return $updated;
     }
 
+    /** Retry only before an external send, reusing the same reserved number and cNF. */
+    public function retryPreparation(NfeDraft $draft): NfeDraft
+    {
+        $updated=DB::transaction(function()use($draft){
+            $note=NfeDraft::query()->lockForUpdate()->findOrFail($draft->id);
+            if($note->status!=='prepared'||$note->transmission_attempted_at!==null
+                ||!$note->document_number||!$note->numeric_code||$note->access_key){
+                throw ValidationException::withMessages(['nfe'=>'Esta NF-e não pode ser preparada novamente.']);
+            }
+            $note->update(['status'=>'queued','error_message'=>null]);
+            return $note->refresh();
+        },3);
+        try{
+            ProcessNfe55Job::dispatch($updated->id)->onConnection('database')->onQueue('fiscal');
+        }catch(Throwable){
+            $updated->update(['status'=>'prepared','error_message'=>'Falha ao agendar preparação.']);
+            throw ValidationException::withMessages(['nfe'=>'Não foi possível agendar a preparação.']);
+        }
+        return $updated;
+    }
+
     public function process(int $id): void
     {
         $lock=Cache::lock('nfe-55:'.$id,300);
@@ -117,10 +138,11 @@ final class Nfe55EmissionService
             }
         }catch(Throwable $error){
             if($draft){
-                $text=$this->safeError($error->getMessage(),$password);
                 $draft->update([
                     'status'=>$attempted?'pending':'prepared',
-                    'error_message'=>$text,'processed_at'=>now(),
+                    'error_message'=>$attempted
+                        ? 'Transmissão sem confirmação. Consulte a SEFAZ pela chave.'
+                        : 'Não foi possível preparar o XML fiscal. Confira as configurações.','processed_at'=>now(),
                 ]);
             }
         }finally{
@@ -135,7 +157,7 @@ final class Nfe55EmissionService
     /** Read-only SEFAZ consultation. Never calls NFE_Enviar again. */
     public function consult(NfeDraft $draft): NfeDraft
     {
-        if(!in_array($draft->status,['pending','authorized','rejected'],true)
+        if(!in_array($draft->status,['processing','pending','authorized','rejected'],true)
             || !preg_match('/^\d{44}$/',(string)$draft->access_key)
             || !$draft->xml_path ||!Storage::disk('local')->exists($draft->xml_path)){
             throw ValidationException::withMessages(['nfe'=>'Esta NF-e ainda não possui XML assinado para consulta.']);
@@ -266,9 +288,4 @@ final class Nfe55EmissionService
         ] as [$section,$key,$value])$service->setConfig($section,$key,$value);
     }
 
-    private function safeError(string $error,string $password): string
-    {
-        if($password!=='')$error=str_replace($password,'[protegido]',$error);
-        return mb_substr($error,0,700);
-    }
 }
