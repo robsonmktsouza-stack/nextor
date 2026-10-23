@@ -5,6 +5,7 @@ namespace App\Services\Fiscal;
 use App\Models\CompanySetting;
 use App\Models\IncomingNfe;
 use App\Models\IncomingNfeManifestationAttempt;
+use App\Services\Fiscal\ACBr\RecipientEventPreparationException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -69,6 +70,9 @@ final class IncomingNfeManifestationService
                 $resultStatus=$parsed['status'];
                 $responseMessage=$parsed['message'];
             } catch (Throwable $error) {
+                if ($error instanceof RecipientEventPreparationException) {
+                    $resultStatus='failed'; // Somente preparação local, sem transmissão.
+                }
                 $responseMessage=$this->safeError($error);
                 // Never expose ACBr raw diagnostics: they may contain private certificate data.
                 Log::warning('Manifestação NF-e: retorno inconclusivo',[
