@@ -259,4 +259,57 @@ final class NfeFormCompletenessTest extends TestCase
         $this->post(route('fiscal.nfe.store'),$data)->assertSessionHasErrors('duplicates_json');
         self::assertSame(0,NfeDraft::query()->count());
     }
+
+    public function test_primary_and_additional_card_payments_emit_integration_type(): void
+    {
+        [$company,$nature,$customer]=$this->init();
+        $data=$this->data($nature,$customer);
+        $data['payment_type']='03';
+        $data['card_integration_type']='2';
+        $data['card_brand']='01';
+        $data['payments_json']=json_encode([[
+            'type'=>'04','condition'=>'a_vista','amount'=>30,
+            'integration_type'=>'2','card_brand'=>'06',
+        ]],JSON_THROW_ON_ERROR);
+
+        $this->post(route('fiscal.nfe.store'),$data)->assertSessionHasNoErrors();
+        $draft=NfeDraft::query()->firstOrFail();
+        self::assertSame('2',$draft->payments[0]['integration_type']);
+        self::assertSame('2',$draft->payments[1]['integration_type']);
+        $ini=app(Nfe55IniBuilder::class)->build($draft,$company,42,12345678);
+        $primary=explode('[pag002]',explode('[pag001]',$ini,2)[1],2)[0];
+        $extra=explode('[pag002]',$ini,2)[1];
+        self::assertStringContainsString('tPag=03',$primary);
+        self::assertStringContainsString('tpIntegra=2',$primary);
+        self::assertStringContainsString('tBand=01',$primary);
+        self::assertStringContainsString('tPag=04',$extra);
+        self::assertStringContainsString('tpIntegra=2',$extra);
+        self::assertStringContainsString('tBand=06',$extra);
+        $this->get(route('fiscal.nfe.edit',$draft))->assertOk()
+            ->assertSee('name="card_integration_type"',false)
+            ->assertSee('nfeExtraPaymentIntegration');
+    }
+
+    public function test_card_payments_without_integration_or_necessary_tef_data_are_rejected(): void
+    {
+        [, $nature,$customer]=$this->init();
+        $data=$this->data($nature,$customer);
+        $data['payment_type']='03';
+        $this->post(route('fiscal.nfe.store'),$data)
+            ->assertSessionHasErrors('card_integration_type');
+
+        $data['card_integration_type']='1';
+        $this->post(route('fiscal.nfe.store'),$data)
+            ->assertSessionHasErrors('card_integration_type');
+
+        $data['card_integration_type']='2';
+        $data['payment_type']='01';
+        $data['payments_json']=json_encode([[
+            'type'=>'04','condition'=>'a_vista','amount'=>30,
+        ]],JSON_THROW_ON_ERROR);
+        $this->post(route('fiscal.nfe.store'),$data)
+            ->assertSessionHasErrors('payments_json');
+
+        self::assertSame(0,NfeDraft::query()->count());
+    }
 }
