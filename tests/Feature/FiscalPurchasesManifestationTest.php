@@ -81,6 +81,10 @@ final class FiscalPurchasesManifestationTest extends TestCase
         self::assertStringContainsString("chNFe=".$this->key(),$ini);
         self::assertStringContainsString("tpEvento=210240\nnSeqEvento=1\nversaoEvento=1.00",$ini);
         self::assertStringContainsString('xJust=Mercadoria não entregue',$ini);
+        // A ACBrLib lê o dhEvento no formato local do INI, sem ISO/T ou offset.
+        self::assertMatchesRegularExpression('/^dhEvento=\\d{2}\\/\\d{2}\\/\\d{4} \\d{2}:\\d{2}:\\d{2}$/m',$ini);
+        self::assertStringNotContainsString('dhEvento='.now()->format('Y-m-d\\TH:i:sP'),$ini);
+
         self::assertStringNotContainsString('xJust=', $gateway->eventIni('12345678000199',$this->key(),'210210',null));
     }
 
