@@ -37,7 +37,7 @@ final class IncomingNfeSyncService
     {
         return IncomingNfeSyncState::query()->firstOrCreate(
             ['cnpj'=>$this->companyCnpj(),'environment'=>'production'],
-            ['last_nsu'=>'000000000000000','max_nsu'=>'000000000000000'],
+            ['last_nsu'=>'000000000000000','max_nsu'=>'000000000000000','auto_sync'=>false],
         );
     }
 
