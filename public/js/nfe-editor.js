@@ -932,11 +932,13 @@
 
   byId('nfeSaveDuplicate')?.addEventListener('click',()=>{
     const value=number(getField('nfeDuplicateValue'));
-    if(value<=0){byId('nfeDuplicateValue')?.focus();return;}
+    const due=getField('nfeDuplicateDue');
+    if(value<=0||duplicates.length>=120){byId('nfeDuplicateValue')?.focus();return;}
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(due)){byId('nfeDuplicateDue')?.focus();return;}
     duplicates.push({
       number:getField('nfeDuplicateNumber'),
       payment_type:getField('nfeDuplicatePaymentType'),
-      due_date:getField('nfeDuplicateDue'),
+      due_date:due,
       value,
     });
     setField('nfeDuplicateNumber','');
