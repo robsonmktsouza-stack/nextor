@@ -285,8 +285,13 @@ final class ACBrNFeService
 
     private function hasIndividualRejection(string $raw): bool
     {
-        if (!str_contains(strtoupper($raw),'[EVENTO001]')) return false;
-        if (!preg_match('/(?mi)^CStat[ \\t]*=[ \\t]*([0-9]{3})[ \\t]*$/',$raw,$match)) return false;
+        $start=stripos($raw,'[EVENTO001]');
+        if ($start===false) return false;
+        $section=substr($raw,$start+strlen('[EVENTO001]'));
+        if (preg_match('/\\R\\[[^]\\r\\n]+\\]/',$section,$end,PREG_OFFSET_CAPTURE)) {
+            $section=substr($section,0,$end[0][1]);
+        }
+        if (!preg_match('/(?mi)^CStat\\s*=\\s*([0-9]{3})\\s*$/',$section,$match)) return false;
         return !in_array($match[1], ['135','136','573'],true);
     }
 
