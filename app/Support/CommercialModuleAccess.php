@@ -23,7 +23,7 @@ final class CommercialModuleAccess
         // Route names cover future aliases as well as canonical URLs.
         $named = match (true) {
             $request->routeIs('pdv.*', 'sales.*') => 'pdv',
-            $request->routeIs('products.*', 'stock.*') => 'products',
+            $request->routeIs('products.*', 'stock.*', 'purchases.*') => 'products',
             $request->routeIs('finance.*') => 'finance',
             $request->routeIs('services.*') => 'services',
             $request->routeIs('fiscal.*') => 'fiscal',
@@ -35,7 +35,7 @@ final class CommercialModuleAccess
 
         return match (true) {
             $request->is('pdv', 'pdv/*', 'sales', 'sales/*') => 'pdv',
-            $request->is('products', 'products/*', 'stock', 'stock/*') => 'products',
+            $request->is('products', 'products/*', 'stock', 'stock/*', 'purchases', 'purchases/*') => 'products',
             $request->is('services', 'services/*') => 'services',
             $request->is('finance', 'finance/*') => 'finance',
             $request->is('fiscal', 'fiscal/*') => 'fiscal',
