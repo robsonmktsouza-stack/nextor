@@ -1,0 +1,35 @@
+name: NF-e 55 - homologação e segurança
+on:
+  push:
+    branches: [develop]
+    paths:
+      - 'app/Services/Fiscal/Nfe55*'
+      - 'app/Http/Controllers/Nfe55EmissionController.php'
+      - 'app/Http/Controllers/NfeDraftController.php'
+      - 'app/Jobs/ProcessNfe55Job.php'
+      - 'app/Models/NfeDraft.php'
+      - 'database/migrations/2026_10_23_000006_add_nfe55_transmission_fields.php'
+      - 'resources/views/fiscal/nfe/**'
+      - 'routes/web.php'
+      - 'tests/Feature/Nfe55EmissionFoundationTest.php'
+      - '.github/workflows/nfe55-homologation.yml'
+  workflow_dispatch:
+jobs:
+  homologation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DB_CONNECTION: sqlite
+      DB_DATABASE: ':memory:'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring,openssl,pdo_sqlite,dom,xml,zip
+          coverage: none
+      - run: composer install --no-interaction --prefer-dist --no-progress
+      - run: cp .env.example .env && php artisan key:generate
+      - run: php -l app/Services/Fiscal/Nfe55IniBuilder.php && php -l app/Services/Fiscal/Nfe55EmissionService.php && php -l app/Jobs/ProcessNfe55Job.php && php artisan view:cache
+      - run: php artisan route:list --path=fiscal/nfe/drafts
+      - run: php -d memory_limit=1024M vendor/bin/phpunit --filter='Nfe55EmissionFoundationTest|NfeEditorTest' --display-errors --display-warnings
