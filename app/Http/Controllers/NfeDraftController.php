@@ -359,6 +359,7 @@ class NfeDraftController extends Controller
 
             'additional_info'=>['nullable','string','max:10000'],
             'duplicates_json'=>['nullable','string'],
+            'payments_json'=>['nullable','string'],
             'references_json'=>['nullable','string'],
             'items_json'=>['required','string'],
         ]);
@@ -375,6 +376,7 @@ class NfeDraftController extends Controller
         $surcharge=max(0,(float)($data['surcharge'] ?? 0));
         $freight=max(0,(float)($data['freight_value'] ?? 0));
         $totals=$this->calculateTotals($items,$discount,$surcharge,$freight);
+        $payments=$this->validatedPayments($request,$data,$totals);
         $destination=$data['destination'] ?? $this->resolveDestination($customer,$company);
         $purpose=$data['purpose'] ?? ($nature->purpose ?: 'normal');
         $hasReferencedDocument=$request->boolean('has_referenced_document');
@@ -489,15 +491,7 @@ class NfeDraftController extends Controller
                 'net_value'=>round($totals['products']-$discount+$surcharge,2),
             ],
             'duplicates'=>$this->decodeArray($data['duplicates_json'] ?? null,'duplicatas'),
-            'payments'=>[[
-                'type'=>$data['payment_type'],
-                'condition'=>$data['payment_condition'],
-                'amount'=>$data['payment_type']==='90' ? 0 : round($totals['products']-$discount+$surcharge,2),
-                'other_description'=>$data['payment_other_description'] ?? null,
-                'card_brand'=>$data['card_brand'] ?? null,
-                'acquirer_document'=>$data['card_acquirer_document'] ?? null,
-                'authorization_code'=>$data['card_authorization_code'] ?? null,
-            ]],
+            'payments'=>$payments,
             'references'=>$references,
             'custom_fields'=>[],
             'additional_info'=>$data['additional_info'] ?? $nature->additional_info,
@@ -604,15 +598,6 @@ class NfeDraftController extends Controller
                 'discount'=>(float)$draft->discount,
                 'net_value'=>round($totals['products']-(float)$draft->discount+(float)$draft->surcharge,2),
             ],
-            'payments'=>[[
-                'type'=>$draft->payment_type,
-                'condition'=>$draft->payment_condition,
-                'amount'=>$draft->payment_type==='90' ? 0 : round($totals['products']-(float)$draft->discount+(float)$draft->surcharge,2),
-                'other_description'=>$draft->payment_other_description,
-                'card_brand'=>$draft->card_brand,
-                'acquirer_document'=>$draft->card_acquirer_document,
-                'authorization_code'=>$draft->card_authorization_code,
-            ]],
         ]);
     }
 
@@ -693,6 +678,67 @@ class NfeDraftController extends Controller
         );
 
         return array_map(fn($value)=>round($value,2),$totals);
+    }
+
+    private function validatedPayments(Request $request,array $data,array $totals): array
+    {
+        $additional=$this->decodeArray($data['payments_json']??null,'pagamentos');
+        if(count($additional)>19){
+            throw ValidationException::withMessages(['payments_json'=>'Limite de 20 formas de pagamento por NF-e.']);
+        }
+        $paymentType=(string)$data['payment_type'];
+        if($paymentType==='90' && $additional){
+            throw ValidationException::withMessages(['payments_json'=>'Sem pagamento não pode ser combinado com outras formas.']);
+        }
+        $totalCents=(int)round((float)$totals['total']*100,0,PHP_ROUND_HALF_UP);
+        $additionalCents=0;
+        $normalized=[];
+        foreach($additional as $index=>$payment){
+            if(!is_array($payment)||!in_array((string)($payment['type']??''),array_keys(self::PAYMENT_TYPES),true)
+                ||(string)($payment['type']??'')==='90'
+                ||!is_numeric($payment['amount']??null)
+                ||!in_array((string)($payment['condition']??'a_vista'),['a_vista','30_dias','personalizado'],true)){
+                throw ValidationException::withMessages(['payments_json'=>'Confira as formas de pagamento adicionais.']);
+            }
+            $amount=(float)$payment['amount'];
+            if($amount<=0||$amount>999999999){
+                throw ValidationException::withMessages(['payments_json'=>'Valor de pagamento inválido.']);
+            }
+            $cents=(int)round($amount*100,0,PHP_ROUND_HALF_UP);
+            $additionalCents+=$cents;
+            $type=(string)$payment['type'];
+            $description=trim((string)($payment['other_description']??''));
+            if($type==='99' && ($description===''||mb_strlen($description)>120)){
+                throw ValidationException::withMessages(['payments_json'=>'Informe a descrição do pagamento Outros.']);
+            }
+            $normalized[]=[
+                'type'=>$type,'condition'=>$payment['condition']??'a_vista',
+                'amount'=>$cents/100,
+                'other_description'=>$type==='99'?$description:null,
+                'card_brand'=>in_array($type,['03','04'],true)?($payment['card_brand']??null):null,
+                'acquirer_document'=>in_array($type,['03','04'],true)?($payment['acquirer_document']??null):null,
+                'authorization_code'=>in_array($type,['03','04'],true)?($payment['authorization_code']??null):null,
+            ];
+        }
+        if($additionalCents>$totalCents){
+            throw ValidationException::withMessages(['payments_json'=>'Os pagamentos adicionais superam o total da NF-e.']);
+        }
+        $main=$paymentType==='90'?0:$totalCents-$additionalCents;
+        if($paymentType!=='90' && $main<=0){
+            throw ValidationException::withMessages(['payment_type'=>'O pagamento principal deve possuir valor positivo.']);
+        }
+        $first=[
+            'type'=>$paymentType,'condition'=>$data['payment_condition'],
+            'amount'=>$main/100,
+            'other_description'=>$paymentType==='99'?($data['payment_other_description']??null):null,
+            'card_brand'=>in_array($paymentType,['03','04'],true)?($data['card_brand']??null):null,
+            'acquirer_document'=>in_array($paymentType,['03','04'],true)?($data['card_acquirer_document']??null):null,
+            'authorization_code'=>in_array($paymentType,['03','04'],true)?($data['card_authorization_code']??null):null,
+        ];
+        if($paymentType==='99' && trim((string)$first['other_description'])===''){
+            throw ValidationException::withMessages(['payment_other_description'=>'Informe a descrição do pagamento Outros.']);
+        }
+        return array_merge([$first],$normalized);
     }
 
     private function validatedReferences(?string $json): array
