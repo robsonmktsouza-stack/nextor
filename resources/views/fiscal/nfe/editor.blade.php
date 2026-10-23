@@ -451,7 +451,7 @@ $origins=[
       </div>
 
       <div class="editor-panel" id="nfeCardPanel">
-        <h3>Dados de cartão / pagamento eletrônico</h3>
+        <h3>Dados do cartão</h3>
         <div class="editor-grid cols-12">
           <label class="field col-3"><span>Integração com o sistema *</span>
             <select name="card_integration_type" id="nfeCardIntegrationType">
