@@ -21,6 +21,9 @@ class NfeDraft extends Model
         'custom_fields','totals','additional_info','tax_authority_info','validated_at',
         'access_key','protocol','numeric_code','xml_path','response_path','error_message',
         'transmission_attempted_at','processed_at','authorized_at',
+        'cancellation_status','cancellation_reason','cancellation_requested_at',
+        'cancellation_attempted_at','cancelled_at','cancellation_protocol',
+        'cancellation_response_path',
     ];
 
     protected function casts(): array
@@ -51,6 +54,8 @@ class NfeDraft extends Model
             'totals'=>'array',
             'validated_at'=>'datetime',
             'transmission_attempted_at'=>'datetime','processed_at'=>'datetime','authorized_at'=>'datetime',
+            'cancellation_requested_at'=>'datetime','cancellation_attempted_at'=>'datetime',
+            'cancelled_at'=>'datetime',
         ];
     }
 
