@@ -22,6 +22,7 @@ use App\Http\Controllers\FinancialReceiptController;
 use App\Http\Controllers\FinancialRecurrenceController;
 use App\Http\Controllers\FinancialTransferController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\QuickCatalogController;
 use App\Http\Controllers\PdvController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SaleReturnController;
@@ -75,6 +76,12 @@ Route::middleware(['auth','control.license'])->group(function () {
     Route::post('/logout', [AuthController::class,'logout'])->name('logout');
     Route::get('/reference/fiscal-codes', FiscalCodeCatalogController::class)->name('reference.fiscal-codes');
     Route::get('/dashboard', DashboardController::class)->name('dashboard')->middleware('permission:dashboard');
+    Route::get('/quick-catalog/{kind}',[QuickCatalogController::class,'search'])
+        ->where('kind','products|customers|suppliers')->name('quick-catalog.search')
+        ->middleware(['permission:products,customers,purchases,sales,fiscal','company.configured','throttle:60,1']);
+    Route::post('/quick-catalog/{kind}',[QuickCatalogController::class,'store'])
+        ->where('kind','products|customers|suppliers')->name('quick-catalog.store')
+        ->middleware(['permission:products,customers','company.configured','throttle:20,1']);
     Route::get('/products',[ProductController::class,'index'])->name('products.index')->middleware('permission:products');
     Route::get('/products/create',[ProductController::class,'create'])->name('products.create')->middleware('permission:products');
     Route::post('/products',[ProductController::class,'store'])->name('products.store')->middleware('permission:products');
