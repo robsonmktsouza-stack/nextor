@@ -441,7 +441,7 @@
   const updateExtraPaymentFields=()=>{
     const type=getField('nfeExtraPaymentType');
     const card=['03','04'].includes(type);
-    for(const id of ['nfeExtraPaymentBrandField','nfeExtraPaymentAcquirerField','nfeExtraPaymentAuthorizationField']){
+    for(const id of ['nfeExtraPaymentIntegrationField','nfeExtraPaymentBrandField','nfeExtraPaymentAcquirerField','nfeExtraPaymentAuthorizationField']){
       const field=byId(id);if(field)field.hidden=!card;
     }
     const other=byId('nfeExtraPaymentOtherField');if(other)other.hidden=type!=='99';
@@ -456,9 +456,14 @@
       return;
     }
     const type=getField('nfeExtraPaymentType');
+    if(['03','04'].includes(type)&&!['1','2'].includes(getField('nfeExtraPaymentIntegration'))){
+      byId('nfeExtraPaymentIntegration')?.focus();
+      return;
+    }
     const p={type,condition:getField('nfeExtraPaymentCondition')||'a_vista',amount};
     if(type==='99')p.other_description=getField('nfeExtraPaymentOther');
     if(['03','04'].includes(type)){
+      p.integration_type=getField('nfeExtraPaymentIntegration');
       p.card_brand=getField('nfeExtraPaymentBrand');
       p.acquirer_document=getField('nfeExtraPaymentAcquirer');
       p.authorization_code=getField('nfeExtraPaymentAuthorization');
