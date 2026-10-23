@@ -71,6 +71,7 @@
 
   let items=parseJson('nfeItemsJson');
   let duplicates=parseJson('nfeDuplicatesJson');
+  let extraPayments=parseJson('nfePaymentsJson');
   let references=parseJson('nfeReferencesJson');
 
   const setField=(id,value)=>{
@@ -88,6 +89,7 @@
   const syncHidden=()=>{
     if(byId('nfeItemsJson')) byId('nfeItemsJson').value=JSON.stringify(items);
     if(byId('nfeDuplicatesJson')) byId('nfeDuplicatesJson').value=JSON.stringify(duplicates);
+    if(byId('nfePaymentsJson')) byId('nfePaymentsJson').value=JSON.stringify(extraPayments);
     if(byId('nfeReferencesJson')) byId('nfeReferencesJson').value=JSON.stringify(references);
   };
 
@@ -324,6 +326,12 @@
       const element=byId(id);
       if(element) element.textContent=money(value);
     });
+    const extra=extraPayments.reduce((sum,item)=>sum+number(item.amount),0);
+    const primary=byId('nfePrimaryPaymentTotal');
+    if(primary){
+      primary.textContent=money(Math.max(0,values.total-extra));
+      primary.classList.toggle('field-invalid',extra>values.total+0.01);
+    }
   };
 
   ['nfeFreightValue','nfeDiscount','nfeSurcharge'].forEach(id=>{
@@ -400,6 +408,49 @@
     syncHidden();
   };
 
+  const renderExtraPayments=()=>{
+    const body=byId('nfeExtraPaymentsBody');
+    if(body){
+      body.innerHTML=extraPayments.length ? extraPayments.map((p,i)=>`
+        <tr><td>${esc(p.type||'')}</td><td>${esc(p.condition||'a_vista')}</td>
+        <td class="nowrap">${money(p.amount)}</td>
+        <td class="action-cell"><button type="button" class="btn-icon row-action-danger"
+          data-nfe-remove-payment="${i}" aria-label="Remover pagamento"
+          data-tooltip="Remover pagamento">${removeTrashIcon}</button></td></tr>
+      `).join(''):'<tr><td colspan="4" class="empty-cell">Nenhum pagamento adicional.</td></tr>';
+    }
+    syncHidden();
+    renderTotals();
+  };
+  const updateExtraPaymentFields=()=>{
+    const type=getField('nfeExtraPaymentType');
+    const card=['03','04'].includes(type);
+    for(const id of ['nfeExtraPaymentBrandField','nfeExtraPaymentAcquirerField','nfeExtraPaymentAuthorizationField']){
+      const field=byId(id);if(field)field.hidden=!card;
+    }
+    const other=byId('nfeExtraPaymentOtherField');if(other)other.hidden=type!=='99';
+  };
+  byId('nfeExtraPaymentType')?.addEventListener('change',updateExtraPaymentFields);
+  byId('nfeAddExtraPayment')?.addEventListener('click',()=>{
+    const amount=Math.round(number(getField('nfeExtraPaymentAmount'))*100)/100;
+    const total=totals().total;
+    const already=extraPayments.reduce((sum,p)=>sum+number(p.amount),0);
+    if(amount<=0||already+amount>total+0.009||getField('nfePaymentType')==='90'){
+      byId('nfeExtraPaymentAmount')?.focus();
+      return;
+    }
+    const type=getField('nfeExtraPaymentType');
+    const p={type,condition:getField('nfeExtraPaymentCondition')||'a_vista',amount};
+    if(type==='99')p.other_description=getField('nfeExtraPaymentOther');
+    if(['03','04'].includes(type)){
+      p.card_brand=getField('nfeExtraPaymentBrand');
+      p.acquirer_document=getField('nfeExtraPaymentAcquirer');
+      p.authorization_code=getField('nfeExtraPaymentAuthorization');
+    }
+    extraPayments.push(p);
+    setField('nfeExtraPaymentAmount','');
+    renderExtraPayments();
+  });
   const updatePaymentVisibility=()=>{
     const type=getField('nfePaymentType');
     const cardPanel=byId('nfeCardPanel');
@@ -873,6 +924,9 @@
     const removeReference=event.target.closest('[data-nfe-remove-reference]');
     if(removeReference){references.splice(Number(removeReference.dataset.nfeRemoveReference),1);renderReferences();return;}
 
+    const removePayment=event.target.closest('[data-nfe-remove-payment]');
+    if(removePayment){extraPayments.splice(Number(removePayment.dataset.nfeRemovePayment),1);renderExtraPayments();return;}
+
     const removeDuplicate=event.target.closest('[data-nfe-remove-duplicate]');
     if(removeDuplicate){duplicates.splice(Number(removeDuplicate.dataset.nfeRemoveDuplicate),1);renderDuplicates();}
   });
@@ -939,6 +993,8 @@
   populateDeliveryAddresses();
   toggleDelivery();
   updatePaymentVisibility();
+  updateExtraPaymentFields();
+  renderExtraPayments();
   renderItems();
   renderReferences();
   renderDuplicates();
