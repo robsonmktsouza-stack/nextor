@@ -82,7 +82,7 @@ final class Nfe55IniBuilder
             'cUF'=>self::UF[$uf],'cNF'=>sprintf('%08d',$numericCode),
             'natOp'=>$draft->operationNature?->name,
             'Modelo'=>'55','serie'=>$draft->series,'nNF'=>$number,
-            'dhEmi'=>($draft->issue_date??now())->format('d/m/Y').' '.($draft->issue_time?:'12:00').':00',
+            'dhEmi'=>($draft->issue_date??now())->format('d/m/Y').' '.substr((string)($draft->issue_time?:'12:00'),0,5).':00',
             'tpNF'=>'1','idDest'=>'1','tpAmb'=>$env,'tpImp'=>'1','tpEmis'=>'1',
             'finNFe'=>'1','indFinal'=>$draft->final_consumer?'1':'0',
             'indPres'=>match($draft->presence){'presential'=>'1','internet'=>'2','phone'=>'3',
@@ -103,7 +103,8 @@ final class Nfe55IniBuilder
             'xNome'=>$env==='2'?'NF-E EMITIDA EM AMBIENTE DE HOMOLOGACAO - SEM VALOR FISCAL':$recipient['name'],
             'indIEDest'=>match($recipient['ie_indicator']??'non_contributor'){
                 'contributor'=>'1','exempt'=>'2',default=>'9'},
-            'IE'=>$this->digits($recipient['state_registration']??''),
+            'IE'=>($recipient['ie_indicator']??'non_contributor')==='contributor'
+                ? $this->digits($recipient['state_registration']??'') : null,
             'xLgr'=>$recipient['address'],'nro'=>$recipient['address_number'],
             'xCpl'=>$recipient['address_complement']??null,'xBairro'=>$recipient['district'],
             'cMun'=>$this->digits($recipient['city_ibge_code']),'xMun'=>$recipient['city'],
@@ -142,7 +143,9 @@ final class Nfe55IniBuilder
             $add('Produto'.$i,[
                 'cProd'=>$item->product_sku?:'ITEM-'.$i,
                 'cEAN'=>$this->digits($item->ean_gtin)?:'SEM GTIN',
-                'xProd'=>$item->product_name,
+                'xProd'=>$env==='2'&&$index===0
+                    ? 'NOTA FISCAL EMITIDA EM AMBIENTE DE HOMOLOGACAO - SEM VALOR FISCAL'
+                    : $item->product_name,
                 'NCM'=>$this->digits($item->ncm),'CEST'=>$this->digits($item->cest),
                 'CFOP'=>$cfop,'uCom'=>$item->unit?:'UN',
                 'qCom'=>number_format($qty,4,'.',''),
