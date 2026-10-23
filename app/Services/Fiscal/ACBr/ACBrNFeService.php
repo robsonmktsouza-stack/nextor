@@ -347,14 +347,15 @@ final class ACBrNFeService
         return $this->fiscalEventOnce('NFE_Cancelar',[$key,$reason,$cnpj,$lot]);
     }
 
-    public function inutilize(string $cnpj,string $reason,int $year,int $series,int $first,int $last): string
+    public function inutilize(string $cnpj,string $reason,int $year,int $series,int $first,int $last,int $model=65): string
     {
-        if (!preg_match('/^\\d{14}$/',$cnpj) || mb_strlen($reason)<15 || $year<2020 || $year>2100
+        if (!preg_match('/^\\d{14}$/',$cnpj) || mb_strlen($reason)<15 || mb_strlen($reason)>255
+            || $year<2020 || $year>2100 || !in_array($model,[55,65],true)
             || $series<0 || $series>999 || $first<1 || $last<$first || $last>999999999 || $last-$first>999) {
-            throw new RuntimeException('Identificação ou faixa de inutilização inválida.');
+            throw new RuntimeException('Identificação, modelo ou faixa de inutilização inválida.');
         }
-        // Manual ACBr: Ano usa dois dígitos, Modelo NFC-e é 65.
-        return $this->fiscalEventOnce('NFE_Inutilizar',[$cnpj,$reason,$year%100,65,$series,$first,$last]);
+        // NFC-e mantém modelo 65 por padrão. NF-e deve passar 55 explicitamente.
+        return $this->fiscalEventOnce('NFE_Inutilizar',[$cnpj,$reason,$year%100,$model,$series,$first,$last]);
     }
 
     /**
