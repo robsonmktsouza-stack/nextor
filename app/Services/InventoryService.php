@@ -41,7 +41,7 @@ class InventoryService
         }, 3);
     }
     // Deve ser chamado dentro de transação, com o produto já bloqueado.
-    public function applyLocked(Product $product, int $deltaMills, string $type, string $reason, ?int $userId, ?int $saleId = null): void
+    public function applyLocked(Product $product, int $deltaMills, string $type, string $reason, ?int $userId, ?int $saleId = null, ?int $purchaseId = null): void
     {
         $old = self::toMills($product->stock_quantity);
         $new = $old + $deltaMills;
@@ -56,7 +56,7 @@ class InventoryService
         $product->stock_quantity = self::formatMills($new);
         $product->save();
         StockMovement::create([
-            'product_id' => $product->id,'user_id' => $userId, 'sale_id' => $saleId,
+            'product_id' => $product->id,'user_id' => $userId, 'sale_id' => $saleId, 'purchase_id' => $purchaseId,
             'type' => $type,'quantity_delta' => self::formatMills($deltaMills),
             'previous_quantity' => self::formatMills($old),
             'new_quantity' => self::formatMills($new),'reason' => $reason,

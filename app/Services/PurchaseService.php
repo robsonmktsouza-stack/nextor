@@ -106,11 +106,7 @@ class PurchaseService
                 }
                 if($product->control_stock) {
                     $this->inventory->applyLocked($product,InventoryService::toMills($item->quantity),
-                        'purchase','Compra #'.$purchase->id,$userId);
-                    StockMovement::query()->where('product_id',$product->id)
-                        ->where('type','purchase')->whereNull('purchase_id')
-                        ->where('reason','Compra #'.$purchase->id)->latest('created_at')->limit(1)
-                        ->update(['purchase_id'=>$purchase->id]);
+                        'purchase','Compra #'.$purchase->id,$userId,null,$purchase->id);
                 }
                 // custo deve refletir a última entrada confirmada; não altera preço de venda
                 $product->cost_price=$item->unit_cost;
@@ -159,11 +155,7 @@ class PurchaseService
                     foreach($movements as $movement) {
                         $product=Product::query()->lockForUpdate()->findOrFail($item->product_id);
                         $this->inventory->applyLocked($product,-InventoryService::toMills($movement->quantity_delta),
-                            'purchase_cancel','Cancelamento da compra #'.$purchase->id,$userId);
-                        StockMovement::query()->where('product_id',$product->id)
-                            ->where('type','purchase_cancel')->whereNull('purchase_id')
-                            ->where('reason','Cancelamento da compra #'.$purchase->id)
-                            ->latest('created_at')->limit(1)->update(['purchase_id'=>$purchase->id]);
+                            'purchase_cancel','Cancelamento da compra #'.$purchase->id,$userId,null,$purchase->id);
                     }
                 }
                 if($payable) $payable->update([
