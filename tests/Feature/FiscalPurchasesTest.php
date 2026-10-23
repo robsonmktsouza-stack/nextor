@@ -225,6 +225,25 @@ final class FiscalPurchasesTest extends TestCase
         self::assertSame(1,$fake->calls);
     }
 
+    public function test_scheduled_command_respects_opt_in_and_the_saved_sefaz_cooldown(): void
+    {
+        $this->ready();
+        $fake=$this->gateway(
+            "[DistribuicaoDFe]\ncStat=137\nultNSU=000000000000000\nmaxNSU=000000000000000"
+        );
+        $state=app(IncomingNfeSyncService::class)->state();
+        self::assertFalse($state->auto_sync);
+        self::assertSame(0,\Illuminate\Support\Facades\Artisan::call('fiscal:sync-incoming-nfe'));
+        self::assertSame(0,$fake->calls);
+
+        $state->update(['auto_sync'=>true]);
+        self::assertSame(0,\Illuminate\Support\Facades\Artisan::call('fiscal:sync-incoming-nfe'));
+        self::assertSame(1,$fake->calls);
+        self::assertSame('000000000000000',$state->fresh()->last_nsu);
+        self::assertSame(0,\Illuminate\Support\Facades\Artisan::call('fiscal:sync-incoming-nfe'));
+        self::assertSame(1,$fake->calls);
+    }
+
     public function test_xml_download_and_sync_are_protected_by_fiscal_permission(): void
     {
         $user=User::query()->create([
