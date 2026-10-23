@@ -253,6 +253,13 @@ class NfeDraftController extends Controller
             'state_registration'=>$customer->state_registration,
             'ie_indicator'=>$customer->ie_indicator,
             'final_consumer'=>(bool)$customer->final_consumer,
+            'delivery_addresses'=>$customer->deliveryAddresses->map(fn($a)=>[
+                'id'=>$a->id,'name'=>$a->name,'document'=>$a->document,
+                'zip_code'=>$a->zip_code,'address'=>$a->address,
+                'address_number'=>$a->address_number,'address_complement'=>$a->address_complement,
+                'district'=>$a->district,'city'=>$a->city,'state'=>$a->state,
+                'city_ibge_code'=>$a->city_ibge_code,
+            ])->values()->all(),
             'zip_code'=>$customer->zip_code,
             'state'=>$customer->state,
             'city'=>$customer->city,
@@ -318,6 +325,17 @@ class NfeDraftController extends Controller
             'expected_delivery_date'=>['nullable','date'],
             'government_purchase'=>['nullable','boolean'],
             'advance_payment'=>['nullable','boolean'],
+            'different_delivery'=>['nullable','boolean'],
+            'delivery_name'=>['nullable','string','max:190'],
+            'delivery_document'=>['nullable','string','max:20'],
+            'delivery_zip_code'=>['nullable','string','max:9'],
+            'delivery_address'=>['nullable','string','max:190'],
+            'delivery_address_number'=>['nullable','string','max:30'],
+            'delivery_address_complement'=>['nullable','string','max:120'],
+            'delivery_district'=>['nullable','string','max:120'],
+            'delivery_city'=>['nullable','string','max:120'],
+            'delivery_state'=>['nullable','string','size:2'],
+            'delivery_city_ibge_code'=>['nullable','string','max:7'],
             'discount'=>['nullable','numeric','min:0'],
             'surcharge'=>['nullable','numeric','min:0'],
 
@@ -378,6 +396,30 @@ class NfeDraftController extends Controller
             ? $this->validatedReferences($data['references_json'] ?? null)
             : [];
 
+        $differentDelivery=$request->boolean('different_delivery');
+        $delivery=null;
+        if($differentDelivery){
+            foreach(['zip_code','address','address_number','district','city','state','city_ibge_code'] as $field){
+                if(trim((string)($data['delivery_'.$field]??''))===''){
+                    throw ValidationException::withMessages(['delivery_'.$field=>'Informe o endereço de entrega completo.']);
+                }
+            }
+            $zip=preg_replace('/\D/','',(string)$data['delivery_zip_code']);
+            $cityCode=preg_replace('/\D/','',(string)$data['delivery_city_ibge_code']);
+            $document=preg_replace('/\D/','',(string)($data['delivery_document']??''));
+            if(strlen($zip)!==8 || strlen($cityCode)!==7 || !preg_match('/^[A-Z]{2}$/',strtoupper($data['delivery_state']))
+                || ($document!==''&&!in_array(strlen($document),[11,14],true))) {
+                throw ValidationException::withMessages(['different_delivery'=>'Confira CEP, município, UF e CPF/CNPJ do local de entrega.']);
+            }
+            $delivery=[
+                'name'=>$data['delivery_name']??null,'document'=>$document?:null,
+                'zip_code'=>$zip,'address'=>$data['delivery_address'],
+                'address_number'=>$data['delivery_address_number'],
+                'address_complement'=>$data['delivery_address_complement']??null,
+                'district'=>$data['delivery_district'],'city'=>$data['delivery_city'],
+                'state'=>strtoupper($data['delivery_state']),'city_ibge_code'=>$cityCode,
+            ];
+        }
         return [
             'operation_nature_id'=>$nature->id,
             'customer_id'=>$customer->id,
@@ -400,7 +442,7 @@ class NfeDraftController extends Controller
             'expected_delivery_date'=>$informExpectedDeliveryDate ? ($data['expected_delivery_date'] ?? null) : null,
             'government_purchase'=>$request->boolean('government_purchase'),
             'advance_payment'=>$request->boolean('advance_payment'),
-            'different_delivery'=>false,
+            'different_delivery'=>$differentDelivery,
             'discount'=>$discount,
             'surcharge'=>$surcharge,
             'payment_type'=>$data['payment_type'],
@@ -423,7 +465,7 @@ class NfeDraftController extends Controller
                 'district','final_consumer','ie_indicator','state_registration','substitute_state_registration',
                 'municipal_registration','suframa'
             ]),
-            'delivery_snapshot'=>null,
+            'delivery_snapshot'=>$delivery,
             'transport_data'=>[
                 'freight_mode'=>$data['freight_mode'],
                 'freight_value'=>$freight,
