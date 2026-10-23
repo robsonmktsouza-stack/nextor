@@ -144,6 +144,12 @@ Route::middleware(['auth','control.license'])->group(function () {
     Route::post('/sales/{sale}/cancel',[SaleController::class,'cancel'])->name('sales.cancel')->middleware(['permission:sales','company.configured']);
 
     Route::get('/fiscal',[FiscalController::class,'index'])->name('fiscal.index')->middleware(['permission:fiscal','company.configured']);
+    Route::get('/fiscal/purchases',[\App\Http\Controllers\FiscalPurchasesController::class,'index'])->name('fiscal.purchases.index')->middleware(['permission:fiscal','company.configured']);
+    Route::post('/fiscal/purchases/sync',[\App\Http\Controllers\FiscalPurchasesController::class,'synchronize'])->name('fiscal.purchases.sync')->middleware(['permission:fiscal','company.configured','throttle:3,1']);
+    Route::post('/fiscal/purchases/automatic',[\App\Http\Controllers\FiscalPurchasesController::class,'automatic'])->name('fiscal.purchases.automatic')->middleware(['permission:fiscal','company.configured']);
+    Route::post('/fiscal/purchases/import',[\App\Http\Controllers\FiscalPurchasesController::class,'importXml'])->name('fiscal.purchases.import')->middleware(['permission:fiscal','company.configured','throttle:10,1']);
+    Route::get('/fiscal/purchases/{incomingNfe}/xml',[\App\Http\Controllers\FiscalPurchasesController::class,'download'])->name('fiscal.purchases.xml')->middleware(['permission:fiscal','company.configured']);
+    Route::get('/fiscal/purchases/{incomingNfe}',[\App\Http\Controllers\FiscalPurchasesController::class,'show'])->name('fiscal.purchases.show')->middleware(['permission:fiscal','company.configured']);
     Route::post('/fiscal/utilities/xml',[FiscalUtilitiesController::class,'xml'])->name('fiscal.utilities.xml')->middleware(['permission:fiscal','company.configured']);
     Route::get('/fiscal/utilities/{fiscalDocumentJob}/auxiliary',[FiscalUtilitiesController::class,'auxiliary'])->name('fiscal.utilities.auxiliary')->middleware(['permission:fiscal','company.configured']);
     Route::get('/fiscal/fcp',[FiscalFcpRuleController::class,'index'])->name('fiscal.fcp.index')->middleware('permission:settings');
