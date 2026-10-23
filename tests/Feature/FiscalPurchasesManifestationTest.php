@@ -33,7 +33,7 @@ final class FiscalPurchasesManifestationTest extends TestCase
 
     private function invoice(): IncomingNfe
     {
-        return IncomingNfe::query()->create(['access_key'=>$this->key(),'status'=>'summary']);
+        return IncomingNfe::query()->create(['access_key'=>$this->key(),'status'=>'summary','issued_at'=>now()]);
     }
 
     private function ready(): void

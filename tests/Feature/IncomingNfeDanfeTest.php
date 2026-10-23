@@ -85,7 +85,7 @@ final class IncomingNfeDanfeTest extends TestCase
     public function test_summary_without_xml_cannot_be_downloaded_or_printed(): void
     {
         Storage::fake('local');
-        $invoice=IncomingNfe::query()->create(['access_key'=>$this->key(),'status'=>'summary','total'=>'99.99']);
+        $invoice=IncomingNfe::query()->create(['access_key'=>$this->key(),'status'=>'summary','issued_at'=>now(),'total'=>'99.99']);
         $pdf=$this->fakePdf();
         $this->actingAs($this->user())
             ->get(route('fiscal.purchases.danfe',$invoice))->assertNotFound();
