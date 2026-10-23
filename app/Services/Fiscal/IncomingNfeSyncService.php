@@ -58,6 +58,7 @@ final class IncomingNfeSyncService
         $company=CompanySetting::current();
         $state=$this->state();
         if($scheduled && !$state->auto_sync) return ['status'=>'disabled','imported'=>0];
+        if(!$this->isReady()) return ['status'=>'not_ready','imported'=>0];
         if($state->next_check_at && $state->next_check_at->isFuture()) {
             return ['status'=>'cooldown','imported'=>0,'next_check_at'=>$state->next_check_at];
         }
@@ -68,9 +69,6 @@ final class IncomingNfeSyncService
             $state->refresh();
             if($state->next_check_at && $state->next_check_at->isFuture()) {
                 return ['status'=>'cooldown','imported'=>0,'next_check_at'=>$state->next_check_at];
-            }
-            if(!$this->isReady()) {
-                throw new RuntimeException('Configure o certificado A1 da empresa em Ajustes → Fiscal.');
             }
             $raw=$this->gateway->fetch($company,$state->cnpj,(string)$state->last_nsu);
             $envelope=$this->parser->envelope($raw);
