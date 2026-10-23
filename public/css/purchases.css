@@ -1,0 +1,35 @@
+/* Operações > Compras: mesmos componentes e densidade das listagens do ERP. */
+.purchases-summary{font-size:12px;color:#667c8d;white-space:nowrap}
+.purchase-row-actions{display:flex;justify-content:center;gap:5px;align-items:center}
+.purchase-editor{display:flex;flex-direction:column;gap:14px}
+.purchase-editor .editor-panel{margin:0}
+.purchase-section-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.purchase-section-heading h2{margin:0;font-size:16px;color:#29465d}
+.purchase-supplier-link .btn{display:inline-flex;gap:5px;align-items:center;min-height:35px}
+.purchase-items-table{table-layout:fixed;min-width:620px}
+.purchase-items-table th:first-child{width:52%}
+.purchase-items-table th:nth-child(2){width:16%}
+.purchase-items-table th:nth-child(3){width:17%}
+.purchase-items-table th:nth-child(4){width:11%}
+.purchase-items-table td select,.purchase-items-table td input{box-sizing:border-box;width:100%;min-width:0;min-height:34px;padding:6px;border:1px solid #cbd5e0;border-radius:4px;background:#fff;color:#2e475d;font:inherit}
+.purchase-items-table td input:focus,.purchase-items-table td select:focus{outline:2px solid #92c9ee;outline-offset:1px}
+.purchase-items-table .btn-icon{color:#8b3945}
+.purchase-totals{margin-top:18px}
+.purchase-sum{display:flex;flex-direction:column;gap:7px}
+.purchase-sum>span{font-size:12px;color:#6e8496}
+.purchase-sum strong{font-size:18px;font-variant-numeric:tabular-nums;color:#234b64}
+.purchase-savebar{justify-content:flex-end;gap:10px}
+.purchase-save-total{margin-right:auto;color:#5d7384}
+.purchase-save-total strong{color:#25506b;font-size:19px;font-variant-numeric:tabular-nums}
+.purchase-detail-wrap{padding:18px 22px}
+.purchase-detail-wrap>h2{font-size:17px;color:#304b61;margin:3px 0 20px}
+.purchase-detail-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px 20px;margin-bottom:24px}
+.purchase-detail-grid>div{min-width:0}
+.purchase-detail-grid span{display:block;color:#768ba0;font-size:11px;margin-bottom:5px}
+.purchase-detail-grid strong{display:block;font-size:13px;overflow-wrap:anywhere}
+.purchase-detail-totals{display:flex;gap:17px;justify-content:flex-end;align-items:center;margin:20px 0;font-size:12px;color:#526b7f;flex-wrap:wrap}
+.purchase-detail-totals strong{font-size:18px;color:#244e67;white-space:nowrap}
+.purchase-notes{border-top:1px solid #d9e3ea;padding-top:12px}
+.purchase-notes h3{font-size:13px}
+@media(max-width:900px){.purchase-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.purchase-detail-grid{grid-template-columns:1fr}.purchase-savebar{flex-wrap:wrap}.purchase-save-total{width:100%}.purchases-summary{display:none}}
