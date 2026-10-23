@@ -108,6 +108,7 @@ final class Nfe55EmissionService
             $service->loadIni($ini);
             $service->sign();
             $service->validateXml();
+            $service->validateBusinessRules();
             $signedXml=$service->getXml();
             $signedKey=$this->signedKey($signedXml,$draft,$company);
             $base='fiscal/nfe55/'.$id;
