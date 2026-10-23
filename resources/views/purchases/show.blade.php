@@ -23,6 +23,7 @@
       <div><span>Fornecedor</span><strong>{{ $purchase->supplier?->name }}</strong></div>
       <div><span>Data</span><strong>{{ $purchase->operation_date?->format('d/m/Y') }}</strong></div>
       <div><span>Documento</span><strong>{{ $purchase->document_number ?: '—' }}</strong></div>
+      <div><span>Palavra-chave</span><strong>{{ $purchase->keyword ?: '—' }}</strong></div>
       <div><span>Recebimento</span><strong>{{ $purchase->received_at?->format('d/m/Y H:i') ?? 'Não recebido' }}</strong></div>
       <div><span>Vencimento</span><strong>{{ $purchase->due_date?->format('d/m/Y') ?: '—' }}</strong></div>
       <div><span>NF-e vinculada</span><strong>
@@ -36,7 +37,7 @@
     </div>
     <div class="purchase-section-heading"><h2>Produtos ({{ $purchase->items->count() }})</h2></div>
     <div class="table-scroll"><table class="cms-table">
-      <thead><tr><th>Produto</th><th>SKU</th><th>Quantidade</th><th>Unidade</th><th>Preço de custo</th><th>Subtotal</th></tr></thead>
+      <thead><tr><th>Produto</th><th>SKU</th><th>Quantidade</th><th>Unidade</th><th>Preço de custo</th><th>Desconto</th><th>Outros custos</th><th>Custos externos</th><th>IPI</th><th>ICMS-ST</th><th>Total</th></tr></thead>
       <tbody>@foreach($purchase->items as $item)
         <tr>
           <td><strong class="table-title">{{ $item->product_name }}</strong></td>
@@ -44,12 +45,18 @@
           <td>{{ number_format((float)$item->quantity,3,',','.') }}</td>
           <td>{{ $item->unit }}</td>
           <td>R$ {{ number_format((float)$item->unit_cost,2,',','.') }}</td>
+          <td>R$ {{ number_format((float)$item->discount,2,',','.') }}</td>
+          <td>R$ {{ number_format((float)$item->other_costs,2,',','.') }}</td>
+          <td>R$ {{ number_format((float)$item->external_costs,2,',','.') }}</td>
+          <td>R$ {{ number_format((float)$item->ipi,2,',','.') }}</td>
+          <td>R$ {{ number_format((float)$item->icms_st,2,',','.') }}</td>
           <td class="price-strong">R$ {{ number_format((float)$item->line_total,2,',','.') }}</td>
         </tr>
       @endforeach</tbody></table></div>
     <div class="purchase-detail-totals">
       <span>Itens: R$ {{ number_format((float)$purchase->subtotal,2,',','.') }}</span>
       <span>Frete: R$ {{ number_format((float)$purchase->freight,2,',','.') }}</span>
+      <span>Outras despesas: R$ {{ number_format((float)$purchase->other_expenses,2,',','.') }}</span>
       <span>Desconto: R$ {{ number_format((float)$purchase->discount,2,',','.') }}</span>
       <strong>Total R$ {{ number_format((float)$purchase->total,2,',','.') }}</strong>
     </div>

@@ -30,6 +30,7 @@ class PurchaseController extends Controller
             ->when($status,fn($q)=>$q->where('status',$status))
             ->when($supplierId,fn($q)=>$q->where('supplier_id',$supplierId))
             ->when($term,fn($q)=>$q->where(function($filter)use($term){
+                $filter->orWhere('keyword','like',"%{$term}%")
                 $filter->where('document_number','like',"%{$term}%")
                     ->orWhere('id','like',"%{$term}%")
                     ->orWhereHas('supplier',fn($s)=>$s->where('name','like',"%{$term}%")
@@ -53,7 +54,7 @@ class PurchaseController extends Controller
     {
         return view('purchases.form',$this->formData(new Purchase([
             'operation_date'=>today(),'due_date'=>today()->addDays(30),
-            'freight'=>'0.00','discount'=>'0.00','generate_payable'=>true,
+            'freight'=>'0.00','discount'=>'0.00','other_expenses'=>'0.00','generate_payable'=>true,
         ]),false,$request));
     }
 
@@ -127,7 +128,9 @@ class PurchaseController extends Controller
             'operation_date'=>['required','date_format:Y-m-d'],
             'due_date'=>['nullable','date_format:Y-m-d'],
             'document_number'=>['nullable','string','max:80'],
+            'keyword'=>['nullable','string','max:190'],
             'freight'=>['required','numeric','min:0','max:9999999999.99','decimal:0,2'],
+            'other_expenses'=>['nullable','numeric','min:0','max:9999999999.99','decimal:0,2'],
             'discount'=>['required','numeric','min:0','max:9999999999.99','decimal:0,2'],
             'generate_payable'=>['required','boolean'],
             'notes'=>['nullable','string','max:5000'],
@@ -135,6 +138,11 @@ class PurchaseController extends Controller
             'items.*.product_id'=>['required','integer','exists:products,id'],
             'items.*.quantity'=>['required','numeric','gt:0','max:999999999','decimal:0,3'],
             'items.*.unit_cost'=>['required','numeric','min:0','max:999999999','decimal:0,2'],
+            'items.*.discount'=>['nullable','numeric','min:0','max:999999999','decimal:0,2'],
+            'items.*.other_costs'=>['nullable','numeric','min:0','max:999999999','decimal:0,2'],
+            'items.*.external_costs'=>['nullable','numeric','min:0','max:999999999','decimal:0,2'],
+            'items.*.ipi'=>['nullable','numeric','min:0','max:999999999','decimal:0,2'],
+            'items.*.icms_st'=>['nullable','numeric','min:0','max:999999999','decimal:0,2'],
         ]);
         $data['generate_payable']=(bool)$data['generate_payable'];
         return $data;

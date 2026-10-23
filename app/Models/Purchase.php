@@ -10,7 +10,7 @@ class Purchase extends Model
 {
     protected $fillable=[
         'supplier_id','incoming_nfe_id','created_by','status','operation_date','due_date',
-        'document_number','subtotal','freight','discount','total','generate_payable',
+        'document_number','keyword','subtotal','freight','discount','other_expenses','total','generate_payable',
         'notes','received_at','cancelled_at',
     ];
     protected function casts(): array
@@ -18,7 +18,7 @@ class Purchase extends Model
         return [
             'operation_date'=>'date','due_date'=>'date',
             'subtotal'=>'decimal:2','freight'=>'decimal:2','discount'=>'decimal:2',
-            'total'=>'decimal:2','generate_payable'=>'boolean',
+            'total'=>'decimal:2','other_expenses'=>'decimal:2','generate_payable'=>'boolean',
             'received_at'=>'datetime','cancelled_at'=>'datetime',
         ];
     }

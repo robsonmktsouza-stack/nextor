@@ -30,8 +30,9 @@ class PurchaseService
             $items=$this->items($data['items']);
             $freight=$this->cents($data['freight']??'0');
             $discount=$this->cents($data['discount']??'0');
+            $otherExpenses=$this->cents($data['other_expenses']??'0');
             $subtotal=array_sum(array_column($items,'line_cents'));
-            $total=$subtotal+$freight-$discount;
+            $total=$subtotal+$freight+$otherExpenses-$discount;
             if($total<=0||$total>999999999999) {
                 throw ValidationException::withMessages(['discount'=>'O total da compra deve ser maior que zero.']);
             }
@@ -62,8 +63,10 @@ class PurchaseService
                 'operation_date'=>$data['operation_date'],
                 'due_date'=>$data['due_date']??null,
                 'document_number'=>trim((string)($data['document_number']??''))?:null,
+                'keyword'=>trim((string)($data['keyword']??''))?:null,
                 'subtotal'=>$this->money($subtotal),
                 'freight'=>$this->money($freight),
+                'other_expenses'=>$this->money($otherExpenses),
                 'discount'=>$this->money($discount),
                 'total'=>$this->money($total),
                 'generate_payable'=>(bool)($data['generate_payable']??false),
@@ -81,6 +84,11 @@ class PurchaseService
                     'quantity'=>InventoryService::formatMills($item['mills']),
                     'unit_cost'=>$this->money($item['unit_cents']),
                     'line_total'=>$this->money($item['line_cents']),
+                    'discount'=>$this->money($item['discount_cents']),
+                    'other_costs'=>$this->money($item['other_costs_cents']),
+                    'external_costs'=>$this->money($item['external_costs_cents']),
+                    'ipi'=>$this->money($item['ipi_cents']),
+                    'icms_st'=>$this->money($item['icms_st_cents']),
                 ]);
             }
             return $purchase->fresh(['items','supplier','invoice']);
@@ -188,8 +196,17 @@ class PurchaseService
             if($mills<1||$price<0) {
                 throw ValidationException::withMessages(['items'=>'Quantidade ou custo inválido.']);
             }
-            $line=(int)round($mills*$price/1000,0,PHP_ROUND_HALF_UP);
-            $result[]=['product'=>$product,'mills'=>$mills,'unit_cents'=>$price,'line_cents'=>$line];
+            $base=(int)round($mills*$price/1000,0,PHP_ROUND_HALF_UP);
+            $extras=[];
+            foreach(['discount','other_costs','external_costs','ipi','icms_st'] as $field) {
+                $extras[$field.'_cents']=$this->cents((string)($item[$field]??'0'));
+            }
+            $line=$base-$extras['discount_cents']+$extras['other_costs_cents']
+                +$extras['external_costs_cents']+$extras['ipi_cents']+$extras['icms_st_cents'];
+            if($line<0)throw ValidationException::withMessages([
+                'items'=>'O desconto do item não pode ultrapassar o valor da linha com seus acréscimos.'
+            ]);
+            $result[]=array_merge(['product'=>$product,'mills'=>$mills,'unit_cents'=>$price,'line_cents'=>$line],$extras);
         }
         return $result;
     }
