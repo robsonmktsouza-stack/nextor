@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded',()=>{
         '<label class="purchase-line-field"><span>Custo unitário *</span>'+
           '<input type="number" name="items['+index+'][unit_cost]" data-number-kind="money" min="0" step="0.01" required data-cost value="0.00"></label>'+
         '<div class="purchase-item-amount"><span>Total do produto</span><strong data-line-total>R$ 0,00</strong></div>'+
-        '<button type="button" class="btn-icon purchase-remove" data-purchase-remove aria-label="Remover item" data-tooltip="Remover produto">×</button>'+
+        '<button type="button" class="btn-icon purchase-remove" data-purchase-remove aria-label="Remover item" data-tooltip="Remover produto"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg></button>'+
       '</div>'+
       '<div class="purchase-item-charges">'+        field(index,'discount','Desconto',data.discount)+
         field(index,'other_costs','Outros custos',data.other_costs)+

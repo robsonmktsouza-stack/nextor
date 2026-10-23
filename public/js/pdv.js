@@ -909,7 +909,8 @@
 
         const remove=document.createElement('button');
         remove.type='button';
-        remove.textContent='×';
+        remove.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg>';
+        remove.setAttribute('data-tooltip','Remover forma de pagamento');
         remove.setAttribute('aria-label','Remover '+row.label);
 
         input.addEventListener('input',()=>{

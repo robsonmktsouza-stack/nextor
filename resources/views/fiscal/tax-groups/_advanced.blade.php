@@ -89,7 +89,7 @@
         <label class="field col-2"><span>IBS municipal (%)</span><input type="number" step="0.0001" min="0" max="100" name="tax_config[municipal_variations][{{ $rowIndex }}][rate]" value="{{ $row['rate'] ?? '' }}"></label>
         <label class="field col-2"><span>Diferimento (%)</span><input type="number" step="0.0001" min="0" max="100" name="tax_config[municipal_variations][{{ $rowIndex }}][deferral_rate]" value="{{ $row['deferral_rate'] ?? '' }}"></label>
         <label class="field col-2"><span>Redução (%)</span><input type="number" step="0.0001" min="0" max="100" name="tax_config[municipal_variations][{{ $rowIndex }}][reduction_rate]" value="{{ $row['reduction_rate'] ?? '' }}"></label>
-        <div class="field col-3"><span>Ação</span><button class="btn btn-secondary" type="button" data-remove-variation>Remover município</button></div>
+        <div class="field col-3"><span>Ação</span><button class="btn btn-secondary" type="button" data-remove-variation aria-label="Remover município">@include('partials.icon',['name'=>'trash','size'=>15]) Remover município</button></div>
       </div>
     @endforeach
   </div>
@@ -100,7 +100,7 @@
       <label class="field col-2"><span>IBS municipal (%)</span><input type="number" step="0.0001" min="0" max="100" name="tax_config[municipal_variations][__INDEX__][rate]"></label>
       <label class="field col-2"><span>Diferimento (%)</span><input type="number" step="0.0001" min="0" max="100" name="tax_config[municipal_variations][__INDEX__][deferral_rate]"></label>
       <label class="field col-2"><span>Redução (%)</span><input type="number" step="0.0001" min="0" max="100" name="tax_config[municipal_variations][__INDEX__][reduction_rate]"></label>
-      <div class="field col-3"><span>Ação</span><button class="btn btn-secondary" type="button" data-remove-variation>Remover município</button></div>
+      <div class="field col-3"><span>Ação</span><button class="btn btn-secondary" type="button" data-remove-variation aria-label="Remover município">@include('partials.icon',['name'=>'trash','size'=>15]) Remover município</button></div>
     </div>
   </template>
 </section>
@@ -118,7 +118,7 @@
         <label class="field col-2"><span>IBS UF (%)</span><input type="number" step="0.0001" min="0" max="100" name="tax_config[state_variations][{{ $rowIndex }}][ibs_uf_rate]" value="{{ $row['ibs_uf_rate'] ?? '' }}"></label>
         <label class="field col-2"><span>Diferimento IBS (%)</span><input type="number" step="0.0001" min="0" max="100" name="tax_config[state_variations][{{ $rowIndex }}][ibs_uf_deferral_rate]" value="{{ $row['ibs_uf_deferral_rate'] ?? '' }}"></label>
         <label class="field col-2"><span>Redução IBS (%)</span><input type="number" step="0.0001" min="0" max="100" name="tax_config[state_variations][{{ $rowIndex }}][ibs_uf_reduction_rate]" value="{{ $row['ibs_uf_reduction_rate'] ?? '' }}"></label>
-        <div class="field col-2"><button type="button" class="btn btn-secondary" data-remove-variation>Remover</button></div>
+        <div class="field col-2"><button type="button" class="btn btn-secondary" data-remove-variation aria-label="Remover variação">@include('partials.icon',['name'=>'trash','size'=>15]) Remover</button></div>
       </div>
     @endforeach
   </div>
@@ -133,7 +133,7 @@
       <label class="field col-2"><span>IBS UF (%)</span><input type="number" step="0.0001" min="0" max="100" name="tax_config[state_variations][__INDEX__][ibs_uf_rate]"></label>
       <label class="field col-2"><span>Diferimento IBS (%)</span><input type="number" step="0.0001" min="0" max="100" name="tax_config[state_variations][__INDEX__][ibs_uf_deferral_rate]"></label>
       <label class="field col-2"><span>Redução IBS (%)</span><input type="number" step="0.0001" min="0" max="100" name="tax_config[state_variations][__INDEX__][ibs_uf_reduction_rate]"></label>
-      <div class="field col-2"><button type="button" class="btn btn-secondary" data-remove-variation>Remover</button></div>
+      <div class="field col-2"><button type="button" class="btn btn-secondary" data-remove-variation aria-label="Remover variação">@include('partials.icon',['name'=>'trash','size'=>15]) Remover</button></div>
     </div>
   </template>
 </section>

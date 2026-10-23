@@ -295,6 +295,7 @@
       : (tax.icms_cst ? 'CST '+tax.icms_cst : '—');
   };
 
+  const removeTrashIcon='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg>';
   const renderItems=()=>{
     const body=byId('nfeItemsBody');
     if(!body) return;
@@ -316,7 +317,7 @@
           <td class="action-cell">
             <div class="row-actions">
               <button type="button" class="btn-icon" data-nfe-edit-item="${index}" data-tooltip="Editar item">✎</button>
-              <button type="button" class="btn-icon row-action-danger" data-nfe-remove-item="${index}" data-tooltip="Remover item">×</button>
+              <button type="button" class="btn-icon row-action-danger" data-nfe-remove-item="${index}" data-tooltip="Remover item" aria-label="Remover item">${removeTrashIcon}</button>
             </div>
           </td>
         </tr>
@@ -333,7 +334,7 @@
       ? references.map((ref,index)=>`
           <tr>
             <td><span class="code-tag">${esc(ref.key||'')}</span></td>
-            <td class="action-cell"><button type="button" class="btn-icon row-action-danger" data-nfe-remove-reference="${index}">×</button></td>
+            <td class="action-cell"><button type="button" class="btn-icon row-action-danger" data-nfe-remove-reference="${index}" data-tooltip="Remover referência" aria-label="Remover referência">${removeTrashIcon}</button></td>
           </tr>
         `).join('')
       : '<tr><td colspan="2" class="empty-cell">Nenhuma NF-e referenciada.</td></tr>';
@@ -350,7 +351,7 @@
             <td>${esc(dup.payment_type||'—')}</td>
             <td class="nowrap">${esc(dup.due_date||'—')}</td>
             <td class="price-strong nowrap">${money(dup.value)}</td>
-            <td class="action-cell"><button type="button" class="btn-icon row-action-danger" data-nfe-remove-duplicate="${index}">×</button></td>
+            <td class="action-cell"><button type="button" class="btn-icon row-action-danger" data-nfe-remove-duplicate="${index}" data-tooltip="Remover duplicata" aria-label="Remover duplicata">${removeTrashIcon}</button></td>
           </tr>
         `).join('')
       : '<tr><td colspan="5" class="empty-cell">Nenhuma duplicata informada.</td></tr>';

@@ -92,7 +92,7 @@ $deliveryAddresses=collect(old('delivery_addresses',$customer->exists ? $custome
    <div class="delivery-addresses" data-delivery-list>
      @foreach($deliveryAddresses as $index=>$address)
        <div class="editor-panel delivery-card" data-delivery-card>
-         <div class="delivery-card-title"><h3>Endereço de entrega</h3><button type="button" class="remove-delivery" data-remove-delivery aria-label="Remover endereço">@include('partials.icon',['name'=>'x','size'=>16])</button></div>
+         <div class="delivery-card-title"><h3>Endereço de entrega</h3><button type="button" class="remove-delivery" data-remove-delivery aria-label="Remover endereço">@include('partials.icon',['name'=>'trash','size'=>16])</button></div>
          <div class="editor-grid cols-12" data-address-scope>
            <label class="field col-3"><span>CEP</span><div class="input-action-group compact-action"><input name="delivery_addresses[{{ $index }}][zip_code]" value="{{ $address['zip_code'] ?? '' }}" data-cep-input><button type="button" class="input-action-button" data-cep-search>@include('partials.icon',['name'=>'search','size'=>15])</button></div></label>
            <label class="field col-3"><span>Estado</span><select name="delivery_addresses[{{ $index }}][state]" data-uf-select><option value="">Selecione</option>@foreach($ufs as $uf=>$label)<option value="{{ $uf }}" @selected(($address['state'] ?? '')===$uf)>{{ $uf }} — {{ $label }}</option>@endforeach</select></label>
@@ -199,7 +199,7 @@ $deliveryAddresses=collect(old('delivery_addresses',$customer->exists ? $custome
 
 <template id="deliveryAddressTemplate">
  <div class="editor-panel delivery-card" data-delivery-card>
-  <div class="delivery-card-title"><h3>Endereço de entrega</h3><button type="button" class="remove-delivery" data-remove-delivery aria-label="Remover endereço">@include('partials.icon',['name'=>'x','size'=>16])</button></div>
+  <div class="delivery-card-title"><h3>Endereço de entrega</h3><button type="button" class="remove-delivery" data-remove-delivery aria-label="Remover endereço">@include('partials.icon',['name'=>'trash','size'=>16])</button></div>
   <div class="editor-grid cols-12" data-address-scope>
    <label class="field col-3"><span>CEP</span><div class="input-action-group compact-action"><input name="delivery_addresses[__INDEX__][zip_code]" data-cep-input><button type="button" class="input-action-button" data-cep-search>@include('partials.icon',['name'=>'search','size'=>15])</button></div></label>
    <label class="field col-3"><span>Estado</span><select name="delivery_addresses[__INDEX__][state]" data-uf-select><option value="">Selecione</option>@foreach($ufs as $uf=>$label)<option value="{{ $uf }}">{{ $uf }} — {{ $label }}</option>@endforeach</select></label>
