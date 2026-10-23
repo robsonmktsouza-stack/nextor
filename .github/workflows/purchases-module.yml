@@ -20,6 +20,11 @@ on:
       - 'resources/views/fiscal/tax-groups/_advanced.blade.php'
       - 'database/migrations/*purchases*'
       - 'tests/Feature/PurchaseOperationsTest.php'
+      - 'tests/Feature/IncomingNfeToPurchaseTest.php'
+      - 'app/Services/Fiscal/IncomingNfePurchasePrefill.php'
+      - 'app/Services/Fiscal/IncomingNfeParser.php'
+      - 'app/Http/Controllers/FiscalPurchasesController.php'
+      - 'resources/views/fiscal/purchases/index.blade.php'
       - '.github/workflows/purchases-module.yml'
   workflow_dispatch:
 jobs:
@@ -40,4 +45,4 @@ jobs:
       - run: cp .env.example .env && php artisan key:generate && php artisan optimize:clear
       - run: php artisan view:cache && php -l app/Services/PurchaseService.php && php -l app/Http/Controllers/PurchaseController.php
       - run: node --check public/js/purchases.js && node --check public/js/nfe-editor.js && node --check public/js/pdv.js
-      - run: php -d memory_limit=1024M -d display_errors=1 vendor/bin/phpunit --filter=PurchaseOperationsTest --debug --display-errors --display-warnings
+      - run: php -d memory_limit=1024M -d display_errors=1 vendor/bin/phpunit --filter='PurchaseOperationsTest|IncomingNfeToPurchaseTest' --debug --display-errors --display-warnings
