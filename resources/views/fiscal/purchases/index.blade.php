@@ -4,6 +4,9 @@
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/fiscal-purchases.css') }}?v={{ filemtime(public_path('css/fiscal-purchases.css')) }}">
 @endpush
+@push('scripts')
+<script defer src="{{ asset('js/fiscal-purchases-manifest.js') }}?v={{ filemtime(public_path('js/fiscal-purchases-manifest.js')) }}"></script>
+@endpush
 @section('content')
 @include('fiscal._nav')
 <section class="cms-card sales-module-card fiscal-purchases-page">
@@ -71,7 +74,7 @@
   <div class="table-scroll">
     <table class="cms-table fiscal-purchases-table">
       <thead>
-        <tr><th>Emissão</th><th>Fornecedor</th><th>Documento</th><th class="align-right">Valor</th><th>Situação</th><th>XML</th><th class="action-cell">Ação</th></tr>
+        <tr><th>Emissão</th><th>Fornecedor</th><th>Documento</th><th class="align-right">Valor</th><th>Situação</th><th>Manifesto</th><th>XML</th><th class="action-cell">Ação</th></tr>
       </thead>
       <tbody>
       @forelse($invoices as $invoice)
@@ -83,13 +86,36 @@
         <td><span class="fiscal-purchases-key">{{ substr($invoice->access_key,0,16) }}…{{ substr($invoice->access_key,-6) }}</span></td>
         <td class="price-strong align-right nowrap">{{ $invoice->total!==null ? 'R$ '.number_format((float)$invoice->total,2,',','.') : '—' }}</td>
         <td><span class="status {{ $invoice->status==='xml_received' ? 'status-ok':'status-muted' }}">{{ $invoice->status==='xml_received' ? 'Para conferência':'Resumo recebido' }}</span></td>
+        <td class="fiscal-manifest-cell">
+          @php
+            $lastAttempt=$invoice->latestManifestationAttempt;
+            $needsReview=$lastAttempt && in_array($lastAttempt->status,['pending','uncertain'],true);
+            $manifestLabel=$manifestationEvents[$invoice->manifestation] ?? 'Sem manifesto';
+          @endphp
+          <select class="fiscal-manifest-select" data-manifest-select
+            data-manifest-url="{{ route('fiscal.purchases.manifest',$invoice) }}"
+            data-invoice-key="{{ $invoice->access_key }}"
+            aria-label="Manifestação da nota {{ $invoice->access_key }}"
+            @disabled($needsReview)
+            @if($needsReview) title="Envio anterior sem confirmação; consulte a SEFAZ" @endif>
+            <option value="">{{ $needsReview ? 'Verificar na SEFAZ' : $manifestLabel }}</option>
+            @unless($needsReview)
+              @foreach($manifestationEvents as $eventCode=>$eventLabel)
+                <option value="{{ $eventCode }}" @disabled($invoice->manifestation===$eventCode)>{{ $eventLabel }}</option>
+              @endforeach
+            @endunless
+          </select>
+          @if($invoice->manifestation_protocol)
+            <span class="fiscal-manifest-protocol" title="Protocolo de manifestação">Prot. {{ $invoice->manifestation_protocol }}</span>
+          @endif
+        </td>
         <td>{{ $invoice->xml_path ? 'Disponível':'Pendente' }}</td>
         <td class="action-cell"><a class="btn-icon" href="{{ route('fiscal.purchases.show',$invoice) }}" data-tooltip="Conferir nota" aria-label="Conferir nota">
           @include('partials.icon',['name'=>'eye','size'=>17])
         </a></td>
       </tr>
       @empty
-      <tr><td colspan="7" class="empty-cell">
+      <tr><td colspan="8" class="empty-cell">
         <div class="fiscal-empty-state" role="status">
           @include('partials.icon',['name'=>'receipt','size'=>23])
           <strong>Nenhuma NF-e de entrada encontrada</strong>
@@ -119,6 +145,29 @@
     <div class="dialog-footer">
       <button class="btn btn-secondary" type="button" data-dialog-close>Cancelar</button>
       <button class="btn btn-primary" type="submit">Importar XML</button>
+    </div>
+  </form>
+</dialog>
+<dialog class="erp-dialog small-dialog" id="purchaseManifestDialog" aria-labelledby="purchaseManifestTitle">
+  <form method="post" id="purchaseManifestForm">
+    @csrf
+    <input type="hidden" name="event_type" id="purchaseManifestType">
+    <div class="dialog-header">
+      <div><h2 id="purchaseManifestTitle">Manifestação do destinatário</h2></div>
+      <button type="button" class="close-dialog" data-dialog-close aria-label="Fechar">×</button>
+    </div>
+    <div class="dialog-body">
+      <strong id="purchaseManifestEvent"></strong>
+      <p class="fiscal-manifest-key" id="purchaseManifestKey"></p>
+      <label class="field wide" id="purchaseManifestReasonBox" hidden>
+        <span>Justificativa da operação não realizada</span>
+        <textarea name="reason" id="purchaseManifestReason" minlength="15" maxlength="255" rows="3" placeholder="Descreva por que a operação não ocorreu"></textarea>
+      </label>
+      <p class="fiscal-manifest-confirmation" id="purchaseManifestWarning"></p>
+    </div>
+    <div class="dialog-footer">
+      <button class="btn btn-secondary" type="button" data-dialog-close>Cancelar</button>
+      <button class="btn btn-primary" type="submit">Enviar à SEFAZ</button>
     </div>
   </form>
 </dialog>

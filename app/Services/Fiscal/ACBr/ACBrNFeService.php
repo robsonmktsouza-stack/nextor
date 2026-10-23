@@ -56,6 +56,9 @@ final class ACBrNFeService
             int NFE_ConfigGravarValor(void *libHandle, const char *eSessao, const char *eChave, const char *eValor);
             int NFE_StatusServico(void *libHandle, char *sResposta, int *esTamanho);
             int NFE_LimparLista(void *libHandle);
+            int NFE_LimparListaEventos(void *libHandle);
+            int NFE_CarregarEventoINI(void *libHandle, const char *eArquivoOuINI);
+            int NFE_EnviarEvento(void *libHandle, int idLote, char *sResposta, int *esTamanho);
             int NFE_CarregarINI(void *libHandle, const char *eArquivoOuINI);
             int NFE_CarregarXML(void *libHandle, const char *eArquivoOuXML);
             int NFE_SalvarPDF(void *libHandle, char *sResposta, int *esTamanho);
@@ -269,6 +272,17 @@ final class ACBrNFeService
             throw new RuntimeException("ACBr {$method} falhou ({$status}); o evento pode ter sido recebido. ".$this->lastReturn());
         }
         return FFI::string($buffer);
+    }
+
+    /** Evento da manifestação: carregar, assinar e transmitir apenas uma vez. */
+    public function sendRecipientEvent(string $eventIni): string
+    {
+        if (!str_starts_with($eventIni,"[EVENTO]\n")) {
+            throw new RuntimeException('INI de evento inválido.');
+        }
+        $this->execute('NFE_LimparListaEventos');
+        $this->execute('NFE_CarregarEventoINI',[$eventIni]);
+        return $this->fiscalEventOnce('NFE_EnviarEvento',[1]);
     }
 
     public function cancel(string $key,string $reason,string $cnpj,int $lot): string

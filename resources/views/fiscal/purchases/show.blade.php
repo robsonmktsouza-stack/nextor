@@ -29,7 +29,12 @@
       <div><span>Emissão</span><strong>{{ $invoice->issued_at?->format('d/m/Y H:i') ?? '—' }}</strong></div>
       <div><span>Valor total</span><strong>{{ $invoice->total!==null?'R$ '.number_format((float)$invoice->total,2,',','.'):'—' }}</strong></div>
       <div class="wide"><span>Chave de acesso</span><strong class="fiscal-purchases-key">{{ $invoice->access_key }}</strong></div>
+      <div><span>Manifesto</span><strong>{{ $manifestationEvents[$invoice->manifestation] ?? 'Sem manifesto' }}</strong></div>
+      <div><span>Protocolo de manifestação</span><strong>{{ $invoice->manifestation_protocol ?: '—' }}</strong></div>
     </div>
+    @if($invoice->latestManifestationAttempt && in_array($invoice->latestManifestationAttempt->status,['pending','uncertain'],true))
+      <p class="fiscal-purchases-alert">A última manifestação precisa de conferência na SEFAZ. Não reenvie antes de verificar o evento.</p>
+    @endif
     @if(!$invoice->xml_path)
       <p class="fiscal-purchases-alert">A SEFAZ disponibilizou o resumo. O XML completo pode depender da manifestação do destinatário. Não registre entrada no estoque com base apenas neste resumo.</p>
     @else

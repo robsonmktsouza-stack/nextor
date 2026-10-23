@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\FiscalController;
 use App\Models\IncomingNfe;
 use App\Services\Fiscal\IncomingNfeSyncService;
+use App\Services\Fiscal\IncomingNfeManifestationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -27,7 +28,7 @@ final class FiscalPurchasesController extends Controller
             ->when(in_array($status,['summary','xml_received'],true),
                 fn($q)=>$q->where('status',$status))
             ->orderByDesc('issued_at')->orderByDesc('id');
-        $invoices=$query->paginate(25)->withQueryString();
+        $invoices=$query->with('latestManifestationAttempt')->paginate(25)->withQueryString();
         $counts=[
             'total'=>IncomingNfe::query()->count(),
             'summary'=>IncomingNfe::query()->where('status','summary')->count(),
@@ -36,6 +37,7 @@ final class FiscalPurchasesController extends Controller
         return view('fiscal.purchases.index',[
             'invoices'=>$invoices,'state'=>$state,'counts'=>$counts,
             'search'=>$term,'status'=>$status,'ready'=>$sync->isReady(),
+            'manifestationEvents'=>IncomingNfeManifestationService::EVENTS,
             'tabs'=>FiscalController::TABS,'tab'=>'purchases',
         ]);
     }
@@ -43,7 +45,9 @@ final class FiscalPurchasesController extends Controller
     public function show(IncomingNfe $incomingNfe)
     {
         return view('fiscal.purchases.show',[
-            'invoice'=>$incomingNfe,'tabs'=>FiscalController::TABS,'tab'=>'purchases',
+            'invoice'=>$incomingNfe->load(['latestManifestationAttempt','manifestationAttempts']),
+            'manifestationEvents'=>IncomingNfeManifestationService::EVENTS,
+            'tabs'=>FiscalController::TABS,'tab'=>'purchases',
         ]);
     }
 
@@ -82,6 +86,26 @@ final class FiscalPurchasesController extends Controller
         $state=$sync->state();
         $state->update(['auto_sync'=>$enabled]);
         return back()->with('success',$enabled?'Busca automática de NF-e ativada.':'Busca automática desativada.');
+    }
+
+    public function manifest(Request $request, IncomingNfe $incomingNfe, IncomingNfeManifestationService $service)
+    {
+        $input=$request->validate([
+            'event_type'=>['required',Rule::in(array_keys(IncomingNfeManifestationService::EVENTS))],
+            'reason'=>['nullable','string','max:255'],
+        ]);
+        $result=$service->manifest($incomingNfe,$input['event_type'],$input['reason']??null,$request->user()?->id);
+        $message=match($result['status']) {
+            'accepted'=>'Manifestação registrada na SEFAZ (protocolo confirmado).',
+            'rejected'=>'SEFAZ rejeitou a manifestação (cStat '.($result['code']??'não informado').').',
+            'uncertain'=>'Retorno inconclusivo. Confira o evento na SEFAZ antes de tentar novamente.',
+            'review'=>'Já existe um envio pendente de conferência para esta NF-e.',
+            'already'=>'Esta manifestação já foi registrada para a NF-e.',
+            'busy'=>'Já existe uma manifestação desta nota em andamento.',
+            'not_ready'=>'Configure um certificado digital A1 válido para manifestar.',
+            default=>'Não foi possível confirmar o evento fiscal.',
+        };
+        return back()->with(in_array($result['status'],['accepted','already'],true)?'success':'error',$message);
     }
 
     public function importXml(Request $request,IncomingNfeSyncService $sync)
