@@ -535,12 +535,12 @@ $origins=[
     <section class="editor-tab-panel" data-tab-panel="nfe-other" hidden>
       <div class="editor-panel">
         <div class="delivery-card-title">
-          <div><h3>NF-e referenciadas</h3></div>
-          <button type="button" class="btn btn-secondary" data-nfe-modal-open="nfeReferenceDialog">@include('partials.icon',['name'=>'plus','size'=>15]) Referenciar NF-e</button>
+          <div><h3>Documentos referenciados</h3></div>
+          <button type="button" class="btn btn-secondary" data-nfe-modal-open="nfeReferenceDialog">@include('partials.icon',['name'=>'plus','size'=>15]) Referenciar documento</button>
         </div>
         <div class="table-scroll">
           <table class="cms-table">
-            <thead><tr><th>Chave de acesso</th><th class="action-cell"></th></tr></thead>
+            <thead><tr><th>Tipo</th><th>Chave de acesso</th><th class="action-cell"></th></tr></thead>
             <tbody id="nfeReferenceBody"></tbody>
           </table>
         </div>
@@ -838,11 +838,17 @@ $origins=[
 <div class="nextor-modal-layer nfe-modal-layer" id="nfeReferenceDialog" data-nfe-modal aria-hidden="true" hidden>
   <div class="erp-dialog small-dialog nextor-modal-window nfe-small-modal-window" role="dialog" aria-modal="true" aria-labelledby="nfeReferenceTitle">
   <div class="dialog-header">
-    <div><h2 id="nfeReferenceTitle">Referenciar NF-e</h2></div>
+    <div><h2 id="nfeReferenceTitle">Referenciar documento</h2></div>
     <button type="button" data-nfe-modal-close class="close-dialog">@include('partials.icon',['name'=>'x'])</button>
   </div>
   <div class="dialog-body">
-    <label class="field"><span>Chave de acesso</span><input id="nfeReferenceKey" maxlength="44"></label>
+    <label class="field"><span>Tipo de documento</span>
+      <select id="nfeReferenceType">
+        <option value="NFE">NF-e (modelo 55/65)</option>
+        <option value="CTE">CT-e (modelo 57)</option>
+      </select>
+    </label>
+    <label class="field"><span>Chave de acesso</span><input id="nfeReferenceKey" maxlength="44" inputmode="numeric"></label>
   </div>
   <div class="dialog-footer">
     <button type="button" data-nfe-modal-close class="btn btn-secondary">Cancelar</button>
