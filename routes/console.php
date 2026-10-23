@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Artisan;
 
 
 Schedule::command('finance:generate-recurring')->dailyAt('00:10')->withoutOverlapping();
+// One scheduler per isolated company installation; service enforces SEFAZ intervals.
+Schedule::command('fiscal:sync-incoming-nfe')->everyFifteenMinutes()->withoutOverlapping();
 
 Schedule::command('nextor:webhooks --limit=25')->everyMinute()->withoutOverlapping();
 
