@@ -34,6 +34,7 @@ class SettingsController extends Controller
         'services'=>'Serviços',
         'customers'=>'Clientes',
         'sales'=>'Vendas',
+        'purchases'=>'Compras',
         'returns'=>'Devoluções',
         'stock'=>'Estoque',
         'pdv'=>'PDV',
