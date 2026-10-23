@@ -217,6 +217,8 @@ class NfeDraftController extends Controller
             ->orderBy('name')
             ->get();
 
+        $carriers=Customer::query()->where('is_carrier',true)->orderBy('name')->get();
+
         $natures=OperationNature::query()
             ->where('is_active',true)
             ->orderBy('name')
@@ -291,6 +293,7 @@ class NfeDraftController extends Controller
             'draft'=>$draft,
             'company'=>$company,
             'customers'=>$customers,
+            'carriers'=>$carriers,
             'products'=>$products,
             'natures'=>$natures,
             'productData'=>$productData,
@@ -341,7 +344,7 @@ class NfeDraftController extends Controller
 
             'freight_mode'=>['required',Rule::in(['0','1','2','3','4','9'])],
             'freight_value'=>['nullable','numeric','min:0'],
-            'carrier_id'=>['nullable','integer','exists:customers,id'],
+            'carrier_id'=>['nullable','integer',Rule::exists('customers','id')->where('is_carrier',true)],
             'vehicle_plate'=>['nullable','string','max:12'],
             'vehicle_state'=>['nullable','string','size:2'],
             'volume_quantity'=>['nullable','numeric','min:0'],

@@ -15,7 +15,7 @@ class QuickCatalogController extends Controller
     /** Never silently create a name just because a search returned no results. */
     public function search(Request $request,string $kind): JsonResponse
     {
-        abort_unless(in_array($kind,['products','customers','suppliers'],true),404);
+        abort_unless(in_array($kind,['products','customers','suppliers','carriers'],true),404);
         $query=trim((string)$request->query('q',''));
         $query=mb_substr($query,0,100);
         if($kind==='products'){
@@ -25,7 +25,7 @@ class QuickCatalogController extends Controller
                 ->orderBy('name')->limit(25)->get();
             return response()->json(['items'=>$result->map(fn($p)=>$this->productData($p))->values()]);
         }
-        $result=Customer::query()->where($kind==='suppliers'?'is_supplier':'is_customer',true)
+        $result=Customer::query()->where($kind==='suppliers'?'is_supplier':($kind==='carriers'?'is_carrier':'is_customer'),true)
             ->when($query!=='',fn($q)=>$q->where(fn($w)=>$w->where('name','like',"%{$query}%")
                 ->orWhere('document','like',"%{$query}%")->orWhere('trade_name','like',"%{$query}%")))
             ->orderBy('name')->limit(25)->get();
@@ -34,7 +34,7 @@ class QuickCatalogController extends Controller
 
     public function store(Request $request,string $kind): JsonResponse
     {
-        abort_unless(in_array($kind,['products','customers','suppliers'],true),404);
+        abort_unless(in_array($kind,['products','customers','suppliers','carriers'],true),404);
         if($kind==='products'){
             $this->allowCreate($request,'products');
             $data=$request->validate([
@@ -91,7 +91,7 @@ class QuickCatalogController extends Controller
             'country_code'=>'1058','country_name'=>'BRASIL',
             'is_supplier'=>$kind==='suppliers',
             'is_customer'=>$kind==='customers',
-            'is_carrier'=>false,'final_consumer'=>false,
+            'is_carrier'=>$kind==='carriers','final_consumer'=>false,
         ],$data));
         return response()->json(['item'=>$this->customerData($item),'message'=>'Cadastro salvo.'],201);
     }

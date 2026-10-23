@@ -8,8 +8,8 @@ document.addEventListener('DOMContentLoaded',()=>{
   const newButton=el('erpCatalogNew'),newLabel=el('erpCatalogNewLabel');
   const fields=el('erpCatalogFields'),error=el('erpCatalogError');
   const save=el('erpCatalogSave');
-  const singular={products:'produto',customers:'cliente',suppliers:'fornecedor'};
-  const labels={products:'Produtos',customers:'Clientes',suppliers:'Fornecedores'};
+  const singular={products:'produto',customers:'cliente',suppliers:'fornecedor',carriers:'transportadora'};
+  const labels={products:'Produtos',customers:'Clientes',suppliers:'Fornecedores',carriers:'Transportadoras'};
   let kind='products',onSelect=null,returnFocus=null,abortController=null,sequence=0;
   let searchTimer=null,localItems=[],selectedQuery='',isCreating=false,createDefaults={};
   const canCreate=type=>dialog.dataset[type==='products'?'catalogProducts':'catalogCustomers']==='1';

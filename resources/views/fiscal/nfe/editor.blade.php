@@ -398,9 +398,9 @@ $origins=[
           </label>
 
           <label class="field col-6"><span>Transportador</span>
-            <select name="carrier_id">
+            <select name="carrier_id" data-quick-create="carriers">
               <option value="">Não informado</option>
-              @foreach($customers->where('is_carrier',true) as $carrier)
+              @foreach($carriers as $carrier)
                 <option value="{{ $carrier->id }}" @selected(old('carrier_id',data_get($transport,'carrier_id'))==$carrier->id)>
                   {{ $carrier->name }}{{ $carrier->document ? ' — '.$carrier->document : '' }}
                 </option>
