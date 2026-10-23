@@ -46,9 +46,9 @@ final class RecipientManifestationDoctorTest extends TestCase
             public function diagnose(CompanySetting $company,string $cnpj,string $key,string $event): void
             {
                 $this->preflights++;
-                self::assertSame('12345678000199',$cnpj);
-                self::assertSame('210210',$event);
-                self::assertSame('29261099887766000122550010000001231000001234',$key);
+                \PHPUnit\Framework\Assert::assertSame('12345678000199',$cnpj);
+                \PHPUnit\Framework\Assert::assertSame('210210',$event);
+                \PHPUnit\Framework\Assert::assertSame('29261099887766000122550010000001231000001234',$key);
             }
             public function send(CompanySetting $company,string $cnpj,string $key,string $event,?string $reason): string
             {
