@@ -27,6 +27,7 @@ use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SaleReturnController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\StockController;
+use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\SettingsController;
 use Illuminate\Support\Facades\Route;
 
@@ -98,6 +99,14 @@ Route::middleware(['auth','control.license'])->group(function () {
     Route::put('/customers/{customer}',[CustomerController::class,'update'])->name('customers.update')->middleware('permission:customers');
     Route::post('/customers/bulk-duplicate',[CustomerController::class,'bulkDuplicate'])->name('customers.bulk-duplicate')->middleware('permission:customers');
     Route::delete('/customers/bulk-delete',[CustomerController::class,'bulkDelete'])->name('customers.bulk-delete')->middleware('permission:customers');
+    Route::get('/purchases',[PurchaseController::class,'index'])->name('purchases.index')->middleware('permission:purchases');
+    Route::get('/purchases/create',[PurchaseController::class,'create'])->name('purchases.create')->middleware(['permission:purchases','company.configured']);
+    Route::post('/purchases',[PurchaseController::class,'store'])->name('purchases.store')->middleware(['permission:purchases','company.configured']);
+    Route::get('/purchases/{purchase}',[PurchaseController::class,'show'])->name('purchases.show')->middleware('permission:purchases');
+    Route::get('/purchases/{purchase}/edit',[PurchaseController::class,'edit'])->name('purchases.edit')->middleware(['permission:purchases','company.configured']);
+    Route::put('/purchases/{purchase}',[PurchaseController::class,'update'])->name('purchases.update')->middleware(['permission:purchases','company.configured']);
+    Route::post('/purchases/{purchase}/receive',[PurchaseController::class,'receive'])->name('purchases.receive')->middleware(['permission:purchases','company.configured','throttle:10,1']);
+    Route::post('/purchases/{purchase}/cancel',[PurchaseController::class,'cancel'])->name('purchases.cancel')->middleware(['permission:purchases','company.configured','throttle:10,1']);
     Route::get('/stock',[StockController::class,'index'])->name('stock.index')->middleware('permission:stock');
     Route::post('/stock',[StockController::class,'store'])->name('stock.store')->middleware('permission:stock');
     Route::get('/pdv',[PdvController::class,'index'])->name('pdv.index')->middleware(['permission:pdv','company.configured']);
