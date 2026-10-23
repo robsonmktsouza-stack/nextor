@@ -8,14 +8,14 @@
     <div class="purchase-section-heading"><h2>Dados da compra</h2></div>
     <div class="purchase-head-grid">
       <label class="field purchase-col-5"><span>Fornecedor *</span>
-        <select name="supplier_id" required autofocus>
+        <select name="supplier_id" data-quick-create="suppliers" required autofocus>
           <option value="">Selecione um fornecedor</option>
           @foreach($suppliers as $supplier)
             <option value="{{ $supplier->id }}" @selected((int)old('supplier_id',$purchase->supplier_id)===$supplier->id)>{{ $supplier->name }}{{ $supplier->document?' — '.$supplier->document:'' }}</option>
           @endforeach
         </select>
       </label>
-      <div class="field purchase-col-2 purchase-supplier-link"><span>Cadastro</span><a class="btn btn-secondary" href="{{ route('customers.create') }}">@include('partials.icon',['name'=>'plus','size'=>15]) Novo fornecedor</a></div>
+      <div class="field purchase-col-2 purchase-supplier-link"><span>Cadastro</span><button type="button" class="btn btn-secondary" data-quick-supplier>@include('partials.icon',['name'=>'plus','size'=>15]) Novo fornecedor</button></div>
       <label class="field purchase-col-2"><span>Data da compra *</span><input type="date" name="operation_date" value="{{ old('operation_date',$purchase->operation_date?->format('Y-m-d')) }}" required></label>
       <label class="field purchase-col-3"><span>Número da nota / pedido</span><input name="document_number" maxlength="80" placeholder="Nº do documento" value="{{ old('document_number',$purchase->document_number) }}"></label>
 

@@ -8,6 +8,12 @@ document.addEventListener('DOMContentLoaded',()=>{
   const products=readJson('purchaseProductsJson');
   const oldItems=readJson('purchaseItemsJson');
   const productMap=new Map(products.map(product=>[String(product.id),product]));
+  document.addEventListener('lumeron:catalog-created',event=>{
+    const {kind,item}=event.detail||{};
+    if(kind!=='products'||!item)return;
+    if(!productMap.has(String(item.id)))products.push(item);
+    productMap.set(String(item.id),item);
+  });
   const currency=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'});
   const display=cents=>currency.format(cents/100);
 
@@ -57,7 +63,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     line.innerHTML=
       '<div class="purchase-item-primary">'+
         '<label class="purchase-line-field purchase-product-field"><span>Produto *</span>'+
-          '<select required name="items['+index+'][product_id]" data-product><option value="">Selecione um produto</option></select></label>'+
+          '<select required name="items['+index+'][product_id]" data-quick-create="products" data-product><option value="">Selecione um produto</option></select></label>'+
         '<label class="purchase-line-field"><span>Quantidade *</span>'+
           '<input type="number" name="items['+index+'][quantity]" min="0.001" step="0.001" required data-qty value="1"></label>'+
         '<label class="purchase-line-field"><span>Custo unitário *</span>'+
@@ -116,7 +122,35 @@ document.addEventListener('DOMContentLoaded',()=>{
     return {total,subtotal,quantity:qtyTotal};
   }
 
-  form.querySelector('[data-purchase-add]').addEventListener('click',()=>addItem());
+  form.querySelector('[data-purchase-add]').addEventListener('click',()=>{
+    window.LumeronCatalog?.pick('products',{
+      items:products,
+      onSelect:product=>{
+        if(!productMap.has(String(product.id)))products.push(product);
+        productMap.set(String(product.id),product);
+        const existing=[...container.querySelectorAll('[data-purchase-item]')]
+          .find(line=>line.querySelector('[data-product]')?.value===String(product.id));
+        if(existing){
+          const qty=existing.querySelector('[data-qty]');
+          qty.value=String((decimal(qty.value)||0)+1);
+          calculate();
+          qty.focus();return;
+        }
+        addItem({product_id:product.id,quantity:'1',unit_cost:product.cost_price});
+      }
+    });
+  });
+  form.querySelector('[data-quick-supplier]')?.addEventListener('click',()=>{
+    window.LumeronCatalog?.create('suppliers',{
+      onSelect:supplier=>{
+        const select=form.querySelector('select[name="supplier_id"]');
+        if(!select)return;
+        select.add(new Option(supplier.name+(supplier.document?' — '+supplier.document:''),supplier.id,false,true));
+        select.value=String(supplier.id);
+        select.dispatchEvent(new Event('change',{bubbles:true}));
+      }
+    });
+  });
   container.addEventListener('input',()=>requestAnimationFrame(calculate));
   container.addEventListener('change',()=>requestAnimationFrame(calculate));
   form.querySelectorAll('[data-purchase-extra]').forEach(node=>{
@@ -132,7 +166,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   // Delegação especial para inputs monetários aprimorados pelo erp.js.
   // Os campos ficam nomeados no hidden; o input visível continua atualizando o resumo.
   if(oldItems.length)oldItems.forEach(addItem);
-  else addItem();
   requestAnimationFrame(calculate);
 
   form.addEventListener('submit',event=>{
