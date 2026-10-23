@@ -533,7 +533,19 @@ class NfeDraftController extends Controller
             $dimensionQuantity=max(0,(float)($item['dimension_quantity'] ?? 1));
             if($dimensionQuantity<=0) $dimensionQuantity=1;
             $unitPrice=max(0,(float)($item['unit_price'] ?? 0));
-            $lineTotal=max(0,$quantity*$dimensionQuantity*$unitPrice);
+            $parts=[];
+            foreach(['freight','insurance','other_expenses','discount'] as $part){
+                $value=$item[$part]??0;
+                if(!is_numeric($value)||(float)$value<0||(float)$value>99999999){
+                    throw ValidationException::withMessages(['items_json'=>'Confira os valores adicionais dos itens da NF-e.']);
+                }
+                $parts[$part]=round((float)$value,2);
+            }
+            $gross=round($quantity*$dimensionQuantity*$unitPrice,2);
+            if($parts['discount']>$gross+$parts['freight']+$parts['insurance']+$parts['other_expenses']){
+                throw ValidationException::withMessages(['items_json'=>'O desconto do item supera seu valor.']);
+            }
+            $lineTotal=max(0,$gross+$parts['freight']+$parts['insurance']+$parts['other_expenses']-$parts['discount']);
 
             $taxData=array_replace(
                 is_array($product?->tax_defaults) ? $product->tax_defaults : [],
@@ -558,10 +570,10 @@ class NfeDraftController extends Controller
                 'quantity'=>$quantity,
                 'dimension_quantity'=>$dimensionQuantity,
                 'unit_price'=>$unitPrice,
-                'freight'=>0,
-                'insurance'=>0,
-                'other_expenses'=>0,
-                'discount'=>0,
+                'freight'=>$parts['freight'],
+                'insurance'=>$parts['insurance'],
+                'other_expenses'=>$parts['other_expenses'],
+                'discount'=>$parts['discount'],
                 'line_total'=>$lineTotal,
                 'cfop'=>$cfop ?: null,
                 'origin'=>$item['origin'] ?? $taxData['origin'] ?? $product?->origin,
@@ -584,6 +596,10 @@ class NfeDraftController extends Controller
             'quantity'=>(float)$item->quantity,
             'dimension_quantity'=>(float)$item->dimension_quantity,
             'unit_price'=>(float)$item->unit_price,
+            'freight'=>(float)$item->freight,
+            'insurance'=>(float)$item->insurance,
+            'other_expenses'=>(float)$item->other_expenses,
+            'discount'=>(float)$item->discount,
             'tax_data'=>$item->tax_data ?? [],
         ])->all();
 
@@ -654,6 +670,8 @@ class NfeDraftController extends Controller
         $totals=[
             'products'=>0.0,
             'freight'=>max(0,$freight),
+            'insurance'=>0.0,
+            'other_expenses'=>0.0,
             'discount'=>max(0,$discount),
             'surcharge'=>max(0,$surcharge),
             'ipi'=>0.0,
@@ -666,6 +684,10 @@ class NfeDraftController extends Controller
             if($dimension<=0) $dimension=1;
             $value=$quantity*$dimension*max(0,(float)($item['unit_price'] ?? 0));
             $totals['products']+=$value;
+            foreach(['freight','insurance','other_expenses'] as $field){
+                $totals[$field]+=max(0,(float)($item[$field]??0));
+            }
+            $totals['discount']+=max(0,(float)($item['discount']??0));
 
             $tax=is_array($item['tax_data'] ?? null) ? $item['tax_data'] : [];
             $ipiRate=max(0,(float)($tax['ipi_rate'] ?? 0));
@@ -674,7 +696,8 @@ class NfeDraftController extends Controller
 
         $totals['total']=max(
             0,
-            $totals['products']+$totals['freight']+$totals['surcharge']+$totals['ipi']-$totals['discount']
+            $totals['products']+$totals['freight']+$totals['insurance']+$totals['other_expenses']
+                +$totals['surcharge']+$totals['ipi']-$totals['discount']
         );
 
         return array_map(fn($value)=>round($value,2),$totals);
