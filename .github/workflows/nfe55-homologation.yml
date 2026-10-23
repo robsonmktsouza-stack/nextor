@@ -13,6 +13,7 @@ on:
       - 'database/migrations/2026_10_23_000007_add_nfe55_cancellation_fields.php'
       - 'resources/views/fiscal/nfe/**'
       - 'public/js/nfe-editor.js'
+      - 'scripts/fiscal/Instalar-ACBrLibNFe-Windows.ps1'
       - 'routes/web.php'
       - 'tests/Feature/Nfe55EmissionFoundationTest.php'
       - 'tests/Feature/Nfe55DanfeTest.php'
@@ -37,5 +38,15 @@ jobs:
       - run: composer install --no-interaction --prefer-dist --no-progress
       - run: cp .env.example .env && php artisan key:generate
       - run: php -l app/Services/Fiscal/Nfe55IniBuilder.php && php -l app/Services/Fiscal/Nfe55EmissionService.php && php -l app/Services/Fiscal/Nfe55CancellationService.php && php -l app/Services/Fiscal/Nfe55DanfeService.php && php -l app/Jobs/ProcessNfe55Job.php && php -l app/Jobs/ProcessNfe55CancellationJob.php && php -l app/Http/Controllers/Nfe55EmissionController.php && php artisan view:cache && node --check public/js/nfe-editor.js
+      - name: Validar sintaxe do instalador ACBr Windows
+        shell: pwsh
+        run: |
+          $tokens=$null
+          $errors=$null
+          [System.Management.Automation.Language.Parser]::ParseFile('scripts/fiscal/Instalar-ACBrLibNFe-Windows.ps1',[ref]$tokens,[ref]$errors) | Out-Null
+          if ($errors.Count -gt 0) {
+            foreach ($erro in $errors) { Write-Error $erro.Message }
+            exit 1
+          }
       - run: php artisan route:list --path=fiscal/nfe/drafts
       - run: php -d memory_limit=1024M vendor/bin/phpunit --filter='Nfe55EmissionFoundationTest|Nfe55DanfeTest|NfeEditorTest|NfeFormCompletenessTest|Nfe55CancellationTest' --display-errors --display-warnings
