@@ -887,18 +887,25 @@ class NfeDraftController extends Controller
     {
         $references=$this->decodeArray($json,'documentos referenciados');
 
+        $normalized=[];$seen=[];
         foreach($references as $reference) {
-            $key=preg_replace('/\D/','',(string)($reference['key'] ?? ''));
-            if(strlen($key)!==44) {
+            if(!is_array($reference)){
+                throw ValidationException::withMessages(['references_json'=>'Documento referenciado inválido.']);
+            }
+            $type=strtoupper(trim((string)($reference['type']??'NFE')));
+            $key=preg_replace('/\D/','',(string)($reference['key']??''));
+            if(!in_array($type,['NFE','CTE'],true)||strlen($key)!==44){
                 throw ValidationException::withMessages([
-                    'references_json'=>'Toda NF-e referenciada deve possuir chave de acesso com 44 dígitos.',
+                    'references_json'=>'Informe uma chave de 44 dígitos de NF-e ou CT-e.',
                 ]);
             }
+            if(isset($seen[$type.':'.$key])){
+                throw ValidationException::withMessages(['references_json'=>'Este documento já foi referenciado.']);
+            }
+            $seen[$type.':'.$key]=true;
+            $normalized[]=['type'=>$type,'key'=>$key];
         }
-
-        return array_values(array_map(fn($reference)=>[
-            'key'=>preg_replace('/\D/','',(string)($reference['key'] ?? '')),
-        ],$references));
+        return $normalized;
     }
 
     private function decodeArray(?string $json,string $label): array
