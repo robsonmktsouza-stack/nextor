@@ -23,6 +23,10 @@ $existingItems=old('items_json')
       'quantity'=>(float)$item->quantity,
       'dimension_quantity'=>(float)($item->dimension_quantity ?? 1),
       'unit_price'=>(float)$item->unit_price,
+      'freight'=>(float)$item->freight,
+      'insurance'=>(float)$item->insurance,
+      'other_expenses'=>(float)$item->other_expenses,
+      'discount'=>(float)$item->discount,
       'cfop'=>$item->cfop,
       'origin'=>$item->origin,
       'ean_gtin'=>$item->ean_gtin,
@@ -368,6 +372,8 @@ $origins=[
         <div class="editor-grid cols-12">
           <div class="field col-2"><span>Produtos</span><div class="readonly-field" id="nfeTotalProducts">R$ 0,00</div></div>
           <div class="field col-2"><span>Frete</span><div class="readonly-field" id="nfeTotalFreight">R$ 0,00</div></div>
+          <div class="field col-2"><span>Seguro</span><div class="readonly-field" id="nfeTotalInsurance">R$ 0,00</div></div>
+          <div class="field col-2"><span>Despesas dos itens</span><div class="readonly-field" id="nfeTotalOtherExpenses">R$ 0,00</div></div>
           <div class="field col-2"><span>IPI estimado</span><div class="readonly-field" id="nfeTotalIpi">R$ 0,00</div></div>
           <div class="field col-2"><span>Desconto</span><div class="readonly-field" id="nfeTotalDiscount">R$ 0,00</div></div>
           <div class="field col-2"><span>Acréscimo</span><div class="readonly-field" id="nfeTotalSurcharge">R$ 0,00</div></div>
@@ -617,7 +623,11 @@ $origins=[
           <label class="field col-2"><span>Quantidade *</span><input id="nfeItemQuantity" type="number" step="0.0001" min="0.0001" value="1"></label>
           <label class="field col-2"><span>Fator / dimensão</span><input id="nfeItemDimensionQuantity" type="number" step="0.0001" min="0.0001" value="1"></label>
           <label class="field col-2"><span>Valor unitário *</span><input id="nfeItemUnitPrice" type="number" step="0.0001" min="0"></label>
-          <div class="field col-2"><span>Subtotal</span><div class="readonly-field" id="nfeItemSubtotal">R$ 0,00</div></div>
+          <div class="field col-2"><span>Total do item</span><div class="readonly-field" id="nfeItemSubtotal">R$ 0,00</div></div>
+          <label class="field col-3"><span>Frete do item</span><input id="nfeItemFreight" type="number" step="0.01" min="0" value="0"></label>
+          <label class="field col-3"><span>Seguro</span><input id="nfeItemInsurance" type="number" step="0.01" min="0" value="0"></label>
+          <label class="field col-3"><span>Outras despesas</span><input id="nfeItemOtherExpenses" type="number" step="0.01" min="0" value="0"></label>
+          <label class="field col-3"><span>Desconto do item</span><input id="nfeItemDiscount" type="number" step="0.01" min="0" value="0"></label>
           <label class="field col-3"><span>Descrição do pedido (xPed)</span><input id="nfeItemPurchaseOrder"></label>
           <label class="field col-1"><span>Item</span><input id="nfeItemPurchaseOrderItem"></label>
           <label class="field col-12"><span>Observação do item</span><input id="nfeItemNotes"></label>
