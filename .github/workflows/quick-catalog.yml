@@ -16,6 +16,7 @@ on:
       - 'public/js/purchases.js'
       - 'public/css/quick-catalog.css'
       - 'tests/Feature/QuickCatalogTest.php'
+      - 'tests/browser/quick-catalog-modal.html'
       - '.github/workflows/quick-catalog.yml'
   workflow_dispatch:
 jobs:
@@ -37,3 +38,15 @@ jobs:
       - run: php artisan view:cache && php artisan route:list --path=quick-catalog
       - run: php -l app/Http/Controllers/QuickCatalogController.php && node --check public/js/quick-catalog.js && node --check public/js/erp.js && node --check public/js/nfe-editor.js && node --check public/js/nfce-editor.js && node --check public/js/purchases.js
       - run: php -d memory_limit=1024M vendor/bin/phpunit --filter=QuickCatalogTest --display-errors --display-warnings
+      - name: Exercitar modal em Chromium
+        run: |
+          BROWSER="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          if [ -z "$BROWSER" ]; then
+            echo "Chromium não encontrado: teste visual não executado."
+          else
+            "$BROWSER" --headless=new --no-sandbox --disable-gpu --no-first-run --disable-background-networking               --allow-file-access-from-files --window-size=1100,800 --virtual-time-budget=2200               --dump-dom "file://$PWD/tests/browser/quick-catalog-modal.html" > /tmp/quick-catalog-browser.html
+            grep -q 'data-quick-catalog-test="passed"' /tmp/quick-catalog-browser.html || {
+              grep -A1 -B1 'id="testResult"' /tmp/quick-catalog-browser.html || true
+              exit 1
+            }
+          fi
