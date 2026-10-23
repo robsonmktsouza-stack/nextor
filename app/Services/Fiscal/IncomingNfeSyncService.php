@@ -147,7 +147,12 @@ final class IncomingNfeSyncService
                 'last_error'=>'Não foi possível concluir a busca. Confira o certificado e a conexão fiscal.',
                 'next_check_at'=>now()->addMinutes(65),
             ]);
-            report($error);
+            // No raw exception message: native ACBr errors may echo INI values
+            // including the private certificate configuration.
+            \Illuminate\Support\Facades\Log::warning('Falha na consulta de NF-e recebidas',[
+                'kind'=>get_class($error),
+                'company_suffix'=>substr($state->cnpj,-4),
+            ]);
             return ['status'=>'error','imported'=>0];
         } finally {
             $lock->release();
