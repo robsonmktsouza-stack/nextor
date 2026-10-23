@@ -222,7 +222,13 @@ final class ACBrNFeService
      */
     public function validateBusinessRules(): void
     {
-        $findings=trim($this->response('NFE_ValidarRegrasdeNegocios'));
+        self::assertBusinessRulesClear($this->response('NFE_ValidarRegrasdeNegocios'));
+    }
+
+    /** Pure guard used in tests without loading a Windows DLL on CI Linux. */
+    public static function assertBusinessRulesClear(string $response): void
+    {
+        $findings=trim($response);
         if($findings!=='' && preg_match('/^(?:ok|sem\\s+(?:erros|inconsist[eê]ncias))\\.?$/iu',$findings)!==1){
             throw new RuntimeException('ACBr apontou regras fiscais pendentes: '.mb_substr($findings,0,1000));
         }
