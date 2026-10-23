@@ -19,6 +19,8 @@ class NfeDraft extends Model
         'series','document_number','environment','emitter_snapshot','recipient_snapshot',
         'delivery_snapshot','transport_data','invoice_data','duplicates','payments','references',
         'custom_fields','totals','additional_info','tax_authority_info','validated_at',
+        'access_key','protocol','numeric_code','xml_path','response_path','error_message',
+        'transmission_attempted_at','processed_at','authorized_at',
     ];
 
     protected function casts(): array
@@ -48,6 +50,7 @@ class NfeDraft extends Model
             'custom_fields'=>'array',
             'totals'=>'array',
             'validated_at'=>'datetime',
+            'transmission_attempted_at'=>'datetime','processed_at'=>'datetime','authorized_at'=>'datetime',
         ];
     }
 
