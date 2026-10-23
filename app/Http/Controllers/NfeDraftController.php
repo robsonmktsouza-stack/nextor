@@ -486,9 +486,9 @@ class NfeDraftController extends Controller
             ],
             'invoice_data'=>[
                 'number'=>null,
-                'original_value'=>round($totals['products']+$surcharge,2),
-                'discount'=>$discount,
-                'net_value'=>round($totals['products']-$discount+$surcharge,2),
+                'original_value'=>round($totals['total']+$totals['discount'],2),
+                'discount'=>$totals['discount'],
+                'net_value'=>$totals['total'],
             ],
             'duplicates'=>$this->decodeArray($data['duplicates_json'] ?? null,'duplicatas'),
             'payments'=>$payments,
@@ -610,9 +610,9 @@ class NfeDraftController extends Controller
             'totals'=>$totals,
             'invoice_data'=>[
                 'number'=>null,
-                'original_value'=>round($totals['products']+(float)$draft->surcharge,2),
-                'discount'=>(float)$draft->discount,
-                'net_value'=>round($totals['products']-(float)$draft->discount+(float)$draft->surcharge,2),
+                'original_value'=>round($totals['total']+$totals['discount'],2),
+                'discount'=>$totals['discount'],
+                'net_value'=>$totals['total'],
             ],
         ]);
     }

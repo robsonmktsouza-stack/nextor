@@ -57,7 +57,8 @@ final class Nfe55EmissionFoundationTest extends TestCase
                 'district','zip_code','ie_indicator',
             ]),
             'totals'=>['products'=>100,'total'=>100],
-            'payment_type'=>'01','discount'=>0,'surcharge'=>0,
+            'payment_type'=>'01','payments'=>[['type'=>'01','amount'=>100,'condition'=>'a_vista']],
+            'discount'=>0,'surcharge'=>0,
             'transport_data'=>['freight_value'=>0],
             'validated_at'=>now(),
         ]);

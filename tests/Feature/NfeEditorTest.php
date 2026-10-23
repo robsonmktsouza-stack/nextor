@@ -405,8 +405,8 @@ class NfeEditorTest extends TestCase
         $this->assertEquals(300.0,(float)data_get($draft->totals,'products'));
         $this->assertEquals(30.0,(float)data_get($draft->totals,'ipi'));
         $this->assertEquals(330.0,(float)data_get($draft->totals,'total'));
-        $this->assertEquals(290.0,(float)data_get($draft->invoice_data,'net_value'));
-        $this->assertEquals(290.0,(float)data_get($draft->payments,'0.amount'));
+        $this->assertEquals(330.0,(float)data_get($draft->invoice_data,'net_value'));
+        $this->assertEquals(330.0,(float)data_get($draft->payments,'0.amount'));
         $this->assertSame('Cliente Teste Ltda',data_get($draft->recipient_snapshot,'name'));
         $this->assertSame('2927408',data_get($draft->recipient_snapshot,'city_ibge_code'));
 
