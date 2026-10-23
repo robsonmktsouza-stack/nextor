@@ -476,7 +476,7 @@
     const type=getField('nfePaymentType');
     const cardPanel=byId('nfeCardPanel');
     const otherField=byId('nfeOtherPaymentField');
-    if(cardPanel) cardPanel.hidden=!['03','04','17'].includes(type);
+    if(cardPanel) cardPanel.hidden=!['03','04'].includes(type);
     if(otherField) otherField.hidden=type!=='99';
   };
   byId('nfePaymentType')?.addEventListener('change',updatePaymentVisibility);
