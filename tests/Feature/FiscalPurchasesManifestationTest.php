@@ -184,6 +184,131 @@ final class FiscalPurchasesManifestationTest extends TestCase
         $this->get(route('fiscal.purchases.show',$invoice))->assertOk()->assertSee('Sem manifesto');
     }
 
+
+    private function proofXml(string $event='210210',string $recipient='12345678000199'): string
+    {
+        $key=$this->key();
+        return '<procEventoNFe xmlns="http://www.portalfiscal.inf.br/nfe" versao="1.00">'.
+            '<evento><infEvento><CNPJ>'.$recipient.'</CNPJ><tpAmb>1</tpAmb>'.
+            '<chNFe>'.$key.'</chNFe><tpEvento>'.$event.'</tpEvento><nSeqEvento>1</nSeqEvento>'.
+            '</infEvento></evento>'.
+            '<retEvento><infEvento><tpAmb>1</tpAmb><cStat>135</cStat>'.
+            '<chNFe>'.$key.'</chNFe><tpEvento>'.$event.'</tpEvento>'.
+            '<nSeqEvento>1</nSeqEvento><nProt>129260000123456</nProt>'.
+            '</infEvento></retEvento></procEventoNFe>';
+    }
+
+    private function fakeConsult(string $response): object
+    {
+        $fake=new class($response) extends IncomingNfeManifestationGateway {
+            public int $reads=0;
+            public int $sends=0;
+            public function __construct(private string $response) {}
+            public function send(CompanySetting $company,string $cnpj,string $key,string $event,?string $reason): string
+            {
+                $this->sends++;
+                throw new RuntimeException('A conferência não pode transmitir eventos.');
+            }
+            public function consult(CompanySetting $company,string $cnpj,string $key): string
+            {
+                $this->reads++;
+                return $this->response;
+            }
+        };
+        app()->instance(IncomingNfeManifestationGateway::class,$fake);
+        return $fake;
+    }
+
+    public function test_explicit_sefaz_check_confirms_only_corresponding_event_proof_without_resending(): void
+    {
+        $this->ready();
+        $invoice=$this->invoice();
+        $invoice->manifestationAttempts()->create([
+            'event_code'=>'210210','status'=>'uncertain','user_id'=>null,
+        ]);
+        $fake=$this->fakeConsult("[CONSULTA]\ncStat=100\n[RESDFE001]\nXML=".$this->proofXml()."\n");
+        $this->actingAs($this->user())
+            ->post(route('fiscal.purchases.manifest.verify',$invoice))
+            ->assertRedirect()->assertSessionHas('success');
+        self::assertSame(1,$fake->reads);
+        self::assertSame(0,$fake->sends);
+        self::assertSame('210210',$invoice->fresh()->manifestation);
+        self::assertSame('129260000123456',$invoice->fresh()->manifestation_protocol);
+        $this->assertDatabaseHas('incoming_nfe_manifestation_attempts',[
+            'incoming_nfe_id'=>$invoice->id,'status'=>'accepted',
+            'sefaz_status'=>'135','protocol'=>'129260000123456',
+        ]);
+        $this->assertDatabaseCount('stock_movements',0);
+    }
+
+    public function test_nfe_authorization_is_not_proof_of_a_manifestation_and_respects_check_interval(): void
+    {
+        $this->ready();
+        $invoice=$this->invoice();
+        $invoice->manifestationAttempts()->create([
+            'event_code'=>'210210','status'=>'pending',
+        ]);
+        $fake=$this->fakeConsult("[CONSULTA]\nCStat=100\nNProt=129260000123456\n");
+        $this->actingAs($this->user())
+            ->post(route('fiscal.purchases.manifest.verify',$invoice))
+            ->assertSessionHas('warning');
+        $this->post(route('fiscal.purchases.manifest.verify',$invoice))
+            ->assertSessionHas('warning');
+        self::assertSame(1,$fake->reads);
+        self::assertSame(0,$fake->sends);
+        self::assertNull($invoice->fresh()->manifestation);
+        $this->assertDatabaseHas('incoming_nfe_manifestation_attempts',[
+            'incoming_nfe_id'=>$invoice->id,'status'=>'uncertain',
+        ]);
+    }
+
+    public function test_other_company_or_other_event_xml_never_unlocks_uncertain_manifestation(): void
+    {
+        $evidence=app(\App\Services\Fiscal\IncomingNfeManifestationEvidence::class);
+        foreach ([
+            $this->proofXml('210220'),
+            $this->proofXml('210210','11222333000100'),
+            str_replace('<cStat>135</cStat>','<cStat>136</cStat>',$this->proofXml()),
+            str_replace('<nProt>129260000123456</nProt>','<nProt></nProt>',$this->proofXml()),
+        ] as $xml) {
+            self::assertNull($evidence->consulted(
+                "[RESDFE001]\nXML=".$xml."\n",$this->key(),'210210','12345678000199'
+            ));
+        }
+    }
+
+    public function test_an_error_stage_is_reported_safely_without_exposing_native_details(): void
+    {
+        $this->ready();
+        $invoice=$this->invoice();
+        $fake=new class extends IncomingNfeManifestationGateway {
+            public function send(CompanySetting $company,string $cnpj,string $key,string $event,?string $reason): string
+            {
+                throw new RuntimeException('ACBr NFE_CarregarEventoINI falhou (-10): SenhaSenhaSecreta');
+            }
+        };
+        app()->instance(IncomingNfeManifestationGateway::class,$fake);
+        $this->actingAs($this->user())->post(route('fiscal.purchases.manifest',$invoice),[
+            'event_type'=>'210210',
+        ])->assertSessionHas('error');
+        $attempt=$invoice->manifestationAttempts()->firstOrFail();
+        self::assertSame('uncertain',$attempt->status);
+        self::assertStringContainsString('NFE_CarregarEventoINI',$attempt->response_message);
+        self::assertStringNotContainsString('SenhaSenhaSecreta',$attempt->response_message);
+    }
+
+    public function test_verification_requires_fiscal_permission(): void
+    {
+        $invoice=$this->invoice();
+        $user=User::query()->create([
+            'name'=>'Sem Fiscal Conferência','email'=>'no-verify@example.test',
+            'password'=>'SenhaSegura123','role'=>'operator',
+            'permissions'=>['pdv'],'is_active'=>true,
+        ]);
+        $this->actingAs($user)->post(route('fiscal.purchases.manifest.verify',$invoice))
+            ->assertForbidden();
+    }
+
     public function test_unprivileged_users_cannot_send_recipient_events(): void
     {
         $invoice=$this->invoice();
