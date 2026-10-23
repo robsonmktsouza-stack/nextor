@@ -64,6 +64,7 @@ final class ACBrNFeService
             int NFE_SalvarPDF(void *libHandle, char *sResposta, int *esTamanho);
             int NFE_Assinar(void *libHandle);
             int NFE_Validar(void *libHandle);
+            int NFE_ValidarRegrasdeNegocios(void *libHandle, char *sResposta, int *esTamanho);
             int NFE_ObterXml(void *libHandle, int AIndex, char *sResposta, int *esTamanho);
             int NFE_Enviar(void *libHandle, int ALote, _Bool AImprimir, _Bool ASincrono, _Bool AZipado, char *sResposta, int *esTamanho);
             int NFE_Consultar(void *libHandle, const char *eChaveOuNFe, _Bool AExtrairEventos, char *sResposta, int *esTamanho);
@@ -213,6 +214,18 @@ final class ACBrNFeService
     public function validateXml(): void
     {
         $this->execute('NFE_Validar');
+    }
+
+    /**
+     * Local ACBr business-rule preflight. A native return code of zero does not
+     * prove there were no fiscal findings in the returned text.
+     */
+    public function validateBusinessRules(): void
+    {
+        $findings=trim($this->response('NFE_ValidarRegrasdeNegocios'));
+        if($findings!=='' && preg_match('/^(?:ok|sem\\s+(?:erros|inconsist[eê]ncias))\\.?$/iu',$findings)!==1){
+            throw new RuntimeException('ACBr apontou regras fiscais pendentes: '.mb_substr($findings,0,1000));
+        }
     }
 
     public function getXml(): string
