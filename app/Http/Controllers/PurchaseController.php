@@ -30,8 +30,8 @@ class PurchaseController extends Controller
             ->when($status,fn($q)=>$q->where('status',$status))
             ->when($supplierId,fn($q)=>$q->where('supplier_id',$supplierId))
             ->when($term,fn($q)=>$q->where(function($filter)use($term){
-                $filter->orWhere('keyword','like',"%{$term}%")
-                $filter->where('document_number','like',"%{$term}%")
+                $filter->where('keyword','like',"%{$term}%")
+                    ->orWhere('document_number','like',"%{$term}%")
                     ->orWhere('id','like',"%{$term}%")
                     ->orWhereHas('supplier',fn($s)=>$s->where('name','like',"%{$term}%")
                         ->orWhere('document','like',"%{$term}%"));
