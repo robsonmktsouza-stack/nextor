@@ -269,6 +269,15 @@ final class ACBrNFeService
             throw new RuntimeException("Retorno {$method} excedeu 1 MB; resultado indeterminado. Consulte a SEFAZ antes de qualquer nova tentativa.");
         }
         if ($status !== 0) {
+            // Alguns builds retornam -10 mas ainda disponibilizam o cStat individual.
+            // Nunca repetir o evento nem aceitar cStat=135 com erro nativo.
+            if ($method === 'NFE_EnviarEvento') {
+                $candidate=FFI::string($buffer);
+                if ($this->hasIndividualRejection($candidate)) return $candidate;
+                $last=$this->lastReturn();
+                if ($this->hasIndividualRejection($last)) return $last;
+                throw new RuntimeException("ACBr {$method} falhou ({$status}): ".$last);
+            }
             throw new RuntimeException("ACBr {$method} falhou ({$status}); o evento pode ter sido recebido. ".$this->lastReturn());
         }
         return FFI::string($buffer);
