@@ -295,18 +295,43 @@ final class ACBrNFeService
         return !in_array($match[1], ['135','136','573'],true);
     }
 
-    /** Evento da manifestação: carregar, assinar e transmitir apenas uma vez. */
-    public function sendRecipientEvent(string $eventIni): string
+    /**
+     * A DLL aceita caminho ou conteúdo do INI. Para evitar ambiguidades no
+     * parser da biblioteca nativa, gravamos um arquivo real, sem BOM, privado
+     * e exclusivo para esta instância. A carga NÃO envia evento à SEFAZ.
+     */
+    public function prepareRecipientEvent(string $eventIni): void
     {
-        if (!str_starts_with($eventIni,"[EVENTO]\n")) {
-            throw new RuntimeException('INI de evento inválido.');
+        if (!str_starts_with($eventIni,"[EVENTO]\n")
+            || strlen($eventIni)>8192 || str_contains($eventIni,"\r")
+            || !str_contains($eventIni,"[EVENTO001]\n")) {
+            throw new RecipientEventPreparationException('INI de manifestação inválido.');
         }
+        $this->initialize();
+        $folder=dirname($this->configPath ?: (string)config('services.acbr_nfe.config_path',''));
+        if (!is_dir($folder) || !is_writable($folder)) {
+            throw new RecipientEventPreparationException('Diretório de eventos indisponível.');
+        }
+        $path=$folder.DIRECTORY_SEPARATOR.'manifest-'.bin2hex(random_bytes(12)).'.ini';
         try {
+            $contents=str_replace("\n","\r\n",$eventIni);
+            if (file_put_contents($path,$contents,LOCK_EX)!==strlen($contents)) {
+                throw new RuntimeException('Não foi possível gravar INI.');
+            }
+            @chmod($path,0600);
             $this->execute('NFE_LimparListaEventos');
-            $this->execute('NFE_CarregarEventoINI',[$eventIni]);
+            $this->execute('NFE_CarregarEventoINI',[$path]);
         } catch (Throwable $error) {
             throw new RecipientEventPreparationException($error->getMessage(),0,$error);
+        } finally {
+            if (is_file($path)) @unlink($path);
         }
+    }
+
+    /** Evento do destinatário só é transmitido após preparação bem-sucedida. */
+    public function sendRecipientEvent(string $eventIni): string
+    {
+        $this->prepareRecipientEvent($eventIni);
         return $this->fiscalEventOnce('NFE_EnviarEvento',[1]);
     }
 
