@@ -29,4 +29,4 @@ jobs:
           coverage: none
       - run: composer install --no-interaction --prefer-dist --no-progress
       - run: cp .env.example .env && php artisan key:generate && php artisan optimize:clear
-      - run: php vendor/bin/phpunit --filter=PurchaseOperationsTest --display-errors --display-warnings
+      - run: php -d memory_limit=1024M -d display_errors=1 vendor/bin/phpunit --filter=PurchaseOperationsTest --debug --display-errors --display-warnings
