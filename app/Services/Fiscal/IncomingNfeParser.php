@@ -15,7 +15,8 @@ final class IncomingNfeParser
 {
     public function details(string $xml,string $companyCnpj): array
     {
-        if(strlen($xml)>6291456 || !str_contains($xml,'<')) {
+        if(strlen($xml)>6291456 || !str_contains($xml,'<')
+            || preg_match('/<!DOCTYPE|<!ENTITY/i',$xml)) {
             throw new InvalidArgumentException('O XML da nota é inválido ou excede o tamanho permitido.');
         }
         $previous=libxml_use_internal_errors(true);
