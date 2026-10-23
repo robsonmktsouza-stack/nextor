@@ -222,7 +222,43 @@
     setSelect('nfeNature','');
   });
 
-  byId('nfeCustomer')?.addEventListener('change',updateRecipientPreview);
+  const deliveryFields=byId('nfeDeliveryFields');
+  const deliveryToggle=byId('nfeDifferentDelivery');
+  const deliverySelect=byId('nfeDeliveryAddressSelect');
+  const deliveryMapping={
+    name:'nfeDeliveryName',document:'nfeDeliveryDocument',zip_code:'nfeDeliveryZip',
+    address:'nfeDeliveryAddress',address_number:'nfeDeliveryNumber',
+    address_complement:'nfeDeliveryComplement',district:'nfeDeliveryDistrict',
+    city:'nfeDeliveryCity',state:'nfeDeliveryState',city_ibge_code:'nfeDeliveryIbge',
+  };
+  const toggleDelivery=()=>{
+    if(!deliveryFields)return;
+    deliveryFields.hidden=!deliveryToggle?.checked;
+    deliveryFields.querySelectorAll('input').forEach(el=>{el.disabled=!deliveryToggle.checked;});
+    if(deliverySelect)deliverySelect.disabled=!deliveryToggle.checked;
+  };
+  const populateDeliveryAddresses=()=>{
+    if(!deliverySelect)return;
+    const previous=deliverySelect.value;
+    deliverySelect.replaceChildren(new Option('Preencher manualmente',''));
+    for(const address of selectedCustomer()?.delivery_addresses||[]){
+      const label=[address.name,address.address,address.address_number,address.city].filter(Boolean).join(' — ');
+      deliverySelect.add(new Option(label,String(address.id)));
+    }
+    if([...deliverySelect.options].some(o=>o.value===previous))deliverySelect.value=previous;
+  };
+  byId('nfeCustomer')?.addEventListener('change',()=>{
+    updateRecipientPreview();
+    populateDeliveryAddresses();
+    if(deliverySelect)deliverySelect.value='';
+  });
+  deliveryToggle?.addEventListener('change',toggleDelivery);
+  deliverySelect?.addEventListener('change',()=>{
+    const address=(selectedCustomer()?.delivery_addresses||[])
+      .find(row=>String(row.id)===deliverySelect.value);
+    if(!address)return;
+    for(const [key,id] of Object.entries(deliveryMapping))setField(id,address[key]||'');
+  });
   byId('nfeOperationType')?.addEventListener('change',recalcItemCfops);
   byId('nfeDestination')?.addEventListener('change',recalcItemCfops);
 
@@ -900,6 +936,8 @@
   });
 
   updateRecipientPreview();
+  populateDeliveryAddresses();
+  toggleDelivery();
   updatePaymentVisibility();
   renderItems();
   renderReferences();
