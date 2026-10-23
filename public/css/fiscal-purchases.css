@@ -86,3 +86,16 @@
 .fiscal-purchases-amount strong{color:#304c62;font-variant-numeric:tabular-nums}
 @media(max-width:1100px){.fiscal-purchases-table td,.fiscal-purchases-table th{padding-left:7px;padding-right:7px}.fiscal-purchases-table .col-supplier{width:22%}.fiscal-purchases-table .col-actions{width:11%}}
 @media(max-width:690px){.fiscal-purchases-table{min-width:950px}.fiscal-purchases-page .grid-actions-right{flex-wrap:wrap}}
+
+/* Navegação por mês igual à aba NF-e; não comprime o seletor de manifesto. */
+.fiscal-purchases-period{display:flex;align-items:center;justify-content:flex-end;gap:5px;flex:none;white-space:nowrap}
+.fiscal-purchases-period .period-label{min-width:116px;text-align:center}
+.fiscal-purchases-page .grid-actions-right{min-width:0;gap:8px}
+@media(max-width:1280px){
+  .fiscal-purchases-page .grid-actionbar{flex-wrap:wrap;row-gap:8px}
+  .fiscal-purchases-page .grid-actions-right{flex-wrap:wrap;justify-content:flex-end}
+}
+@media(max-width:690px){
+  .fiscal-purchases-period{width:100%;justify-content:flex-end}
+  .fiscal-purchases-period .period-label{min-width:110px}
+}

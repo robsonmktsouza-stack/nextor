@@ -120,6 +120,71 @@ final class FiscalPurchasesTest extends TestCase
         }
     }
 
+    public function test_purchases_month_filter_follows_fiscal_period_and_scopes_totals(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-10-23 13:00:00'));
+        $this->actingAs($this->accountant());
+        IncomingNfe::query()->create([
+            'access_key'=>'29261099887766000122550010000001231000001234',
+            'supplier_name'=>'Mercado Outubro','issued_at'=>'2026-10-02 11:00:00',
+            'total'=>'90.50','status'=>'summary',
+        ]);
+        IncomingNfe::query()->create([
+            'access_key'=>'29260899887766000122550010000001231000004567',
+            'supplier_name'=>'Fornecedor Agosto','issued_at'=>'2026-08-31 18:00:00',
+            'total'=>'488.71','status'=>'summary',
+        ]);
+        IncomingNfe::query()->create([
+            'access_key'=>'29260999887766000122550010000001231000007890',
+            'supplier_name'=>'Fornecedor Setembro','issued_at'=>'2026-09-01 00:00:00',
+            'total'=>'120.00','status'=>'xml_received',
+        ]);
+
+        $this->get(route('fiscal.purchases.index'))
+            ->assertOk()->assertSee('Outubro 2026')
+            ->assertSee('Mercado Outubro')->assertSee('R$ 90,50')
+            ->assertDontSee('Fornecedor Agosto')->assertDontSee('Fornecedor Setembro');
+
+        $this->get(route('fiscal.purchases.index',['month'=>'2026-08']))
+            ->assertOk()->assertSee('Agosto 2026')->assertSee('Fornecedor Agosto')
+            ->assertSee('R$ 488,71')->assertDontSee('Mercado Outubro')
+            ->assertDontSee('Fornecedor Setembro');
+
+        $this->get(route('fiscal.purchases.index',['month'=>'2026-09']))
+            ->assertOk()->assertSee('Setembro 2026')->assertSee('Fornecedor Setembro')
+            ->assertDontSee('Fornecedor Agosto')->assertDontSee('Mercado Outubro');
+    }
+
+    public function test_search_and_status_filter_keep_month_and_invalid_month_defaults_to_current(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-10-23 13:00:00'));
+        $this->actingAs($this->accountant());
+        IncomingNfe::query()->create([
+            'access_key'=>'29260899887766000122550010000001231000004567',
+            'supplier_name'=>'Mercado Agosto','issued_at'=>'2026-08-15 10:00:00',
+            'total'=>'50.00','status'=>'summary',
+        ]);
+        IncomingNfe::query()->create([
+            'access_key'=>'29260899887766000122550010000001231000009999',
+            'supplier_name'=>'Outro fornecedor','issued_at'=>'2026-08-16 10:00:00',
+            'total'=>'60.00','status'=>'xml_received',
+        ]);
+
+        $this->get(route('fiscal.purchases.index',[
+            'month'=>'2026-08','search'=>'Mercado','status'=>'summary',
+        ]))->assertOk()->assertSee('Agosto 2026')->assertSee('Mercado Agosto')
+            ->assertDontSee('Outro fornecedor')
+            ->assertSee('R$ 50,00')
+            ->assertSee('name="month" value="2026-08"',false)
+            ->assertSee('month=2026-09')
+            ->assertSee('search=Mercado')
+            ->assertSee('status=summary');
+
+        $this->get(route('fiscal.purchases.index',['month'=>'2026-13']))
+            ->assertOk()->assertSee('Outubro 2026')
+            ->assertDontSee('Mercado Agosto');
+    }
+
     public function test_parser_reads_model_55_items_and_refuses_another_recipient(): void
     {
         $parser=app(IncomingNfeParser::class);

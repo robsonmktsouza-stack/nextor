@@ -6,6 +6,7 @@ use App\Http\Controllers\FiscalController;
 use App\Models\IncomingNfe;
 use App\Services\Fiscal\IncomingNfeSyncService;
 use App\Services\Fiscal\IncomingNfeManifestationService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -18,7 +19,19 @@ final class FiscalPurchasesController extends Controller
         $state=$sync->state();
         $term=trim((string)$request->query('search',''));
         $status=(string)$request->query('status','');
+        $month=(string)$request->query('month',now()->format('Y-m'));
+        if (!preg_match('/^\d{4}-(0[1-9]|1[0-2])$/',$month)) {
+            $month=now()->format('Y-m');
+        }
+        $period=Carbon::createFromFormat('Y-m-d',$month.'-01')->startOfMonth();
+        $periodEnd=$period->copy()->addMonth();
+        $monthNames=[
+            1=>'Janeiro',2=>'Fevereiro',3=>'Março',4=>'Abril',5=>'Maio',6=>'Junho',
+            7=>'Julho',8=>'Agosto',9=>'Setembro',10=>'Outubro',11=>'Novembro',12=>'Dezembro',
+        ];
         $query=IncomingNfe::query()
+            ->where('issued_at','>=',$period)
+            ->where('issued_at','<',$periodEnd)
             ->when($term,fn($q)=>$q->where(function($w)use($term){
                 $digits=preg_replace('/\D/','',$term);
                 $w->where('access_key','like','%'.$term.'%')
@@ -29,15 +42,16 @@ final class FiscalPurchasesController extends Controller
                 fn($q)=>$q->where('status',$status))
             ->orderByDesc('issued_at')->orderByDesc('id');
         $filteredTotal=(clone $query)->reorder()->sum('total');
+        $filteredCount=(clone $query)->reorder()->count();
         $invoices=$query->with('latestManifestationAttempt')->paginate(25)->withQueryString();
-        $counts=[
-            'total'=>IncomingNfe::query()->count(),
-            'summary'=>IncomingNfe::query()->where('status','summary')->count(),
-            'xml_received'=>IncomingNfe::query()->where('status','xml_received')->count(),
-        ];
+        $counts=['total'=>$filteredCount];
         return view('fiscal.purchases.index',[
             'invoices'=>$invoices,'state'=>$state,'counts'=>$counts,
             'filteredTotal'=>$filteredTotal,
+            'month'=>$month,
+            'prevMonth'=>$period->copy()->subMonth()->format('Y-m'),
+            'nextMonth'=>$period->copy()->addMonth()->format('Y-m'),
+            'monthLabel'=>$monthNames[(int)$period->format('n')].' '.$period->format('Y'),
             'search'=>$term,'status'=>$status,'ready'=>$sync->isReady(),
             'manifestationEvents'=>IncomingNfeManifestationService::EVENTS,
             'tabs'=>FiscalController::TABS,'tab'=>'purchases',
@@ -86,7 +100,7 @@ final class FiscalPurchasesController extends Controller
         ]);
     }
 
-    public function synchronize(IncomingNfeSyncService $sync)
+    public function synchronize(Request $request,IncomingNfeSyncService $sync)
     {
         $result=$sync->synchronize();
         $message=match($result['status']) {
@@ -96,7 +110,7 @@ final class FiscalPurchasesController extends Controller
             'not_ready'=>'Configure o certificado digital A1 em Ajustes → Fiscal para buscar as notas.',
             default=>'A consulta não pôde ser concluída. Confira o certificado e tente mais tarde.',
         };
-        return redirect()->route('fiscal.purchases.index')
+        return redirect()->route('fiscal.purchases.index',$request->only(['month','search','status']))
             ->with(in_array($result['status'],['error','not_ready'],true)?'error':'success',$message);
     }
 

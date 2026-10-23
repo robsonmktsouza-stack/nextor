@@ -12,7 +12,7 @@
 <section class="cms-card sales-module-card fiscal-purchases-page">
   <div class="grid-actionbar">
     <div class="grid-actions-left">
-      <form method="post" action="{{ route('fiscal.purchases.sync') }}">
+      <form method="post" action="{{ route('fiscal.purchases.sync',request()->only('month','search','status')) }}">
         @csrf
         <button class="grid-primary-action" type="submit" data-tooltip="Consultar notas recebidas na SEFAZ">
           @include('partials.icon',['name'=>'refresh','size'=>17]) <span>Buscar notas</span>
@@ -30,7 +30,7 @@
     <div class="grid-actions-right">
       <span class="fiscal-purchases-count">{{ $counts['total'] }} {{ $counts['total'] === 1 ? 'nota' : 'notas' }}</span>
       <span class="fiscal-purchases-amount" data-tooltip="Soma das notas encontradas pelos filtros, incluindo outras páginas">Total: <strong>R$ {{ number_format((float)$filteredTotal,2,',','.') }}</strong></span>
-      <form method="post" action="{{ route('fiscal.purchases.automatic') }}" class="fiscal-purchases-auto-form">
+      <form method="post" action="{{ route('fiscal.purchases.automatic',request()->only('month','search','status')) }}" class="fiscal-purchases-auto-form">
         @csrf
         <input type="hidden" name="auto_sync" value="{{ $state->auto_sync ? '0' : '1' }}">
         <button type="submit" class="fiscal-purchases-switch-button" role="switch"
@@ -41,6 +41,16 @@
           <span class="fiscal-purchases-switch-track" aria-hidden="true"><span class="fiscal-purchases-switch-thumb"></span></span>
         </button>
       </form>
+      <nav class="fiscal-purchases-period" aria-label="Navegar pelos meses de emissão">
+        <a class="period-current" href="{{ route('fiscal.purchases.index',array_merge(request()->except('page','month'),['month'=>now()->format('Y-m')])) }}">Mês atual</a>
+        <a class="period-arrow" href="{{ route('fiscal.purchases.index',array_merge(request()->except('page','month'),['month'=>$prevMonth])) }}" aria-label="Mês anterior" data-tooltip="Mês anterior">
+          @include('partials.icon',['name'=>'chevron-left','size'=>19])
+        </a>
+        <span class="period-label">{{ $monthLabel }}</span>
+        <a class="period-arrow" href="{{ route('fiscal.purchases.index',array_merge(request()->except('page','month'),['month'=>$nextMonth])) }}" aria-label="Próximo mês" data-tooltip="Próximo mês">
+          @include('partials.icon',['name'=>'chevron','size'=>19])
+        </a>
+      </nav>
       <button class="grid-filter-button" type="button" data-filter-toggle="purchases-filters" aria-controls="purchases-filters" data-tooltip="Filtrar compras" aria-label="Filtrar compras">
         @include('partials.icon',['name'=>'search','size'=>18])
       </button>
@@ -54,6 +64,7 @@
   @endif
   <div class="grid-filter-panel" id="purchases-filters" @if(!$search && !$status) hidden @endif>
     <form method="get" action="{{ route('fiscal.purchases.index') }}" class="toolbar-filters fiscal-purchases-toolbar-filters">
+      <input type="hidden" name="month" value="{{ $month }}">
       <div class="table-search-group">
         <input type="search" name="search" value="{{ $search }}" autocomplete="off"
           placeholder="Fornecedor, CNPJ ou chave de acesso" aria-label="Pesquisar nota ou fornecedor">
@@ -68,7 +79,7 @@
       </select>
       <button class="btn btn-secondary" type="submit">Filtrar</button>
       @if($search || $status)
-        <a class="btn btn-light" href="{{ route('fiscal.purchases.index') }}">Limpar</a>
+        <a class="btn btn-light" href="{{ route('fiscal.purchases.index',['month'=>$month]) }}">Limpar</a>
       @endif
     </form>
   </div>
@@ -154,7 +165,7 @@
         <div class="fiscal-empty-state" role="status">
           @include('partials.icon',['name'=>'receipt','size'=>23])
           <strong>Nenhuma NF-e de entrada encontrada</strong>
-          <span>Consulte a SEFAZ ou importe um XML.</span>
+          <span>Nenhuma nota emitida em {{ $monthLabel }} para os filtros selecionados. Escolha outro mês ou ajuste a pesquisa.</span>
         </div>
       </td></tr>
       @endforelse
