@@ -164,6 +164,10 @@ final class IncomingNfeManifestationService
     private function safeError(Throwable $error): string
     {
         $message=$error->getMessage();
+        if (preg_match('/\\b596\\b/',$message)
+            && preg_match('/prazo|rejei[çc][aã]o|10 dias/iu',$message)) {
+            return 'A ACBr informou rejeição 596 (evento fora do prazo), mas não forneceu retorno individual verificável.';
+        }
         if (preg_match('/ACBr (NFE_[A-Za-z]+) falhou \\((-?\\d+)\\)/',$message,$match)) {
             return 'Falha da ACBr em '.$match[1].' (código '.$match[2].').';
         }
