@@ -34,7 +34,7 @@ Operações que excedem esses limites são interrompidas antes da SEFAZ. Não su
 
 - Emissão **real** em homologação com a ACBrLib instalada, certificado A1 válido e schemas atualizados; conferir XML, assinatura, regras de validação e protocolo real
 - Homologação de regimes além dos casos mapeados (CRT 2/3, ST, ICMS normal e desonerações, monofasia, DIFAL/FCP, operações interestaduais, exportação)
-- Rateio **global** de frete, descontos e despesas adicionais entre itens; os valores informados **por item** já possuem persistência e mapeamento no INI do cenário simples, sujeitos à homologação
+- Rateio global proporcional com arredondamento em centavos para frete, descontos e acréscimos, além dos valores por item; código implementado, mas o XML final depende de homologação na biblioteca ACBr e na SEFAZ
 - Devolução, notas complementares, ajuste, transferência, referências especiais e documentos fiscais correlatos
 - Parametrização abrangente de IBS/CBS/IS conforme NT vigente
 - Eventos de cancelamento, CC-e, inutilização, manifestação aplicável e respectiva conciliação
