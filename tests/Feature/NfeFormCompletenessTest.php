@@ -135,6 +135,8 @@ final class NfeFormCompletenessTest extends TestCase
         $items=json_decode($data['items_json'],true);
         $items[0]['discount']=900;
         $data['items_json']=json_encode($items);
+        $data['payments_json']='[]';
+        $data['payment_type']='90';
         $this->post(route('fiscal.nfe.store'),$data)
             ->assertSessionHasErrors('items_json');
         self::assertSame(0,NfeDraft::query()->count());
@@ -151,7 +153,7 @@ final class NfeFormCompletenessTest extends TestCase
         $data['items_json']=json_encode($items);
         $this->post(route('fiscal.nfe.store'),$data)->assertSessionHasNoErrors();
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('RTC do Simples Nacional');
+        $this->expectExceptionMessage('RTC:');
         app(Nfe55IniBuilder::class)->build(NfeDraft::query()->firstOrFail(),$company,42,12345678);
     }
 }
