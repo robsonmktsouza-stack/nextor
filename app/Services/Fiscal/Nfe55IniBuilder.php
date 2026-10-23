@@ -353,12 +353,25 @@ final class Nfe55IniBuilder
             if(!preg_match('/^\d{2}$/',$type)||$amount<0)
                 throw new RuntimeException('Forma de pagamento inválida.');
             if($type==='90')$hasNoPayment=true;
+            $card=in_array($type,['03','04'],true);
+            $integration=(string)($payment['integration_type']??'');
+            if($card){
+                if(!in_array($integration,['1','2'],true)){
+                    throw new RuntimeException('Informe o tipo de integração do pagamento com cartão.');
+                }
+                $acquirer=$this->digits($payment['acquirer_document']??null);
+                if($integration==='1'&&(strlen($acquirer)!==14
+                    ||trim((string)($payment['authorization_code']??''))==='')){
+                    throw new RuntimeException('Pagamento integrado exige CNPJ da credenciadora e autorização.');
+                }
+            }
             $totalPaid+=(int)round($amount*100,0,PHP_ROUND_HALF_UP);
             $add('pag'.sprintf('%03d',$index+1),[
                 'tPag'=>$type,'vPag'=>$this->money($amount),
                 'indPag'=>($payment['condition']??'a_vista')==='a_vista'?'0':'1',
                 'xPag'=>$type==='99'?($payment['other_description']??null):null,
-                'tBand'=>in_array($type,['03','04'],true)?($payment['card_brand']??null):null,
+                'tpIntegra'=>$card?$integration:null,
+                'tBand'=>$card?($payment['card_brand']??null):null,
                 'CNPJ'=>in_array($type,['03','04'],true)
                     ?$this->digits($payment['acquirer_document']??null):null,
                 'cAut'=>in_array($type,['03','04'],true)?($payment['authorization_code']??null):null,
