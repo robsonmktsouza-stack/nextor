@@ -69,6 +69,7 @@ $origins=[
 
   <input type="hidden" name="items_json" id="nfeItemsJson" value="{{ old('items_json',json_encode($existingItems,JSON_UNESCAPED_UNICODE)) }}">
   <input type="hidden" name="duplicates_json" id="nfeDuplicatesJson" value="{{ old('duplicates_json',json_encode($existingDuplicates,JSON_UNESCAPED_UNICODE)) }}">
+  <input type="hidden" name="payments_json" id="nfePaymentsJson" value="{{ old('payments_json',json_encode(array_slice($draft->payments ?? [],1),JSON_UNESCAPED_UNICODE)) }}">
   <input type="hidden" name="references_json" id="nfeReferencesJson" value="{{ old('references_json',json_encode($existingReferences,JSON_UNESCAPED_UNICODE)) }}">
 
   <div class="dialog-header">
@@ -459,6 +460,40 @@ $origins=[
         </div>
       </div>
 
+      <div class="editor-panel">
+        <div class="delivery-card-title">
+          <h3>Formas de pagamento</h3>
+        </div>
+        <div class="editor-grid cols-12">
+          <div class="field col-4"><span>Valor do pagamento principal</span><div class="readonly-field" id="nfePrimaryPaymentTotal">R$ 0,00</div></div>
+        </div>
+        <div class="table-scroll">
+          <table class="cms-table">
+            <thead><tr><th>Pagamento adicional</th><th>Condição</th><th>Valor</th><th class="action-cell"></th></tr></thead>
+            <tbody id="nfeExtraPaymentsBody"></tbody>
+          </table>
+        </div>
+        <div class="editor-grid cols-12">
+          <label class="field col-4"><span>Forma de pagamento</span>
+            <select id="nfeExtraPaymentType">
+              @foreach($paymentTypes as $code=>$label)
+              @if($code!=='90')<option value="{{ $code }}">{{ $code }} - {{ $label }}</option>@endif
+              @endforeach
+            </select>
+          </label>
+          <label class="field col-3"><span>Condição</span><select id="nfeExtraPaymentCondition">
+            <option value="a_vista">À vista</option><option value="30_dias">30 dias</option><option value="personalizado">Personalizado</option>
+          </select></label>
+          <label class="field col-3"><span>Valor</span><input type="number" id="nfeExtraPaymentAmount" min="0.01" step="0.01" placeholder="0,00"></label>
+          <div class="field col-2"><span>&nbsp;</span><button type="button" class="btn btn-secondary" id="nfeAddExtraPayment">@include('partials.icon',['name'=>'plus','size'=>15]) Adicionar</button></div>
+          <label class="field col-6" id="nfeExtraPaymentOtherField" hidden><span>Descrição da forma de pagamento</span><input id="nfeExtraPaymentOther" maxlength="120"></label>
+          <label class="field col-3" id="nfeExtraPaymentBrandField" hidden><span>Bandeira do cartão</span><select id="nfeExtraPaymentBrand">
+            <option value="">Não informada</option>@foreach($cardBrands as $code=>$label)<option value="{{ $code }}">{{ $code }} - {{ $label }}</option>@endforeach
+          </select></label>
+          <label class="field col-3" id="nfeExtraPaymentAcquirerField" hidden><span>CNPJ da credenciadora</span><input id="nfeExtraPaymentAcquirer" maxlength="20"></label>
+          <label class="field col-3" id="nfeExtraPaymentAuthorizationField" hidden><span>Código da autorização</span><input id="nfeExtraPaymentAuthorization" maxlength="40"></label>
+        </div>
+      </div>
       <div class="editor-panel">
         <div class="delivery-card-title">
           <div>
