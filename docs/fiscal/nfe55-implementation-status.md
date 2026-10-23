@@ -3,6 +3,13 @@
 ## Implementado em develop
 
 - Editor persistente, com dados de destinatário, natureza, itens, impostos, transporte, pagamento e referências
+- Endereço de entrega diferente do destinatário, com escolha entre endereços cadastrados e preenchimento manual
+- Transportadoras pesquisáveis e cadastro rápido sem abandonar a NF-e
+- Frete, seguro, outras despesas e desconto por item, com recálculo fiscal e persistência individual
+- Múltiplas formas de pagamento com soma conciliada ao total real da nota
+- Grupos ACBr INI de Entrega, Transportador/Volume, Fatura/Duplicatas, múltiplos pagamentos e NF-e referenciadas
+- Campos IBS/CBS de alíquotas e reduções, vinculados ao payload fiscal; cenários ainda não homologados são recusados
+- Validações de CEP, município, UF e valores; não substituir dados inválidos por zeros arbitrários
 - Preparação ACBrLibNFe via PHP FFI, modelo 55
 - Geração do INI com série/número reservados, código numérico e ambiente
 - Pré-validação de dados e recusa explícita dos cenários tributários ainda não suportados
@@ -27,7 +34,7 @@ Operações que excedem esses limites são interrompidas antes da SEFAZ. Não su
 
 - Emissão **real** em homologação com a ACBrLib instalada, certificado A1 válido e schemas atualizados; conferir XML, assinatura, regras de validação e protocolo real
 - Homologação de regimes além dos casos mapeados (CRT 2/3, ST, ICMS normal e desonerações, monofasia, DIFAL/FCP, operações interestaduais, exportação)
-- Rateio de frete, descontos, seguro e despesas acessórias
+- Rateio **global** de frete, descontos e despesas adicionais entre itens; os valores informados **por item** já possuem persistência e mapeamento no INI do cenário simples, sujeitos à homologação
 - Devolução, notas complementares, ajuste, transferência, referências especiais e documentos fiscais correlatos
 - Parametrização abrangente de IBS/CBS/IS conforme NT vigente
 - Eventos de cancelamento, CC-e, inutilização, manifestação aplicável e respectiva conciliação
@@ -48,3 +55,9 @@ Operações que excedem esses limites são interrompidas antes da SEFAZ. Não su
 6. Preencher uma NF-e de mercadorias simples, salvar, **validar**, emitir e verificar status/XML/DANFE sem usar um CNPJ de produção.
 
 A migração de emissão não altera documentos pré-existentes nem a branch main.
+
+## Estado do formulário após revisão de 23/10/2026
+
+O editor agora persiste e reabre endereço de entrega, transportadoras independentes, pagamentos parciais e valores individuais por item. A documentação da ACBr confirma os grupos INI utilizados, mas **não há confirmação de execução real de NF-e modelo 55 na SEFAZ de homologação**.
+
+O arquivo ZIP da mesma edição da ACBrLibNFe usada localmente (MT Cdecl x64, com exemplos e schemas) é necessário para validar de ponta a ponta a montagem do XML no Windows e sua equivalência no Linux. Não guardar certificados ou segredos no repositório.
