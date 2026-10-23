@@ -77,9 +77,9 @@ try {
         Copy-Item -LiteralPath $envFile -Destination ($envFile + '.acbr-backup-' + (Get-Date -Format 'yyyyMMddHHmmss')) -Force
         $texto = [IO.File]::ReadAllText($envFile)
         $variaveis = @{
-            ACBr_NFE_LIBRARY_PATH = ($destDll -replace '\','/')
-            ACBr_NFE_SCHEMAS_PATH = ($destSchema -replace '\','/')
-            ACBr_NFE_CONFIG_PATH = ((Join-Path $Destino 'acbr-nfe-diagnostico.ini') -replace '\','/')
+            ACBr_NFE_LIBRARY_PATH = ($destDll -replace '\\','/')
+            ACBr_NFE_SCHEMAS_PATH = ($destSchema -replace '\\','/')
+            ACBr_NFE_CONFIG_PATH = ((Join-Path $Destino 'acbr-nfe-diagnostico.ini') -replace '\\','/')
         }
         foreach ($nome in @('ACBr_NFE_LIBRARY_PATH','ACBr_NFE_SCHEMAS_PATH','ACBr_NFE_CONFIG_PATH')) {
             $linha = $nome + '="' + $variaveis[$nome] + '"'
