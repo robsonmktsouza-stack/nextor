@@ -135,6 +135,7 @@ final class Nfe55IniBuilder
             ]);
         }
         $totalProduct=0;$totalPis=0;$totalCofins=0;$totalIpi=0;
+        $totalFreight=0;$totalInsurance=0;$totalOther=0;$totalDiscount=0;
         $rtcTotal=['bc'=>0,'uf'=>0,'mun'=>0,'cbs'=>0];$rtcCount=0;
         foreach($draft->items as $index=>$item) {
             $tax=$item->tax_data??[];
@@ -160,6 +161,23 @@ final class Nfe55IniBuilder
                 ||!in_array($ipi,['53'],true)) {
                 throw new RuntimeException('Tributação federal deste item requer cálculo específico ainda não homologado.');
             }
+            foreach(['ipi_rate','pis_rate','cofins_rate','iss_rate'] as $rateField){
+                if((float)($tax[$rateField]??0)!==0.0){
+                    throw new RuntimeException('Tributação federal deste item exige cálculo ainda não homologado.');
+                }
+            }
+            $freight=(float)$item->freight;
+            $insurance=(float)$item->insurance;
+            $other=(float)$item->other_expenses;
+            $discount=(float)$item->discount;
+            if($freight<0||$insurance<0||$other<0||$discount<0
+                ||$discount>$gross+$freight+$insurance+$other){
+                throw new RuntimeException('Valores adicionais de item inconsistentes.');
+            }
+            $totalFreight+=(int)round($freight*100);
+            $totalInsurance+=(int)round($insurance*100);
+            $totalOther+=(int)round($other*100);
+            $totalDiscount+=(int)round($discount*100);
             $i=sprintf('%03d',$index+1);
             $totalProduct+=(int)round($gross*100);
             $add('Produto'.$i,[
@@ -173,6 +191,10 @@ final class Nfe55IniBuilder
                 'qCom'=>number_format($qty,4,'.',''),
                 'vUnCom'=>number_format((float)$item->unit_price,4,'.',''),
                 'vProd'=>$this->money($gross),
+                'vFrete'=>$freight>0?$this->money($freight):null,
+                'vSeg'=>$insurance>0?$this->money($insurance):null,
+                'vOutro'=>$other>0?$this->money($other):null,
+                'vDesc'=>$discount>0?$this->money($discount):null,
                 'cEANTrib'=>$this->digits($item->ean_gtin)?:'SEM GTIN',
                 'uTrib'=>$item->tax_unit?:$item->unit?:'UN',
                 'qTrib'=>number_format($qty,4,'.',''),
@@ -189,6 +211,9 @@ final class Nfe55IniBuilder
                 'discount'=>0,'tax_defaults'=>$tax,'origin'=>$item->origin,
             ],(string)$company->crt,$draft->issue_date?->toDateString());
             if($rtc!==null){
+                if($freight>0||$insurance>0||$other>0||$discount>0){
+                    throw new RuntimeException('IBS/CBS com rateio de valores ainda não homologado.');
+                }
                 $rtcCount++;
                 foreach(['ibscbs'=>'IBSCBS','gibscbs'=>'gIBSCBS','gibsuf'=>'gIBSUF',
                     'gibsmun'=>'gIBSMun','gcbs'=>'gCBS'] as $from=>$prefix){
@@ -203,12 +228,16 @@ final class Nfe55IniBuilder
         if($rtcCount>0 && $rtcCount!==$draft->items->count()){
             throw new RuntimeException('IBS/CBS preenchido somente em alguns itens; confira a classificação fiscal.');
         }
-        $total=$this->money($totalProduct/100);
+        $total=$this->money(($totalProduct+$totalFreight+$totalInsurance+$totalOther-$totalDiscount)/100);
         $expected=$this->money(data_get($draft->totals,'total',data_get($draft->totals,'products',0)));
         if($expected!==$total)throw new RuntimeException('Total fiscal não confere com o rascunho.');
         $add('Total',[
             'vBC'=>'0.00','vICMS'=>'0.00','vBCST'=>'0.00','vST'=>'0.00',
-            'vProd'=>$total,'vFrete'=>'0.00','vDesc'=>'0.00','vIPI'=>'0.00',
+            'vProd'=>$this->money($totalProduct/100),
+            'vFrete'=>$this->money($totalFreight/100),
+            'vSeg'=>$this->money($totalInsurance/100),
+            'vOutro'=>$this->money($totalOther/100),
+            'vDesc'=>$this->money($totalDiscount/100),'vIPI'=>'0.00',
             'vPIS'=>$this->money($totalPis/100),'vCOFINS'=>$this->money($totalCofins/100),
             'vNF'=>$total,
         ]);
