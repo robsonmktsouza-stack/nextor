@@ -54,6 +54,7 @@ final class IncomingNfePurchasePrefill
                 'product_id'=>$match?->id,
                 'source_description'=>$item['description'],
                 'source_code'=>$code,
+                'source_unit'=>$item['unit'],
                 'quantity'=>$item['quantity'],
                 'unit_cost'=>number_format((float)$item['unit_price'],2,'.',''),
                 'discount'=>number_format($discount,2,'.',''),

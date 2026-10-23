@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   const singular={products:'produto',customers:'cliente',suppliers:'fornecedor'};
   const labels={products:'Produtos',customers:'Clientes',suppliers:'Fornecedores'};
   let kind='products',onSelect=null,returnFocus=null,abortController=null,sequence=0;
-  let searchTimer=null,localItems=[],selectedQuery='',isCreating=false;
+  let searchTimer=null,localItems=[],selectedQuery='',isCreating=false,createDefaults={};
   const canCreate=type=>dialog.dataset[type==='products'?'catalogProducts':'catalogCustomers']==='1';
   const norm=text=>String(text||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR');
   const labelItem=item=>item.sku ? item.sku+' — '+item.name : item.name;
@@ -124,6 +124,13 @@ document.addEventListener('DOMContentLoaded',()=>{
     isCreating=true;selectedQuery=String(name??search.value).trim().slice(0,190);
     picker.hidden=true;form.hidden=false;error.hidden=true;title.textContent='Cadastrar '+singular[kind];
     prepareFields();
+    for(const [key,value] of Object.entries(createDefaults)){
+      const control=[...fields.querySelectorAll('[name]')].find(node=>node.name===key);
+      if(control && value!==null && value!==undefined){
+        if(control.type==='checkbox')control.checked=Boolean(value);
+        else control.value=String(value);
+      }
+    }
     fields.querySelector('[name="name"]')?.focus();
   };
   const showPicker=()=>{
@@ -138,6 +145,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     kind=type;onSelect=typeof options.onSelect==='function'?options.onSelect:null;
     returnFocus=document.activeElement;
     localItems=Array.isArray(options.items)?options.items:[];
+    createDefaults=options.defaults && typeof options.defaults==='object'?options.defaults:{};
     selectedQuery=String(options.initial||'');
     search.value=selectedQuery;
     newButton.disabled=!canCreate(kind);

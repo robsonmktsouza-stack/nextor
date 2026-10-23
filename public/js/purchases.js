@@ -103,6 +103,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     mapButton.addEventListener('click',()=>{
       window.LumeronCatalog?.pick('products',{
         initial:data.source_description||'',
+        defaults:{name:data.source_description||'',sku:data.source_code||'',unit:data.source_unit||'UN'},
         items:products,
         onSelect:selectProduct,
       });
@@ -171,6 +172,8 @@ document.addEventListener('DOMContentLoaded',()=>{
   });
   form.querySelector('[data-quick-supplier]')?.addEventListener('click',()=>{
     window.LumeronCatalog?.create('suppliers',{
+      initial:form.dataset.importSupplierName||'',
+      defaults:{name:form.dataset.importSupplierName||'',document:form.dataset.importSupplierDocument||''},
       onSelect:supplier=>{
         const select=form.querySelector('select[name="supplier_id"]');
         if(!select)return;

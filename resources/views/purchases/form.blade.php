@@ -1,7 +1,9 @@
 @extends('layouts.app')
 @section('title',$editing?'Editar compra #'.$purchase->id:'Nova compra')
 @section('content')
-<form method="post" id="purchaseForm" class="purchase-editor" action="{{ $editing?route('purchases.update',$purchase):route('purchases.store') }}">
+<form method="post" id="purchaseForm" class="purchase-editor"
+  @if(isset($sourceInvoice)) data-import-supplier-name="{{ $sourceInvoice->supplier_name }}" data-import-supplier-document="{{ $sourceInvoice->supplier_cnpj }}" @endif
+  action="{{ $editing?route('purchases.update',$purchase):route('purchases.store') }}">
   @csrf
   @if($editing) @method('PUT') @endif
   <section class="editor-panel purchase-header-panel">
