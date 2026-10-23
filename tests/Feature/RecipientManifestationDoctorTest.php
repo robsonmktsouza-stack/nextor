@@ -78,7 +78,7 @@ final class RecipientManifestationDoctorTest extends TestCase
         app()->instance(IncomingNfeManifestationGateway::class,$gateway);
         self::assertSame(1,Artisan::call('fiscal:manifestation-doctor',['invoice'=>$invoice->id]));
         $output=Artisan::output();
-        self::assertStringContainsString('NFE', $output);
+        self::assertStringContainsString('INI do evento', $output);
         self::assertStringContainsString('(-10)', $output);
         self::assertStringNotContainsString('senha-secreta',$output);
         self::assertStringNotContainsString('certificados',$output);
