@@ -156,4 +156,57 @@ final class NfeFormCompletenessTest extends TestCase
         $this->expectExceptionMessage('RTC:');
         app(Nfe55IniBuilder::class)->build(NfeDraft::query()->firstOrFail(),$company,42,12345678);
     }
+
+    public function test_document_level_charges_are_distributed_to_items_without_losing_cents(): void
+    {
+        [$company,$nature,$customer]=$this->init();
+        $data=$this->data($nature,$customer);
+        $data['freight_mode']='0';
+        $data['freight_value']='0.03';
+        $data['surcharge']='0.03';
+        $data['discount']='0.03';
+        $items=json_decode($data['items_json'],true,512,JSON_THROW_ON_ERROR);
+        $items[]=[
+            'product_name'=>'Segunda mercadoria','product_sku'=>'ITEM-02',
+            'quantity'=>1,'dimension_quantity'=>1,'unit_price'=>100,
+            'cfop'=>'5102','origin'=>'0','unit'=>'UN','tax_unit'=>'UN','ncm'=>'61091000',
+            'tax_data'=>[
+                'icms_csosn'=>'102','pis_cst'=>'49','cofins_cst'=>'49','ipi_cst'=>'53',
+            ],
+        ];
+        $data['items_json']=json_encode($items,JSON_THROW_ON_ERROR);
+
+        $this->post(route('fiscal.nfe.store'),$data)->assertSessionHasNoErrors();
+        $draft=NfeDraft::query()->firstOrFail()->load('items');
+        self::assertEqualsWithDelta(310.03,(float)$draft->totals['total'],0.0001);
+        // Allocation is exclusive to the fiscal output; editing the draft retains the entered amounts.
+        self::assertEqualsWithDelta(10,(float)$draft->items[0]->freight,0.0001);
+        self::assertEqualsWithDelta(0,(float)$draft->items[1]->freight,0.0001);
+        $ini=app(Nfe55IniBuilder::class)->build($draft,$company,42,12345678);
+
+        $first=explode('[ICMS001]',explode('[Produto001]',$ini,2)[1],2)[0];
+        foreach(['vProd=200.00','vFrete=10.02','vSeg=3.00',
+            'vOutro=2.02','vDesc=5.02'] as $expected){
+            self::assertStringContainsString($expected,$first);
+        }
+        $second=explode('[ICMS002]',explode('[Produto002]',$ini,2)[1],2)[0];
+        foreach(['vProd=100.00','vFrete=0.01','vOutro=0.01',
+            'vDesc=0.01'] as $expected){
+            self::assertStringContainsString($expected,$second);
+        }
+        $total=explode('[Transportador]',explode('[Total]',$ini,2)[1],2)[0];
+        foreach(['vProd=300.00','vFrete=10.03','vSeg=3.00',
+            'vOutro=2.03','vDesc=5.03','vNF=310.03'] as $expected){
+            self::assertStringContainsString($expected,$total);
+        }
+    }
+
+    public function test_discount_larger_than_invoice_is_rejected_before_creating_draft(): void
+    {
+        [, $nature,$customer]=$this->init();
+        $data=$this->data($nature,$customer);
+        $data['discount']='300.00';
+        $this->post(route('fiscal.nfe.store'),$data)->assertSessionHasErrors('discount');
+        self::assertSame(0,NfeDraft::query()->count());
+    }
 }
