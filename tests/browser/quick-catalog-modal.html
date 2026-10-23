@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="csrf-token" content="mock-token">
+<link rel="stylesheet" href="../../public/css/quick-catalog.css">
+<script>
+window.fetch=async(url,init={})=>{
+  const isPost=init.method==='POST';
+  if(isPost&&String(url).includes('/suppliers')){
+    return new Response(JSON.stringify({message:'Validação',errors:{document:['CNPJ já cadastrado.']}}),
+      {status:422,headers:{'content-type':'application/json'}});
+  }
+  if(isPost){
+    return new Response(JSON.stringify({item:{
+      id:88,name:'CAMISETA NOVA',sku:'NOVO-88',unit:'UN',sale_price:29.90,cost_price:15,
+      ncm:'61091000',origin:'0',control_stock:true
+    }}),{status:201,headers:{'content-type':'application/json'}});
+  }
+  return new Response(JSON.stringify({items:[]}),
+    {status:200,headers:{'content-type':'application/json'}});
+};
+</script>
+<script defer src="../../public/js/quick-catalog.js"></script>
+</head>
+<body>
+<main><input id="draftValue" value="Pedido em andamento"></main>
+<dialog id="erpCatalogDialog" class="erp-catalog-dialog" aria-labelledby="erpCatalogTitle"
+ data-catalog-products="1" data-catalog-customers="1"
+ data-search-url="/quick-catalog" data-store-url="/quick-catalog">
+  <div class="erp-catalog-header">
+    <div><h2 id="erpCatalogTitle">Selecionar</h2><p id="erpCatalogSubtitle"></p></div>
+    <button type="button" data-catalog-close class="erp-catalog-close">Fechar</button>
+  </div>
+  <section class="erp-catalog-main">
+    <div id="erpCatalogPicker">
+      <label class="erp-catalog-field"><span>Pesquisar</span><input type="search" id="erpCatalogSearch"></label>
+      <div id="erpCatalogResults" class="erp-catalog-results"></div>
+      <button type="button" id="erpCatalogNew" class="erp-catalog-new"><span id="erpCatalogNewLabel"></span></button>
+    </div>
+    <form id="erpCatalogCreate" class="erp-catalog-form" hidden novalidate>
+      <p id="erpCatalogHint"></p>
+      <div id="erpCatalogFields" class="erp-catalog-fields"></div>
+      <div id="erpCatalogError" hidden role="alert"></div>
+      <div class="erp-catalog-footer">
+        <button type="button" id="erpCatalogBack">Voltar</button>
+        <button type="submit" id="erpCatalogSave">Salvar cadastro</button>
+      </div>
+    </form>
+  </section>
+</dialog>
+<p id="testResult">Aguardando</p>
+<script>
+window.addEventListener('load',()=>{
+  setTimeout(async()=>{
+    try{
+      const assert=(truth,message)=>{if(!truth)throw Error(message)};
+      const dialog=document.getElementById('erpCatalogDialog');
+      let received=null;
+      window.LumeronCatalog.pick('products',{initial:'CAMISETA NOVA',onSelect:p=>received=p});
+      assert(dialog.open,'seletor não abriu o modal');
+      assert(document.getElementById('erpCatalogSearch').value==='CAMISETA NOVA','pesquisa inicial foi perdida');
+      document.getElementById('erpCatalogNew').click();
+      const form=document.getElementById('erpCatalogCreate');
+      assert(!form.hidden,'cadastro de produto não abriu');
+      const fill=(name,value)=>{const e=form.querySelector('[name="'+name+'"]');assert(e,'campo '+name+' ausente');e.value=value};
+      fill('name','CAMISETA NOVA');fill('sku','NOVO-88');fill('cost_price','15.00');
+      fill('sale_price','29.90');fill('ncm','61091000');
+      form.requestSubmit();
+      await new Promise(done=>setTimeout(done,85));
+      assert(!dialog.open,'modal continuou aberto depois do cadastro');
+      assert(received?.id===88 && received.name==='CAMISETA NOVA','novo produto não voltou ao formulário');
+      assert(document.getElementById('draftValue').value==='Pedido em andamento','operação perdeu seus dados');
+      window.LumeronCatalog.create('suppliers',{initial:'Teste fornecedor'});
+      assert(dialog.open&&!form.hidden,'cadastro de fornecedor não abriu');
+      fill('name','Teste fornecedor');fill('document','00000000000000');
+      form.requestSubmit();
+      await new Promise(done=>setTimeout(done,85));
+      assert(dialog.open,'modal fechou ao receber validação');
+      assert(document.getElementById('erpCatalogError').textContent.includes('CNPJ já cadastrado'),
+        'erro do backend não apareceu');
+      document.body.dataset.quickCatalogTest='passed';
+      document.getElementById('testResult').textContent='PASS modais + cadastro + retorno + validação + preservação';
+    }catch(error){
+      document.body.dataset.quickCatalogTest='failed';
+      document.getElementById('testResult').textContent='FAIL '+error.message;
+    }
+  },80);
+});
+</script>
+</body></html>
