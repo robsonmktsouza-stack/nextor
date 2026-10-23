@@ -42,6 +42,9 @@ final class Nfe55CancellationTest extends TestCase
         $draft=NfeDraft::query()->create([
             'user_id'=>$user->id,'operation_nature_id'=>$nature->id,'customer_id'=>$customer->id,
             'status'=>$status,'environment'=>$environment,'series'=>1,'document_number'=>42,
+            'operation_type'=>'outbound','destination'=>'internal','purpose'=>'normal',
+            'payment_type'=>'01','payment_condition'=>'a_vista','presence'=>'presential',
+            'issue_date'=>'2026-10-23','issue_time'=>'14:00',
             'access_key'=>$key,'protocol'=>'123456789012345','authorized_at'=>now(),
         ]);
         return [$user,$draft];
