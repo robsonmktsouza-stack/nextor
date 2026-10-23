@@ -1,6 +1,7 @@
 (()=>{
   const byId=id=>document.getElementById(id);
 
+  const readOnly=()=>document.getElementById('nfeEditorDialog')?.dataset.nfeReadonly==='1';
   const modalIsOpen=modal=>!!modal && !modal.hidden && modal.classList.contains('is-open');
 
   const openModal=modal=>{
@@ -31,6 +32,7 @@
     const opener=event.target.closest('[data-nfe-modal-open]');
     if(opener){
       event.preventDefault();
+      if(readOnly())return;
       openModal(byId(opener.getAttribute('data-nfe-modal-open')));
       return;
     }
@@ -857,6 +859,7 @@
   });
 
   byId('nfeSaveItem')?.addEventListener('click',()=>{
+    if(readOnly())return;
     const product=productById(getField('nfeItemProduct'));
     const productName=getField('nfeItemName').trim();
     const quantity=number(getField('nfeItemQuantity'));
@@ -949,6 +952,7 @@
   });
 
   document.addEventListener('click',event=>{
+    if(readOnly())return;
     const edit=event.target.closest('[data-nfe-edit-item]');
     if(edit){openEditItem(Number(edit.dataset.nfeEditItem));return;}
 
@@ -971,6 +975,9 @@
   document.body.classList.add('nfe-modal-open');
 
   document.addEventListener('keydown',event=>{
+    if(readOnly() && ['F4','F6','F8'].includes(event.key)){
+      event.preventDefault();return;
+    }
     const openLayers=[...document.querySelectorAll('[data-nfe-modal].is-open:not([hidden])')];
 
     if(event.key==='Escape'){
