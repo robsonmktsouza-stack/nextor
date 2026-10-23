@@ -759,6 +759,12 @@ $origins=[
           <label class="field col-3"><span>CST IBS</span><input id="nfeTaxIbsCst"></label>
           <label class="field col-3"><span>CST CBS</span><input id="nfeTaxCbsCst"></label>
           <label class="field col-6"><span>Classificação tributária</span><input id="nfeTaxClassification"></label>
+          <label class="field col-4"><span>Alíquota IBS estadual %</span><input id="nfeIbsUfRate" type="number" min="0" step="0.0001"></label>
+          <label class="field col-4"><span>Alíquota IBS municipal %</span><input id="nfeIbsMunicipalRate" type="number" min="0" step="0.0001"></label>
+          <label class="field col-4"><span>Alíquota CBS %</span><input id="nfeCbsRate" type="number" min="0" step="0.0001"></label>
+          <label class="field col-4"><span>Redução IBS estadual %</span><input id="nfeIbsUfReduction" type="number" min="0" step="0.0001"></label>
+          <label class="field col-4"><span>Redução IBS municipal %</span><input id="nfeIbsMunicipalReduction" type="number" min="0" step="0.0001"></label>
+          <label class="field col-4"><span>Redução CBS %</span><input id="nfeCbsReduction" type="number" min="0" step="0.0001"></label>
         </div>
       </div>
     </section>

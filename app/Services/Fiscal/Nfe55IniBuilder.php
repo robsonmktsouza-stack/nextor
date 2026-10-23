@@ -139,6 +139,17 @@ final class Nfe55IniBuilder
         $rtcTotal=['bc'=>0,'uf'=>0,'mun'=>0,'cbs'=>0];$rtcCount=0;
         foreach($draft->items as $index=>$item) {
             $tax=$item->tax_data??[];
+            // Normalize legacy editor keys into the RTC engine's canonical fields.
+            $ibsCst=trim((string)($tax['ibs_cst']??''));
+            $cbsCst=trim((string)($tax['cbs_cst']??''));
+            $classification=trim((string)($tax['tax_classification_code']??''));
+            if($ibsCst!==''||$cbsCst!==''||$classification!==''){
+                if($ibsCst===''||$cbsCst===''||$ibsCst!==$cbsCst){
+                    throw new RuntimeException('CST de IBS e CBS devem corresponder à classificação informada.');
+                }
+                $tax['ibs_cbs_cst']=$ibsCst;
+                $tax['ibs_cbs_class']=$classification;
+            }
             $qty=(float)$item->quantity*(float)$item->dimension_quantity;
             $gross=round($qty*(float)$item->unit_price,2);
             $cfop=(string)$item->cfop;

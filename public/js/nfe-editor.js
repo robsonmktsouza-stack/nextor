@@ -139,7 +139,13 @@
       tax_quantity_factor:raw.tax_quantity_factor??raw.quantidade_tributavel??'1',
       ibs_cst:raw.ibs_cst??raw.ibs_cst_default??'',
       cbs_cst:raw.cbs_cst??raw.cbs_cst_default??'',
-      tax_classification_code:raw.tax_classification_code??''
+      tax_classification_code:raw.tax_classification_code??raw.ibs_cbs_class??'',
+      ibs_uf_rate:raw.ibs_uf_rate??'',
+      ibs_municipal_rate:raw.ibs_municipal_rate??'',
+      cbs_rate:raw.cbs_rate??'',
+      ibs_uf_reduction_rate:raw.ibs_uf_reduction_rate??'',
+      ibs_municipal_reduction_rate:raw.ibs_municipal_reduction_rate??'',
+      cbs_reduction_rate:raw.cbs_reduction_rate??''
     };
   };
 
@@ -534,6 +540,12 @@
     ibs_cst:'nfeTaxIbsCst',
     cbs_cst:'nfeTaxCbsCst',
     tax_classification_code:'nfeTaxClassification',
+    ibs_uf_rate:'nfeIbsUfRate',
+    ibs_municipal_rate:'nfeIbsMunicipalRate',
+    cbs_rate:'nfeCbsRate',
+    ibs_uf_reduction_rate:'nfeIbsUfReduction',
+    ibs_municipal_reduction_rate:'nfeIbsMunicipalReduction',
+    cbs_reduction_rate:'nfeCbsReduction',
   };
 
   const specialFields={
