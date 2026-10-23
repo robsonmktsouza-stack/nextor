@@ -8,6 +8,7 @@
 
 @php
 $transport=$draft->transport_data ?? [];
+$delivery=$draft->delivery_snapshot ?? [];
 $freightMode=match((string)data_get($transport,'freight_mode','9')){
   'sender'=>'0','recipient'=>'1','third_party'=>'2','own_sender'=>'3','own_recipient'=>'4','none'=>'9',
   default=>(string)data_get($transport,'freight_mode','9'),
@@ -311,6 +312,30 @@ $origins=[
 
           <label class="field col-3"><span>Desconto da nota</span><input type="number" name="discount" id="nfeDiscount" step="0.01" min="0" value="{{ old('discount',$draft->discount ?? 0) }}"></label>
           <label class="field col-3"><span>Acréscimo da nota</span><input type="number" name="surcharge" id="nfeSurcharge" step="0.01" min="0" value="{{ old('surcharge',$draft->surcharge ?? 0) }}"></label>
+        </div>
+      </div>
+      <div class="editor-panel nfe-delivery-panel">
+        <div class="field"><span>Local de entrega diferente do destinatário</span>
+          <label class="switch-field">
+            <input type="hidden" name="different_delivery" value="0">
+            <input type="checkbox" id="nfeDifferentDelivery" name="different_delivery" value="1" @checked(old('different_delivery',$draft->different_delivery))>
+            <span class="switch-track"></span><strong data-switch-label>Sim</strong>
+          </label>
+        </div>
+        <div id="nfeDeliveryFields" hidden>
+          <div class="editor-grid cols-12">
+            <label class="field col-12"><span>Endereço cadastrado</span><select id="nfeDeliveryAddressSelect"><option value="">Preencher manualmente</option></select></label>
+            <label class="field col-6"><span>Nome do recebedor</span><input name="delivery_name" id="nfeDeliveryName" maxlength="190" value="{{ old('delivery_name',data_get($delivery,'name')) }}"></label>
+            <label class="field col-3"><span>CPF/CNPJ</span><input name="delivery_document" id="nfeDeliveryDocument" maxlength="20" value="{{ old('delivery_document',data_get($delivery,'document')) }}"></label>
+            <label class="field col-3"><span>CEP *</span><input name="delivery_zip_code" id="nfeDeliveryZip" inputmode="numeric" maxlength="9" value="{{ old('delivery_zip_code',data_get($delivery,'zip_code')) }}"></label>
+            <label class="field col-6"><span>Logradouro *</span><input name="delivery_address" id="nfeDeliveryAddress" maxlength="190" value="{{ old('delivery_address',data_get($delivery,'address')) }}"></label>
+            <label class="field col-2"><span>Número *</span><input name="delivery_address_number" id="nfeDeliveryNumber" maxlength="30" value="{{ old('delivery_address_number',data_get($delivery,'address_number')) }}"></label>
+            <label class="field col-4"><span>Complemento</span><input name="delivery_address_complement" id="nfeDeliveryComplement" maxlength="120" value="{{ old('delivery_address_complement',data_get($delivery,'address_complement')) }}"></label>
+            <label class="field col-4"><span>Bairro *</span><input name="delivery_district" id="nfeDeliveryDistrict" maxlength="120" value="{{ old('delivery_district',data_get($delivery,'district')) }}"></label>
+            <label class="field col-4"><span>Município *</span><input name="delivery_city" id="nfeDeliveryCity" maxlength="120" value="{{ old('delivery_city',data_get($delivery,'city')) }}"></label>
+            <label class="field col-2"><span>UF *</span><input name="delivery_state" id="nfeDeliveryState" maxlength="2" value="{{ old('delivery_state',data_get($delivery,'state')) }}"></label>
+            <label class="field col-2"><span>Código IBGE *</span><input name="delivery_city_ibge_code" id="nfeDeliveryIbge" inputmode="numeric" maxlength="7" value="{{ old('delivery_city_ibge_code',data_get($delivery,'city_ibge_code')) }}"></label>
+          </div>
         </div>
       </div>
     </section>
