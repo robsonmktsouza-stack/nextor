@@ -169,14 +169,14 @@ class FinanceController extends Controller
 
     public function edit(FinancialEntry $entry)
     {
-        if($entry->sale_id!==null) return redirect()->route('finance.entries.show',$entry)->with('warning','Lançamentos gerados por venda não são editados diretamente.');
+        if($entry->sale_id!==null || $entry->purchase_id!==null) return redirect()->route('finance.entries.show',$entry)->with('warning','Lançamentos gerados por venda ou compra não são editados diretamente.');
         if($entry->status==='cancelled') return redirect()->route('finance.entries.show',$entry)->with('warning','Lançamento cancelado não pode ser editado.');
         return view('finance.form',$this->formData($entry,true));
     }
 
     public function update(Request $request, FinancialEntry $entry)
     {
-        if($entry->sale_id!==null) throw ValidationException::withMessages(['entry'=>'Lançamentos originados de venda não podem ser editados diretamente.']);
+        if($entry->sale_id!==null || $entry->purchase_id!==null) throw ValidationException::withMessages(['entry'=>'Lançamentos originados de venda ou compra não podem ser editados diretamente.']);
         if($entry->status==='cancelled') throw ValidationException::withMessages(['entry'=>'Lançamento cancelado não pode ser editado.']);
 
         $data=$this->validatedEntry($request);
@@ -333,7 +333,7 @@ class FinanceController extends Controller
                 : null;
 
             foreach($entries as $entry) {
-                if($entry->sale_id!==null || $entry->status==='cancelled') {
+                if(($entry->sale_id!==null || $entry->purchase_id!==null) || $entry->status==='cancelled') {
                     $skipped++;
                     continue;
                 }
@@ -380,7 +380,7 @@ class FinanceController extends Controller
             }
 
             foreach($entries as $entry) {
-                if($entry->sale_id!==null || $entry->status==='cancelled') {
+                if(($entry->sale_id!==null || $entry->purchase_id!==null) || $entry->status==='cancelled') {
                     $skipped++;
                     continue;
                 }
@@ -398,7 +398,7 @@ class FinanceController extends Controller
             $message=$applied.' lançamento(s) atualizado(s).';
         } elseif($data['action']==='cancel') {
             foreach($entries as $entry) {
-                if($entry->sale_id!==null || $entry->status==='cancelled' || $entry->active_settlements_count>0) {
+                if(($entry->sale_id!==null || $entry->purchase_id!==null) || $entry->status==='cancelled' || $entry->active_settlements_count>0) {
                     $skipped++;
                     continue;
                 }
@@ -410,7 +410,7 @@ class FinanceController extends Controller
             $message=$applied.' lançamento(s) cancelado(s).';
         } else {
             foreach($entries as $entry) {
-                if($entry->sale_id!==null || $entry->status!=='cancelled') {
+                if(($entry->sale_id!==null || $entry->purchase_id!==null) || $entry->status!=='cancelled') {
                     $skipped++;
                     continue;
                 }
