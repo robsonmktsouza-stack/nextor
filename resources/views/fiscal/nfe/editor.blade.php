@@ -571,7 +571,7 @@ $origins=[
       @if($isEditing && $draft->status==='draft')
         <button class="btn btn-success" type="submit" form="nfeEmitForm" id="nfeSubmitEmission"
           @disabled(!$draft->validated_at)>Emitir NF-e</button>
-      @elseif($isEditing && ($draft->status==='prepared' || ($draft->status==='processing' && !$draft->access_key && !$draft->xml_path && !$draft->transmission_attempted_at && $draft->updated_at?->lt(now()->subMinutes(15)))))
+      @elseif($isEditing && ($draft->status==='prepared' || ($draft->status==='processing' && !$draft->transmission_attempted_at && ($draft->xml_path===null || $draft->xml_path==='fiscal/nfe55/'.$draft->id.'/signed.xml') && $draft->updated_at?->lt(now()->subMinutes(15)))))
         <button class="btn btn-secondary" type="submit" form="nfeRetryForm">Tentar novamente</button>
       @elseif($isEditing && in_array($draft->status,['pending','processing','rejected','authorized'],true))
         <button class="btn btn-secondary" type="submit" form="nfeConsultForm">Consultar SEFAZ</button>
