@@ -152,6 +152,35 @@ class NfeEditorTest extends TestCase
         self::assertStringContainsString("flowBody.scrollTo({top,behavior:'smooth'})",$script);
     }
 
+    public function test_compact_invoice_layout_keeps_every_essential_field_and_all_sections(): void
+    {
+        $this->actingAs($this->admin());
+        $this->company();
+
+        $html=$this->get(route('fiscal.nfe.create'))->assertOk()->getContent();
+        foreach (['general','items','payment','transport','other'] as $section) {
+            self::assertStringContainsString('id="nfe-section-'.$section.'"',$html);
+        }
+        self::assertSame(5,substr_count($html,'class="editor-tab-panel nfe-form-section cms-card"'));
+        self::assertStringContainsString('class="nfe-general-actions"',$html);
+        self::assertStringContainsString('class="editor-grid cols-12 nfe-totals-grid"',$html);
+        self::assertStringContainsString('class="nfe-general-dates"',$html);
+        self::assertSame(6,substr_count($html,'class="field col-2 nfe-flag-field"'));
+        foreach (['nfeNature','nfeOperationType','nfeDestination','nfeIssueDate','nfeIssueTime',
+            'nfeCustomer','nfeDiscount','nfeSurcharge','nfeTotalInvoice','nfeFreightValue',
+            'nfeItemName','nfeItemNotes','nfeItemCfop','nfePaymentType'] as $id) {
+            self::assertSame(1,substr_count($html,'id="'.$id.'"'),$id.' must exist once.');
+        }
+        self::assertStringContainsString('name="volume_quantity"',$html);
+        self::assertStringContainsString('name="gross_weight"',$html);
+        self::assertStringNotContainsString('class="field col-4"></div>',$html);
+
+        $css=(string)file_get_contents(public_path('css/nfe-form-workflow.css'));
+        $js=(string)file_get_contents(public_path('js/nfe-editor.js'));
+        self::assertStringContainsString('grid-template-columns:repeat(5,minmax(0,1fr))',$css);
+        self::assertStringContainsString('const group=input.closest(', $js);
+    }
+
     public function test_payment_form_progressively_discloses_advanced_fields_without_removing_them(): void
     {
         $this->actingAs($this->admin());
