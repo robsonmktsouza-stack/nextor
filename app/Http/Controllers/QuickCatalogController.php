@@ -37,6 +37,9 @@ class QuickCatalogController extends Controller
         abort_unless(in_array($kind,['products','customers','suppliers','carriers'],true),404);
         if($kind==='products'){
             $this->allowCreate($request,'products');
+            // O formulário apresenta máscaras legíveis, mas os documentos
+            // fiscais são persistidos apenas com seus algarismos.
+            $this->normalizeDigits($request,['ncm','cest','ean_gtin']);
             $data=$request->validate([
                 'name'=>['required','string','min:2','max:190'],
                 'sku'=>['nullable','string','max:80','unique:products,sku'],
@@ -46,6 +49,8 @@ class QuickCatalogController extends Controller
                 'sale_price'=>['required','numeric','min:0','max:9999999999.99','decimal:0,2'],
                 'ean_gtin'=>['nullable','string','max:32'],
                 'ncm'=>['nullable','regex:/^\d{8}$/'],
+                'cest'=>['nullable','regex:/^\d{7}$/'],
+                'ean_gtin'=>['nullable','regex:/^\d{8}(?:\d{4,6})?$/'],
                 'origin'=>['required',Rule::in(['0','1','2','3','4','5','6','7','8'])],
                 'control_stock'=>['required','boolean'],
             ]);
@@ -65,18 +70,27 @@ class QuickCatalogController extends Controller
             return response()->json(['item'=>$this->productData($item),'message'=>'Produto cadastrado.'],201);
         }
         $this->allowCreate($request,'customers');
+        $this->normalizeDigits($request,['document','zip_code','city_ibge_code']);
         $data=$request->validate([
             'name'=>['required','string','min:2','max:190'],
-            'document'=>['nullable','string','max:20'],
+            'trade_name'=>['nullable','string','max:190'],
+            'document'=>['nullable','regex:/^(?:\d{11}|\d{14})$/'],
             'email'=>['nullable','email','max:255'],
             'phone'=>['nullable','string','max:25'],
             'state'=>['nullable','string','size:2'],
             'city'=>['nullable','string','max:120'],
-            'city_ibge_code'=>['nullable','string','max:10'],
+            'city_ibge_code'=>['nullable','regex:/^\d{7}$/'],
+            'zip_code'=>['nullable','regex:/^\d{8}$/'],
             'address'=>['nullable','string','max:190'],
             'address_number'=>['nullable','string','max:30'],
+            'address_complement'=>['nullable','string','max:120'],
+            'district'=>['nullable','string','max:120'],
             'state_registration'=>['nullable','string','max:40'],
             'ie_indicator'=>['required',Rule::in(['contributor','exempt','non_contributor'])],
+        ], [
+            'document.regex'=>'Informe um CPF ou CNPJ com 11 ou 14 números.',
+            'zip_code.regex'=>'Confira o CEP informado.',
+            'city_ibge_code.regex'=>'O código IBGE do município deve ter 7 números.',
         ]);
         $document=preg_replace('/\D/','',(string)($data['document']??''));
         if($document!==''){
@@ -94,6 +108,17 @@ class QuickCatalogController extends Controller
             'is_carrier'=>$kind==='carriers','final_consumer'=>false,
         ],$data));
         return response()->json(['item'=>$this->customerData($item),'message'=>'Cadastro salvo.'],201);
+    }
+
+    private function normalizeDigits(Request $request,array $fields): void
+    {
+        $normalized=[];
+        foreach($fields as $field){
+            if($request->filled($field)){
+                $normalized[$field]=preg_replace('/\D/','',(string)$request->input($field));
+            }
+        }
+        if($normalized!==[])$request->merge($normalized);
     }
 
     private function allowCreate(Request $request,string $permission): void
@@ -126,12 +151,12 @@ class QuickCatalogController extends Controller
     private function customerData(Customer $c): array
     {
         return [
-            'id'=>$c->id,'name'=>$c->name,'document'=>$c->document,
+            'id'=>$c->id,'name'=>$c->name,'trade_name'=>$c->trade_name,'document'=>$c->document,
             'foreign_id'=>$c->foreign_id,'final_consumer'=>(bool)$c->final_consumer,
             'state_registration'=>$c->state_registration,'ie_indicator'=>$c->ie_indicator,
             'state'=>$c->state,'city'=>$c->city,'city_ibge_code'=>$c->city_ibge_code,
             'address'=>$c->address,'address_number'=>$c->address_number,
-            'district'=>$c->district,'zip_code'=>$c->zip_code,
+            'address_complement'=>$c->address_complement,'district'=>$c->district,'zip_code'=>$c->zip_code,
             'country_code'=>$c->country_code,'country_name'=>$c->country_name,
         ];
     }
