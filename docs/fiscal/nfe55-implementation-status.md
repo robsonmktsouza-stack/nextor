@@ -1,4 +1,17 @@
-# NF-e modelo 55 — implantação controlada (23/10/2026)
+# NF-e modelo 55 — implantação controlada (24/10/2026)
+
+## Revisão da emissão e testes locais — 24/10/2026
+
+- Na instalação Windows, o usuário confirmou pelo `php artisan acbr:nfe-doctor`: ACBrLibNFe **1.5.0.490**, FFI PHP CLI habilitada, `NFE_Inicializar: OK` e 0 falhas. Isso **não** equivale a XML assinado e homologação autorizada.
+- Foi extraída e examinada a biblioteca Windows MT/Cdecl x64 do pacote fornecido: SHA-256 `a5c355c67913253dbce28c7f4157c4460321440a0e73cdc66fce28d938be47ba`; a DLL exporta realmente `NFE_VerificarAssinatura` e `NFE_ValidarRegrasdeNegocios`. O contêiner Linux não executa essa DLL Windows.
+- Em **Fiscal → NF-e → editar um rascunho validado**, o novo botão **Verificar na ACBr** chama `Nfe55PreflightService`: usa o CNPJ/certificado local, cria XML provisório, assina, valida XSD, valida regras fiscais e assinatura; verifica número, série, cNF e CNPJ; fecha a biblioteca e descarta o arquivo temporário.
+- **Essa pré-validação não reserva série/número, não grava XML assinado definitivo, não altera o rascunho, não enfileira e não chama a SEFAZ.** O número usado é somente uma simulação do próximo número configurado.
+- O worker de emissão agora também usa `NFE_VerificarAssinatura` antes do envio, além de `NFE_Validar` e `NFE_ValidarRegrasdeNegocios`. A chave é conferida nas posições corretas do CNPJ, modelo, série, número e cNF — não por pesquisa de substring.
+- Reprocessamento sem contato com SEFAZ: uma preparação que travou em `processing` há mais de 15 minutos só pode voltar à fila se **não houver chave, XML assinado ou registro de tentativa de transmissão**; reaproveita o número e cNF originais. Notas que podem ter sido transmitidas devem ser consultadas, não reenviadas.
+- Corrigida a interface que desabilitava inadvertidamente os botões **Consultar SEFAZ** e **Preparar novamente** em documentos somente-leitura. O DANFE modelo 55 força formato A4 retrato em vez de herdar configurações da NFC-e.
+- Testes de unidade/feature adicionados para os cenários de pré-validação, chave divergente e retomada após travamento; CI verifica sintaxe dos novos arquivos. **Ainda não foi possível executar PHPUnit neste ambiente do assistente nem ver um retorno de homologação real.**
+
+**Validação operacional ainda necessária no Windows:** abrir NF-e modelo 55 em homologação, salvar, clicar **Validar** e depois **Verificar na ACBr**. Em caso de erro, conferir `storage/logs/laravel.log` pelo identificador do rascunho; nunca copiar certificado nem senha. Só após XML assinado aprovado, usar **Emitir NF-e** e verificar worker fiscal, cStat e protocolo da SEFAZ. Não liberar produção automaticamente.
 
 ## Implementado em develop
 
