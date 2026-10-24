@@ -448,6 +448,7 @@
   const renderDuplicates=()=>{
     const body=byId('nfeDuplicateBody');
     if(!body) return;
+    if(duplicates.length && byId('nfePaymentInstallments'))byId('nfePaymentInstallments').open=true;
     body.innerHTML=duplicates.length
       ? duplicates.map((dup,index)=>`
           <tr>
@@ -464,6 +465,7 @@
 
   const renderExtraPayments=()=>{
     const body=byId('nfeExtraPaymentsBody');
+    if(extraPayments.length && byId('nfeSplitPayments'))byId('nfeSplitPayments').open=true;
     if(body){
       body.innerHTML=extraPayments.length ? extraPayments.map((p,i)=>`
         <tr><td>${esc(p.type||'')}</td><td>${esc(p.condition||'a_vista')}</td>
@@ -518,6 +520,12 @@
     if(otherField) otherField.hidden=type!=='99';
   };
   byId('nfePaymentType')?.addEventListener('change',updatePaymentVisibility);
+  // Parcelas são opcionais; só abrir o grupo quando há informação
+  // existente ou quando o operador escolhe pagamento a prazo.
+  byId('nfePaymentCondition')?.addEventListener('change',()=>{
+    const group=byId('nfePaymentInstallments');
+    if(group && getField('nfePaymentCondition')!=='a_vista')group.open=true;
+  });
 
   const itemDialog=byId('nfeItemDialog');
 
@@ -1198,6 +1206,9 @@
   toggleDelivery();
   updatePaymentVisibility();
   updateExtraPaymentFields();
+  if(getField('nfePaymentCondition')!=='a_vista' && byId('nfePaymentInstallments')){
+    byId('nfePaymentInstallments').open=true;
+  }
   renderExtraPayments();
   renderItems();
   renderReferences();
