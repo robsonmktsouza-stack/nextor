@@ -140,4 +140,49 @@ final class Nfe55EmissionFoundationTest extends TestCase
             'Erro(s) nas Regras de negócios da nota: 1 226-Rejeição: UF divergente'
         );
     }
+
+    public function test_acbr_preflight_refuses_unvalidated_draft_without_reserving_number(): void
+    {
+        $draft=$this->draft();
+        $draft->update(['validated_at'=>null]);
+        $this->actingAs(User::query()->where('email','nfe55@example.test')->firstOrFail());
+
+        $this->post(route('fiscal.nfe.preflight',$draft))->assertSessionHasErrors('nfe');
+
+        self::assertSame('draft',$draft->fresh()->status);
+        self::assertNull($draft->fresh()->document_number);
+        self::assertNull($draft->fresh()->transmission_attempted_at);
+    }
+
+    public function test_acbr_preflight_will_not_test_production_or_reserve_number(): void
+    {
+        $draft=$this->draft();
+        $draft->update(['environment'=>'production']);
+        $this->actingAs(User::query()->where('email','nfe55@example.test')->firstOrFail());
+
+        $this->post(route('fiscal.nfe.preflight',$draft))->assertSessionHasErrors('nfe');
+
+        self::assertSame('draft',$draft->fresh()->status);
+        self::assertNull($draft->fresh()->document_number);
+        self::assertNull($draft->fresh()->access_key);
+    }
+
+    public function test_signed_xml_must_match_issuer_even_when_key_contains_another_cnpj(): void
+    {
+        $draft=$this->draft();
+        $draft->update(['document_number'=>24,'numeric_code'=>12345678]);
+        $wrongIssuer='99999999000100';
+        $xml='<NFe xmlns="http://www.portalfiscal.inf.br/nfe">'
+            .'<infNFe Id="NFe292610'.$wrongIssuer.'550010000000241123456781">'
+            .'<ide><mod>55</mod><serie>1</serie><nNF>24</nNF><tpEmis>1</tpEmis>'
+            .'<tpAmb>2</tpAmb><cNF>12345678</cNF></ide>'
+            .'<emit><CNPJ>'.$wrongIssuer.'</CNPJ></emit></infNFe>'
+            .'<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"/>'
+            .'</NFe>';
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('XML assinado não corresponde');
+        app(\\App\\Services\\Fiscal\\Nfe55EmissionService::class)
+            ->verifySignedXml($xml,$draft,CompanySetting::current());
+    }
 }
