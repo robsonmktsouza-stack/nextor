@@ -92,17 +92,14 @@ class NfeDraftController extends Controller
 
     public function store(Request $request)
     {
-        $draft=DB::transaction(function() use($request) {
-            $draft=NfeDraft::query()->create(['user_id'=>auth()->id()]+$this->draftData($request));
-            $this->replaceItems($draft,$request);
-            return $draft->refresh();
-        });
+        $draft=$this->savePartialDraft($request);
 
         if($request->input('after_save')==='validate') {
-            return $this->validateAndRedirect($draft);
+            return $this->validateSavedForm($request,$draft);
         }
 
-        return redirect()->route('fiscal.nfe.edit',$draft)->with('success','Rascunho da NF-e salvo.');
+        return redirect()->route('fiscal.nfe.edit',$draft)
+            ->with('success','Rascunho salvo. Você pode continuar o preenchimento depois.');
     }
 
     public function edit(NfeDraft $nfeDraft)
@@ -113,17 +110,115 @@ class NfeDraftController extends Controller
 
     public function update(Request $request, NfeDraft $nfeDraft)
     {
-        DB::transaction(function() use($request,$nfeDraft) {
-            if($nfeDraft->status!=='draft')abort(409,'NF-e já encaminhada ao processamento fiscal.');
-            $nfeDraft->update($this->draftData($request)+['validated_at'=>null]);
-            $this->replaceItems($nfeDraft,$request);
-        });
+        abort_unless($nfeDraft->status==='draft',409,'Esta NF-e não pode mais ser editada.');
+        $this->savePartialDraft($request,$nfeDraft);
 
         if($request->input('after_save')==='validate') {
-            return $this->validateAndRedirect($nfeDraft->refresh());
+            return $this->validateSavedForm($request,$nfeDraft->refresh());
         }
 
-        return redirect()->route('fiscal.nfe.edit',$nfeDraft)->with('success','Rascunho da NF-e atualizado.');
+        return redirect()->route('fiscal.nfe.edit',$nfeDraft)
+            ->with('success','Rascunho atualizado. Nenhuma nota foi enviada.');
+    }
+
+    /** Guarda o trabalho, mesmo sem cliente, natureza, pagamento ou impostos completos.
+     *  Nenhum número fiscal é reservado e nenhuma NF-e é transmitida.
+     */
+    private function savePartialDraft(Request $request,?NfeDraft $existing=null): NfeDraft
+    {
+        $values=$request->except(['_token','_method','after_save']);
+        $snapshot=[];
+        if(count($values)>110){
+            throw ValidationException::withMessages(['nfe'=>'Há campos demais na nota. Reabra o formulário e tente novamente.']);
+        }
+        foreach($values as $key=>$value){
+            if(!preg_match('/^[a-z][a-z0-9_]{0,79}$/D',(string)$key) || (!is_string($value)&&!is_numeric($value)&&!is_bool($value)))continue;
+            if(strlen((string)$value)>400000){
+                throw ValidationException::withMessages(['nfe'=>'A nota contém informações muito extensas. Revise os itens.']);
+            }
+            $snapshot[$key]=(string)$value;
+        }
+
+        $rawItems=(string)($snapshot['items_json']??'[]');
+        $items=json_decode($rawItems,true);
+        if(!is_array($items)||!array_is_list($items)||count($items)>80){
+            throw ValidationException::withMessages(['items_json'=>'Não foi possível salvar a lista de produtos. Revise os itens.']);
+        }
+        $now=now()->toDateString();
+        $rawDate=(string)($snapshot['issue_date']??'');
+        $issueDate=preg_match('/^\\d{4}-\\d{2}-\\d{2}$/',$rawDate)===1
+            &&checkdate((int)substr($rawDate,5,2),(int)substr($rawDate,8,2),(int)substr($rawDate,0,4))
+            ? $rawDate:$now;
+        $rawType=(string)($snapshot['operation_type']??'');
+        $rawDestination=(string)($snapshot['destination']??'');
+        $candidateNature=(int)($snapshot['operation_nature_id']??0);
+        $candidateCustomer=(int)($snapshot['customer_id']??0);
+        $company=CompanySetting::current();
+
+        return DB::transaction(function()use($request,$existing,$snapshot,$items,$issueDate,$rawType,$rawDestination,$candidateNature,$candidateCustomer,$company){
+            $draft=$existing ? NfeDraft::query()->lockForUpdate()->findOrFail($existing->id) : new NfeDraft();
+            if($draft->exists && $draft->status!=='draft')abort(409,'Esta NF-e não pode mais ser editada.');
+
+            $nature=OperationNature::query()->find($candidateNature);
+            $customer=Customer::query()->find($candidateCustomer);
+            $changes=[
+                'status'=>'draft',
+                'user_id'=>auth()->id(),
+                'operation_nature_id'=>$nature?->id,
+                'customer_id'=>$customer?->id,
+                'operation_type'=>in_array($rawType,['outbound','inbound'],true)?$rawType:'outbound',
+                'destination'=>in_array($rawDestination,['internal','interstate','foreign'],true)?$rawDestination:'internal',
+                'issue_date'=>$issueDate,
+                'issue_time'=>$this->minuteTime($snapshot['issue_time']??null),
+                'series'=>$draft->series ?? (int)AppSetting::value('nfe','series',1),
+                'environment'=>$draft->environment ?: (string)AppSetting::value('nfe','environment','homologation'),
+                'validated_at'=>null,
+                'custom_fields'=>array_replace($draft->custom_fields??[],['_editor_form'=>$snapshot]),
+            ];
+            if(!$draft->exists){
+                $changes['environment']=(string)AppSetting::value('nfe','environment','homologation');
+                $changes['emitter_snapshot']=$company->only([
+                    'document','legal_name','trade_name','state_registration','state','city',
+                    'city_ibge_code','zip_code','address','address_number','district','crt',
+                ]);
+            }
+            $draft->fill($changes)->save();
+
+            // Produtos com os dados mínimos corretos passam a constar também da
+            // listagem e dos totais. Se um item ainda está incompleto, o
+            // snapshot integral continua salvo até a validação final.
+            if($items===[]){
+                $draft->items()->delete();
+                $draft->update(['totals'=>['total'=>0,'discount'=>0,'surcharge'=>0]]);
+            }else{
+                try {
+                    DB::transaction(fn()=> $this->replaceItems($draft,$request));
+                    $draft->update(['totals'=>$this->calculateTotals(
+                        $items,max(0,(float)($snapshot['discount']??0)),
+                        max(0,(float)($snapshot['surcharge']??0)),
+                        max(0,(float)($snapshot['freight_value']??0))
+                    )]);
+                } catch(ValidationException $error){
+                    // Ainda é rascunho, não uma nota pronta para envio.
+                    // Não descartar valores digitados por causa de um item parcial.
+                }
+            }
+            return $draft->refresh();
+        },3);
+    }
+
+    private function validateSavedForm(Request $request,NfeDraft $draft)
+    {
+        try {
+            DB::transaction(function()use($request,$draft){
+                $draft->update($this->draftData($request)+['validated_at'=>null]);
+                $this->replaceItems($draft,$request);
+            },3);
+        }catch(ValidationException $error){
+            return redirect()->route('fiscal.nfe.edit',$draft)
+                ->withErrors($error->errors())->withInput();
+        }
+        return $this->validateAndRedirect($draft->refresh());
     }
 
     public function validateDraft(NfeDraft $nfeDraft)
