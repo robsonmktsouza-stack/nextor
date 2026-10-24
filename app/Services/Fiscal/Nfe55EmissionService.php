@@ -31,7 +31,7 @@ final class Nfe55EmissionService
     {
         $company=CompanySetting::current();
         if(!$draft->validated_at)throw ValidationException::withMessages(['nfe'=>'Valide a NF-e antes de emitir.']);
-        $this->readiness($draft,$company);
+        $this->assertReady($draft,$company);
         $this->builder->build($draft,$company,1,12345678); // preflight without reserving a number
         $updated=DB::transaction(function()use($draft){
             $locked=NfeDraft::query()->lockForUpdate()->findOrFail($draft->id);
@@ -94,7 +94,7 @@ final class Nfe55EmissionService
             });
             if(!$draft)return;
             $company=CompanySetting::current();
-            $this->readiness($draft,$company);
+            $this->assertReady($draft,$company);
             $this->builder->build($draft,$company,(int)$draft->document_number,(int)$draft->numeric_code);
             $dir=storage_path('app/acbr-runtime');
             if(!is_dir($dir)&&!mkdir($dir,0700,true)&&!is_dir($dir)){
@@ -109,8 +109,9 @@ final class Nfe55EmissionService
             $service->sign();
             $service->validateXml();
             $service->validateBusinessRules();
+            $service->verifySignature();
             $signedXml=$service->getXml();
-            $signedKey=$this->signedKey($signedXml,$draft,$company);
+            $signedKey=$this->verifySignedXml($signedXml,$draft,$company);
             $base='fiscal/nfe55/'.$id;
             $signedPath=$base.'/signed.xml';
             if(!Storage::disk('local')->put($signedPath,$signedXml)){
@@ -219,7 +220,7 @@ final class Nfe55EmissionService
         $draft->update($attrs);
     }
 
-    private function signedKey(string $xml,NfeDraft $draft,CompanySetting $company): string
+    public function verifySignedXml(string $xml,NfeDraft $draft,CompanySetting $company,?int $number=null,?int $numericCode=null): string
     {
         if(strlen($xml)>6291456 || preg_match('/<!DOCTYPE|<!ENTITY/i',$xml))throw new RuntimeException('XML assinado inválido.');
         $dom=new DOMDocument();
@@ -230,18 +231,37 @@ final class Nfe55EmissionService
         $sig=$root->getElementsByTagNameNS('http://www.w3.org/2000/09/xmldsig#','Signature')->item(0);
         $key=$info instanceof DOMElement?substr($info->getAttribute('Id'),3):'';
         $get=static fn($tag)=>trim((string)$info?->getElementsByTagNameNS('http://www.portalfiscal.inf.br/nfe',$tag)->item(0)?->textContent);
-        if(!$sig||preg_match('/^\d{44}$/',$key)!==1
+        $cnpj=preg_replace('/\D/','',(string)$company->document);
+        $n=$number??(int)$draft->document_number;
+        $code=$numericCode??(int)$draft->numeric_code;
+        $emit=$info instanceof DOMElement
+            ?$info->getElementsByTagNameNS('http://www.portalfiscal.inf.br/nfe','emit')->item(0)
+            :null;
+        $xmlCnpj=$emit instanceof DOMElement
+            ?trim((string)$emit->getElementsByTagNameNS('http://www.portalfiscal.inf.br/nfe','CNPJ')->item(0)?->textContent)
+            :'';
+        if(!$sig||$root->namespaceURI!=='http://www.portalfiscal.inf.br/nfe'
+            ||preg_match('/^\d{44}$/',$key)!==1
+            ||!preg_match('/^\d{14}$/',$cnpj)
+            ||$xmlCnpj!==$cnpj
             ||$get('mod')!=='55'
             ||$get('tpAmb')!==($draft->environment==='production'?'1':'2')
-            ||(int)$get('nNF')!==(int)$draft->document_number
+            ||$get('tpEmis')!=='1'
+            ||(int)$get('nNF')!==$n
             ||(int)$get('serie')!==(int)$draft->series
-            ||!str_contains($key,preg_replace('/\D/','',(string)$company->document))){
+            ||(int)$get('cNF')!==$code
+            ||substr($key,6,14)!==$cnpj
+            ||substr($key,20,2)!=='55'
+            ||substr($key,22,3)!==sprintf('%03d',(int)$draft->series)
+            ||substr($key,25,9)!==sprintf('%09d',$n)
+            ||substr($key,34,1)!=='1'
+            ||substr($key,35,8)!==sprintf('%08d',$code)){
             throw new RuntimeException('XML assinado não corresponde à NF-e reservada.');
         }
         return $key;
     }
 
-    private function readiness(NfeDraft $draft,CompanySetting $company): void
+    public function assertReady(NfeDraft $draft,CompanySetting $company): void
     {
         $issue=$this->settings->transmissionIssue('nfe',(string)$draft->environment);
         if($issue)throw ValidationException::withMessages(['nfe'=>$issue]);
