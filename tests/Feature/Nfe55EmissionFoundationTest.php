@@ -182,7 +182,7 @@ final class Nfe55EmissionFoundationTest extends TestCase
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('XML assinado não corresponde');
-        app(\\App\\Services\\Fiscal\\Nfe55EmissionService::class)
+        app(\App\Services\Fiscal\Nfe55EmissionService::class)
             ->verifySignedXml($xml,$draft,CompanySetting::current());
     }
 }
