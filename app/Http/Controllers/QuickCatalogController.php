@@ -73,6 +73,35 @@ class QuickCatalogController extends Controller
             return response()->json(['item'=>$this->productData($item),'message'=>'Produto cadastrado.'],201);
         }
         $this->allowCreate($request,'customers');
+        $data=$this->validatedCustomerData($request);
+        $item=Customer::query()->create(array_merge([
+            'country_code'=>'1058','country_name'=>'BRASIL',
+            'is_supplier'=>$kind==='suppliers',
+            'is_customer'=>$kind==='customers',
+            'is_carrier'=>$kind==='carriers','final_consumer'=>false,
+        ],$data));
+        return response()->json(['item'=>$this->customerData($item),'message'=>'Cadastro salvo.'],201);
+    }
+
+    /**
+     * Atualiza somente os campos apresentados no cadastro contextual.
+     * As demais informações do cliente (LGPD, endereços alternativos,
+     * indicadores e vínculos) são preservadas.
+     */
+    public function updateCustomer(Request $request,Customer $customer): JsonResponse
+    {
+        $this->allowCreate($request,'customers');
+        abort_unless($customer->is_customer,404);
+        $data=$this->validatedCustomerData($request,$customer);
+        $customer->update($data);
+        return response()->json([
+            'item'=>$this->customerData($customer->refresh()),
+            'message'=>'Dados do cliente atualizados.',
+        ]);
+    }
+
+    private function validatedCustomerData(Request $request,?Customer $current=null): array
+    {
         $this->normalizeDigits($request,['document','zip_code','city_ibge_code']);
         $data=$request->validate([
             'name'=>['required','string','min:2','max:190'],
@@ -97,20 +126,14 @@ class QuickCatalogController extends Controller
         ]);
         $document=preg_replace('/\D/','',(string)($data['document']??''));
         if($document!==''){
-            $exists=Customer::query()->whereNotNull('document')->get(['id','document'])
+            $exists=Customer::query()->whereNotNull('document')->when($current,fn($query)=>$query->whereKeyNot($current->id))->get(['id','document'])
                 ->contains(fn($c)=>preg_replace('/\D/','',(string)$c->document)===$document);
             if($exists)throw ValidationException::withMessages([
                 'document'=>'Este CPF/CNPJ já está cadastrado. Pesquise e selecione o cadastro existente.',
             ]);
             $data['document']=$document;
         }
-        $item=Customer::query()->create(array_merge([
-            'country_code'=>'1058','country_name'=>'BRASIL',
-            'is_supplier'=>$kind==='suppliers',
-            'is_customer'=>$kind==='customers',
-            'is_carrier'=>$kind==='carriers','final_consumer'=>false,
-        ],$data));
-        return response()->json(['item'=>$this->customerData($item),'message'=>'Cadastro salvo.'],201);
+        return $data;
     }
 
     private function normalizeDigits(Request $request,array $fields): void
@@ -155,6 +178,7 @@ class QuickCatalogController extends Controller
     {
         return [
             'id'=>$c->id,'name'=>$c->name,'trade_name'=>$c->trade_name,'document'=>$c->document,
+            'email'=>$c->email,'phone'=>$c->phone,
             'foreign_id'=>$c->foreign_id,'final_consumer'=>(bool)$c->final_consumer,
             'state_registration'=>$c->state_registration,'ie_indicator'=>$c->ie_indicator,
             'state'=>$c->state,'city'=>$c->city,'city_ibge_code'=>$c->city_ibge_code,
