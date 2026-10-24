@@ -229,7 +229,11 @@
           option.dataset.name=updated.name;
         }
         updateRecipientPreview();
-        window.NextorNotify?.('Dados do cliente atualizados.',{
+        // A atualização do cadastro invalida a conferência fiscal anterior.
+        // O operador mantém o rascunho e precisa validá-lo novamente.
+        const emitButton=byId('nfeSubmitEmission');
+        if(emitButton)emitButton.disabled=true;
+        window.NextorNotify?.('Dados do cliente atualizados. Confira e valide a NF-e antes de emitir.',{
           type:'success',title:'Destinatário'
         });
       },
