@@ -569,6 +569,8 @@ $origins=[
       <button class="btn btn-primary" type="submit">Apenas salvar <kbd data-tutorial>Ctrl+S</kbd></button>
       <button class="btn btn-secondary" type="submit" name="after_save" value="validate" id="nfeValidateCurrent">Validar <kbd data-tutorial>F8</kbd></button>
       @if($isEditing && $draft->status==='draft')
+        <button class="btn btn-secondary" type="submit" form="nfePreflightForm"
+          @disabled(!$draft->validated_at) title="Assina e valida o XML na ACBr, sem transmitir ou reservar número">Verificar na ACBr</button>
         <button class="btn btn-success" type="submit" form="nfeEmitForm" id="nfeSubmitEmission"
           @disabled(!$draft->validated_at)>Emitir NF-e</button>
       @elseif($isEditing && $draft->status==='prepared')
@@ -598,6 +600,7 @@ $origins=[
   </div>
 @endif
 @if($isEditing)
+  <form id="nfePreflightForm" method="post" action="{{ route('fiscal.nfe.preflight',$draft) }}">@csrf</form>
   <form id="nfeEmitForm" method="post" action="{{ route('fiscal.nfe.emit',$draft) }}">@csrf</form>
   <form id="nfeConsultForm" method="post" action="{{ route('fiscal.nfe.consult',$draft) }}">@csrf</form>
   <form id="nfeRetryForm" method="post" action="{{ route('fiscal.nfe.retry',$draft) }}">@csrf</form>
