@@ -184,3 +184,24 @@
   .nfe-tax-review-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .nfe-tax-review-grid button{border-bottom:1px solid #dce4ea}
 }
+
+/* Edição do destinatário: ação no cabeçalho existente, sem moldura extra. */
+.nfe-recipient-panel .nfe-recipient-heading{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px;
+}
+.nfe-recipient-panel .nfe-recipient-heading h3{
+  margin:0;
+  font-size:14px;
+  font-weight:650;
+}
+.nfe-recipient-panel #nfeEditCustomer{
+  min-height:31px;
+  padding:6px 10px;
+  font-size:12px;
+  white-space:nowrap;
+}
+.nfe-recipient-panel #nfeEditCustomer[hidden]{display:none!important}
