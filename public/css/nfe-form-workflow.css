@@ -1,155 +1,144 @@
-/* NF-e: fluxo comercial contínuo e edição fiscal orientada.
-   Isolado dos demais módulos para não gerar overrides globais. */
+/* NF-e — extensão do design system do Lumeron.
+   Componentes base: editor-tabs/editor-tab, cms-card/card-header,
+   editor-panel, field, dialog-header e dialog-footer.
+   Evitar cores, sombras e estilos paralelos aos formulários do ERP. */
 
 .nfe-modal-layer .nfe-workspace-body{
-  background:#f6f8fa;
-  padding:14px 20px 22px;
-  scroll-behavior:smooth;
+  min-width:0;
+  padding:14px 18px 22px;
+  overflow-x:hidden;
+  overflow-y:auto;
+  background:#fff;
   scrollbar-gutter:stable;
 }
-.nfe-flow-nav{
+.nfe-workspace-body .nfe-flow-nav.editor-tabs{
   position:sticky;
   top:-14px;
-  z-index:15;
-  display:flex;
-  flex-wrap:wrap;
-  gap:5px;
-  align-items:center;
-  padding:9px 10px;
-  margin:0 0 16px;
-  border:1px solid #d6e0e7;
+  z-index:12;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:4px;
+  margin:0 0 14px;
+  padding:5px;
+  border:1px solid #c9d4de;
   border-radius:5px;
-  background:#fff;
-  box-shadow:0 3px 12px rgba(22,44,62,.075);
+  background:#dce4ea;
 }
-.nfe-flow-nav button{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  min-height:36px;
-  padding:7px 12px;
-  border:1px solid transparent;
-  border-radius:4px;
-  background:transparent;
-  color:#476073;
-  font-family:inherit;
+.nfe-flow-nav .editor-tab{
+  min-width:0;
+  height:39px;
+  padding:0 9px;
   font-size:12px;
-  font-weight:600;
-  cursor:pointer;
+  font-weight:650;
+  text-transform:none;
+  white-space:normal;
+  line-height:1.25;
 }
-.nfe-flow-nav button:hover,
-.nfe-flow-nav button:focus-visible{
-  color:#215f87;
-  background:#ebf4f8;
-  border-color:#c9dfed;
-  outline:0;
-}
-.nfe-flow-nav button span{
-  display:grid;
-  place-items:center;
-  width:21px;
-  height:21px;
-  flex:none;
-  border-radius:4px;
-  background:#e8f0f6;
-  color:#326481;
-  font-size:10px;
-  font-weight:700;
-}
-.nfe-workspace-body .nfe-form-section{
+.nfe-workspace-body .nfe-form-section.cms-card{
   display:flex;
   flex-direction:column;
-  gap:12px;
+  gap:0;
   min-width:0;
-  scroll-margin-top:84px;
-  margin-bottom:19px;
-}
-.nfe-form-section .nfe-flow-heading{
-  display:flex;
-  align-items:center;
-  min-height:49px;
-  padding:10px 14px;
-  border:1px solid #d6e1e7;
-  border-left:3px solid #327ca7;
-  border-radius:4px;
+  margin:0 0 14px;
+  padding:0 0 14px;
+  border-radius:6px;
   background:#fff;
+  scroll-margin-top:85px;
+  overflow:visible;
 }
-.nfe-form-section .nfe-flow-heading h3{
+.nfe-form-section .nfe-flow-heading.card-header{
+  flex:none;
+  min-height:58px;
+  margin:0 0 14px;
+  padding:12px 16px;
+  border-bottom:1px solid #dfe5ec;
+  border-radius:6px 6px 0 0;
+  background:#fbfcfe;
+}
+.nfe-form-section .nfe-flow-heading h2{
   margin:0;
-  color:#304f65;
   font-size:15px;
   font-weight:650;
-  line-height:1.2;
+  color:#344b5f;
+  line-height:1.35;
 }
 .nfe-form-section .nfe-flow-heading p{
   margin:3px 0 0;
-  color:#81919d;
-  font-size:11px;
-  font-weight:400;
+  font-size:12px;
+  line-height:1.4;
+  color:#8392a1;
 }
+.nfe-workspace-body .nfe-form-section>.nfe-emitter-summary,
+.nfe-workspace-body .nfe-form-section>.nfe-general-card,
 .nfe-workspace-body .nfe-form-section>.editor-panel,
 .nfe-workspace-body .nfe-form-section>.cms-card{
+  margin:0 16px 14px;
+  width:auto;
+  min-width:0;
+  max-width:calc(100% - 32px);
+  border-radius:5px;
+}
+.nfe-workspace-body .nfe-form-section>.editor-panel{
+  padding:18px 20px;
+  background:#f7f9fb;
+  border:1px solid #d7e0e7;
+  box-shadow:0 1px 2px #14243708;
+}
+.nfe-workspace-body .nfe-form-section>.cms-card{
+  border:1px solid #d8e0e8;
+  border-radius:5px;
+}
+.nfe-workspace-body .nfe-form-section>.nfe-emitter-summary,
+.nfe-workspace-body .nfe-form-section>.nfe-general-card{
+  border-color:#ccd8e1;
   background:#fff;
-  padding:16px 18px;
-  border:1px solid #dce4e9;
-  border-radius:4px;
-  box-shadow:none;
 }
-.nfe-workspace-body .nfe-form-section .nfe-general-card{
-  margin:0;
-  border-radius:4px;
-  border-color:#dbe4ea;
+.nfe-workspace-body .nfe-form-section>.editor-panel:last-child,
+.nfe-workspace-body .nfe-form-section>.nfe-emitter-summary:last-child,
+.nfe-workspace-body .nfe-form-section>.nfe-general-card:last-child{
+  margin-bottom:0;
 }
-.nfe-workspace-body .nfe-form-section .nfe-emitter-summary{
-  margin:0;
-  background:#fff;
-  box-shadow:none;
+.nfe-workspace-body .nfe-form-section .field>span{
+  color:#465767;
+  font-weight:600;
 }
-.nfe-workspace-body .nfe-form-section .editor-grid{row-gap:13px}
-.nfe-workspace-body .nfe-form-section .field>span{font-weight:650}
-
-/* Editor de item: acordes curtos, abertos em fluxo vertical.
-   Os detalhes opcionais permanecem acessíveis mas não dominam a tela. */
+/* Detalhes do item — editor-panel nativo, não um segundo tema. */
 .nfe-modal-layer .nfe-item-dialog{
-  width:min(1150px,calc(100vw - 36px));
-  max-height:calc(100dvh - 28px);
-  height:min(830px,calc(100dvh - 28px));
-}
-.nfe-modal-layer .nfe-item-dialog>.dialog-header{
-  min-height:57px;
-  padding:14px 20px;
-}
-.nfe-modal-layer .nfe-item-dialog>.dialog-header h2{
-  font-size:16px;
-  font-weight:650;
+  width:min(1180px,calc(100vw - 40px));
+  height:min(820px,calc(100dvh - 40px));
+  max-height:calc(100dvh - 40px);
 }
 .nfe-modal-layer .nfe-item-body{
-  display:block;
-  padding:14px 18px 22px;
-  background:#f5f7f9;
+  min-width:0;
+  padding:14px 18px 20px;
+  background:#fff;
   scrollbar-gutter:stable;
   overscroll-behavior:contain;
 }
-.nfe-item-intro{
+.nfe-item-body .nfe-item-intro.card-header{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:14px;
-  padding:14px 17px;
-  margin-bottom:12px;
-  border:1px solid #d7e1e8;
-  border-radius:4px;
+  flex-wrap:wrap;
+  gap:12px;
+  min-height:66px;
+  padding:12px 16px;
+  margin:0 0 12px;
+  border:1px solid #d8e0e8;
+  border-radius:5px;
   background:#fff;
 }
-.nfe-item-intro strong{
-  font-size:14px;
+.nfe-item-intro.card-header h2{
+  margin:0;
+  color:#344b5f;
+  font-size:15px;
   font-weight:650;
-  color:#36566e;
 }
-.nfe-item-intro p{
-  margin:4px 0 0;
-  font-size:11px;
-  color:#7d8b98;
+.nfe-item-intro.card-header p{
+  margin:3px 0 0;
+  color:#8996a5;
+  font-size:12px;
+  font-weight:400;
+  line-height:1.4;
 }
 .nfe-item-intro-total{
   display:flex;
@@ -157,173 +146,132 @@
   flex-direction:column;
   align-items:flex-end;
   gap:2px;
+  border-left:1px solid #e4e9ef;
   padding-left:18px;
-  border-left:1px solid #e2e9ef;
-  white-space:nowrap;
-}
-.nfe-item-intro-total small{
-  font-size:10px;
-  color:#738796;
-}
-.nfe-item-intro-total strong{
-  color:#245d7c;
-  font-size:17px;
-  font-weight:700;
   font-variant-numeric:tabular-nums;
 }
-.nfe-item-section{
-  min-width:0;
+.nfe-item-intro-total small{font-size:11px;color:#8390a1}
+.nfe-item-intro-total strong{font-size:18px;font-weight:700;color:#263547}
+.nfe-item-body .nfe-item-section.editor-panel{
+  display:block;
   margin:0 0 10px;
+  padding:0;
+  border:1px solid #d7e0e7;
+  border-radius:5px;
+  background:#f7f9fb;
+  box-shadow:0 1px 2px #14243708;
   overflow:hidden;
-  border:1px solid #d5e0e7;
-  border-radius:4px;
-  background:#fff;
-  scroll-margin-top:12px;
 }
 .nfe-item-section-heading{
   display:flex;
   align-items:center;
-  gap:11px;
-  min-height:58px;
-  padding:10px 15px;
-  background:#fff;
-  color:#37566a;
-  cursor:pointer;
+  gap:10px;
+  min-height:56px;
+  padding:10px 16px;
   list-style:none;
-  user-select:none;
+  cursor:pointer;
+  background:#f7f9fb;
 }
 .nfe-item-section-heading::-webkit-details-marker{display:none}
 .nfe-item-section-heading:hover,
 .nfe-item-section-heading:focus-visible{
-  background:#f3f8fb;
+  background:#eef4f8;
   outline:0;
 }
 .nfe-item-section[open]>.nfe-item-section-heading{
-  border-bottom:1px solid #dce5ea;
-  background:#edf3f7;
+  border-bottom:1px solid #d7e0e7;
+  background:#eaf0f4;
 }
 .nfe-section-index{
-  flex:none;
   display:grid;
+  flex:0 0 26px;
+  width:26px;
+  height:26px;
   place-items:center;
-  width:28px;
-  height:28px;
-  border:1px solid #bdd4e3;
-  border-radius:4px;
   background:#fff;
+  border:1px solid #c9d4de;
+  border-radius:4px;
+  color:#496679;
   font-size:11px;
-  font-weight:700;
-  color:#376c8b;
-  font-variant-numeric:tabular-nums;
+  font-weight:650;
 }
 .nfe-section-label{
   display:flex;
-  flex:1 1 auto;
+  flex:1;
   min-width:0;
   flex-direction:column;
-  gap:3px;
+  gap:2px;
 }
-.nfe-section-label strong{
-  color:#314f64;
-  font-size:13px;
-  font-weight:650;
-}
-.nfe-section-label small{
-  font-size:11px;
-  font-weight:400;
-  color:#81909c;
-}
+.nfe-section-label strong{font-size:13px;font-weight:650;color:#344b5f}
+.nfe-section-label small{font-size:11px;font-weight:400;color:#8392a1}
 .nfe-section-caret{
+  flex:0 0 8px;
   width:8px;
   height:8px;
-  flex:none;
-  border-right:1.7px solid #708697;
-  border-bottom:1.7px solid #708697;
+  margin:0 3px 4px;
+  border-right:1.5px solid #738697;
+  border-bottom:1.5px solid #738697;
   transform:rotate(45deg);
-  margin:0 5px 5px;
 }
 .nfe-item-section[open] .nfe-section-caret{
   transform:rotate(225deg);
-  margin-top:6px;
+  margin-top:5px;
   margin-bottom:0;
 }
 .nfe-item-section-content{
   display:flex;
-  min-width:0;
   flex-direction:column;
-  gap:13px;
-  padding:16px 18px 18px;
+  gap:14px;
+  padding:17px 20px 18px;
+  min-width:0;
 }
 .nfe-item-section-content>.editor-panel{
-  min-width:0;
-  margin:0;
   padding:0;
+  margin:0;
   border:0;
-  border-radius:0;
   background:transparent;
   box-shadow:none;
 }
-.nfe-item-section-content>.editor-panel + .editor-panel{
-  padding-top:15px;
-  border-top:1px solid #e1e9ee;
+.nfe-item-section-content>.editor-panel+.editor-panel{
+  border-top:1px solid #dce3e9;
+  padding-top:14px;
 }
 .nfe-item-section-content>.editor-panel h3{
   margin:0 0 12px;
-  color:#4b687d;
-  font-size:12.5px;
-  font-weight:650;
+  color:#344b5f;
+  font-size:14px;
 }
-.nfe-item-section-content .editor-grid{
-  gap:14px 13px;
-}
-.nfe-item-section-content .field{
-  gap:6px;
-}
-.nfe-item-section-content .field>span{
-  color:#566c7e;
-  font-size:11px;
-  font-weight:650;
-}
-.nfe-item-section-content .field :is(input,select,textarea){
-  min-height:38px;
-  border-radius:4px;
-}
-.nfe-item-section-content .readonly-field{
-  min-height:38px;
-  display:flex;
-  align-items:center;
-  border-style:solid;
-  border-color:#dce5eb;
-  background:#f2f6f8;
-  font-variant-numeric:tabular-nums;
-}
-.nfe-tax-review{
-  padding:13px 15px 15px;
-  margin:13px 0 12px;
-  border:1px solid #d1dde5;
-  border-radius:4px;
-  background:#fff;
+.nfe-item-section-content .editor-grid{gap:14px 16px}
+.nfe-item-section-content .readonly-field{border-style:solid}
+.nfe-item-body .nfe-tax-review.editor-panel{
+  margin:0 0 10px;
+  padding:16px 18px;
+  border:1px solid #d7e0e7;
+  border-radius:5px;
+  background:#f7f9fb;
+  box-shadow:0 1px 2px #14243708;
 }
 .nfe-tax-review-heading{
   display:flex;
-  align-items:baseline;
   flex-wrap:wrap;
+  align-items:baseline;
   gap:9px;
-  margin:0 0 12px;
+  margin-bottom:13px;
 }
-.nfe-tax-review-heading strong{
-  color:#31546b;
+.nfe-tax-review-heading h3{
+  margin:0;
   font-size:14px;
   font-weight:650;
+  color:#344b5f;
 }
 .nfe-tax-review-heading span{
   font-size:11px;
-  color:#85929c;
+  color:#8392a1;
 }
 .nfe-tax-review-grid{
   display:grid;
   grid-template-columns:repeat(5,minmax(0,1fr));
-  gap:8px;
+  gap:9px;
 }
 .nfe-tax-review-grid button{
   display:flex;
@@ -334,63 +282,48 @@
   justify-content:center;
   gap:5px;
   padding:10px 12px;
-  border:1px solid #d5e0e7;
+  border:1px solid #cfd8e2;
   border-radius:4px;
-  background:#f2f7fa;
-  cursor:pointer;
+  background:#fff;
+  font-family:inherit;
   text-align:left;
+  cursor:pointer;
 }
 .nfe-tax-review-grid button:hover,
 .nfe-tax-review-grid button:focus-visible{
-  border-color:#9dc3dc;
-  background:#eaf3f9;
+  border-color:#8cb5d2;
+  background:#eef4f8;
   outline:0;
 }
 .nfe-tax-review-grid button small{
-  font-size:10px;
-  font-weight:650;
-  color:#647d8f;
-  letter-spacing:.02em;
-}
-.nfe-tax-review-grid button strong{
-  color:#315c75;
-  font-size:12px;
-  font-weight:700;
-  overflow-wrap:anywhere;
-  line-height:1.35;
-}
-.nfe-tax-review-grid button.nfe-tax-needs-review{
-  background:#fff9ee;
-  border-color:#eadcc3;
-}
-.nfe-tax-review-grid button.nfe-tax-needs-review strong{
-  color:#956b34;
+  color:#7c8b9a;
+  font-size:11px;
   font-weight:600;
 }
-.nfe-item-dialog>.dialog-footer{
-  padding:11px 20px;
-  min-height:65px;
+.nfe-tax-review-grid button strong{
+  color:#344b5f;
+  font-size:13px;
+  line-height:1.35;
+  font-weight:650;
+  overflow-wrap:anywhere;
 }
-@media(max-width:1040px){
-  .nfe-flow-nav button{padding:7px 9px}
+.nfe-tax-review-grid button.nfe-tax-needs-review{border-color:#d4dce4}
+.nfe-tax-review-grid button.nfe-tax-needs-review strong{color:#8392a1;font-weight:500}
+.nfe-item-dialog>.dialog-footer{min-height:62px}
+@media(max-width:1100px){
+  .nfe-workspace-body .nfe-flow-nav.editor-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}
   .nfe-tax-review-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 @media(max-width:760px){
-  .nfe-modal-layer .nfe-workspace-body{padding:9px 11px 18px}
-  .nfe-flow-nav{top:-9px;gap:3px;padding:7px}
-  .nfe-flow-nav button{padding:6px 7px;font-size:11px}
-  .nfe-flow-nav button span{width:18px;height:18px}
+  .nfe-modal-layer .nfe-workspace-body{padding:10px}
+  .nfe-workspace-body .nfe-flow-nav.editor-tabs{top:-10px;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .nfe-workspace-body .nfe-form-section>.nfe-emitter-summary,
+  .nfe-workspace-body .nfe-form-section>.nfe-general-card,
   .nfe-workspace-body .nfe-form-section>.editor-panel,
-  .nfe-workspace-body .nfe-form-section>.cms-card{padding:12px}
+  .nfe-workspace-body .nfe-form-section>.cms-card{margin:0 10px 10px;max-width:calc(100% - 20px)}
+  .nfe-workspace-body .nfe-form-section>.editor-panel{padding:12px}
   .nfe-modal-layer .nfe-item-dialog{width:100vw;height:100dvh;max-height:100dvh}
   .nfe-modal-layer .nfe-item-body{padding:10px}
-  .nfe-item-intro{padding:12px;align-items:flex-start}
-  .nfe-item-intro-total{padding-left:10px}
   .nfe-item-section-content{padding:12px}
   .nfe-tax-review-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-}
-@media(max-width:440px){
-  .nfe-flow-nav button span{display:none}
-  .nfe-item-intro p{max-width:210px}
-  .nfe-tax-review-grid{grid-template-columns:1fr 1fr}
 }
