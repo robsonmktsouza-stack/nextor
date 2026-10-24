@@ -808,6 +808,25 @@
       notes:getField('nfeItemNotes'),
     };
     const defaults=productDefaults(product);
+    const sameSavedProduct=currentIndex!==''
+      &&String(items[Number(currentIndex)]?.product_id)===String(product.id);
+    // Reabrir/selecionar o mesmo produto não deve apagar tributos ou
+    // informações específicas que já foram conferidos manualmente.
+    if(sameSavedProduct){
+      const tax=normalizeTax(defaults.tax_data||{});
+      for(const [key,id] of Object.entries(taxFields)){
+        const value=getField(id);
+        if(value!=='')tax[key]=value;
+      }
+      defaults.tax_data=tax;
+      const special={...(defaults.special_data||{})};
+      for(const [key,id] of Object.entries(specialFields)){
+        const value=getField(id);
+        if(value!=='')special[key]=value;
+      }
+      special.petroleum_derived=!!byId('nfeSpecialPetroleum')?.checked;
+      defaults.special_data=special;
+    }
     for(const [key,value] of Object.entries(manualFields)){
       if(value!=='' && value!==null)defaults[key]=value;
     }
