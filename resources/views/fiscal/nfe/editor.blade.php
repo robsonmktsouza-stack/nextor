@@ -986,7 +986,7 @@ $origins=[
 @endsection
 
 @push('scripts')
-<script src="{{ asset('js/nfe-editor.js') }}"></script>
+<script src="{{ asset('js/nfe-editor.js') }}?v={{ filemtime(public_path('js/nfe-editor.js')) }}"></script>
 @if($isEditing)
 <script>
 document.addEventListener('DOMContentLoaded',()=>{
