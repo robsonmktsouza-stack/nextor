@@ -152,6 +152,30 @@ class NfeEditorTest extends TestCase
         self::assertStringContainsString("flowBody.scrollTo({top,behavior:'smooth'})",$script);
     }
 
+    public function test_payment_form_progressively_discloses_advanced_fields_without_removing_them(): void
+    {
+        $this->actingAs($this->admin());
+        $this->company();
+
+        $this->get(route('fiscal.nfe.create'))->assertOk()
+            ->assertSee('id="nfePaymentType"',false)
+            ->assertSee('id="nfePaymentCondition"',false)
+            ->assertSee('id="nfePrimaryPaymentTotal"',false)
+            ->assertSee('id="nfeCardPanel" hidden',false)
+            ->assertSee('id="nfeOtherPaymentField" hidden',false)
+            ->assertSee('id="nfeSplitPayments"',false)
+            ->assertSee('id="nfePaymentInstallments"',false)
+            ->assertSee('id="nfeExtraPaymentIntegrationField" hidden',false)
+            ->assertSee('id="nfeExtraPaymentsBody"',false)
+            ->assertSee('id="nfeDuplicateBody"',false);
+
+        $css=(string)file_get_contents(public_path('css/nfe-form-workflow.css'));
+        $script=(string)file_get_contents(public_path('js/nfe-editor.js'));
+        self::assertStringContainsString('.nfe-modal-layer [hidden]{display:none!important}',$css);
+        self::assertStringContainsString("byId('nfePaymentInstallments').open=true",$script);
+        self::assertStringContainsString("byId('nfeSplitPayments').open=true",$script);
+    }
+
     public function test_new_nfe_uses_nextor_pattern_and_real_legacy_mapping(): void
     {
         $this->company();
