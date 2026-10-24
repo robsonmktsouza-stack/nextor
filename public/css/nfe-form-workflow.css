@@ -4,32 +4,43 @@
  * Nenhuma regra altera visibilidade/validação de dados fiscais.
  */
 .nfe-modal-layer{
-  --nfe-border:#e2e8ee;
-  --nfe-text:#34495d;
-  --nfe-muted:#7b8b98;
+  --nfe-border:#e7e9e1;
+  --nfe-text:#39463d;
+  --nfe-muted:#7a857a;
   --nfe-surface:#fff;
 }
 
 /* Apenas a janela recebe uma sombra discreta; nunca os painéis internos. */
 .app-root .nfe-modal-layer .nextor-modal-window{
-  border:1px solid #bfcbd6;
+  border:1px solid #d5dcd3;
   border-radius:5px;
   box-shadow:0 9px 26px rgba(17,35,52,.16);
 }
 .app-root .nfe-modal-layer .dialog-header{
   min-height:54px;
   padding:12px 18px;
+  background:#fffdf8;
+  color:#36453a;
+  border-bottom:1px solid #e3e9df;
   box-shadow:none;
 }
 .app-root .nfe-modal-layer .dialog-header h2{
+  color:#36453a;
   font-size:16px;
   font-weight:650;
+}
+.app-root .nfe-modal-layer .dialog-header .close-dialog{
+  color:#56695a;
+}
+.app-root .nfe-modal-layer .dialog-header .close-dialog:hover{
+  background:#edf5eb;
+  color:#276b51;
 }
 .app-root .nfe-modal-layer .dialog-footer{
   min-height:60px;
   padding:10px 17px;
   border-top:1px solid var(--nfe-border);
-  background:#fafbfd!important;
+  background:#fffefa!important;
   box-shadow:none!important;
 }
 .app-root .nfe-modal-layer .nfe-dialog-footer{
@@ -43,34 +54,34 @@
   background-image:none;
 }
 .app-root .nfe-modal-layer .dialog-footer .btn-primary{
-  background-color:#2b7fb8;
-  border-color:#2774a8;
+  background-color:#357b90;
+  border-color:#306b82;
   color:#fff;
 }
 .app-root .nfe-modal-layer .dialog-footer .btn-primary:hover:not(:disabled){
-  background-color:#246f9f;
+  background-color:#2c6e82;
 }
 .app-root .nfe-modal-layer .dialog-footer .btn-success{
-  background-color:#35a85c;
-  border-color:#329a55;
+  background-color:#36a85f;
+  border-color:#309756;
   color:#fff;
 }
 .app-root .nfe-modal-layer .dialog-footer .btn-success:hover:not(:disabled){
-  background-color:#2c944f;
+  background-color:#2d9455;
 }
 .app-root .nfe-modal-layer .dialog-footer :is(.btn-secondary,.btn-light){
   background-color:#fff;
-  border-color:#cdd8e1;
-  color:#495d6d;
+  border-color:#d6ded5;
+  color:#4b5b51;
 }
 .app-root .nfe-modal-layer .dialog-footer :is(.btn-secondary,.btn-light):hover:not(:disabled){
-  background-color:#f1f5f8;
+  background-color:#f4f7f1;
 }
 
 /* Limpeza dos controles: sem relevo/gradiente, foco ainda perceptível. */
 .app-root .nfe-modal-layer :is(.nfe-workspace-body,.nfe-item-body)
   .field :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]),select,textarea,.ui-select-trigger){
-  border:1px solid #cdd8e1;
+  border:1px solid #d6ded5;
   border-radius:4px;
   background-color:#fff;
   background-image:none;
@@ -79,19 +90,19 @@
 .app-root .nfe-modal-layer :is(.nfe-workspace-body,.nfe-item-body)
   .field :is(input,select,textarea,.ui-select-trigger):focus-visible{
   outline:0;
-  border-color:#498bb7;
+  border-color:#388875;
   box-shadow:0 0 0 2px rgba(58,126,173,.11);
 }
 .app-root .nfe-modal-layer :is(.nfe-workspace-body,.nfe-item-body)
   .field :is(input,select,textarea)[readonly],
 .app-root .nfe-modal-layer :is(.nfe-workspace-body,.nfe-item-body) .readonly-field{
-  border-color:#e0e7ed;
-  background-color:#f6f8fa;
-  color:#53697b;
+  border-color:#e5e9e1;
+  background-color:#f9faf6;
+  color:#606f63;
   box-shadow:none;
 }
 .app-root .nfe-modal-layer :is(.nfe-workspace-body,.nfe-item-body) .field>span{
-  color:#526575;
+  color:#58675b;
   font-weight:600;
 }
 .app-root .nfe-modal-layer :is(.nfe-workspace-body,.nfe-item-body)
@@ -109,14 +120,20 @@
   background-color:#fff;
 }
 .app-root .nfe-modal-layer :is(.nfe-workspace-body,.nfe-item-body)
-  .btn-primary{background-color:#2b7fb8;color:#fff}
+  .btn-primary{background-color:#357b90;color:#fff}
 .app-root .nfe-modal-layer :is(.nfe-workspace-body,.nfe-item-body)
-  .btn-success{background-color:#35a85c;color:#fff}
+  .btn-success{background-color:#36a85f;color:#fff}
 .app-root .nfe-modal-layer :is(.nfe-workspace-body,.nfe-item-body)
   .switch-field{
-  background:#f7f9fa;
-  border-color:#e0e7ec;
+  background:#fcfbf7;
+  border-color:#e5e9e1;
   box-shadow:none;
+}
+.app-root .nfe-modal-layer .switch-field input:checked + .switch-track{
+  background:#38a477;
+}
+.app-root .nfe-modal-layer .switch-field input:checked ~ strong{
+  color:#307453;
 }
 
 /* A navegação tem uma única linha divisória em vez de cinco botões altos. */
@@ -144,7 +161,7 @@
   scrollbar-width:thin;
   background:#fff;
   border:0;
-  border-bottom:1px solid #d9e2e9;
+  border-bottom:1px solid #e4e8df;
   border-radius:0;
   box-shadow:none;
 }
@@ -157,7 +174,7 @@
   border-bottom:2px solid transparent;
   border-radius:0;
   background:#fff;
-  color:#667789;
+  color:#68776b;
   font-size:12px;
   font-weight:600;
   box-shadow:none;
@@ -165,39 +182,39 @@
   transform:none;
 }
 .app-root #nfeEditorDialog .nfe-flow-nav .editor-tab:hover:not(.active){
-  background:#f7fafc;
-  color:#366785;
-  border-bottom-color:#b8cedd;
+  background:#f8faf5;
+  color:#387965;
+  border-bottom-color:#bad4c7;
   box-shadow:none;
 }
 .app-root #nfeEditorDialog .nfe-flow-nav .editor-tab.active,
 .app-root #nfeEditorDialog .nfe-flow-nav .editor-tab[aria-selected="true"]{
   background:#fff;
-  border-bottom-color:#2b7fbd;
-  color:#276e9c;
+  border-bottom-color:#32856d;
+  color:#2e7564;
   font-weight:700;
   box-shadow:none;
 }
 
 /* Um único nível de seções; cor apenas no título, não em painéis inteiros. */
 .app-root #nfeEditorDialog .nfe-form-section.cms-card{
-  --nfe-accent:#3b718f;
+  --nfe-accent:#467769;
   display:block;
   min-width:0;
   margin:0 0 23px;
   padding:0 0 19px;
   border:0;
-  border-bottom:1px solid #e3e9ee;
+  border-bottom:1px solid #e7eae3;
   border-radius:0;
   background:transparent;
   box-shadow:none;
   overflow:visible;
   scroll-margin-top:80px;
 }
-.app-root #nfeEditorDialog #nfe-section-items{--nfe-accent:#2b766c}
-.app-root #nfeEditorDialog #nfe-section-payment{--nfe-accent:#3b7862}
-.app-root #nfeEditorDialog #nfe-section-transport{--nfe-accent:#94734b}
-.app-root #nfeEditorDialog #nfe-section-other{--nfe-accent:#65748a}
+.app-root #nfeEditorDialog #nfe-section-items{--nfe-accent:#317c61}
+.app-root #nfeEditorDialog #nfe-section-payment{--nfe-accent:#417950}
+.app-root #nfeEditorDialog #nfe-section-transport{--nfe-accent:#9d7947}
+.app-root #nfeEditorDialog #nfe-section-other{--nfe-accent:#7b7d6f}
 .app-root #nfeEditorDialog .nfe-form-section .nfe-flow-heading.card-header{
   display:flex;
   align-items:center;
@@ -205,7 +222,7 @@
   margin:0 0 16px;
   padding:4px 0 9px;
   border:0;
-  border-bottom:1px solid #e9eef2;
+  border-bottom:1px solid #e9ece5;
   border-radius:0;
   background:transparent;
   box-shadow:none;
@@ -220,7 +237,7 @@
 .app-root #nfeEditorDialog .nfe-flow-heading p{
   margin:4px 0 0;
   font-size:11px;
-  color:#8a97a2;
+  color:#8a9488;
   line-height:1.35;
 }
 .app-root #nfeEditorDialog .nfe-form-section>:is(.editor-panel,.cms-card,.nfe-general-card,.nfe-emitter-summary){
@@ -230,7 +247,7 @@
   margin:0 0 16px;
   padding:13px 0;
   border:0;
-  border-bottom:1px solid #edf1f4;
+  border-bottom:1px solid #ecede7;
   border-radius:0;
   background:transparent;
   box-shadow:none;
@@ -250,11 +267,11 @@
   min-height:95px;
   border:0;
   border-radius:4px;
-  background:#f5f8fa;
+  background:#faf9f5;
   box-shadow:none;
 }
 .app-root #nfeEditorDialog .nfe-emitter-logo{
-  border-color:#edf1f4;
+  border-color:#ecede7;
 }
 .app-root #nfeEditorDialog .nfe-general-card{
   overflow:visible;
@@ -278,9 +295,9 @@
   border:0;
 }
 .app-root #nfeEditorDialog .nfe-recipient-panel #nfeRecipientSummary{
-  border:1px solid #e1e7ec;
+  border:1px solid #e7eae4;
   border-radius:4px;
-  background:#f8fafb;
+  background:#fcfbf7;
 }
 .app-root #nfeEditorDialog .nfe-recipient-heading{
   display:flex;
@@ -304,15 +321,15 @@
   border-collapse:collapse;
 }
 .app-root #nfeEditorDialog .nfe-form-section .cms-table thead th{
-  background:#f5f8fa;
+  background:#f6f8f2;
   border-top:0;
-  border-bottom:1px solid #dce5ec;
+  border-bottom:1px solid #e3e8df;
 }
 .app-root #nfeEditorDialog .nfe-form-section .cms-table td{
   background:#fff;
 }
 .app-root #nfeEditorDialog #nfeTotalInvoice{
-  color:#2b694f;
+  color:#2d764b;
   font-size:15px;
   font-weight:700;
 }
@@ -323,7 +340,7 @@
   margin-bottom:15px;
   padding:12px 0 17px;
   border:0;
-  border-bottom:1px solid #e8edf0;
+  border-bottom:1px solid #e9ede6;
   border-radius:0;
   background:transparent;
   box-shadow:none;
@@ -333,10 +350,10 @@
   display:flex;
   align-items:center;
   min-height:38px;
-  border:1px solid #d6e9dc;
+  border:1px solid #d4e9d7;
   border-radius:4px;
-  background:#f4faf6;
-  color:#2c714b;
+  background:#f4fcf5;
+  color:#317b50;
   font-variant-numeric:tabular-nums;
   font-weight:700;
 }
@@ -363,7 +380,7 @@
   gap:3px;
 }
 .nfe-payment-disclosure>summary strong{
-  color:#3d5769;
+  color:#4a624f;
   font-size:13px;
   font-weight:650;
 }
@@ -397,7 +414,7 @@
 .nfe-payment-disclosure-content .table-scroll{
   max-width:100%;
   overflow-x:auto;
-  border:1px solid #e5ebf0;
+  border:1px solid #e8ece4;
   border-radius:4px;
 }
 
@@ -417,12 +434,12 @@
   font-variant-numeric:tabular-nums;
 }
 .app-root #nfeItemDialog .nfe-item-header-actions span{
-  color:#dbe7ee;
+  color:#727f72;
   font-size:11px;
   white-space:nowrap;
 }
 .app-root #nfeItemDialog .nfe-item-header-actions strong{
-  color:#fff;
+  color:#27704c;
   font-size:15px;
   font-weight:700;
   white-space:nowrap;
@@ -464,7 +481,7 @@
   background:#f8fafc;
 }
 .app-root #nfeItemDialog .nfe-item-section[open]>.nfe-item-section-heading{
-  background:#f7f9fa;
+  background:#fbfaf7;
   border:0;
 }
 .app-root #nfeItemDialog .nfe-section-index{
@@ -488,12 +505,12 @@
   gap:2px;
 }
 .app-root #nfeItemDialog .nfe-section-label strong{
-  color:#3d5769;
+  color:#4a624f;
   font-size:13px;
   font-weight:650;
 }
 .app-root #nfeItemDialog .nfe-section-label small{
-  color:#8795a0;
+  color:#869184;
   font-size:11px;
   font-weight:400;
 }
@@ -502,8 +519,8 @@
   height:8px;
   flex:0 0 8px;
   margin:0 6px 5px 0;
-  border-right:1.5px solid #7d8c9a;
-  border-bottom:1.5px solid #7d8c9a;
+  border-right:1.5px solid #7d897e;
+  border-bottom:1.5px solid #7d897e;
   transform:rotate(45deg);
 }
 .app-root #nfeItemDialog .nfe-item-section[open] .nfe-section-caret{
@@ -528,12 +545,12 @@
 .app-root #nfeItemDialog .nfe-item-section-content>.editor-panel+.editor-panel{
   margin-top:5px;
   padding-top:17px;
-  border-top:1px solid #ecf0f3;
+  border-top:1px solid #eaeee6;
 }
 .app-root #nfeItemDialog .nfe-item-section-content h3{
   margin:0 0 13px;
   font-size:13px;
-  color:#3d5769;
+  color:#4a624f;
 }
 .app-root #nfeItemDialog .nfe-item-section-content .editor-grid{
   gap:19px 17px;
@@ -556,12 +573,12 @@
 }
 .nfe-tax-review-heading h3{
   margin:0;
-  color:#3d5769;
+  color:#4a624f;
   font-size:13px;
   font-weight:650;
 }
 .nfe-tax-review-heading span{
-  color:#8795a0;
+  color:#869184;
   font-size:11px;
 }
 .app-root #nfeItemDialog .nfe-tax-review-grid{
@@ -601,17 +618,17 @@
 .app-root #nfeItemDialog .nfe-tax-review-grid button small{
   font-size:11px;
   font-weight:600;
-  color:#7c8c99;
+  color:#7c887e;
 }
 .app-root #nfeItemDialog .nfe-tax-review-grid button strong{
   font-size:12px;
   font-weight:650;
   line-height:1.35;
   overflow-wrap:anywhere;
-  color:#3b5365;
+  color:#45584a;
 }
 .app-root #nfeItemDialog .nfe-tax-review-grid button.nfe-tax-needs-review strong{
-  color:#8997a2;
+  color:#879187;
   font-weight:500;
 }
 .app-root #nfeItemDialog .nfe-tax-review-grid button:focus-visible{
@@ -693,8 +710,8 @@
 .app-root #nfeEditorDialog .nfe-general-fields .nfe-flag-field .switch-field{
   min-height:34px;
   padding:5px 8px;
-  background:#f7f9fa;
-  border:1px solid #e3e9ee;
+  background:#fbfaf7;
+  border:1px solid #e7eae3;
   border-radius:4px;
 }
 .app-root #nfeEditorDialog .nfe-general-card .nfe-general-dates{
@@ -706,7 +723,7 @@
   margin:0;
   min-width:0;
   border:0;
-  border-top:1px solid #e7edf1;
+  border-top:1px solid #eaeee6;
   border-radius:0;
   background:transparent;
 }
@@ -775,8 +792,8 @@
   padding:7px 10px;
 }
 .app-root #nfeEditorDialog .nfe-totals-grid>.nfe-total-final .readonly-field{
-  background:#edf7f0;
-  border-color:#cfdfd5;
+  background:#f0faf2;
+  border-color:#cfe5d4;
 }
 .app-root #nfeEditorDialog #nfe-section-items>.cms-card{
   padding-top:0;
@@ -789,7 +806,7 @@
   box-shadow:none;
 }
 .app-root #nfeEditorDialog #nfe-section-items .table-scroll{
-  border:1px solid #e3e9ee;
+  border:1px solid #e7eae3;
   border-radius:4px;
   box-shadow:none;
 }
