@@ -794,11 +794,26 @@
   const applyProductToItemDialog=product=>{
     if(!product) return;
     const currentIndex=getField('nfeItemIndex');
-    const currentQty=Math.max(number(getField('nfeItemQuantity'))||1,0.0001);
-    const currentDimension=Math.max(number(getField('nfeItemDimensionQuantity'))||1,0.0001);
+    // Mudar o produto não pode apagar frete, desconto, pedido ou observações
+    // que o operador já digitou neste item.
+    const manualFields={
+      quantity:getField('nfeItemQuantity'),
+      dimension_quantity:getField('nfeItemDimensionQuantity'),
+      freight:getField('nfeItemFreight'),
+      insurance:getField('nfeItemInsurance'),
+      other_expenses:getField('nfeItemOtherExpenses'),
+      discount:getField('nfeItemDiscount'),
+      purchase_order:getField('nfeItemPurchaseOrder'),
+      purchase_order_item:getField('nfeItemPurchaseOrderItem'),
+      notes:getField('nfeItemNotes'),
+    };
     const defaults=productDefaults(product);
-    defaults.quantity=currentQty;
-    defaults.dimension_quantity=currentDimension;
+    for(const [key,value] of Object.entries(manualFields)){
+      if(value!=='' && value!==null)defaults[key]=value;
+    }
+    // Preservar preço unitário apenas quando o mesmo produto for reaberto.
+    if(String(getField('nfeItemProduct'))===String(product.id)
+       &&getField('nfeItemUnitPrice')!=='') defaults.unit_price=getField('nfeItemUnitPrice');
     populateItemDialog(defaults,currentIndex);
   };
 
@@ -1036,7 +1051,18 @@
     if(removeDuplicate){duplicates.splice(Number(removeDuplicate.dataset.nfeRemoveDuplicate),1);renderDuplicates();}
   });
 
-  byId('nfeDraftForm')?.addEventListener('submit',syncHidden);
+  byId('nfeDraftForm')?.addEventListener('submit',event=>{
+    syncHidden();
+    // Evita submissão dupla de um mesmo rascunho, inclusive em conexões lentas.
+    const button=event.submitter;
+    if(button && button.type==='submit'){
+      if(button.dataset.nfeSubmitting==='1'){
+        event.preventDefault();return;
+      }
+      button.dataset.nfeSubmitting='1';
+      button.disabled=true;
+    }
+  });
 
   const mainDialog=byId('nfeEditorDialog');
   document.body.classList.add('nfe-modal-open');
@@ -1070,7 +1096,9 @@
     if((event.ctrlKey||event.metaKey) && event.key.toLowerCase()==='s'){
       event.preventDefault();
       syncHidden();
-      byId('nfeDraftForm')?.requestSubmit();
+      const form=byId('nfeDraftForm');
+      const saveButton=byId('nfeSaveDraft');
+      if(form && saveButton)form.requestSubmit(saveButton);
       return;
     }
 
