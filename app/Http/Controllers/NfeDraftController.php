@@ -199,7 +199,7 @@ class NfeDraftController extends Controller
 
         $draft->update(['validated_at'=>now()]);
         return redirect()->route('fiscal.nfe.edit',$draft)
-            ->with('success','Rascunho validado estruturalmente. A validação fiscal final será executada pelo ACBr antes da emissão.');
+            ->with('success','Dados obrigatórios conferidos. Ao emitir, o sistema verificará a nota antes do envio.');
     }
 
     private function editor(NfeDraft $draft)
