@@ -1129,6 +1129,9 @@
   document.body.classList.add('nfe-modal-open');
 
   document.addEventListener('keydown',event=>{
+    // Um cadastro contextual é um <dialog> independente. Seus atalhos,
+    // inclusive Esc, não podem fechar a NF-e que continua sendo editada.
+    if(byId('erpCatalogDialog')?.open)return;
     if(readOnly() && ['F4','F6','F8'].includes(event.key)){
       event.preventDefault();return;
     }
