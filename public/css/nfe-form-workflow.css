@@ -19,22 +19,26 @@
 
 /* Apenas a janela recebe uma sombra discreta; nunca os painéis internos. */
 .app-root .nfe-modal-layer .nextor-modal-window{
-  border:1px solid #d5dcd3;
-  border-radius:5px;
-  box-shadow:0 9px 26px rgba(17,35,52,.16);
+  border:1px solid #cbd8d1;
+  border-radius:6px;
+  background:#fff;
+  box-shadow:0 12px 34px rgba(23,43,37,.13);
 }
 .app-root .nfe-modal-layer .dialog-header{
-  min-height:54px;
-  padding:12px 18px;
-  background:#fffdf8;
-  color:#36453a;
-  border-bottom:1px solid #e3e9df;
+  min-height:56px;
+  padding:12px 21px;
+  background:#fbfdfc;
+  color:#263a34;
+  border-bottom:1px solid #e0eae5;
+  border-left:3px solid #2b8b6a;
   box-shadow:none;
 }
 .app-root .nfe-modal-layer .dialog-header h2{
-  color:#36453a;
-  font-size:16px;
-  font-weight:650;
+  margin:0;
+  color:#263a34;
+  font-size:16.5px;
+  font-weight:700;
+  letter-spacing:-.015em;
 }
 .app-root .nfe-modal-layer .dialog-header .close-dialog{
   color:#56695a;
@@ -44,10 +48,10 @@
   color:#276b51;
 }
 .app-root .nfe-modal-layer .dialog-footer{
-  min-height:60px;
-  padding:10px 17px;
-  border-top:1px solid var(--nfe-border);
-  background:#fffefa!important;
+  min-height:62px;
+  padding:10px 18px;
+  border-top:1px solid #e2eae5;
+  background:#fcfdfc!important;
   box-shadow:none!important;
 }
 .app-root .nfe-modal-layer .nfe-dialog-footer{
@@ -61,20 +65,22 @@
   background-image:none;
 }
 .app-root .nfe-modal-layer .dialog-footer .btn-primary{
-  background-color:#357b90;
-  border-color:#306b82;
+  background-color:#287b72;
+  border-color:#287b72;
   color:#fff;
 }
 .app-root .nfe-modal-layer .dialog-footer .btn-primary:hover:not(:disabled){
-  background-color:#2c6e82;
+  background-color:#226b62;
+  border-color:#226b62;
 }
 .app-root .nfe-modal-layer .dialog-footer .btn-success{
-  background-color:#36a85f;
-  border-color:#309756;
+  background-color:#279e62;
+  border-color:#279e62;
   color:#fff;
 }
 .app-root .nfe-modal-layer .dialog-footer .btn-success:hover:not(:disabled){
-  background-color:#2d9455;
+  background-color:#218953;
+  border-color:#218953;
 }
 .app-root .nfe-modal-layer .dialog-footer :is(.btn-secondary,.btn-light){
   background-color:#fff;
@@ -160,30 +166,32 @@
   position:sticky;
   top:-12px;
   z-index:12;
-  min-height:43px;
-  gap:19px;
+  min-height:44px;
+  gap:7px;
   margin:0 0 18px;
-  padding:0 5px;
+  padding:0 3px;
   overflow-x:auto;
   scrollbar-width:thin;
   background:#fff;
   border:0;
-  border-bottom:1px solid #e4e8df;
+  border-bottom:1px solid #e2eae5;
   border-radius:0;
   box-shadow:none;
 }
 .app-root #nfeEditorDialog .nfe-flow-nav .editor-tab{
   flex:0 0 auto;
-  height:42px;
-  min-height:42px;
-  padding:0 9px;
+  height:43px;
+  min-height:43px;
+  padding:0 14px;
   border:0;
   border-bottom:2px solid transparent;
-  border-radius:0;
-  background:#fff;
-  color:#68776b;
-  font-size:12px;
+  border-radius:4px 4px 0 0;
+  background:transparent;
+  color:#64766b;
+  font-size:12.5px;
   font-weight:600;
+  letter-spacing:0;
+  text-transform:none;
   box-shadow:none;
   white-space:nowrap;
   transform:none;
@@ -196,9 +204,9 @@
 }
 .app-root #nfeEditorDialog .nfe-flow-nav .editor-tab.active,
 .app-root #nfeEditorDialog .nfe-flow-nav .editor-tab[aria-selected="true"]{
-  background:#fff;
-  border-bottom-color:#32856d;
-  color:#2e7564;
+  background:#f1f8f4;
+  border-bottom-color:#28896b;
+  color:#1e6b52;
   font-weight:700;
   box-shadow:none;
 }
@@ -236,16 +244,17 @@
 }
 .app-root #nfeEditorDialog .nfe-flow-heading h2{
   margin:0;
-  font-size:15px;
-  font-weight:650;
-  color:var(--nfe-accent);
+  font-size:15.5px;
+  font-weight:700;
+  letter-spacing:-.012em;
+  color:#2a4236;
   line-height:1.3;
 }
 .app-root #nfeEditorDialog .nfe-flow-heading p{
-  margin:4px 0 0;
-  font-size:11px;
-  color:#8a9488;
-  line-height:1.35;
+  margin:3px 0 0;
+  font-size:11.5px;
+  color:#77867b;
+  line-height:1.4;
 }
 .app-root #nfeEditorDialog .nfe-form-section>:is(.editor-panel,.cms-card,.nfe-general-card,.nfe-emitter-summary){
   min-width:0;
@@ -272,9 +281,9 @@
 }
 .app-root #nfeEditorDialog .nfe-document-summary{
   min-height:95px;
-  border:0;
-  border-radius:4px;
-  background:#faf9f5;
+  border:1px solid #dbeae0;
+  border-radius:5px;
+  background:#f4faf6;
   box-shadow:none;
 }
 .app-root #nfeEditorDialog .nfe-emitter-logo{
@@ -302,9 +311,9 @@
   border:0;
 }
 .app-root #nfeEditorDialog .nfe-recipient-panel #nfeRecipientSummary{
-  border:1px solid #e7eae4;
-  border-radius:4px;
-  background:#fcfbf7;
+  border:1px solid #dce7df;
+  border-radius:5px;
+  background:#f7faf8;
 }
 .app-root #nfeEditorDialog .nfe-recipient-heading{
   display:flex;
@@ -712,17 +721,17 @@
   gap:5px;
 }
 .app-root #nfeEditorDialog .nfe-general-fields .nfe-flag-field>span{
-  min-height:26px;
+  min-height:28px;
   display:flex;
   align-items:flex-end;
-  font-size:11px;
-  line-height:1.25;
+  font-size:11.5px;
+  line-height:1.3;
 }
 .app-root #nfeEditorDialog .nfe-general-fields .nfe-flag-field .switch-field{
   min-height:34px;
-  padding:5px 8px;
-  background:#fbfaf7;
-  border:1px solid #e7eae3;
+  padding:5px 9px;
+  background:#f8faf9;
+  border:1px solid #e1e9e3;
   border-radius:4px;
 }
 .app-root #nfeEditorDialog .nfe-general-card .nfe-general-dates{
@@ -881,5 +890,135 @@
   }
   .app-root #nfeItemDialog .nfe-item-section-content .editor-grid.cols-12>*{
     grid-column:1;
+  }
+}
+
+/* Hierarquia de leitura: maior contraste, sem criar mais molduras. */
+.app-root #nfeEditorDialog .nfe-emitter-name strong{
+  font-size:15px;
+  font-weight:750;
+  letter-spacing:-.01em;
+  color:#273c34;
+}
+.app-root #nfeEditorDialog .nfe-emitter-address,
+.app-root #nfeEditorDialog .nfe-emitter-docs{
+  color:#66766e;
+  font-size:11.5px;
+  line-height:1.4;
+}
+.app-root #nfeEditorDialog .nfe-emitter-docs b{
+  color:#425a4a;
+}
+.app-root #nfeEditorDialog :is(.nfe-emitter-edit,.nfe-clear-field,.nfe-section-toggle){
+  color:#247859;
+  text-decoration:none;
+}
+.app-root #nfeEditorDialog :is(.nfe-emitter-edit,.nfe-clear-field,.nfe-section-toggle):hover{
+  color:#165a43;
+  text-decoration:underline;
+}
+.app-root #nfeEditorDialog .nfe-document-summary>span{
+  color:#637d6b;
+  font-size:10px;
+}
+.app-root #nfeEditorDialog .nfe-document-summary>strong{
+  color:#276a4b;
+  font-size:15px;
+}
+.app-root #nfeEditorDialog .nfe-document-summary>div{
+  border-top-color:#dce9e0;
+}
+.app-root #nfeEditorDialog .nfe-recipient-heading h3,
+.app-root #nfeEditorDialog .nfe-form-section>.editor-panel>h3{
+  font-size:13.5px;
+  font-weight:700;
+  color:#34493d;
+}
+.app-root #nfeEditorDialog .nfe-recipient-panel #nfeRecipientSummary{
+  padding:9px 12px;
+  min-height:58px;
+  gap:5px;
+  line-height:1.35;
+}
+.app-root #nfeEditorDialog #nfeRecipientSummary>strong{
+  display:block;
+  color:#284639;
+  font-size:12.5px;
+  font-weight:700;
+  line-height:1.35;
+}
+.app-root #nfeEditorDialog #nfeRecipientSummary .nfe-recipient-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:3px 12px;
+  color:#596d60;
+  font-size:11.5px;
+  line-height:1.45;
+}
+.app-root #nfeEditorDialog #nfeRecipientSummary .nfe-recipient-meta>span{
+  display:inline;
+  min-width:0;
+}
+.app-root #nfeEditorDialog #nfeRecipientSummary .nfe-recipient-address{
+  display:block;
+  color:#6a7a70;
+  font-size:11.5px;
+  line-height:1.4;
+  overflow-wrap:anywhere;
+}
+.app-root .nfe-modal-layer :is(.nfe-workspace-body,.nfe-item-body) .field>span{
+  font-size:12px;
+  line-height:1.45;
+  color:#45584a;
+  font-weight:650;
+}
+.app-root .nfe-modal-layer :is(.nfe-workspace-body,.nfe-item-body) .field
+  :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),select,textarea,.ui-select-trigger){
+  font-size:13px;
+  color:#304138;
+}
+.app-root .nfe-modal-layer :is(.nfe-workspace-body,.nfe-item-body) .field
+  :is(input,select,textarea,.ui-select-trigger):focus{
+  outline:0;
+  border-color:#369578;
+  box-shadow:0 0 0 2px rgba(54,149,120,.12);
+}
+.app-root #nfeEditorDialog .nfe-form-section .nfe-recipient-panel{
+  padding-top:13px;
+  padding-bottom:12px;
+}
+.app-root #nfeEditorDialog .nfe-dialog-footer .nfe-dialog-status{
+  gap:10px;
+}
+.app-root #nfeEditorDialog .nfe-dialog-footer .nfe-dialog-status>strong{
+  color:#2a5b42;
+  font-size:15px;
+  font-weight:750;
+  font-variant-numeric:tabular-nums;
+}
+.app-root #nfeEditorDialog .nfe-dialog-footer .status.status-muted{
+  background:#edf1ee;
+  color:#576e5e;
+  border-radius:3px;
+  font-size:11px;
+  padding:3px 6px;
+}
+.app-root .nfe-modal-layer .dialog-footer :is(.btn,.btn-icon){
+  min-height:37px;
+  padding:8px 13px;
+  font-size:12px;
+  font-weight:650;
+}
+.app-root .nfe-modal-layer .dialog-footer :is(.btn,.btn-icon):focus-visible{
+  outline:2px solid #379573;
+  outline-offset:2px;
+}
+@media(max-width:760px){
+  .app-root #nfeEditorDialog .nfe-flow-nav .editor-tab{
+    padding:0 10px;
+    font-size:12px;
+  }
+  .app-root #nfeEditorDialog #nfeRecipientSummary .nfe-recipient-meta{
+    display:block;
   }
 }
