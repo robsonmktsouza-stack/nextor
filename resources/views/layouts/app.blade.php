@@ -19,7 +19,7 @@
 <script defer src="{{ asset('js/commercial-readonly.js') }}?v={{ filemtime(public_path('js/commercial-readonly.js')) }}"></script>
 <script defer src="{{ asset('js/erp.js') }}?v={{ filemtime(public_path('js/erp.js')) }}"></script>
 <script defer src="{{ asset('js/desktop-polish.js') }}?v={{ filemtime(public_path('js/desktop-polish.js')) }}"></script>
-<script defer src="{{ asset('js/fiscal-codes.js') }}"></script>
+<script defer src="{{ asset('js/fiscal-codes.js') }}?v={{ filemtime(public_path('js/fiscal-codes.js')) }}"></script>
 </head>
 @php
   $commercialLicense = request()->attributes->get('lumeron_commercial_license', []);
