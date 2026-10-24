@@ -312,9 +312,10 @@
   const generalToggle=byId('nfeGeneralFields');
   document.querySelector('[data-nfe-general-toggle]')?.addEventListener('click',event=>{
     if(!generalToggle) return;
-    const hidden=generalToggle.hidden;
-    generalToggle.hidden=!hidden;
-    event.currentTarget.textContent=hidden?'ocultar':'mostrar';
+    const wasHidden=generalToggle.hidden;
+    generalToggle.hidden=!wasHidden;
+    event.currentTarget.textContent=wasHidden?'Ocultar detalhes':'Mostrar detalhes';
+    event.currentTarget.setAttribute('aria-expanded',String(wasHidden));
   });
 
   const syncDateControl=(checkboxId,inputIds)=>{
@@ -324,7 +325,12 @@
     const apply=()=>{
       inputIds.forEach(id=>{
         const input=byId(id);
-        if(input) input.disabled=!checkbox.checked;
+        if(!input)return;
+        input.disabled=!checkbox.checked;
+        // Datas opcionais não ocupam uma coluna vazia quando desativadas.
+        // O valor permanece no formulário e reaparece se a opção for ligada.
+        const group=input.closest('[data-nfe-date-group]');
+        if(group)group.hidden=!checkbox.checked;
       });
     };
 
