@@ -594,10 +594,12 @@
     const subtotal=byId('nfeItemSubtotal');
     const quantity=number(getField('nfeItemQuantity'));
     const dimension=Math.max(number(getField('nfeItemDimensionQuantity'))||1,0);
-    if(subtotal) subtotal.textContent=money(Math.max(0,
-      quantity*dimension*number(getField('nfeItemUnitPrice'))
+    const total=money(Math.max(0,quantity*dimension*number(getField('nfeItemUnitPrice'))
         +number(getField('nfeItemFreight'))+number(getField('nfeItemInsurance'))
         +number(getField('nfeItemOtherExpenses'))-number(getField('nfeItemDiscount'))));
+    if(subtotal) subtotal.textContent=total;
+    const headerTotal=byId('nfeItemHeaderTotal');
+    if(headerTotal)headerTotal.textContent=total;
   };
   byId('nfeItemQuantity')?.addEventListener('input',updateItemSubtotal);
   byId('nfeItemDimensionQuantity')?.addEventListener('input',updateItemSubtotal);
@@ -605,18 +607,42 @@
   ['nfeItemFreight','nfeItemInsurance','nfeItemOtherExpenses','nfeItemDiscount']
     .forEach(id=>byId(id)?.addEventListener('input',updateItemSubtotal));
 
-  const switchItemTab=target=>{
-    document.querySelectorAll('[data-nfe-item-tab]').forEach(button=>{
-      button.classList.toggle('active',button.dataset.nfeItemTab===target);
-    });
-    document.querySelectorAll('[data-nfe-item-panel]').forEach(panel=>{
-      const active=panel.dataset.nfeItemPanel===target;
-      panel.classList.toggle('active',active);
-      panel.hidden=!active;
-    });
+  // Um único formulário rolável: grupos fiscais recolhíveis, sem perder
+  // valores de campos ocultos e sem trocar de aba para conferir o item.
+  const itemSections=[...itemDialog?.querySelectorAll('[data-nfe-item-panel]')||[]];
+  const openItemSection=(target,scroll=false)=>{
+    const section=itemSections.find(node=>node.dataset.nfeItemPanel===target);
+    if(!section)return;
+    section.open=true;
+    if(scroll)section.scrollIntoView({behavior:'smooth',block:'nearest'});
   };
-  document.querySelectorAll('[data-nfe-item-tab]').forEach(button=>{
-    button.addEventListener('click',()=>switchItemTab(button.dataset.nfeItemTab));
+  itemDialog?.querySelectorAll('[data-nfe-open-section]').forEach(button=>{
+    button.addEventListener('click',()=>openItemSection(button.dataset.nfeOpenSection,true));
+  });
+  const updateItemTaxSummary=()=>{
+    const summary=(id,value)=>{
+      const element=byId(id);
+      if(!element)return;
+      element.textContent=value||'Não informado';
+      element.closest('button')?.classList.toggle('nfe-tax-needs-review',!value);
+    };
+    const icms=getField('nfeTaxCsosn');
+    const cst=getField('nfeTaxIcmsCst');
+    summary('nfeTaxSummaryIcms',icms?'CSOSN '+icms:cst?'CST '+cst:'');
+    summary('nfeTaxSummaryPis',getField('nfeTaxPisCst')?'CST '+getField('nfeTaxPisCst'):'');
+    summary('nfeTaxSummaryCofins',getField('nfeTaxCofinsCst')?'CST '+getField('nfeTaxCofinsCst'):'');
+    summary('nfeTaxSummaryIpi',getField('nfeTaxIpiCst')?'CST '+getField('nfeTaxIpiCst'):'');
+    const ibs=getField('nfeTaxIbsCst'),cbs=getField('nfeTaxCbsCst');
+    summary('nfeTaxSummaryIbs',ibs||cbs
+      ?[ibs?'IBS '+ibs:null,cbs?'CBS '+cbs:null].filter(Boolean).join(' · ')
+      :'');
+  };
+  itemDialog?.addEventListener('input',updateItemTaxSummary);
+  itemDialog?.addEventListener('change',updateItemTaxSummary);
+  document.querySelectorAll('[data-nfe-jump]').forEach(button=>{
+    button.addEventListener('click',()=>{
+      byId(button.dataset.nfeJump)?.scrollIntoView({behavior:'smooth',block:'start'});
+    });
   });
 
   const clearItemDialog=()=>{
@@ -630,7 +656,10 @@
     const petroleum=byId('nfeSpecialPetroleum');
     if(petroleum) petroleum.checked=false;
     updateItemSubtotal();
-    switchItemTab('item-general');
+    updateItemTaxSummary();
+    itemSections.forEach(section=>{
+      section.open=['item-general','item-fiscal','item-icms','item-federal'].includes(section.dataset.nfeItemPanel);
+    });
   };
 
   const productDefaults=product=>{
@@ -720,6 +749,7 @@
 
     setField('nfeItemIndex',indexValue);
     updateItemSubtotal();
+    updateItemTaxSummary();
   };
 
   const openNewItem=()=>{
