@@ -10,6 +10,13 @@
   --nfe-surface:#fff;
 }
 
+/* Largura de leitura do editor principal. O fundo escurecido continua
+   cobrindo a viewport, mas o formulário fica centralizado e legível. */
+.app-root #nfeEditorDialog .nfe-workspace-dialog{
+  width:min(1200px,calc(100vw - 36px));
+  max-width:calc(100vw - 36px);
+}
+
 /* Apenas a janela recebe uma sombra discreta; nunca os painéis internos. */
 .app-root .nfe-modal-layer .nextor-modal-window{
   border:1px solid #d5dcd3;
@@ -641,6 +648,10 @@
   .app-root #nfeItemDialog .nfe-tax-review-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 @media(max-width:760px){
+  .app-root #nfeEditorDialog .nfe-workspace-dialog{
+    width:100vw;
+    max-width:100vw;
+  }
   .app-root .nfe-modal-layer .nextor-modal-window{
     border:0;
     border-radius:0;
