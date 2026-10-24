@@ -86,15 +86,16 @@ $origins=[
   </div>
 
   <div class="dialog-body nfe-workspace-body">
-    <div class="editor-tabs nfe-editor-tabs" data-tabs>
-      <button type="button" class="editor-tab active" data-tab-target="nfe-general">Dados gerais</button>
-      <button type="button" class="editor-tab" data-tab-target="nfe-items">Itens</button>
-      <button type="button" class="editor-tab" data-tab-target="nfe-transport">Transporte</button>
-      <button type="button" class="editor-tab" data-tab-target="nfe-payment">Pagamento</button>
-      <button type="button" class="editor-tab" data-tab-target="nfe-other">Referências / observações</button>
-    </div>
+    <nav class="nfe-flow-nav" aria-label="Seções da nota">
+      <button type="button" data-nfe-jump="nfe-section-general"><span>01</span> Dados gerais</button>
+      <button type="button" data-nfe-jump="nfe-section-items"><span>02</span> Produtos</button>
+      <button type="button" data-nfe-jump="nfe-section-payment"><span>03</span> Pagamento</button>
+      <button type="button" data-nfe-jump="nfe-section-transport"><span>04</span> Transporte</button>
+      <button type="button" data-nfe-jump="nfe-section-other"><span>05</span> Informações adicionais</button>
+    </nav>
 
-    <section class="editor-tab-panel active" data-tab-panel="nfe-general">
+    <section class="editor-tab-panel nfe-form-section" id="nfe-section-general">
+      <header class="nfe-flow-heading"><div><h3>Dados gerais</h3><p>Natureza da operação, emitente e destinatário</p></div></header>
       <div class="nfe-emitter-summary">
         <div class="nfe-emitter-logo">
           @if($company->logo_path)
@@ -345,7 +346,8 @@ $origins=[
       </div>
     </section>
 
-    <section class="editor-tab-panel" data-tab-panel="nfe-items" hidden>
+    <section class="editor-tab-panel nfe-form-section" id="nfe-section-items">
+      <header class="nfe-flow-heading"><div><h3>Produtos e valores</h3><p>Mercadorias, tributação e totais</p></div></header>
       <div class="cms-card">
         <div class="grid-actionbar">
           <div class="grid-actions-left">
@@ -382,7 +384,8 @@ $origins=[
       </div>
     </section>
 
-    <section class="editor-tab-panel" data-tab-panel="nfe-transport" hidden>
+    <section class="editor-tab-panel nfe-form-section" id="nfe-section-transport">
+      <header class="nfe-flow-heading"><div><h3>Transporte</h3><p>Frete, transportador e volumes</p></div></header>
       <div class="editor-panel">
         <h3>Transportadora e frete</h3>
         <div class="editor-grid cols-12">
@@ -427,7 +430,8 @@ $origins=[
       </div>
     </section>
 
-    <section class="editor-tab-panel" data-tab-panel="nfe-payment" hidden>
+    <section class="editor-tab-panel nfe-form-section" id="nfe-section-payment">
+      <header class="nfe-flow-heading"><div><h3>Pagamento</h3><p>Forma de pagamento e vencimentos</p></div></header>
       <div class="editor-panel">
         <div class="editor-grid cols-12">
           <label class="field col-4"><span>Tipo de pagamento *</span>
@@ -532,7 +536,8 @@ $origins=[
       </div>
     </section>
 
-    <section class="editor-tab-panel" data-tab-panel="nfe-other" hidden>
+    <section class="editor-tab-panel nfe-form-section" id="nfe-section-other">
+      <header class="nfe-flow-heading"><div><h3>Informações adicionais</h3><p>Documentos referenciados e observações</p></div></header>
       <div class="editor-panel">
         <div class="delivery-card-title">
           <div><h3>Documentos referenciados</h3></div>
