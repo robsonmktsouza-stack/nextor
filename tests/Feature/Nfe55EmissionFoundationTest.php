@@ -10,6 +10,9 @@ use App\Models\OperationNature;
 use App\Models\User;
 use App\Services\Fiscal\Nfe55IniBuilder;
 use App\Services\Fiscal\ACBr\ACBrNFeService;
+use App\Jobs\ProcessNfe55Job;
+use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\WithConfiguredCompany;
 use Tests\TestCase;
@@ -184,5 +187,41 @@ final class Nfe55EmissionFoundationTest extends TestCase
         $this->expectExceptionMessage('XML assinado não corresponde');
         app(\App\Services\Fiscal\Nfe55EmissionService::class)
             ->verifySignedXml($xml,$draft,CompanySetting::current());
+    }
+
+    public function test_stalled_pre_transmission_job_can_be_requeued_using_original_number(): void
+    {
+        $draft=$this->draft();
+        $draft->update(['status'=>'processing','document_number'=>41,'numeric_code'=>12345678]);
+        DB::table($draft->getTable())->where('id',$draft->id)
+            ->update(['updated_at'=>now()->subMinutes(20)]);
+        Bus::fake();
+
+        $this->actingAs(User::query()->where('email','nfe55@example.test')->firstOrFail());
+        $this->post(route('fiscal.nfe.retry',$draft))
+            ->assertRedirect(route('fiscal.nfe.edit',$draft));
+        Bus::assertDispatched(ProcessNfe55Job::class);
+        $draft->refresh();
+        self::assertSame('queued',$draft->status);
+        self::assertSame(41,$draft->document_number);
+        self::assertSame(12345678,$draft->numeric_code);
+        self::assertNull($draft->transmission_attempted_at);
+    }
+
+    public function test_stalled_job_with_any_transmission_attempt_cannot_be_requeued(): void
+    {
+        $draft=$this->draft();
+        $draft->update([
+            'status'=>'processing','document_number'=>41,'numeric_code'=>12345678,
+            'transmission_attempted_at'=>now()->subMinutes(20),
+        ]);
+        DB::table($draft->getTable())->where('id',$draft->id)
+            ->update(['updated_at'=>now()->subMinutes(20)]);
+        Bus::fake();
+
+        $this->actingAs(User::query()->where('email','nfe55@example.test')->firstOrFail());
+        $this->post(route('fiscal.nfe.retry',$draft))->assertSessionHasErrors('nfe');
+        Bus::assertNotDispatched(ProcessNfe55Job::class);
+        self::assertSame('processing',$draft->fresh()->status);
     }
 }
