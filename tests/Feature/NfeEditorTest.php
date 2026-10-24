@@ -150,6 +150,9 @@ class NfeEditorTest extends TestCase
         self::assertStringContainsString('.nfe-modal-layer .nfe-workspace-dialog .nfe-workspace-body',$css);
         self::assertStringNotContainsString('.nfe-modal-layer .nfe-fixed-shell',$css);
         self::assertStringContainsString("flowBody.scrollTo({top,behavior:'smooth'})",$script);
+        $layoutCss=(string)file_get_contents(public_path('css/nfe-form-workflow.css'));
+        self::assertStringContainsString('width:min(1200px,calc(100vw - 36px))',$layoutCss);
+        self::assertStringContainsString('width:100vw;',$layoutCss);
     }
 
     public function test_compact_invoice_layout_keeps_every_essential_field_and_all_sections(): void
