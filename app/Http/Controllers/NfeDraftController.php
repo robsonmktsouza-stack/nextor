@@ -324,6 +324,17 @@ class NfeDraftController extends Controller
             $errors[]='Informe ao menos um documento referenciado.';
         }
 
+        if($draft->inform_issue_datetime && (!$draft->issue_date || !$draft->issue_time)) {
+            $errors[]='Informe data e horário de emissão.';
+        }
+        if($draft->inform_exit_datetime && (!$draft->exit_date || !$draft->exit_time)) {
+            $errors[]='Informe data e horário de saída ou entrada.';
+        }
+        if($draft->operation_type!=='outbound' || $draft->destination!=='internal'
+            || $draft->purpose!=='normal') {
+            $errors[]='Esta combinação de operação, destino e finalidade ainda não está disponível para emissão.';
+        }
+
         if($draft->items->isEmpty()) $errors[]='Adicione pelo menos um produto.';
 
         foreach($draft->items as $item) {
