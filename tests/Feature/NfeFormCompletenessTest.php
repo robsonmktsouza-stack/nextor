@@ -80,6 +80,7 @@ final class NfeFormCompletenessTest extends TestCase
     {
         $this->init();
         $response=$this->post(route('fiscal.nfe.store'),[
+            'draft_action'=>'draft',
             'operation_type'=>'outbound',
             'destination'=>'internal',
             'issue_date'=>'2026-10-24',
@@ -111,6 +112,7 @@ final class NfeFormCompletenessTest extends TestCase
         [, $nature,$customer]=$this->init();
         $data=$this->data($nature,$customer);
         unset($data['customer_id']);
+        $data['draft_action']='draft';
         $data['after_save']='validate';
         $response=$this->post(route('fiscal.nfe.store'),$data);
         $draft=NfeDraft::query()->firstOrFail();
