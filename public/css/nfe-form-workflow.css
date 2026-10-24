@@ -1,395 +1,649 @@
-/* Lumeron NF-e — hierarquia visual com os componentes do ERP.
- * Azul continua sendo a cor da navegação e das ações principais.
- * Acentos suaves diferenciam grupos sem novos cartões, contornos
- * chamativos ou alteração dos controles compartilhados do sistema.
+/* Lumeron NF-e — acabamento plano, exclusivo do editor modelo 55.
+ * Utiliza campos, botões e grid do ERP. Uma borda leve ou espaçamento
+ * separa seções; não cria cartões dentro de cartões ou sombras internas.
+ * Nenhuma regra altera visibilidade/validação de dados fiscais.
  */
-.nfe-modal-layer .nfe-workspace-body{
+.nfe-modal-layer{
+  --nfe-border:#e2e8ee;
+  --nfe-text:#34495d;
+  --nfe-muted:#7b8b98;
+  --nfe-surface:#fff;
+}
+
+/* Apenas a janela recebe uma sombra discreta; nunca os painéis internos. */
+.app-root .nfe-modal-layer .nextor-modal-window{
+  border:1px solid #bfcbd6;
+  border-radius:5px;
+  box-shadow:0 9px 26px rgba(17,35,52,.16);
+}
+.app-root .nfe-modal-layer .dialog-header{
+  min-height:54px;
+  padding:12px 18px;
+  box-shadow:none;
+}
+.app-root .nfe-modal-layer .dialog-header h2{
+  font-size:16px;
+  font-weight:650;
+}
+.app-root .nfe-modal-layer .dialog-footer{
+  min-height:60px;
+  padding:10px 17px;
+  border-top:1px solid var(--nfe-border);
+  background:#fafbfd!important;
+  box-shadow:none!important;
+}
+.app-root .nfe-modal-layer .nfe-dialog-footer{
+  box-shadow:none!important;
+}
+.app-root .nfe-modal-layer .dialog-footer :is(.btn,.btn-icon),
+.app-root .nfe-modal-layer .dialog-footer :is(.btn,.btn-icon):hover:not(:disabled){
+  box-shadow:none;
+  transform:none;
+  border-radius:4px;
+  background-image:none;
+}
+.app-root .nfe-modal-layer .dialog-footer .btn-primary{
+  background-color:#2b7fb8;
+  border-color:#2774a8;
+  color:#fff;
+}
+.app-root .nfe-modal-layer .dialog-footer .btn-primary:hover:not(:disabled){
+  background-color:#246f9f;
+}
+.app-root .nfe-modal-layer .dialog-footer .btn-success{
+  background-color:#35a85c;
+  border-color:#329a55;
+  color:#fff;
+}
+.app-root .nfe-modal-layer .dialog-footer .btn-success:hover:not(:disabled){
+  background-color:#2c944f;
+}
+.app-root .nfe-modal-layer .dialog-footer :is(.btn-secondary,.btn-light){
+  background-color:#fff;
+  border-color:#cdd8e1;
+  color:#495d6d;
+}
+.app-root .nfe-modal-layer .dialog-footer :is(.btn-secondary,.btn-light):hover:not(:disabled){
+  background-color:#f1f5f8;
+}
+
+/* Limpeza dos controles: sem relevo/gradiente, foco ainda perceptível. */
+.app-root .nfe-modal-layer :is(.nfe-workspace-body,.nfe-item-body)
+  .field :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]),select,textarea,.ui-select-trigger){
+  border:1px solid #cdd8e1;
+  border-radius:4px;
+  background-color:#fff;
+  background-image:none;
+  box-shadow:none;
+}
+.app-root .nfe-modal-layer :is(.nfe-workspace-body,.nfe-item-body)
+  .field :is(input,select,textarea,.ui-select-trigger):focus-visible{
+  outline:0;
+  border-color:#498bb7;
+  box-shadow:0 0 0 2px rgba(58,126,173,.11);
+}
+.app-root .nfe-modal-layer :is(.nfe-workspace-body,.nfe-item-body)
+  .field :is(input,select,textarea)[readonly],
+.app-root .nfe-modal-layer :is(.nfe-workspace-body,.nfe-item-body) .readonly-field{
+  border-color:#e0e7ed;
+  background-color:#f6f8fa;
+  color:#53697b;
+  box-shadow:none;
+}
+.app-root .nfe-modal-layer :is(.nfe-workspace-body,.nfe-item-body) .field>span{
+  color:#526575;
+  font-weight:600;
+}
+.app-root .nfe-modal-layer :is(.nfe-workspace-body,.nfe-item-body)
+  :is(.btn,.btn-icon,.input-action-button){
+  box-shadow:none;
+  background-image:none;
+}
+.app-root .nfe-modal-layer :is(.nfe-workspace-body,.nfe-item-body)
+  :is(.btn,.btn-icon,.input-action-button):hover:not(:disabled){
+  box-shadow:none;
+  transform:none;
+}
+.app-root .nfe-modal-layer :is(.nfe-workspace-body,.nfe-item-body)
+  :is(.btn-secondary,.btn-light,.btn-icon,.input-action-button){
+  background-color:#fff;
+}
+.app-root .nfe-modal-layer :is(.nfe-workspace-body,.nfe-item-body)
+  .btn-primary{background-color:#2b7fb8;color:#fff}
+.app-root .nfe-modal-layer :is(.nfe-workspace-body,.nfe-item-body)
+  .btn-success{background-color:#35a85c;color:#fff}
+.app-root .nfe-modal-layer :is(.nfe-workspace-body,.nfe-item-body)
+  .switch-field{
+  background:#f7f9fa;
+  border-color:#e0e7ec;
+  box-shadow:none;
+}
+
+/* A navegação tem uma única linha divisória em vez de cinco botões altos. */
+.app-root #nfeEditorDialog .nfe-workspace-body{
   min-width:0;
-  padding:14px 18px 24px;
+  padding:12px 19px 25px;
   background:#fff;
   overflow-x:hidden;
   overflow-y:auto;
   scrollbar-gutter:stable;
+  overscroll-behavior:contain;
 }
-.nfe-workspace-body .nfe-flow-nav.editor-tabs{
-  position:sticky;top:-14px;z-index:12;
-  display:grid;grid-template-columns:repeat(5,minmax(0,1fr));
-  gap:4px;margin:0 0 18px;padding:5px;
-  border:1px solid #c9d4de;border-radius:5px;background:#eaf0f5;
-}
-.nfe-flow-nav .editor-tab{
-  min-width:0;height:39px;padding:0 8px;
-  font-size:12px;font-weight:650;text-transform:none;line-height:1.25;
-}
-.nfe-workspace-body .nfe-form-section.cms-card{
-  --nfe-accent:#316f9d;
-  --nfe-tint:#f0f6fb;
-  --nfe-divider:#d2e4f1;
-  display:block;min-width:0;margin:0 0 23px;padding:0 0 12px;
-  border:0;border-bottom:1px solid #dfe5eb;border-radius:0;
-  background:transparent;box-shadow:none;overflow:visible;
-  scroll-margin-top:78px;
-}
-/* Tons distintos por assunto, sem abandonar o azul corporativo. */
-.nfe-workspace-body #nfe-section-items{
-  --nfe-accent:#18766c;--nfe-tint:#eef8f5;--nfe-divider:#cee9e1;
-}
-.nfe-workspace-body #nfe-section-payment{
-  --nfe-accent:#347c54;--nfe-tint:#f0f8f2;--nfe-divider:#d5e8d8;
-}
-.nfe-workspace-body #nfe-section-transport{
-  --nfe-accent:#966c36;--nfe-tint:#fcf7ec;--nfe-divider:#f0e2c8;
-}
-.nfe-workspace-body #nfe-section-other{
-  --nfe-accent:#66718e;--nfe-tint:#f4f5fa;--nfe-divider:#dfe3ed;
-}
-.nfe-form-section .nfe-flow-heading.card-header{
-  display:flex;align-items:center;
-  min-height:48px;margin:0 0 14px;padding:8px 12px 9px;
-  border:0;border-left:3px solid var(--nfe-accent);
-  border-bottom:1px solid var(--nfe-divider);border-radius:0 3px 3px 0;
-  background:var(--nfe-tint);box-shadow:none;
-}
-.nfe-form-section .nfe-flow-heading h2{
-  margin:0;color:var(--nfe-accent);font-size:15px;font-weight:650;line-height:1.35;
-}
-.nfe-form-section .nfe-flow-heading p{
-  margin:2px 0 0;color:#627180;font-size:11.5px;line-height:1.4;
-}
-.nfe-workspace-body .nfe-form-section>.nfe-general-card,
-.nfe-workspace-body .nfe-form-section>.editor-panel,
-.nfe-workspace-body .nfe-form-section>.cms-card,
-.nfe-workspace-body .nfe-form-section>.nfe-emitter-summary{
-  width:auto;max-width:none;min-width:0;margin:0 0 13px;
-  border-radius:4px;box-shadow:none;
-}
-.nfe-workspace-body .nfe-form-section>.editor-panel,
-.nfe-workspace-body .nfe-form-section>.cms-card{
-  padding:14px 16px;background:#fbfcfd;
-  border:1px solid #dde5eb;
-}
-/* As caixas seguem neutras; pontos de leitura recebem contraste pontual. */
-.nfe-workspace-body #nfe-section-payment>.editor-panel{
-  background:#f8fbf9;
-}
-.nfe-workspace-body #nfe-section-transport>.editor-panel{
-  background:#fdfbf7;
-}
-.nfe-workspace-body #nfe-section-other>.editor-panel{
-  background:#fafbfd;
-}
-.nfe-workspace-body #nfe-section-items>.cms-card{
+.app-root #nfeEditorDialog .nfe-flow-nav.editor-tabs{
+  display:flex;
+  align-items:stretch;
+  flex-wrap:nowrap;
+  position:sticky;
+  top:-12px;
+  z-index:12;
+  min-height:43px;
+  gap:19px;
+  margin:0 0 18px;
+  padding:0 5px;
+  overflow-x:auto;
+  scrollbar-width:thin;
   background:#fff;
+  border:0;
+  border-bottom:1px solid #d9e2e9;
+  border-radius:0;
+  box-shadow:none;
 }
-.nfe-workspace-body #nfe-section-items .cms-table thead{
-  background:#eef5f3;
+.app-root #nfeEditorDialog .nfe-flow-nav .editor-tab{
+  flex:0 0 auto;
+  height:42px;
+  min-height:42px;
+  padding:0 9px;
+  border:0;
+  border-bottom:2px solid transparent;
+  border-radius:0;
+  background:#fff;
+  color:#667789;
+  font-size:12px;
+  font-weight:600;
+  box-shadow:none;
+  white-space:nowrap;
+  transform:none;
 }
-.nfe-workspace-body #nfe-section-items #nfeTotalInvoice{
-  color:#236e4d;font-size:15px;font-weight:750;
+.app-root #nfeEditorDialog .nfe-flow-nav .editor-tab:hover:not(.active){
+  background:#f7fafc;
+  color:#366785;
+  border-bottom-color:#b8cedd;
+  box-shadow:none;
 }
-.nfe-workspace-body #nfe-section-items #nfeTotalInvoice::selection{
-  background:#c8ebdb;
-}
-.nfe-workspace-body .nfe-form-section>.nfe-general-card{
-  padding:0;border:0;background:transparent;
-}
-.nfe-workspace-body .nfe-form-section>.nfe-emitter-summary{
-  border:1px solid #d9e3eb;background:#fff;
-}
-.nfe-workspace-body .nfe-document-summary{
-  background:#f1f6fa;border-color:#d2e1ea;
-}
-.nfe-workspace-body .nfe-recipient-panel #nfeRecipientSummary{
-  background:#f0f6fb;border-color:#d1e1ef;
-}
-.nfe-workspace-body .nfe-form-section>.nfe-general-card .editor-panel,
-.nfe-workspace-body .nfe-form-section>.nfe-general-card .nfe-general-main{
-  border:0;box-shadow:none;border-radius:0;
-}
-.nfe-workspace-body .nfe-form-section>.nfe-general-card .nfe-general-dates{
-  border-radius:4px;background:#f3f6f8;
-}
-.nfe-workspace-body .nfe-form-section .field>span{
-  color:#465767;font-weight:600;
-}
-/* Editor de item: linhas expansíveis no lugar de cartões empilhados. */
-.nfe-modal-layer .nfe-item-dialog{
-  width:min(1180px,calc(100vw - 40px));
-  height:min(820px,calc(100dvh - 40px));
-  max-height:calc(100dvh - 40px);
-}
-.nfe-modal-layer .nfe-item-body{
-  padding:12px 18px 20px;background:#fff;
-  min-width:0;scrollbar-gutter:stable;overscroll-behavior:contain;
-}
-.nfe-item-body .nfe-item-intro.card-header{
-  display:flex;align-items:center;justify-content:space-between;
-  gap:12px;padding:5px 2px 13px;margin:0 0 6px;
-  border:0;border-bottom:1px solid #dce4ea;border-radius:0;
-  background:transparent;box-shadow:none;
-}
-.nfe-item-intro h2{margin:0;color:#344b5f;font-size:15px;font-weight:650}
-.nfe-item-intro p{margin:3px 0 0;color:#8392a1;font-size:11px;line-height:1.4}
-.nfe-item-intro-total{
-  display:flex;flex-direction:column;align-items:flex-end;gap:2px;
-  padding-left:15px;border-left:1px solid #dce4ea;
-}
-.nfe-item-intro-total small{font-size:11px;color:#8392a1}
-.nfe-item-intro-total strong{
-  font-size:17px;font-weight:700;color:#246c4b;font-variant-numeric:tabular-nums;
-}
-.nfe-item-body .nfe-item-section.editor-panel{
-  --nfe-item-accent:#316f9d;
-  --nfe-item-tint:#f0f6fb;
-  display:block;margin:0;padding:0;overflow:visible;
-  border:0;border-bottom:1px solid #dce4ea;
-  border-radius:0;background:#fff;box-shadow:none;
-}
-.nfe-item-body [data-nfe-item-panel="item-fiscal"]{
-  --nfe-item-accent:#18766c;--nfe-item-tint:#eef8f5;
-}
-.nfe-item-body [data-nfe-item-panel="item-icms"],
-.nfe-item-body [data-nfe-item-panel="item-federal"]{
-  --nfe-item-accent:#347c54;--nfe-item-tint:#f0f8f2;
-}
-.nfe-item-body [data-nfe-item-panel="item-difal"],
-.nfe-item-body [data-nfe-item-panel="item-specific"]{
-  --nfe-item-accent:#966c36;--nfe-item-tint:#fcf7ec;
-}
-.nfe-item-body [data-nfe-item-panel="item-ibscbs"]{
-  --nfe-item-accent:#66718e;--nfe-item-tint:#f4f5fa;
-}
-.nfe-item-section-heading{
-  display:flex;align-items:center;gap:10px;min-height:52px;
-  padding:9px 6px;list-style:none;cursor:pointer;
-  background:transparent;
-}
-.nfe-item-section-heading::-webkit-details-marker{display:none}
-.nfe-item-section-heading:hover,.nfe-item-section-heading:focus-visible{
-  background:#f3f7fa;outline:0;
-}
-.nfe-item-section[open]>.nfe-item-section-heading{
-  background:var(--nfe-item-tint);
-  border-left:3px solid var(--nfe-item-accent);
-  padding-left:3px;
-}
-.nfe-section-index{
-  display:grid;place-items:center;flex:0 0 24px;
-  width:24px;height:24px;border:1px solid #d4dde6;
-  border-radius:4px;background:#fff;
-  font-size:11px;font-weight:650;color:var(--nfe-item-accent);
-}
-.nfe-section-label{display:flex;flex:1;min-width:0;flex-direction:column;gap:2px}
-.nfe-section-label strong{font-size:13px;font-weight:650;color:var(--nfe-item-accent)}
-.nfe-section-label small{font-size:11px;font-weight:400;color:#8392a1}
-.nfe-section-caret{
-  flex:0 0 8px;width:8px;height:8px;margin:0 5px 4px 0;
-  border-right:1.5px solid #738697;border-bottom:1.5px solid #738697;
-  transform:rotate(45deg);
-}
-.nfe-item-section[open] .nfe-section-caret{transform:rotate(225deg);margin-top:5px;margin-bottom:0}
-.nfe-item-section-content{
-  display:flex;flex-direction:column;gap:14px;min-width:0;
-  padding:14px 8px 19px;
-}
-.nfe-item-section-content>.editor-panel{
-  margin:0;padding:0;border:0;border-radius:0;
-  background:transparent;box-shadow:none;
-}
-.nfe-item-section-content>.editor-panel+.editor-panel{
-  border-top:1px solid #e0e6ec;padding-top:14px;
-}
-.nfe-item-section-content>.editor-panel h3{
-  margin:0 0 12px;color:#344b5f;font-size:14px;
-}
-.nfe-item-section-content .editor-grid{gap:14px 16px}
-.nfe-item-section-content .readonly-field{border-style:solid}
-.nfe-item-body .nfe-tax-review.editor-panel{
-  margin:14px 0 6px;padding:12px 0 14px;
-  border:0;border-bottom:1px solid #dce4ea;
-  border-radius:0;background:#fff;box-shadow:none;
-}
-.nfe-tax-review-heading{
-  display:flex;align-items:baseline;flex-wrap:wrap;
-  gap:9px;margin:0 0 10px;
-}
-.nfe-tax-review-heading h3{margin:0;font-size:14px;font-weight:650;color:#344b5f}
-.nfe-tax-review-heading span{font-size:11px;color:#8392a1}
-.nfe-tax-review-grid{
-  display:grid;grid-template-columns:repeat(5,minmax(0,1fr));
-  gap:0;border:1px solid #dce4ea;border-radius:4px;overflow:hidden;
-}
-.nfe-tax-review-grid button{
-  display:flex;flex-direction:column;justify-content:center;
-  align-items:flex-start;min-width:0;min-height:56px;
-  gap:5px;padding:9px 12px;border:0;border-right:1px solid #dce4ea;
-  border-radius:0;background:#f8fafc;text-align:left;
-  font-family:inherit;cursor:pointer;
-}
-.nfe-tax-review-grid button:nth-child(1){background:#edf7f5}
-.nfe-tax-review-grid button:nth-child(2),
-.nfe-tax-review-grid button:nth-child(3){background:#f0f7f2}
-.nfe-tax-review-grid button:nth-child(4){background:#fcf7ec}
-.nfe-tax-review-grid button:nth-child(5){background:#f3f4fa}
-.nfe-tax-review-grid button:last-child{border-right:0}
-.nfe-tax-review-grid button:hover,.nfe-tax-review-grid button:focus-visible{
-  background:#e7f0f6;outline:2px solid #a5bfd3;outline-offset:-2px;
-}
-.nfe-tax-review-grid button small{font-size:11px;color:#7c8b9a;font-weight:600}
-.nfe-tax-review-grid button strong{
-  font-size:12.5px;color:#344b5f;font-weight:650;
-  line-height:1.35;overflow-wrap:anywhere;
-}
-.nfe-tax-review-grid .nfe-tax-needs-review strong{color:#8392a1;font-weight:500}
-@media(max-width:1100px){
-  .nfe-workspace-body .nfe-flow-nav.editor-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .nfe-tax-review-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
-}
-@media(max-width:760px){
-  .nfe-modal-layer .nfe-workspace-body{padding:9px}
-  .nfe-workspace-body .nfe-flow-nav.editor-tabs{top:-9px;grid-template-columns:repeat(2,minmax(0,1fr))}
-  .nfe-workspace-body .nfe-form-section>.editor-panel,
-  .nfe-workspace-body .nfe-form-section>.cms-card{padding:12px}
-  .nfe-modal-layer .nfe-item-dialog{width:100vw;height:100dvh;max-height:100dvh}
-  .nfe-modal-layer .nfe-item-body{padding:10px}
-  .nfe-item-section-content{padding:12px 4px}
-  .nfe-tax-review-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .nfe-tax-review-grid button{border-bottom:1px solid #dce4ea}
+.app-root #nfeEditorDialog .nfe-flow-nav .editor-tab.active,
+.app-root #nfeEditorDialog .nfe-flow-nav .editor-tab[aria-selected="true"]{
+  background:#fff;
+  border-bottom-color:#2b7fbd;
+  color:#276e9c;
+  font-weight:700;
+  box-shadow:none;
 }
 
-/* Edição do destinatário: ação no cabeçalho existente, sem moldura extra. */
-.nfe-recipient-panel .nfe-recipient-heading{
+/* Um único nível de seções; cor apenas no título, não em painéis inteiros. */
+.app-root #nfeEditorDialog .nfe-form-section.cms-card{
+  --nfe-accent:#3b718f;
+  display:block;
+  min-width:0;
+  margin:0 0 23px;
+  padding:0 0 19px;
+  border:0;
+  border-bottom:1px solid #e3e9ee;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  overflow:visible;
+  scroll-margin-top:80px;
+}
+.app-root #nfeEditorDialog #nfe-section-items{--nfe-accent:#2b766c}
+.app-root #nfeEditorDialog #nfe-section-payment{--nfe-accent:#3b7862}
+.app-root #nfeEditorDialog #nfe-section-transport{--nfe-accent:#94734b}
+.app-root #nfeEditorDialog #nfe-section-other{--nfe-accent:#65748a}
+.app-root #nfeEditorDialog .nfe-form-section .nfe-flow-heading.card-header{
+  display:flex;
+  align-items:center;
+  min-height:40px;
+  margin:0 0 16px;
+  padding:4px 0 9px;
+  border:0;
+  border-bottom:1px solid #e9eef2;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+}
+.app-root #nfeEditorDialog .nfe-flow-heading h2{
+  margin:0;
+  font-size:15px;
+  font-weight:650;
+  color:var(--nfe-accent);
+  line-height:1.3;
+}
+.app-root #nfeEditorDialog .nfe-flow-heading p{
+  margin:4px 0 0;
+  font-size:11px;
+  color:#8a97a2;
+  line-height:1.35;
+}
+.app-root #nfeEditorDialog .nfe-form-section>:is(.editor-panel,.cms-card,.nfe-general-card,.nfe-emitter-summary){
+  min-width:0;
+  width:100%;
+  max-width:none;
+  margin:0 0 16px;
+  padding:13px 0;
+  border:0;
+  border-bottom:1px solid #edf1f4;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+}
+.app-root #nfeEditorDialog .nfe-form-section>:is(.editor-panel,.cms-card,.nfe-general-card,.nfe-emitter-summary):last-child{
+  margin-bottom:0;
+  border-bottom:0;
+}
+.app-root #nfeEditorDialog .nfe-form-section .editor-grid{
+  row-gap:19px;
+  column-gap:18px;
+}
+.app-root #nfeEditorDialog .nfe-emitter-summary{
+  padding:10px 0 16px;
+}
+.app-root #nfeEditorDialog .nfe-document-summary{
+  min-height:95px;
+  border:0;
+  border-radius:4px;
+  background:#f5f8fa;
+  box-shadow:none;
+}
+.app-root #nfeEditorDialog .nfe-emitter-logo{
+  border-color:#edf1f4;
+}
+.app-root #nfeEditorDialog .nfe-general-card{
+  overflow:visible;
+}
+.app-root #nfeEditorDialog .nfe-general-card .nfe-section-title{
+  padding:6px 0;
+  min-height:34px;
+  border-bottom:0;
+  background:transparent;
+}
+.app-root #nfeEditorDialog .nfe-general-card .nfe-general-fields{
+  padding:12px 12px 12px 0;
+}
+.app-root #nfeEditorDialog .nfe-general-card .nfe-general-dates{
+  padding:12px;
+  border:0;
+  border-radius:4px;
+  background:#f7f9fb;
+}
+.app-root #nfeEditorDialog .nfe-general-card .nfe-general-layout{
+  border:0;
+}
+.app-root #nfeEditorDialog .nfe-recipient-panel #nfeRecipientSummary{
+  border:1px solid #e1e7ec;
+  border-radius:4px;
+  background:#f8fafb;
+}
+.app-root #nfeEditorDialog .nfe-recipient-heading{
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:12px;
-  margin-bottom:12px;
+  margin:0 0 13px;
 }
-.nfe-recipient-panel .nfe-recipient-heading h3{
+.app-root #nfeEditorDialog .nfe-recipient-heading h3{
   margin:0;
-  font-size:14px;
+  font-size:13px;
   font-weight:650;
 }
-.nfe-recipient-panel #nfeEditCustomer{
+.app-root #nfeEditorDialog #nfeEditCustomer{
   min-height:31px;
-  padding:6px 10px;
   font-size:12px;
-  white-space:nowrap;
+  padding:6px 10px;
 }
-.nfe-recipient-panel #nfeEditCustomer[hidden]{display:none!important}
-
-
-/* Pagamento — abordagem progressiva: forma e valor primeiro, detalhes somente
-   quando usados. Também corrige .field{display:flex} anulando [hidden]. */
-.nfe-modal-layer [hidden]{display:none!important}
-.nfe-workspace-body #nfe-section-payment>.editor-panel{
-  padding:13px 6px 18px;
-  margin:0 0 15px;
-  border:0;
-  border-bottom:1px solid #e1e7e9;
-  border-radius:0;
+.app-root #nfeEditorDialog #nfeEditCustomer[hidden]{display:none!important}
+.app-root #nfeEditorDialog .nfe-form-section .cms-table{
+  border-collapse:collapse;
+}
+.app-root #nfeEditorDialog .nfe-form-section .cms-table thead th{
+  background:#f5f8fa;
+  border-top:0;
+  border-bottom:1px solid #dce5ec;
+}
+.app-root #nfeEditorDialog .nfe-form-section .cms-table td{
   background:#fff;
+}
+.app-root #nfeEditorDialog #nfeTotalInvoice{
+  color:#2b694f;
+  font-size:15px;
+  font-weight:700;
+}
+
+/* Pagamento: apenas linhas leves; campos condicionais continuam acessíveis. */
+.nfe-modal-layer [hidden]{display:none!important}
+.app-root #nfeEditorDialog #nfe-section-payment>.editor-panel{
+  margin-bottom:15px;
+  padding:12px 0 17px;
+  border:0;
+  border-bottom:1px solid #e8edf0;
+  border-radius:0;
+  background:transparent;
   box-shadow:none;
 }
-.nfe-workspace-body #nfe-section-payment>.editor-panel:first-of-type{
-  padding-top:3px;
-}
-.nfe-workspace-body #nfe-section-payment>.editor-panel:last-child{
-  border-bottom:0;
-}
-.nfe-workspace-body #nfe-section-payment>.editor-panel>.editor-grid{
-  gap:18px 20px;
-}
-.nfe-workspace-body #nfe-section-payment .nfe-payment-value .readonly-field{
+.app-root #nfeEditorDialog #nfe-section-payment>.editor-panel:last-child{border-bottom:0}
+.app-root #nfeEditorDialog #nfe-section-payment .nfe-payment-value .readonly-field{
   display:flex;
   align-items:center;
   min-height:38px;
-  border:1px solid #cfe3d5;
+  border:1px solid #d6e9dc;
   border-radius:4px;
-  background:#eef8f1;
-  color:#256744;
-  font-size:13px;
-  font-weight:700;
+  background:#f4faf6;
+  color:#2c714b;
   font-variant-numeric:tabular-nums;
-}
-.nfe-workspace-body #nfe-section-payment>.nfe-payment-optional.editor-panel{
-  padding:0;
-  margin-bottom:0;
-  border-bottom:1px solid #e1e7e9;
-  background:#fff;
-}
-.nfe-payment-disclosure{
-  min-width:0;
-  margin:0;
-  padding:0;
+  font-weight:700;
 }
 .nfe-payment-disclosure>summary{
   display:flex;
-  align-items:center;
   justify-content:space-between;
-  gap:14px;
-  min-height:55px;
-  padding:10px 6px;
-  cursor:pointer;
+  align-items:center;
+  gap:12px;
+  min-height:53px;
+  padding:10px 0;
   list-style:none;
-  color:#40576b;
+  color:#435a6c;
+  cursor:pointer;
 }
 .nfe-payment-disclosure>summary::-webkit-details-marker{display:none}
 .nfe-payment-disclosure>summary:hover,
 .nfe-payment-disclosure>summary:focus-visible{
-  background:#f3f8f7;
+  background:#f8fafc;
   outline:0;
 }
 .nfe-payment-disclosure>summary>span:first-child{
   display:flex;
   flex-direction:column;
-  gap:4px;
+  gap:3px;
 }
 .nfe-payment-disclosure>summary strong{
+  color:#3d5769;
   font-size:13px;
   font-weight:650;
-  color:#39566b;
 }
 .nfe-payment-disclosure>summary small{
+  color:#8392a0;
   font-size:11px;
   font-weight:400;
-  color:#8492a0;
-  line-height:1.4;
 }
 .nfe-payment-disclosure-state{
   flex:0 0 8px;
   width:8px;
   height:8px;
-  margin-right:9px;
-  border-right:1.5px solid #74889a;
-  border-bottom:1.5px solid #74889a;
+  margin-right:7px;
+  border-right:1.5px solid #7b8c9b;
+  border-bottom:1.5px solid #7b8c9b;
   transform:rotate(45deg);
 }
 .nfe-payment-disclosure[open] .nfe-payment-disclosure-state{
   transform:rotate(225deg);
 }
 .nfe-payment-disclosure-content{
-  padding:6px 6px 18px;
   display:flex;
   flex-direction:column;
   gap:15px;
-}
-.nfe-payment-disclosure-content .editor-grid{
-  gap:16px 18px;
-}
-.nfe-payment-disclosure-content .table-scroll{
-  border:1px solid #e1e7ec;
-  border-radius:4px;
-  overflow:auto;
+  padding:4px 0 18px;
 }
 .nfe-payment-disclosure-toolbar{
   display:flex;
   justify-content:flex-end;
+}
+.nfe-payment-disclosure-content .table-scroll{
+  max-width:100%;
+  overflow-x:auto;
+  border:1px solid #e5ebf0;
+  border-radius:4px;
+}
+
+/* Editor de produto: a mesma leitura plana em vez de cards aninhados. */
+.app-root #nfeItemDialog .nfe-item-body{
+  min-width:0;
+  padding:14px 19px 22px;
+  background:#fff;
+  overflow-x:hidden;
+  overflow-y:auto;
+  scrollbar-gutter:stable;
+  overscroll-behavior:contain;
+}
+.app-root #nfeItemDialog .nfe-item-intro.card-header{
+  display:flex;
   align-items:center;
+  justify-content:space-between;
+  gap:15px;
+  margin:0 0 7px;
+  padding:4px 0 14px;
+  border:0;
+  border-bottom:1px solid #e2e8ee;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+}
+.app-root #nfeItemDialog .nfe-item-intro h2{
+  margin:0;
+  color:var(--nfe-text);
+  font-size:15px;
+  font-weight:650;
+}
+.app-root #nfeItemDialog .nfe-item-intro p{
+  margin:4px 0 0;
+  color:var(--nfe-muted);
+  font-size:11px;
+}
+.app-root #nfeItemDialog .nfe-item-intro-total{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  padding-left:16px;
+  border-left:1px solid var(--nfe-border);
+}
+.app-root #nfeItemDialog .nfe-item-intro-total strong{
+  color:#28664d;
+  font-size:17px;
+  font-weight:700;
+}
+.app-root #nfeItemDialog .nfe-item-section.editor-panel{
+  margin:0;
+  padding:0;
+  border:0;
+  border-bottom:1px solid var(--nfe-border);
+  border-radius:0;
+  background:#fff;
+  box-shadow:none;
+  overflow:visible;
+}
+.app-root #nfeItemDialog .nfe-item-section-heading{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-height:52px;
+  padding:8px 2px;
+  list-style:none;
+  background:transparent;
+  cursor:pointer;
+}
+.app-root #nfeItemDialog .nfe-item-section-heading::-webkit-details-marker{display:none}
+.app-root #nfeItemDialog .nfe-item-section-heading:hover{
+  background:#f8fafc;
+}
+.app-root #nfeItemDialog .nfe-item-section[open]>.nfe-item-section-heading{
+  background:#f7f9fa;
+  border:0;
+}
+.app-root #nfeItemDialog .nfe-section-index{
+  display:grid;
+  place-items:center;
+  width:26px;
+  height:26px;
+  flex:0 0 26px;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  color:#6d8190;
+  font-size:11px;
+  font-weight:650;
+}
+.app-root #nfeItemDialog .nfe-section-label{
+  display:flex;
+  flex:1;
+  min-width:0;
+  flex-direction:column;
+  gap:2px;
+}
+.app-root #nfeItemDialog .nfe-section-label strong{
+  color:#3d5769;
+  font-size:13px;
+  font-weight:650;
+}
+.app-root #nfeItemDialog .nfe-section-label small{
+  color:#8795a0;
+  font-size:11px;
+  font-weight:400;
+}
+.app-root #nfeItemDialog .nfe-section-caret{
+  width:8px;
+  height:8px;
+  flex:0 0 8px;
+  margin:0 6px 5px 0;
+  border-right:1.5px solid #7d8c9a;
+  border-bottom:1.5px solid #7d8c9a;
+  transform:rotate(45deg);
+}
+.app-root #nfeItemDialog .nfe-item-section[open] .nfe-section-caret{
+  transform:rotate(225deg);
+}
+.app-root #nfeItemDialog .nfe-item-section-content{
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+  min-width:0;
+  padding:14px 4px 20px;
+}
+.app-root #nfeItemDialog .nfe-item-section-content>.editor-panel{
+  min-width:0;
+  margin:0;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+}
+.app-root #nfeItemDialog .nfe-item-section-content>.editor-panel+.editor-panel{
+  margin-top:5px;
+  padding-top:17px;
+  border-top:1px solid #ecf0f3;
+}
+.app-root #nfeItemDialog .nfe-item-section-content h3{
+  margin:0 0 13px;
+  font-size:13px;
+  color:#3d5769;
+}
+.app-root #nfeItemDialog .nfe-item-section-content .editor-grid{
+  gap:19px 17px;
+}
+.app-root #nfeItemDialog .nfe-tax-review.editor-panel{
+  margin:10px 0;
+  padding:15px 0 18px;
+  border:0;
+  border-bottom:1px solid var(--nfe-border);
+  border-radius:0;
+  background:#fff;
+  box-shadow:none;
+}
+.nfe-tax-review-heading{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:baseline;
+  gap:9px;
+  margin:0 0 12px;
+}
+.nfe-tax-review-heading h3{
+  margin:0;
+  color:#3d5769;
+  font-size:13px;
+  font-weight:650;
+}
+.nfe-tax-review-heading span{
+  color:#8795a0;
+  font-size:11px;
+}
+.app-root #nfeItemDialog .nfe-tax-review-grid{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:0;
+  border:1px solid #e5ebef;
+  border-radius:4px;
+  overflow:hidden;
+}
+.app-root #nfeItemDialog .nfe-tax-review-grid button{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:flex-start;
+  min-width:0;
+  min-height:55px;
+  gap:4px;
+  padding:9px 11px;
+  border:0;
+  border-right:1px solid #e5ebef;
+  border-radius:0;
+  background:#fff;
+  text-align:left;
+  font-family:inherit;
+  cursor:pointer;
+  box-shadow:none;
+}
+.app-root #nfeItemDialog .nfe-tax-review-grid button:last-child{
+  border-right:0;
+}
+.app-root #nfeItemDialog .nfe-tax-review-grid button:hover,
+.app-root #nfeItemDialog .nfe-tax-review-grid button:focus-visible{
+  outline:0;
+  background:#f3f7fa;
+}
+.app-root #nfeItemDialog .nfe-tax-review-grid button small{
+  font-size:11px;
+  font-weight:600;
+  color:#7c8c99;
+}
+.app-root #nfeItemDialog .nfe-tax-review-grid button strong{
+  font-size:12px;
+  font-weight:650;
+  line-height:1.35;
+  overflow-wrap:anywhere;
+  color:#3b5365;
+}
+.app-root #nfeItemDialog .nfe-tax-review-grid button.nfe-tax-needs-review strong{
+  color:#8997a2;
+  font-weight:500;
+}
+.app-root #nfeItemDialog .nfe-tax-review-grid button:focus-visible{
+  box-shadow:inset 0 0 0 2px rgba(58,126,173,.14);
+}
+
+/* Adaptação da janela, sem impedir a rolagem interna. */
+@media(max-width:1100px){
+  .app-root #nfeEditorDialog .nfe-flow-nav.editor-tabs{gap:11px}
+  .app-root #nfeItemDialog .nfe-tax-review-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 @media(max-width:760px){
-  .nfe-workspace-body #nfe-section-payment>.editor-panel{padding:11px 3px 15px}
-  .nfe-workspace-body #nfe-section-payment>.editor-panel>.editor-grid{gap:13px}
-  .nfe-payment-disclosure-content{padding:6px 4px 15px}
-  .nfe-payment-disclosure>summary{padding:10px 4px}
+  .app-root .nfe-modal-layer .nextor-modal-window{
+    border:0;
+    border-radius:0;
+  }
+  .app-root #nfeEditorDialog .nfe-workspace-body{padding:10px 12px 18px}
+  .app-root #nfeEditorDialog .nfe-flow-nav.editor-tabs{top:-10px;gap:7px;margin-bottom:12px}
+  .app-root #nfeEditorDialog .nfe-flow-nav .editor-tab{padding:0 7px}
+  .app-root #nfeEditorDialog .nfe-form-section .editor-grid{row-gap:13px;column-gap:12px}
+  .app-root #nfeEditorDialog .nfe-general-card .nfe-general-fields{padding:12px 0}
+  .app-root #nfeItemDialog .nfe-item-body{padding:10px 12px 18px}
+  .app-root #nfeItemDialog .nfe-item-section-content{padding:12px 2px 16px}
+  .app-root #nfeItemDialog .nfe-tax-review-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .app-root #nfeItemDialog .nfe-tax-review-grid button{border-bottom:1px solid #e5ebef}
+  .app-root .nfe-modal-layer .dialog-footer{padding:10px 12px}
 }
