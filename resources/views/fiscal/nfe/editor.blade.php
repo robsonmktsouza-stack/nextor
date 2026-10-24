@@ -159,14 +159,14 @@ $origins=[
       </div>
 
       <div class="nfe-general-card">
-        <div class="nfe-section-title nfe-section-title--actions">
-          <button type="button" class="nfe-section-toggle" data-nfe-general-toggle>Ocultar campos</button>
+        <div class="nfe-general-actions">
+          <button type="button" class="nfe-section-toggle" data-nfe-general-toggle>Ocultar detalhes</button>
         </div>
 
         <div class="nfe-general-layout" id="nfeGeneralFields">
           <div class="nfe-general-fields">
             <div class="editor-grid cols-12">
-              <label class="field col-12">
+              <label class="field col-6">
                 <span class="nfe-field-title">
                   <span>Natureza da operação *</span>
                   <button type="button" class="nfe-clear-field" id="nfeClearNature">Limpar campo</button>
@@ -186,7 +186,7 @@ $origins=[
                 </div>
               </label>
 
-              <label class="field col-4">
+              <label class="field col-3">
                 <span>Tipo de operação</span>
                 <select name="operation_type" id="nfeOperationType">
                   <option value="inbound" @selected($nfeOld('operation_type',$draft->operation_type)==='inbound')>Entrada</option>
@@ -194,7 +194,7 @@ $origins=[
                 </select>
               </label>
 
-              <label class="field col-4">
+              <label class="field col-3">
                 <span>Destino da operação</span>
                 <select name="destination" id="nfeDestination">
                   <option value="internal" @selected($nfeOld('destination',$draft->destination)==='internal' || $nfeOld('destination',$draft->destination)==='auto')>Operação interna</option>
@@ -203,7 +203,7 @@ $origins=[
                 </select>
               </label>
 
-              <label class="field col-4">
+              <label class="field col-6">
                 <span>Presença do comprador</span>
                 <select name="presence" id="nfePresence">
                   <option value="not_applicable" @selected($nfeOld('presence',$draft->presence)==='not_applicable')>Não se aplica</option>
@@ -216,7 +216,7 @@ $origins=[
                 </select>
               </label>
 
-              <label class="field col-4">
+              <label class="field col-3">
                 <span>Finalidade da emissão</span>
                 <select name="purpose" id="nfePurpose">
                   <option value="normal" @selected($nfeOld('purpose',$draft->purpose)==='normal')>NF-e Normal</option>
@@ -228,14 +228,13 @@ $origins=[
                 </select>
               </label>
 
-              <label class="field col-4">
+              <label class="field col-3">
                 <span>Ins. Est. Subst. Trib.</span>
                 <input name="substitute_state_registration" maxlength="30" value="{{ $nfeOld('substitute_state_registration',$draft->substitute_state_registration) }}">
               </label>
 
-              <div class="field col-4"></div>
 
-              <div class="field col-4">
+              <div class="field col-2 nfe-flag-field">
                 <span>Possui documento referenciado?</span>
                 <label class="switch-field">
                   <input type="hidden" name="has_referenced_document" value="0">
@@ -245,7 +244,7 @@ $origins=[
                 </label>
               </div>
 
-              <div class="field col-4">
+              <div class="field col-2 nfe-flag-field">
                 <span>Informar data de emissão</span>
                 <label class="switch-field">
                   <input type="hidden" name="inform_issue_datetime" value="0">
@@ -255,7 +254,7 @@ $origins=[
                 </label>
               </div>
 
-              <div class="field col-4">
+              <div class="field col-2 nfe-flag-field">
                 <span>Informar data de saída</span>
                 <label class="switch-field">
                   <input type="hidden" name="inform_exit_datetime" value="0">
@@ -265,7 +264,7 @@ $origins=[
                 </label>
               </div>
 
-              <div class="field col-4">
+              <div class="field col-2 nfe-flag-field">
                 <span>Informar previsão de entrega</span>
                 <label class="switch-field">
                   <input type="hidden" name="inform_expected_delivery_date" value="0">
@@ -275,7 +274,7 @@ $origins=[
                 </label>
               </div>
 
-              <div class="field col-4">
+              <div class="field col-2 nfe-flag-field">
                 <span>Compra governamental</span>
                 <label class="switch-field">
                   <input type="hidden" name="government_purchase" value="0">
@@ -284,7 +283,7 @@ $origins=[
                 </label>
               </div>
 
-              <div class="field col-4">
+              <div class="field col-2 nfe-flag-field">
                 <span>Pagamento antecipado</span>
                 <label class="switch-field">
                   <input type="hidden" name="advance_payment" value="0">
@@ -295,7 +294,7 @@ $origins=[
             </div>
           </div>
 
-          <div class="nfe-general-dates">
+          <div class="nfe-general-dates" aria-label="Datas e horários">
             <label class="field" data-nfe-date-group="issue">
               <span>Data emissão NF (atual)</span>
               <input type="date" name="issue_date" id="nfeIssueDate" value="{{ $nfeOld('issue_date',$draft->issue_date?->format('Y-m-d') ?? now()->format('Y-m-d')) }}">
@@ -328,7 +327,7 @@ $origins=[
           @endif
         </div>
         <div class="editor-grid cols-12">
-          <label class="field col-8">
+          <label class="field col-6">
             <span>Destinatário *</span>
             <select name="customer_id" id="nfeCustomer" data-quick-create="customers" required>
               <option value="">Selecione o cliente</option>
@@ -340,13 +339,12 @@ $origins=[
             </select>
           </label>
 
-          <div class="field col-4">
+          <div class="field col-6">
             <span>Identificação</span>
             <div class="readonly-field" id="nfeRecipientSummary">Selecione um destinatário.</div>
           </div>
 
-          <label class="field col-3"><span>Desconto da nota</span><input type="number" name="discount" id="nfeDiscount" step="0.01" min="0" value="{{ $nfeOld('discount',$draft->discount ?? 0) }}"></label>
-          <label class="field col-3"><span>Acréscimo da nota</span><input type="number" name="surcharge" id="nfeSurcharge" step="0.01" min="0" value="{{ $nfeOld('surcharge',$draft->surcharge ?? 0) }}"></label>
+
         </div>
       </div>
       <div class="editor-panel nfe-delivery-panel">
@@ -398,9 +396,9 @@ $origins=[
         </div>
       </div>
 
-      <div class="editor-panel">
+      <div class="editor-panel nfe-totals-panel">
         <h3>Totais da nota</h3>
-        <div class="editor-grid cols-12">
+        <div class="editor-grid cols-12 nfe-totals-grid">
           <div class="field col-2"><span>Produtos</span><div class="readonly-field" id="nfeTotalProducts">R$ 0,00</div></div>
           <div class="field col-2"><span>Frete</span><div class="readonly-field" id="nfeTotalFreight">R$ 0,00</div></div>
           <div class="field col-2"><span>Seguro</span><div class="readonly-field" id="nfeTotalInsurance">R$ 0,00</div></div>
@@ -408,7 +406,9 @@ $origins=[
           <div class="field col-2"><span>IPI estimado</span><div class="readonly-field" id="nfeTotalIpi">R$ 0,00</div></div>
           <div class="field col-2"><span>Desconto</span><div class="readonly-field" id="nfeTotalDiscount">R$ 0,00</div></div>
           <div class="field col-2"><span>Acréscimo</span><div class="readonly-field" id="nfeTotalSurcharge">R$ 0,00</div></div>
-          <div class="field col-2"><span>Total NF-e</span><div class="readonly-field"><strong id="nfeTotalInvoice">R$ 0,00</strong></div></div>
+          <label class="field col-2"><span>Desconto da nota</span><input type="number" name="discount" id="nfeDiscount" step="0.01" min="0" value="{{ $nfeOld('discount',$draft->discount ?? 0) }}"></label>
+          <label class="field col-2"><span>Acréscimo da nota</span><input type="number" name="surcharge" id="nfeSurcharge" step="0.01" min="0" value="{{ $nfeOld('surcharge',$draft->surcharge ?? 0) }}"></label>
+          <div class="field col-2 nfe-total-final"><span>Total NF-e</span><div class="readonly-field"><strong id="nfeTotalInvoice">R$ 0,00</strong></div></div>
         </div>
       </div>
     </section>
@@ -529,7 +529,7 @@ $origins=[
     <section class="editor-tab-panel nfe-form-section cms-card" id="nfe-section-transport">
       <header class="card-header nfe-flow-heading"><div><h2>Transporte</h2><p>Frete, transportador e volumes</p></div></header>
       <div class="editor-panel">
-        <h3>Transportadora e frete</h3>
+        <h3>Transportadora e volumes</h3>
         <div class="editor-grid cols-12">
           <label class="field col-4"><span>Modalidade do frete *</span>
             <select name="freight_mode" id="nfeFreightMode">
@@ -542,7 +542,7 @@ $origins=[
             </select>
           </label>
 
-          <label class="field col-6"><span>Transportador</span>
+          <label class="field col-4"><span>Transportador</span>
             <select name="carrier_id" data-quick-create="carriers">
               <option value="">Não informado</option>
               @foreach($carriers as $carrier)
@@ -555,24 +555,18 @@ $origins=[
 
           <label class="field col-2"><span>Valor do frete</span><input type="number" name="freight_value" id="nfeFreightValue" min="0" step="0.01" value="{{ $nfeOld('freight_value',data_get($transport,'freight_value',0)) }}"></label>
 
-          <label class="field col-3"><span>Placa</span><input name="vehicle_plate" maxlength="12" value="{{ $nfeOld('vehicle_plate',data_get($transport,'vehicle_plate')) }}"></label>
+          <label class="field col-2"><span>Placa</span><input name="vehicle_plate" maxlength="12" value="{{ $nfeOld('vehicle_plate',data_get($transport,'vehicle_plate')) }}"></label>
           <label class="field col-2"><span>UF do veículo</span><input name="vehicle_state" maxlength="2" value="{{ $nfeOld('vehicle_state',data_get($transport,'vehicle_state')) }}"></label>
-        </div>
-      </div>
 
-      <div class="editor-panel">
-        <h3>Volumes transportados</h3>
-        <div class="editor-grid cols-12">
           <label class="field col-2"><span>Quantidade</span><input type="number" min="0" step="1" name="volume_quantity" value="{{ $nfeOld('volume_quantity',data_get($transport,'volume_quantity')) }}"></label>
-          <label class="field col-3"><span>Espécie</span><input name="volume_species" value="{{ $nfeOld('volume_species',data_get($transport,'volume_species')) }}"></label>
-          <label class="field col-3"><span>Numeração</span><input name="volume_numbering" value="{{ $nfeOld('volume_numbering',data_get($transport,'volume_numbering')) }}"></label>
+          <label class="field col-2"><span>Espécie</span><input name="volume_species" value="{{ $nfeOld('volume_species',data_get($transport,'volume_species')) }}"></label>
+          <label class="field col-2"><span>Numeração</span><input name="volume_numbering" value="{{ $nfeOld('volume_numbering',data_get($transport,'volume_numbering')) }}"></label>
           <label class="field col-2"><span>Peso líquido</span><input type="number" min="0" step="0.001" name="net_weight" value="{{ $nfeOld('net_weight',data_get($transport,'net_weight')) }}"></label>
           <label class="field col-2"><span>Peso bruto</span><input type="number" min="0" step="0.001" name="gross_weight" value="{{ $nfeOld('gross_weight',data_get($transport,'gross_weight')) }}"></label>
         </div>
       </div>
-    </section>
 
-    <section class="editor-tab-panel nfe-form-section cms-card" id="nfe-section-other">
+id="nfe-section-other">
       <header class="card-header nfe-flow-heading"><div><h2>Informações adicionais</h2><p>Documentos referenciados e observações</p></div></header>
       <div class="editor-panel">
         <div class="delivery-card-title">
@@ -590,7 +584,7 @@ $origins=[
       <div class="editor-panel notes-panel">
         <label class="field">
           <span>Informação adicional</span>
-          <textarea name="additional_info" rows="5" placeholder="Observação da operação">{{ $nfeOld('additional_info',$draft->additional_info) }}</textarea>
+          <textarea name="additional_info" rows="3" placeholder="Observação da operação">{{ $nfeOld('additional_info',$draft->additional_info) }}</textarea>
         </label>
 
       </div>
@@ -724,17 +718,17 @@ $origins=[
           <label class="field col-8"><span>Descrição do item *</span><input id="nfeItemName" maxlength="190" placeholder="Descrição que será enviada na NF-e"></label>
           <label class="field col-4"><span>Código próprio</span><input id="nfeItemSku" maxlength="80" placeholder="Opcional"></label>
 
-          <label class="field col-2"><span>Quantidade *</span><input id="nfeItemQuantity" type="number" step="0.0001" min="0.0001" value="1"></label>
-          <label class="field col-2"><span>Fator / dimensão</span><input id="nfeItemDimensionQuantity" type="number" step="0.0001" min="0.0001" value="1"></label>
-          <label class="field col-2"><span>Valor unitário *</span><input id="nfeItemUnitPrice" type="number" step="0.0001" min="0"></label>
-          <div class="field col-2"><span>Total do item</span><div class="readonly-field" id="nfeItemSubtotal">R$ 0,00</div></div>
+          <label class="field col-3"><span>Quantidade *</span><input id="nfeItemQuantity" type="number" step="0.0001" min="0.0001" value="1"></label>
+          <label class="field col-3"><span>Fator / dimensão</span><input id="nfeItemDimensionQuantity" type="number" step="0.0001" min="0.0001" value="1"></label>
+          <label class="field col-3"><span>Valor unitário *</span><input id="nfeItemUnitPrice" type="number" step="0.0001" min="0"></label>
+          <div class="field col-3"><span>Total do item</span><div class="readonly-field" id="nfeItemSubtotal">R$ 0,00</div></div>
           <label class="field col-3"><span>Frete do item</span><input id="nfeItemFreight" type="number" step="0.01" min="0" value="0"></label>
           <label class="field col-3"><span>Seguro</span><input id="nfeItemInsurance" type="number" step="0.01" min="0" value="0"></label>
           <label class="field col-3"><span>Outras despesas</span><input id="nfeItemOtherExpenses" type="number" step="0.01" min="0" value="0"></label>
           <label class="field col-3"><span>Desconto do item</span><input id="nfeItemDiscount" type="number" step="0.01" min="0" value="0"></label>
-          <label class="field col-3"><span>Descrição do pedido (xPed)</span><input id="nfeItemPurchaseOrder"></label>
-          <label class="field col-1"><span>Item</span><input id="nfeItemPurchaseOrderItem"></label>
-          <label class="field col-12"><span>Observação do item</span><input id="nfeItemNotes"></label>
+          <label class="field col-6"><span>Descrição do pedido (xPed)</span><input id="nfeItemPurchaseOrder"></label>
+          <label class="field col-2"><span>Item</span><input id="nfeItemPurchaseOrderItem"></label>
+          <label class="field col-4"><span>Observação do item</span><input id="nfeItemNotes"></label>
         </div>
 
       </div>
@@ -765,7 +759,7 @@ $origins=[
 
           <label class="field col-3"><span>Unidade tributável</span><input id="nfeItemTaxUnit" maxlength="12"></label>
           <label class="field col-3"><span>Qtd. tributável por unidade</span><input id="nfeTaxQuantityFactor" type="number" step="0.0001" min="0" value="1"></label>
-          <label class="field col-3"><span>CFOP aplicado</span><input id="nfeItemCfop" maxlength="10"></label>
+          <label class="field col-6"><span>CFOP aplicado</span><input id="nfeItemCfop" maxlength="10"></label>
         </div>
       </div>
 
