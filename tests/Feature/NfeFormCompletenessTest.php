@@ -101,6 +101,53 @@ final class NfeFormCompletenessTest extends TestCase
             ->assertSee('nfeItemInsurance')->assertSee('nfeIbsUfRate');
     }
 
+    public function test_saved_note_reopens_with_nature_recipient_and_local_time_selected(): void
+    {
+        [, $nature,$customer]=$this->init();
+        $data=$this->data($nature,$customer);
+        // Em MySQL TIME pode ser devolvido como HH:mm:ss.
+        $data['issue_time']='11:24:00';
+        $this->post(route('fiscal.nfe.store'),$data)->assertSessionHasNoErrors();
+
+        $draft=NfeDraft::query()->firstOrFail();
+        self::assertSame('11:24',(string)$draft->issue_time);
+        $draft->update(['issue_time'=>'11:24:00','exit_time'=>'12:05:00']);
+
+        $response=$this->get(route('fiscal.nfe.edit',$draft))->assertOk()
+            ->assertSee('id="nfeIssueTime" value="11:24"',false)
+            ->assertSee('id="nfeExitTime" value="12:05"',false);
+
+        $html=$response->getContent();
+        preg_match('/<select[^>]*id="nfeNature"[^>]*>(.*?)<\\/select>/s',$html,$natureSelect);
+        preg_match('/<select[^>]*id="nfeCustomer"[^>]*>(.*?)<\\/select>/s',$html,$customerSelect);
+        self::assertNotEmpty($natureSelect);
+        self::assertNotEmpty($customerSelect);
+        self::assertMatchesRegularExpression('/value="'.preg_quote((string)$nature->id,'/').'"\\s+selected/', $natureSelect[1]);
+        self::assertMatchesRegularExpression('/value="'.preg_quote((string)$customer->id,'/').'"\\s+selected/', $customerSelect[1]);
+    }
+
+    public function test_incompatible_nature_does_not_overwrite_existing_invoice(): void
+    {
+        [, $nature,$customer]=$this->init();
+        $data=$this->data($nature,$customer);
+        $data['operation_type']='inbound';
+
+        $this->post(route('fiscal.nfe.store'),$data)->assertSessionHasErrors('operation_type');
+        self::assertSame(0,NfeDraft::query()->count());
+    }
+
+    public function test_invoice_with_wrong_destination_is_not_marked_validated(): void
+    {
+        [, $nature,$customer]=$this->init();
+        $data=$this->data($nature,$customer);
+        $data['destination']='interstate';
+        $data['after_save']='validate';
+
+        $this->post(route('fiscal.nfe.store'),$data)->assertSessionHas('warning');
+        $draft=NfeDraft::query()->firstOrFail();
+        self::assertNull($draft->validated_at);
+    }
+
     public function test_acbr_ini_contains_delivery_charges_and_two_payments(): void
     {
         [$company,$nature,$customer]=$this->init();
