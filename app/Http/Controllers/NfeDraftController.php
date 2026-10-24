@@ -224,7 +224,9 @@ class NfeDraftController extends Controller
                 });
                 return $draft->refresh();
             }catch(ValidationException $error){
-                // Campos pendentes são permitidos exclusivamente no rascunho.
+                // Uma tentativa parcial não deve deixar valores do objeto
+                // Eloquent que já foram revertidos pelo savepoint.
+                $draft->refresh();
             }
 
             // Produtos com os dados mínimos corretos passam a constar também da
@@ -576,11 +578,6 @@ class NfeDraftController extends Controller
         $company=CompanySetting::current();
         $customer=Customer::query()->findOrFail((int)$data['customer_id']);
         $nature=OperationNature::query()->findOrFail((int)$data['operation_nature_id']);
-        if($data['operation_type']!==$nature->operation_type){
-            throw ValidationException::withMessages([
-                'operation_type'=>'O tipo de operação não corresponde à natureza selecionada. Confira se é entrada ou saída.',
-            ]);
-        }
         $carrier=$request->filled('carrier_id')
             ? Customer::query()->find((int)$request->input('carrier_id'))
             : null;
