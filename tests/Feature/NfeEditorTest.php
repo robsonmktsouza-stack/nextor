@@ -142,6 +142,22 @@ class NfeEditorTest extends TestCase
         ],$override));
     }
 
+    public function test_invoice_editor_has_consistent_visual_hierarchy_and_readable_recipient_summary(): void
+    {
+        $css=(string)file_get_contents(public_path('css/nfe-form-workflow.css'));
+        $script=(string)file_get_contents(public_path('js/nfe-editor.js'));
+
+        self::assertStringContainsString('width:min(1200px,calc(100vw - 36px))',$css);
+        self::assertStringContainsString('border-left:3px solid #2b8b6a',$css);
+        self::assertStringContainsString('border-bottom-color:#28896b',$css);
+        self::assertStringContainsString('background:#f1f8f4',$css);
+        self::assertStringContainsString('nfe-recipient-meta',$css);
+        self::assertStringContainsString('nfe-recipient-address',$css);
+        self::assertStringContainsString('nfe-recipient-meta',$script);
+        self::assertStringContainsString('nfe-recipient-address',$script);
+        self::assertStringContainsString('esc(customer.city_ibge_code',$script);
+    }
+
     public function test_scrollable_editor_shell_uses_grid_and_not_absolute_positioning(): void
     {
         $css=(string)file_get_contents(public_path('css/erp.css'));
