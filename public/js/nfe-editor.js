@@ -650,8 +650,16 @@
     });
   };
   flowButtons.forEach(button=>button.addEventListener('click',()=>{
+    const section=byId(button.dataset.nfeJump);
+    if(!section||!flowBody)return;
     markFlowButton(button);
-    byId(button.dataset.nfeJump)?.scrollIntoView({behavior:'smooth',block:'start'});
+    // A NF-e é uma janela com rolagem própria: nunca tentar rolar o
+    // documento externo (que permanece bloqueado enquanto o modal abre).
+    const containerTop=flowBody.getBoundingClientRect().top;
+    const targetTop=section.getBoundingClientRect().top;
+    const navHeight=flowBody.querySelector('.nfe-flow-nav')?.getBoundingClientRect().height||0;
+    const top=Math.max(0,flowBody.scrollTop+targetTop-containerTop-navHeight-18);
+    flowBody.scrollTo({top,behavior:'smooth'});
   }));
   if(flowBody && flowButtons.length){
     let scheduled=false;
