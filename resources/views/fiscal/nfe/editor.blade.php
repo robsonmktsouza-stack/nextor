@@ -51,6 +51,20 @@ $existingReferences=old('references_json')
   ? (json_decode(old('references_json'),true) ?: [])
   : ($draft->references ?? []);
 
+// Um rascunho antigo pode ter sido validado antes de correções de consistência.
+// Não oferecer emissão enquanto natureza/tipo/destino estiverem divergentes.
+$draftNature=$draft->exists ? $draft->operationNature : null;
+$draftRecipient=$draft->exists ? $draft->customer : null;
+$draftTypeConsistent=$draftNature && $draft->operation_type===$draftNature->operation_type;
+$issuerState=strtoupper((string)($company->state??''));
+$recipientState=strtoupper((string)($draftRecipient?->state??''));
+$draftDestinationConsistent=$draftRecipient && $issuerState!=='' && $recipientState!=='' && (
+    ($draft->destination==='internal' && $issuerState===$recipientState)
+    ||($draft->destination==='interstate' && $issuerState!==$recipientState)
+    ||$draft->destination==='foreign'
+);
+$draftCanEmit=(bool)$draft->validated_at && $draftTypeConsistent && $draftDestinationConsistent;
+
 $origins=[
  '0'=>'0 - Nacional',
  '1'=>'1 - Estrangeira: importação direta',
@@ -86,6 +100,9 @@ $origins=[
   </div>
 
   <div class="dialog-body nfe-workspace-body">
+    @if($isEditing && $draft->validated_at && !$draftCanEmit)
+      <p class="inline-note" role="alert">Confira a natureza da operação, o tipo de movimentação e o destino. Salve e valide novamente antes de emitir.</p>
+    @endif
     <nav class="editor-tabs nfe-flow-nav" aria-label="Seções da nota">
       <button type="button" class="editor-tab active" data-nfe-jump="nfe-section-general" aria-current="location">Dados gerais</button>
       <button type="button" class="editor-tab" data-nfe-jump="nfe-section-items">Produtos</button>
@@ -575,7 +592,7 @@ $origins=[
       <button class="btn btn-secondary" type="submit" name="after_save" value="validate" id="nfeValidateCurrent">Validar <kbd data-tutorial>F8</kbd></button>
       @if($isEditing && $draft->status==='draft')
         <button class="btn btn-success" type="submit" form="nfeEmitForm" id="nfeSubmitEmission"
-          @disabled(!$draft->validated_at)>Emitir NF-e</button>
+          @disabled(!$draftCanEmit)>Emitir NF-e</button>
       @elseif($isEditing && ($draft->status==='prepared' || ($draft->status==='processing' && !$draft->transmission_attempted_at && ($draft->xml_path===null || $draft->xml_path==='fiscal/nfe55/'.$draft->id.'/signed.xml') && $draft->updated_at?->lt(now()->subMinutes(15)))))
         <button class="btn btn-secondary" type="submit" form="nfeRetryForm">Tentar novamente</button>
       @elseif($isEditing && in_array($draft->status,['pending','processing','rejected','authorized'],true))
