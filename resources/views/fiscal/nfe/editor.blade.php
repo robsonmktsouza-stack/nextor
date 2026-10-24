@@ -785,7 +785,7 @@ $origins=[
       </div>
     </details>
 
-    <details class="nfe-item-section" data-nfe-item-panel="item-federal" open>
+    <details class="nfe-item-section" data-nfe-item-panel="item-federal">
       <summary class="nfe-item-section-heading">
         <span class="nfe-section-index">04</span>
         <span class="nfe-section-label"><strong>PIS, COFINS e IPI</strong><small>Classificação tributária federal</small></span>
