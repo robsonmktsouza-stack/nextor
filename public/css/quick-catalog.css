@@ -167,3 +167,59 @@
   border-color:#29999a;
   box-shadow:0 0 0 2px rgba(41,153,154,.13);
 }
+
+
+/* A busca de produtos, serviços e o seletor de cadastro rápido seguem a
+   mesma densidade, separadores e destaque de linha dos demais resultados. */
+.sale-item-suggestions{
+  min-height:0;
+  max-height:min(300px,50dvh);
+  overflow-x:hidden;
+  overflow-y:auto;
+  border:1px solid #bdcbd6;
+  border-radius:4px;
+  box-shadow:0 8px 22px rgba(22,48,69,.18);
+  scrollbar-width:thin;
+}
+.sale-item-suggestions .sale-suggestion,
+.erp-catalog-results .erp-catalog-result{
+  border-bottom:1px solid #e9edf1;
+  border-radius:0;
+  background:#fff;
+  color:#31445b;
+  padding:9px 11px;
+  gap:4px;
+  min-height:37px;
+  text-align:left;
+  line-height:1.35;
+}
+.sale-item-suggestions .sale-suggestion:is(:hover,:focus-visible,.active),
+.erp-catalog-results .erp-catalog-result:is(:hover,:focus-visible,.active){
+  background:#fff9d5;
+  outline:0;
+}
+.sale-item-suggestions .sale-suggestion strong,
+.erp-catalog-results .erp-catalog-result strong{
+  font-size:12px;
+  font-weight:650;
+  color:#31536a;
+}
+.sale-item-suggestions .sale-suggestion small,
+.erp-catalog-results .erp-catalog-result small{
+  font-size:11px;
+  font-weight:400;
+  color:#76899a;
+}
+.erp-catalog-results{
+  min-height:0;
+  max-height:280px;
+  overflow-x:hidden;
+  overflow-y:auto;
+  scrollbar-width:thin;
+}
+.erp-catalog-new{
+  background:#fff8c8;
+  border-color:#eadfa5;
+  color:#485b31;
+}
+.erp-catalog-new:hover{background:#fff0a9}
