@@ -173,6 +173,12 @@ final class Nfe55EmissionService
                 ]);
             }
         }catch(Throwable $error){
+            \Illuminate\Support\Facades\Log::error('NF-e: falha no processamento fiscal interno', [
+                'draft_id' => $id,
+                'attempted_send' => $attempted,
+                'exception_type' => get_class($error),
+                'reason' => mb_substr($error->getMessage(), 0, 1500),
+            ]);
             if($draft){
                 $draft->update([
                     'status'=>$attempted?'pending':'prepared',
@@ -224,7 +230,12 @@ final class Nfe55EmissionService
             }
             return $draft->refresh();
         }catch(Throwable $error){
-            throw ValidationException::withMessages(['nfe'=>'Não foi possível concluir a consulta à SEFAZ.']);
+            \Illuminate\Support\Facades\Log::warning('NF-e: falha na consulta fiscal', [
+                'draft_id' => $draft->id,
+                'exception_type' => get_class($error),
+                'reason' => mb_substr($error->getMessage(), 0, 1500),
+            ]);
+            throw ValidationException::withMessages(['nfe'=>'Não foi possível consultar a nota neste momento. Confira sua conexão e tente novamente.']);
         }finally{
             try{$service?->close();}finally{
                 $password='';
