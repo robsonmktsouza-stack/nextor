@@ -296,19 +296,19 @@ $origins=[
 
           <div class="nfe-general-dates" aria-label="Datas e horários">
             <label class="field" data-nfe-date-group="issue">
-              <span>Data emissão NF (atual)</span>
+              <span>Data de emissão</span>
               <input type="date" name="issue_date" id="nfeIssueDate" value="{{ $nfeOld('issue_date',$draft->issue_date?->format('Y-m-d') ?? now()->format('Y-m-d')) }}">
             </label>
             <label class="field" data-nfe-date-group="issue">
-              <span>Hora emissão NF (atual)</span>
+              <span>Hora de emissão</span>
               <input type="time" name="issue_time" id="nfeIssueTime" value="{{ substr((string)$nfeOld('issue_time',$draft->issue_time ?? now()->format('H:i')),0,5) }}">
             </label>
             <label class="field" data-nfe-date-group="exit">
-              <span>Data saída/entrada (atual)</span>
+              <span>Data de saída/entrada</span>
               <input type="date" name="exit_date" id="nfeExitDate" value="{{ $nfeOld('exit_date',$draft->exit_date?->format('Y-m-d')) }}">
             </label>
             <label class="field" data-nfe-date-group="exit">
-              <span>Hora saída/entrada (atual)</span>
+              <span>Hora de saída/entrada</span>
               <input type="time" name="exit_time" id="nfeExitTime" value="{{ substr((string)$nfeOld('exit_time',$draft->exit_time),0,5) }}">
             </label>
             <label class="field" data-nfe-date-group="delivery">
@@ -677,20 +677,15 @@ $origins=[
   <div class="erp-dialog nfe-item-dialog nextor-modal-window" role="dialog" aria-modal="true" aria-labelledby="nfeItemTitle">
   <div class="dialog-header">
     <div><h2 id="nfeItemTitle">Item da NF-e</h2></div>
-    <button type="button" data-nfe-modal-close class="close-dialog" aria-label="Fechar">@include('partials.icon',['name'=>'x'])</button>
+    <div class="nfe-item-header-actions">
+      <span>Total do item</span>
+      <strong id="nfeItemHeaderTotal">R$ 0,00</strong>
+      <button type="button" data-nfe-modal-close class="close-dialog" aria-label="Fechar">@include('partials.icon',['name'=>'x'])</button>
+    </div>
   </div>
 
   <div class="dialog-body nfe-item-body">
     <input type="hidden" id="nfeItemIndex">
-
-    <div class="card-header nfe-item-intro">
-      <div>
-        <h2>Produto e tributação</h2>
-        <p>Preencha a mercadoria e confira os códigos tributários antes de salvar.</p>
-      </div>
-      <div class="nfe-item-intro-total"><small>Total do item</small><strong id="nfeItemHeaderTotal">R$ 0,00</strong></div>
-    </div>
-
 
     <details class="editor-panel nfe-item-section" data-nfe-item-panel="item-general" open>
       <summary class="nfe-item-section-heading">
