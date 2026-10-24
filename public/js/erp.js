@@ -310,22 +310,11 @@
   };
   window.NextorLoading={show:beginLoading,hide:()=>endLoading(),reset:resetLoading};
 
-  // Fetch/XHR têm eventos de conclusão; cada requisição encerra apenas seu token.
-  const nativeFetch=window.fetch.bind(window);
-  window.NextorFetch=nativeFetch;
-  window.fetch=async(...args)=>{
-    const generation=beginLoading('Carregando...');
-    try{return await nativeFetch(...args);}
-    finally{endLoading(generation);}
-  };
-
-  const nativeXhrSend=XMLHttpRequest.prototype.send;
-  XMLHttpRequest.prototype.send=function(...args){
-    const generation=beginLoading('Carregando...');
-    this.addEventListener('loadend',()=>endLoading(generation),{once:true});
-    try{return nativeXhrSend.apply(this,args);}
-    catch(error){endLoading(generation);throw error;}
-  };
+  // Consultas em segundo plano (busca de cliente, produto, CFOP, cadastros)
+  // NÃO podem tornar a aplicação inerte. A tela só bloqueia quando uma ação
+  // explicitamente solicita um carregamento (envio/salvamento/navegação).
+  // Preservar fetch/XHR nativos mantém buscas interativas enquanto carregam.
+  window.NextorFetch=window.fetch.bind(window);
 
   const skipsFormLoading=form=>form.hasAttribute('data-no-loading')
     || (form.target && form.target!=='_self');
