@@ -126,7 +126,7 @@ class QuickCatalogController extends Controller
         ]);
         $document=preg_replace('/\D/','',(string)($data['document']??''));
         if($document!==''){
-            $exists=Customer::query()->whereNotNull('document')->when($current,fn($query)=>$query->whereKeyNot($current->id))->get(['id','document'])
+            $exists=Customer::query()->whereNotNull('document')->when($current,fn($query)=>$query->where('id','!=',$current->id))->get(['id','document'])
                 ->contains(fn($c)=>preg_replace('/\D/','',(string)$c->document)===$document);
             if($exists)throw ValidationException::withMessages([
                 'document'=>'Este CPF/CNPJ já está cadastrado. Pesquise e selecione o cadastro existente.',
