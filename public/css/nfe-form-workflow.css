@@ -32,7 +32,9 @@
   border-radius:4px;
   background:transparent;
   color:#476073;
-  font:600 12px inherit;
+  font-family:inherit;
+  font-size:12px;
+  font-weight:600;
   cursor:pointer;
 }
 .nfe-flow-nav button:hover,
