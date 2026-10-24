@@ -486,15 +486,19 @@
       if(!searchable) return;
       const q=normalize(query);
       let exact=false;
+      let matched=0;
       menu.querySelectorAll('.ui-select-option').forEach(item=>{
         const label=item._nextorNormalizedSearch;
         item.hidden=!!q && !label.includes(q);
+        if(!item.hidden && !item.disabled && item.dataset.value!=='') matched++;
         if(q && normalize(item.dataset.optionName||'')===q)exact=true;
       });
+      const empty=menu.querySelector('.ui-select-empty');
+      if(empty)empty.hidden=matched>0;
       const add=menu.querySelector('.ui-select-catalog-create');
       if(add){
         add.hidden=exact;
-        add.textContent=query.trim() ? 'Cadastrar "'+query.trim().slice(0,90)+'"' : 'Cadastrar novo';
+        add.textContent=query.trim() ? '＋ Cadastrar "'+query.trim().slice(0,90)+'"' : '＋ Cadastrar novo';
       }
     };
     const buildOptions=()=>{
@@ -528,7 +532,7 @@
         const create=document.createElement('button');
         create.type='button';
         create.className='ui-select-catalog-create';
-        create.textContent='Cadastrar novo';
+        create.textContent='＋ Cadastrar novo';
         create.addEventListener('click',()=>{
           const term=trigger.value.trim();
           closeUiSelects();
@@ -548,6 +552,11 @@
         });
         fragment.appendChild(create);
       }
+      const empty=document.createElement('p');
+      empty.className='ui-select-empty';
+      empty.textContent='Nenhuma opção encontrada.';
+      empty.hidden=true;
+      fragment.appendChild(empty);
       menu.replaceChildren(fragment);
       optionsBuilt=true;
       filterOptions();
