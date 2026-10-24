@@ -90,6 +90,7 @@ $origins=[
       action="{{ $isEditing ? route('fiscal.nfe.update',$draft) : route('fiscal.nfe.store') }}">
   @csrf
   @if($isEditing) @method('PUT') @endif
+  <input type="hidden" name="draft_action" value="draft">
 
   <input type="hidden" name="items_json" id="nfeItemsJson" value="{{ $nfeOld('items_json',json_encode($existingItems,JSON_UNESCAPED_UNICODE)) }}">
   <input type="hidden" name="duplicates_json" id="nfeDuplicatesJson" value="{{ $nfeOld('duplicates_json',json_encode($existingDuplicates,JSON_UNESCAPED_UNICODE)) }}">
