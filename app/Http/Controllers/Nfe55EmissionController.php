@@ -16,6 +16,28 @@ final class Nfe55EmissionController extends Controller
             ->with('success','NF-e encaminhada à fila fiscal.');
     }
 
+    /**
+     * Real local ACBr validation, no SEFAZ request and no numbering reservation.
+     */
+    public function preflight(NfeDraft $nfeDraft,\App\Services\Fiscal\Nfe55PreflightService $service)
+    {
+        try {
+            $result=$service->check($nfeDraft);
+        } catch (\Illuminate\Validation\ValidationException $exception) {
+            throw $exception;
+        } catch (\Throwable $exception) {
+            \Illuminate\Support\Facades\Log::warning('NF-e modelo 55: verificacao fiscal local nao passou',[
+                'draft_id'=>$nfeDraft->id,
+                'exception'=>get_class($exception),
+                'detail'=>mb_substr($exception->getMessage(),0,1000),
+            ]);
+            return redirect()->route('fiscal.nfe.edit',$nfeDraft)
+                ->with('warning','A verificação fiscal não foi concluída. Confira o cadastro, a tributação, o certificado e os schemas.');
+        }
+        return redirect()->route('fiscal.nfe.edit',$nfeDraft)
+            ->with('success','XML modelo 55 validado e assinatura conferida pela ACBr em homologação. Nenhuma nota foi transmitida.');
+    }
+
     public function retry(NfeDraft $nfeDraft,Nfe55EmissionService $service)
     {
         $service->retryPreparation($nfeDraft);
