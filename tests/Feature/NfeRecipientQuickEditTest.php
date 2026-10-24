@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\CompanySetting;
 use App\Models\Customer;
+use App\Models\NfeDraft;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\WithConfiguredCompany;
@@ -59,6 +60,12 @@ final class NfeRecipientQuickEditTest extends TestCase
     {
         $this->setupUserAndCompany();
         $customer=$this->customer();
+        $draft=NfeDraft::query()->create([
+            'customer_id'=>$customer->id,
+            'issue_date'=>'2026-10-24',
+            'status'=>'draft',
+            'validated_at'=>now(),
+        ]);
         $this->get(route('fiscal.nfe.create'))
             ->assertOk()->assertSee('id="nfeEditCustomer"',false);
 
@@ -88,6 +95,8 @@ final class NfeRecipientQuickEditTest extends TestCase
         self::assertSame('Rua Atualizada',$customer->address);
         self::assertSame('3550308',$customer->city_ibge_code);
         self::assertSame('cliente@example.test',$customer->email);
+        self::assertNull($draft->fresh()->validated_at);
+        self::assertNull($draft->fresh()->document_number);
     }
 
     public function test_editing_customer_cannot_reuse_another_customers_document(): void
