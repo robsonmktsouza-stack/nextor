@@ -362,6 +362,24 @@ class NfeDraftController extends Controller
             if(empty($ipiCst)) $errors[]=$prefix.'CST do IPI não informado.';
         }
 
+        if(!$errors) {
+            try {
+                // Usa as mesmas regras de construção fiscal do envio,
+                // sem reservar numeração nem transmitir à SEFAZ.
+                app(\App\Services\Fiscal\Nfe55IniBuilder::class)->build(
+                    $draft,CompanySetting::current(),
+                    max(1,(int)AppSetting::value('nfe','next_number',1)),
+                    12345678
+                );
+            } catch (\Throwable $error) {
+                \Illuminate\Support\Facades\Log::warning('NF-e: conferência fiscal incompleta',[
+                    'draft_id'=>$draft->id,
+                    'type'=>get_class($error),
+                ]);
+                $errors[]='Confira a classificação fiscal e os impostos dos produtos antes de emitir. Esta combinação ainda não está pronta para envio.';
+            }
+        }
+
         if($errors) {
             // Uma nota já marcada como validada pode tornar-se inconsistente
             // se os cadastros relacionados forem modificados.
