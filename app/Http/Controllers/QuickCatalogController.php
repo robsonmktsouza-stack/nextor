@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AppSetting;
 use App\Models\Customer;
+use App\Models\NfeDraft;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -93,7 +94,16 @@ class QuickCatalogController extends Controller
         $this->allowCreate($request,'customers');
         abort_unless($customer->is_customer,404);
         $data=$this->validatedCustomerData($request,$customer);
-        $customer->update($data);
+        DB::transaction(function()use($customer,$data){
+            $customer->update($data);
+            // Os dados do destinatário compõem o XML da NF-e. Uma mudança
+            // cadastral invalida apenas conferências de rascunhos, nunca
+            // notas já transmitidas ou autorizadas.
+            NfeDraft::query()->where('customer_id',$customer->id)
+                ->where('status','draft')
+                ->whereNotNull('validated_at')
+                ->update(['validated_at'=>null]);
+        });
         return response()->json([
             'item'=>$this->customerData($customer->refresh()),
             'message'=>'Dados do cliente atualizados.',
