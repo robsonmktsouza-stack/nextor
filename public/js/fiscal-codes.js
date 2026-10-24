@@ -70,10 +70,11 @@
     const originalClasses=source.className;
     let committedValue=oldValue;
     const cfopPrefix=(()=>{
-      if(/outbound_internal/.test(name))return '5';
-      if(/outbound_interstate|state_variations/.test(name))return '6';
+      if(name==='cfop_internal'||/outbound_internal/.test(name))return '5';
+      if(name==='cfop_interstate'||/outbound_interstate|state_variations/.test(name))return '6';
       if(/inbound_internal/.test(name))return '1';
       if(/inbound_interstate/.test(name))return '2';
+      if(name==='cfop_foreign')return '7';
       if(name==='cfop'&&/\/fiscal\/rules(?:\/|$)/.test(form?.action||''))return '5';
       return '';
     })();
@@ -199,8 +200,8 @@
       if(list.hidden)return;
       const rect=search.getBoundingClientRect();
       if(rect.bottom<0||rect.top>window.innerHeight){close();return;}
-      const width=Math.min(rect.width,window.innerWidth-16);
-      list.style.width=Math.max(150,width)+'px';
+      const width=Math.min(Math.max(rect.width,window.innerWidth>560?300:rect.width),window.innerWidth-16);
+      list.style.width=width+'px';
       list.style.left=Math.max(8,Math.min(rect.left,window.innerWidth-width-8))+'px';
       const height=list.offsetHeight;
       const below=window.innerHeight-rect.bottom-8;
@@ -277,7 +278,7 @@
       const q=normalize(query);
       list.replaceChildren();
       const matches=catalogItems.filter(item=>isAllowed(item.code)&&item.search.includes(q));
-      matches.slice(0,4).forEach(item=>option(item.code,item.description));
+      matches.slice(0,12).forEach(item=>option(item.code,item.description));
       if(allowManual&&manualPattern.test(String(query).trim())
         && !matches.some(item=>item.code===String(query).trim())
         && isAllowed(String(query).trim())){
@@ -395,6 +396,13 @@
       node.nodeType===1 && (node.matches?.('input[name]') || node.querySelector?.('input[name]'))
     )))queueUpgrade();
   }).observe(document.body,{childList:true,subtree:true});
+  document.addEventListener('close',event=>{
+    if(event.target?.matches?.('dialog')){
+      document.querySelectorAll('.fiscal-code-field.open').forEach(field=>
+        field.dispatchEvent(new Event('fiscal-code-close'))
+      );
+    }
+  },true);
   document.addEventListener('pointerdown',event=>{
     document.querySelectorAll('.fiscal-code-field.open').forEach(field=>{
       if(!field.contains(event.target)
