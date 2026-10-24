@@ -92,6 +92,18 @@ class NfeDraftController extends Controller
 
     public function store(Request $request)
     {
+        // Compatibilidade com integrações legadas: a tela nova envia o modo
+        // rascunho explicitamente; os demais clientes mantêm a regra estrita.
+        if($request->input('draft_action')!=='draft'){
+            $draft=DB::transaction(function()use($request){
+                $draft=NfeDraft::query()->create(['user_id'=>auth()->id()]+$this->draftData($request));
+                $this->replaceItems($draft,$request);
+                return $draft->refresh();
+            });
+            return $request->input('after_save')==='validate'
+                ?$this->validateAndRedirect($draft)
+                :redirect()->route('fiscal.nfe.edit',$draft)->with('success','Rascunho da NF-e salvo.');
+        }
         $draft=$this->savePartialDraft($request);
 
         if($request->input('after_save')==='validate') {
@@ -111,6 +123,15 @@ class NfeDraftController extends Controller
     public function update(Request $request, NfeDraft $nfeDraft)
     {
         abort_unless($nfeDraft->status==='draft',409,'Esta NF-e não pode mais ser editada.');
+        if($request->input('draft_action')!=='draft'){
+            DB::transaction(function()use($request,$nfeDraft){
+                $nfeDraft->update($this->draftData($request)+['validated_at'=>null]);
+                $this->replaceItems($nfeDraft,$request);
+            });
+            return $request->input('after_save')==='validate'
+                ?$this->validateAndRedirect($nfeDraft->refresh())
+                :redirect()->route('fiscal.nfe.edit',$nfeDraft)->with('success','Rascunho da NF-e atualizado.');
+        }
         $this->savePartialDraft($request,$nfeDraft);
 
         if($request->input('after_save')==='validate') {
@@ -126,7 +147,7 @@ class NfeDraftController extends Controller
      */
     private function savePartialDraft(Request $request,?NfeDraft $existing=null): NfeDraft
     {
-        $values=$request->except(['_token','_method','after_save']);
+        $values=$request->except(['_token','_method','after_save','draft_action']);
         $snapshot=[];
         $totalChars=0;
         if(count($values)>110){
