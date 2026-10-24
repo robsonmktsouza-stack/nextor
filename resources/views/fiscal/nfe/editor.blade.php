@@ -573,7 +573,7 @@ $origins=[
           @disabled(!$draft->validated_at) title="Assina e valida o XML na ACBr, sem transmitir ou reservar número">Verificar na ACBr</button>
         <button class="btn btn-success" type="submit" form="nfeEmitForm" id="nfeSubmitEmission"
           @disabled(!$draft->validated_at)>Emitir NF-e</button>
-      @elseif($isEditing && $draft->status==='prepared')
+      @elseif($isEditing && ($draft->status==='prepared' || ($draft->status==='processing' && !$draft->access_key && !$draft->xml_path && !$draft->transmission_attempted_at && $draft->updated_at?->lt(now()->subMinutes(15)))))
         <button class="btn btn-secondary" type="submit" form="nfeRetryForm">Preparar novamente</button>
       @elseif($isEditing && in_array($draft->status,['pending','processing','rejected','authorized'],true))
         <button class="btn btn-secondary" type="submit" form="nfeConsultForm">Consultar SEFAZ</button>
@@ -903,7 +903,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   @if($draft->status!=='draft')
     editor.querySelectorAll('input,select,textarea,button').forEach(node=>{
       // Fiscal events remain available on an immutable authorized document.
-      if(node.matches('[data-nfe-allow-readonly]'))return;
+      if(node.matches('[data-nfe-allow-readonly],[form="nfeRetryForm"],[form="nfeConsultForm"]'))return;
       node.disabled=true;
     });
   @else
