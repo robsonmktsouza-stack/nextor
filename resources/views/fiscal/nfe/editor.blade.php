@@ -160,7 +160,7 @@ $origins=[
 
       <div class="nfe-general-card">
         <div class="nfe-general-actions">
-          <button type="button" class="nfe-section-toggle" data-nfe-general-toggle>Ocultar detalhes</button>
+          <button type="button" class="nfe-section-toggle" data-nfe-general-toggle aria-controls="nfeGeneralFields" aria-expanded="true">Ocultar detalhes</button>
         </div>
 
         <div class="nfe-general-layout" id="nfeGeneralFields">
@@ -565,8 +565,9 @@ $origins=[
           <label class="field col-2"><span>Peso bruto</span><input type="number" min="0" step="0.001" name="gross_weight" value="{{ $nfeOld('gross_weight',data_get($transport,'gross_weight')) }}"></label>
         </div>
       </div>
+    </section>
 
-id="nfe-section-other">
+    <section class="editor-tab-panel nfe-form-section cms-card" id="nfe-section-other">
       <header class="card-header nfe-flow-heading"><div><h2>Informações adicionais</h2><p>Documentos referenciados e observações</p></div></header>
       <div class="editor-panel">
         <div class="delivery-card-title">
