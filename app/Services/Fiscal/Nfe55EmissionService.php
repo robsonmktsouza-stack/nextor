@@ -57,25 +57,44 @@ final class Nfe55EmissionService
         return $updated;
     }
 
-    /** Retry only before an external send, reusing the same reserved number and cNF. */
+    /**
+     * Reprepare a document only if the SEFAZ has definitely never been contacted.
+     * A crashed worker can leave status=processing; after 15 minutes, recover only
+     * when there is no persisted signed XML/key and no transmission attempt.
+     * The same reserved number and cNF must be reused.
+     */
     public function retryPreparation(NfeDraft $draft): NfeDraft
     {
-        $updated=DB::transaction(function()use($draft){
-            $note=NfeDraft::query()->lockForUpdate()->findOrFail($draft->id);
-            if($note->status!=='prepared'||$note->transmission_attempted_at!==null
-                ||!$note->document_number||!$note->numeric_code||$note->access_key){
-                throw ValidationException::withMessages(['nfe'=>'Esta NF-e não pode ser preparada novamente.']);
-            }
-            $note->update(['status'=>'queued','error_message'=>null]);
-            return $note->refresh();
-        },3);
-        try{
-            ProcessNfe55Job::dispatch($updated->id)->onConnection('database')->onQueue('fiscal');
-        }catch(Throwable){
-            $updated->update(['status'=>'prepared','error_message'=>'Falha ao agendar preparação.']);
-            throw ValidationException::withMessages(['nfe'=>'Não foi possível agendar a preparação.']);
+        $lock=Cache::lock('nfe-55:'.$draft->id,300);
+        if(!$lock->get()) {
+            throw ValidationException::withMessages(['nfe'=>'Já existe uma operação fiscal em andamento.']);
         }
-        return $updated;
+        try {
+            $updated=DB::transaction(function()use($draft){
+                $note=NfeDraft::query()->lockForUpdate()->findOrFail($draft->id);
+                $stalled=$note->status==='processing'
+                    && $note->updated_at!==null
+                    && $note->updated_at->lt(now()->subMinutes(15));
+                if(!in_array($note->status,['prepared','processing'],true)
+                    ||($note->status==='processing'&&!$stalled)
+                    ||$note->transmission_attempted_at!==null
+                    ||!$note->document_number||!$note->numeric_code
+                    ||$note->access_key||$note->xml_path){
+                    throw ValidationException::withMessages(['nfe'=>'Esta NF-e não pode ser preparada novamente. Consulte a SEFAZ se houve tentativa de transmissão.']);
+                }
+                $note->update(['status'=>'queued','error_message'=>null]);
+                return $note->refresh();
+            },3);
+            try {
+                ProcessNfe55Job::dispatch($updated->id)->onConnection('database')->onQueue('fiscal');
+            } catch(Throwable) {
+                $updated->update(['status'=>'prepared','error_message'=>'Falha ao agendar preparação.']);
+                throw ValidationException::withMessages(['nfe'=>'Não foi possível agendar a preparação.']);
+            }
+            return $updated;
+        } finally {
+            $lock->release();
+        }
     }
 
     public function process(int $id): void
