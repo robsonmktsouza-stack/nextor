@@ -142,6 +142,16 @@ class NfeEditorTest extends TestCase
         ],$override));
     }
 
+    public function test_scrollable_editor_shell_uses_grid_and_not_absolute_positioning(): void
+    {
+        $css=(string)file_get_contents(public_path('css/erp.css'));
+        $script=(string)file_get_contents(public_path('js/nfe-editor.js'));
+        self::assertStringContainsString('grid-template-rows:auto minmax(0,1fr) auto',$css);
+        self::assertStringContainsString('.nfe-modal-layer .nfe-workspace-dialog .nfe-workspace-body',$css);
+        self::assertStringNotContainsString('.nfe-modal-layer .nfe-fixed-shell',$css);
+        self::assertStringContainsString("flowBody.scrollTo({top,behavior:'smooth'})",$script);
+    }
+
     public function test_new_nfe_uses_nextor_pattern_and_real_legacy_mapping(): void
     {
         $this->company();
@@ -156,7 +166,9 @@ class NfeEditorTest extends TestCase
             ->assertSee('erp-dialog',false)
             ->assertSee('nextor-modal-layer',false)
             ->assertSee('nextor-modal-window',false)
-            ->assertSee('nfe-fixed-shell',false)
+            ->assertDontSee('nfe-fixed-shell',false)
+            ->assertSee('id="nfeScrollRegion"',false)
+            ->assertSee('tabindex="0" aria-label="Conteúdo da NF-e"',false)
             ->assertSee('data-nfe-modal',false)
             ->assertSee('id="erpCatalogDialog"',false)
             ->assertSee('dialog-header',false)
