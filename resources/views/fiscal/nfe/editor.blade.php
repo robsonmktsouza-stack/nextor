@@ -321,7 +321,12 @@ $origins=[
       </div>
 
       <div class="editor-panel nfe-recipient-panel">
-        <h3>Dados do destinatário</h3>
+        <div class="nfe-recipient-heading">
+          <h3>Dados do destinatário</h3>
+          @if($draft->status==='draft' && auth()->user()?->canAccess('customers') && !((bool)data_get(request()->attributes->get('lumeron_commercial_license',[]),'readonly',false)))
+            <button type="button" class="btn btn-secondary" id="nfeEditCustomer" hidden>Editar dados</button>
+          @endif
+        </div>
         <div class="editor-grid cols-12">
           <label class="field col-8">
             <span>Destinatário *</span>
