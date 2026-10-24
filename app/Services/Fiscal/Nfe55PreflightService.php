@@ -8,7 +8,6 @@ use App\Models\NfeDraft;
 use App\Services\Fiscal\ACBr\ACBrNFeService;
 use Illuminate\Validation\ValidationException;
 use RuntimeException;
-use Throwable;
 
 /**
  * Native NF-e validation on Windows with the configured A1 certificate.
