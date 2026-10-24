@@ -662,7 +662,10 @@ class NfeEditorTest extends TestCase
             ->assertRedirect();
 
         $draft=NfeDraft::query()->firstOrFail();
-        $this->assertNotNull($draft->validated_at);
+        // O formulário foi salvo, mas uma tributação não suportada pelo
+        // emissor não pode ser exibida como pronta para emissão.
+        $this->assertNull($draft->validated_at);
+        $this->assertEquals(1,$draft->items()->count());
     }
 
     public function test_product_fiscal_tab_exposes_legacy_mapped_defaults(): void
