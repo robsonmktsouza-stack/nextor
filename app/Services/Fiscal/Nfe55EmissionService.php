@@ -75,7 +75,9 @@ final class Nfe55EmissionService
     /**
      * Reprepare a document only if the SEFAZ has definitely never been contacted.
      * A crashed worker can leave status=processing; after 15 minutes, recover only
-     * when there is no persisted signed XML/key and no transmission attempt.
+     * when there is no transmission attempt. A locally signed XML can exist
+     * because signing precedes contacting SEFAZ; reusing the same reserved
+     * number/cNF is then safe, while foreign or authorized XML paths are not.
      * The same reserved number and cNF must be reused.
      */
     public function retryPreparation(NfeDraft $draft): NfeDraft
@@ -90,11 +92,21 @@ final class Nfe55EmissionService
                 $stalled=$note->status==='processing'
                     && $note->updated_at!==null
                     && $note->updated_at->lt(now()->subMinutes(15));
+                $expectedSignedPath='fiscal/nfe55/'.$note->id.'/signed.xml';
+                $signedKey=(string)($note->access_key??'');
+                $keyIsConsistent=$signedKey==='' || (
+                    preg_match('/^\\d{44}$/',$signedKey)===1
+                    &&substr($signedKey,20,2)==='55'
+                    &&substr($signedKey,22,3)===sprintf('%03d',(int)$note->series)
+                    &&substr($signedKey,25,9)===sprintf('%09d',(int)$note->document_number)
+                    &&substr($signedKey,35,8)===sprintf('%08d',(int)$note->numeric_code)
+                );
                 if(!in_array($note->status,['prepared','processing'],true)
                     ||($note->status==='processing'&&!$stalled)
                     ||$note->transmission_attempted_at!==null
                     ||!$note->document_number||!$note->numeric_code
-                    ||$note->access_key||$note->xml_path){
+                    ||($note->xml_path!==null && $note->xml_path!==$expectedSignedPath)
+                    ||!$keyIsConsistent){
                     throw ValidationException::withMessages(['nfe'=>'Não é possível repetir o envio desta nota. Consulte a situação na SEFAZ antes de prosseguir.']);
                 }
                 $note->update(['status'=>'queued','error_message'=>null]);
@@ -160,7 +172,7 @@ final class Nfe55EmissionService
             Storage::disk('local')->put($base.'/sefaz-response.ini',$raw);
             $draft->update(['response_path'=>$base.'/sefaz-response.ini']);
             $result=$this->responses->parse($raw);
-            if($this->responses->authorized($result) && hash_equals($signedKey,(string)$result['key'])){
+            if($this->authorizationMatches($result,$signedKey,(string)$draft->environment)){
                 $this->persistAuthorization($draft,$signedXml,$result);
             }else{
                 $code=(string)($result['cstat']??'');
@@ -220,8 +232,7 @@ final class Nfe55EmissionService
             $base='fiscal/nfe55/'.$draft->id;
             Storage::disk('local')->put($base.'/consult-response.ini',$raw);
             $result=$this->responses->parseConsult($raw);
-            if($this->responses->authorized($result)
-                && hash_equals((string)$draft->access_key,(string)$result['key'])){
+            if($this->authorizationMatches($result,(string)$draft->access_key,(string)$draft->environment)){
                 $signedPath=$base.'/signed.xml';
                 if(!Storage::disk('local')->exists($signedPath)){
                     throw new RuntimeException('XML assinado original não foi encontrado.');
@@ -243,6 +254,17 @@ final class Nfe55EmissionService
                 $lock->release();
             }
         }
+    }
+
+    /** Only the matching access key AND SEFAZ environment can confirm authorization. */
+    public function authorizationMatches(array $response,string $key,string $environment): bool
+    {
+        return $this->responses->authorized($response)
+            && preg_match('/^\\d{44}$/',$key)===1
+            && hash_equals($key,(string)($response['key']??''))
+            && ($environment==='homologation'
+                ? (string)($response['environment']??'')==='2'
+                : ($environment==='production' && (string)($response['environment']??'')==='1'));
     }
 
     private function persistAuthorization(NfeDraft $draft,string $signed,array $result): void
