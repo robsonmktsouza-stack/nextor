@@ -44,12 +44,12 @@
           <td><span class="status {{ $draft->status==='authorized' && !$draft->cancellation_status?'status-ok':'status-muted' }}">
             {{ $draft->cancellation_status
                 ? match($draft->cancellation_status){
-                    'pending'=>'Cancelamento na fila','processing'=>'Cancelamento em processamento',
-                    'uncertain'=>'Cancelamento a conferir','rejected'=>'Cancelamento rejeitado',
+                    'pending'=>'Cancelamento solicitado','processing'=>'Aguardando resposta da SEFAZ',
+                    'uncertain'=>'Verificar cancelamento','rejected'=>'Cancelamento não autorizado',
                     'authorized'=>'Cancelada',default=>'Cancelamento em análise'}
                 : match($draft->status){'authorized'=>'Autorizada','cancelled'=>'Cancelada',
-                    'pending'=>'Pendente SEFAZ','queued'=>'Na fila','processing'=>'Processando',
-                    'rejected'=>'Rejeitada','prepared'=>'Preparação pendente',
+                    'pending'=>'Aguardando confirmação','queued'=>'Aguardando envio','processing'=>'Enviando',
+                    'rejected'=>'Não autorizada','prepared'=>'Não enviada',
                     default=>$draft->validated_at?'Validada':'Rascunho'} }}
           </span></td>
           <td>{{ $draft->user?->name ?? '—' }}</td>
