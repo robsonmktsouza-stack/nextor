@@ -76,6 +76,53 @@ final class NfeFormCompletenessTest extends TestCase
         ];
     }
 
+    public function test_incomplete_draft_saves_without_a_customer_nature_or_item(): void
+    {
+        $this->init();
+        $response=$this->post(route('fiscal.nfe.store'),[
+            'operation_type'=>'outbound',
+            'destination'=>'internal',
+            'issue_date'=>'2026-10-24',
+            'issue_time'=>'09:43',
+            'presence'=>'presential',
+            'additional_info'=>'Texto parcialmente preenchido para continuar depois.',
+            'items_json'=>'[]',
+            'payments_json'=>'[]',
+            'duplicates_json'=>'[]',
+            'references_json'=>'[]',
+        ]);
+        $draft=NfeDraft::query()->firstOrFail();
+        $response->assertRedirect(route('fiscal.nfe.edit',$draft))
+            ->assertSessionHasNoErrors();
+        self::assertSame('draft',$draft->status);
+        self::assertNull($draft->customer_id);
+        self::assertNull($draft->operation_nature_id);
+        self::assertNull($draft->validated_at);
+        self::assertNull($draft->document_number);
+        self::assertSame('Texto parcialmente preenchido para continuar depois.',
+            data_get($draft->custom_fields,'_editor_form.additional_info'));
+        $this->get(route('fiscal.nfe.edit',$draft))
+            ->assertOk()
+            ->assertSee('Texto parcialmente preenchido para continuar depois.');
+    }
+
+    public function test_invalid_validation_keeps_draft_and_original_items(): void
+    {
+        [, $nature,$customer]=$this->init();
+        $data=$this->data($nature,$customer);
+        unset($data['customer_id']);
+        $data['after_save']='validate';
+        $response=$this->post(route('fiscal.nfe.store'),$data);
+        $draft=NfeDraft::query()->firstOrFail();
+        $response->assertRedirect(route('fiscal.nfe.edit',$draft))
+            ->assertSessionHasErrors('customer_id');
+        self::assertNull($draft->validated_at);
+        self::assertNull($draft->customer_id);
+        self::assertSame('Camiseta comercial',
+            json_decode((string)data_get($draft->custom_fields,'_editor_form.items_json'),true)[0]['product_name']);
+        $this->get(route('fiscal.nfe.edit',$draft))->assertSee('nfeItemsJson');
+    }
+
     public function test_delivery_charges_payments_and_invoice_totals_survive_save_and_reopen(): void
     {
         [$company,$nature,$customer]=$this->init();
