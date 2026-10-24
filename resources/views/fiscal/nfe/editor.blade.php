@@ -652,17 +652,22 @@ $origins=[
   <div class="dialog-body nfe-item-body">
     <input type="hidden" id="nfeItemIndex">
 
-    <div class="editor-tabs nfe-item-tabs" data-nfe-item-tabs>
-      <button type="button" class="editor-tab active" data-nfe-item-tab="item-general">Produto</button>
-      <button type="button" class="editor-tab" data-nfe-item-tab="item-fiscal">Fiscal</button>
-      <button type="button" class="editor-tab" data-nfe-item-tab="item-icms">ICMS / ST</button>
-      <button type="button" class="editor-tab" data-nfe-item-tab="item-federal">PIS / COFINS / IPI</button>
-      <button type="button" class="editor-tab" data-nfe-item-tab="item-difal">DIFAL / FCP</button>
-      <button type="button" class="editor-tab" data-nfe-item-tab="item-specific">Específicos</button>
-      <button type="button" class="editor-tab" data-nfe-item-tab="item-ibscbs">IBS / CBS</button>
+    <div class="nfe-item-intro">
+      <div>
+        <strong>Produto e tributação</strong>
+        <p>Preencha os dados da mercadoria e confira os códigos tributários da operação.</p>
+      </div>
+      <div class="nfe-item-intro-total"><small>Total do item</small><strong id="nfeItemHeaderTotal">R$ 0,00</strong></div>
     </div>
 
-    <section class="editor-tab-panel active" data-nfe-item-panel="item-general">
+
+    <details class="nfe-item-section" data-nfe-item-panel="item-general" open>
+      <summary class="nfe-item-section-heading">
+        <span class="nfe-section-index">01</span>
+        <span class="nfe-section-label"><strong>Dados gerais</strong><small>Produto, quantidade e valores</small></span>
+        <span class="nfe-section-caret" aria-hidden="true"></span>
+      </summary>
+      <div class="nfe-item-section-content">
       <div class="editor-panel">
         <div class="editor-grid cols-12">
           <div class="field col-8">
@@ -697,9 +702,17 @@ $origins=[
         </div>
 
       </div>
-    </section>
 
-    <section class="editor-tab-panel" data-nfe-item-panel="item-fiscal" hidden>
+      </div>
+    </details>
+
+    <details class="nfe-item-section" data-nfe-item-panel="item-fiscal" open>
+      <summary class="nfe-item-section-heading">
+        <span class="nfe-section-index">02</span>
+        <span class="nfe-section-label"><strong>Identificação fiscal</strong><small>NCM, origem, CFOP e unidades</small></span>
+        <span class="nfe-section-caret" aria-hidden="true"></span>
+      </summary>
+      <div class="nfe-item-section-content">
       <div class="editor-panel">
         <h3>Identificação fiscal do produto</h3>
         <div class="editor-grid cols-12">
@@ -729,9 +742,27 @@ $origins=[
           <label class="field col-3"><span>Entrada interestadual</span><input id="nfeCfopInboundInterstate" maxlength="10"></label>
         </div>
       </div>
-    </section>
 
-    <section class="editor-tab-panel" data-nfe-item-panel="item-icms" hidden>
+      </div>
+    </details>
+
+    <div class="nfe-tax-review" aria-label="Resumo dos códigos tributários">
+      <div class="nfe-tax-review-heading"><strong>Tributação do item</strong><span>Confira os códigos antes de salvar</span></div>
+      <div class="nfe-tax-review-grid">
+        <button type="button" data-nfe-open-section="item-icms"><small>ICMS</small><strong id="nfeTaxSummaryIcms">Não informado</strong></button>
+        <button type="button" data-nfe-open-section="item-federal"><small>PIS</small><strong id="nfeTaxSummaryPis">Não informado</strong></button>
+        <button type="button" data-nfe-open-section="item-federal"><small>COFINS</small><strong id="nfeTaxSummaryCofins">Não informado</strong></button>
+        <button type="button" data-nfe-open-section="item-federal"><small>IPI</small><strong id="nfeTaxSummaryIpi">Não informado</strong></button>
+        <button type="button" data-nfe-open-section="item-ibscbs"><small>IBS / CBS</small><strong id="nfeTaxSummaryIbs">Não informado</strong></button>
+      </div>
+    </div>
+    <details class="nfe-item-section" data-nfe-item-panel="item-icms" open>
+      <summary class="nfe-item-section-heading">
+        <span class="nfe-section-index">03</span>
+        <span class="nfe-section-label"><strong>ICMS / Simples Nacional</strong><small>Situação tributária e substituição</small></span>
+        <span class="nfe-section-caret" aria-hidden="true"></span>
+      </summary>
+      <div class="nfe-item-section-content">
       <div class="editor-panel">
         <div class="editor-grid cols-12">
           <label class="field col-3"><span>CSOSN</span><input id="nfeTaxCsosn" maxlength="4"></label>
@@ -750,9 +781,17 @@ $origins=[
           <label class="field col-3"><span>MVA %</span><input id="nfeTaxMvaRate" type="number" step="0.0001"></label>
         </div>
       </div>
-    </section>
 
-    <section class="editor-tab-panel" data-nfe-item-panel="item-federal" hidden>
+      </div>
+    </details>
+
+    <details class="nfe-item-section" data-nfe-item-panel="item-federal" open>
+      <summary class="nfe-item-section-heading">
+        <span class="nfe-section-index">04</span>
+        <span class="nfe-section-label"><strong>PIS, COFINS e IPI</strong><small>Classificação tributária federal</small></span>
+        <span class="nfe-section-caret" aria-hidden="true"></span>
+      </summary>
+      <div class="nfe-item-section-content">
       <div class="editor-panel">
         <div class="editor-grid cols-12">
           <label class="field col-2"><span>CST PIS *</span><input id="nfeTaxPisCst" maxlength="4"></label>
@@ -770,9 +809,17 @@ $origins=[
           <label class="field col-3"><span>Item lista de serviço</span><input id="nfeTaxServiceListCode"></label>
         </div>
       </div>
-    </section>
 
-    <section class="editor-tab-panel" data-nfe-item-panel="item-difal" hidden>
+      </div>
+    </details>
+
+    <details class="nfe-item-section" data-nfe-item-panel="item-difal">
+      <summary class="nfe-item-section-heading">
+        <span class="nfe-section-index">05</span>
+        <span class="nfe-section-label"><strong>DIFAL e FCP</strong><small>Somente quando aplicável à operação</small></span>
+        <span class="nfe-section-caret" aria-hidden="true"></span>
+      </summary>
+      <div class="nfe-item-section-content">
       <div class="editor-panel">
         <h3>ICMS destino / FCP</h3>
 
@@ -782,9 +829,17 @@ $origins=[
           <label class="field col-4"><span>FCP interestadual %</span><input id="nfeTaxFcpRate" type="number" step="0.0001"></label>
         </div>
       </div>
-    </section>
 
-    <section class="editor-tab-panel" data-nfe-item-panel="item-specific" hidden>
+      </div>
+    </details>
+
+    <details class="nfe-item-section" data-nfe-item-panel="item-specific">
+      <summary class="nfe-item-section-heading">
+        <span class="nfe-section-index">06</span>
+        <span class="nfe-section-label"><strong>Dados específicos</strong><small>Combustíveis, veículos e rastreabilidade</small></span>
+        <span class="nfe-section-caret" aria-hidden="true"></span>
+      </summary>
+      <div class="nfe-item-section-content">
       <div class="editor-panel">
         <h3>Combustível / ANP</h3>
         <div class="editor-grid cols-12">
@@ -813,9 +868,17 @@ $origins=[
           <label class="field col-3"><span>Cor</span><input id="nfeSpecialVehicleColor"></label>
         </div>
       </div>
-    </section>
 
-    <section class="editor-tab-panel" data-nfe-item-panel="item-ibscbs" hidden>
+      </div>
+    </details>
+
+    <details class="nfe-item-section" data-nfe-item-panel="item-ibscbs">
+      <summary class="nfe-item-section-heading">
+        <span class="nfe-section-index">07</span>
+        <span class="nfe-section-label"><strong>IBS e CBS</strong><small>Preencha conforme o enquadramento tributário</small></span>
+        <span class="nfe-section-caret" aria-hidden="true"></span>
+      </summary>
+      <div class="nfe-item-section-content">
       <div class="editor-panel">
 
         <div class="editor-grid cols-12">
@@ -830,7 +893,9 @@ $origins=[
           <label class="field col-4"><span>Redução CBS %</span><input id="nfeCbsReduction" type="number" min="0" step="0.0001"></label>
         </div>
       </div>
-    </section>
+
+      </div>
+    </details>
   </div>
 
   <div class="dialog-footer">
