@@ -163,6 +163,7 @@ class NfeEditorTest extends TestCase
         }
         self::assertSame(5,substr_count($html,'class="editor-tab-panel nfe-form-section cms-card"'));
         self::assertStringContainsString('class="nfe-general-actions"',$html);
+        self::assertStringContainsString('class="nfe-item-header-actions"',$html);
         self::assertStringContainsString('class="editor-grid cols-12 nfe-totals-grid"',$html);
         self::assertStringContainsString('class="nfe-general-dates"',$html);
         self::assertSame(6,substr_count($html,'class="field col-2 nfe-flag-field"'));
