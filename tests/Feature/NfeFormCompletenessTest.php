@@ -175,14 +175,17 @@ final class NfeFormCompletenessTest extends TestCase
         self::assertMatchesRegularExpression('/value="'.preg_quote((string)$customer->id,'/').'"\\s+selected/', $customerSelect[1]);
     }
 
-    public function test_incompatible_nature_does_not_overwrite_existing_invoice(): void
+    public function test_incompatible_nature_remains_draft_after_validation(): void
     {
         [, $nature,$customer]=$this->init();
         $data=$this->data($nature,$customer);
         $data['operation_type']='inbound';
+        $data['after_save']='validate';
 
-        $this->post(route('fiscal.nfe.store'),$data)->assertSessionHasErrors('operation_type');
-        self::assertSame(0,NfeDraft::query()->count());
+        $response=$this->post(route('fiscal.nfe.store'),$data);
+        $draft=NfeDraft::query()->firstOrFail();
+        $response->assertSessionHas('warning');
+        self::assertNull($draft->validated_at);
     }
 
     public function test_invoice_with_wrong_destination_is_not_marked_validated(): void
