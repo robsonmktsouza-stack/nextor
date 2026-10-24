@@ -41,7 +41,7 @@ final class NfeRecipientQuickEditTest extends TestCase
     {
         return Customer::query()->create([
             'name'=>'Cliente Original',
-            'document'=>'06821038295',
+            'document'=>'12345678909',
             'is_customer'=>true,
             'final_consumer'=>true,
             'ie_indicator'=>'non_contributor',
@@ -64,7 +64,7 @@ final class NfeRecipientQuickEditTest extends TestCase
 
         $response=$this->putJson(route('quick-catalog.customers.update',$customer),[
             'name'=>'Cliente Atualizado',
-            'document'=>'068.210.382-95',
+            'document'=>'123.456.789-09',
             'ie_indicator'=>'non_contributor',
             'state'=>'SP',
             'city'=>'São Paulo',
@@ -80,7 +80,7 @@ final class NfeRecipientQuickEditTest extends TestCase
         $response->assertOk()
             ->assertJsonPath('item.id',$customer->id)
             ->assertJsonPath('item.city_ibge_code','3550308')
-            ->assertJsonPath('item.document','06821038295')
+            ->assertJsonPath('item.document','12345678909')
             ->assertJsonPath('item.address','Rua Atualizada');
         self::assertSame(1,Customer::query()->count());
         $customer->refresh();
@@ -107,7 +107,7 @@ final class NfeRecipientQuickEditTest extends TestCase
             'ie_indicator'=>'non_contributor',
         ])->assertUnprocessable()->assertJsonValidationErrors('document');
 
-        self::assertSame('06821038295',$customer->fresh()->document);
+        self::assertSame('12345678909',$customer->fresh()->document);
         self::assertSame(2,Customer::query()->count());
     }
 }
