@@ -66,6 +66,10 @@ class Nfe55DanfeService
             $service->setConfig('DFe','UF',strtoupper((string)$company->state));
             $service->setConfig('NFe','ModeloDF','0');
             $service->setConfig('NFe','PathSchemas',$schemas);
+            // Nunca herdar configuração DANFE de NFC-e no INI base.
+            $service->setConfig('DANFE','TipoDANFE','1');
+            $service->setConfig('DANFE','MostraPreview','0');
+            $service->setConfig('DANFE','MostraStatus','0');
             $service->loadXml($xml);
             return $service->savePdf();
         }finally{
