@@ -433,11 +433,12 @@ $origins=[
             </select>
           </label>
 
-          <label class="field col-4" id="nfeOtherPaymentField"><span>Descrição quando “Outros”</span><input name="payment_other_description" value="{{ $nfeOld('payment_other_description',$draft->payment_other_description) }}"></label>
+          <div class="field col-4 nfe-payment-value"><span>Valor do pagamento principal</span><div class="readonly-field" id="nfePrimaryPaymentTotal">R$ 0,00</div></div>
+          <label class="field col-6" id="nfeOtherPaymentField" hidden><span>Descrição da forma de pagamento</span><input name="payment_other_description" value="{{ $nfeOld('payment_other_description',$draft->payment_other_description) }}"></label>
         </div>
       </div>
 
-      <div class="editor-panel" id="nfeCardPanel">
+      <div class="editor-panel" id="nfeCardPanel" hidden>
         <h3>Dados do cartão</h3>
         <div class="editor-grid cols-12">
           <label class="field col-3"><span>Integração com o sistema *</span>
@@ -460,13 +461,13 @@ $origins=[
         </div>
       </div>
 
-      <div class="editor-panel">
-        <div class="delivery-card-title">
-          <h3>Formas de pagamento</h3>
-        </div>
-        <div class="editor-grid cols-12">
-          <div class="field col-4"><span>Valor do pagamento principal</span><div class="readonly-field" id="nfePrimaryPaymentTotal">R$ 0,00</div></div>
-        </div>
+      <div class="editor-panel nfe-payment-optional">
+        <details class="nfe-payment-disclosure" id="nfeSplitPayments">
+          <summary>
+            <span><strong>Dividir pagamento</strong><small>Use quando o cliente pagar com mais de uma forma.</small></span>
+            <span class="nfe-payment-disclosure-state" aria-hidden="true"></span>
+          </summary>
+          <div class="nfe-payment-disclosure-content">
         <div class="table-scroll">
           <table class="cms-table">
             <thead><tr><th>Pagamento adicional</th><th>Condição</th><th>Valor</th><th class="action-cell"></th></tr></thead>
@@ -500,15 +501,19 @@ $origins=[
           <label class="field col-3" id="nfeExtraPaymentAcquirerField" hidden><span>CNPJ da credenciadora</span><input id="nfeExtraPaymentAcquirer" maxlength="20"></label>
           <label class="field col-3" id="nfeExtraPaymentAuthorizationField" hidden><span>Código da autorização</span><input id="nfeExtraPaymentAuthorization" maxlength="40"></label>
         </div>
-      </div>
-      <div class="editor-panel">
-        <div class="delivery-card-title">
-          <div>
-            <h3>Duplicatas</h3>
-
           </div>
-          <button type="button" class="btn btn-secondary" data-nfe-modal-open="nfeDuplicateDialog">@include('partials.icon',['name'=>'plus','size'=>15]) Adicionar</button>
-        </div>
+        </details>
+      </div>
+      <div class="editor-panel nfe-payment-optional">
+        <details class="nfe-payment-disclosure" id="nfePaymentInstallments" @if($existingDuplicates!==[]) open @endif>
+          <summary>
+            <span><strong>Vencimentos e duplicatas</strong><small>Informe parcelas quando houver cobrança a prazo.</small></span>
+            <span class="nfe-payment-disclosure-state" aria-hidden="true"></span>
+          </summary>
+          <div class="nfe-payment-disclosure-content">
+            <div class="nfe-payment-disclosure-toolbar">
+              <button type="button" class="btn btn-secondary" data-nfe-modal-open="nfeDuplicateDialog">@include('partials.icon',['name'=>'plus','size'=>15]) Adicionar vencimento</button>
+            </div>
         <div class="table-scroll">
           <table class="cms-table">
             <thead><tr><th>Nº</th><th>Tipo pagamento</th><th>Vencimento</th><th>Valor</th><th class="action-cell"></th></tr></thead>
@@ -516,6 +521,8 @@ $origins=[
           </table>
         </div>
 
+          </div>
+        </details>
       </div>
     </section>
 
