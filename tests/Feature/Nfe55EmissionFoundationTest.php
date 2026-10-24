@@ -145,6 +145,19 @@ final class Nfe55EmissionFoundationTest extends TestCase
         );
     }
 
+    public function test_developer_preflight_command_refuses_unvalidated_draft_without_transmitting(): void
+    {
+        $draft=$this->draft();
+        $draft->update(['validated_at'=>null]);
+        $exit=\Illuminate\Support\Facades\Artisan::call('nfe:preflight',[
+            'id'=>(string)$draft->id,
+        ]);
+        self::assertSame(1,$exit);
+        self::assertSame('draft',$draft->fresh()->status);
+        self::assertNull($draft->fresh()->document_number);
+        self::assertNull($draft->fresh()->transmission_attempted_at);
+    }
+
     public function test_internal_preflight_refuses_unvalidated_draft_without_reserving_number(): void
     {
         $draft=$this->draft();
