@@ -146,9 +146,23 @@ class NfeDraftController extends Controller
         $errors=[];
 
         if(!$draft->operationNature) $errors[]='Selecione uma natureza de operação.';
+        elseif($draft->operation_type!==$draft->operationNature->operation_type){
+            $errors[]='A natureza selecionada não corresponde ao tipo de operação (entrada ou saída).';
+        }
         if(!$draft->customer) $errors[]='Selecione o destinatário.';
         if(!$draft->customer?->document && !$draft->customer?->foreign_id) {
             $errors[]='O destinatário está sem CPF/CNPJ ou identificação de estrangeiro.';
+        }
+
+        $recipientUf=strtoupper((string)($draft->customer?->state??''));
+        $emitterUf=strtoupper((string)CompanySetting::current()->state);
+        if($recipientUf!=='' && $emitterUf!==''){
+            if($draft->destination==='internal' && $recipientUf!==$emitterUf){
+                $errors[]='O destino está como operação interna, mas o destinatário é de outra UF.';
+            }
+            if($draft->destination==='interstate' && $recipientUf===$emitterUf){
+                $errors[]='O destino está como interestadual, mas emitente e destinatário são da mesma UF.';
+            }
         }
 
         $foreign=$this->isForeignCustomer($draft->customer);
@@ -307,6 +321,13 @@ class NfeDraftController extends Controller
         ]);
     }
 
+    private function minuteTime(?string $time): ?string
+    {
+        // MySQL TIME pode voltar com segundos, embora o editor use HH:mm.
+        // Mantemos apenas as horas e os minutos, sem alterar o horário.
+        return $time === null || $time === '' ? null : substr($time,0,5);
+    }
+
     private function draftData(Request $request): array
     {
         $data=$request->validate([
@@ -322,9 +343,9 @@ class NfeDraftController extends Controller
             'inform_exit_datetime'=>['nullable','boolean'],
             'inform_expected_delivery_date'=>['nullable','boolean'],
             'issue_date'=>['nullable','date'],
-            'issue_time'=>['nullable','date_format:H:i'],
+            'issue_time'=>['nullable','date_format:H:i,H:i:s'],
             'exit_date'=>['nullable','date'],
-            'exit_time'=>['nullable','date_format:H:i'],
+            'exit_time'=>['nullable','date_format:H:i,H:i:s'],
             'expected_delivery_date'=>['nullable','date'],
             'government_purchase'=>['nullable','boolean'],
             'advance_payment'=>['nullable','boolean'],
@@ -366,11 +387,23 @@ class NfeDraftController extends Controller
             'payments_json'=>['nullable','string'],
             'references_json'=>['nullable','string'],
             'items_json'=>['required','string'],
+        ], [
+            'issue_time.date_format'=>'Confira a hora de emissão. Utilize um horário válido, como 11:24.',
+            'exit_time.date_format'=>'Confira a hora de saída ou entrada.',
+            'operation_nature_id.required'=>'Selecione a natureza da operação.',
+            'operation_nature_id.exists'=>'A natureza selecionada não está disponível. Selecione outra.',
+            'customer_id.required'=>'Selecione o destinatário.',
+            'customer_id.exists'=>'O destinatário selecionado não está disponível.',
         ]);
 
         $company=CompanySetting::current();
         $customer=Customer::query()->findOrFail((int)$data['customer_id']);
         $nature=OperationNature::query()->findOrFail((int)$data['operation_nature_id']);
+        if($data['operation_type']!==$nature->operation_type){
+            throw ValidationException::withMessages([
+                'operation_type'=>'O tipo de operação não corresponde à natureza selecionada. Confira se é entrada ou saída.',
+            ]);
+        }
         $carrier=$request->filled('carrier_id')
             ? Customer::query()->find((int)$request->input('carrier_id'))
             : null;
@@ -454,9 +487,9 @@ class NfeDraftController extends Controller
             'inform_exit_datetime'=>$informExitDatetime,
             'inform_expected_delivery_date'=>$informExpectedDeliveryDate,
             'issue_date'=>$informIssueDatetime ? $data['issue_date'] : now()->toDateString(),
-            'issue_time'=>$informIssueDatetime ? ($data['issue_time'] ?? null) : now()->format('H:i'),
+            'issue_time'=>$informIssueDatetime ? $this->minuteTime($data['issue_time'] ?? null) : now()->format('H:i'),
             'exit_date'=>$informExitDatetime ? ($data['exit_date'] ?? null) : null,
-            'exit_time'=>$informExitDatetime ? ($data['exit_time'] ?? null) : null,
+            'exit_time'=>$informExitDatetime ? $this->minuteTime($data['exit_time'] ?? null) : null,
             'expected_delivery_date'=>$informExpectedDeliveryDate ? ($data['expected_delivery_date'] ?? null) : null,
             'government_purchase'=>$request->boolean('government_purchase'),
             'advance_payment'=>$request->boolean('advance_payment'),
