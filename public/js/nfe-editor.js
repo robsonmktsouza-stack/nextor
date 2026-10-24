@@ -204,13 +204,16 @@
 
     const address=[customer.address,customer.address_number,customer.district,customer.city,customer.state].filter(Boolean).join(', ');
     const document=customer.document||customer.foreign_id||'—';
+    // Informações separadas para leitura rápida, sem texto fiscal
+    // comprido numa única linha. Conteúdo dinâmico sempre escapado.
     summary.innerHTML=
-      '<strong>'+esc(customer.name)+'</strong><small>'+
-      'CPF/CNPJ/ID: '+esc(document)+
-      ' · IE: '+esc(customer.state_registration||'—')+
-      ' · Município IBGE: '+esc(customer.city_ibge_code||'—')+
-      ' · '+esc(address||'Endereço não informado')+
-      '</small>';
+      '<strong>'+esc(customer.name)+'</strong>'+
+      '<span class="nfe-recipient-meta">'+
+        '<span>CPF/CNPJ: '+esc(document)+'</span>'+
+        '<span>IE: '+esc(customer.state_registration||'—')+'</span>'+
+        '<span>Município IBGE: '+esc(customer.city_ibge_code||'—')+'</span>'+
+      '</span>'+
+      '<span class="nfe-recipient-address">'+esc(address||'Endereço não informado')+'</span>';
   };
 
   byId('nfeEditCustomer')?.addEventListener('click',()=>{
