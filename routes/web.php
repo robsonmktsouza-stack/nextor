@@ -83,6 +83,9 @@ Route::middleware(['auth','control.license'])->group(function () {
     Route::post('/quick-catalog/{kind}',[QuickCatalogController::class,'store'])
         ->where('kind','products|customers|suppliers|carriers')->name('quick-catalog.store')
         ->middleware(['permission:products,customers','company.configured','throttle:20,1']);
+    Route::put('/quick-catalog/customers/{customer}',[QuickCatalogController::class,'updateCustomer'])
+        ->name('quick-catalog.customers.update')
+        ->middleware(['permission:customers','company.configured','throttle:20,1']);
     Route::get('/products',[ProductController::class,'index'])->name('products.index')->middleware('permission:products');
     Route::get('/products/create',[ProductController::class,'create'])->name('products.create')->middleware('permission:products');
     Route::post('/products',[ProductController::class,'store'])->name('products.store')->middleware('permission:products');
