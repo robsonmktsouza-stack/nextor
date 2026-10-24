@@ -639,11 +639,37 @@
   };
   itemDialog?.addEventListener('input',updateItemTaxSummary);
   itemDialog?.addEventListener('change',updateItemTaxSummary);
-  document.querySelectorAll('[data-nfe-jump]').forEach(button=>{
-    button.addEventListener('click',()=>{
-      byId(button.dataset.nfeJump)?.scrollIntoView({behavior:'smooth',block:'start'});
+  const flowButtons=[...document.querySelectorAll('[data-nfe-jump]')];
+  const flowBody=document.querySelector('.nfe-workspace-body');
+  const markFlowButton=active=>{
+    flowButtons.forEach(button=>{
+      const selected=button===active;
+      button.classList.toggle('active',selected);
+      if(selected)button.setAttribute('aria-current','location');
+      else button.removeAttribute('aria-current');
     });
-  });
+  };
+  flowButtons.forEach(button=>button.addEventListener('click',()=>{
+    markFlowButton(button);
+    byId(button.dataset.nfeJump)?.scrollIntoView({behavior:'smooth',block:'start'});
+  }));
+  if(flowBody && flowButtons.length){
+    let scheduled=false;
+    flowBody.addEventListener('scroll',()=>{
+      if(scheduled)return;
+      scheduled=true;
+      requestAnimationFrame(()=>{
+        scheduled=false;
+        const boundary=flowBody.getBoundingClientRect().top+125;
+        let current=flowButtons[0];
+        for(const button of flowButtons){
+          const section=byId(button.dataset.nfeJump);
+          if(section && section.getBoundingClientRect().top<=boundary)current=button;
+        }
+        markFlowButton(current);
+      });
+    },{passive:true});
+  }
 
   const clearItemDialog=()=>{
     Object.values(itemFields).forEach(id=>setField(id,''));
