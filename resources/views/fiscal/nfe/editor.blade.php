@@ -151,7 +151,7 @@ $origins=[
                   <select name="operation_nature_id" id="nfeNature" required>
                     <option value="">Selecione</option>
                     @foreach($natures as $nature)
-                      <option value="{{ $nature->id }}" @selected(old('operation_nature_id',$draft->operation_nature_id)===$nature->id)>
+                      <option value="{{ $nature->id }}" @selected((string)old('operation_nature_id',$draft->operation_nature_id)===(string)$nature->id)>
                         {{ $nature->cfop_internal ? $nature->cfop_internal.' - ' : '' }}{{ $nature->name }}
                       </option>
                     @endforeach
@@ -278,7 +278,7 @@ $origins=[
             </label>
             <label class="field" data-nfe-date-group="issue">
               <span>Hora emissão NF (atual)</span>
-              <input type="time" name="issue_time" id="nfeIssueTime" value="{{ old('issue_time',$draft->issue_time ?? now()->format('H:i')) }}">
+              <input type="time" name="issue_time" id="nfeIssueTime" value="{{ substr((string)old('issue_time',$draft->issue_time ?? now()->format('H:i')),0,5) }}">
             </label>
             <label class="field" data-nfe-date-group="exit">
               <span>Data saída/entrada (atual)</span>
@@ -286,7 +286,7 @@ $origins=[
             </label>
             <label class="field" data-nfe-date-group="exit">
               <span>Hora saída/entrada (atual)</span>
-              <input type="time" name="exit_time" id="nfeExitTime" value="{{ old('exit_time',$draft->exit_time) }}">
+              <input type="time" name="exit_time" id="nfeExitTime" value="{{ substr((string)old('exit_time',$draft->exit_time),0,5) }}">
             </label>
             <label class="field" data-nfe-date-group="delivery">
               <span>Previsão de entrega</span>
@@ -304,7 +304,7 @@ $origins=[
             <select name="customer_id" id="nfeCustomer" data-quick-create="customers" required>
               <option value="">Selecione o cliente</option>
               @foreach($customers as $customer)
-                <option value="{{ $customer->id }}" @selected(old('customer_id',$draft->customer_id)===$customer->id)>
+                <option value="{{ $customer->id }}" @selected((string)old('customer_id',$draft->customer_id)===(string)$customer->id)>
                   {{ $customer->name }}{{ $customer->document ? ' — '.$customer->document : '' }}
                 </option>
               @endforeach
