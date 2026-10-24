@@ -107,6 +107,63 @@ final class NfeFormCompletenessTest extends TestCase
             ->assertSee('Texto parcialmente preenchido para continuar depois.');
     }
 
+    public function test_user_can_reopen_and_edit_saved_draft_multiple_times(): void
+    {
+        [, $nature,$customer]=$this->init();
+        $initial=[
+            'draft_action'=>'draft',
+            'operation_type'=>'outbound',
+            'destination'=>'internal',
+            'issue_date'=>'2026-10-24',
+            'issue_time'=>'10:05',
+            'additional_info'=>'Preenchimento inicial',
+            'items_json'=>'[]',
+            'payments_json'=>'[]',
+            'duplicates_json'=>'[]',
+            'references_json'=>'[]',
+        ];
+        $this->post(route('fiscal.nfe.store'),$initial)->assertSessionHasNoErrors();
+        $draft=NfeDraft::query()->firstOrFail();
+        self::assertSame('draft',$draft->status);
+
+        $first=$this->data($nature,$customer);
+        $first['draft_action']='draft';
+        $first['additional_info']='Primeira alteração do rascunho';
+        $this->put(route('fiscal.nfe.update',$draft),$first)
+            ->assertRedirect(route('fiscal.nfe.edit',$draft))
+            ->assertSessionHasNoErrors();
+        $draft->refresh();
+        self::assertSame((int)$nature->id,(int)$draft->operation_nature_id);
+        self::assertSame((int)$customer->id,(int)$draft->customer_id);
+        self::assertSame('Primeira alteração do rascunho',
+            data_get($draft->custom_fields,'_editor_form.additional_info'));
+        self::assertSame('Camiseta comercial',
+            $draft->items()->firstOrFail()->product_name);
+
+        $second=$first;
+        $second['additional_info']='Segunda alteração do rascunho';
+        $second['issue_time']='11:42';
+        $secondItems=json_decode($second['items_json'],true);
+        $secondItems[0]['unit_price']=75;
+        $second['items_json']=json_encode($secondItems,JSON_THROW_ON_ERROR);
+        $this->put(route('fiscal.nfe.update',$draft),$second)
+            ->assertRedirect(route('fiscal.nfe.edit',$draft))
+            ->assertSessionHasNoErrors();
+
+        $draft->refresh();
+        self::assertSame('draft',$draft->status);
+        self::assertNull($draft->validated_at);
+        self::assertNull($draft->document_number);
+        self::assertSame('11:42',(string)$draft->issue_time);
+        self::assertSame('Segunda alteração do rascunho',
+            data_get($draft->custom_fields,'_editor_form.additional_info'));
+        self::assertSame(75.0,(float)$draft->items()->firstOrFail()->unit_price);
+        $this->get(route('fiscal.nfe.edit',$draft))->assertOk()
+            ->assertSee('Segunda alteração do rascunho')
+            ->assertSee('id="nfeSaveDraft"',false)
+            ->assertSee('data-nfe-readonly="0"',false);
+    }
+
     public function test_invalid_validation_keeps_draft_and_original_items(): void
     {
         [, $nature,$customer]=$this->init();
