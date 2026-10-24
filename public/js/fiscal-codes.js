@@ -60,7 +60,12 @@
     if(!type||!data[type]||source.dataset.fiscalCatalogReady)return;
     const name=source.name;
     const form=source.closest('form');
-    const oldValue=source.value;
+    // Se o catálogo terminar de carregar durante a primeira digitação,
+    // preserve o foco e o texto já digitado em vez de descartar a tecla.
+    const wasEditing=document.activeElement===source;
+    const editingText=wasEditing?source.value:'';
+    const oldValue=wasEditing && !Object.prototype.hasOwnProperty.call(data[type],source.value)
+      ? '' : source.value;
     const mandatory=source.required;
     const originalClasses=source.className;
     let committedValue=oldValue;
@@ -111,6 +116,10 @@
     list.hidden=true;
     list.setAttribute('role','listbox');
     list.id='fiscal-code-results-'+(++nextId);
+    // Popover manual entra na camada superior do navegador, acima de
+    // <dialog showModal>; apenas z-index não supera o backdrop de um dialog.
+    let canUsePopover=typeof list.showPopover==='function' && typeof list.hidePopover==='function';
+    if(canUsePopover)list.setAttribute('popover','manual');
     search.setAttribute('aria-controls',list.id);
     search.setAttribute('aria-haspopup','listbox');
 
@@ -118,6 +127,7 @@
     source.dataset.fiscalCatalogReady='1';
     source.required=false;
     source.type='hidden';
+    source.value=oldValue;
     source.replaceWith(wrapper);
     wrapper.append(source,search);
     // Portal no body: nenhum grid, modal ou card muda de altura ou corta o menu.
@@ -203,6 +213,7 @@
     };
     const close=()=>{
       wrapper.classList.remove('open');
+      if(canUsePopover && list.matches(':popover-open'))list.hidePopover();
       list.hidden=true;
       search.setAttribute('aria-expanded','false');
       search.removeAttribute('aria-activedescendant');
@@ -217,6 +228,21 @@
       });
       wrapper.classList.add('open');
       list.hidden=false;
+      if(canUsePopover){
+        try{
+          if(!list.matches(':popover-open'))list.showPopover();
+        }catch(error){
+          canUsePopover=false;
+          list.removeAttribute('popover');
+        }
+      }
+      // Compatibilidade com navegadores sem Popover API: a lista precisa
+      // permanecer dentro do dialog modal para ficar visível.
+      if(!canUsePopover){
+        const dialog=wrapper.closest('dialog[open]');
+        if(dialog && list.parentElement!==dialog)dialog.appendChild(list);
+        else if(!dialog && list.parentElement!==document.body)document.body.appendChild(list);
+      }
       search.setAttribute('aria-expanded','true');
       positionResults();
       document.addEventListener('scroll',reposition,true);
@@ -280,10 +306,12 @@
     search.addEventListener('input',()=>{
       const typed=search.value;
       source.value='';
-      source.dispatchEvent(new Event('change',{bubbles:true}));
-      validate();
+      // Abrir a lista ANTES de disparar change é indispensável: o handler
+      // do campo oculto faz sync() quando fechado e apagava o primeiro dígito.
       if(typed.trim())render(typed);
       else close();
+      validate();
+      source.dispatchEvent(new Event('change',{bubbles:true}));
     });
     search.addEventListener('keydown',event=>{
       if(event.key==='ArrowDown'||event.key==='ArrowUp'){
@@ -335,6 +363,11 @@
       }
     });
     sync();
+    if(wasEditing && source.isConnected){
+      search.focus({preventScroll:true});
+      search.value=editingText;
+      if(editingText.trim())render(editingText);
+    }
   };
 
   let upgradePending=false;
@@ -353,7 +386,13 @@
       if(codeInputs(document).length)upgrade();
     });
   };
-  new MutationObserver(queueUpgrade).observe(document.body,{childList:true,subtree:true});
+  new MutationObserver(records=>{
+    // Os próprios resultados são reconstruídos a cada tecla. Ignorar essas
+    // mutações evita varrer todos os inputs da página desnecessariamente.
+    if(records.some(record=>[...record.addedNodes].some(node=>
+      node.nodeType===1 && (node.matches?.('input[name]') || node.querySelector?.('input[name]'))
+    )))queueUpgrade();
+  }).observe(document.body,{childList:true,subtree:true});
   document.addEventListener('pointerdown',event=>{
     document.querySelectorAll('.fiscal-code-field.open').forEach(field=>{
       if(!field.contains(event.target)
