@@ -130,8 +130,10 @@
     source.value=oldValue;
     source.replaceWith(wrapper);
     wrapper.append(source,search);
-    // Portal no body: nenhum grid, modal ou card muda de altura ou corta o menu.
-    document.body.appendChild(list);
+    // Em <dialog showModal> o conteúdo fora do dialog fica inerte.
+    // Anexar ao próprio dialog mantém as opções clicáveis; a Popover API
+    // coloca o menu na camada superior sem alterar o layout do formulário.
+    (wrapper.closest('dialog')||document.body).appendChild(list);
     wrapper.fiscalResultList=list;
 
     const allowManual=['cfop','cfop_pattern','ibs_cbs_class'].includes(type);
