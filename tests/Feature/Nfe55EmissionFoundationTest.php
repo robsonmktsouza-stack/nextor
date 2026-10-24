@@ -13,6 +13,7 @@ use App\Services\Fiscal\ACBr\ACBrNFeService;
 use App\Jobs\ProcessNfe55Job;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\WithConfiguredCompany;
 use Tests\TestCase;
@@ -144,30 +145,48 @@ final class Nfe55EmissionFoundationTest extends TestCase
         );
     }
 
-    public function test_acbr_preflight_refuses_unvalidated_draft_without_reserving_number(): void
+    public function test_internal_preflight_refuses_unvalidated_draft_without_reserving_number(): void
     {
         $draft=$this->draft();
         $draft->update(['validated_at'=>null]);
-        $this->actingAs(User::query()->where('email','nfe55@example.test')->firstOrFail());
-
-        $this->post(route('fiscal.nfe.preflight',$draft))->assertSessionHasErrors('nfe');
+        try {
+            app(\App\Services\Fiscal\Nfe55PreflightService::class)->check($draft->fresh());
+            self::fail('Rascunho não validado não pode passar na conferência.');
+        } catch (ValidationException $exception) {
+            self::assertArrayHasKey('nfe',$exception->errors());
+        }
 
         self::assertSame('draft',$draft->fresh()->status);
         self::assertNull($draft->fresh()->document_number);
         self::assertNull($draft->fresh()->transmission_attempted_at);
     }
 
-    public function test_acbr_preflight_will_not_test_production_or_reserve_number(): void
+    public function test_internal_preflight_will_not_test_production_or_reserve_number(): void
     {
         $draft=$this->draft();
         $draft->update(['environment'=>'production']);
-        $this->actingAs(User::query()->where('email','nfe55@example.test')->firstOrFail());
-
-        $this->post(route('fiscal.nfe.preflight',$draft))->assertSessionHasErrors('nfe');
+        try {
+            app(\App\Services\Fiscal\Nfe55PreflightService::class)->check($draft->fresh());
+            self::fail('Pré-validação de produção não deve ser executada.');
+        } catch (ValidationException $exception) {
+            self::assertArrayHasKey('nfe',$exception->errors());
+        }
 
         self::assertSame('draft',$draft->fresh()->status);
         self::assertNull($draft->fresh()->document_number);
         self::assertNull($draft->fresh()->access_key);
+    }
+
+    public function test_customer_can_see_emit_but_not_an_acbr_diagnostic_button(): void
+    {
+        $draft=$this->draft();
+        $this->actingAs(User::query()->where('email','nfe55@example.test')->firstOrFail());
+        $response=$this->get(route('fiscal.nfe.edit',$draft));
+        $response->assertOk();
+        $response->assertSee('Emitir NF-e');
+        $response->assertDontSee('Verificar na ACBr');
+        $response->assertDontSee('nfePreflightForm');
+        self::assertFalse(\Illuminate\Support\Facades\Route::has('fiscal.nfe.preflight'));
     }
 
     public function test_signed_xml_must_match_issuer_even_when_key_contains_another_cnpj(): void
