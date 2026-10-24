@@ -364,6 +364,7 @@
 .erp-catalog-dialog .erp-catalog-fields-grid .catalog-col-8{grid-column:span 8}
 .erp-catalog-dialog .erp-catalog-toggle{
   display:flex;
+  flex-direction:row;
   align-items:center;
   justify-content:flex-start;
   gap:9px;
