@@ -47,12 +47,15 @@ class QuickCatalogController extends Controller
                 'usage_type'=>['required',Rule::in(['resale','consumption','raw_material','fixed_asset','packaging','other'])],
                 'cost_price'=>['required','numeric','min:0','max:9999999999.99','decimal:0,2'],
                 'sale_price'=>['required','numeric','min:0','max:9999999999.99','decimal:0,2'],
-                'ean_gtin'=>['nullable','string','max:32'],
                 'ncm'=>['nullable','regex:/^\d{8}$/'],
                 'cest'=>['nullable','regex:/^\d{7}$/'],
                 'ean_gtin'=>['nullable','regex:/^\d{8}(?:\d{4,6})?$/'],
                 'origin'=>['required',Rule::in(['0','1','2','3','4','5','6','7','8'])],
                 'control_stock'=>['required','boolean'],
+            ], [
+                'ncm.regex'=>'O NCM deve conter oito números.',
+                'cest.regex'=>'O CEST deve conter sete números.',
+                'ean_gtin.regex'=>'Confira o código de barras informado.',
             ]);
             $item=DB::transaction(function()use($data){
                 if(blank($data['sku']??null)){
