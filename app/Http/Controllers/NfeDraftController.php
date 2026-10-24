@@ -128,12 +128,17 @@ class NfeDraftController extends Controller
     {
         $values=$request->except(['_token','_method','after_save']);
         $snapshot=[];
+        $totalChars=0;
         if(count($values)>110){
             throw ValidationException::withMessages(['nfe'=>'Há campos demais na nota. Reabra o formulário e tente novamente.']);
         }
         foreach($values as $key=>$value){
             if(!preg_match('/^[a-z][a-z0-9_]{0,79}$/D',(string)$key) || (!is_string($value)&&!is_numeric($value)&&!is_bool($value)))continue;
             if(strlen((string)$value)>400000){
+                throw ValidationException::withMessages(['nfe'=>'A nota contém informações muito extensas. Revise os itens.']);
+            }
+            $totalChars+=strlen((string)$value);
+            if($totalChars>600000){
                 throw ValidationException::withMessages(['nfe'=>'A nota contém informações muito extensas. Revise os itens.']);
             }
             $snapshot[$key]=(string)$value;
@@ -184,6 +189,23 @@ class NfeDraftController extends Controller
             }
             $draft->fill($changes)->save();
 
+            // Formulário completo: gravar integralmente a NF-e, inclusive
+            // destinatário, transporte, pagamentos, totais e dados fiscais.
+            // Um erro não cancela o rascunho: a versão parcial continua salva.
+            try {
+                DB::transaction(function()use($request,$draft,$snapshot){
+                    $complete=$this->draftData($request);
+                    $complete['custom_fields']=array_replace(
+                        $draft->custom_fields??[],['_editor_form'=>$snapshot]
+                    );
+                    $draft->update($complete+['validated_at'=>null]);
+                    $this->replaceItems($draft,$request);
+                });
+                return $draft->refresh();
+            }catch(ValidationException $error){
+                // Campos pendentes são permitidos exclusivamente no rascunho.
+            }
+
             // Produtos com os dados mínimos corretos passam a constar também da
             // listagem e dos totais. Se um item ainda está incompleto, o
             // snapshot integral continua salvo até a validação final.
@@ -221,9 +243,16 @@ class NfeDraftController extends Controller
         return $this->validateAndRedirect($draft->refresh());
     }
 
-    public function validateDraft(NfeDraft $nfeDraft)
+    public function validateDraft(Request $request,NfeDraft $nfeDraft)
     {
         abort_unless($nfeDraft->status==='draft',409);
+        $saved=(array)data_get($nfeDraft->custom_fields,'_editor_form',[]);
+        if($saved!==[]){
+            // Valida os mesmos dados que o usuário salvou como rascunho,
+            // nunca campos relacionais antigos que ficaram incompletos.
+            $request->replace($saved);
+            return $this->validateSavedForm($request,$nfeDraft);
+        }
         return $this->validateAndRedirect($nfeDraft);
     }
 
