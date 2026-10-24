@@ -620,11 +620,11 @@
     button.addEventListener('click',()=>openItemSection(button.dataset.nfeOpenSection,true));
   });
   const updateItemTaxSummary=()=>{
-    const summary=(id,value)=>{
+    const summary=(id,value,optional=false)=>{
       const element=byId(id);
       if(!element)return;
-      element.textContent=value||'Não informado';
-      element.closest('button')?.classList.toggle('nfe-tax-needs-review',!value);
+      element.textContent=value||(optional?'Sem preenchimento':'Não informado');
+      element.closest('button')?.classList.toggle('nfe-tax-needs-review',!value&&!optional);
     };
     const icms=getField('nfeTaxCsosn');
     const cst=getField('nfeTaxIcmsCst');
@@ -635,7 +635,7 @@
     const ibs=getField('nfeTaxIbsCst'),cbs=getField('nfeTaxCbsCst');
     summary('nfeTaxSummaryIbs',ibs||cbs
       ?[ibs?'IBS '+ibs:null,cbs?'CBS '+cbs:null].filter(Boolean).join(' · ')
-      :'');
+      :'',true);
   };
   itemDialog?.addEventListener('input',updateItemTaxSummary);
   itemDialog?.addEventListener('change',updateItemTaxSummary);
@@ -658,7 +658,7 @@
     updateItemSubtotal();
     updateItemTaxSummary();
     itemSections.forEach(section=>{
-      section.open=['item-general','item-fiscal','item-icms','item-federal'].includes(section.dataset.nfeItemPanel);
+      section.open=['item-general','item-fiscal','item-icms'].includes(section.dataset.nfeItemPanel);
     });
   };
 
