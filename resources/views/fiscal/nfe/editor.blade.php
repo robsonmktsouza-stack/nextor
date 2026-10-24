@@ -7,6 +7,12 @@
 ]])
 
 @php
+// Incomplete drafts keep their entire form in the database. Session input
+// overrides it after a validation error, but never replaces the saved copy.
+$savedNfeInput=(array)data_get($draft->custom_fields,'_editor_form',[]);
+$nfeOld=static fn(string $key,$fallback=null)=>old(
+    $key,array_key_exists($key,$savedNfeInput)?$savedNfeInput[$key]:$fallback
+);
 $transport=$draft->transport_data ?? [];
 $delivery=$draft->delivery_snapshot ?? [];
 $freightMode=match((string)data_get($transport,'freight_mode','9')){
@@ -14,8 +20,8 @@ $freightMode=match((string)data_get($transport,'freight_mode','9')){
   default=>(string)data_get($transport,'freight_mode','9'),
 };
 
-$existingItems=old('items_json')
-  ? (json_decode(old('items_json'),true) ?: [])
+$existingItems=$nfeOld('items_json')
+  ? (json_decode($nfeOld('items_json'),true) ?: [])
   : $draft->items->map(fn($item)=>[
       'product_id'=>$item->product_id,
       'product_name'=>$item->product_name,
@@ -43,12 +49,12 @@ $existingItems=old('items_json')
       'special_data'=>$item->special_data ?? [],
     ])->values()->all();
 
-$existingDuplicates=old('duplicates_json')
-  ? (json_decode(old('duplicates_json'),true) ?: [])
+$existingDuplicates=$nfeOld('duplicates_json')
+  ? (json_decode($nfeOld('duplicates_json'),true) ?: [])
   : ($draft->duplicates ?? []);
 
-$existingReferences=old('references_json')
-  ? (json_decode(old('references_json'),true) ?: [])
+$existingReferences=$nfeOld('references_json')
+  ? (json_decode($nfeOld('references_json'),true) ?: [])
   : ($draft->references ?? []);
 
 // Um rascunho antigo pode ter sido validado antes de correções de consistência.
@@ -85,10 +91,10 @@ $origins=[
   @csrf
   @if($isEditing) @method('PUT') @endif
 
-  <input type="hidden" name="items_json" id="nfeItemsJson" value="{{ old('items_json',json_encode($existingItems,JSON_UNESCAPED_UNICODE)) }}">
-  <input type="hidden" name="duplicates_json" id="nfeDuplicatesJson" value="{{ old('duplicates_json',json_encode($existingDuplicates,JSON_UNESCAPED_UNICODE)) }}">
-  <input type="hidden" name="payments_json" id="nfePaymentsJson" value="{{ old('payments_json',json_encode(array_slice($draft->payments ?? [],1),JSON_UNESCAPED_UNICODE)) }}">
-  <input type="hidden" name="references_json" id="nfeReferencesJson" value="{{ old('references_json',json_encode($existingReferences,JSON_UNESCAPED_UNICODE)) }}">
+  <input type="hidden" name="items_json" id="nfeItemsJson" value="{{ $nfeOld('items_json',json_encode($existingItems,JSON_UNESCAPED_UNICODE)) }}">
+  <input type="hidden" name="duplicates_json" id="nfeDuplicatesJson" value="{{ $nfeOld('duplicates_json',json_encode($existingDuplicates,JSON_UNESCAPED_UNICODE)) }}">
+  <input type="hidden" name="payments_json" id="nfePaymentsJson" value="{{ $nfeOld('payments_json',json_encode(array_slice($draft->payments ?? [],1),JSON_UNESCAPED_UNICODE)) }}">
+  <input type="hidden" name="references_json" id="nfeReferencesJson" value="{{ $nfeOld('references_json',json_encode($existingReferences,JSON_UNESCAPED_UNICODE)) }}">
 
   <div class="dialog-header">
     <div>
@@ -168,7 +174,7 @@ $origins=[
                   <select name="operation_nature_id" id="nfeNature" required>
                     <option value="">Selecione</option>
                     @foreach($natures as $nature)
-                      <option value="{{ $nature->id }}" @selected((string)old('operation_nature_id',$draft->operation_nature_id)===(string)$nature->id)>
+                      <option value="{{ $nature->id }}" @selected((string)$nfeOld('operation_nature_id',$draft->operation_nature_id)===(string)$nature->id)>
                         {{ $nature->cfop_internal ? $nature->cfop_internal.' - ' : '' }}{{ $nature->name }}
                       </option>
                     @endforeach
@@ -182,48 +188,48 @@ $origins=[
               <label class="field col-4">
                 <span>Tipo de operação</span>
                 <select name="operation_type" id="nfeOperationType">
-                  <option value="inbound" @selected(old('operation_type',$draft->operation_type)==='inbound')>Entrada</option>
-                  <option value="outbound" @selected(old('operation_type',$draft->operation_type)==='outbound')>Saída</option>
+                  <option value="inbound" @selected($nfeOld('operation_type',$draft->operation_type)==='inbound')>Entrada</option>
+                  <option value="outbound" @selected($nfeOld('operation_type',$draft->operation_type)==='outbound')>Saída</option>
                 </select>
               </label>
 
               <label class="field col-4">
                 <span>Destino da operação</span>
                 <select name="destination" id="nfeDestination">
-                  <option value="internal" @selected(old('destination',$draft->destination)==='internal' || old('destination',$draft->destination)==='auto')>Operação interna</option>
-                  <option value="interstate" @selected(old('destination',$draft->destination)==='interstate')>Operação interestadual</option>
-                  <option value="foreign" @selected(old('destination',$draft->destination)==='foreign')>Operação com exterior</option>
+                  <option value="internal" @selected($nfeOld('destination',$draft->destination)==='internal' || $nfeOld('destination',$draft->destination)==='auto')>Operação interna</option>
+                  <option value="interstate" @selected($nfeOld('destination',$draft->destination)==='interstate')>Operação interestadual</option>
+                  <option value="foreign" @selected($nfeOld('destination',$draft->destination)==='foreign')>Operação com exterior</option>
                 </select>
               </label>
 
               <label class="field col-4">
                 <span>Presença do comprador</span>
                 <select name="presence" id="nfePresence">
-                  <option value="not_applicable" @selected(old('presence',$draft->presence)==='not_applicable')>Não se aplica</option>
-                  <option value="presential" @selected(old('presence',$draft->presence)==='presential')>Operação presencial</option>
-                  <option value="internet" @selected(old('presence',$draft->presence)==='internet')>Operação não presencial, pela Internet</option>
-                  <option value="phone" @selected(old('presence',$draft->presence)==='phone')>Operação não presencial, teleatendimento</option>
-                  <option value="delivery_home" @selected(old('presence',$draft->presence)==='delivery_home')>NFC-e em operação com entrega a domicílio</option>
-                  <option value="outside_establishment" @selected(old('presence',$draft->presence)==='outside_establishment')>Operação presencial, fora do estabelecimento</option>
-                  <option value="other" @selected(old('presence',$draft->presence)==='other')>Operação não presencial, outros</option>
+                  <option value="not_applicable" @selected($nfeOld('presence',$draft->presence)==='not_applicable')>Não se aplica</option>
+                  <option value="presential" @selected($nfeOld('presence',$draft->presence)==='presential')>Operação presencial</option>
+                  <option value="internet" @selected($nfeOld('presence',$draft->presence)==='internet')>Operação não presencial, pela Internet</option>
+                  <option value="phone" @selected($nfeOld('presence',$draft->presence)==='phone')>Operação não presencial, teleatendimento</option>
+                  <option value="delivery_home" @selected($nfeOld('presence',$draft->presence)==='delivery_home')>NFC-e em operação com entrega a domicílio</option>
+                  <option value="outside_establishment" @selected($nfeOld('presence',$draft->presence)==='outside_establishment')>Operação presencial, fora do estabelecimento</option>
+                  <option value="other" @selected($nfeOld('presence',$draft->presence)==='other')>Operação não presencial, outros</option>
                 </select>
               </label>
 
               <label class="field col-4">
                 <span>Finalidade da emissão</span>
                 <select name="purpose" id="nfePurpose">
-                  <option value="normal" @selected(old('purpose',$draft->purpose)==='normal')>NF-e Normal</option>
-                  <option value="complementary" @selected(old('purpose',$draft->purpose)==='complementary')>NF-e Complementar</option>
-                  <option value="adjustment" @selected(old('purpose',$draft->purpose)==='adjustment')>NF-e de ajuste</option>
-                  <option value="return" @selected(old('purpose',$draft->purpose)==='return')>Devolução de mercadoria</option>
-                  <option value="credit_note" @selected(old('purpose',$draft->purpose)==='credit_note')>Nota de crédito</option>
-                  <option value="debit_note" @selected(old('purpose',$draft->purpose)==='debit_note')>Nota de débito</option>
+                  <option value="normal" @selected($nfeOld('purpose',$draft->purpose)==='normal')>NF-e Normal</option>
+                  <option value="complementary" @selected($nfeOld('purpose',$draft->purpose)==='complementary')>NF-e Complementar</option>
+                  <option value="adjustment" @selected($nfeOld('purpose',$draft->purpose)==='adjustment')>NF-e de ajuste</option>
+                  <option value="return" @selected($nfeOld('purpose',$draft->purpose)==='return')>Devolução de mercadoria</option>
+                  <option value="credit_note" @selected($nfeOld('purpose',$draft->purpose)==='credit_note')>Nota de crédito</option>
+                  <option value="debit_note" @selected($nfeOld('purpose',$draft->purpose)==='debit_note')>Nota de débito</option>
                 </select>
               </label>
 
               <label class="field col-4">
                 <span>Ins. Est. Subst. Trib.</span>
-                <input name="substitute_state_registration" maxlength="30" value="{{ old('substitute_state_registration',$draft->substitute_state_registration) }}">
+                <input name="substitute_state_registration" maxlength="30" value="{{ $nfeOld('substitute_state_registration',$draft->substitute_state_registration) }}">
               </label>
 
               <div class="field col-4"></div>
@@ -233,7 +239,7 @@ $origins=[
                 <label class="switch-field">
                   <input type="hidden" name="has_referenced_document" value="0">
                   <input type="checkbox" name="has_referenced_document" id="nfeHasReferencedDocument" value="1"
-                    @checked(old('has_referenced_document',$draft->has_referenced_document || !empty($draft->references)))>
+                    @checked($nfeOld('has_referenced_document',$draft->has_referenced_document || !empty($draft->references)))>
                   <span class="switch-track"></span><strong data-switch-label>Sim</strong>
                 </label>
               </div>
@@ -243,7 +249,7 @@ $origins=[
                 <label class="switch-field">
                   <input type="hidden" name="inform_issue_datetime" value="0">
                   <input type="checkbox" name="inform_issue_datetime" id="nfeInformIssueDatetime" value="1"
-                    @checked(old('inform_issue_datetime',$draft->inform_issue_datetime ?? true))>
+                    @checked($nfeOld('inform_issue_datetime',$draft->inform_issue_datetime ?? true))>
                   <span class="switch-track"></span><strong data-switch-label>Sim</strong>
                 </label>
               </div>
@@ -253,7 +259,7 @@ $origins=[
                 <label class="switch-field">
                   <input type="hidden" name="inform_exit_datetime" value="0">
                   <input type="checkbox" name="inform_exit_datetime" id="nfeInformExitDatetime" value="1"
-                    @checked(old('inform_exit_datetime',$draft->inform_exit_datetime ?? false))>
+                    @checked($nfeOld('inform_exit_datetime',$draft->inform_exit_datetime ?? false))>
                   <span class="switch-track"></span><strong data-switch-label>Sim</strong>
                 </label>
               </div>
@@ -263,7 +269,7 @@ $origins=[
                 <label class="switch-field">
                   <input type="hidden" name="inform_expected_delivery_date" value="0">
                   <input type="checkbox" name="inform_expected_delivery_date" id="nfeInformExpectedDeliveryDate" value="1"
-                    @checked(old('inform_expected_delivery_date',$draft->inform_expected_delivery_date ?? false))>
+                    @checked($nfeOld('inform_expected_delivery_date',$draft->inform_expected_delivery_date ?? false))>
                   <span class="switch-track"></span><strong data-switch-label>Sim</strong>
                 </label>
               </div>
@@ -272,7 +278,7 @@ $origins=[
                 <span>Compra governamental</span>
                 <label class="switch-field">
                   <input type="hidden" name="government_purchase" value="0">
-                  <input type="checkbox" name="government_purchase" value="1" @checked(old('government_purchase',$draft->government_purchase))>
+                  <input type="checkbox" name="government_purchase" value="1" @checked($nfeOld('government_purchase',$draft->government_purchase))>
                   <span class="switch-track"></span><strong data-switch-label>Sim</strong>
                 </label>
               </div>
@@ -281,7 +287,7 @@ $origins=[
                 <span>Pagamento antecipado</span>
                 <label class="switch-field">
                   <input type="hidden" name="advance_payment" value="0">
-                  <input type="checkbox" name="advance_payment" value="1" @checked(old('advance_payment',$draft->advance_payment))>
+                  <input type="checkbox" name="advance_payment" value="1" @checked($nfeOld('advance_payment',$draft->advance_payment))>
                   <span class="switch-track"></span><strong data-switch-label>Sim</strong>
                 </label>
               </div>
@@ -291,23 +297,23 @@ $origins=[
           <div class="nfe-general-dates">
             <label class="field" data-nfe-date-group="issue">
               <span>Data emissão NF (atual)</span>
-              <input type="date" name="issue_date" id="nfeIssueDate" value="{{ old('issue_date',$draft->issue_date?->format('Y-m-d') ?? now()->format('Y-m-d')) }}">
+              <input type="date" name="issue_date" id="nfeIssueDate" value="{{ $nfeOld('issue_date',$draft->issue_date?->format('Y-m-d') ?? now()->format('Y-m-d')) }}">
             </label>
             <label class="field" data-nfe-date-group="issue">
               <span>Hora emissão NF (atual)</span>
-              <input type="time" name="issue_time" id="nfeIssueTime" value="{{ substr((string)old('issue_time',$draft->issue_time ?? now()->format('H:i')),0,5) }}">
+              <input type="time" name="issue_time" id="nfeIssueTime" value="{{ substr((string)$nfeOld('issue_time',$draft->issue_time ?? now()->format('H:i')),0,5) }}">
             </label>
             <label class="field" data-nfe-date-group="exit">
               <span>Data saída/entrada (atual)</span>
-              <input type="date" name="exit_date" id="nfeExitDate" value="{{ old('exit_date',$draft->exit_date?->format('Y-m-d')) }}">
+              <input type="date" name="exit_date" id="nfeExitDate" value="{{ $nfeOld('exit_date',$draft->exit_date?->format('Y-m-d')) }}">
             </label>
             <label class="field" data-nfe-date-group="exit">
               <span>Hora saída/entrada (atual)</span>
-              <input type="time" name="exit_time" id="nfeExitTime" value="{{ substr((string)old('exit_time',$draft->exit_time),0,5) }}">
+              <input type="time" name="exit_time" id="nfeExitTime" value="{{ substr((string)$nfeOld('exit_time',$draft->exit_time),0,5) }}">
             </label>
             <label class="field" data-nfe-date-group="delivery">
               <span>Previsão de entrega</span>
-              <input type="date" name="expected_delivery_date" id="nfeExpectedDeliveryDate" value="{{ old('expected_delivery_date',$draft->expected_delivery_date?->format('Y-m-d')) }}">
+              <input type="date" name="expected_delivery_date" id="nfeExpectedDeliveryDate" value="{{ $nfeOld('expected_delivery_date',$draft->expected_delivery_date?->format('Y-m-d')) }}">
             </label>
           </div>
         </div>
@@ -321,7 +327,7 @@ $origins=[
             <select name="customer_id" id="nfeCustomer" data-quick-create="customers" required>
               <option value="">Selecione o cliente</option>
               @foreach($customers as $customer)
-                <option value="{{ $customer->id }}" @selected((string)old('customer_id',$draft->customer_id)===(string)$customer->id)>
+                <option value="{{ $customer->id }}" @selected((string)$nfeOld('customer_id',$draft->customer_id)===(string)$customer->id)>
                   {{ $customer->name }}{{ $customer->document ? ' — '.$customer->document : '' }}
                 </option>
               @endforeach
@@ -333,31 +339,31 @@ $origins=[
             <div class="readonly-field" id="nfeRecipientSummary">Selecione um destinatário.</div>
           </div>
 
-          <label class="field col-3"><span>Desconto da nota</span><input type="number" name="discount" id="nfeDiscount" step="0.01" min="0" value="{{ old('discount',$draft->discount ?? 0) }}"></label>
-          <label class="field col-3"><span>Acréscimo da nota</span><input type="number" name="surcharge" id="nfeSurcharge" step="0.01" min="0" value="{{ old('surcharge',$draft->surcharge ?? 0) }}"></label>
+          <label class="field col-3"><span>Desconto da nota</span><input type="number" name="discount" id="nfeDiscount" step="0.01" min="0" value="{{ $nfeOld('discount',$draft->discount ?? 0) }}"></label>
+          <label class="field col-3"><span>Acréscimo da nota</span><input type="number" name="surcharge" id="nfeSurcharge" step="0.01" min="0" value="{{ $nfeOld('surcharge',$draft->surcharge ?? 0) }}"></label>
         </div>
       </div>
       <div class="editor-panel nfe-delivery-panel">
         <div class="field"><span>Local de entrega diferente do destinatário</span>
           <label class="switch-field">
             <input type="hidden" name="different_delivery" value="0">
-            <input type="checkbox" id="nfeDifferentDelivery" name="different_delivery" value="1" @checked(old('different_delivery',$draft->different_delivery))>
+            <input type="checkbox" id="nfeDifferentDelivery" name="different_delivery" value="1" @checked($nfeOld('different_delivery',$draft->different_delivery))>
             <span class="switch-track"></span><strong data-switch-label>Sim</strong>
           </label>
         </div>
         <div id="nfeDeliveryFields" hidden>
           <div class="editor-grid cols-12">
             <label class="field col-12"><span>Endereço cadastrado</span><select id="nfeDeliveryAddressSelect"><option value="">Preencher manualmente</option></select></label>
-            <label class="field col-6"><span>Nome do recebedor</span><input name="delivery_name" id="nfeDeliveryName" maxlength="190" value="{{ old('delivery_name',data_get($delivery,'name')) }}"></label>
-            <label class="field col-3"><span>CPF/CNPJ</span><input name="delivery_document" id="nfeDeliveryDocument" maxlength="20" value="{{ old('delivery_document',data_get($delivery,'document')) }}"></label>
-            <label class="field col-3"><span>CEP *</span><input name="delivery_zip_code" id="nfeDeliveryZip" inputmode="numeric" maxlength="9" value="{{ old('delivery_zip_code',data_get($delivery,'zip_code')) }}"></label>
-            <label class="field col-6"><span>Logradouro *</span><input name="delivery_address" id="nfeDeliveryAddress" maxlength="190" value="{{ old('delivery_address',data_get($delivery,'address')) }}"></label>
-            <label class="field col-2"><span>Número *</span><input name="delivery_address_number" id="nfeDeliveryNumber" maxlength="30" value="{{ old('delivery_address_number',data_get($delivery,'address_number')) }}"></label>
-            <label class="field col-4"><span>Complemento</span><input name="delivery_address_complement" id="nfeDeliveryComplement" maxlength="120" value="{{ old('delivery_address_complement',data_get($delivery,'address_complement')) }}"></label>
-            <label class="field col-4"><span>Bairro *</span><input name="delivery_district" id="nfeDeliveryDistrict" maxlength="120" value="{{ old('delivery_district',data_get($delivery,'district')) }}"></label>
-            <label class="field col-4"><span>Município *</span><input name="delivery_city" id="nfeDeliveryCity" maxlength="120" value="{{ old('delivery_city',data_get($delivery,'city')) }}"></label>
-            <label class="field col-2"><span>UF *</span><input name="delivery_state" id="nfeDeliveryState" maxlength="2" value="{{ old('delivery_state',data_get($delivery,'state')) }}"></label>
-            <label class="field col-2"><span>Código IBGE *</span><input name="delivery_city_ibge_code" id="nfeDeliveryIbge" inputmode="numeric" maxlength="7" value="{{ old('delivery_city_ibge_code',data_get($delivery,'city_ibge_code')) }}"></label>
+            <label class="field col-6"><span>Nome do recebedor</span><input name="delivery_name" id="nfeDeliveryName" maxlength="190" value="{{ $nfeOld('delivery_name',data_get($delivery,'name')) }}"></label>
+            <label class="field col-3"><span>CPF/CNPJ</span><input name="delivery_document" id="nfeDeliveryDocument" maxlength="20" value="{{ $nfeOld('delivery_document',data_get($delivery,'document')) }}"></label>
+            <label class="field col-3"><span>CEP *</span><input name="delivery_zip_code" id="nfeDeliveryZip" inputmode="numeric" maxlength="9" value="{{ $nfeOld('delivery_zip_code',data_get($delivery,'zip_code')) }}"></label>
+            <label class="field col-6"><span>Logradouro *</span><input name="delivery_address" id="nfeDeliveryAddress" maxlength="190" value="{{ $nfeOld('delivery_address',data_get($delivery,'address')) }}"></label>
+            <label class="field col-2"><span>Número *</span><input name="delivery_address_number" id="nfeDeliveryNumber" maxlength="30" value="{{ $nfeOld('delivery_address_number',data_get($delivery,'address_number')) }}"></label>
+            <label class="field col-4"><span>Complemento</span><input name="delivery_address_complement" id="nfeDeliveryComplement" maxlength="120" value="{{ $nfeOld('delivery_address_complement',data_get($delivery,'address_complement')) }}"></label>
+            <label class="field col-4"><span>Bairro *</span><input name="delivery_district" id="nfeDeliveryDistrict" maxlength="120" value="{{ $nfeOld('delivery_district',data_get($delivery,'district')) }}"></label>
+            <label class="field col-4"><span>Município *</span><input name="delivery_city" id="nfeDeliveryCity" maxlength="120" value="{{ $nfeOld('delivery_city',data_get($delivery,'city')) }}"></label>
+            <label class="field col-2"><span>UF *</span><input name="delivery_state" id="nfeDeliveryState" maxlength="2" value="{{ $nfeOld('delivery_state',data_get($delivery,'state')) }}"></label>
+            <label class="field col-2"><span>Código IBGE *</span><input name="delivery_city_ibge_code" id="nfeDeliveryIbge" inputmode="numeric" maxlength="7" value="{{ $nfeOld('delivery_city_ibge_code',data_get($delivery,'city_ibge_code')) }}"></label>
           </div>
         </div>
       </div>
@@ -408,20 +414,20 @@ $origins=[
           <label class="field col-4"><span>Tipo de pagamento *</span>
             <select name="payment_type" id="nfePaymentType">
               @foreach($paymentTypes as $code=>$label)
-                <option value="{{ $code }}" @selected((string)old('payment_type',$draft->payment_type ?: '01')===(string)$code)>{{ $code }} - {{ $label }}</option>
+                <option value="{{ $code }}" @selected((string)$nfeOld('payment_type',$draft->payment_type ?: '01')===(string)$code)>{{ $code }} - {{ $label }}</option>
               @endforeach
             </select>
           </label>
 
           <label class="field col-4"><span>Condição *</span>
             <select name="payment_condition" id="nfePaymentCondition">
-              <option value="a_vista" @selected(old('payment_condition',$draft->payment_condition ?: 'a_vista')==='a_vista')>À vista</option>
-              <option value="30_dias" @selected(old('payment_condition',$draft->payment_condition)==='30_dias')>30 dias</option>
-              <option value="personalizado" @selected(old('payment_condition',$draft->payment_condition)==='personalizado')>Personalizado</option>
+              <option value="a_vista" @selected($nfeOld('payment_condition',$draft->payment_condition ?: 'a_vista')==='a_vista')>À vista</option>
+              <option value="30_dias" @selected($nfeOld('payment_condition',$draft->payment_condition)==='30_dias')>30 dias</option>
+              <option value="personalizado" @selected($nfeOld('payment_condition',$draft->payment_condition)==='personalizado')>Personalizado</option>
             </select>
           </label>
 
-          <label class="field col-4" id="nfeOtherPaymentField"><span>Descrição quando “Outros”</span><input name="payment_other_description" value="{{ old('payment_other_description',$draft->payment_other_description) }}"></label>
+          <label class="field col-4" id="nfeOtherPaymentField"><span>Descrição quando “Outros”</span><input name="payment_other_description" value="{{ $nfeOld('payment_other_description',$draft->payment_other_description) }}"></label>
         </div>
       </div>
 
@@ -431,20 +437,20 @@ $origins=[
           <label class="field col-3"><span>Integração com o sistema *</span>
             <select name="card_integration_type" id="nfeCardIntegrationType">
               <option value="">Selecione</option>
-              <option value="1" @selected(old('card_integration_type',data_get($draft->payments,'0.integration_type'))==='1')>Integrado (TEF)</option>
-              <option value="2" @selected(old('card_integration_type',data_get($draft->payments,'0.integration_type'))==='2')>Não integrado (POS)</option>
+              <option value="1" @selected($nfeOld('card_integration_type',data_get($draft->payments,'0.integration_type'))==='1')>Integrado (TEF)</option>
+              <option value="2" @selected($nfeOld('card_integration_type',data_get($draft->payments,'0.integration_type'))==='2')>Não integrado (POS)</option>
             </select>
           </label>
           <label class="field col-3"><span>Bandeira</span>
             <select name="card_brand">
               <option value="">Não informada</option>
               @foreach($cardBrands as $code=>$label)
-                <option value="{{ $code }}" @selected((string)old('card_brand',$draft->card_brand)===(string)$code)>{{ $code }} - {{ $label }}</option>
+                <option value="{{ $code }}" @selected((string)$nfeOld('card_brand',$draft->card_brand)===(string)$code)>{{ $code }} - {{ $label }}</option>
               @endforeach
             </select>
           </label>
-          <label class="field col-3"><span>CNPJ da credenciadora</span><input name="card_acquirer_document" value="{{ old('card_acquirer_document',$draft->card_acquirer_document) }}" maxlength="20"></label>
-          <label class="field col-3"><span>Código de autorização</span><input name="card_authorization_code" value="{{ old('card_authorization_code',$draft->card_authorization_code) }}" maxlength="40"></label>
+          <label class="field col-3"><span>CNPJ da credenciadora</span><input name="card_acquirer_document" value="{{ $nfeOld('card_acquirer_document',$draft->card_acquirer_document) }}" maxlength="20"></label>
+          <label class="field col-3"><span>Código de autorização</span><input name="card_authorization_code" value="{{ $nfeOld('card_authorization_code',$draft->card_authorization_code) }}" maxlength="40"></label>
         </div>
       </div>
 
@@ -514,12 +520,12 @@ $origins=[
         <div class="editor-grid cols-12">
           <label class="field col-4"><span>Modalidade do frete *</span>
             <select name="freight_mode" id="nfeFreightMode">
-              <option value="9" @selected(old('freight_mode',$freightMode)==='9')>9 - Sem frete</option>
-              <option value="0" @selected(old('freight_mode',$freightMode)==='0')>0 - Por conta do emitente</option>
-              <option value="1" @selected(old('freight_mode',$freightMode)==='1')>1 - Por conta do destinatário</option>
-              <option value="2" @selected(old('freight_mode',$freightMode)==='2')>2 - Por conta de terceiros</option>
-              <option value="3" @selected(old('freight_mode',$freightMode)==='3')>3 - Próprio por conta do remetente</option>
-              <option value="4" @selected(old('freight_mode',$freightMode)==='4')>4 - Próprio por conta do destinatário</option>
+              <option value="9" @selected($nfeOld('freight_mode',$freightMode)==='9')>9 - Sem frete</option>
+              <option value="0" @selected($nfeOld('freight_mode',$freightMode)==='0')>0 - Por conta do emitente</option>
+              <option value="1" @selected($nfeOld('freight_mode',$freightMode)==='1')>1 - Por conta do destinatário</option>
+              <option value="2" @selected($nfeOld('freight_mode',$freightMode)==='2')>2 - Por conta de terceiros</option>
+              <option value="3" @selected($nfeOld('freight_mode',$freightMode)==='3')>3 - Próprio por conta do remetente</option>
+              <option value="4" @selected($nfeOld('freight_mode',$freightMode)==='4')>4 - Próprio por conta do destinatário</option>
             </select>
           </label>
 
@@ -527,28 +533,28 @@ $origins=[
             <select name="carrier_id" data-quick-create="carriers">
               <option value="">Não informado</option>
               @foreach($carriers as $carrier)
-                <option value="{{ $carrier->id }}" @selected(old('carrier_id',data_get($transport,'carrier_id'))==$carrier->id)>
+                <option value="{{ $carrier->id }}" @selected($nfeOld('carrier_id',data_get($transport,'carrier_id'))==$carrier->id)>
                   {{ $carrier->name }}{{ $carrier->document ? ' — '.$carrier->document : '' }}
                 </option>
               @endforeach
             </select>
           </label>
 
-          <label class="field col-2"><span>Valor do frete</span><input type="number" name="freight_value" id="nfeFreightValue" min="0" step="0.01" value="{{ old('freight_value',data_get($transport,'freight_value',0)) }}"></label>
+          <label class="field col-2"><span>Valor do frete</span><input type="number" name="freight_value" id="nfeFreightValue" min="0" step="0.01" value="{{ $nfeOld('freight_value',data_get($transport,'freight_value',0)) }}"></label>
 
-          <label class="field col-3"><span>Placa</span><input name="vehicle_plate" maxlength="12" value="{{ old('vehicle_plate',data_get($transport,'vehicle_plate')) }}"></label>
-          <label class="field col-2"><span>UF do veículo</span><input name="vehicle_state" maxlength="2" value="{{ old('vehicle_state',data_get($transport,'vehicle_state')) }}"></label>
+          <label class="field col-3"><span>Placa</span><input name="vehicle_plate" maxlength="12" value="{{ $nfeOld('vehicle_plate',data_get($transport,'vehicle_plate')) }}"></label>
+          <label class="field col-2"><span>UF do veículo</span><input name="vehicle_state" maxlength="2" value="{{ $nfeOld('vehicle_state',data_get($transport,'vehicle_state')) }}"></label>
         </div>
       </div>
 
       <div class="editor-panel">
         <h3>Volumes transportados</h3>
         <div class="editor-grid cols-12">
-          <label class="field col-2"><span>Quantidade</span><input type="number" min="0" step="1" name="volume_quantity" value="{{ old('volume_quantity',data_get($transport,'volume_quantity')) }}"></label>
-          <label class="field col-3"><span>Espécie</span><input name="volume_species" value="{{ old('volume_species',data_get($transport,'volume_species')) }}"></label>
-          <label class="field col-3"><span>Numeração</span><input name="volume_numbering" value="{{ old('volume_numbering',data_get($transport,'volume_numbering')) }}"></label>
-          <label class="field col-2"><span>Peso líquido</span><input type="number" min="0" step="0.001" name="net_weight" value="{{ old('net_weight',data_get($transport,'net_weight')) }}"></label>
-          <label class="field col-2"><span>Peso bruto</span><input type="number" min="0" step="0.001" name="gross_weight" value="{{ old('gross_weight',data_get($transport,'gross_weight')) }}"></label>
+          <label class="field col-2"><span>Quantidade</span><input type="number" min="0" step="1" name="volume_quantity" value="{{ $nfeOld('volume_quantity',data_get($transport,'volume_quantity')) }}"></label>
+          <label class="field col-3"><span>Espécie</span><input name="volume_species" value="{{ $nfeOld('volume_species',data_get($transport,'volume_species')) }}"></label>
+          <label class="field col-3"><span>Numeração</span><input name="volume_numbering" value="{{ $nfeOld('volume_numbering',data_get($transport,'volume_numbering')) }}"></label>
+          <label class="field col-2"><span>Peso líquido</span><input type="number" min="0" step="0.001" name="net_weight" value="{{ $nfeOld('net_weight',data_get($transport,'net_weight')) }}"></label>
+          <label class="field col-2"><span>Peso bruto</span><input type="number" min="0" step="0.001" name="gross_weight" value="{{ $nfeOld('gross_weight',data_get($transport,'gross_weight')) }}"></label>
         </div>
       </div>
     </section>
@@ -571,7 +577,7 @@ $origins=[
       <div class="editor-panel notes-panel">
         <label class="field">
           <span>Informação adicional</span>
-          <textarea name="additional_info" rows="5" placeholder="Observação da operação">{{ old('additional_info',$draft->additional_info) }}</textarea>
+          <textarea name="additional_info" rows="5" placeholder="Observação da operação">{{ $nfeOld('additional_info',$draft->additional_info) }}</textarea>
         </label>
 
       </div>
@@ -588,7 +594,7 @@ $origins=[
     </div>
     <div>
       <a class="btn btn-secondary" href="{{ route('fiscal.index',['tab'=>'nfe']) }}">Cancelar <kbd data-tutorial>Esc</kbd></a>
-      <button class="btn btn-primary" type="submit">Apenas salvar <kbd data-tutorial>Ctrl+S</kbd></button>
+      <button class="btn btn-primary" type="submit" id="nfeSaveDraft" formnovalidate>Salvar rascunho <kbd data-tutorial>Ctrl+S</kbd></button>
       <button class="btn btn-secondary" type="submit" name="after_save" value="validate" id="nfeValidateCurrent">Validar <kbd data-tutorial>F8</kbd></button>
       @if($isEditing && $draft->status==='draft')
         <button class="btn btn-success" type="submit" form="nfeEmitForm" id="nfeSubmitEmission"
