@@ -1060,7 +1060,8 @@
         event.preventDefault();return;
       }
       button.dataset.nfeSubmitting='1';
-      button.disabled=true;
+      // Não desabilitar o submitter antes da serialização: seu name/value
+      // after_save=validate precisa acompanhar o POST.
     }
   });
 
