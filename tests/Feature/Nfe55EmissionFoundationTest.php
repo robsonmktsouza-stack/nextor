@@ -249,4 +249,48 @@ final class Nfe55EmissionFoundationTest extends TestCase
         Bus::assertNotDispatched(ProcessNfe55Job::class);
         self::assertSame('processing',$draft->fresh()->status);
     }
+
+    public function test_sefaz_authorization_must_match_the_exact_invoice_and_environment(): void
+    {
+        $service=app(\App\Services\Fiscal\Nfe55EmissionService::class);
+        $key=str_repeat('2',44);
+        $accepted=[
+            'individual'=>true,'cstat'=>'100',
+            'protocol'=>'129261234567890','key'=>$key,
+            'environment'=>'2',
+        ];
+        self::assertTrue($service->authorizationMatches($accepted,$key,'homologation'));
+        self::assertFalse($service->authorizationMatches(
+            array_replace($accepted,['environment'=>'1']),$key,'homologation'
+        ));
+        self::assertFalse($service->authorizationMatches(
+            array_replace($accepted,['environment'=>'']),$key,'homologation'
+        ));
+        self::assertFalse($service->authorizationMatches($accepted,str_repeat('3',44),'homologation'));
+    }
+
+    public function test_stalled_signed_xml_without_external_attempt_can_reuse_number(): void
+    {
+        $draft=$this->draft();
+        $number=41;
+        $code=12345678;
+        $key='29261012345678000100550010000000411123456789';
+        self::assertSame(44,strlen($key));
+        $draft->update([
+            'status'=>'processing','document_number'=>$number,'numeric_code'=>$code,
+            'xml_path'=>'fiscal/nfe55/'.$draft->id.'/signed.xml',
+            'access_key'=>$key,
+        ]);
+        DB::table($draft->getTable())->where('id',$draft->id)
+            ->update(['updated_at'=>now()->subMinutes(20)]);
+        Bus::fake();
+
+        $this->actingAs(User::query()->where('email','nfe55@example.test')->firstOrFail());
+        $this->post(route('fiscal.nfe.retry',$draft))
+            ->assertRedirect(route('fiscal.nfe.edit',$draft));
+        Bus::assertDispatched(ProcessNfe55Job::class);
+        self::assertSame('queued',$draft->fresh()->status);
+        self::assertSame($number,(int)$draft->fresh()->document_number);
+        self::assertSame($code,(int)$draft->fresh()->numeric_code);
+    }
 }
