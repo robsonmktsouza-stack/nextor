@@ -493,13 +493,13 @@
         if(!item.hidden && !item.disabled && item.dataset.value!=='') matched++;
         if(q && normalize(item.dataset.optionName||'')===q)exact=true;
       });
-      const empty=menu.querySelector('.ui-select-empty');
-      if(empty)empty.hidden=matched>0;
       const add=menu.querySelector('.ui-select-catalog-create');
       if(add){
         add.hidden=exact;
         add.textContent=query.trim() ? '＋ Cadastrar "'+query.trim().slice(0,90)+'"' : '＋ Cadastrar novo';
       }
+      const empty=menu.querySelector('.ui-select-empty');
+      if(empty)empty.hidden=matched>0 || (Boolean(add) && !add.hidden);
     };
     const buildOptions=()=>{
       const fragment=document.createDocumentFragment();
