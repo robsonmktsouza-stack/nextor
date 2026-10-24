@@ -64,6 +64,7 @@ final class ACBrNFeService
             int NFE_SalvarPDF(void *libHandle, char *sResposta, int *esTamanho);
             int NFE_Assinar(void *libHandle);
             int NFE_Validar(void *libHandle);
+            int NFE_VerificarAssinatura(void *libHandle, char *sResposta, int *esTamanho);
             int NFE_ValidarRegrasdeNegocios(void *libHandle, char *sResposta, int *esTamanho);
             int NFE_ObterXml(void *libHandle, int AIndex, char *sResposta, int *esTamanho);
             int NFE_Enviar(void *libHandle, int ALote, _Bool AImprimir, _Bool ASincrono, _Bool AZipado, char *sResposta, int *esTamanho);
@@ -214,6 +215,12 @@ final class ACBrNFeService
     public function validateXml(): void
     {
         $this->execute('NFE_Validar');
+    }
+
+    /** Confere assinatura criptográfica de todos os XMLs carregados na ACBr. */
+    public function verifySignature(): void
+    {
+        $this->response('NFE_VerificarAssinatura');
     }
 
     /**
