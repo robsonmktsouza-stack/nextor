@@ -828,8 +828,9 @@
   }
 }
 @media(max-width:760px){
+  /* O grid global vira uma coluna no celular. Nunca criar colunas implícitas. */
   .app-root #nfeEditorDialog .nfe-general-fields .nfe-flag-field{
-    grid-column:span 6;
+    grid-column:1;
   }
   .app-root #nfeEditorDialog .nfe-general-card .nfe-general-dates{
     grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
