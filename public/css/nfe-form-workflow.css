@@ -1,5 +1,7 @@
-/* Lumeron NF-e — composição enxuta usando as classes e tokens do ERP.
- * Folha deliberadamente isolada; sem novas molduras ou temas paralelos.
+/* Lumeron NF-e — hierarquia visual com os componentes do ERP.
+ * Azul continua sendo a cor da navegação e das ações principais.
+ * Acentos suaves diferenciam grupos sem novos cartões, contornos
+ * chamativos ou alteração dos controles compartilhados do sistema.
  */
 .nfe-modal-layer .nfe-workspace-body{
   min-width:0;
@@ -13,29 +15,46 @@
   position:sticky;top:-14px;z-index:12;
   display:grid;grid-template-columns:repeat(5,minmax(0,1fr));
   gap:4px;margin:0 0 18px;padding:5px;
-  border:1px solid #c9d4de;border-radius:5px;background:#dce4ea;
+  border:1px solid #c9d4de;border-radius:5px;background:#eaf0f5;
 }
 .nfe-flow-nav .editor-tab{
   min-width:0;height:39px;padding:0 8px;
   font-size:12px;font-weight:650;text-transform:none;line-height:1.25;
 }
 .nfe-workspace-body .nfe-form-section.cms-card{
+  --nfe-accent:#316f9d;
+  --nfe-tint:#f0f6fb;
+  --nfe-divider:#d2e4f1;
   display:block;min-width:0;margin:0 0 23px;padding:0 0 12px;
   border:0;border-bottom:1px solid #dfe5eb;border-radius:0;
   background:transparent;box-shadow:none;overflow:visible;
   scroll-margin-top:78px;
 }
+/* Tons distintos por assunto, sem abandonar o azul corporativo. */
+.nfe-workspace-body #nfe-section-items{
+  --nfe-accent:#18766c;--nfe-tint:#eef8f5;--nfe-divider:#cee9e1;
+}
+.nfe-workspace-body #nfe-section-payment{
+  --nfe-accent:#347c54;--nfe-tint:#f0f8f2;--nfe-divider:#d5e8d8;
+}
+.nfe-workspace-body #nfe-section-transport{
+  --nfe-accent:#966c36;--nfe-tint:#fcf7ec;--nfe-divider:#f0e2c8;
+}
+.nfe-workspace-body #nfe-section-other{
+  --nfe-accent:#66718e;--nfe-tint:#f4f5fa;--nfe-divider:#dfe3ed;
+}
 .nfe-form-section .nfe-flow-heading.card-header{
   display:flex;align-items:center;
-  min-height:43px;margin:0 0 14px;padding:6px 2px 10px;
-  border:0;border-bottom:1px solid #dce4ea;border-radius:0;
-  background:transparent;box-shadow:none;
+  min-height:48px;margin:0 0 14px;padding:8px 12px 9px;
+  border:0;border-left:3px solid var(--nfe-accent);
+  border-bottom:1px solid var(--nfe-divider);border-radius:0 3px 3px 0;
+  background:var(--nfe-tint);box-shadow:none;
 }
 .nfe-form-section .nfe-flow-heading h2{
-  margin:0;color:#344b5f;font-size:15px;font-weight:650;line-height:1.35;
+  margin:0;color:var(--nfe-accent);font-size:15px;font-weight:650;line-height:1.35;
 }
 .nfe-form-section .nfe-flow-heading p{
-  margin:2px 0 0;color:#8392a1;font-size:11.5px;line-height:1.4;
+  margin:2px 0 0;color:#627180;font-size:11.5px;line-height:1.4;
 }
 .nfe-workspace-body .nfe-form-section>.nfe-general-card,
 .nfe-workspace-body .nfe-form-section>.editor-panel,
@@ -46,14 +65,42 @@
 }
 .nfe-workspace-body .nfe-form-section>.editor-panel,
 .nfe-workspace-body .nfe-form-section>.cms-card{
-  padding:14px 16px;background:#f7f9fb;
+  padding:14px 16px;background:#fbfcfd;
   border:1px solid #dde5eb;
+}
+/* As caixas seguem neutras; pontos de leitura recebem contraste pontual. */
+.nfe-workspace-body #nfe-section-payment>.editor-panel{
+  background:#f8fbf9;
+}
+.nfe-workspace-body #nfe-section-transport>.editor-panel{
+  background:#fdfbf7;
+}
+.nfe-workspace-body #nfe-section-other>.editor-panel{
+  background:#fafbfd;
+}
+.nfe-workspace-body #nfe-section-items>.cms-card{
+  background:#fff;
+}
+.nfe-workspace-body #nfe-section-items .cms-table thead{
+  background:#eef5f3;
+}
+.nfe-workspace-body #nfe-section-items #nfeTotalInvoice{
+  color:#236e4d;font-size:15px;font-weight:750;
+}
+.nfe-workspace-body #nfe-section-items #nfeTotalInvoice::selection{
+  background:#c8ebdb;
 }
 .nfe-workspace-body .nfe-form-section>.nfe-general-card{
   padding:0;border:0;background:transparent;
 }
 .nfe-workspace-body .nfe-form-section>.nfe-emitter-summary{
-  border:1px solid #dde5eb;background:#fff;
+  border:1px solid #d9e3eb;background:#fff;
+}
+.nfe-workspace-body .nfe-document-summary{
+  background:#f1f6fa;border-color:#d2e1ea;
+}
+.nfe-workspace-body .nfe-recipient-panel #nfeRecipientSummary{
+  background:#f0f6fb;border-color:#d1e1ef;
 }
 .nfe-workspace-body .nfe-form-section>.nfe-general-card .editor-panel,
 .nfe-workspace-body .nfe-form-section>.nfe-general-card .nfe-general-main{
@@ -89,12 +136,28 @@
 }
 .nfe-item-intro-total small{font-size:11px;color:#8392a1}
 .nfe-item-intro-total strong{
-  font-size:17px;font-weight:700;color:#344b5f;font-variant-numeric:tabular-nums;
+  font-size:17px;font-weight:700;color:#246c4b;font-variant-numeric:tabular-nums;
 }
 .nfe-item-body .nfe-item-section.editor-panel{
+  --nfe-item-accent:#316f9d;
+  --nfe-item-tint:#f0f6fb;
   display:block;margin:0;padding:0;overflow:visible;
   border:0;border-bottom:1px solid #dce4ea;
   border-radius:0;background:#fff;box-shadow:none;
+}
+.nfe-item-body [data-nfe-item-panel="item-fiscal"]{
+  --nfe-item-accent:#18766c;--nfe-item-tint:#eef8f5;
+}
+.nfe-item-body [data-nfe-item-panel="item-icms"],
+.nfe-item-body [data-nfe-item-panel="item-federal"]{
+  --nfe-item-accent:#347c54;--nfe-item-tint:#f0f8f2;
+}
+.nfe-item-body [data-nfe-item-panel="item-difal"],
+.nfe-item-body [data-nfe-item-panel="item-specific"]{
+  --nfe-item-accent:#966c36;--nfe-item-tint:#fcf7ec;
+}
+.nfe-item-body [data-nfe-item-panel="item-ibscbs"]{
+  --nfe-item-accent:#66718e;--nfe-item-tint:#f4f5fa;
 }
 .nfe-item-section-heading{
   display:flex;align-items:center;gap:10px;min-height:52px;
@@ -105,15 +168,19 @@
 .nfe-item-section-heading:hover,.nfe-item-section-heading:focus-visible{
   background:#f3f7fa;outline:0;
 }
-.nfe-item-section[open]>.nfe-item-section-heading{background:#f3f6f8}
+.nfe-item-section[open]>.nfe-item-section-heading{
+  background:var(--nfe-item-tint);
+  border-left:3px solid var(--nfe-item-accent);
+  padding-left:3px;
+}
 .nfe-section-index{
   display:grid;place-items:center;flex:0 0 24px;
-  width:24px;height:24px;border:1px solid #c9d4de;
+  width:24px;height:24px;border:1px solid #d4dde6;
   border-radius:4px;background:#fff;
-  font-size:11px;font-weight:650;color:#496679;
+  font-size:11px;font-weight:650;color:var(--nfe-item-accent);
 }
 .nfe-section-label{display:flex;flex:1;min-width:0;flex-direction:column;gap:2px}
-.nfe-section-label strong{font-size:13px;font-weight:650;color:#344b5f}
+.nfe-section-label strong{font-size:13px;font-weight:650;color:var(--nfe-item-accent)}
 .nfe-section-label small{font-size:11px;font-weight:400;color:#8392a1}
 .nfe-section-caret{
   flex:0 0 8px;width:8px;height:8px;margin:0 5px 4px 0;
@@ -156,12 +223,17 @@
   display:flex;flex-direction:column;justify-content:center;
   align-items:flex-start;min-width:0;min-height:56px;
   gap:5px;padding:9px 12px;border:0;border-right:1px solid #dce4ea;
-  border-radius:0;background:#f7f9fb;text-align:left;
+  border-radius:0;background:#f8fafc;text-align:left;
   font-family:inherit;cursor:pointer;
 }
+.nfe-tax-review-grid button:nth-child(1){background:#edf7f5}
+.nfe-tax-review-grid button:nth-child(2),
+.nfe-tax-review-grid button:nth-child(3){background:#f0f7f2}
+.nfe-tax-review-grid button:nth-child(4){background:#fcf7ec}
+.nfe-tax-review-grid button:nth-child(5){background:#f3f4fa}
 .nfe-tax-review-grid button:last-child{border-right:0}
 .nfe-tax-review-grid button:hover,.nfe-tax-review-grid button:focus-visible{
-  background:#edf4f9;outline:0;
+  background:#e7f0f6;outline:2px solid #a5bfd3;outline-offset:-2px;
 }
 .nfe-tax-review-grid button small{font-size:11px;color:#7c8b9a;font-weight:600}
 .nfe-tax-review-grid button strong{
