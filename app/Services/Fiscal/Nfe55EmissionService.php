@@ -32,7 +32,22 @@ final class Nfe55EmissionService
         $company=CompanySetting::current();
         if(!$draft->validated_at)throw ValidationException::withMessages(['nfe'=>'Valide a NF-e antes de emitir.']);
         $this->assertReady($draft,$company);
-        $this->builder->build($draft,$company,1,12345678); // preflight without reserving a number
+        // A verificação nativa acontece automaticamente antes de reservar a
+        // numeração. Nenhum botão de diagnóstico é necessário na interface.
+        try {
+            app(Nfe55PreflightService::class)->check($draft);
+        } catch (ValidationException $exception) {
+            throw $exception;
+        } catch (Throwable $exception) {
+            \Illuminate\Support\Facades\Log::warning('NF-e: falha na pré-validação interna antes do envio', [
+                'draft_id' => $draft->id,
+                'exception_type' => get_class($exception),
+                'reason' => mb_substr($exception->getMessage(), 0, 1000),
+            ]);
+            throw ValidationException::withMessages([
+                'nfe' => 'Não foi possível conferir esta nota. Revise os dados da empresa, do cliente e a tributação dos produtos.',
+            ]);
+        }
         $updated=DB::transaction(function()use($draft){
             $locked=NfeDraft::query()->lockForUpdate()->findOrFail($draft->id);
             if($locked->status!=='draft'||$locked->document_number!==null){
@@ -51,8 +66,8 @@ final class Nfe55EmissionService
             ProcessNfe55Job::dispatch($updated->id)->onConnection('database')->onQueue('fiscal');
         } catch(Throwable $exception){
             // Reserved numbers must not be recycled after a dispatch failure.
-            $updated->update(['status'=>'prepared','error_message'=>'Não foi possível agendar a transmissão.']);
-            throw ValidationException::withMessages(['nfe'=>'Transmissão não agendada. Confira a fila fiscal.']);
+            $updated->update(['status'=>'prepared','error_message'=>'Não foi possível iniciar o envio da nota.']);
+            throw ValidationException::withMessages(['nfe'=>'Não foi possível iniciar o envio. Tente novamente ou solicite suporte.']);
         }
         return $updated;
     }
@@ -80,7 +95,7 @@ final class Nfe55EmissionService
                     ||$note->transmission_attempted_at!==null
                     ||!$note->document_number||!$note->numeric_code
                     ||$note->access_key||$note->xml_path){
-                    throw ValidationException::withMessages(['nfe'=>'Esta NF-e não pode ser preparada novamente. Consulte a SEFAZ se houve tentativa de transmissão.']);
+                    throw ValidationException::withMessages(['nfe'=>'Não é possível repetir o envio desta nota. Consulte a situação na SEFAZ antes de prosseguir.']);
                 }
                 $note->update(['status'=>'queued','error_message'=>null]);
                 return $note->refresh();
@@ -88,8 +103,8 @@ final class Nfe55EmissionService
             try {
                 ProcessNfe55Job::dispatch($updated->id)->onConnection('database')->onQueue('fiscal');
             } catch(Throwable) {
-                $updated->update(['status'=>'prepared','error_message'=>'Falha ao agendar preparação.']);
-                throw ValidationException::withMessages(['nfe'=>'Não foi possível agendar a preparação.']);
+                $updated->update(['status'=>'prepared','error_message'=>'Não foi possível iniciar uma nova tentativa de envio.']);
+                throw ValidationException::withMessages(['nfe'=>'Não foi possível iniciar uma nova tentativa. Tente novamente.']);
             }
             return $updated;
         } finally {
@@ -163,7 +178,7 @@ final class Nfe55EmissionService
                     'status'=>$attempted?'pending':'prepared',
                     'error_message'=>$attempted
                         ? 'Transmissão sem confirmação. Consulte a SEFAZ pela chave.'
-                        : 'Não foi possível preparar o XML fiscal. Confira as configurações.','processed_at'=>now(),
+                        : 'Não foi possível preparar a nota. Confira as informações e tente novamente.','processed_at'=>now(),
                 ]);
             }
         }finally{
@@ -234,7 +249,7 @@ final class Nfe55EmissionService
             $attrs['xml_path']=$path;
         }catch(Throwable){
             // Authorization is irreversible even when local nfeProc materialization fails.
-            $attrs['error_message']='Autorização confirmada. XML com protocolo indisponível.';
+            $attrs['error_message']='Nota autorizada, mas o documento para download ainda está indisponível.';
         }
         $draft->update($attrs);
     }
@@ -297,7 +312,7 @@ final class Nfe55EmissionService
             throw ValidationException::withMessages(['nfe'=>'Certificado A1 indisponível ou vencido.']);
         }
         if(!extension_loaded('ffi') || !is_file((string)config('services.acbr_nfe.library_path',''))){
-            throw ValidationException::withMessages(['nfe'=>'Biblioteca ACBrLibNFe não está configurada neste ambiente.']);
+            throw ValidationException::withMessages(['nfe'=>'O serviço de emissão de NF-e está indisponível. Solicite suporte.']);
         }
         if($draft->environment!=='homologation'){
             // Production is not enabled until an end-to-end model 55 authorization
