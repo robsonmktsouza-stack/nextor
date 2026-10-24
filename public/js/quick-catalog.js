@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   const singular={products:'produto',customers:'cliente',suppliers:'fornecedor',carriers:'transportadora'};
   const labels={products:'Produtos',customers:'Clientes',suppliers:'Fornecedores',carriers:'Transportadoras'};
   let kind='products',onSelect=null,returnFocus=null,abortController=null,sequence=0;
-  let searchTimer=null,localItems=[],selectedQuery='',isCreating=false,createDefaults={};
+  let searchTimer=null,localItems=[],selectedQuery='',isCreating=false,createDefaults={},editingItem=null;
   const canCreate=type=>dialog.dataset[type==='products'?'catalogProducts':'catalogCustomers']==='1';
   const norm=text=>String(text||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR');
   const labelItem=item=>item.sku ? item.sku+' — '+item.name : item.name;
@@ -107,11 +107,15 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(dialog.open)dialog.close();
     returnFocus?.focus?.();
     onSelect=null;
+    editingItem=null;
   };
-  const choose=item=>{
+  const choose=(item,updated=false)=>{
     const callback=onSelect;
     close();
-    document.dispatchEvent(new CustomEvent('lumeron:catalog-created',{detail:{kind,item}}));
+    document.dispatchEvent(new CustomEvent(
+      updated?'lumeron:catalog-updated':'lumeron:catalog-created',
+      {detail:{kind,item}}
+    ));
     callback?.(item);
   };
   const render=(items)=>{
@@ -159,11 +163,17 @@ document.addEventListener('DOMContentLoaded',()=>{
   const showCreate=(name)=>{
     if(!canCreate(kind))return;
     isCreating=true;selectedQuery=String(name??search.value).trim().slice(0,190);
-    picker.hidden=true;form.hidden=false;error.hidden=true;title.textContent='Cadastrar '+singular[kind];
-    subtitle.textContent='Preencha os dados e salve sem sair desta operação.';
-    back.hidden=false;save.hidden=false;
+    picker.hidden=true;form.hidden=false;error.hidden=true;
+    title.textContent=(editingItem?'Editar ':'Cadastrar ')+singular[kind];
+    subtitle.textContent=editingItem
+      ?'Atualize o cadastro sem sair da nota.'
+      :'Preencha os dados e salve sem sair desta operação.';
+    back.hidden=!!editingItem;
+    save.hidden=false;
+    save.textContent=editingItem?'Salvar alterações':'Salvar cadastro';
     prepareFields();
-    for(const [key,value] of Object.entries(createDefaults)){
+    const values=editingItem||createDefaults;
+    for(const [key,value] of Object.entries(values)){
       const control=[...fields.querySelectorAll('[name]')].find(node=>node.name===key);
       if(control && value!==null && value!==undefined){
         if(control.type==='checkbox')control.checked=Boolean(value);
@@ -173,7 +183,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     fields.querySelector('[name="name"]')?.focus();
   };
   const showPicker=()=>{
-    isCreating=false;form.hidden=true;picker.hidden=false;
+    isCreating=false;editingItem=null;form.hidden=true;picker.hidden=false;
     back.hidden=true;save.hidden=true;error.hidden=true;
     title.textContent='Selecionar '+singular[kind];
     subtitle.textContent='Pesquise um cadastro existente ou adicione um novo.';
@@ -183,6 +193,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(!singular[type])return;
     if(dialog.open)close();
     kind=type;onSelect=typeof options.onSelect==='function'?options.onSelect:null;
+    editingItem=null;
     returnFocus=document.activeElement;
     localItems=Array.isArray(options.items)?options.items:[];
     createDefaults=options.defaults && typeof options.defaults==='object'?options.defaults:{};
@@ -198,6 +209,13 @@ document.addEventListener('DOMContentLoaded',()=>{
   const create=(type,options={})=>{
     pick(type,options);showCreate(options.initial??'');
   };
+  const edit=(type,options={})=>{
+    // A edição contextual só fica disponível a perfis com autorização.
+    if(type!=='customers'||!canCreate('customers')||!options.item?.id)return;
+    pick(type,{...options,initial:options.item.name||''});
+    editingItem={...options.item};
+    showCreate(editingItem.name);
+  };
   const submit=async event=>{
     event.preventDefault();
     if(save.disabled)return;
@@ -210,10 +228,13 @@ document.addEventListener('DOMContentLoaded',()=>{
     }
     if(kind==='products')raw.control_stock=form.querySelector('[name="control_stock"]').checked?1:0;
     if(raw.state)raw.state=String(raw.state).trim().toUpperCase();
+    const updateId=editingItem?.id;
     save.disabled=true;save.textContent='Salvando...';
     try{
-      const response=await fetch(dialog.dataset.storeUrl+'/'+kind,{
-        method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json',
+      const url=dialog.dataset.storeUrl+'/'+kind+(updateId?'/'+encodeURIComponent(String(updateId)):'');
+      const response=await fetch(url,{
+        method:updateId?'PUT':'POST',
+        headers:{'Content-Type':'application/json','Accept':'application/json',
           'X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]')?.content||''},
         body:JSON.stringify(raw)
       });
@@ -227,12 +248,13 @@ document.addEventListener('DOMContentLoaded',()=>{
         const msg=Object.values(invalid).flat().join(' ')||'Confira os dados informados.';
         throw new Error(msg);
       }
-      choose(data.item);
+      choose(data.item,!!updateId);
     }catch(e){
       error.textContent=e.message||'Não foi possível salvar o cadastro.';
       error.hidden=false;
     }finally{
-      save.disabled=false;save.textContent='Salvar cadastro';
+      save.disabled=false;
+      save.textContent=editingItem?'Salvar alterações':'Salvar cadastro';
     }
   };
   search.addEventListener('input',updateQuery);
@@ -247,5 +269,5 @@ document.addEventListener('DOMContentLoaded',()=>{
   form.addEventListener('submit',submit);
   dialog.querySelectorAll('[data-catalog-close]').forEach(button=>button.addEventListener('click',close));
   dialog.addEventListener('cancel',event=>{event.preventDefault();close();});
-  window.LumeronCatalog={pick,create};
+  window.LumeronCatalog={pick,create,edit};
 });
