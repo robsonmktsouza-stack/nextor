@@ -174,9 +174,15 @@ final class Nfe55EmissionFoundationTest extends TestCase
     {
         $draft=$this->draft();
         $draft->update(['document_number'=>24,'numeric_code'=>12345678]);
-        $wrongIssuer='99999999000100';
+        // The correct issuer CNPJ appears across the AAMM/CNPJ boundary,
+        // so a naive str_contains(key, company_document) would accept it.
+        $wrongIssuer='23456780001009';
+        $key='292601'.$wrongIssuer.'550010000000241123456780';
+        self::assertSame(44,strlen($key));
+        self::assertStringContainsString('12345678000100',$key);
+        self::assertNotSame('12345678000100',substr($key,6,14));
         $xml='<NFe xmlns="http://www.portalfiscal.inf.br/nfe">'
-            .'<infNFe Id="NFe292610'.$wrongIssuer.'550010000000241123456781">'
+            .'<infNFe Id="NFe'.$key.'">'
             .'<ide><mod>55</mod><serie>1</serie><nNF>24</nNF><tpEmis>1</tpEmis>'
             .'<tpAmb>2</tpAmb><cNF>12345678</cNF></ide>'
             .'<emit><CNPJ>'.$wrongIssuer.'</CNPJ></emit></infNFe>'
