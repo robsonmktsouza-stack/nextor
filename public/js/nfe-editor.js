@@ -67,6 +67,15 @@
     if(kind==='products'&&!products.some(p=>String(p.id)===String(item.id)))products.push(item);
     if(kind==='customers'&&!customers.some(c=>String(c.id)===String(item.id)))customers.push(item);
   });
+  document.addEventListener('lumeron:catalog-updated',event=>{
+    const {kind,item}=event.detail||{};
+    if(kind!=='customers'||!item?.id)return;
+    const index=customers.findIndex(customer=>String(customer.id)===String(item.id));
+    if(index<0)return;
+    // Dados de entrega alternativos não são alterados pelo cadastro rápido.
+    customers[index]={...customers[index],...item};
+    updateRecipientPreview();
+  });
   const productById=id=>products.find(item=>String(item.id)===String(id));
   const customerById=id=>customers.find(item=>String(item.id)===String(id));
   const natureById=id=>natures.find(item=>String(item.id)===String(id));
@@ -185,7 +194,8 @@
   const updateRecipientPreview=()=>{
     const customer=selectedCustomer();
     const summary=byId('nfeRecipientSummary');
-
+    const editButton=byId('nfeEditCustomer');
+    if(editButton)editButton.hidden=!customer||readOnly();
     if(!summary) return;
     if(!customer){
       summary.textContent='Selecione um destinatário.';
@@ -202,6 +212,29 @@
       ' · '+esc(address||'Endereço não informado')+
       '</small>';
   };
+
+  byId('nfeEditCustomer')?.addEventListener('click',()=>{
+    if(readOnly())return;
+    const customer=selectedCustomer();
+    if(!customer)return;
+    window.LumeronCatalog?.edit('customers',{
+      item:customer,
+      onSelect:updated=>{
+        // Mantém a NF-e aberta, com produtos, descontos e observações
+        // intactos; atualiza apenas o nome exibido e o resumo cadastral.
+        const option=[...byId('nfeCustomer').options]
+          .find(option=>option.value===String(updated.id));
+        if(option){
+          option.textContent=updated.name+(updated.document?' — '+updated.document:'');
+          option.dataset.name=updated.name;
+        }
+        updateRecipientPreview();
+        window.NextorNotify?.('Dados do cliente atualizados.',{
+          type:'success',title:'Destinatário'
+        });
+      },
+    });
+  });
 
   const recalcItemCfops=()=>{
     const nature=selectedNature();
