@@ -443,6 +443,9 @@ class NfeDraftController extends Controller
         $customerData=$customers->map(fn($customer)=>[
             'id'=>$customer->id,
             'name'=>$customer->name,
+            'trade_name'=>$customer->trade_name,
+            'email'=>$customer->email,
+            'phone'=>$customer->phone,
             'document'=>$customer->document,
             'foreign_id'=>$customer->foreign_id,
             'state_registration'=>$customer->state_registration,
