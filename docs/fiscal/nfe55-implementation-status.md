@@ -1,5 +1,25 @@
 # NF-e modelo 55 — implantação controlada (24/10/2026)
 
+## Verificação de emissão em homologação — 24/10/2026
+
+- Confirmado no manual ACBrLib o mapeamento `NFe.ModeloDF=0` (NF-e modelo 55), `NFe.VersaoDF=3` (4.00) e `NFe.Ambiente=1` (homologação). Estes valores já são usados pelo emissor.
+- Nova ferramenta **somente para desenvolvedor/suporte** no PHP CLI: `php artisan nfe:preflight {id}`, onde `{id}` é o número do rascunho validado. A ferramenta testa a geração, assinatura, schema, regras fiscais e chave **sem reservar numeração, alterar o rascunho nem transmitir**; a interface comercial permanece inalterada.
+- O retorno de autorização só é aceito quando os códigos de aprovação, a chave e o **ambiente SEFAZ** correspondem integralmente à nota. Uma autorização de produção não valida uma NF-e de homologação nem o contrário.
+- Corrigida recuperação de falha antes do contato externo: caso haja XML **apenas assinado e nunca transmitido**, a preparação pode ser retomada depois do período de segurança com a mesma numeração/código. Notas com qualquer tentativa de transmissão continuam bloqueadas para reenvio automático.
+- O CI passa a verificar sintaxe do novo comando, registro na lista do Artisan e testes de regressão de ambiente e numeração. **Ainda não foi confirmado resultado de execução do workflow nem do ensaio ACBr/SEFAZ real**.
+
+### Teste inicial recomendado no Laragon
+
+```bat
+cd C:\\laragon\\www\\nextor
+git pull --ff-only origin develop
+php artisan optimize:clear
+php artisan test --filter=Nfe55
+php artisan nfe:preflight 1
+```
+
+Substituir `1` pelo ID real da NF-e salva e validada no Lumeron (sem incluir símbolos `#`). O comando é para operador técnico no ambiente de desenvolvimento, **não deve aparecer como botão no sistema vendido**. Não copiar certificados/senhas; se falhar, reportar somente a mensagem do comando e trechos de log sanitizados. Uma saída "Verificação concluída" **não é autorização SEFAZ**, e a liberação para produção continua bloqueada.
+
 ## Padrão de mensagens comerciais — 24/10/2026
 
 - O botão e endpoint públicos de diagnóstico ACBr foram **removidos**. A conferência fiscal nativa continua ativa, mas **integrada ao fluxo normal de Emitir NF-e**, sem expor a tecnologia interna ao cliente.
