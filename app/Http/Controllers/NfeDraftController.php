@@ -207,6 +207,9 @@ class NfeDraftController extends Controller
         }
 
         if($errors) {
+            // Uma nota já marcada como validada pode tornar-se inconsistente
+            // se os cadastros relacionados forem modificados.
+            if($draft->validated_at!==null)$draft->update(['validated_at'=>null]);
             return redirect()->route('fiscal.nfe.edit',$draft)
                 ->with('warning',"A NF-e ainda possui pendências:\n".implode("\n",$errors));
         }
