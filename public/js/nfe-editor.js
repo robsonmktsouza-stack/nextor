@@ -812,7 +812,7 @@
       if(value!=='' && value!==null)defaults[key]=value;
     }
     // Preservar preço unitário apenas quando o mesmo produto for reaberto.
-    if(String(getField('nfeItemProduct'))===String(product.id)
+    if(currentIndex!=='' && String(items[Number(currentIndex)]?.product_id)===String(product.id)
        &&getField('nfeItemUnitPrice')!=='') defaults.unit_price=getField('nfeItemUnitPrice');
     populateItemDialog(defaults,currentIndex);
   };
