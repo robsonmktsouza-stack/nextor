@@ -384,52 +384,6 @@ $origins=[
       </div>
     </section>
 
-    <section class="editor-tab-panel nfe-form-section" id="nfe-section-transport">
-      <header class="nfe-flow-heading"><div><h3>Transporte</h3><p>Frete, transportador e volumes</p></div></header>
-      <div class="editor-panel">
-        <h3>Transportadora e frete</h3>
-        <div class="editor-grid cols-12">
-          <label class="field col-4"><span>Modalidade do frete *</span>
-            <select name="freight_mode" id="nfeFreightMode">
-              <option value="9" @selected(old('freight_mode',$freightMode)==='9')>9 - Sem frete</option>
-              <option value="0" @selected(old('freight_mode',$freightMode)==='0')>0 - Por conta do emitente</option>
-              <option value="1" @selected(old('freight_mode',$freightMode)==='1')>1 - Por conta do destinatário</option>
-              <option value="2" @selected(old('freight_mode',$freightMode)==='2')>2 - Por conta de terceiros</option>
-              <option value="3" @selected(old('freight_mode',$freightMode)==='3')>3 - Próprio por conta do remetente</option>
-              <option value="4" @selected(old('freight_mode',$freightMode)==='4')>4 - Próprio por conta do destinatário</option>
-            </select>
-          </label>
-
-          <label class="field col-6"><span>Transportador</span>
-            <select name="carrier_id" data-quick-create="carriers">
-              <option value="">Não informado</option>
-              @foreach($carriers as $carrier)
-                <option value="{{ $carrier->id }}" @selected(old('carrier_id',data_get($transport,'carrier_id'))==$carrier->id)>
-                  {{ $carrier->name }}{{ $carrier->document ? ' — '.$carrier->document : '' }}
-                </option>
-              @endforeach
-            </select>
-          </label>
-
-          <label class="field col-2"><span>Valor do frete</span><input type="number" name="freight_value" id="nfeFreightValue" min="0" step="0.01" value="{{ old('freight_value',data_get($transport,'freight_value',0)) }}"></label>
-
-          <label class="field col-3"><span>Placa</span><input name="vehicle_plate" maxlength="12" value="{{ old('vehicle_plate',data_get($transport,'vehicle_plate')) }}"></label>
-          <label class="field col-2"><span>UF do veículo</span><input name="vehicle_state" maxlength="2" value="{{ old('vehicle_state',data_get($transport,'vehicle_state')) }}"></label>
-        </div>
-      </div>
-
-      <div class="editor-panel">
-        <h3>Volumes transportados</h3>
-        <div class="editor-grid cols-12">
-          <label class="field col-2"><span>Quantidade</span><input type="number" min="0" step="1" name="volume_quantity" value="{{ old('volume_quantity',data_get($transport,'volume_quantity')) }}"></label>
-          <label class="field col-3"><span>Espécie</span><input name="volume_species" value="{{ old('volume_species',data_get($transport,'volume_species')) }}"></label>
-          <label class="field col-3"><span>Numeração</span><input name="volume_numbering" value="{{ old('volume_numbering',data_get($transport,'volume_numbering')) }}"></label>
-          <label class="field col-2"><span>Peso líquido</span><input type="number" min="0" step="0.001" name="net_weight" value="{{ old('net_weight',data_get($transport,'net_weight')) }}"></label>
-          <label class="field col-2"><span>Peso bruto</span><input type="number" min="0" step="0.001" name="gross_weight" value="{{ old('gross_weight',data_get($transport,'gross_weight')) }}"></label>
-        </div>
-      </div>
-    </section>
-
     <section class="editor-tab-panel nfe-form-section" id="nfe-section-payment">
       <header class="nfe-flow-heading"><div><h3>Pagamento</h3><p>Forma de pagamento e vencimentos</p></div></header>
       <div class="editor-panel">
@@ -533,6 +487,52 @@ $origins=[
           </table>
         </div>
 
+      </div>
+    </section>
+
+    <section class="editor-tab-panel nfe-form-section" id="nfe-section-transport">
+      <header class="nfe-flow-heading"><div><h3>Transporte</h3><p>Frete, transportador e volumes</p></div></header>
+      <div class="editor-panel">
+        <h3>Transportadora e frete</h3>
+        <div class="editor-grid cols-12">
+          <label class="field col-4"><span>Modalidade do frete *</span>
+            <select name="freight_mode" id="nfeFreightMode">
+              <option value="9" @selected(old('freight_mode',$freightMode)==='9')>9 - Sem frete</option>
+              <option value="0" @selected(old('freight_mode',$freightMode)==='0')>0 - Por conta do emitente</option>
+              <option value="1" @selected(old('freight_mode',$freightMode)==='1')>1 - Por conta do destinatário</option>
+              <option value="2" @selected(old('freight_mode',$freightMode)==='2')>2 - Por conta de terceiros</option>
+              <option value="3" @selected(old('freight_mode',$freightMode)==='3')>3 - Próprio por conta do remetente</option>
+              <option value="4" @selected(old('freight_mode',$freightMode)==='4')>4 - Próprio por conta do destinatário</option>
+            </select>
+          </label>
+
+          <label class="field col-6"><span>Transportador</span>
+            <select name="carrier_id" data-quick-create="carriers">
+              <option value="">Não informado</option>
+              @foreach($carriers as $carrier)
+                <option value="{{ $carrier->id }}" @selected(old('carrier_id',data_get($transport,'carrier_id'))==$carrier->id)>
+                  {{ $carrier->name }}{{ $carrier->document ? ' — '.$carrier->document : '' }}
+                </option>
+              @endforeach
+            </select>
+          </label>
+
+          <label class="field col-2"><span>Valor do frete</span><input type="number" name="freight_value" id="nfeFreightValue" min="0" step="0.01" value="{{ old('freight_value',data_get($transport,'freight_value',0)) }}"></label>
+
+          <label class="field col-3"><span>Placa</span><input name="vehicle_plate" maxlength="12" value="{{ old('vehicle_plate',data_get($transport,'vehicle_plate')) }}"></label>
+          <label class="field col-2"><span>UF do veículo</span><input name="vehicle_state" maxlength="2" value="{{ old('vehicle_state',data_get($transport,'vehicle_state')) }}"></label>
+        </div>
+      </div>
+
+      <div class="editor-panel">
+        <h3>Volumes transportados</h3>
+        <div class="editor-grid cols-12">
+          <label class="field col-2"><span>Quantidade</span><input type="number" min="0" step="1" name="volume_quantity" value="{{ old('volume_quantity',data_get($transport,'volume_quantity')) }}"></label>
+          <label class="field col-3"><span>Espécie</span><input name="volume_species" value="{{ old('volume_species',data_get($transport,'volume_species')) }}"></label>
+          <label class="field col-3"><span>Numeração</span><input name="volume_numbering" value="{{ old('volume_numbering',data_get($transport,'volume_numbering')) }}"></label>
+          <label class="field col-2"><span>Peso líquido</span><input type="number" min="0" step="0.001" name="net_weight" value="{{ old('net_weight',data_get($transport,'net_weight')) }}"></label>
+          <label class="field col-2"><span>Peso bruto</span><input type="number" min="0" step="0.001" name="gross_weight" value="{{ old('gross_weight',data_get($transport,'gross_weight')) }}"></label>
+        </div>
       </div>
     </section>
 
