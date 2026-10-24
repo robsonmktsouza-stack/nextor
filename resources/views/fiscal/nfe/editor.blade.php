@@ -87,7 +87,7 @@ $origins=[
 
   <div class="dialog-body nfe-workspace-body">
     <nav class="editor-tabs nfe-flow-nav" aria-label="Seções da nota">
-      <button type="button" class="editor-tab active" data-nfe-jump="nfe-section-general" aria-current="step">Dados gerais</button>
+      <button type="button" class="editor-tab active" data-nfe-jump="nfe-section-general" aria-current="location">Dados gerais</button>
       <button type="button" class="editor-tab" data-nfe-jump="nfe-section-items">Produtos</button>
       <button type="button" class="editor-tab" data-nfe-jump="nfe-section-payment">Pagamento</button>
       <button type="button" class="editor-tab" data-nfe-jump="nfe-section-transport">Transporte</button>
