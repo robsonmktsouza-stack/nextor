@@ -1,3 +1,24 @@
+## Contador integrado e rejeição 486 — 25/10/2026
+
+Código integrado publicado em `277c6b4`: cadastro Contabilidade ligado ao INI/XML
+55, autorização explícita de acesso, CPF/CNPJ validado, contador prioritário e
+alternativa BA selecionada pelo operador. Contador autorizado prevalece sobre a
+alternativa estadual. Atalhos em Configurações → Notas fiscais e NF-e.
+BA sem grupo bloqueado no preflight; XML retornado pela ACBr confere autorizados
+e ordem. Política NFC-e preservada.
+
+Rejeição 486 de envio reconhecida como negativa comprovada. A recuperação
+arquiva originais e preserva chave/número/cNF; `--correct-486` permite corrigir
+a mesma nota após cadastro. Estado pending com `--consult` consulta imediatamente.
+Migration 000005 adiciona failed_jobs, ausente no Windows e na árvore original.
+
+Testes: suíte com 877 testes/5504 assertions, zero falhas/erros, dois ignorados
+por falta de Chromium. O ajuste final de precedência autXML também passou em
+54 testes/334 assertions direcionados. PHP 8.5.12/SQLite; logs/hash em
+`docs/fiscal/evidence/nfe55-accountant-*`. Relato Windows do usuário: preflight 4
+aprovado e SEFAZ 486 na transmissão. A nova correção não foi transmitida pela
+nuvem. [Cadastro, comando local e fontes](../fiscal/nfe55-accountant-autxml.md).
+
 ## NF-e 4 — conferência em um terminal
 
 Na branch feature/nfe55-motor-fiscal-completo, nfe:verify-flow ganhou --process:

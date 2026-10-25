@@ -1,3 +1,19 @@
+## Correção BA 486 — contador/autXML
+
+O cadastro contábil existente agora alimenta a autorização XML 55 mediante
+seleção explícita: CPF/CNPJ validado, contador prioritário, conferência XML/INI
+e opção BA conforme retorno fornecido. Corrigida a classificação da 486 e
+implementada recuperação conservadora da mesma nota, com arquivo de provas e
+preservação da numeração. Adicionada migration failed_jobs, ausente no projeto.
+[Procedimento e fontes](nfe55-accountant-autxml.md).
+
+Suíte executada: 877 testes/5504 assertions, zero falhas/erros, dois ignorados
+por falta de Chromium. Ajuste final de precedência verificado em 54 testes/334
+assertions direcionados. Runtime PHP 8.5.12/SQLite.
+[Evidências](evidence/nfe55-accountant-tests.json).
+Relato real do usuário: preflight passou; emissão rejeitada 486. Nenhuma nova
+transmissão ou correção foi executada pela sessão Linux no Windows do usuário.
+
 ## Continuação — operação configurada e validação no Laragon
 
 Commits `cfe8fbb` e `68bcdae`: corrigido o bloqueio incondicional de produção

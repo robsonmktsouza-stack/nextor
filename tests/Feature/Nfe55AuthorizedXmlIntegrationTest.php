@@ -72,7 +72,7 @@ final class Nfe55AuthorizedXmlIntegrationTest extends TestCase
         [$draft,$company]=$this->invoice([]);
         $ini=$this->ini($draft,$company);
         self::assertSame('11222333000181',$ini['autXML001']['CNPJCPF']);
-        self::assertSame('13937073000156',$ini['autXML002']['CNPJCPF']);
+        self::assertArrayNotHasKey('autXML002',$ini);
         self::assertArrayNotHasKey('autXML003',$ini);
         app(\App\Services\Fiscal\Nfe55AuthorizedXmlService::class)->assertRequired($draft,$company);
     }

@@ -21,7 +21,7 @@ final class Nfe55AuthorizedXmlService
             if (!BrazilianTaxId::valid($raw)) throw new RuntimeException('Informe CPF/CNPJ válido do contador em Configurações → Contabilidade.');
             $documents[]=preg_replace('/\D/','',$raw);
         }
-        if (strtoupper((string)$company->state)==='BA'
+        if (!$documents && strtoupper((string)$company->state)==='BA'
             && (bool)AppSetting::value('accounting','nfe_ba_sefaz_xml_authorized',false)) {
             // An explicit alternative selected by the operator, never an automatic fallback.
             $documents[]=self::SEFAZ_BA;
