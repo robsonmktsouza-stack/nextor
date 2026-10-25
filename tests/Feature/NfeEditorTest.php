@@ -302,7 +302,7 @@ class NfeEditorTest extends TestCase
             ->assertSee('Modalidade do frete')
             ->assertSee('Tipo de pagamento')
             ->assertSee('Adicionar duplicata')
-            ->assertSee('NF-e referenciadas')
+            ->assertSee('Documentos referenciados')
             ->assertSee('Código benefício (cBenef)')
             ->assertSee('CSOSN exportação')
             ->assertSee('CSOSN entrada')
