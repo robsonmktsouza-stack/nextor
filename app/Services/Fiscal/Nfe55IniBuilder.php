@@ -193,11 +193,11 @@ final class Nfe55IniBuilder
             $pis=(string)($tax['pis_cst']??'');
             $cofins=(string)($tax['cofins_cst']??'');
             $ipi=(string)($tax['ipi_cst']??'');
-            if(!in_array($pis,['49','99'],true)||!in_array($cofins,['49','99'],true)
+            if(!in_array($pis,['01','02','49','99'],true)||!in_array($cofins,['01','02','49','99'],true)
                 ||!in_array($ipi,['53'],true)) {
                 throw new RuntimeException('Tributação federal deste item requer cálculo específico ainda não homologado.');
             }
-            foreach(['ipi_rate','pis_rate','cofins_rate','iss_rate'] as $rateField){
+            foreach(['ipi_rate','iss_rate'] as $rateField){
                 if((float)($tax[$rateField]??0)!==0.0){
                     throw new RuntimeException('Tributação federal deste item exige cálculo ainda não homologado.');
                 }
@@ -238,8 +238,12 @@ final class Nfe55IniBuilder
                 'indTot'=>'1','infAdProd'=>$item->notes,
             ]);
             $add('ICMS'.$i,['orig'=>$item->origin,'CSOSN'=>$csosn]);
-            $add('PIS'.$i,['CST'=>$pis,'vBC'=>'0.00','pPIS'=>'0.00','vPIS'=>'0.00']);
-            $add('COFINS'.$i,['CST'=>$cofins,'vBC'=>'0.00','pCOFINS'=>'0.00','vCOFINS'=>'0.00']);
+            $federalBase=(int)round(($gross+$freight+$insurance+$other-$discount)*100);
+            $federal=app(NfeFederalItemTaxCalculator::class)->calculate($tax,$federalBase);
+            $totalPis+=$federal['pis_amount'];
+            $totalCofins+=$federal['cofins_amount'];
+            $add('PIS'.$i,$federal['pis']);
+            $add('COFINS'.$i,$federal['cofins']);
             $add('IPI'.$i,['CST'=>$ipi,'cEnq'=>$tax['ipi_enq']??'999']);
             // Only tax profiles the RTC calculator can prove; never fabricate IBS/CBS.
             $rtc=$this->rtc->calculate([
