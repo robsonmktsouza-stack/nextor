@@ -130,6 +130,11 @@ final class NFCeSefazResponseParser
     /** Strict model-55 recovery proof; deliberately separate from NFC-e policy. */
     public function definitiveNfe55Rejection486(string $raw, string $key, string $environment): bool
     {
+        return $this->definitiveNfe55AuthorizationRejection($raw, $key, $environment, ['486']);
+    }
+
+    public function definitiveNfe55AuthorizationRejection(string $raw, string $key, string $environment, array $allowedCodes = ['486', '487']): bool
+    {
         if (strlen($raw) > 8388608 || preg_match('/<!DOCTYPE|<!ENTITY/i', $raw)
             || !preg_match('/^\d{44}$/', $key)
             || !in_array($environment, ['homologation', 'production'], true)) return false;
@@ -162,8 +167,8 @@ final class NFCeSefazResponseParser
             if (str_starts_with($name, 'NFE')
                 && (int) substr($name, 3) !== (int) substr($key, 25, 9)) return false;
             $code = (string) ($values['cstat'] ?? '');
-            if (!in_array($code, ['103', '104', '486'], true)) return false;
-            if ($code === '486') {
+            if (!in_array($code, array_merge(['103', '104'], $allowedCodes), true)) return false;
+            if (in_array($code, $allowedCodes, true)) {
                 if (preg_match('/^\s*Rejei(?:c|ç)(?:a|ã)o\b/iu', (string) ($values['xmotivo'] ?? '')) !== 1) return false;
                 $found = true;
             } elseif (str_starts_with($name, 'NFE')) return false;
