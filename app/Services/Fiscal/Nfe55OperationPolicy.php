@@ -19,7 +19,7 @@ final class Nfe55OperationPolicy
 
     // Explicitly bounded operation families. This is not a CFOP tax-rate table.
     private const RETURN_SUFFIXES = ['201','202','208','209','210','410','411','553','556','661','662'];
-    private const ORDINARY_SUFFIXES = ['101','102','401','403','405'];
+    private const ORDINARY_SUFFIXES = ['101','102','108','401','403','405'];
     private const SPECIAL_SUFFIXES = [
         'transfer'=>['151','152','408','409'],
         'bonus'=>['910'], 'gift'=>['910'], 'sample'=>['911'],
@@ -221,6 +221,10 @@ final class Nfe55OperationPolicy
         }
         if ($kind !== 'devolution' && in_array($suffix, self::RETURN_SUFFIXES, true)) {
             throw new RuntimeException('CFOP de devolução exige finalidade Devolução de mercadoria.');
+        }
+        if ($kind === 'sale' && $suffix === '108'
+            && ($cfop !== '6108' || ($operation['recipient_profile'] ?? '') !== 'non_contributor')) {
+            throw new RuntimeException('CFOP 6108 exige venda interestadual a destinatário não contribuinte do ICMS.');
         }
         if ($kind === 'sale' && !in_array($suffix, self::ORDINARY_SUFFIXES, true)) {
             throw new RuntimeException('Este CFOP exige uma operação fiscal específica; não pode ser enviado como venda ou compra comum.');
