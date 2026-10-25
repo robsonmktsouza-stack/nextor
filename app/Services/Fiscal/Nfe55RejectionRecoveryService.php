@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
-/** Recovers only the archived, definitive 486. Never contacts SEFAZ. */
+/** Audited recovery of archived definitive rejection proofs. Never contacts SEFAZ. */
 final class Nfe55RejectionRecoveryService
 {
     public function __construct(private readonly NFCeSefazResponseParser $responses) {}
@@ -64,7 +64,9 @@ final class Nfe55RejectionRecoveryService
                 $rejectionCode = (string) $this->responses->parse($raw)['cstat'];
                 $signed = $disk->get($note->xml_path);
                 try {
-                    $key = app(Nfe55EmissionService::class)->verifySignedXml($signed, $note, $company);
+                    $key = app(Nfe55EmissionService::class)->verifySignedXml(
+                        $signed, $note, $company, null, null, $rejectionCode !== '321'
+                    );
                 } catch (\Throwable) {
                     $this->refuse();
                 }
