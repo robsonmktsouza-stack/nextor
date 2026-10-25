@@ -407,6 +407,30 @@ final class Nfe55EmissionService
         if($expectedTotal===null || NfeTaxMath::scaled($draft->issue_date?->toDateString()>='2027-01-01'?$get('vNFTot'):$get('vNF'),2,'Total XML')!==NfeTaxMath::scaled($expectedTotal,2,'Total reservado')){
             throw new RuntimeException('Total do XML assinado não corresponde à NF-e reservada.');
         }
+        if($draft->purpose==='return'){
+            $xpath=new DOMXPath($dom);
+            $xpath->registerNamespace('n','http://www.portalfiscal.inf.br/nfe');
+            if($xpath->query('/n:NFe/n:infNFe/n:ide/n:NFref')->length!==0){
+                throw new RuntimeException('A devolução não pode utilizar o referenciamento antigo no cabeçalho.');
+            }
+            foreach($draft->items->values() as $index=>$item){
+                $expected=$item->special_data['dfe_reference']??null;
+                $detail=$details?->item($index);
+                $references=$detail instanceof DOMElement
+                    ?$xpath->query('./n:DFeReferenciado',$detail):null;
+                if(!is_array($expected)||$references?->length!==1){
+                    throw new RuntimeException('XML da devolução sem referência fiscal por item.');
+                }
+                $reference=$references->item(0);
+                $originalKey=trim((string)$xpath->evaluate('string(./n:chaveAcesso)',$reference));
+                $originalItem=trim((string)$xpath->evaluate('string(./n:nItem)',$reference));
+                if(!hash_equals((string)($expected['key']??''),$originalKey)
+                    ||!ctype_digit($originalItem)
+                    ||(int)$originalItem!==(int)($expected['n_item']??0)){
+                    throw new RuntimeException('Referência fiscal do XML diverge da nota de origem.');
+                }
+            }
+        }
         return $key;
     }
 
