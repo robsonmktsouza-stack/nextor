@@ -191,6 +191,7 @@ final class Nfe55EmissionService
                 $code=(string)($result['cstat']??'');
                 $definitive=$this->responses->definitiveCorrectionRejection($result)
                     && ($result['key']===null || hash_equals($signedKey,(string)$result['key']));
+                $definitive=$definitive || $this->responses->definitiveNfe55Rejection486($raw,$signedKey,(string)$draft->environment);
                 $draft->update([
                     'status'=>$definitive?'rejected':'pending',
                     'error_message'=>mb_substr('Retorno da SEFAZ: '.$code.' - '.($result['reason']??''),0,900),
@@ -413,6 +414,8 @@ final class Nfe55EmissionService
     {
         $issue=$this->settings->transmissionIssue('nfe',(string)$draft->environment);
         if($issue)throw ValidationException::withMessages(['nfe'=>$issue]);
+        try { app(Nfe55AuthorizedXmlService::class)->assertRequired($draft,$company); }
+        catch(RuntimeException $error) { throw ValidationException::withMessages(['nfe'=>$error->getMessage()]); }
         $numbering=$this->settings->nfeNumbering((string)$draft->environment);
         if((int)$draft->series!==$numbering['series']){
             throw ValidationException::withMessages(['nfe'=>'A série do rascunho difere da série configurada neste ambiente. Revalide a nota.']);

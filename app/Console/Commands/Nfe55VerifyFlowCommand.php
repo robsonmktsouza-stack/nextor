@@ -19,6 +19,7 @@ final class Nfe55VerifyFlowCommand extends Command
     protected $signature = 'nfe:verify-flow {id : Identificador da NF-e}
         {--enqueue : Agenda emissão em homologação pela fila fiscal existente}
         {--process : Processa somente esta NF-e neste terminal pelo serviço fiscal existente}
+        {--correct-486 : Corrige rejeição 486 comprovada após configurar acesso ao XML, preservando número e chave}
         {--wait=0 : Segundos para acompanhar o worker existente (0 a 300)}
         {--consult : Consulta a SEFAZ pela chave já existente}';
 
@@ -41,6 +42,12 @@ final class Nfe55VerifyFlowCommand extends Command
         $base = 'fiscal/nfe55/'.$draft->id;
         try {
             $this->line('NF-e '.$draft->id.' | Homologação | Estado: '.$draft->status);
+            if ($this->option('correct-486')) {
+                $draft=app(\App\Services\Fiscal\Nfe55RejectionRecoveryService::class)->prepareCorrection486($draft);
+                $draft=$emission->retryPreparation($draft);
+                $summary['stages'][]='rejection_486_corrected_same_fiscal_identity';
+                $this->line('Correção 486 preparada com a mesma numeração e chave; tentativa anterior arquivada.');
+            }
             $reserved = $draft->document_number !== null || $draft->access_key !== null
                 || $draft->transmission_attempted_at !== null || $draft->protocol !== null;
             if ($draft->status === 'draft' && !$reserved && (!$this->option('consult') || $this->option('enqueue'))) {
@@ -56,6 +63,11 @@ final class Nfe55VerifyFlowCommand extends Command
                 }
             } elseif ($this->option('enqueue')) {
                 $this->line('Documento já reservado ou fora de rascunho: nenhuma nova emissão foi agendada.');
+            }
+            if($draft->response_path===$base.'/sefaz-response.ini' && Storage::disk('local')->exists($draft->response_path)){
+                $previous=app(\App\Services\Fiscal\NFCeSefazResponseParser::class)->parse(Storage::disk('local')->get($draft->response_path));
+                $summary['last_send_cstat']=$previous['cstat'];
+                if($previous['cstat']!==null)$this->line('Último retorno de envio: '.$previous['cstat'].' - '.mb_substr(strip_tags((string)$previous['reason']),0,500));
             }
 
             if ($this->option('process')) {
@@ -75,7 +87,8 @@ final class Nfe55VerifyFlowCommand extends Command
             }
 
             $deadline = microtime(true) + (int)$wait;
-            while (in_array($draft->status, ['queued', 'processing', 'pending'], true) && microtime(true) < $deadline) {
+            while (in_array($draft->status, ['queued', 'processing', 'pending'], true)
+                && !($this->option('consult') && $draft->status==='pending') && microtime(true) < $deadline) {
                 $remaining = $deadline - microtime(true);
                 if ($remaining <= 0) break;
                 usleep((int)(min(2, $remaining) * 1000000));
@@ -90,6 +103,13 @@ final class Nfe55VerifyFlowCommand extends Command
                 $draft = $emission->consult($draft);
                 $summary['stages'][] = 'sefaz_consultation_completed';
                 $this->info('Consulta SEFAZ concluída pelo serviço fiscal existente.');
+            }
+            if (in_array($draft->status,['pending','rejected'],true) && $draft->response_path===$base.'/sefaz-response.ini'
+                && Storage::disk('local')->exists($draft->response_path)
+                && app(\App\Services\Fiscal\NFCeSefazResponseParser::class)->definitiveNfe55Rejection486(
+                    Storage::disk('local')->get($draft->response_path),(string)$draft->access_key,(string)$draft->environment)) {
+                $draft=app(\App\Services\Fiscal\Nfe55RejectionRecoveryService::class)->recover486($draft);
+                $summary['stages'][]='definitive_rejection_486_identified';
             }
 
             $code = self::SUCCESS;
@@ -113,6 +133,8 @@ final class Nfe55VerifyFlowCommand extends Command
                 $this->line('PDF privado: '.$base.'/verified-danfe.pdf');
             } elseif (in_array($draft->status, ['rejected', 'prepared', 'cancelled'], true)) {
                 $this->warn('Estado final: '.$draft->status.'. Fluxo de autorização não concluído.');
+                if($draft->status==='rejected' && str_contains((string)$draft->error_message,'486'))
+                    $this->warn('Rejeição 486: configure o acesso ao XML em Configurações → Contabilidade; depois use --correct-486 para corrigir esta mesma nota.');
                 if ($draft->status === 'prepared') $this->line('Confira o erro no ERP e use a ação existente de reagendamento manual; este comando não repete o envio.');
                 $code = self::FAILURE;
             } elseif ($draft->status !== 'draft' || $reserved) {

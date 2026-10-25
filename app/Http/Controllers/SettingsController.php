@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Models\WebhookDelivery;
 use App\Services\AccountingExportService;
 use App\Services\FinancialBalanceService;
+use App\Support\BrazilianTaxId;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
@@ -194,6 +195,10 @@ class SettingsController extends Controller
     {
         [$rules,$booleanKeys,$secretKeys]=$this->groupRules($group);
         $data=$request->validate($rules);
+
+        if ($group==='accounting' && isset($data['accountant_document'])) {
+            $data['accountant_document']=preg_replace('/\D/','',$data['accountant_document']);
+        }
 
         if ($group==='nfe') {
             DB::transaction(function()use($request,$data,$booleanKeys,$rules){
@@ -628,7 +633,11 @@ class SettingsController extends Controller
             'accounting'=>[[
                 'office_name'=>['nullable','string','max:190'],
                 'accountant_name'=>['nullable','string','max:190'],
-                'accountant_document'=>['nullable','string','max:20'],
+                'accountant_document'=>['bail','required_if:accountant_xml_authorized,1','nullable','string','max:20',function($attribute,$value,$fail){
+                    if (!BrazilianTaxId::valid((string)$value)) $fail('Informe um CPF ou CNPJ válido para o contador.');
+                }],
+                'accountant_xml_authorized'=>['nullable','boolean'],
+                'nfe_ba_sefaz_xml_authorized'=>['nullable','boolean'],
                 'crc'=>['nullable','string','max:40'],
                 'email'=>['nullable','email','max:255'],
                 'phone'=>['nullable','string','max:30'],
@@ -636,7 +645,7 @@ class SettingsController extends Controller
                 'cost_center_enabled'=>['nullable','boolean'],
                 'automatic_monthly_export'=>['nullable','boolean'],
                 'notes'=>['nullable','string','max:3000'],
-            ],['cost_center_enabled','automatic_monthly_export'],[]],
+            ],['cost_center_enabled','automatic_monthly_export','accountant_xml_authorized','nfe_ba_sefaz_xml_authorized'],[]],
 
             'integrations'=>[[
                 'smtp_enabled'=>['nullable','boolean'],
@@ -725,6 +734,7 @@ class SettingsController extends Controller
             'accounting'=>[
                 'office_name'=>null,'accountant_name'=>null,'accountant_document'=>null,'crc'=>null,
                 'email'=>null,'phone'=>null,'accounting_system'=>null,
+                'accountant_xml_authorized'=>false,'nfe_ba_sefaz_xml_authorized'=>false,
                 'cost_center_enabled'=>false,'automatic_monthly_export'=>false,'notes'=>null,
             ],
             'integrations'=>[

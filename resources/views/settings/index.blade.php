@@ -554,6 +554,7 @@ foreach($primaryTabs as $key=>$item){
           <label class="field col-4"><span>E-mail do contador</span><input type="email" name="accountant_email" value="{{ $fiscal['accountant_email'] }}"></label>
           <label class="field col-4"><span>Perfil tributário</span><input name="tax_profile" value="{{ $fiscal['tax_profile'] }}" placeholder="Ex.: padrão Simples Nacional"></label>
         </div>
+        <a class="btn btn-secondary" href="{{ route('settings.index',['tab'=>'accounting']) }}">Contador e autorização de acesso ao XML da NF-e</a>
         <div class="settings-switch-grid">
           <label class="settings-switch"><input type="checkbox" name="enabled" value="1" @checked($fiscal['enabled'])><span><strong>Mostrar opções de notas fiscais</strong></span></label>
           <label class="settings-switch"><input type="checkbox" name="send_xml_email" value="1" @checked($fiscal['send_xml_email'])><span><strong>Enviar XML por e-mail</strong><small>Preferência padrão para documentos autorizados.</small></span></label>
@@ -670,6 +671,7 @@ foreach($primaryTabs as $key=>$item){
     @csrf
     <section class="editor-panel settings-panel">
       <div class="settings-panel-head"><div><h2>Nota fiscal de produtos (NF-e)</h2></div></div>
+      <a class="btn btn-secondary" href="{{ route('settings.index',['tab'=>'accounting']) }}">Contador e autorização de acesso ao XML da NF-e</a>
       <div class="editor-grid cols-12 settings-grid">
         <label class="field col-3"><span>Ambiente</span><select name="environment"><option value="homologation" @selected($nfe['environment']==='homologation')>Homologação</option><option value="production" @selected($nfe['environment']==='production')>Produção</option></select></label>
         <label class="field col-2"><span>Série de homologação</span><input type="number" min="0" max="999" name="series" value="{{ $nfe['series'] }}"></label>
@@ -795,21 +797,24 @@ foreach($primaryTabs as $key=>$item){
     @csrf
     <section class="editor-panel settings-panel">
       <div class="settings-panel-head">
-        <div><h2>Contabilidade</h2></div>
-        
+        <a class="btn btn-secondary" href="{{ route('settings.index',['tab'=>'nfe']) }}">Configuração da NF-e</a>
       </div>
       <div class="editor-grid cols-12 settings-grid">
-        <label class="field col-6"><span>Escritório contábil</span><input name="office_name" value="{{ $accounting['office_name'] }}"></label>
-        <label class="field col-6"><span>Contador responsável</span><input name="accountant_name" value="{{ $accounting['accountant_name'] }}"></label>
-        <label class="field col-3"><span>CPF / CNPJ</span><input name="accountant_document" value="{{ $accounting['accountant_document'] }}"></label>
-        <label class="field col-3"><span>CRC</span><input name="crc" value="{{ $accounting['crc'] }}"></label>
-        <label class="field col-3"><span>E-mail</span><input type="email" name="email" value="{{ $accounting['email'] }}"></label>
+        <label class="field col-6"><span>Escritório contábil</span><input name="office_name" value="{{ old('office_name',$accounting['office_name']) }}"></label>
+        <label class="field col-6"><span>Contador responsável</span><input name="accountant_name" value="{{ old('accountant_name',$accounting['accountant_name']) }}"></label>
+        <label class="field col-3"><span>CPF / CNPJ do contador</span><input name="accountant_document" value="{{ old('accountant_document',$accounting['accountant_document']) }}" inputmode="numeric" maxlength="20" aria-describedby="accountantXmlHelp"></label>
+        <label class="field col-3"><span>CRC</span><input name="crc" value="{{ old('crc',$accounting['crc']) }}"></label>
+        <label class="field col-3"><span>E-mail</span><input type="email" name="email" value="{{ old('email',$accounting['email']) }}"></label>
         <label class="field col-3"><span>Telefone</span><input name="phone" value="{{ $accounting['phone'] }}"></label>
         <label class="field col-6"><span>Sistema contábil de destino</span><input name="accounting_system" value="{{ $accounting['accounting_system'] }}" placeholder="Ex.: Domínio, Alterdata, outro"></label>
         <div class="field col-6"><span>Formato do arquivo</span><div class="inline-note"><strong>CSV</strong> · formato atualmente gerado pelo Lumeron.</div></div>
         <label class="field col-12"><span>Observações</span><textarea name="notes" rows="4">{{ $accounting['notes'] }}</textarea></label>
       </div>
       <div class="settings-switch-grid">
+        <input type="hidden" name="accountant_xml_authorized" value="0">
+        <label class="settings-switch"><input type="checkbox" name="accountant_xml_authorized" value="1" @checked(old('accountant_xml_authorized',$accounting['accountant_xml_authorized']))><span><strong>Autorizar o contador a acessar o XML completo da NF-e</strong><small id="accountantXmlHelp">O CPF/CNPJ informado terá acesso aos dados completos das novas NF-e. Informe um documento válido para autorizar.</small></span></label>
+        <input type="hidden" name="nfe_ba_sefaz_xml_authorized" value="0">
+        <label class="settings-switch"><input type="checkbox" name="nfe_ba_sefaz_xml_authorized" value="1" @checked(old('nfe_ba_sefaz_xml_authorized',$accounting['nfe_ba_sefaz_xml_authorized']))><span><strong>Autorizar acesso da SEFAZ-BA quando não houver contador autorizado</strong><small>Nas NF-e da Bahia, autoriza o CNPJ 13.937.073/0001-56 a acessar o XML completo.</small></span></label>
         <label class="settings-switch"><input type="checkbox" name="cost_center_enabled" value="1" @checked($accounting['cost_center_enabled'])><span><strong>Usar centros de custo</strong><small>Prepara classificações financeiras para detalhamento contábil.</small></span></label>
         <label class="settings-switch"><input type="checkbox" name="automatic_monthly_export" value="1" @checked($accounting['automatic_monthly_export'])><span><strong>Exportação mensal automática</strong><small>Gera automaticamente o CSV do mês anterior no primeiro dia de cada mês.</small></span></label>
       </div>

@@ -109,6 +109,9 @@ final class Nfe55IniBuilder
             'cPais'=>$isForeign?$recipient['country_code']:'1058','xPais'=>$isForeign?$recipient['country_name']:'BRASIL','Fone'=>$this->digits($recipient['phone']??null),
             'email'=>$recipient['email']??null,
         ]);
+        foreach(app(Nfe55AuthorizedXmlService::class)->documents($draft,$company) as $index=>$authorizedDocument){
+            $add('autXML'.sprintf('%03d',$index+1),['CNPJCPF'=>$authorizedDocument]);
+        }
         if($draft->different_delivery){
             $delivery=$draft->delivery_snapshot??[];
             if(!$delivery || strlen($this->digits($delivery['zip_code']??''))!==8

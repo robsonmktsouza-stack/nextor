@@ -46,7 +46,23 @@ final class Nfe55XmlTaxConsistency
             $invoices = $xpath->query('/n:NFe/n:infNFe | /n:nfeProc/n:NFe/n:infNFe');
             if ($invoices->length !== 1) throw new RuntimeException('XML fiscal sem uma única NF-e identificável.');
             $invoice = $invoices->item(0);
-            foreach ($this->sections($ini) as $section=>$fields) {
+            $sections=$this->sections($ini);
+            $expectedAuthorized=[];
+            foreach($sections as $section=>$fields){
+                if(preg_match('/^autXML(\d{2,3})$/iD',$section,$match)){
+                    if((int)$match[1]!==count($expectedAuthorized)+1 || !isset($fields['CNPJCPF']))
+                        throw new RuntimeException('INI com autorizações XML fora de sequência.');
+                    $expectedAuthorized[]=$fields['CNPJCPF'];
+                }
+            }
+            $authorized=$xpath->query('n:autXML',$invoice);
+            if($authorized->length!==count($expectedAuthorized))throw new RuntimeException('XML fiscal divergente no grupo autXML.');
+            foreach($authorized as $index=>$group){
+                $identifiers=$xpath->query('n:CNPJ | n:CPF',$group);
+                if($identifiers->length!==1 || trim($identifiers->item(0)->textContent)!==$expectedAuthorized[$index])
+                    throw new RuntimeException('XML fiscal divergente no documento autorizado em autXML.');
+            }
+            foreach ($sections as $section=>$fields) {
                 if (!$fields) continue;
                 $name = strtoupper($section);
                 $context = $invoice;
