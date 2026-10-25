@@ -177,6 +177,64 @@ final class Nfe55TaxIniTest extends TestCase
         self::assertSame('100.00',$ini['Total']['vNF']);
     }
 
+    public function test_return_serializes_document_reference_per_item_not_in_header(): void
+    {
+        $tax=[
+            'icms_csosn'=>'102','pis_cst'=>'49','pis_rate'=>'0',
+            'cofins_cst'=>'49','cofins_rate'=>'0','ipi_cst'=>'49','ipi_rate'=>'0','ipi_enq'=>'999',
+        ];
+        [$draft,$company]=$this->invoice($tax,crt:'1',date:'2026-10-25');
+        $originalKey=str_repeat('1',44);
+        $draft->purpose='return';
+        $draft->operation_type='inbound';
+        $draft->destination='interstate';
+        $draft->has_referenced_document=true;
+        $draft->references=[['type'=>'NFE','key'=>$originalKey]];
+        $draft->payment_type='90';
+        $draft->payments=[['type'=>'90','amount'=>'0.00','condition'=>'a_vista']];
+        $draft->recipient_snapshot=array_replace($draft->recipient_snapshot,[
+            'state'=>'SP','city_ibge_code'=>'3550308',
+        ]);
+        $draft->operationNature->purpose='return';
+        $draft->operationNature->operation_type='inbound';
+        $draft->items->first()->cfop='2202';
+        $draft->items->first()->special_data=[
+            'dfe_reference'=>['key'=>$originalKey,'n_item'=>1],
+        ];
+        $ini=$this->ini($draft,$company);
+        self::assertSame('2202',$ini['Produto001']['CFOP']);
+        self::assertSame('4',$ini['Identificacao']['finNFe']);
+        self::assertSame('0',$ini['Identificacao']['tpNF']);
+        self::assertSame($originalKey,$ini['DFeReferenciado001']['chaveAcesso']);
+        self::assertSame('1',$ini['DFeReferenciado001']['nItem']);
+        self::assertArrayNotHasKey('NFRef001',$ini);
+    }
+
+    public function test_return_without_item_reference_is_refused_before_signing(): void
+    {
+        $tax=[
+            'icms_csosn'=>'102','pis_cst'=>'49','pis_rate'=>'0',
+            'cofins_cst'=>'49','cofins_rate'=>'0','ipi_cst'=>'49','ipi_rate'=>'0','ipi_enq'=>'999',
+        ];
+        [$draft,$company]=$this->invoice($tax,crt:'1',date:'2026-10-25');
+        $draft->purpose='return';
+        $draft->operation_type='inbound';
+        $draft->destination='interstate';
+        $draft->has_referenced_document=true;
+        $draft->references=[['type'=>'NFE','key'=>str_repeat('1',44)]];
+        $draft->payment_type='90';
+        $draft->payments=[['type'=>'90','amount'=>'0.00','condition'=>'a_vista']];
+        $draft->recipient_snapshot=array_replace($draft->recipient_snapshot,[
+            'state'=>'SP','city_ibge_code'=>'3550308',
+        ]);
+        $draft->operationNature->purpose='return';
+        $draft->operationNature->operation_type='inbound';
+        $draft->items->first()->cfop='2202';
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('chave e número do item');
+        $this->ini($draft,$company);
+    }
+
     public function test_interstate_noncontributor_sale_uses_cfop_6108(): void
     {
         [$draft,$company]=$this->invoice([
