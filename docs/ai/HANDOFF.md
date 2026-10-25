@@ -1,3 +1,7 @@
+## 25/10/2026 — NF-e 55, branch feature/nfe55-motor-fiscal-completo
+
+Implementação integrada e testes publicados para revisão, sem merge/deploy. Ver [entrega e limitações](../fiscal/nfe55-delivery-2026-10-25.md). Suíte completa executada: 737 testes, 4695 assertions, 1 expectativa antiga de interface remanescente e 2 ignorados; expectativa corrigida e reteste direcionado aprovado (1 teste, 87 assertions). Lint PHP, compilação Blade e sintaxe JavaScript aprovados. Suíte completa não repetida após a última correção textual de teste. Sem ACBr/SEFAZ real. Produção permanece bloqueada; IS, grupos RTC avançados, contingência e finalidades especiais ainda não estão completos.
+
 ## 23/10/2026 — NF-e 55: cancelamento auditável e CT-e referenciado (develop)
 
 - Pedido do proprietário: concluir integralmente NF-e, não somente campos da interface. **Esta entrega é incremental e NÃO representa NF-e 100% pronta ou produção homologada.**

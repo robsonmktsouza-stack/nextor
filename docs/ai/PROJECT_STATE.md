@@ -74,3 +74,7 @@ por opção fiscal batch oneshot; cliente exigindo baixa latência pode habilita
 worker rápido dedicado. A VPS ainda não recebeu esta arquitetura. Estado e
 limites estão em docs/deployment/shared-immutable-releases.md. Consulte a
 CI do último SHA da develop antes de declarar testes plenamente aprovados.
+
+## NF-e 55 — 25/10/2026
+
+A branch `feature/nfe55-motor-fiscal-completo` recebeu motor fiscal integrado, regras versionadas, editor e controles de numeração/eventos. Ver [evidências e limitações](../fiscal/nfe55-delivery-2026-10-25.md). Não há homologação ACBr/SEFAZ nem conclusão integral dos grupos exigidos.
