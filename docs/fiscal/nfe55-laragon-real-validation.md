@@ -59,6 +59,23 @@ informada acima e se o schema configurado é o da release instalada.
 
 ## Transmissão, autorização, protocolo, XML e DANFE
 
+Para executar a NF-e 4 no mesmo terminal, após atualizar esta branch:
+
+```powershell
+php -d ffi.enable=true artisan nfe:verify-flow 4 --enqueue --process --wait=180 --consult
+```
+
+`--process` chama o mesmo serviço do job fiscal, direcionado ao ID informado,
+com os locks e a reivindicação atômica existentes. Processa a nota quando está
+na fila; estados com tentativa fiscal registrada seguem para acompanhamento/
+consulta. O job original permanece seguro para o worker existente: encontra
+o estado já reivindicado e não repete transmissão. Os demais jobs ficam na fila.
+Esta opção dispensa iniciar outro worker para a nota informada. No Windows,
+`--wait` limita o acompanhamento posterior; não interrompe uma chamada nativa
+ACBr em execução. O resultado final depende do estado e das provas da nota.
+
+O fluxo de dois terminais abaixo continua disponível:
+
 Mantenha o worker fiscal existente. Se não houver worker ativo, em outro terminal
 do Laragon, no mesmo projeto e com o mesmo PHP:
 
@@ -74,7 +91,7 @@ php -d ffi.enable=true artisan nfe:verify-flow $nota --enqueue --wait=180 --cons
 ```
 
 `--enqueue` agenda uma única NF-e de homologação validada pelo serviço existente.
-O comando não inicia worker nem transmite diretamente, não reenfileira documentos
+Sem `--process`, o comando não inicia worker nem transmite diretamente; não reenfileira documentos
 já reservados e recusa produção antes de qualquer ação. `--consult` usa a chave
 existente e o serviço de consulta já utilizado no ERP.
 

@@ -56,7 +56,7 @@ final class Nfe55VerifyFlowCommandTest extends TestCase
     public function test_production_is_refused_before_queue_consultation_or_artifact_creation(): void
     {
         $draft = $this->draft(['environment' => 'production']);
-        $this->artisan('nfe:verify-flow', ['id' => $draft->id, '--enqueue' => true, '--consult' => true])
+        $this->artisan('nfe:verify-flow', ['id' => $draft->id, '--enqueue' => true, '--process' => true, '--consult' => true])
             ->expectsOutputToContain('Produção recusada')->assertExitCode(1);
         self::assertSame([], Storage::disk('local')->allFiles());
         self::assertSame('draft', $draft->fresh()->status);
@@ -150,5 +150,40 @@ final class Nfe55VerifyFlowCommandTest extends TestCase
                 ->expectsOutputToContain('--wait entre 0 e 300')->assertExitCode(1);
         }
         self::assertSame([], Storage::disk('local')->allFiles());
+    }
+
+    public function test_targeted_processing_uses_the_existing_claim_without_consuming_other_fiscal_jobs(): void
+    {
+        $draft=$this->draft(['status'=>'queued','document_number'=>42]);
+        $other=NfeDraft::query()->create(['status'=>'queued','environment'=>'production','series'=>1,'document_number'=>43,'issue_date'=>now()->toDateString()]);
+        // A real database queue entry for an unrelated document must stay untouched.
+        // Queue directly because the fixture's Bus facade intentionally records dispatches.
+        app('queue')->connection('database')->push((new ProcessNfe55Job($draft->id))->onQueue('fiscal'),'','fiscal');
+        app('queue')->connection('database')->push((new ProcessNfe55Job($other->id))->onQueue('fiscal'),'','fiscal');
+        $before=\Illuminate\Support\Facades\DB::table('jobs')->count();
+        $this->artisan('nfe:verify-flow',['id'=>$draft->id,'--process'=>true])
+            ->expectsOutputToContain('Processamento fiscal da NF-e '.$draft->id.' concluído')
+            ->assertExitCode(1);
+        self::assertSame('prepared',$draft->fresh()->status);
+        self::assertNull($draft->fresh()->transmission_attempted_at);
+        self::assertSame('queued',$other->fresh()->status);
+        self::assertSame($before,\Illuminate\Support\Facades\DB::table('jobs')->count());
+        $summary=json_decode(Storage::disk('local')->get('fiscal/nfe55/'.$draft->id.'/verification.json'),true);
+        self::assertFalse($summary['full_flow_verified']);
+        self::assertContains('target_fiscal_processing_completed',$summary['stages']);
+        (new ProcessNfe55Job($draft->id))->handle(app(\App\Services\Fiscal\Nfe55EmissionService::class));
+        self::assertSame('prepared',$draft->fresh()->status);
+        self::assertNull($draft->fresh()->transmission_attempted_at);
+    }
+
+    public function test_targeted_processing_preserves_pending_transmission_and_never_sends_again(): void
+    {
+        $attempt=now()->startOfSecond();
+        $draft=$this->draft(['status'=>'pending','document_number'=>42,'transmission_attempted_at'=>$attempt]);
+        $this->artisan('nfe:verify-flow',['id'=>$draft->id,'--enqueue'=>true,'--process'=>true])
+            ->expectsOutputToContain('nenhuma nova emissão foi agendada')->assertExitCode(2);
+        self::assertSame('pending',$draft->fresh()->status);
+        self::assertTrue($attempt->equalTo($draft->fresh()->transmission_attempted_at));
+        Bus::assertNotDispatched(ProcessNfe55Job::class);
     }
 }

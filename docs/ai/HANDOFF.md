@@ -1,3 +1,19 @@
+## NF-e 4 — conferência em um terminal
+
+Na branch feature/nfe55-motor-fiscal-completo, nfe:verify-flow ganhou --process:
+executa somente o ID em estado queued pelo Nfe55EmissionService existente,
+com lock/claim atômico. Consulta e verificação do XML/protocolo/DANFE continuam
+iguais. Não consome outros jobs; job original posterior é no-op após o claim.
+Teste com fila real preserva outra nota de produção e comprova falha preparada
+sem tentativa externa; outro teste preserva pending sem retransmissão.
+Validação: 26 testes, 149 assertions, aprovados em PHP8.5.12/SQLite (comando e
+concorrência). Suíte completa anterior:850/5330; não repetida nesta mudança
+restrita. Evidência: docs/fiscal/evidence/nfe55-single-terminal-tests.txt.
+Usuário relatou sucesso nativo do preflight da nota4 no Laragon, com XML e
+assinatura conferidos, sem reserva/transmissão. Esse relato não foi executado
+pela sessão Linux. Comando local: php -d ffi.enable=true artisan
+nfe:verify-flow 4 --enqueue --process --wait=180 --consult.
+
 ## Laragon e fluxo de produção — continuação de 25/10/2026
 
 `cfe8fbb`: produção ligada à configuração existente, numeração/série isoladas,

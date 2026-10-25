@@ -18,6 +18,7 @@ final class Nfe55VerifyFlowCommand extends Command
 {
     protected $signature = 'nfe:verify-flow {id : Identificador da NF-e}
         {--enqueue : Agenda emissão em homologação pela fila fiscal existente}
+        {--process : Processa somente esta NF-e neste terminal pelo serviço fiscal existente}
         {--wait=0 : Segundos para acompanhar o worker existente (0 a 300)}
         {--consult : Consulta a SEFAZ pela chave já existente}';
 
@@ -55,6 +56,22 @@ final class Nfe55VerifyFlowCommand extends Command
                 }
             } elseif ($this->option('enqueue')) {
                 $this->line('Documento já reservado ou fora de rascunho: nenhuma nova emissão foi agendada.');
+            }
+
+            if ($this->option('process')) {
+                $draft->refresh();
+                if ($draft->environment !== 'homologation') throw new RuntimeException('Ambiente alterado antes do processamento.');
+                if ($draft->status === 'queued') {
+                    // Same atomic claim/lock as ProcessNfe55Job. A later queued job
+                    // sees the committed state and cannot retransmit this document.
+                    if ($emission->process($draft->id)) {
+                        $summary['stages'][] = 'target_fiscal_processing_completed';
+                        $this->line('Processamento fiscal da NF-e '.$draft->id.' concluído; conferindo o resultado.');
+                    } else {
+                        $this->line('Esta NF-e já está em processamento; acompanhando o estado existente.');
+                    }
+                    $draft->refresh();
+                }
             }
 
             $deadline = microtime(true) + (int)$wait;
