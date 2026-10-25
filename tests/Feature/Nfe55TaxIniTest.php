@@ -177,6 +177,40 @@ final class Nfe55TaxIniTest extends TestCase
         self::assertSame('100.00',$ini['Total']['vNF']);
     }
 
+    public function test_interstate_noncontributor_sale_uses_cfop_6108(): void
+    {
+        [$draft,$company]=$this->invoice([
+            'icms_csosn'=>'102','pis_cst'=>'49','pis_rate'=>'0',
+            'cofins_cst'=>'49','cofins_rate'=>'0','ipi_cst'=>'53','ipi_enq'=>'999',
+        ],crt:'1');
+        $draft->destination='interstate';
+        $draft->recipient_snapshot=array_replace($draft->recipient_snapshot,[
+            'state'=>'SP','city'=>'Sao Paulo','city_ibge_code'=>'3550308',
+            'ie_indicator'=>'non_contributor',
+        ]);
+        $draft->items->first()->cfop='6108';
+        $ini=$this->ini($draft,$company);
+        self::assertSame('6108',$ini['Produto001']['CFOP']);
+        self::assertSame('2',$ini['Identificacao']['idDest']);
+    }
+
+    public function test_cfop_6108_is_rejected_for_contributor_recipient(): void
+    {
+        [$draft,$company]=$this->invoice([
+            'icms_csosn'=>'102','pis_cst'=>'49','pis_rate'=>'0',
+            'cofins_cst'=>'49','cofins_rate'=>'0','ipi_cst'=>'53','ipi_enq'=>'999',
+        ],crt:'1');
+        $draft->destination='interstate';
+        $draft->recipient_snapshot=array_replace($draft->recipient_snapshot,[
+            'state'=>'SP','city'=>'Sao Paulo','city_ibge_code'=>'3550308',
+            'ie_indicator'=>'contributor','state_registration'=>'1234567890',
+        ]);
+        $draft->items->first()->cfop='6108';
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('CFOP 6108 exige');
+        $this->ini($draft,$company);
+    }
+
     public function test_simples_interstate_final_consumer_does_not_get_an_automatic_difal_group(): void
     {
         [$draft,$company]=$this->invoice(['icms_csosn'=>'102','pis_cst'=>'49','pis_rate'=>'0',
