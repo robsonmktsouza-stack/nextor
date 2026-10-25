@@ -353,7 +353,7 @@ final class Nfe55EmissionService
         return hash_equals($digest,trim((string)$nodes->item(0)->textContent));
     }
 
-    public function verifySignedXml(string $xml,NfeDraft $draft,CompanySetting $company,?int $number=null,?int $numericCode=null): string
+    public function verifySignedXml(string $xml,NfeDraft $draft,CompanySetting $company,?int $number=null,?int $numericCode=null,bool $requireReturnItemReferences=true): string
     {
         if(strlen($xml)>6291456 || preg_match('/<!DOCTYPE|<!ENTITY/i',$xml))throw new RuntimeException('XML assinado inválido.');
         $dom=new DOMDocument();
@@ -407,7 +407,7 @@ final class Nfe55EmissionService
         if($expectedTotal===null || NfeTaxMath::scaled($draft->issue_date?->toDateString()>='2027-01-01'?$get('vNFTot'):$get('vNF'),2,'Total XML')!==NfeTaxMath::scaled($expectedTotal,2,'Total reservado')){
             throw new RuntimeException('Total do XML assinado não corresponde à NF-e reservada.');
         }
-        if($draft->purpose==='return'){
+        if($draft->purpose==='return' && $requireReturnItemReferences){
             $xpath=new DOMXPath($dom);
             $xpath->registerNamespace('n','http://www.portalfiscal.inf.br/nfe');
             if($xpath->query('/n:NFe/n:infNFe/n:ide/n:NFref')->length!==0){
