@@ -20,6 +20,7 @@ final class Nfe55VerifyFlowCommand extends Command
         {--enqueue : Agenda emissão em homologação pela fila fiscal existente}
         {--process : Processa somente esta NF-e neste terminal pelo serviço fiscal existente}
         {--correct-486 : Corrige rejeição 486 comprovada após configurar acesso ao XML, preservando número e chave}
+        {--correct-487 : Corrige rejeição 487 comprovada após selecionar autorização SEFAZ-BA, preservando número e chave}
         {--wait=0 : Segundos para acompanhar o worker existente (0 a 300)}
         {--consult : Consulta a SEFAZ pela chave já existente}';
 
@@ -42,11 +43,15 @@ final class Nfe55VerifyFlowCommand extends Command
         $base = 'fiscal/nfe55/'.$draft->id;
         try {
             $this->line('NF-e '.$draft->id.' | Homologação | Estado: '.$draft->status);
-            if ($this->option('correct-486')) {
-                $draft=app(\App\Services\Fiscal\Nfe55RejectionRecoveryService::class)->prepareCorrection486($draft);
+            if ($this->option('correct-486') && $this->option('correct-487')) throw new RuntimeException('Escolha apenas uma opção de correção fiscal.');
+            if ($this->option('correct-486') || $this->option('correct-487')) {
+                $correctionCode = $this->option('correct-487') ? '487' : '486';
+                $draft = $correctionCode === '487'
+                    ? app(\App\Services\Fiscal\Nfe55RejectionRecoveryService::class)->prepareCorrection487($draft)
+                    : app(\App\Services\Fiscal\Nfe55RejectionRecoveryService::class)->prepareCorrection486($draft);
                 $draft=$emission->retryPreparation($draft);
-                $summary['stages'][]='rejection_486_corrected_same_fiscal_identity';
-                $this->line('Correção 486 preparada com a mesma numeração e chave; tentativa anterior arquivada.');
+                $summary['stages'][]='rejection_'.$correctionCode.'_corrected_same_fiscal_identity';
+                $this->line('Correção '.$correctionCode.' preparada com a mesma numeração e chave; tentativa anterior arquivada.');
             }
             $reserved = $draft->document_number !== null || $draft->access_key !== null
                 || $draft->transmission_attempted_at !== null || $draft->protocol !== null;
@@ -112,6 +117,11 @@ final class Nfe55VerifyFlowCommand extends Command
                 $summary['stages'][]='definitive_rejection_486_identified';
             }
 
+            $draft->refresh();
+            if ($draft->response_path===$base.'/sefaz-response.ini' && Storage::disk('local')->exists($draft->response_path)) {
+                $latest = app(\App\Services\Fiscal\NFCeSefazResponseParser::class)->parse(Storage::disk('local')->get($draft->response_path));
+                $summary['last_send_cstat'] = $latest['cstat'];
+            }
             $code = self::SUCCESS;
             if ($draft->status === 'authorized') {
                 if (!$draft->authorized_at || !preg_match('/^\d{44}$/', (string)$draft->access_key)
