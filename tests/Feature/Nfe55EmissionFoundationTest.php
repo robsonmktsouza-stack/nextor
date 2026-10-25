@@ -71,7 +71,7 @@ final class Nfe55EmissionFoundationTest extends TestCase
             'item_number'=>1,'product_name'=>'MERCADORIA','product_sku'=>'ITEM-001',
             'quantity'=>'2.0000','dimension_quantity'=>'1.0000','unit_price'=>'50.0000',
             'cfop'=>'5102','origin'=>'0','unit'=>'UN','tax_unit'=>'UN','ncm'=>'61091000',
-            'tax_data'=>['icms_csosn'=>'102','pis_cst'=>'49','cofins_cst'=>'49','ipi_cst'=>'53'],
+            'tax_data'=>['icms_csosn'=>'102','pis_cst'=>'49','pis_rate'=>'0','cofins_cst'=>'49','cofins_rate'=>'0','ipi_cst'=>'53','ipi_enq'=>'999'],
         ]);
         return $draft->refresh();
     }
@@ -96,10 +96,10 @@ final class Nfe55EmissionFoundationTest extends TestCase
     {
         $draft=$this->draft();
         $draft->items()->first()->update(['tax_data'=>[
-            'icms_csosn'=>'500','pis_cst'=>'49','cofins_cst'=>'49','ipi_cst'=>'53',
+            'icms_csosn'=>'900','pis_cst'=>'49','pis_rate'=>'0','cofins_cst'=>'49','cofins_rate'=>'0','ipi_cst'=>'53','ipi_enq'=>'999',
         ]]);
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('CSOSN 500');
+        $this->expectExceptionMessage('CSOSN 900');
         app(Nfe55IniBuilder::class)->build($draft->fresh(),CompanySetting::current(),24,12345678);
     }
 

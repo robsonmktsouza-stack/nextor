@@ -71,7 +71,8 @@ final class Nfe55EmissionController extends Controller
         $expected=['fiscal/nfe55/'.$nfeDraft->id.'/signed.xml','fiscal/nfe55/'.$nfeDraft->id.'/authorized.xml'];
         abort_unless($path && in_array($path,$expected,true) && Storage::disk('local')->exists($path),404);
         return Storage::disk('local')->download($path,
-            'NFe-'.$nfeDraft->id.'-'.($nfeDraft->access_key??'rascunho').'.xml',
+            'NFe-'.$nfeDraft->id.'-'.($nfeDraft->access_key??'rascunho')
+                .(str_ends_with($path,'/signed.xml')?'-assinado-sem-protocolo':'-autorizada').'.xml',
             ['Content-Type'=>'application/xml','Cache-Control'=>'private, no-store',
              'X-Content-Type-Options'=>'nosniff']);
     }

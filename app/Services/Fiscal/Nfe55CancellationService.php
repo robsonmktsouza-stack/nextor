@@ -49,7 +49,12 @@ final class Nfe55CancellationService
                 ||!$note->authorized_at){
                 throw ValidationException::withMessages(['nfe'=>'Somente NF-e modelo 55 autorizada pode ser cancelada.']);
             }
-            if($note->cancellation_status || $note->cancelled_at){
+            $failedBeforeSend=$note->cancellation_status==='prepared'
+                && $note->cancellation_attempted_at===null;
+            $stalledBeforeSend=$note->cancellation_status==='processing'
+                && $note->cancellation_attempted_at===null
+                && $note->updated_at?->lt(now()->subMinutes(15));
+            if(($note->cancellation_status && !$failedBeforeSend && !$stalledBeforeSend) || $note->cancelled_at){
                 throw ValidationException::withMessages(['nfe'=>'Já existe uma solicitação de cancelamento para esta NF-e.']);
             }
             if(mb_strlen($reason)<15||mb_strlen($reason)>255){
@@ -68,7 +73,8 @@ final class Nfe55CancellationService
         }catch(Throwable){
             // Dispatch may have succeeded before a connection failure.
             // Do not silently allow a second event.
-            $note->update(['cancellation_status'=>'uncertain']);
+            NfeDraft::query()->whereKey($note->id)->where('cancellation_status','pending')
+                ->whereNull('cancellation_attempted_at')->update(['cancellation_status'=>'prepared']);
             throw ValidationException::withMessages([
                 'nfe'=>'Não foi possível confirmar o agendamento. Confira a fila fiscal antes de qualquer nova tentativa.',
             ]);
@@ -76,12 +82,12 @@ final class Nfe55CancellationService
         return $note;
     }
 
-    public function process(int $id): void
+    public function process(int $id): bool
     {
         // Reuse the exact emission/consultation lock to avoid concurrent FFI
         // operations on the same model 55 access key.
         $lock=Cache::lock('nfe-55:'.$id,300);
-        if(!$lock->get())return;
+        if(!$lock->get())return false;
         $service=null;$runtimeIni=null;$password='';
         try{
             $draft=DB::transaction(function()use($id){
@@ -93,7 +99,7 @@ final class Nfe55CancellationService
                 $note->update(['cancellation_status'=>'processing']);
                 return $note->refresh();
             },3);
-            if(!$draft)return;
+            if(!$draft)return true;
 
             try{
                 if($draft->environment!=='homologation')throw new RuntimeException('Ambiente não liberado.');
@@ -129,7 +135,7 @@ final class Nfe55CancellationService
                 $accepted=$this->responseParser->cancellationAccepted(
                     $data,(string)$draft->access_key,(string)$draft->environment
                 );
-                // Require a matching signed SEFAZ event response, not just cStat.
+                // Require a matching SEFAZ event XML response, not just cStat.
                 if($accepted && is_array($proof)
                     && hash_equals((string)$draft->access_key,(string)($proof['key']??''))
                     && hash_equals((string)$data['protocol'],(string)($proof['protocol']??''))
@@ -139,7 +145,7 @@ final class Nfe55CancellationService
                         'cancelled_at'=>now(),'cancellation_protocol'=>$data['protocol'],
                         'cancellation_response_path'=>$path,'error_message'=>null,
                     ]);
-                    return;
+                    return true;
                 }
                 // 101/135/155 may represent an accepted operation with missing proof.
                 $possible=in_array($data['cstat'],['101','135','155','128'],true);
@@ -151,9 +157,12 @@ final class Nfe55CancellationService
                         : 'Cancelamento rejeitado: '.mb_substr($data['reason'],0,500),
                 ]);
             }catch(Throwable){
+                $attempted=$draft->cancellation_attempted_at!==null;
                 $draft->update([
-                    'cancellation_status'=>'uncertain',
-                    'error_message'=>'Situação fiscal indeterminada. Consulte a SEFAZ antes de qualquer nova tentativa.',
+                    'cancellation_status'=>$attempted?'uncertain':'prepared',
+                    'error_message'=>$attempted
+                        ?'Situação fiscal indeterminada. Consulte a SEFAZ antes de qualquer nova tentativa.'
+                        :'Não foi possível preparar o cancelamento. Confira o serviço fiscal antes de solicitar novamente.',
                 ]);
             }
         }finally{
@@ -163,5 +172,6 @@ final class Nfe55CancellationService
                 $lock->release();
             }
         }
+        return true;
     }
 }
