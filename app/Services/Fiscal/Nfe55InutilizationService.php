@@ -3,7 +3,6 @@
 namespace App\Services\Fiscal;
 
 use App\Jobs\ProcessNfe55InutilizationJob;
-use App\Models\AppSetting;
 use App\Models\CompanySetting;
 use App\Models\Nfe55Inutilization;
 use App\Models\NfeDraft;
@@ -27,13 +26,12 @@ final class Nfe55InutilizationService
     {
         $record = DB::transaction(function () use ($input, $userId) {
             $environment = app(FiscalDocumentSettings::class)->environment('nfe');
-            if ($environment !== 'homologation') {
-                throw ValidationException::withMessages(['first_number' => 'A inutilização NF-e está disponível somente em homologação nesta versão.']);
+            if (!$this->environmentAuthorized($environment)) {
+                throw ValidationException::withMessages(['first_number' => 'Ambiente inválido ou inutilização NF-e em produção não liberada nas configurações.']);
             }
             // Same physical sequence row locked by model 55 number reservation.
-            $sequence = AppSetting::query()->where('group', 'nfe')->where('key', 'next_number')->lockForUpdate()->first();
-            $raw = $sequence?->value;
-            $next = is_string($raw) && str_starts_with($raw, 'json:') ? json_decode(substr($raw, 5), true) : $raw;
+            $numbering = app(FiscalDocumentSettings::class)->nfeNumbering($environment, true);
+            $next = $numbering['next_number'];
             $company = CompanySetting::current();
             $issuer = preg_replace('/\D/', '', (string) $company->document);
             $year = (int) ($input['year'] ?? 0);
@@ -42,9 +40,8 @@ final class Nfe55InutilizationService
             $last = (int) ($input['last_number'] ?? 0);
             $reason = trim((string) ($input['reason'] ?? ''));
             if (!InstanceIdentity::matches($company->document) || !preg_match('/^\d{14}$/', $issuer)
-                || !$sequence || !is_numeric($next) || $sequence->is_secret
                 || $year < 2020 || $year > (int) now()->year
-                || $series < 0 || $series > 999 || $series !== (int) AppSetting::value('nfe', 'series', 1)
+                || $series < 0 || $series > 999 || $series !== $numbering['series']
                 || $first < 1 || $last < $first
                 || $last > 999999999 || $last - $first > 999 || $last >= (int) $next
                 || mb_strlen($reason) < 15 || mb_strlen($reason) > 255) {
@@ -88,19 +85,17 @@ final class Nfe55InutilizationService
         }
         try {
             $updated = DB::transaction(function () use ($record) {
-                $sequence = AppSetting::query()->where('group', 'nfe')->where('key', 'next_number')->lockForUpdate()->first();
                 $row = Nfe55Inutilization::query()->lockForUpdate()->findOrFail($record->id);
+                $numbering = app(FiscalDocumentSettings::class)->nfeNumbering((string)$row->environment, true);
                 $stalled = $row->status === 'processing' && $row->updated_at?->lt(now()->subMinutes(15));
                 $company = CompanySetting::current();
-                $raw = $sequence?->value;
-                $next = is_string($raw) && str_starts_with($raw, 'json:') ? json_decode(substr($raw, 5), true) : $raw;
                 if ((!in_array($row->status, ['prepared', 'pending', 'uncertain'], true) && !$stalled)
                     || $row->attempted_at !== null || $row->protocol !== null
-                    || $row->environment !== 'homologation'
+                    || !$this->environmentAuthorized((string)$row->environment)
                     || !InstanceIdentity::matches($company->document)
                     || $row->issuer_document !== preg_replace('/\D/', '', (string) $company->document)
-                    || !$sequence || $sequence->is_secret || !is_numeric($next) || $row->last_number >= (int) $next
-                    || (int) $row->series !== (int) AppSetting::value('nfe', 'series', 1)
+                    || $row->last_number >= $numbering['next_number']
+                    || (int) $row->series !== $numbering['series']
                     || $this->rangeUsed($row->environment, $row->series, $row->first_number, $row->last_number)) {
                     throw ValidationException::withMessages([
                         'first_number' => 'Não é possível repetir esta solicitação. Confira a faixa e consulte a SEFAZ antes de prosseguir.',
@@ -142,14 +137,14 @@ final class Nfe55InutilizationService
             }, 3);
             if (!$record) return true;
             $company = CompanySetting::current();
-            if ($record->environment !== 'homologation'
+            if (!$this->environmentAuthorized((string)$record->environment)
                 || !InstanceIdentity::matches($company->document)
                 || preg_replace('/\D/', '', (string) $company->document) !== $record->issuer_document
                 || $this->rangeUsed($record->environment, $record->series, $record->first_number, $record->last_number)) {
                 throw new RuntimeException('Emitente, ambiente ou disponibilidade da faixa não conferem.');
             }
             $context = new NfeDraft(['environment' => $record->environment]);
-            $this->emission->assertReady($context, $company);
+            $this->emission->assertRuntimeReady($context, $company);
             $folder = storage_path('app/acbr-runtime');
             if (!is_dir($folder) && !mkdir($folder, 0700, true) && !is_dir($folder)) {
                 throw new RuntimeException('Diretório fiscal privado indisponível.');
@@ -226,6 +221,12 @@ final class Nfe55InutilizationService
             && ctype_digit((string) ($proof['series'] ?? '')) && (int) $proof['series'] === (int) $record->series
             && ctype_digit((string) ($proof['first_number'] ?? '')) && (int) $proof['first_number'] === (int) $record->first_number
             && ctype_digit((string) ($proof['last_number'] ?? '')) && (int) $proof['last_number'] === (int) $record->last_number;
+    }
+
+    private function environmentAuthorized(string $environment): bool
+    {
+        return in_array($environment, ['homologation', 'production'], true)
+            && ($environment !== 'production' || app(FiscalDocumentSettings::class)->productionAuthorized('nfe'));
     }
 
     private function rangeUsed(string $environment, int $series, int $first, int $last): bool

@@ -38,8 +38,8 @@ final class Nfe55CancellationService
         $cnpj=preg_replace('/\D/','',(string)$company->document);
         $note=DB::transaction(function()use($draft,$reason,$cnpj){
             $note=NfeDraft::query()->lockForUpdate()->findOrFail($draft->id);
-            if($note->environment!=='homologation'){
-                throw ValidationException::withMessages(['nfe'=>'Cancelamento em produção depende de homologação e liberação fiscal.']);
+            if(!$this->environmentAuthorized((string)$note->environment)){
+                throw ValidationException::withMessages(['nfe'=>'Ambiente inválido ou cancelamento NF-e em produção não liberado nas configurações.']);
             }
             if($note->status!=='authorized'
                 ||!preg_match('/^\d{44}$/',(string)$note->access_key)
@@ -102,7 +102,7 @@ final class Nfe55CancellationService
             if(!$draft)return true;
 
             try{
-                if($draft->environment!=='homologation')throw new RuntimeException('Ambiente não liberado.');
+                if(!$this->environmentAuthorized((string)$draft->environment))throw new RuntimeException('Ambiente não liberado.');
                 $company=CompanySetting::current();
                 if(!InstanceIdentity::matches($company->document))throw new RuntimeException('Instalação incorreta.');
                 $cnpj=preg_replace('/\D/','',(string)$company->document);
@@ -111,6 +111,7 @@ final class Nfe55CancellationService
                     ||substr((string)$draft->access_key,20,2)!=='55'){
                     throw new RuntimeException('Emitente e chave fiscal não conferem.');
                 }
+                $this->emission->assertRuntimeReady($draft,$company);
                 $reason=trim((string)$draft->cancellation_reason);
                 if(mb_strlen($reason)<15||mb_strlen($reason)>255){
                     throw new RuntimeException('Justificativa inválida.');
@@ -139,7 +140,7 @@ final class Nfe55CancellationService
                 if($accepted && is_array($proof)
                     && hash_equals((string)$draft->access_key,(string)($proof['key']??''))
                     && hash_equals((string)$data['protocol'],(string)($proof['protocol']??''))
-                    && ($proof['environment']??'')==='2'){
+                    && ($proof['environment']??'')===($draft->environment==='production'?'1':'2')){
                     $draft->update([
                         'status'=>'cancelled','cancellation_status'=>'authorized',
                         'cancelled_at'=>now(),'cancellation_protocol'=>$data['protocol'],
@@ -173,5 +174,11 @@ final class Nfe55CancellationService
             }
         }
         return true;
+    }
+
+    private function environmentAuthorized(string $environment): bool
+    {
+        return in_array($environment,['homologation','production'],true)
+            && ($environment!=='production' || app(FiscalDocumentSettings::class)->productionAuthorized('nfe'));
     }
 }

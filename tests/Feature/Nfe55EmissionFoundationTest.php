@@ -103,6 +103,15 @@ final class Nfe55EmissionFoundationTest extends TestCase
         app(Nfe55IniBuilder::class)->build($draft->fresh(),CompanySetting::current(),24,12345678);
     }
 
+    public function test_production_builder_keeps_the_real_recipient_and_tp_amb_one(): void
+    {
+        $draft=$this->draft();$draft->update(['environment'=>'production']);
+        $ini=app(Nfe55IniBuilder::class)->build($draft->fresh(),CompanySetting::current(),24,12345678);
+        self::assertStringContainsString('tpAmb=1',$ini);
+        self::assertStringContainsString('Comprador local',$ini);
+        self::assertStringNotContainsString('NOTA FISCAL EMITIDA EM AMBIENTE DE HOMOLOGACAO',$ini);
+    }
+
     public function test_production_is_not_automatically_enabled_by_the_editor(): void
     {
         $draft=$this->draft();
@@ -174,13 +183,13 @@ final class Nfe55EmissionFoundationTest extends TestCase
         self::assertNull($draft->fresh()->transmission_attempted_at);
     }
 
-    public function test_internal_preflight_will_not_test_production_or_reserve_number(): void
+    public function test_internal_preflight_refuses_unconfigured_production_without_reserving_number(): void
     {
         $draft=$this->draft();
         $draft->update(['environment'=>'production']);
         try {
             app(\App\Services\Fiscal\Nfe55PreflightService::class)->check($draft->fresh());
-            self::fail('Pré-validação de produção não deve ser executada.');
+            self::fail('Produção sem configuração não pode passar na conferência.');
         } catch (ValidationException $exception) {
             self::assertArrayHasKey('nfe',$exception->errors());
         }

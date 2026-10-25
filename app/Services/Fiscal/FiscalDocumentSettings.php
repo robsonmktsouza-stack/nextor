@@ -3,6 +3,7 @@
 namespace App\Services\Fiscal;
 
 use App\Models\AppSetting;
+use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 
 /**
@@ -74,5 +75,30 @@ final class FiscalDocumentSettings
             return 'Ative a emissão em produção nas configurações do documento.';
         }
         return null;
+    }
+
+    /** Separate sequences are read from the database, never from the settings cache. */
+    public function nfeNumbering(string $environment, bool $lock = false): array
+    {
+        if (!in_array($environment, ['homologation', 'production'], true)) {
+            throw ValidationException::withMessages(['nfe'=>'Ambiente fiscal inválido.']);
+        }
+        $prefix = $environment === 'production' ? 'production_' : '';
+        $rows = AppSetting::query()->where('group', 'nfe')
+            ->whereIn('key', [$prefix.'series', $prefix.'next_number'])->orderBy('key')
+            ->when($lock, fn ($query) => $query->lockForUpdate())->get()->keyBy('key');
+        $result = [];
+        foreach (['series'=>[0,999], 'next_number'=>[1,999999999]] as $field=>[$min,$max]) {
+            $row = $rows->get($prefix.$field);
+            $value = $row?->value;
+            if (is_string($value) && str_starts_with($value, 'json:')) $value = json_decode(substr($value, 5), true);
+            if (!$row && $environment === 'homologation') $value = 1;
+            if ($row?->is_secret || (!is_int($value) && !is_string($value))
+                || !preg_match('/^\d+$/D', (string)$value) || (int)$value < $min || (int)$value > $max) {
+                throw ValidationException::withMessages(['nfe'=>'Configure série e próximo número válidos para '.$environment.'.']);
+            }
+            $result[$field] = (int)$value;
+        }
+        return $result;
     }
 }

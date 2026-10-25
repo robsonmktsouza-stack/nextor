@@ -672,9 +672,11 @@ foreach($primaryTabs as $key=>$item){
       <div class="settings-panel-head"><div><h2>Nota fiscal de produtos (NF-e)</h2></div></div>
       <div class="editor-grid cols-12 settings-grid">
         <label class="field col-3"><span>Ambiente</span><select name="environment"><option value="homologation" @selected($nfe['environment']==='homologation')>Homologação</option><option value="production" @selected($nfe['environment']==='production')>Produção</option></select></label>
-        <label class="field col-2"><span>Série</span><input type="number" min="0" max="999" name="series" value="{{ $nfe['series'] }}"></label>
-        <label class="field col-3"><span>Próximo número</span><input type="number" min="1" name="next_number" value="{{ $nfe['next_number'] }}"></label>
+        <label class="field col-2"><span>Série de homologação</span><input type="number" min="0" max="999" name="series" value="{{ $nfe['series'] }}"></label>
+        <label class="field col-3"><span>Próximo número de homologação</span><input type="number" min="1" max="999999999" name="next_number" value="{{ $nfe['next_number'] }}"></label>
         <label class="field col-4"><span>CFOP padrão</span><input name="default_cfop" value="{{ $nfe['default_cfop'] }}"></label>
+        <label class="field col-3"><span>Série de produção</span><input type="number" min="0" max="999" name="production_series" value="{{ $nfe['production_series'] }}"></label>
+        <label class="field col-3"><span>Próximo número de produção</span><input type="number" min="1" max="999999999" name="production_next_number" value="{{ $nfe['production_next_number'] }}"></label>
         <label class="field col-12"><span>Tipo de operação usado por padrão</span><input name="default_nature" value="{{ $nfe['default_nature'] }}"></label>
       </div>
       <div class="settings-switch-grid">

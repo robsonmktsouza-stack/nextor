@@ -413,12 +413,18 @@ final class Nfe55EmissionService
     {
         $issue=$this->settings->transmissionIssue('nfe',(string)$draft->environment);
         if($issue)throw ValidationException::withMessages(['nfe'=>$issue]);
-        if(!InstanceIdentity::matches($company->document))throw ValidationException::withMessages(['nfe'=>'Empresa fiscal não corresponde à instalação.']);
-        if($draft->environment==='production'
-            &&(!is_numeric(AppSetting::value('nfe','production_next_number'))
-                || !is_numeric(AppSetting::value('nfe','production_series')))){
-            throw ValidationException::withMessages(['nfe'=>'Configure série e numeração de produção da NF-e.']);
+        $numbering=$this->settings->nfeNumbering((string)$draft->environment);
+        if((int)$draft->series!==$numbering['series']){
+            throw ValidationException::withMessages(['nfe'=>'A série do rascunho difere da série configurada neste ambiente. Revalide a nota.']);
         }
+        $this->assertRuntimeReady($draft,$company);
+    }
+
+    /** Fiscal regularization uses the document environment even when new issuance is disabled. */
+    public function assertRuntimeReady(NfeDraft $draft,CompanySetting $company): void
+    {
+        if(!in_array($draft->environment,['homologation','production'],true))throw ValidationException::withMessages(['nfe'=>'Ambiente fiscal inválido.']);
+        if(!InstanceIdentity::matches($company->document))throw ValidationException::withMessages(['nfe'=>'Empresa fiscal não corresponde à instalação.']);
         $disk=Storage::disk('local');
         if(!$company->certificate_path || !$company->certificate_password
             ||(!$company->certificate_expires_at?->isFuture() && $company->certificate_expires_at!==null)
@@ -427,11 +433,6 @@ final class Nfe55EmissionService
         }
         if(!extension_loaded('ffi') || !is_file((string)config('services.acbr_nfe.library_path',''))){
             throw ValidationException::withMessages(['nfe'=>'O serviço de emissão de NF-e está indisponível. Solicite suporte.']);
-        }
-        if($draft->environment!=='homologation'){
-            // Production is not enabled until an end-to-end model 55 authorization
-            // and the RTC fiscal matrix have been confirmed for this version.
-            throw ValidationException::withMessages(['nfe'=>'Emissão NF-e em produção aguarda homologação fiscal.']);
         }
     }
 

@@ -7,6 +7,8 @@ use App\Models\CompanySetting;
 use App\Models\FinancialAccount;
 use App\Models\FinancialCategory;
 use App\Models\FiscalDocumentJob;
+use App\Models\NfeDraft;
+use App\Models\Nfe55Inutilization;
 use App\Models\PaymentMethod;
 use App\Models\User;
 use App\Models\WebhookDelivery;
@@ -14,6 +16,7 @@ use App\Services\AccountingExportService;
 use App\Services\FinancialBalanceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -191,6 +194,31 @@ class SettingsController extends Controller
     {
         [$rules,$booleanKeys,$secretKeys]=$this->groupRules($group);
         $data=$request->validate($rules);
+
+        if ($group==='nfe') {
+            DB::transaction(function()use($request,$data,$booleanKeys,$rules){
+                // Lock the same sequence rows as the emission/inutilization paths.
+                AppSetting::query()->where('group','nfe')->orderBy('key')->lockForUpdate()->get();
+                $values=$data;
+                if($request->boolean('production_enabled') || ($values['environment']??'')==='production') {
+                    foreach(['production_series','production_next_number'] as $key) {
+                        if(!isset($values[$key]))throw ValidationException::withMessages([$key=>'Informe série e próximo número próprios de produção.']);
+                    }
+                }
+                foreach(['homologation'=>['series','next_number'],'production'=>['production_series','production_next_number']] as $environment=>[$series,$number]) {
+                    if(!isset($values[$series],$values[$number]))continue;
+                    $highest=NfeDraft::query()->where('environment',$environment)->where('series',(int)$values[$series])->max('document_number');
+                    $gap=Nfe55Inutilization::query()->where('environment',$environment)->where('series',(int)$values[$series])->max('last_number');
+                    $highest=max((int)$highest,(int)$gap);
+                    if((int)$values[$number]<=$highest)throw ValidationException::withMessages([$number=>'O próximo número deve ser maior que a numeração já reservada ou inutilizada nesta série e ambiente ('.$highest.').']);
+                }
+                foreach($rules as $key=>$_rules) {
+                    $value=in_array($key,$booleanKeys,true)?$request->boolean($key):($values[$key]??null);
+                    AppSetting::put('nfe',$key,$value,false);
+                }
+            },3);
+            return redirect()->route('settings.index',['tab'=>'nfe'])->with('success','Configurações salvas.');
+        }
 
         if ($group==='nfce') {
             // Produção é um conjunto independente de parâmetros. Jamais
@@ -539,6 +567,8 @@ class SettingsController extends Controller
                 'environment'=>['required',Rule::in(['homologation','production'])],
                 'series'=>['required','integer','min:0','max:999'],
                 'next_number'=>['required','integer','min:1','max:999999999'],
+                'production_series'=>['nullable','integer','min:0','max:999'],
+                'production_next_number'=>['nullable','integer','min:1','max:999999999'],
                 'default_nature'=>['nullable','string','max:120'],
                 'default_cfop'=>['nullable','string','max:10'],
                 'auto_from_sale'=>['nullable','boolean'],
@@ -673,6 +703,7 @@ class SettingsController extends Controller
             ],
             'nfe'=>[
                 'enabled'=>false,'environment'=>'homologation','series'=>1,'next_number'=>1,
+                'production_series'=>null,'production_next_number'=>null,
                 'default_nature'=>null,'default_cfop'=>null,'auto_from_sale'=>false,'production_enabled'=>false,'send_email'=>true,'print_danfe'=>true,
             ],
             'nfce'=>[

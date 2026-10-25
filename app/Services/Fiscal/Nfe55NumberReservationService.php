@@ -37,9 +37,19 @@ final class Nfe55NumberReservationService
                 ]);
             }
             $numberKey = $draft->environment === 'production' ? 'production_next_number' : 'next_number';
+            $settings=app(FiscalDocumentSettings::class);
+            $numbering=$settings->nfeNumbering((string)$draft->environment,true);
+            if($draft->environment==='production' && (!$settings->productionAuthorized('nfe')
+                || (int)$draft->series!==$numbering['series'])) {
+                throw ValidationException::withMessages(['nfe'=>'Confira a autorização e a série de produção antes de emitir.']);
+            }
             $number = AppSetting::reserveInteger('nfe', $numberKey, 1);
             if ($number < 1 || $number > 999999999) {
                 throw ValidationException::withMessages(['nfe' => 'A numeração da NF-e deve estar entre 1 e 999999999.']);
+            }
+            if(NfeDraft::query()->where('environment',$draft->environment)->where('series',$draft->series)
+                ->where('document_number',$number)->whereKeyNot($draft->id)->exists()) {
+                throw ValidationException::withMessages(['nfe'=>'O próximo número já foi reservado nesta série e ambiente. Corrija a sequência fiscal.']);
             }
             if (Nfe55Inutilization::query()->where('environment', $draft->environment)
                 ->where('series', $draft->series)->where('first_number', '<=', $number)

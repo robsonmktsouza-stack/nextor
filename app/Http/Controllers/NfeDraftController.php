@@ -72,6 +72,8 @@ class NfeDraftController extends Controller
 
     public function create()
     {
+        $environment=app(\App\Services\Fiscal\FiscalDocumentSettings::class)->environment('nfe');
+        $numbering=app(\App\Services\Fiscal\FiscalDocumentSettings::class)->nfeNumbering($environment);
         return $this->editor(new NfeDraft([
             'status'=>'draft',
             'operation_type'=>'outbound',
@@ -89,8 +91,8 @@ class NfeDraftController extends Controller
             'surcharge'=>0,
             'payment_type'=>(string)AppSetting::value('operations','default_payment_method','01'),
             'payment_condition'=>'a_vista',
-            'environment'=>AppSetting::value('nfe','environment',AppSetting::value('fiscal','default_environment','homologation')),
-            'series'=>(int)AppSetting::value('nfe','series',1),
+            'environment'=>$environment,
+            'series'=>$numbering['series'],
         ]));
     }
 
@@ -175,7 +177,7 @@ class NfeDraftController extends Controller
         if($request->input('draft_action')!=='draft'){
             DB::transaction(function()use($request,$nfeDraft){
                 $locked=$this->editableDraft($nfeDraft);
-                $locked->update($this->draftData($request)+['validated_at'=>null]);
+                $locked->update($this->draftData($request,$locked)+['validated_at'=>null]);
                 $this->replaceItems($locked,$request);
             });
             return $request->input('after_save')==='validate'
@@ -246,13 +248,13 @@ class NfeDraftController extends Controller
                 'destination'=>in_array($rawDestination,['internal','interstate','foreign'],true)?$rawDestination:'internal',
                 'issue_date'=>$issueDate,
                 'issue_time'=>$this->minuteTime($snapshot['issue_time']??null),
-                'series'=>$draft->series ?? (int)AppSetting::value('nfe','series',1),
-                'environment'=>$draft->environment ?: (string)AppSetting::value('nfe','environment','homologation'),
+                'series'=>$draft->series ?? app(\App\Services\Fiscal\FiscalDocumentSettings::class)->nfeNumbering($draft->environment ?: app(\App\Services\Fiscal\FiscalDocumentSettings::class)->environment('nfe'))['series'],
+                'environment'=>$draft->environment ?: app(\App\Services\Fiscal\FiscalDocumentSettings::class)->environment('nfe'),
                 'validated_at'=>null,
                 'custom_fields'=>array_replace($draft->custom_fields??[],['_editor_form'=>$snapshot]),
             ];
             if(!$draft->exists){
-                $changes['environment']=(string)AppSetting::value('nfe','environment','homologation');
+                $changes['environment']=app(\App\Services\Fiscal\FiscalDocumentSettings::class)->environment('nfe');
                 $changes['emitter_snapshot']=$company->only([
                     'document','legal_name','trade_name','state_registration','state','city',
                     'city_ibge_code','zip_code','address','address_number','district','crt',
@@ -265,7 +267,7 @@ class NfeDraftController extends Controller
             // Um erro não cancela o rascunho: a versão parcial continua salva.
             try {
                 DB::transaction(function()use($request,$draft,$snapshot){
-                    $complete=$this->draftData($request);
+                    $complete=$this->draftData($request,$draft);
                     $complete['custom_fields']=array_replace(
                         $draft->custom_fields??[],$complete['custom_fields']??[],['_editor_form'=>$snapshot]
                     );
@@ -307,7 +309,7 @@ class NfeDraftController extends Controller
         try {
             DB::transaction(function()use($request,$draft){
                 $locked=$this->editableDraft($draft);
-                $locked->update($this->draftData($request)+['validated_at'=>null]);
+                $locked->update($this->draftData($request,$locked)+['validated_at'=>null]);
                 $this->replaceItems($locked,$request);
             },3);
         }catch(ValidationException $error){
@@ -445,7 +447,7 @@ class NfeDraftController extends Controller
                 // sem reservar numeração nem transmitir à SEFAZ.
                 app(\App\Services\Fiscal\Nfe55IniBuilder::class)->build(
                     $draft,CompanySetting::current(),
-                    max(1,(int)AppSetting::value('nfe','next_number',1)),
+                    app(\App\Services\Fiscal\FiscalDocumentSettings::class)->nfeNumbering((string)$draft->environment)['next_number'],
                     12345678
                 );
             } catch (\Throwable $error) {
@@ -575,7 +577,7 @@ class NfeDraftController extends Controller
             'paymentTypes'=>self::PAYMENT_TYPES,
             'cardBrands'=>self::CARD_BRANDS,
             'isEditing'=>$draft->exists,
-            'nextNumber'=>(int)AppSetting::value('nfe','next_number',1),
+            'nextNumber'=>(int)AppSetting::value('nfe',$draft->environment==='production'?'production_next_number':'next_number',$draft->environment==='production'?null:1),
         ]);
     }
 
@@ -586,8 +588,10 @@ class NfeDraftController extends Controller
         return $time === null || $time === '' ? null : substr($time,0,5);
     }
 
-    private function draftData(Request $request): array
+    private function draftData(Request $request,?NfeDraft $existing=null): array
     {
+        $environment=$existing?->environment ?: app(\App\Services\Fiscal\FiscalDocumentSettings::class)->environment('nfe');
+        $series=$existing?->series ?? app(\App\Services\Fiscal\FiscalDocumentSettings::class)->nfeNumbering($environment)['series'];
         $data=$request->validate([
             'operation_nature_id'=>['required','integer','exists:operation_natures,id'],
             'customer_id'=>['required','integer','exists:customers,id'],
@@ -762,8 +766,8 @@ class NfeDraftController extends Controller
             'card_brand'=>$data['card_brand'] ?? null,
             'card_acquirer_document'=>$data['card_acquirer_document'] ?? null,
             'card_authorization_code'=>$data['card_authorization_code'] ?? null,
-            'series'=>(int)AppSetting::value('nfe','series',1),
-            'environment'=>(string)AppSetting::value('nfe','environment',AppSetting::value('fiscal','default_environment','homologation')),
+            'series'=>$series,
+            'environment'=>$environment,
             'emitter_snapshot'=>$company->only([
                 'document','legal_name','trade_name','state_registration','municipal_registration','cnae_main',
                 'phone','email','zip_code','state','city','city_ibge_code','address','address_number',

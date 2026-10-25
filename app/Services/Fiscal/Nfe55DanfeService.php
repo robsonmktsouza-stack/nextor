@@ -32,8 +32,11 @@ class Nfe55DanfeService
         $prot=$xp->query('/n:nfeProc/n:protNFe/n:infProt')->item(0);
         $v=static fn(string $expr,DOMElement $context)=>trim((string)$xp->evaluate('string('.$expr.')',$context));
         if(!$info instanceof DOMElement||!$prot instanceof DOMElement
+            ||!in_array($draft->environment,['homologation','production'],true)
             ||!hash_equals('NFe'.$draft->access_key,$info->getAttribute('Id'))
             ||$v('n:ide/n:mod',$info)!=='55'
+            ||$v('n:ide/n:tpAmb',$info)!==($draft->environment==='production'?'1':'2')
+            ||$v('n:tpAmb',$prot)!==($draft->environment==='production'?'1':'2')
             ||$v('n:chNFe',$prot)!==$draft->access_key
             ||$v('n:nProt',$prot)!==$draft->protocol
             ||!in_array($v('n:cStat',$prot),['100','150'],true)) {
