@@ -192,6 +192,20 @@ final class Nfe55IniBuilder
                 throw new RuntimeException('Confira quantidade, NCM, CFOP e origem dos produtos da NF-e.');
             }
             $special=$item->special_data??[];
+            $itemReference=$special['dfe_reference']??null;
+            if($draft->purpose==='return'){
+                $key=is_array($itemReference)?(string)($itemReference['key']??''):'';
+                $originalItem=is_array($itemReference)?($itemReference['n_item']??null):null;
+                $allowed=array_filter($draft->references??[],static fn($ref)=>
+                    strtoupper((string)($ref['type']??'NFE'))==='NFE' && (string)($ref['key']??'')===$key);
+                if(!preg_match('/^\\d{44}$/D',$key) || !filter_var($originalItem,FILTER_VALIDATE_INT)
+                    ||(int)$originalItem<1 ||(int)$originalItem>990 || !$allowed){
+                    throw new RuntimeException('Devolução exige chave e número do item da NF-e original em cada produto.');
+                }
+                unset($special['dfe_reference']);
+            }elseif($itemReference!==null){
+                throw new RuntimeException('Referência de documento por item exige operação de devolução.');
+            }
             if($isForeign && $foreignTrade['kind']==='import')unset($special['import_declarations'],$special['import_taxes']);
             if($this->hasFiscalValue($special)) {
                 throw new RuntimeException('Este produto exige grupo fiscal específico ainda não homologado.');
@@ -246,6 +260,12 @@ final class Nfe55IniBuilder
                 'vUnTrib'=>NfeTaxMath::format($taxPrice,10),
                 'indTot'=>'1','infAdProd'=>$item->notes,
             ]);
+            if($draft->purpose==='return'){
+                $add('DFeReferenciado'.$i,[
+                    'chaveAcesso'=>$itemReference['key'],
+                    'nItem'=>(int)$itemReference['n_item'],
+                ]);
+            }
             $federalBase=$grossCents+$freightCents+$insuranceCents+$otherCents-$discountCents;
             $icms=app(NfeIcmsItemTaxCalculator::class)->calculate($tax,$federalBase,(string)$company->crt,number_format($qty,4,'.',''));
             $federal=app(NfeFederalItemTaxCalculator::class)->calculate($tax,$federalBase);
@@ -438,7 +458,7 @@ final class Nfe55IniBuilder
             : $totalPaid!==(int)round((float)$total*100)){
             throw new RuntimeException('Os pagamentos não conciliam com o total da NF-e.');
         }
-        if($draft->has_referenced_document){
+        if($draft->has_referenced_document && $draft->purpose!=='return'){
             $refs=$draft->references??[];
             if(!$refs)throw new RuntimeException('Documento referenciado não informado.');
             foreach($refs as $i=>$reference){
