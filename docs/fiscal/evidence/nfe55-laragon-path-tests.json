@@ -1,0 +1,24 @@
+{
+  "code_commit": "68bcdaeedf2d5b941d87466422e3f90614650e17",
+  "runtime": "PHP 8.5.12 / PHPUnit 12.5.40 / SQLite / composer:2",
+  "tests": 850,
+  "assertions": 5330,
+  "errors": 0,
+  "failures": 0,
+  "skipped": 2,
+  "command_tests": {
+    "tests": 8,
+    "assertions": 72
+  },
+  "production_path_targeted": {
+    "tests": 105,
+    "assertions": 730
+  },
+  "junit_sha256": "960586924eeb26ed1135b6896bda11bb566ec17f906dad3556e579a51c33ffb3",
+  "native_windows_executed": false,
+  "sefaz_transmitted": false,
+  "skipped_tests": [
+    "Tests.Feature.NFCePrintSettingsTest::test_original_danfe_can_render_real_pdf_with_local_chrome_when_installed",
+    "Tests.Feature.QuoteCommercialDocumentTest::test_real_chromium_generates_valid_pdf_when_installed"
+  ]
+}

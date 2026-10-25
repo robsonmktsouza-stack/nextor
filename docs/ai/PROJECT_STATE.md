@@ -78,3 +78,13 @@ CI do último SHA da develop antes de declarar testes plenamente aprovados.
 ## NF-e 55 — 25/10/2026
 
 A branch `feature/nfe55-motor-fiscal-completo` recebeu motor fiscal integrado, regras versionadas, editor e controles de numeração/eventos. Ver [evidências e limitações](../fiscal/nfe55-delivery-2026-10-25.md). Não há homologação ACBr/SEFAZ nem conclusão integral dos grupos exigidos.
+
+
+## NF-e 55 — caminho de operação e Laragon
+
+Na mesma branch feature, commits cfe8fbb/68bcdae corrigem bloqueios incondicionais
+de produção, completam configuração de série/numeração por ambiente e adicionam
+nfe:verify-flow de homologação usando a fila/ACBr existentes. A configuração
+local informada (Windows/Laragon,PHP8.3,ACBr1.5.0.490,BA/CRT1,A1) não é acessível
+na nuvem; [procedimento local](../fiscal/nfe55-laragon-real-validation.md).
+Não houve acesso ao Windows, transmissão SEFAZ real ou deploy nesta sessão.

@@ -1,3 +1,39 @@
+## Continuação — operação configurada e validação no Laragon
+
+Commits `cfe8fbb` e `68bcdae`: corrigido o bloqueio incondicional de produção
+que ignorava a configuração existente. Produção agora usa a autorização já
+existente, série/numeração próprias, preflight nativo e conferência do documento.
+Cancelamento/inutilização preservam ambiente/prova XML correspondentes; emissão
+desligada não bloqueia suas verificações de runtime. Rascunhos antigos preservam
+ambiente e série quando a configuração global muda. Nenhuma opção foi ativada
+em instalação real, nem foi efetuado deploy/merge.
+
+Verificação final: **850 testes, 5330 assertions, zero falhas/erros, dois
+ignorados por falta de Chromium**. PHP 8.5.12/SQLite na nuvem. Foram também
+aprovados 105 testes direcionados do caminho de produção (730 assertions) e oito
+testes do comando local (72 assertions). A primeira execução de integração
+identificou uma fixture repetindo número fiscal; corrigida e a suíte completa
+foi reexecutada. Blade compilado e sintaxe PHP do comando conferida.
+[Evidência PHPUnit](evidence/nfe55-laragon-path-tests.txt),
+[metadados/hash](evidence/nfe55-laragon-path-tests.json),
+[arquivos de código desta continuação](evidence/nfe55-laragon-path-files.txt).
+
+Comando `nfe:verify-flow` usa a fila e os serviços ACBr existentes em homologação,
+sem reenviar nota reservada, preservando XML/protocolo/DANFE e resumo privado.
+Comandos completos para o Windows do proprietário:
+[validação real no Laragon](nfe55-laragon-real-validation.md).
+
+O proprietário informou ACBrLibNFe 1.5.0.490, PHP 8.3/FFI, BA/CRT 1 e A1 já
+configurado em `C:\laragon\www\nextor`. A sessão de execução é Linux e não tem
+acesso ao Windows. A configuração informada não foi substituída, nem o
+certificado foi solicitado, copiado ou enviado. A execução real deve ocorrer no
+terminal local; não há resultado SEFAZ novo produzido nesta sessão.
+
+A mudança de prontidão operacional acima substitui a afirmação histórica de
+bloqueio incondicional de produção nas seções anteriores. As limitações de
+cobertura tributária documentadas permanecem; ativar a configuração não torna
+um grupo não implementado emitível nem comprova homologação.
+
 ## Continuação — RTC, DIFAL, ICMS residual e conferência de XML
 
 Publicação de código: `899ba66` (após `70be57f`, grupos federais).

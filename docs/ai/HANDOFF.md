@@ -1,3 +1,17 @@
+## Laragon e fluxo de produção — continuação de 25/10/2026
+
+`cfe8fbb`: produção ligada à configuração existente, numeração/série isoladas,
+preflight em ambos ambientes, regularizações com prova tpAmb correta, preservação
+de ambiente de rascunho e validação de DANFE por ambiente. `68bcdae`: comando
+nfe:verify-flow para emitir/acompanhar/consultar uma nota de homologação na fila
+existente e conferir XML/protocolo/DANFE com resumo privado. Não inicia worker.
+Testes direcionados aprovados: 105/730 e 8/72. Suíte final: 850 testes,
+5330 assertions, zero falhas/erros, dois ignorados por falta de Chromium.
+Runtime PHP 8.5.12/SQLite; evidências em docs/fiscal/evidence/.
+Windows real não acessível daqui; usuário informou Laragon/ACBr1.5.0.490/PHP8.3/A1
+existentes. [Comandos locais](../fiscal/nfe55-laragon-real-validation.md).
+Nenhuma homologação real ou implantação foi realizada pela sessão Linux.
+
 ## Ampliação RTC/DIFAL/IS — 25/10/2026
 
 Código publicado em `899ba66`: catálogo SVRS com flags/vigência, grupos RTC
