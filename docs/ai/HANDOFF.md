@@ -1,3 +1,12 @@
+## Ampliação RTC/DIFAL/IS — 25/10/2026
+
+Código publicado em `899ba66`: catálogo SVRS com flags/vigência, grupos RTC
+configurados, DIFAL delimitado por MOC, CST 90/CSOSN 900, IS explícito futuro,
+conferência XML/INI e novos campos de formulário/regras. Ver
+[entrega e limites atuais](../fiscal/nfe55-delivery-2026-10-25.md).
+Sem homologação ACBr/SEFAZ; módulo integral ainda incompleto. Suíte final: 824 testes, 5181 assertions, zero falhas/erros, dois ignorados
+por Chromium ausente (PDF real). PHP 8.5.12/SQLite; não comprova PHP 8.3/MySQL.
+
 ## Continuação de 25/10/2026 — PIS/COFINS-ST e IPI devolvido
 
 Calculadores ligados ao builder, totais, formulário e cadastro de regras.
