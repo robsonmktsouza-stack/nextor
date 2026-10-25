@@ -412,7 +412,7 @@
           other_expenses:'nfeTotalOtherExpenses',discount:'nfeTotalDiscount',surcharge:'nfeTotalSurcharge',
           ipi:'nfeTotalIpi',icms:'nfeTotalIcms',icms_st:'nfeTotalIcmsSt',fcp_st:'nfeTotalFcpSt',fcp:'nfeTotalFcp',
           pis:'nfeTotalPis',cofins:'nfeTotalCofins',ibs_uf:'nfeTotalIbsUf',ibs_municipal:'nfeTotalIbsMunicipal',
-          cbs:'nfeTotalCbs',total:'nfeTotalInvoice',pis_st:'nfeTotalPisSt',cofins_st:'nfeTotalCofinsSt',ipi_returned:'nfeTotalIpiReturned',ii:'nfeTotalIi',icms_desonerated:'nfeTotalDesonerated',
+          cbs:'nfeTotalCbs',total:'nfeTotalInvoice',pis_st:'nfeTotalPisSt',cofins_st:'nfeTotalCofinsSt',ipi_returned:'nfeTotalIpiReturned',selective_tax:'nfeTotalSelective',ii:'nfeTotalIi',icms_desonerated:'nfeTotalDesonerated',
           desoneration_deduction:'nfeTotalDesonerationDeduction',icms_credit:'nfeTotalIcmsCredit',
           difal_destination:'nfeTotalDifalDestination',fcp_destination:'nfeTotalFcpDestination',fcp_st_retained:'nfeTotalFcpRetained'};
         Object.entries(fields).forEach(([key,id])=>{
@@ -465,7 +465,7 @@
     Object.entries({ipi:'nfeTotalIpi',icms:'nfeTotalIcms',icms_st:'nfeTotalIcmsSt',
       fcp_st:'nfeTotalFcpSt',fcp:'nfeTotalFcp',pis:'nfeTotalPis',cofins:'nfeTotalCofins',
       ibs_uf:'nfeTotalIbsUf',ibs_municipal:'nfeTotalIbsMunicipal',cbs:'nfeTotalCbs',
-      pis_st:'nfeTotalPisSt',cofins_st:'nfeTotalCofinsSt',ipi_returned:'nfeTotalIpiReturned',ii:'nfeTotalIi',icms_desonerated:'nfeTotalDesonerated',desoneration_deduction:'nfeTotalDesonerationDeduction',
+      pis_st:'nfeTotalPisSt',cofins_st:'nfeTotalCofinsSt',ipi_returned:'nfeTotalIpiReturned',selective_tax:'nfeTotalSelective',ii:'nfeTotalIi',icms_desonerated:'nfeTotalDesonerated',desoneration_deduction:'nfeTotalDesonerationDeduction',
       icms_credit:'nfeTotalIcmsCredit',difal_destination:'nfeTotalDifalDestination',
       fcp_destination:'nfeTotalFcpDestination',fcp_st_retained:'nfeTotalFcpRetained'}).forEach(([key,id])=>{
       if(byId(id))byId(id).textContent=authoritative?.[key]==null?'Pendente':money(authoritative[key]);
@@ -652,6 +652,30 @@
   };
 
   const taxFields={
+    ibs_uf_deferral_rate:'nfeExtraIbsUfDeferralRate',
+    ibs_municipal_deferral_rate:'nfeExtraIbsMunicipalDeferralRate',
+    cbs_deferral_rate:'nfeExtraCbsDeferralRate',
+    rtc_regular_cst:'nfeExtraRtcRegularCst',
+    rtc_regular_class:'nfeExtraRtcRegularClass',
+    rtc_regular_base:'nfeExtraRtcRegularBase',
+    rtc_regular_ibs_uf_rate:'nfeExtraRtcRegularIbsUfRate',
+    rtc_regular_ibs_municipal_rate:'nfeExtraRtcRegularIbsMunicipalRate',
+    rtc_regular_cbs_rate:'nfeExtraRtcRegularCbsRate',
+    rtc_regular_legal_source:'nfeExtraRtcRegularLegalSource',
+    rtc_regular_legal_reference:'nfeExtraRtcRegularLegalReference',
+    is_cst:'nfeExtraIsCst',
+    is_class:'nfeExtraIsClass',
+    is_calculation_type:'nfeExtraIsCalculationType',
+    is_base:'nfeExtraIsBase',
+    is_rate:'nfeExtraIsRate',
+    is_quantity:'nfeExtraIsQuantity',
+    is_unit_rate:'nfeExtraIsUnitRate',
+    is_unit:'nfeExtraIsUnit',
+    is_valid_from:'nfeExtraIsValidFrom',
+    is_valid_until:'nfeExtraIsValidUntil',
+    is_legal_source:'nfeExtraIsLegalSource',
+    is_legal_reference:'nfeExtraIsLegalReference',
+
     pis_st_calculation_type:'nfeTaxPisStMode',
     pis_st_base:'nfeTaxPisStBase',
     pis_st_rate:'nfeTaxPisStRate',

@@ -46,7 +46,7 @@ final class Nfe55DraftTotalsService
             'other_expenses'=>0,'discount'=>$discount,'surcharge'=>$surcharge,
             'ipi'=>0,'icms'=>0,'icms_st'=>0,'fcp'=>0,'fcp_st'=>0,'pis'=>0,'cofins'=>0,
             'ibs_uf'=>0,'ibs_municipal'=>0,'cbs'=>0,'icms_desonerated'=>0,'desoneration_deduction'=>0,
-            'fcp_st_retained'=>0,'icms_credit'=>0,'difal_destination'=>0,'difal_origin'=>0,'fcp_destination'=>0,'ii'=>0,'pis_st'=>0,'cofins_st'=>0,'federal_st_addition'=>0,'ipi_returned'=>0];
+            'fcp_st_retained'=>0,'icms_credit'=>0,'difal_destination'=>0,'difal_origin'=>0,'fcp_destination'=>0,'ii'=>0,'pis_st'=>0,'cofins_st'=>0,'federal_st_addition'=>0,'ipi_returned'=>0,'selective_tax'=>0];
         $errors=[];$taxItems=[];$unknown=[];$rtcCount=0;
         foreach($normalized as $index=>$item){
             $tax=Nfe55TaxParameters::forDirection(is_array($item['tax_data']??null)?$item['tax_data']:[],
@@ -85,6 +85,8 @@ final class Nfe55DraftTotalsService
                 $errors[]='Item '.($index+1).': '.$error->getMessage();
             }
             try {
+                $selective=app(Nfe55SelectiveTaxCalculator::class)->calculate($tax,$issueDate);
+                $sum['selective_tax']+=$selective['amount']??0;$result['selective_tax']=($selective['amount']??0)/100;
                 $federalSt=app(Nfe55FederalStCalculator::class)->calculate($tax);
                 foreach(['pis_st','cofins_st'] as $name){
                     $sum[$name]+=$federalSt[$name.'_amount'];$result[$name]=$federalSt[$name.'_amount']/100;
@@ -95,7 +97,7 @@ final class Nfe55DraftTotalsService
                 $sum['ipi_returned']+=$returnedIpi['amount']??0;
                 $result['ipi_returned']=($returnedIpi['amount']??0)/100;
             }catch(RuntimeException $error){
-                foreach(['pis_st','cofins_st','federal_st_addition','ipi_returned'] as $name){$unknown[$name]=true;$result[$name]=null;}
+                foreach(['pis_st','cofins_st','federal_st_addition','ipi_returned','selective_tax'] as $name){$unknown[$name]=true;$result[$name]=null;}
                 $errors[]='Item '.($index+1).': '.$error->getMessage();
             }
             $special=is_array($item['special_data']??null)?$item['special_data']:[];
@@ -131,8 +133,8 @@ final class Nfe55DraftTotalsService
                 if($rtc!==null){
                     $rtcCount++;
                     foreach(['ibs_uf'=>['gibsuf','vIBSUF'],'ibs_municipal'=>['gibsmun','vIBSMun'],'cbs'=>['gcbs','vCBS']] as $name=>[$section,$field]){
-                        $sum[$name]+=$this->cents($rtc[$section][$field]);
-                        $result[$name]=(float)$rtc[$section][$field];
+                        $value=$rtc[$section][$field]??'0.00';
+                        $sum[$name]+=$this->cents($value);$result[$name]=(float)$value;
                     }
                 }
             }catch(RuntimeException $error){
@@ -143,6 +145,8 @@ final class Nfe55DraftTotalsService
         }
         $sum['total']=$sum['products']+$sum['freight']+$sum['insurance']+$sum['other_expenses']
             +$sum['surcharge']+$sum['ipi']+$sum['icms_st']+$sum['fcp_st']+$sum['ii']+$sum['federal_st_addition']+$sum['ipi_returned']-$sum['discount']-$sum['desoneration_deduction'];
+        $sum['legacy_total']=$sum['total'];
+        if($issueDate>='2027-01-01')$sum['total']+=$sum['selective_tax']+$sum['ibs_uf']+$sum['ibs_municipal']+$sum['cbs'];
         $totals=array_map(static fn(int $value)=>$value/100.0,$sum);
         foreach(array_keys($unknown) as $name)$totals[$name]=null;
         if($rtcCount===0)foreach(['ibs_uf','ibs_municipal','cbs'] as $name)$totals[$name]=null;

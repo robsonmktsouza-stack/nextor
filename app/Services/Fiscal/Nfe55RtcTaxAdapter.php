@@ -32,23 +32,20 @@ final class Nfe55RtcTaxAdapter
         $explicit=isset($tax['ibs_cbs_base']) && $tax['ibs_cbs_base'] !== '';
         // An explicit RTC base is final. Never subtract the legacy taxes from it a second time.
         $base=$explicit ? NfeTaxMath::scaled($tax['ibs_cbs_base'],2,'Base IBS/CBS') : $netBaseCents-$deduction;
-        $profile=$this->profiles->calculate([
-            'quantity'=>1,'unit_price'=>($explicit ? $base+$deduction : $netBaseCents)/100,
-            'discount'=>0,'tax_defaults'=>$tax,
-        ],$crt,$issueDate,$legacy);
-        if ($profile===null) return null;
-        if ($import && !$explicit) throw new RuntimeException('RTC da importação exige base IBS/CBS expressamente aprovada para os tributos e despesas aduaneiras.');
-        if ($base < 0) throw new RuntimeException('RTC: tributos legados superam o valor líquido do item.');
-        $zeroRated=$tax['ibs_cbs_cst']==='200' && $tax['ibs_cbs_class']==='200003';
-        $amounts=[];
-        foreach (['uf'=>['gibsuf','ibs_uf_rate','vIBSUF'],
-            'municipal'=>['gibsmun','ibs_municipal_rate','vIBSMun'],
-            'cbs'=>['gcbs','cbs_rate','vCBS']] as $name=>[$group,$rate,$field]) {
-            $amounts[$name]=$zeroRated ? 0 : NfeTaxMath::percent($base,$tax[$rate],'RTC '.$rate);
-            $profile[$group][$field]=NfeTaxMath::format($amounts[$name]);
+        // Validate IS separately; the shared NFC-e service does not implement its group.
+        $selective=(new Nfe55SelectiveTaxCalculator())->calculate($tax,$issueDate);
+        if($selective!==null && !$explicit)throw new RuntimeException('RTC: informe base final explícita com o tratamento do Imposto Seletivo.');
+        $profileTax=array_filter($tax,static fn($key)=>!str_starts_with((string)$key,'is_'),ARRAY_FILTER_USE_KEY);
+        if($ibs==='' && $cbs==='' && $classification==='') {
+            foreach($tax as $key=>$value){if(str_starts_with((string)$key,'rtc_') && $value!==null && $value!=='')throw new RuntimeException('RTC: informe CST e classificação para os grupos específicos.');}
+            return $this->profiles->calculate([
+                'quantity'=>1,'unit_price'=>$netBaseCents/100,'discount'=>0,'tax_defaults'=>$profileTax,
+            ],$crt,$issueDate,$legacy);
         }
-        $profile['gibscbs']['vBC']=NfeTaxMath::format($base);
-        $profile['gibscbs']['vIBS']=NfeTaxMath::format($amounts['uf']+$amounts['municipal']);
-        return $profile;
+        if(in_array($crt,['1','4'],true))throw new RuntimeException('RTC: Simples Nacional exige opção e enquadramento específicos; não aplicar o regime regular automaticamente.');
+        if(!in_array($crt,['2','3'],true))throw new RuntimeException('RTC: CRT inválido.');
+        if($import && !$explicit)throw new RuntimeException('RTC da importação exige base IBS/CBS expressamente aprovada para os tributos e despesas aduaneiras.');
+        if($base<0)throw new RuntimeException('RTC: tributos legados superam o valor líquido do item.');
+        return (new Nfe55RtcConfiguredCalculator())->calculate($profileTax,$base,$issueDate);
     }
 }

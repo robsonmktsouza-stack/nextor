@@ -96,10 +96,10 @@ final class Nfe55EmissionFoundationTest extends TestCase
     {
         $draft=$this->draft();
         $draft->items()->first()->update(['tax_data'=>[
-            'icms_csosn'=>'900','pis_cst'=>'49','pis_rate'=>'0','cofins_cst'=>'49','cofins_rate'=>'0','ipi_cst'=>'53','ipi_enq'=>'999',
+            'icms_csosn'=>'999','pis_cst'=>'49','pis_rate'=>'0','cofins_cst'=>'49','cofins_rate'=>'0','ipi_cst'=>'53','ipi_enq'=>'999',
         ]]);
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('CSOSN 900');
+        $this->expectExceptionMessage('CSOSN 999');
         app(Nfe55IniBuilder::class)->build($draft->fresh(),CompanySetting::current(),24,12345678);
     }
 

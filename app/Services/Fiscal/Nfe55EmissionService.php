@@ -170,6 +170,7 @@ final class Nfe55EmissionService
             $service->verifySignature();
             $signedXml=$service->getXml();
             $signedKey=$this->verifySignedXml($signedXml,$draft,$company);
+            app(Nfe55XmlTaxConsistency::class)->assertMatches($ini,$signedXml);
             $base='fiscal/nfe55/'.$id;
             $signedPath=$base.'/signed.xml';
             if(!Storage::disk('local')->put($signedPath,$signedXml)){
@@ -402,7 +403,7 @@ final class Nfe55EmissionService
             throw new RuntimeException('XML assinado não corresponde à NF-e reservada.');
         }
         $expectedTotal=data_get($draft->totals,'total');
-        if($expectedTotal===null || NfeTaxMath::scaled($get('vNF'),2,'Total XML')!==NfeTaxMath::scaled($expectedTotal,2,'Total reservado')){
+        if($expectedTotal===null || NfeTaxMath::scaled($draft->issue_date?->toDateString()>='2027-01-01'?$get('vNFTot'):$get('vNF'),2,'Total XML')!==NfeTaxMath::scaled($expectedTotal,2,'Total reservado')){
             throw new RuntimeException('Total do XML assinado não corresponde à NF-e reservada.');
         }
         return $key;

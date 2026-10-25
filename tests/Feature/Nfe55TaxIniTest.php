@@ -126,4 +126,93 @@ final class Nfe55TaxIniTest extends TestCase
         self::assertSame('SP',$ini['Destinatario']['UF']);
         self::assertSame('6102',$ini['Produto001']['CFOP']);
     }
+    private function regularRtcTax(array $extra=[]): array
+    {
+        return array_replace(['icms_cst'=>'00','icms_rate'=>'18',
+            'pis_cst'=>'49','pis_rate'=>'0','cofins_cst'=>'49','cofins_rate'=>'0',
+            'ipi_cst'=>'53','ipi_enq'=>'999','ibs_cbs_cst'=>'000','ibs_cbs_class'=>'000001',
+            'ibs_uf_rate'=>'1','ibs_municipal_rate'=>'0','cbs_rate'=>'10'],$extra);
+    }
+
+    public function test_official_reduced_classification_is_calculated_in_the_emission_ini(): void
+    {
+        [$draft,$company]=$this->invoice($this->regularRtcTax([
+            'ibs_cbs_cst'=>'200','ibs_cbs_class'=>'200033','ibs_uf_reduction_rate'=>'60',
+            'ibs_municipal_reduction_rate'=>'60','cbs_reduction_rate'=>'60',
+        ]),date:'2026-10-25');
+        $ini=$this->ini($draft,$company);
+        self::assertSame('0.4000',$ini['gIBSUF001']['pAliqEfet']);
+        self::assertSame('0.33',$ini['gIBSUF001']['vIBSUF']);
+        self::assertSame('3.28',$ini['gCBS001']['vCBS']);
+        self::assertSame('100.00',$ini['Total']['vNF']);
+    }
+
+    public function test_deferral_groups_and_their_totals_are_serialized_with_the_actual_amounts(): void
+    {
+        [$draft,$company]=$this->invoice($this->regularRtcTax([
+            'ibs_cbs_cst'=>'510','ibs_cbs_class'=>'510001','ibs_uf_deferral_rate'=>'50',
+            'ibs_municipal_deferral_rate'=>'100','cbs_deferral_rate'=>'100',
+        ]),date:'2026-10-25');
+        $ini=$this->ini($draft,$company);
+        self::assertSame('0.41',$ini['gIBSUF001']['vDif']);
+        self::assertSame('0.41',$ini['gIBSUFTot']['vDif']);
+        self::assertSame('0.41',$ini['gIBSUF001']['vIBSUF']);
+        self::assertSame('8.20',$ini['gCBSTot']['vDif']);
+        self::assertSame('0.00',$ini['gCBS001']['vCBS']);
+    }
+
+    public function test_difal_is_integrated_for_the_reviewed_regular_interstate_context(): void
+    {
+        [$draft,$company]=$this->invoice($this->regularRtcTax([
+            'icms_rate'=>'12','difal_base'=>'100','difal_fcp_base'=>'100','difal_internal_rate'=>'18',
+            'difal_interstate_rate'=>'12','difal_share_rate'=>'100','difal_fcp_rate'=>'2',
+        ]),date:'2026-10-25');
+        $draft->destination='interstate';$draft->final_consumer=true;
+        $draft->recipient_snapshot=array_replace($draft->recipient_snapshot,['state'=>'SP','city_ibge_code'=>'3550308']);
+        $draft->items->first()->cfop='6102';
+        $ini=$this->ini($draft,$company);
+        self::assertSame('6.00',$ini['ICMSUFDEST001']['vICMSUFDest']);
+        self::assertSame('2.00',$ini['Total']['vFCPUFDest']);
+        self::assertSame('80.00',$ini['gIBSCBS001']['vBC']);
+        self::assertSame('100.00',$ini['Total']['vNF']);
+    }
+
+    public function test_simples_interstate_final_consumer_does_not_get_an_automatic_difal_group(): void
+    {
+        [$draft,$company]=$this->invoice(['icms_csosn'=>'102','pis_cst'=>'49','pis_rate'=>'0',
+            'cofins_cst'=>'49','cofins_rate'=>'0','ipi_cst'=>'53','ipi_enq'=>'999'],crt:'1',date:'2026-10-25');
+        $draft->destination='interstate';$draft->final_consumer=true;
+        $draft->recipient_snapshot=array_replace($draft->recipient_snapshot,['state'=>'SP','city_ibge_code'=>'3550308']);
+        $draft->items->first()->cfop='6102';
+        $ini=$this->ini($draft,$company);
+        self::assertArrayNotHasKey('ICMSUFDEST001',$ini);
+        self::assertSame('2',$ini['Identificacao']['idDest']);
+    }
+
+    public function test_future_is_parameters_are_serialized_only_with_explicit_approved_base_and_period(): void
+    {
+        \Illuminate\Support\Carbon::setTestNow('2027-02-01 12:00:00');
+        try {
+            // Synthetic arithmetic inputs; this test does not approve CSTIS or a statutory rate.
+            [$draft,$company]=$this->invoice($this->regularRtcTax([
+                'ibs_cbs_base'=>'92.00','ibs_uf_rate'=>'0.1','cbs_rate'=>'10',
+                'is_cst'=>'000','is_class'=>'000001','is_calculation_type'=>'percent','is_base'=>'100','is_rate'=>'10',
+                'is_valid_from'=>'2027-01-01','is_valid_until'=>'2027-12-31',
+                'is_legal_source'=>'https://www.planalto.gov.br/','is_legal_reference'=>'Fixture aritmética, não enquadramento jurídico',
+            ]),date:'2027-02-01');
+            $draft->totals=['products'=>100,'total'=>119.29];
+            $draft->payments=[['type'=>'01','amount'=>119.29,'condition'=>'a_vista']];
+            $ini=$this->ini($draft,$company);
+            self::assertSame('10.00',$ini['IS001']['vIS']);
+            self::assertSame('10.00',$ini['ISTot']['vIS']);
+            self::assertSame('100.00',$ini['Total']['vNF']);
+            self::assertSame('119.29',$ini['Total']['vNFTot']);
+            $preview=app(\App\Services\Fiscal\Nfe55DraftTotalsService::class)->calculate($draft->items->map->toArray()->all(),[
+                'crt'=>'3','issue_date'=>'2027-02-01','operation_type'=>'outbound','purpose'=>'normal',
+            ]);
+            self::assertEquals(119.29,$preview['total']);
+            self::assertEquals(100,$preview['legacy_total']);
+        } finally { \Illuminate\Support\Carbon::setTestNow(); }
+    }
+
 }

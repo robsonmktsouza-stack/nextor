@@ -37,6 +37,7 @@ final class Nfe55OperationPolicy
             || $draft->exit_date->toDateString() < $draft->issue_date->toDateString())) {
             throw new RuntimeException('Confira data e horário de saída ou entrada; a data não pode anteceder a emissão.');
         }
+        if($draft->issue_date->toDateString()>now()->toDateString())throw new RuntimeException('A data de emissão não pode estar no futuro.');
         $origin = strtoupper((string)$company->state);
         $recipient = $draft->recipient_snapshot ?? [];
         $destination = strtoupper((string)($recipient['state'] ?? ''));
@@ -91,9 +92,28 @@ final class Nfe55OperationPolicy
         }
         // The ordinary interstate non-contributor final-consumer flow requires
         // ICMSUFDest/FCP and its own basis. Never omit that group silently.
-        if ($draft->destination === 'interstate' && $draft->final_consumer && $profile === 'non_contributor'
-            && $draft->purpose !== 'return') {
-            throw new RuntimeException('Venda interestadual a consumidor final não contribuinte exige DIFAL e FCP de destino, ainda não implementados neste fluxo.');
+        if ($draft->destination === 'interstate' && $draft->operation_type==='outbound'
+            && $draft->final_consumer && $profile === 'non_contributor' && $draft->purpose === 'normal'
+            && in_array((string)$company->crt,['2','3'],true)) {
+            foreach($draft->items as $item){
+                $tax=Nfe55TaxParameters::forDirection($item->tax_data??[],'outbound');
+                if(app(Nfe55DifalCalculator::class)->calculate($tax,$draft->issue_date->toDateString())===null){
+                    throw new RuntimeException('DIFAL: informe bases, alíquotas e partilha para consumidor final não contribuinte.');
+                }
+                $inter=NfeTaxMath::rate($tax['difal_interstate_rate'],'DIFAL alíquota interestadual');
+                if($inter===40000 && !in_array((string)$item->origin,['1','2','3','8'],true)){
+                    throw new RuntimeException('DIFAL: alíquota interestadual de 4% incompatível com a origem da mercadoria (MOC NA09-10).');
+                }
+                $imported=in_array((string)$item->origin,['1','2','3','8'],true);
+                if($inter!==40000 && $imported)throw new RuntimeException('DIFAL: a origem importada exige conferência da alíquota de 4% (MOC NA09-20).');
+                $differentDelivery=$draft->different_delivery && strtoupper((string)data_get($draft->delivery_snapshot,'state'))!==$origin;
+                if($inter!==40000 && !$differentDelivery){
+                    $southSoutheast=['RS','SC','PR','SP','RJ','MG'];
+                    $expected=in_array($origin,$southSoutheast,true)&&!in_array($destination,$southSoutheast,true)?70000:120000;
+                    if($inter!==$expected)throw new RuntimeException('DIFAL: alíquota interestadual incompatível com as UFs (MOC NA09-30).');
+                }
+
+            }
         }
         $operation = (string)data_get($draft->custom_fields, 'fiscal_operation', $draft->purpose === 'return' ? 'devolution' : 'sale');
         if (!in_array($operation, ['sale','devolution','import','export',...array_keys(self::SPECIAL_SUFFIXES)], true)) {
@@ -151,6 +171,7 @@ final class Nfe55OperationPolicy
         $inbound = ($operation['tpNF'] ?? '1') === '0';
         $tax = Nfe55TaxParameters::forDirection($tax, $inbound ? 'inbound' : 'outbound');
         $csosn = (string)($tax['icms_csosn'] ?? '');
+        if(in_array((string)($tax['ibs_cbs_cst']??$tax['ibs_cst']??''),['800','811'],true))throw new RuntimeException('Transferência de crédito ou ajuste de competência RTC exige finalidade específica ainda não integrada ao editor.');
         if ($kind === 'import' && !in_array((string)$item->origin, ['1','6'], true)) {
             throw new RuntimeException('Importação direta exige origem estrangeira de importação direta, conforme o enquadramento do produto.');
         }
@@ -159,7 +180,13 @@ final class Nfe55OperationPolicy
                 || !in_array($csosn, ['102','300'], true))) {
             throw new RuntimeException('Este cenário do MEI exige parametrização específica ainda não implementada.');
         }
-        if (in_array($csosn, ['101','201'], true)
+        $residual = (string)($tax['icms_cst'] ?? '') === '90' || $csosn === '900';
+        if ($residual && !data_get($tax, 'fiscal_rule_trace.legal_source')) {
+            throw new RuntimeException('CST 90 e CSOSN 900 exigem regra fiscal aprovada com fundamento legal e parâmetros explícitos.');
+        }
+        $residualCredit = $csosn === '900'
+            && (isset($tax['icms_credit_rate']) || isset($tax['simple_credit_rate']));
+        if ((in_array($csosn, ['101','201'], true) || $residualCredit)
             && (($operation['final_consumer'] ?? false)
                 || ($operation['recipient_profile'] ?? '') !== 'contributor'
                 || !data_get($tax,'fiscal_rule_trace.legal_source'))) {
@@ -215,7 +242,7 @@ final class Nfe55OperationPolicy
         if ($kind === 'devolution') {
             foreach (['ipi_return_amount','ipi_return_percentage','ipi_rate','ipi_unit_rate'] as $field) {
                 if (isset($tax[$field]) && (float)$tax[$field] != 0.0) {
-                    throw new RuntimeException('Devolução com IPI exige o grupo de imposto devolvido, ainda não implementado.');
+                    throw new RuntimeException('Devolução com IPI exige os campos próprios de IPI devolvido, com percentual e valor original.');
                 }
             }
         }

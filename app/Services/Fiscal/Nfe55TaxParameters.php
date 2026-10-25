@@ -49,7 +49,11 @@ final class Nfe55TaxParameters
                 'icms_desonerated_value','difal_base','difal_fcp_base','difal_internal_rate',
                 'difal_interstate_rate','difal_share_rate','difal_fcp_rate',
                 'interstate_icms_rate','internal_icms_rate','fcp_interstate_rate',
-                'ipi_returned_percentage','ipi_returned_original_amount'];
+                'ipi_returned_percentage','ipi_returned_original_amount',
+                'ibs_uf_deferral_rate','ibs_municipal_deferral_rate','cbs_deferral_rate',
+                'rtc_regular_cst','rtc_regular_class','rtc_regular_base','rtc_regular_ibs_uf_rate','rtc_regular_ibs_municipal_rate','rtc_regular_cbs_rate','rtc_regular_legal_source','rtc_regular_legal_reference',
+                'rtc_transfer_ibs','rtc_transfer_cbs','rtc_adjustment_period','rtc_adjustment_ibs','rtc_adjustment_cbs',
+                'is_cst','is_class','is_calculation_type','is_base','is_rate','is_unit_rate','is_quantity','is_unit','is_valid_from','is_valid_until','is_legal_source','is_legal_reference'];
             if (in_array($name,$implemented,true) || preg_match('/^(pis|cofins)_st_(calculation_type|calc_type|base|rate|quantity|unit_rate|add_to_total)$/D',$name)) continue;
             $groupCode=in_array($name,['is_cst','is_class','is_classification','is_classification_code'],true);
             $unsupported=(bool)preg_match('/^(?:pis|cofins)_st(?:_|$)|(?:desoner|retained|substitutor|monoph|monofas|presumed_credit|presumido|transfer_credit|credito_presumido|regular_tax|tributacao_regular)/i',$name)

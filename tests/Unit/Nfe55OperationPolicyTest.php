@@ -65,11 +65,12 @@ final class Nfe55OperationPolicyTest extends TestCase
     public function test_interstate_final_consumer_without_difal_is_blocked(): void
     {
         $draft = $this->draft('outbound','interstate');
+        $company=$this->company();$company->crt='3';
         $draft->final_consumer = true;
         $draft->recipient_snapshot = array_replace($draft->recipient_snapshot,['ie_indicator'=>'non_contributor']);
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('DIFAL');
-        (new Nfe55OperationPolicy())->validate($draft,$this->company());
+        (new Nfe55OperationPolicy())->validate($draft,$company);
     }
 
     public function test_devolution_requires_references_and_generates_fin_nfe_four(): void
@@ -143,5 +144,27 @@ final class Nfe55OperationPolicyTest extends TestCase
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('operação fiscal específica');
         (new Nfe55OperationPolicy())->validate($draft,$this->company());
+    }
+
+    public function test_residual_codes_require_a_reviewed_rule_and_only_declared_credit_requires_contributor(): void
+    {
+        $draft=$this->draft();
+        $company=$this->company();$company->crt='1';
+        $draft->recipient_snapshot=array_replace($draft->recipient_snapshot,['ie_indicator'=>'non_contributor']);
+        $draft->items[0]->tax_data=['icms_csosn'=>'900','icms_base'=>'100','icms_rate'=>'0','icms_base_mode'=>'3'];
+        try {
+            (new Nfe55OperationPolicy())->validate($draft,$company);
+            self::fail('Código residual sem fundamento legal.');
+        } catch (RuntimeException $error) {
+            self::assertStringContainsString('fundamento legal',$error->getMessage());
+        }
+        $tax=$draft->items[0]->tax_data;
+        $tax['fiscal_rule_trace']=['legal_source'=>'https://www.confaz.fazenda.gov.br/legislacao'];
+        $draft->items[0]->tax_data=$tax;
+        self::assertSame('1',(new Nfe55OperationPolicy())->validate($draft,$company)['crt']);
+        $draft->items[0]->tax_data=$tax+['icms_credit_rate'=>'3'];
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Crédito do Simples');
+        (new Nfe55OperationPolicy())->validate($draft,$company);
     }
 }

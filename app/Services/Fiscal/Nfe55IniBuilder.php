@@ -165,7 +165,7 @@ final class Nfe55IniBuilder
         $totalDesonerated=0;$totalDesonerationDeduction=0;$totalRetainedFcp=0;
         $totalDestinationIcms=0;$totalOriginIcms=0;$totalDestinationFcp=0;
         $totalFreight=0;$totalInsurance=0;$totalOther=0;$totalDiscount=0;
-        $rtcTotal=['bc'=>0,'uf'=>0,'mun'=>0,'cbs'=>0];$rtcCount=0;
+        $rtcTotal=array_fill_keys(['bc','uf','mun','cbs','dif_uf','dif_mun','dif_cbs','dev_uf','dev_mun','dev_cbs','presumed_ibs','presumed_cbs','presumed_conditional_ibs','presumed_conditional_cbs'],0);$rtcCount=0;$totalSelective=0;$selectiveCount=0;
         foreach($items as $index=>$item) {
             $tax=Nfe55TaxParameters::forDirection($item->tax_data??[],(string)$draft->operation_type);
             Nfe55TaxParameters::assertSupported($tax);
@@ -246,6 +246,8 @@ final class Nfe55IniBuilder
             $federalBase=$grossCents+$freightCents+$insuranceCents+$otherCents-$discountCents;
             $icms=app(NfeIcmsItemTaxCalculator::class)->calculate($tax,$federalBase,(string)$company->crt,number_format($qty,4,'.',''));
             $federal=app(NfeFederalItemTaxCalculator::class)->calculate($tax,$federalBase);
+            $selective=app(Nfe55SelectiveTaxCalculator::class)->calculate($tax,$draft->issue_date->toDateString());
+            if($selective!==null){$selectiveCount++;$add('IS'.$i,$selective['fields']);$totalSelective+=$selective['amount'];}
             $federalSt=app(Nfe55FederalStCalculator::class)->calculate($tax);
             $returnedIpi=app(Nfe55ReturnedIpiCalculator::class)->calculate($tax);
             $totalFederalStAddition+=$federalSt['total_addition'];
@@ -287,12 +289,16 @@ final class Nfe55IniBuilder
                 $rtcCount++;
                 foreach(['ibscbs'=>'IBSCBS','gibscbs'=>'gIBSCBS','gibsuf'=>'gIBSUF',
                     'gibsmun'=>'gIBSMun','gcbs'=>'gCBS'] as $from=>$prefix){
-                    $add($prefix.$i,$rtc[$from]);
+                    if(!empty($rtc[$from]))$add($prefix.$i,$rtc[$from]);
                 }
-                $rtcTotal['bc']+=(int)round((float)$rtc['gibscbs']['vBC']*100);
-                $rtcTotal['uf']+=(int)round((float)$rtc['gibsuf']['vIBSUF']*100);
-                $rtcTotal['mun']+=(int)round((float)$rtc['gibsmun']['vIBSMun']*100);
-                $rtcTotal['cbs']+=(int)round((float)$rtc['gcbs']['vCBS']*100);
+                foreach($rtc['extra_sections']??[] as $prefix=>$fields){
+                    if($prefix==='gAjusteCompet'){
+                        $month=\DateTimeImmutable::createFromFormat('!Y-m',$fields['competApur']);
+                        $fields['competApur']=$month->format('d/m/Y');
+                    }
+                    $add($prefix.$i,$fields);
+                }
+                foreach($rtcTotal as $key=>$unused)$rtcTotal[$key]+=$rtc['totals'][$key]??0;
             }
         }
         if($rtcCount>0 && $rtcCount!==$draft->items->count()){
@@ -302,7 +308,9 @@ final class Nfe55IniBuilder
         $totalCents=$totalProduct+$totalFreight+$totalInsurance+$totalOther+$totalIpi+$totalSt+$totalFcpSt
             +$foreignTrade['ii_total_cents']+$totalFederalStAddition+$totalReturnedIpi-$totalDiscount-$totalDesonerationDeduction;
         if($totalCents<0 || $totalCents>999999999999999)throw new RuntimeException('Total da NF-e fora dos limites do documento fiscal.');
-        $total=NfeTaxMath::format($totalCents);
+        $legacyTotal=NfeTaxMath::format($totalCents);
+        $modern=$draft->issue_date->toDateString()>='2027-01-01';
+        $total=NfeTaxMath::format($totalCents+($modern?($totalSelective+$rtcTotal['uf']+$rtcTotal['mun']+$rtcTotal['cbs']):0));
         $expected=$this->money(data_get($draft->totals,'total',data_get($draft->totals,'products',0)));
         if($expected!==$total)throw new RuntimeException('Total fiscal não confere com o rascunho.');
         $add('Total',[
@@ -320,15 +328,16 @@ final class Nfe55IniBuilder
             'vDesc'=>$this->money($totalDiscount/100),'vIPI'=>NfeTaxMath::format($totalIpi),
             'vIPIDevol'=>NfeTaxMath::format($totalReturnedIpi),
             'vPIS'=>$this->money($totalPis/100),'vCOFINS'=>$this->money($totalCofins/100),
-            'vNF'=>$total,
+            'vNF'=>$legacyTotal,'vNFTot'=>$modern?$total:null,
         ]);
+        if($selectiveCount>0)$add('ISTot',['vIS'=>NfeTaxMath::format($totalSelective)]);
         if($rtcCount>0){
             $m=fn($key)=>$this->money($rtcTotal[$key]/100);
             $add('IBSCBSTot',['vBCIBSCBS'=>$m('bc')]);
-            $add('gIBS',['vIBS'=>$this->money(($rtcTotal['uf']+$rtcTotal['mun'])/100)]);
-            $add('gIBSUFTot',['vIBSUF'=>$m('uf')]);
-            $add('gIBSMunTot',['vIBSMun'=>$m('mun')]);
-            $add('gCBSTot',['vCBS'=>$m('cbs')]);
+            $add('gIBS',['vIBS'=>$this->money(($rtcTotal['uf']+$rtcTotal['mun'])/100),'vCredPres'=>$m('presumed_ibs'),'vCredPresCondSus'=>$m('presumed_conditional_ibs')]);
+            $add('gIBSUFTot',['vIBSUF'=>$m('uf'),'vDif'=>$m('dif_uf'),'vDevTrib'=>$m('dev_uf')]);
+            $add('gIBSMunTot',['vIBSMun'=>$m('mun'),'vDif'=>$m('dif_mun'),'vDevTrib'=>$m('dev_mun')]);
+            $add('gCBSTot',['vCBS'=>$m('cbs'),'vDif'=>$m('dif_cbs'),'vDevTrib'=>$m('dev_cbs'),'vCredPres'=>$m('presumed_cbs'),'vCredPresCondSus'=>$m('presumed_conditional_cbs')]);
         }
         $transport=$draft->transport_data??[];
         $freightMode=(string)($transport['freight_mode']??'9');

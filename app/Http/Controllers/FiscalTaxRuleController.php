@@ -32,6 +32,10 @@ final class FiscalTaxRuleController extends Controller
         'pis_st_calculation_type','pis_st_base','pis_st_rate','pis_st_quantity','pis_st_unit_rate','pis_st_add_to_total',
         'cofins_st_calculation_type','cofins_st_base','cofins_st_rate','cofins_st_quantity','cofins_st_unit_rate','cofins_st_add_to_total',
         'ipi_returned_percentage','ipi_returned_original_amount',
+        'ibs_uf_deferral_rate','ibs_municipal_deferral_rate','cbs_deferral_rate',
+        'rtc_regular_cst','rtc_regular_class','rtc_regular_base','rtc_regular_ibs_uf_rate','rtc_regular_ibs_municipal_rate','rtc_regular_cbs_rate','rtc_regular_legal_source','rtc_regular_legal_reference',
+        'rtc_transfer_ibs','rtc_transfer_cbs','rtc_adjustment_period','rtc_adjustment_ibs','rtc_adjustment_cbs',
+        'is_cst','is_class','is_calculation_type','is_base','is_rate','is_unit_rate','is_quantity','is_unit','is_valid_from','is_valid_until','is_legal_source','is_legal_reference',
         'ibs_cbs_cst','ibs_cbs_class','ibs_cbs_base','ibs_uf_rate','ibs_municipal_rate','cbs_rate',
         'ibs_uf_reduction_rate','ibs_municipal_reduction_rate','cbs_reduction_rate',
     ];
@@ -130,7 +134,7 @@ final class FiscalTaxRuleController extends Controller
             'consulted_at' => ['nullable','date_format:Y-m-d','before_or_equal:today'],
             'application_conditions' => ['nullable','string','max:4000'],
             'tax_parameters_json' => ['nullable','string','max:10000'],
-            'tax_parameters' => ['nullable','array','max:100'],
+            'tax_parameters' => ['nullable','array','max:200'],
         ]);
         if ($data['document_type'] === 'nfce') {
             if ($data['origin_uf'] !== $data['destination_uf']) $this->invalid('destination_uf', 'A NFC-e deste fluxo admite somente operação interna: selecione a mesma UF de origem e destino.');
@@ -171,6 +175,35 @@ final class FiscalTaxRuleController extends Controller
             if (!is_array($parameters) || array_is_list($parameters)) $this->invalid('tax_parameters_json', 'Informe parâmetros como objeto JSON com nomes de campos.');
         }
         foreach ($parameters as $key => $value) {
+                if(in_array($key,['is_legal_source','rtc_regular_legal_source'],true)){
+                    $host=is_string($value)?strtolower((string)parse_url($value,PHP_URL_HOST)):'';
+                    if(!is_string($value)||!filter_var($value,FILTER_VALIDATE_URL)||parse_url($value,PHP_URL_SCHEME)!=='https'||!(str_ends_with($host,'.gov.br')||str_ends_with($host,'.leg.br'))) $this->invalid('tax_parameters_json','Informe fonte normativa governamental HTTPS.');
+                    continue;
+                }
+                if(in_array($key,['is_legal_reference','rtc_regular_legal_reference'],true)){
+                    if(!is_string($value)||trim($value)===''||mb_strlen($value)>255)$this->invalid('tax_parameters_json','Referência legal inválida.');
+                    continue;
+                }
+                if(in_array($key,['is_valid_from','is_valid_until'],true)){
+                    $date=is_string($value)?\DateTimeImmutable::createFromFormat('!Y-m-d',$value):false;
+                    if(!$date||$date->format('Y-m-d')!==$value)$this->invalid('tax_parameters_json','Vigência IS inválida.');
+                    continue;
+                }
+                if($key==='rtc_adjustment_period'){
+                    if(!is_string($value)||!preg_match('/^\d{4}-(?:0[1-9]|1[0-2])$/D',$value))$this->invalid('tax_parameters_json','Competência inválida.');
+                    continue;
+                }
+                if($key==='is_unit'){
+                    if(!is_string($value)||trim($value)===''||mb_strlen($value)>6)$this->invalid('tax_parameters_json','Unidade IS inválida.');
+                    continue;
+                }
+                if($key==='is_calculation_type'){
+                    if(!in_array($value,['percent','quantity','combined'],true))$this->invalid('tax_parameters_json','Modo de cálculo IS inválido.');
+                    continue;
+                }
+                if(in_array($key,['is_cst','rtc_regular_cst'],true)&&(!is_string($value)||!preg_match('/^\d{3}$/D',$value)))$this->invalid('tax_parameters_json','CST deve conter três dígitos.');
+                if(in_array($key,['is_class','rtc_regular_class'],true)&&(!is_string($value)||!preg_match('/^\d{6}$/D',$value)))$this->invalid('tax_parameters_json','Classificação deve conter seis dígitos.');
+
                 if ($key === 'st_retained_amount_scope') {
                     if (!in_array($value, ['line','unit'], true)) $this->invalid('tax_parameters_json', 'Informe o escopo por item ou por unidade da retenção anterior.');
                     continue;
@@ -190,7 +223,7 @@ final class FiscalTaxRuleController extends Controller
                 if ($key === 'icms_desoneration_deduct' && !in_array((string) $value, ['0','1'], true)) $this->invalid('tax_parameters_json', 'A dedução do ICMS desonerado deve ser Sim ou Não.');
                 if (!in_array($key, self::TAX_PARAMETERS, true) || !is_scalar($value) || is_bool($value)
                     || !preg_match('/^\d{1,12}(?:\.\d{1,4})?$/', (string) $value)) $this->invalid('tax_parameters_json', 'Parâmetro inválido: '.$key.'. Use apenas campos tributários reconhecidos e valores decimais não negativos.');
-                if ((str_ends_with($key, '_rate') && !str_ends_with($key, '_unit_rate') || str_ends_with($key, '_reduction')) && (float) $value > 100) $this->invalid('tax_parameters_json', 'Percentual superior a 100: '.$key.'.');
+                if ($key!=='is_rate' && (str_ends_with($key, '_rate') && !str_ends_with($key, '_unit_rate') || str_ends_with($key, '_reduction')) && (float) $value > 100) $this->invalid('tax_parameters_json', 'Percentual superior a 100: '.$key.'.');
         }
         if ($data['document_type'] === 'nfce' && $parameters !== []) {
             $this->invalid('tax_parameters_json', 'Os parâmetros ampliados são exclusivos do motor NF-e 55. Mantenha a parametrização NFC-e em seus grupos fiscais existentes.');

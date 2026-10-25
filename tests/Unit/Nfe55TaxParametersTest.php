@@ -23,7 +23,7 @@ final class Nfe55TaxParametersTest extends TestCase
 
     public function test_a_zero_valued_cst_is_still_an_unsupported_group_request(): void
     {
-        foreach (['is_cst'=>'000','pis_st_cst'=>'00','ibs_presumed_credit_cst'=>'00'] as $key=>$value) {
+        foreach (['is_classification'=>'000','pis_st_cst'=>'00','ibs_presumed_credit_cst'=>'00'] as $key=>$value) {
             try { Nfe55TaxParameters::assertSupported([$key=>$value]); self::fail('Group was discarded.'); }
             catch (RuntimeException $error) { self::assertStringContainsString($key,$error->getMessage()); }
         }
@@ -31,7 +31,7 @@ final class Nfe55TaxParametersTest extends TestCase
 
     public function test_nonzero_unsupported_groups_cannot_be_silently_omitted(): void
     {
-        foreach (['icms_monophase_amount','pis_st_rate','cofins_st_rate','ibs_credit_amount','cbs_deferral_rate','difal_amount'] as $key) {
+        foreach (['icms_monophase_amount','pis_st_unknown_rate','cofins_st_unknown_rate','ibs_credit_amount','cbs_unknown_credit','difal_amount'] as $key) {
             try { Nfe55TaxParameters::assertSupported([$key=>'1']); self::fail('Group was discarded.'); }
             catch (RuntimeException $error) { self::assertStringContainsString($key,$error->getMessage()); }
         }

@@ -60,6 +60,7 @@ final class Nfe55PreflightService
             $service->verifySignature();
             $xml=$service->getXml();
             $key=$this->emission->verifySignedXml($xml,$draft,$company,$number,$code);
+            app(Nfe55XmlTaxConsistency::class)->assertMatches($ini,$xml);
             return [
                 'ok'=>true,'model'=>'55','environment'=>'homologation',
                 'tested_number'=>$number,'signed_key_verified'=>strlen($key)===44,
