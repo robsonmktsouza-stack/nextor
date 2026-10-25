@@ -21,6 +21,7 @@ final class Nfe55VerifyFlowCommand extends Command
         {--process : Processa somente esta NF-e neste terminal pelo serviço fiscal existente}
         {--correct-486 : Corrige rejeição 486 comprovada após configurar acesso ao XML, preservando número e chave}
         {--correct-487 : Corrige rejeição 487 comprovada após selecionar autorização SEFAZ-BA, preservando número e chave}
+        {--correct-321 : Corrige rejeição 321 comprovada com chave e item de origem, preservando número e chave}
         {--wait=0 : Segundos para acompanhar o worker existente (0 a 300)}
         {--consult : Consulta a SEFAZ pela chave já existente}';
 
@@ -43,12 +44,20 @@ final class Nfe55VerifyFlowCommand extends Command
         $base = 'fiscal/nfe55/'.$draft->id;
         try {
             $this->line('NF-e '.$draft->id.' | Homologação | Estado: '.$draft->status);
-            if ($this->option('correct-486') && $this->option('correct-487')) throw new RuntimeException('Escolha apenas uma opção de correção fiscal.');
-            if ($this->option('correct-486') || $this->option('correct-487')) {
-                $correctionCode = $this->option('correct-487') ? '487' : '486';
-                $draft = $correctionCode === '487'
-                    ? app(\App\Services\Fiscal\Nfe55RejectionRecoveryService::class)->prepareCorrection487($draft)
-                    : app(\App\Services\Fiscal\Nfe55RejectionRecoveryService::class)->prepareCorrection486($draft);
+            $corrections=array_filter([
+                '486'=>$this->option('correct-486'),
+                '487'=>$this->option('correct-487'),
+                '321'=>$this->option('correct-321'),
+            ]);
+            if (count($corrections)>1) throw new RuntimeException('Escolha apenas uma opção de correção fiscal.');
+            if ($corrections) {
+                $correctionCode=(string)array_key_first($corrections);
+                $recovery=app(\App\Services\Fiscal\Nfe55RejectionRecoveryService::class);
+                $draft = match($correctionCode){
+                    '487'=>$recovery->prepareCorrection487($draft),
+                    '321'=>$recovery->prepareCorrection321($draft),
+                    default=>$recovery->prepareCorrection486($draft),
+                };
                 $draft=$emission->retryPreparation($draft);
                 $summary['stages'][]='rejection_'.$correctionCode.'_corrected_same_fiscal_identity';
                 $this->line('Correção '.$correctionCode.' preparada com a mesma numeração e chave; tentativa anterior arquivada.');
