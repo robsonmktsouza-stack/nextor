@@ -440,7 +440,7 @@ $origins=[
         <details>
           <summary>Outros totalizadores fiscais</summary>
           <div class="editor-grid cols-12">
-            @foreach(['nfeTotalIi'=>'Imposto de Importação','nfeTotalDesonerated'=>'ICMS desonerado','nfeTotalDesonerationDeduction'=>'Desoneração deduzida','nfeTotalIcmsCredit'=>'Crédito de ICMS','nfeTotalDifalDestination'=>'DIFAL destino','nfeTotalFcpDestination'=>'FCP destino','nfeTotalFcpRetained'=>'FCP ST retido anteriormente'] as $id=>$label)
+            @foreach(['nfeTotalPisSt'=>'PIS ST','nfeTotalCofinsSt'=>'COFINS ST','nfeTotalIpiReturned'=>'IPI devolvido','nfeTotalIi'=>'Imposto de Importação','nfeTotalDesonerated'=>'ICMS desonerado','nfeTotalDesonerationDeduction'=>'Desoneração deduzida','nfeTotalIcmsCredit'=>'Crédito de ICMS','nfeTotalDifalDestination'=>'DIFAL destino','nfeTotalFcpDestination'=>'FCP destino','nfeTotalFcpRetained'=>'FCP ST retido anteriormente'] as $id=>$label)
               <div class="field col-3"><span>{{ $label }}</span><div class="readonly-field" id="{{ $id }}">—</div></div>
             @endforeach
           </div>
@@ -926,6 +926,8 @@ $origins=[
 
       </div>
     </details>
+
+    @include('fiscal.nfe._additional-federal-taxes',['ruleMode'=>false,'federalParameters'=>[]])
 
     <details class="editor-panel nfe-item-section" data-nfe-item-panel="item-difal">
       <summary class="nfe-item-section-heading">

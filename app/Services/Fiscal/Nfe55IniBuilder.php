@@ -160,6 +160,7 @@ final class Nfe55IniBuilder
         $discountShares=$this->proportionalShares($globalDiscount,$discountWeights);
 
         $totalProduct=0;$totalPis=0;$totalCofins=0;$totalIpi=0;
+        $totalFederalStAddition=0;$totalReturnedIpi=0;
         $totalIcmsBase=0;$totalIcms=0;$totalStBase=0;$totalSt=0;$totalFcp=0;$totalFcpSt=0;
         $totalDesonerated=0;$totalDesonerationDeduction=0;$totalRetainedFcp=0;
         $totalDestinationIcms=0;$totalOriginIcms=0;$totalDestinationFcp=0;
@@ -245,6 +246,13 @@ final class Nfe55IniBuilder
             $federalBase=$grossCents+$freightCents+$insuranceCents+$otherCents-$discountCents;
             $icms=app(NfeIcmsItemTaxCalculator::class)->calculate($tax,$federalBase,(string)$company->crt,number_format($qty,4,'.',''));
             $federal=app(NfeFederalItemTaxCalculator::class)->calculate($tax,$federalBase);
+            $federalSt=app(Nfe55FederalStCalculator::class)->calculate($tax);
+            $returnedIpi=app(Nfe55ReturnedIpiCalculator::class)->calculate($tax);
+            $totalFederalStAddition+=$federalSt['total_addition'];
+            $totalReturnedIpi+=$returnedIpi['amount']??0;
+            if($federalSt['pis_st'])$add('PISST'.$i,$federalSt['pis_st']);
+            if($federalSt['cofins_st'])$add('COFINSST'.$i,$federalSt['cofins_st']);
+            if($returnedIpi!==null)$add('impostoDevol'.$i,$returnedIpi['fields']);
             $difal=app(Nfe55DifalCalculator::class)->calculate($tax,$draft->issue_date->toDateString());
             if($difal!==null){
                 if($draft->destination!=='interstate' || !$draft->final_consumer
@@ -292,7 +300,7 @@ final class Nfe55IniBuilder
         }
         foreach($foreignTrade['sections'] as $foreignSection)$add($foreignSection['name'],$foreignSection['fields']);
         $totalCents=$totalProduct+$totalFreight+$totalInsurance+$totalOther+$totalIpi+$totalSt+$totalFcpSt
-            +$foreignTrade['ii_total_cents']-$totalDiscount-$totalDesonerationDeduction;
+            +$foreignTrade['ii_total_cents']+$totalFederalStAddition+$totalReturnedIpi-$totalDiscount-$totalDesonerationDeduction;
         if($totalCents<0 || $totalCents>999999999999999)throw new RuntimeException('Total da NF-e fora dos limites do documento fiscal.');
         $total=NfeTaxMath::format($totalCents);
         $expected=$this->money(data_get($draft->totals,'total',data_get($draft->totals,'products',0)));
@@ -310,6 +318,7 @@ final class Nfe55IniBuilder
             'vSeg'=>$this->money($totalInsurance/100),
             'vOutro'=>$this->money($totalOther/100),
             'vDesc'=>$this->money($totalDiscount/100),'vIPI'=>NfeTaxMath::format($totalIpi),
+            'vIPIDevol'=>NfeTaxMath::format($totalReturnedIpi),
             'vPIS'=>$this->money($totalPis/100),'vCOFINS'=>$this->money($totalCofins/100),
             'vNF'=>$total,
         ]);

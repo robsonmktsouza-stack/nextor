@@ -146,7 +146,7 @@ class NfeDraftController extends Controller
         $customer=isset($data['customer_id'])?Customer::query()->find($data['customer_id']):null;
         $items=$this->resolveFormTaxes($this->decodeArray($data['items_json'],'itens'),$data,$company,$customer);
         $totals=$this->calculateTotals($items,(float)($data['discount']??0),
-            (float)($data['surcharge']??0),(float)($data['freight_value']??0),$data['operation_type'],$data['issue_date']??null);
+            (float)($data['surcharge']??0),(float)($data['freight_value']??0),$data['operation_type'],$data['issue_date']??null,$data['purpose']??'normal');
         $documentErrors=[];
         try {
             // The same builder checks operation semantics and base composition;
@@ -361,7 +361,7 @@ class NfeDraftController extends Controller
             app(Nfe55TaxRuleApplicationService::class)->apply($draft,CompanySetting::current());
             $totals=$this->calculateTotals($draft->items->map(fn($item)=>$item->toArray())->all(),
                 (float)$draft->discount,(float)$draft->surcharge,
-                (float)data_get($draft->transport_data,'freight_value',0),$draft->operation_type,$draft->issue_date?->toDateString());
+                (float)data_get($draft->transport_data,'freight_value',0),$draft->operation_type,$draft->issue_date?->toDateString(),$draft->purpose);
             $draft->update(['totals'=>$totals,'invoice_data'=>array_replace($draft->invoice_data??[],[
                 'original_value'=>round($totals['total']+$totals['discount'],2),
                 'discount'=>$totals['discount'],'net_value'=>$totals['total'],
@@ -673,7 +673,7 @@ class NfeDraftController extends Controller
         $discount=max(0,(float)($data['discount'] ?? 0));
         $surcharge=max(0,(float)($data['surcharge'] ?? 0));
         $freight=max(0,(float)($data['freight_value'] ?? 0));
-        $totals=$this->calculateTotals($items,$discount,$surcharge,$freight,$data['operation_type'],$data['issue_date']??null);
+        $totals=$this->calculateTotals($items,$discount,$surcharge,$freight,$data['operation_type'],$data['issue_date']??null,$data['purpose']??'normal');
         $payments=$this->validatedPayments($request,$data,$totals);
         $duplicates=$this->validatedDuplicates($data['duplicates_json'] ?? null,$totals);
         $usesMercantileDuplicate=false;
@@ -940,7 +940,7 @@ class NfeDraftController extends Controller
         ])->all();
 
         $freight=(float)data_get($draft->transport_data,'freight_value',0);
-        $totals=$this->calculateTotals($storedItems,(float)$draft->discount,(float)$draft->surcharge,$freight,$draft->operation_type,$draft->issue_date?->toDateString());
+        $totals=$this->calculateTotals($storedItems,(float)$draft->discount,(float)$draft->surcharge,$freight,$draft->operation_type,$draft->issue_date?->toDateString(),$draft->purpose);
 
         $draft->update([
             'totals'=>$totals,
@@ -1034,13 +1034,13 @@ class NfeDraftController extends Controller
         return $customer->state==='EX' || ($country!=='' && $country!=='1058');
     }
 
-    private function calculateTotals(array $items,float $discount=0,float $surcharge=0,float $freight=0,string $direction='outbound',?string $issueDate=null): array
+    private function calculateTotals(array $items,float $discount=0,float $surcharge=0,float $freight=0,string $direction='outbound',?string $issueDate=null,string $purpose='normal'): array
     {
         try {
             return app(Nfe55DraftTotalsService::class)->calculate($items,[
                 'discount'=>$discount,'surcharge'=>$surcharge,'freight'=>$freight,
                 'crt'=>(string)CompanySetting::current()->crt,
-                'operation_type'=>$direction,
+                'operation_type'=>$direction,'purpose'=>$purpose,
                 'issue_date'=>$issueDate??now()->toDateString(),
             ]);
         }catch(\RuntimeException $error){

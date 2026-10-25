@@ -53,6 +53,7 @@
   </div>
   <p>Campos vazios permanecem sem parametrização. Taxas e enquadramentos dependem de aprovação fiscal; cadastrar uma regra não comprova suporte ou homologação do cenário.</p>
 </details>
+@include('fiscal.nfe._additional-federal-taxes',['ruleMode'=>true,'federalParameters'=>$parameters])
 <details style="margin-top:12px"><summary>Retenção anterior, desoneração e DIFAL</summary>
   <div class="editor-grid cols-12 settings-grid" style="margin-top:10px">
     @foreach(['icms_st_retained_base'=>'BC ST retida (R$)','st_retained_rate'=>'ST retida %','icms_substitutor_value'=>'ICMS substituto (R$)','icms_st_retained_value'=>'ICMS ST retido (R$)','fcp_st_retained_base'=>'BC FCP retido (R$)','fcp_st_retained_rate'=>'FCP retido %','fcp_st_retained_value'=>'FCP retido (R$)','icms_effective_base'=>'BC ICMS efetivo (R$)','icms_effective_rate'=>'ICMS efetivo %','icms_effective_value'=>'ICMS efetivo (R$)','icms_effective_reduction'=>'Redução ICMS efetivo %','icms_desoneration_amount'=>'ICMS desonerado (R$)','icms_desoneration_reason'=>'Motivo desoneração','difal_base'=>'BC DIFAL (R$)','difal_fcp_base'=>'BC FCP destino (R$)','difal_internal_rate'=>'Alíquota interna destino %','difal_interstate_rate'=>'Alíquota interestadual %','difal_share_rate'=>'Partilha destino %','difal_fcp_rate'=>'FCP destino %'] as $field=>$label)

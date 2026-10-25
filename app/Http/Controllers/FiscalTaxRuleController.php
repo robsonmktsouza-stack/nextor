@@ -29,6 +29,9 @@ final class FiscalTaxRuleController extends Controller
         'icms_desoneration_amount','icms_desoneration_reason','icms_desoneration_deduct',
         'difal_base','difal_fcp_base','difal_internal_rate','difal_interstate_rate',
         'difal_share_rate','difal_fcp_rate',
+        'pis_st_calculation_type','pis_st_base','pis_st_rate','pis_st_quantity','pis_st_unit_rate','pis_st_add_to_total',
+        'cofins_st_calculation_type','cofins_st_base','cofins_st_rate','cofins_st_quantity','cofins_st_unit_rate','cofins_st_add_to_total',
+        'ipi_returned_percentage','ipi_returned_original_amount',
         'ibs_cbs_cst','ibs_cbs_class','ibs_cbs_base','ibs_uf_rate','ibs_municipal_rate','cbs_rate',
         'ibs_uf_reduction_rate','ibs_municipal_reduction_rate','cbs_reduction_rate',
     ];
@@ -172,10 +175,12 @@ final class FiscalTaxRuleController extends Controller
                     if (!in_array($value, ['line','unit'], true)) $this->invalid('tax_parameters_json', 'Informe o escopo por item ou por unidade da retenção anterior.');
                     continue;
                 }
-                if (in_array($key, ['ipi_calculation_type','pis_calculation_type','cofins_calculation_type'], true)) {
+                if (in_array($key, ['ipi_calculation_type','pis_calculation_type','cofins_calculation_type','pis_st_calculation_type','cofins_st_calculation_type'], true)) {
                     if (!in_array($value, ['percent','quantity'], true)) $this->invalid('tax_parameters_json', 'Tipo de cálculo inválido: '.$key.'.');
                     continue;
                 }
+                if (str_ends_with($key,'_st_add_to_total') && !in_array((string)$value,['0','1'],true)) $this->invalid('tax_parameters_json','Indicador de soma ST deve ser 0 ou 1.');
+                if ($key === 'ipi_returned_percentage' && ((float)$value>100 || !preg_match('/^\d+(?:\.\d{1,2})?$/D',(string)$value))) $this->invalid('tax_parameters_json','Percentual de devolução: máximo 100 e duas casas decimais.');
                 if ($key === 'ipi_cst' && (!is_string($value) || !preg_match('/^\d{2}$/', $value))) $this->invalid('tax_parameters_json', 'CST IPI deve conter dois dígitos.');
                 if ($key === 'ipi_enq' && (!is_string($value) || !preg_match('/^\d{3}$/', $value))) $this->invalid('tax_parameters_json', 'Enquadramento IPI deve conter três dígitos.');
                 if ($key === 'ibs_cbs_cst' && (!is_string($value) || !preg_match('/^\d{3}$/', $value))) $this->invalid('tax_parameters_json', 'CST IBS/CBS deve conter três dígitos.');

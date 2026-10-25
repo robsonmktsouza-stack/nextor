@@ -208,6 +208,10 @@ final class Nfe55OperationPolicy
                 throw new RuntimeException('A operação especial exige regra fiscal com fundamento legal e vigência registrados.');
             }
         }
+        $returnedIpi=app(Nfe55ReturnedIpiCalculator::class)->calculate($tax);
+        if ($returnedIpi!==null && $kind!=='devolution') {
+            throw new RuntimeException('IPI devolvido exige finalidade de devolução e documento de origem referenciado.');
+        }
         if ($kind === 'devolution') {
             foreach (['ipi_return_amount','ipi_return_percentage','ipi_rate','ipi_unit_rate'] as $field) {
                 if (isset($tax[$field]) && (float)$tax[$field] != 0.0) {

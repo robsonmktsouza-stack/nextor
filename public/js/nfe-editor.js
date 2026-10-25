@@ -412,7 +412,7 @@
           other_expenses:'nfeTotalOtherExpenses',discount:'nfeTotalDiscount',surcharge:'nfeTotalSurcharge',
           ipi:'nfeTotalIpi',icms:'nfeTotalIcms',icms_st:'nfeTotalIcmsSt',fcp_st:'nfeTotalFcpSt',fcp:'nfeTotalFcp',
           pis:'nfeTotalPis',cofins:'nfeTotalCofins',ibs_uf:'nfeTotalIbsUf',ibs_municipal:'nfeTotalIbsMunicipal',
-          cbs:'nfeTotalCbs',total:'nfeTotalInvoice',ii:'nfeTotalIi',icms_desonerated:'nfeTotalDesonerated',
+          cbs:'nfeTotalCbs',total:'nfeTotalInvoice',pis_st:'nfeTotalPisSt',cofins_st:'nfeTotalCofinsSt',ipi_returned:'nfeTotalIpiReturned',ii:'nfeTotalIi',icms_desonerated:'nfeTotalDesonerated',
           desoneration_deduction:'nfeTotalDesonerationDeduction',icms_credit:'nfeTotalIcmsCredit',
           difal_destination:'nfeTotalDifalDestination',fcp_destination:'nfeTotalFcpDestination',fcp_st_retained:'nfeTotalFcpRetained'};
         Object.entries(fields).forEach(([key,id])=>{
@@ -465,7 +465,7 @@
     Object.entries({ipi:'nfeTotalIpi',icms:'nfeTotalIcms',icms_st:'nfeTotalIcmsSt',
       fcp_st:'nfeTotalFcpSt',fcp:'nfeTotalFcp',pis:'nfeTotalPis',cofins:'nfeTotalCofins',
       ibs_uf:'nfeTotalIbsUf',ibs_municipal:'nfeTotalIbsMunicipal',cbs:'nfeTotalCbs',
-      ii:'nfeTotalIi',icms_desonerated:'nfeTotalDesonerated',desoneration_deduction:'nfeTotalDesonerationDeduction',
+      pis_st:'nfeTotalPisSt',cofins_st:'nfeTotalCofinsSt',ipi_returned:'nfeTotalIpiReturned',ii:'nfeTotalIi',icms_desonerated:'nfeTotalDesonerated',desoneration_deduction:'nfeTotalDesonerationDeduction',
       icms_credit:'nfeTotalIcmsCredit',difal_destination:'nfeTotalDifalDestination',
       fcp_destination:'nfeTotalFcpDestination',fcp_st_retained:'nfeTotalFcpRetained'}).forEach(([key,id])=>{
       if(byId(id))byId(id).textContent=authoritative?.[key]==null?'Pendente':money(authoritative[key]);
@@ -652,6 +652,21 @@
   };
 
   const taxFields={
+    pis_st_calculation_type:'nfeTaxPisStMode',
+    pis_st_base:'nfeTaxPisStBase',
+    pis_st_rate:'nfeTaxPisStRate',
+    pis_st_quantity:'nfeTaxPisStQuantity',
+    pis_st_unit_rate:'nfeTaxPisStUnitRate',
+    pis_st_add_to_total:'nfeTaxPisStAdd',
+    cofins_st_calculation_type:'nfeTaxCofinsStMode',
+    cofins_st_base:'nfeTaxCofinsStBase',
+    cofins_st_rate:'nfeTaxCofinsStRate',
+    cofins_st_quantity:'nfeTaxCofinsStQuantity',
+    cofins_st_unit_rate:'nfeTaxCofinsStUnitRate',
+    cofins_st_add_to_total:'nfeTaxCofinsStAdd',
+    ipi_returned_percentage:'nfeTaxIpiReturnedPercentage',
+    ipi_returned_original_amount:'nfeTaxIpiReturnedOriginal',
+
     tax_quantity_factor:'nfeTaxQuantityFactor',
     cfop_outbound_internal:'nfeCfopOutboundInternal',
     cfop_outbound_interstate:'nfeCfopOutboundInterstate',

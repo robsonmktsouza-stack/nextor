@@ -48,8 +48,9 @@ final class Nfe55TaxParameters
                 'icms_desoneration_amount','icms_desoneration_reason','icms_desoneration_deduct',
                 'icms_desonerated_value','difal_base','difal_fcp_base','difal_internal_rate',
                 'difal_interstate_rate','difal_share_rate','difal_fcp_rate',
-                'interstate_icms_rate','internal_icms_rate','fcp_interstate_rate'];
-            if (in_array($name,$implemented,true)) continue;
+                'interstate_icms_rate','internal_icms_rate','fcp_interstate_rate',
+                'ipi_returned_percentage','ipi_returned_original_amount'];
+            if (in_array($name,$implemented,true) || preg_match('/^(pis|cofins)_st_(calculation_type|calc_type|base|rate|quantity|unit_rate|add_to_total)$/D',$name)) continue;
             $groupCode=in_array($name,['is_cst','is_class','is_classification','is_classification_code'],true);
             $unsupported=(bool)preg_match('/^(?:pis|cofins)_st(?:_|$)|(?:desoner|retained|substitutor|monoph|monofas|presumed_credit|presumido|transfer_credit|credito_presumido|regular_tax|tributacao_regular)/i',$name)
                 || preg_match('/^(?:icms_uf_dest|icms_uf_remet|difal|is_|gIS|ibs_credit|cbs_credit|ibs_mono|cbs_mono)/i',$name)

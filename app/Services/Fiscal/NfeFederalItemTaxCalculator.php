@@ -34,13 +34,7 @@ final class NfeFederalItemTaxCalculator
     private function contribution(array $tax, string $name, int $baseCents): array
     {
         $label = strtoupper($name);
-        foreach ($tax as $key=>$value) {
-            if (preg_match('/^'.preg_quote($name,'/').'_st(?:_|$)/D',(string)$key)
-                && $value !== null && $value !== '' && $value !== false
-                && (str_ends_with((string)$key,'_cst') || !is_numeric($value) || (float)$value !== 0.0)) {
-                throw new RuntimeException($label.' ST: grupo específico ainda não implementado.');
-            }
-        }
+        (new Nfe55FederalStCalculator())->calculateGroup($tax,$name);
         $cst = trim((string) ($tax[$name.'_cst'] ?? ''));
         $rate = $tax[$name.'_rate'] ?? null;
         if (in_array($cst, ['04','05','06','07','08','09'], true)) {

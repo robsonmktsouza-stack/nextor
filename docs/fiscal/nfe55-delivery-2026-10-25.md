@@ -1,3 +1,26 @@
+## Continuação — grupos federais integrados
+
+PIS-ST e COFINS-ST percentuais/quantidade agora são calculados, editáveis no
+formulário/regras e serializados nos grupos oficiais. O indicador de soma ao
+valor da nota é explícito por tributo. IPI devolvido usa o valor original do item
+e o percentual de devolução, exige finalidade/referência e compõe vIPIDevol/vNF.
+Prévia, rascunho e INI usam os mesmos valores em centavos.
+
+Executados: 58 testes direcionados (209 assertions) e 40 testes de integração e
+regressão (323 assertions), aprovados em PHP 8.5.12/SQLite. A nova suíte completa
+será registrada após integrar a ampliação RTC. Não houve homologação nativa.
+
+Fontes consultadas nesta continuação:
+- ACBr INI reader, revisão SVN consultada 48801:
+  https://svn.code.sf.net/p/acbr/code/trunk2/Fontes/ACBrDFe/ACBrNFe/Base/ACBrNFe.IniReader.pas
+  (indSomaPISST, indSomaCOFINSST, indDeduzDeson, impostoDevol e totalizadores).
+- XSD leiauteNFe_v4.00.xsd:
+  https://svn.code.sf.net/p/acbr/code/trunk2/Exemplos/ACBrDFe/Schemas/NFe/leiauteNFe_v4.00.xsd
+  (pDevol: duas casas; indicadores ST: 0/1).
+
+O histórico abaixo descreve o estado anterior e suas limitações, superadas
+somente nos pontos explicitamente registrados acima.
+
 # NF-e 55 — entrega de desenvolvimento em 25/10/2026
 
 Branch exclusiva: `feature/nfe55-motor-fiscal-completo`. Sem merge ou deploy.
