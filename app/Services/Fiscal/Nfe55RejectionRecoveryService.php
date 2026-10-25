@@ -23,15 +23,20 @@ final class Nfe55RejectionRecoveryService
     /** Explicit correction preserves the original fiscal identity and evidence. */
     public function prepareCorrection486(NfeDraft $draft): NfeDraft
     {
-        return $this->locked($draft, true);
+        return $this->locked($draft, true, ['486']);
     }
 
-    private function locked(NfeDraft $draft, bool $prepare): NfeDraft
+    public function prepareCorrection487(NfeDraft $draft): NfeDraft
+    {
+        return $this->locked($draft, true, ['487']);
+    }
+
+    private function locked(NfeDraft $draft, bool $prepare, array $codes = ['486']): NfeDraft
     {
         $lock = Cache::lock('nfe-55:'.$draft->id, 300);
         if (!$lock->get()) $this->refuse();
         try {
-            return DB::transaction(function () use ($draft, $prepare) {
+            return DB::transaction(function () use ($draft, $prepare, $codes) {
                 $note = NfeDraft::query()->lockForUpdate()->findOrFail($draft->id);
                 $company = CompanySetting::query()->lockForUpdate()->findOrFail(CompanySetting::current()->id);
                 $base = 'fiscal/nfe55/'.$note->id;
@@ -49,7 +54,8 @@ final class Nfe55RejectionRecoveryService
                 if ($disk->exists($base.'/consult-response.ini')
                     && !$this->consultationDoesNotConflict($disk->get($base.'/consult-response.ini'), $note)) $this->refuse();
                 $raw = $disk->get($note->response_path);
-                if (!$this->responses->definitiveNfe55Rejection486($raw, (string) $note->access_key, (string) $note->environment)) $this->refuse();
+                if (!$this->responses->definitiveNfe55AuthorizationRejection($raw, (string) $note->access_key, (string) $note->environment, $codes)) $this->refuse();
+                $rejectionCode = (string) $this->responses->parse($raw)['cstat'];
                 $signed = $disk->get($note->xml_path);
                 try {
                     $key = app(Nfe55EmissionService::class)->verifySignedXml($signed, $note, $company);
@@ -62,7 +68,7 @@ final class Nfe55RejectionRecoveryService
                     || !hash_equals($fingerprint, app(Nfe55DocumentSnapshot::class)->materialFingerprint($note, $company))) $this->refuse();
                 // Content-addressed copies are immutable across retries and are
                 // committed before any send eligibility can be changed.
-                $archive = $base.'/attempts/rejection-486-'.hash('sha256', $signed."\0".$raw);
+                $archive = $base.'/attempts/rejection-'.$rejectionCode.'-'.hash('sha256', $signed."\0".$raw);
                 $this->preserve($archive.'/signed.xml', $signed);
                 $this->preserve($archive.'/sefaz-response.ini', $raw);
                 if ($disk->exists($base.'/consult-response.ini')) {
@@ -81,7 +87,7 @@ final class Nfe55RejectionRecoveryService
                     app(Nfe55IniBuilder::class)->build($note, $company, (int) $note->document_number, (int) $note->numeric_code);
                     $note->update(['status' => 'prepared', 'transmission_attempted_at' => null, 'error_message' => null]);
                 } else {
-                    $note->update(['status' => 'rejected', 'error_message' => 'Retorno da SEFAZ: 486 - '.$this->responses->parse($raw)['reason']]);
+                    $note->update(['status' => 'rejected', 'error_message' => 'Retorno da SEFAZ: '.$rejectionCode.' - '.$this->responses->parse($raw)['reason']]);
                 }
                 return $note->refresh();
             }, 3);
@@ -130,6 +136,6 @@ final class Nfe55RejectionRecoveryService
 
     private function refuse(): never
     {
-        throw ValidationException::withMessages(['nfe' => 'Não foi possível comprovar a rejeição 486 desta NF-e. Preserve a nota e consulte a situação na SEFAZ antes de prosseguir.']);
+        throw ValidationException::withMessages(['nfe' => 'Não foi possível comprovar a rejeição fiscal desta NF-e. Preserve a nota e consulte a situação na SEFAZ antes de prosseguir.']);
     }
 }
