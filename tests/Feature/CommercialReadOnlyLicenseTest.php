@@ -130,6 +130,22 @@ final class CommercialReadOnlyLicenseTest extends TestCase
             ->assertJsonPath('license_status', 'expired');
     }
 
+    public function test_nfe55_legal_regularization_remains_available_without_allowing_emission(): void
+    {
+        $this->license('suspended');
+        $this->actingAs($this->user());
+        foreach (['consult','cancel','inutilizations.store'] as $action) {
+            Route::post('/__nfe55-regularize/'.$action, fn () => 'regularizacao-permitida')
+                ->middleware(['auth','control.license'])->name('fiscal.nfe.'.$action);
+            $this->post('/__nfe55-regularize/'.$action)->assertOk();
+        }
+        foreach (['emit','retry','store','preview-taxes'] as $action) {
+            Route::post('/__nfe55-commercial/'.$action, fn () => 'nao-permitido')
+                ->middleware(['auth','control.license'])->name('fiscal.nfe.'.$action);
+            $this->postJson('/__nfe55-commercial/'.$action)->assertStatus(423);
+        }
+    }
+
     public function test_unverified_license_displays_technical_not_billing_message(): void
     {
         config()->set('central_license.enabled', true);

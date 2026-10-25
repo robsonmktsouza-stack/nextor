@@ -1022,3 +1022,7 @@
     display:block;
   }
 }
+
+/* Fiscal calculation evidence stays readable on demand inside the existing ERP form. */
+.nfe-modal-layer #nfeAppliedRulesBody,.nfe-modal-layer #nfeTaxPreviewErrorsBody{white-space:pre-line;padding:8px 0;line-height:1.5}
+.nfe-modal-layer #nfeImportDeclarations .editor-panel{border:1px solid #d8dee5;margin:10px 0;padding:10px}

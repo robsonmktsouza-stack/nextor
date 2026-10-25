@@ -46,7 +46,7 @@ final class FiscalConciseLayoutTest extends TestCase
     public function test_nfe_editor_and_settings_keep_real_controls_without_duplicate_descriptions(): void
     {
         $nfe=file_get_contents(resource_path('views/fiscal/nfe/editor.blade.php'));
-        self::assertStringContainsString('data-tab-target="nfe-payment"',$nfe);
+        self::assertStringContainsString('data-nfe-jump="nfe-section-payment"',$nfe);
         self::assertStringContainsString('data-nfe-general-toggle',$nfe);
         self::assertStringNotContainsString('<h3>Dados gerais</h3>',$nfe);
         self::assertStringNotContainsString('<h3>Pagamento</h3>',$nfe);

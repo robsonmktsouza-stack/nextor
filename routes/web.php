@@ -17,6 +17,7 @@ use App\Http\Controllers\FiscalFcpRuleController;
 use App\Http\Controllers\NFCeDanfeController;
 use App\Http\Controllers\NfeDraftController;
 use App\Http\Controllers\Nfe55EmissionController;
+use App\Http\Controllers\Nfe55InutilizationController;
 use App\Http\Controllers\OperationNatureController;
 use App\Http\Controllers\FinancialReconciliationController;
 use App\Http\Controllers\FinancialReceiptController;
@@ -194,6 +195,16 @@ Route::middleware(['auth','control.license'])->group(function () {
     Route::post('/fiscal/nfce/inutilizations',[NFCeInutilizationController::class,'store'])->name('fiscal.nfce.inutilizations.store')->middleware(['permission:fiscal','company.configured']);
     Route::post('/fiscal/nfce',[NFCeManualController::class,'store'])->name('fiscal.nfce.store')->middleware(['permission:fiscal','company.configured']);
     Route::get('/fiscal/nfe/create',[NfeDraftController::class,'create'])->name('fiscal.nfe.create')->middleware(['permission:fiscal','company.configured']);
+    Route::get('/fiscal/nfe/inutilizations',[Nfe55InutilizationController::class,'index'])
+        ->name('fiscal.nfe.inutilizations.index')->middleware(['permission:fiscal','company.configured']);
+    Route::post('/fiscal/nfe/inutilizations',[Nfe55InutilizationController::class,'store'])
+        ->name('fiscal.nfe.inutilizations.store')->middleware(['permission:fiscal','permission:settings','company.configured','throttle:3,1']);
+    Route::get('/fiscal/nfe/inutilizations/{nfe55Inutilization}/xml',[Nfe55InutilizationController::class,'xml'])
+        ->name('fiscal.nfe.inutilizations.xml')->middleware(['permission:fiscal','company.configured']);
+    Route::post('/fiscal/nfe/inutilizations/{nfe55Inutilization}/retry',[Nfe55InutilizationController::class,'retry'])
+        ->name('fiscal.nfe.inutilizations.retry')->middleware(['permission:fiscal','permission:settings','company.configured','throttle:3,1']);
+    Route::post('/fiscal/nfe/preview-taxes',[NfeDraftController::class,'previewTaxes'])
+        ->name('fiscal.nfe.preview-taxes')->middleware(['permission:fiscal','company.configured','throttle:60,1']);
     Route::get('/fiscal/nfe/drafts',[NfeDraftController::class,'index'])->name('fiscal.nfe.drafts.index')->middleware(['permission:fiscal','company.configured']);
     Route::post('/fiscal/nfe/drafts',[NfeDraftController::class,'store'])->name('fiscal.nfe.store')->middleware(['permission:fiscal','company.configured']);
     Route::get('/fiscal/nfe/drafts/{nfeDraft}/edit',[NfeDraftController::class,'edit'])->name('fiscal.nfe.edit')->middleware(['permission:fiscal','company.configured']);
