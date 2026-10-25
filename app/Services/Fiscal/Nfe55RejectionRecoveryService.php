@@ -31,6 +31,12 @@ final class Nfe55RejectionRecoveryService
         return $this->locked($draft, true, ['487']);
     }
 
+    /** Correct only a proved 321 after a later, matching SEFAZ 217 consultation. */
+    public function prepareCorrection321(NfeDraft $draft): NfeDraft
+    {
+        return $this->locked($draft, true, ['321']);
+    }
+
     private function locked(NfeDraft $draft, bool $prepare, array $codes = ['486']): NfeDraft
     {
         $lock = Cache::lock('nfe-55:'.$draft->id, 300);
@@ -81,8 +87,9 @@ final class Nfe55RejectionRecoveryService
                     'reserved_fiscal_fingerprint' => $fingerprint,
                 ], JSON_THROW_ON_ERROR));
                 if ($prepare) {
-                    // The builder must validate the newly configured autXML.
-                    // No tax, item, recipient or issuer mutation is accepted.
+                    if ($rejectionCode === '321') {
+                        $this->addReturnItemReferences321($note, $company);
+                    }
                     app(Nfe55AuthorizedXmlService::class)->assertRequired($note, $company);
                     app(Nfe55IniBuilder::class)->build($note, $company, (int) $note->document_number, (int) $note->numeric_code);
                     $note->update(['status' => 'prepared', 'transmission_attempted_at' => null, 'error_message' => null]);
@@ -94,6 +101,54 @@ final class Nfe55RejectionRecoveryService
         } finally {
             $lock->release();
         }
+    }
+
+    /**
+     * Attach the original item position, not the position of a new, unrelated
+     * merchandise line. Only recover a one-to-one, locally verified return.
+     */
+    private function addReturnItemReferences321(NfeDraft $note, CompanySetting $company): void
+    {
+        $refs=$note->references??[];
+        if($note->purpose!=='return' || $note->operation_type!=='inbound'
+            || count($refs)!==1 || strtoupper((string)($refs[0]['type']??'NFE'))!=='NFE'){
+            $this->refuse();
+        }
+        $key=(string)($refs[0]['key']??'');
+        if(!preg_match('/^\\d{44}$/D',$key))$this->refuse();
+        $original=NfeDraft::query()->where('access_key',$key)->where('environment',$note->environment)
+            ->where('status','authorized')->with('items')->first();
+        if(!$original || !$original->protocol || $original->id===$note->id
+            || $original->customer_id!==$note->customer_id
+            || $original->operation_type!=='outbound' || $original->purpose!=='normal'
+            || $original->items->isEmpty() || $original->items->count()!==1){
+            $this->refuse();
+        }
+        $note->load(['items','operationNature']);
+        if($note->items->count()!==1 || $original->items->first()->item_number!==1
+            || $note->items->first()->item_number!==1){
+            $this->refuse();
+        }
+        $returned=$note->items->first();
+        $sold=$original->items->first();
+        if((string)$returned->ncm!==(string)$sold->ncm
+            || (string)$returned->origin!==(string)$sold->origin
+            || (float)$returned->quantity<=0 || (float)$returned->quantity>(float)$sold->quantity
+            || (string)$returned->unit_price!==(string)$sold->unit_price){
+            $this->refuse();
+        }
+        $special=$returned->special_data??[];
+        if($special!==[] && $special!==['dfe_reference'=>['key'=>$key,'n_item'=>1]]){
+            $this->refuse();
+        }
+        $returned->special_data=['dfe_reference'=>['key'=>$key,'n_item'=>1]];
+        $returned->save();
+        $note->load('items');
+        $snapshot=app(Nfe55DocumentSnapshot::class);
+        $custom=$note->custom_fields??[];
+        $custom['_reserved_fiscal_fingerprint']=$snapshot->materialFingerprint($note,$company);
+        $note->custom_fields=$custom;
+        $note->save();
     }
 
     private function preserve(string $path, string $content): void
