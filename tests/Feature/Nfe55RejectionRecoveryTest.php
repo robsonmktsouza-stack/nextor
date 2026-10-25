@@ -188,9 +188,9 @@ final class Nfe55RejectionRecoveryTest extends TestCase
     {
         $parser = app(NFCeSefazResponseParser::class);
         $key = '29261012345678000100550010000000231123456780';
-        self::assertTrue($parser->definitiveNfe55AuthorizationRejection("[Envio]\\nCStat=487\\nTpAmb=2\\nXMotivo=Rejeicao: escritorio nao cadastrado\\n", $key, 'homologation', ['487']));
-        self::assertFalse($parser->definitiveNfe55AuthorizationRejection("[Envio]\\nCStat=100\\nTpAmb=2\\nXMotivo=Autorizado\\n", $key, 'homologation', ['487']));
-        self::assertFalse($parser->definitiveNfe55AuthorizationRejection("[Envio]\\nCStat=486\\nTpAmb=2\\nXMotivo=Rejeicao: autXML\\n", $key, 'homologation', ['487']));
+        self::assertTrue($parser->definitiveNfe55AuthorizationRejection("[Envio]\nCStat=487\nTpAmb=2\nXMotivo=Rejeicao: escritorio nao cadastrado\n", $key, 'homologation', ['487']));
+        self::assertFalse($parser->definitiveNfe55AuthorizationRejection("[Envio]\nCStat=100\nTpAmb=2\nXMotivo=Autorizado\n", $key, 'homologation', ['487']));
+        self::assertFalse($parser->definitiveNfe55AuthorizationRejection("[Envio]\nCStat=486\nTpAmb=2\nXMotivo=Rejeicao: autXML\n", $key, 'homologation', ['487']));
     }
 
     public function test_shared_nfce_correction_policy_does_not_expand_to_486(): void
