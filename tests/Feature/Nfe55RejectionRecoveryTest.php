@@ -166,6 +166,33 @@ final class Nfe55RejectionRecoveryTest extends TestCase
         }
     }
 
+
+    public function test_rejection_487_requires_definitive_response_and_preserves_fiscal_identity(): void
+    {
+        Bus::fake();
+        $note = $this->completeDraft();
+        $disk = Storage::disk('local');
+        $disk->put($note->response_path, "[Envio]\nCStat=487\nTpAmb=2\nXMotivo=Rejeicao: Escritorio de Contabilidade nao cadastrado na SEFAZ\n");
+        AppSetting::put('accounting', 'accountant_xml_authorized', false);
+        AppSetting::put('accounting', 'nfe_ba_sefaz_xml_authorized', true);
+        $original = $note->only(['id', 'access_key', 'document_number', 'numeric_code']);
+        $prepared = app(Nfe55RejectionRecoveryService::class)->prepareCorrection487($note);
+        self::assertSame('prepared', $prepared->status);
+        self::assertSame($original, $prepared->only(array_keys($original)));
+        self::assertTrue($disk->exists('fiscal/nfe55/'.$note->id.'/attempts/rejection-487-'.hash('sha256', $disk->get($note->xml_path)."\0".$disk->get($note->response_path)).'/attempt.json'));
+        self::assertSame('queued', app(Nfe55EmissionService::class)->retryPreparation($prepared)->status);
+        Bus::assertDispatchedTimes(ProcessNfe55Job::class, 1);
+    }
+
+    public function test_rejection_487_does_not_accept_486_or_authorization_as_evidence(): void
+    {
+        $parser = app(NFCeSefazResponseParser::class);
+        $key = '29261012345678000100550010000000231123456780';
+        self::assertTrue($parser->definitiveNfe55AuthorizationRejection("[Envio]\\nCStat=487\\nTpAmb=2\\nXMotivo=Rejeicao: escritorio nao cadastrado\\n", $key, 'homologation', ['487']));
+        self::assertFalse($parser->definitiveNfe55AuthorizationRejection("[Envio]\\nCStat=100\\nTpAmb=2\\nXMotivo=Autorizado\\n", $key, 'homologation', ['487']));
+        self::assertFalse($parser->definitiveNfe55AuthorizationRejection("[Envio]\\nCStat=486\\nTpAmb=2\\nXMotivo=Rejeicao: autXML\\n", $key, 'homologation', ['487']));
+    }
+
     public function test_shared_nfce_correction_policy_does_not_expand_to_486(): void
     {
         $parser = app(NFCeSefazResponseParser::class);
