@@ -1,0 +1,137 @@
+/* Lumeron Mobile — extra visual layer. Desktop, fiscal printouts and business logic untouched. */
+.lumeron-mobile-nav{display:none}
+@media screen and (max-width:760px){
+  :root{--lumeron-mobile-bar:64px}
+  html{scroll-padding-bottom:calc(var(--lumeron-mobile-bar) + env(safe-area-inset-bottom,0px))}
+  .app-root{--mobile-touch-target:44px}
+  .app-root .cms-topbar{z-index:104}
+  .app-root .cms-sidebar{z-index:103}
+  .app-root .mobile-overlay:not([hidden]){z-index:102}
+  .app-root .main-content{
+    padding-bottom:calc(90px + env(safe-area-inset-bottom,0px))!important;
+    scroll-padding-bottom:calc(100px + env(safe-area-inset-bottom,0px));
+    min-height:0;
+    overscroll-behavior-y:contain;
+  }
+  .app-root .cms-page-shell{min-width:0;max-width:100vw}
+  .app-root :is(.cms-card,.editor-panel,.page-heading,.grid-actionbar,.grid-filter-panel,.form-grid,.editor-grid){min-width:0;max-width:100%}
+  .app-root :is(input:not([type="checkbox"]):not([type="radio"]),textarea,select){
+    font-size:max(16px,1rem);
+    min-width:0;
+    max-width:100%;
+  }
+  .app-root :is(.btn,.grid-primary-action,.grid-secondary-action,.btn-icon,.row-actions button,.row-actions a,.close-dialog,.cms-topbar-icon){
+    min-height:44px;
+  }
+  .app-root .page-actions{display:flex;flex-wrap:wrap;gap:7px;align-items:center;min-width:0}
+  .app-root .page-actions :is(a,button){min-width:0;white-space:normal}
+  .app-root :is(.grid-actionbar,.grid-actions-left,.grid-actions-right,.toolbar-filters){
+    min-width:0;max-width:100%;
+  }
+  .app-root .toolbar-filters :is(.table-search-group,.table-search,select,.ui-select){max-width:100%;min-width:0}
+  .app-root .cms-table{font-size:12px}
+  .app-root .table-scroll{
+    width:100%;max-width:100%;
+    overflow-x:auto;
+    overscroll-behavior-x:contain;
+    -webkit-overflow-scrolling:touch;
+    touch-action:pan-x pan-y;
+  }
+  .app-root :is(.editor-tabs,.sales-module-tabs,.finance-module-tabs,.settings-main-tabs){
+    max-width:100%;min-width:0;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  }
+  .app-root .erp-dialog{
+    max-width:calc(100vw - 18px);
+    width:calc(100vw - 18px);
+    max-height:calc(100dvh - 28px);
+    overscroll-behavior:contain;
+  }
+  .app-root .dialog-body{
+    max-height:calc(100dvh - 150px);
+    overflow-y:auto;
+    padding:15px;
+  }
+  .app-root .dialog-header,.app-root .dialog-footer{padding:12px 15px}
+  .app-root .dialog-footer{position:sticky;bottom:0;z-index:1;flex-wrap:wrap}
+  .app-root :is(.editor-savebar,.sale-savebar){
+    bottom:calc(var(--lumeron-mobile-bar) + env(safe-area-inset-bottom,0px))!important;
+    max-width:100vw;
+  }
+  .app-root :is(.customer-editor,.product-editor,.sale-editor){
+    padding-bottom:calc(98px + var(--lumeron-mobile-bar) + env(safe-area-inset-bottom,0px));
+  }
+  .lumeron-mobile-nav{
+    position:fixed;inset:auto 0 0;z-index:101;
+    display:flex;align-items:stretch;justify-content:space-around;
+    height:calc(var(--lumeron-mobile-bar) + env(safe-area-inset-bottom,0px));
+    padding:4px 5px calc(5px + env(safe-area-inset-bottom,0px));
+    border-top:1px solid #ccd7e1;
+    background:#fff;
+    box-shadow:0 -3px 13px rgba(22,44,63,.11);
+  }
+  .lumeron-mobile-nav :is(a,button){
+    flex:1 1 0;min-width:0;min-height:54px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:4px;padding:6px 2px;
+    border:0;border-radius:5px;background:transparent;
+    font-size:10px;line-height:1.1;font-weight:650;
+    color:#62758a;text-decoration:none;
+    touch-action:manipulation;
+  }
+  .lumeron-mobile-nav :is(a,button) svg{width:21px;height:21px}
+  .lumeron-mobile-nav :is(a.is-active,button[aria-expanded="true"]){
+    color:#216db0;background:#edf5fc;
+  }
+  .lumeron-mobile-nav :is(a,button):focus-visible{
+    outline:2px solid #2877c7;outline-offset:-2px;
+  }
+  /* Read-only lists may use structured cards; form grids and fiscal tables do not. */
+  .app-root .table-scroll:has(table[data-mobile-cards]){overflow-x:visible}
+  .app-root table[data-mobile-cards],
+  .app-root table[data-mobile-cards] tbody{display:block;width:100%;border:0}
+  .app-root table[data-mobile-cards] thead{
+    position:absolute!important;width:1px;height:1px;
+    clip-path:inset(50%);overflow:hidden;white-space:nowrap;
+  }
+  .app-root table[data-mobile-cards] tbody>tr:not(.mobile-row-regular){
+    display:block;margin:9px 8px;
+    background:#fff;border:1px solid #dce5ed;border-radius:6px;
+    box-shadow:0 1px 3px rgba(20,36,55,.04);
+    overflow:hidden;
+  }
+  .app-root table[data-mobile-cards] tbody>tr:not(.mobile-row-regular)>td{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:10px;min-height:35px;width:100%!important;
+    padding:7px 11px!important;
+    white-space:normal;text-align:right;
+    border-bottom:1px solid #edf1f5;
+    height:auto!important;
+    overflow-wrap:anywhere;
+  }
+  .app-root table[data-mobile-cards] tbody>tr:not(.mobile-row-regular)>td:last-child{border-bottom:0}
+  .app-root table[data-mobile-cards] tbody>tr:not(.mobile-row-regular)>td::before{
+    content:attr(data-mobile-label);
+    color:#6a7b8b;font-weight:600;font-size:11px;line-height:1.4;
+    flex:0 0 38%;text-align:left;
+  }
+  .app-root table[data-mobile-cards] tbody>tr:not(.mobile-row-regular)>td:not([data-mobile-label])::before,
+  .app-root table[data-mobile-cards] tbody>tr:not(.mobile-row-regular)>td[data-mobile-label=""]::before{display:none}
+  .app-root table[data-mobile-cards] tbody>tr:not(.mobile-row-regular)>td:has(.row-actions){justify-content:flex-end}
+  .app-root table[data-mobile-cards] tbody>tr:not(.mobile-row-regular)>td:has(.row-actions)::before{margin-right:auto}
+  .app-root table[data-mobile-cards] tbody>tr:not(.mobile-row-regular)>td.select-cell{min-height:30px}
+  .app-root table[data-mobile-cards] tbody>tr:not(.mobile-row-regular)>td.select-cell input{width:19px;height:19px}
+  .app-root table[data-mobile-cards] .table-title,
+  .app-root table[data-mobile-cards] .table-subtitle{text-align:right;white-space:normal;overflow-wrap:anywhere}
+  .app-root table[data-mobile-cards] tbody>tr.mobile-row-regular{display:table-row}
+  .app-root table[data-mobile-cards] tbody>tr.mobile-row-regular td{display:table-cell}
+  .app-root table[data-mobile-cards] .empty-cell{padding:18px!important;text-align:center!important}
+  .app-root table[data-mobile-cards] .empty-cell::before{display:none}
+}
+@media screen and (max-width:380px){
+  .lumeron-mobile-nav :is(a,button){font-size:9px}
+  .app-root .page-actions .btn{flex:1 1 auto}
+  .app-root .dialog-footer .btn{flex:1 1 100%}
+}
+@media print{
+  .lumeron-mobile-nav{display:none!important}
+}
