@@ -72,7 +72,7 @@ return [
     'ip' => 'O campo :attribute deve conter um endereço IP válido.',
     'ipv4' => 'O campo :attribute deve conter um endereço IPv4 válido.',
     'ipv6' => 'O campo :attribute deve conter um endereço IPv6 válido.',
-    'json' => 'O campo :attribute deve conter um JSON válido.',
+    'json' => 'Confira o formato dos dados em :attribute.',
     'list' => 'O campo :attribute deve conter uma lista de itens válida.',
     'lowercase' => 'O campo :attribute deve estar em letras minúsculas.',
     'lt' => [
@@ -156,8 +156,8 @@ return [
     'uploaded' => 'Não foi possível enviar o arquivo :attribute.',
     'uppercase' => 'O campo :attribute deve estar em letras maiúsculas.',
     'url' => 'O campo :attribute deve conter um endereço válido.',
-    'ulid' => 'O campo :attribute deve conter um ULID válido.',
-    'uuid' => 'O campo :attribute deve conter um UUID válido.',
+    'ulid' => 'O identificador informado em :attribute é inválido.',
+    'uuid' => 'O identificador informado em :attribute é inválido.',
 
     // Mensagens de uso diário do caixa, sem chaves técnicas nem nomes de arrays.
     'custom' => [
@@ -174,6 +174,18 @@ return [
         'amount' => [
             'gt' => 'Informe um valor maior que zero.',
         ],
+    ],
+
+    // Valores mencionados por validações condicionais também usam linguagem da tela.
+    'values' => [
+        'type' => ['payable'=>'conta a pagar', 'receivable'=>'conta a receber', 'income'=>'receita', 'expense'=>'despesa', 'entry'=>'entrada', 'exit'=>'saída', 'adjustment'=>'ajuste'],
+        'operation_type' => ['inbound'=>'entrada', 'outbound'=>'saída', 'sale'=>'venda', 'quote'=>'orçamento'],
+        'environment' => ['homologation'=>'homologação', 'production'=>'produção'],
+        'destination' => ['internal'=>'dentro do estado', 'interstate'=>'outro estado', 'foreign'=>'exterior'],
+        'purpose' => ['normal'=>'normal', 'complementary'=>'complemento', 'adjustment'=>'ajuste', 'return'=>'devolução', 'credit_note'=>'nota de crédito', 'debit_note'=>'nota de débito'],
+        'status' => ['draft'=>'rascunho', 'open'=>'em aberto', 'partial'=>'parcial', 'paid'=>'pago', 'cancelled'=>'cancelado', 'active'=>'ativo', 'paused'=>'pausado'],
+        'ie_indicator' => ['contributor'=>'contribuinte', 'exempt'=>'isento', 'non_contributor'=>'não contribuinte'],
+        'recipient_icms_indicator' => ['contributor'=>'contribuinte', 'exempt'=>'isento', 'non_contributor'=>'não contribuinte'],
     ],
 
     // Estes nomes também são usados quando a validação ocorre dentro de uma lista.
@@ -200,7 +212,7 @@ return [
         'payments.*.terminal_id' => 'terminal do pagamento',
         'cash_received' => 'valor recebido em dinheiro',
         'notes' => 'observação',
-        'items' => 'itens da venda',
+        'items' => 'itens',
         'items.*.item_type' => 'tipo do item',
         'items.*.product_id' => 'produto',
         'items.*.quantity' => 'quantidade do produto',

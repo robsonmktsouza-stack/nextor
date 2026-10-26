@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="{{ asset('css/login.css') }}?v={{ filemtime(public_path('css/login.css')) }}">
+<script defer src="{{ asset('js/user-messages.js') }}?v={{ filemtime(public_path('js/user-messages.js')) }}"></script>
 </head>
 <body class="lumeron-login">
   <main class="login-shell">
@@ -29,7 +30,6 @@
       </form>
       <a href="{{ route('login') }}" class="login-back-link">Voltar ao acesso</a>
     </section>
-    <footer class="login-copyright">A recuperação é individual para esta empresa.</footer>
   </main>
 </body>
 </html>
