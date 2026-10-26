@@ -1,0 +1,32 @@
+{
+  "id": "/",
+  "name": "Lumeron ERP",
+  "short_name": "Lumeron",
+  "description": "Gestão empresarial Lumeron ERP",
+  "lang": "pt-BR",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#eef2f6",
+  "theme_color": "#142437",
+  "icons": [
+    {
+      "src": "/pwa/lumeron-icon.svg",
+      "sizes": "any 192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/lumeron/elephant.png",
+      "sizes": "450x372",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa/lumeron-maskable.svg",
+      "sizes": "any 192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
