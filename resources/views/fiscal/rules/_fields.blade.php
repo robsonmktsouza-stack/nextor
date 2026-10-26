@@ -56,7 +56,7 @@
     @endforeach
     @foreach(['ipi'=>'IPI','pis'=>'PIS','cofins'=>'COFINS'] as $tax=>$label)<label class="field col-3"><span>Cálculo {{ $label }}</span><select name="tax_parameters[{{ $tax }}_calculation_type]"><option value="">Conforme CST</option><option value="percent" @selected(($parameters[$tax.'_calculation_type']??'')==='percent')>Percentual</option><option value="quantity" @selected(($parameters[$tax.'_calculation_type']??'')==='quantity')>Por quantidade</option></select></label>@endforeach
   </div>
-  <p>Campos vazios permanecem sem parametrização. Taxas e enquadramentos dependem de aprovação fiscal; cadastrar uma regra não comprova suporte ou homologação do cenário.</p>
+  <p>Confira os dados tributários antes de ativar a regra.</p>
 </details>
 @include('fiscal.nfe._additional-federal-taxes',['ruleMode'=>true,'federalParameters'=>$parameters])
 @include('fiscal.nfe._rtc-extra-fields',['ruleMode'=>true,'extraParameters'=>$parameters])
@@ -78,8 +78,8 @@
 </details>
 <details style="margin-top:12px" @if(!$rule) open @endif><summary>Fundamento e condições de aplicação</summary>
   <div class="editor-grid cols-12 settings-grid" style="margin-top:10px">
-    <label class="field col-3"><span>Versão do catálogo</span><input name="catalog_version" maxlength="32" value="{{ $value('catalog_version') }}"></label>
-    <label class="field col-3"><span>Revisão do modelo</span><select name="catalog_status"><option value="">Configuração existente</option>@foreach(['template'=>'Modelo para revisão','reviewed'=>'Revisada','custom'=>'Exceção personalizada revisada'] as $code=>$label)<option value="{{ $code }}" @selected($value('catalog_status')===$code)>{{ $label }}</option>@endforeach</select></label>
+    <label class="field col-3"><span>Referência do catálogo</span><input name="catalog_version" maxlength="32" value="{{ $value('catalog_version') }}"></label>
+    <label class="field col-3"><span>Situação da configuração</span><select name="catalog_status"><option value="">Configuração existente</option>@foreach(['template'=>'Modelo para revisão','reviewed'=>'Revisada','custom'=>'Exceção personalizada revisada'] as $code=>$label)<option value="{{ $code }}" @selected($value('catalog_status')===$code)>{{ $label }}</option>@endforeach</select></label>
     <div class="field col-6"><span>Aplicação automática do catálogo</span><label class="settings-switch"><input type="checkbox" name="fiscal_review_confirmed" value="1"><span><strong>Revisei os critérios e o fundamento desta regra</strong></span></label>@if($rule?->fiscal_reviewed_at)<small>Última revisão {{ $rule->fiscal_reviewed_at->format('d/m/Y H:i') }}</small>@endif</div>
     <label class="field col-6"><span>Fonte oficial (URL HTTPS)</span><input name="legal_source" type="url" maxlength="2000" value="{{ $value('legal_source') }}"></label>
     <label class="field col-6"><span>Norma ou tabela</span><input name="legal_reference" maxlength="255" value="{{ $value('legal_reference') }}"></label>
