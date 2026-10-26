@@ -1,3 +1,14 @@
+## 26/10/2026 — Mobile-first: revisão após primeiro teste no celular
+
+- Feedback: a primeira PWA estava apenas condensando a interface desktop. Corrigida a arquitetura visual na `feature/lumeron-mobile` sem alterar `main`, `develop`, `control-center` ou VPS.
+- Criados Blade `partials/mobile-home`, `mobile-finance-dashboard`, `mobile-products-list`, `mobile-customers-list`, `mobile-sales-list` e CSS `public/css/mobile-native.css`. Layout app recebeu cabeçalho mobile próprio com ação contextual e acesso ao menu; sidebar mobile inclui logout.
+- `dashboard.blade.php` e `finance/dashboard.blade.php` mantêm HTML desktop para larguras grandes e exibem componentes distintos em celular. Listagens de produtos/clientes/vendas renderizam cartões específicos, com mesmos dados, rotas, permissões e paginação. Formulário de nova venda recebeu etapas navegáveis e cartões verticais para itens/parcelas, mantendo submissão e cálculos existentes.
+- Segurança: recursos condicionados às permissões e módulos contratados. Não houve alterações de controllers, rotas, serviços, estoque, financeiro persistido, fiscal ou banco. Cabeçalho com ações ainda necessárias de módulos não migrados foi preservado.
+- CI Lumeron Mobile PWA do commit `8163f91`: **6 testes e 76 asserções aprovados**. Isolamento CNPJ e regressão RTC/NFC-e também aprovados. Testes completos PHPUnit/ACBr ainda não tinham resultado final na consulta deste registro.
+- Pendente validação visual e funcional real em Android/iOS, inclusive venda completa, teclados, modais e seleção; demais módulos (Fiscal, Estoque detalhado, Compras e configurações) ainda precisarão de apresentações mobile próprias. Não declarar pronto para produção.
+- Para atualizar Laragon: no worktree `C:\laragon\www\nextor-mobile`, `git pull --ff-only origin feature/lumeron-mobile`; executar `php artisan optimize:clear`; reiniciar servidor da porta 8002 caso necessário e recarregar a página no celular. Não rodar migrations/destruir dados.
+
+
 ## 26/10/2026 — Lumeron Mobile: implementação PWA e responsividade na feature branch
 
 - Repositório `robsonmktsouza-stack/nextor`, branch `feature/lumeron-mobile`, origem `develop`. Implementação registrada no PR rascunho #23 para execução de CI, sem merge nem deploy.
