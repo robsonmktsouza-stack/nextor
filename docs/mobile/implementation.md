@@ -8,7 +8,7 @@
 ## Recursos implementados
 
 - `public/manifest.webmanifest`: manifesto PWA com escopo e origem relativos, título, idioma, cores e modo standalone. O arquivo estático é servido pela instância/subdomínio; o navegador não compartilha uma PWA com outro CNPJ.
-- `public/pwa/lumeron-icon.svg`, `lumeron-maskable.svg`: ícones SVG que incorporam exatamente a marca oficial `public/images/lumeron/elephant.png`; original PNG como fallback. **Pendente de comprovação de instalabilidade e qualidade visual em Chrome Android/Safari iOS**. Caso algum navegador exija PNG quadrado, criar versões PNG 192/512 e Apple touch icon quadrado da marca original.
+- `public/pwa/icons/`: PNGs quadrados reais 192×192, 512×512, maskable 512×512 e Apple touch 180×180 gerados da marca oficial com `docs/mobile/generate-icons.py`. A marca original não foi alterada. Os SVGs continuam disponíveis como alternativa. A instalação e a qualidade visual em Android/iOS precisam de teste real.
 - `public/sw.js`: registra apenas página offline genérica e pública no Cache Storage; páginas HTML autenticadas e documentos/solicitações ficam em rede, sem API ou armazenamento de dados do ERP. Não faz reenvio de vendas, escrituração, NF-e/NFC-e nem operações financeiras.
 - `public/pwa/offline.html`: comunicação de indisponibilidade sem informações comerciais.
 - `public/js/mobile-pwa.js`: registro em HTTPS/localhost, sincronização de menu acessível, fechamento de navegação, adaptação progressiva de tabelas de consulta com rótulos e seleção em massa existente.
@@ -31,7 +31,7 @@ O PWA é **online-first**. O Service Worker intercepta somente navegação GET e
 4. Verificar **Application > Cache Storage**: só `/pwa/offline.html`; o login, produtos, XML, PDF, fiscal, vendas e API jamais aparecem no cache.
 5. Testar as telas em 320, 360, 375, 390, 430, 768, 1024 e 1366px, rotação, zoom, teclado virtual e barras de ações com botões persistentes.
 6. Exercitar fluxo completo de PDV, orçamento, estoque, financeiro e fiscal online — criação, validações, correções, erros, impressão e bloqueios.
-7. Verificar a experiência da PWA instalada em navegadores que exigem raster 192/512; SVG `any` mais PNG não quadrado **não substituem teste prático**.
+7. Verificar a experiência da PWA instalada em navegadores que exigem PNG quadrado 192/512 e `maskable`. Arquivos e dimensões estão versionados e testados, mas **não substituem a verificação prática de instalação**.
 8. Validar que o mecanismo de atualização do SW não interrompa processos de edição.
 9. Garantir que mudanças nesta branch não impactem main, develop, control-center, instalações clientes ou VPS sem autorização.
 
@@ -49,5 +49,11 @@ php artisan serve --host=127.0.0.1 --port=8001
 ```
 
 Abra `http://127.0.0.1:8001`; para instalação externa use **HTTPS**. Testes de usuário/de produção ficam bloqueados até validação de fluxos e aceite de release.
+
+## CI observado em 26/10/2026
+- Workflow **Lumeron Mobile PWA** concluído com sucesso na revisão `550b2e6`: validação do manifesto, sintaxe de JavaScript e testes de interface/PWA (incluindo dimensões reais dos ícones PNG).
+- Workflows de isolamento por CNPJ e regressão RTC/NFC-e também concluíram com sucesso nessa revisão.
+- A suíte PHPUnit **completa** da primeira revisão reportou 4 falhas em `FiscalConciseLayoutTest` e `NfeEditorTest`. Esses arquivos fiscais não foram modificados pelo mobile; não houve execução independente da `develop` para atribuir oficialmente a origem das falhas. Não corrigir módulos fiscais fora do escopo sem revisão própria.
+- Execução física Chrome Android/Safari iOS e instalação standalone ainda não realizadas.
 
 **Não feito aqui:** publicação/instalação na VPS, modificação de banco, migrações, teste visual em aparelho físico, verificação de SEFAZ, provas de installability no navegador.
