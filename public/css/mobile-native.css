@@ -1,6 +1,7 @@
 /* Lumeron Mobile — own interface, not the desktop scaled down.
    This last-loaded stylesheet is screen-only and never changes fiscal output. */
 .lm-appbar,.lm-home,.lm-finance-home,.lm-native-list,.lm-sidebar-account{display:none}
+.lm-sale-jump{display:none}
 @media screen and (max-width:760px){
   :root{
     --lm-ink:#192c3c;--lm-sub:#758799;--lm-blue:#176da9;
