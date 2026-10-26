@@ -125,6 +125,7 @@
         </select>
         <button class="bulk-apply" type="button" data-bulk-apply disabled>Aplicar</button>
       </div>
+      @endif
     </div>
 
     <div class="grid-actions-right">
