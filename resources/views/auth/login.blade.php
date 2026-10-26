@@ -7,11 +7,16 @@
   <meta name="robots" content="noindex,nofollow">
   <title>Entrar · Lumeron</title>
   <link rel="icon" type="image/png" href="{{ asset('images/lumeron/elephant.png') }}">
+<link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
+<link rel="apple-touch-icon" href="{{ asset('images/lumeron/elephant.png') }}">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="{{ asset('css/login.css') }}?v={{ filemtime(public_path('css/login.css')) }}">
   <script src="{{ asset('js/login.js') }}?v={{ filemtime(public_path('js/login.js')) }}" defer></script>
+<script defer src="{{ asset('js/mobile-pwa.js') }}?v={{ filemtime(public_path('js/mobile-pwa.js')) }}"></script>
 </head>
 <body class="lumeron-login">
   <main class="login-shell">
