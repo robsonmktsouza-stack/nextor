@@ -36,7 +36,7 @@
   <section class="editor-panel settings-panel">
     <div class="settings-panel-head">
       <div><h2>Dados gerais</h2></div>
-      @if($editing)<span class="status status-blue">Revisão {{ $group->revision }}</span>@endif
+      
     </div>
     <div class="editor-grid cols-12 settings-grid">
       <label class="field col-6"><span>Descrição</span><input required maxlength="160" name="name" value="{{ old('name',$group->name) }}" placeholder="Ex.: Venda de mercadorias — revisão contábil"></label>
@@ -172,10 +172,7 @@
     <summary class="btn btn-secondary" style="cursor:pointer;display:inline-flex">Outros tributos</summary>
   <section class="editor-panel settings-panel" data-group-kind="products" @if($selectedKind==='services') hidden @endif>
     <div class="settings-panel-head"><div><h2>IBS / CBS</h2></div></div>
-    <details class="erp-help-details">
-      <summary>Regras de enquadramento IBS/CBS</summary>
-      <p>CST 000 / 000001: tributação integral. CST 200 / 200003: redução de 100% para produtos legalmente enquadrados no Anexo I. Confira a classificação com a contabilidade. Não atribua alíquotas presumidas ao Simples Nacional.</p>
-    </details>
+    
     <div class="editor-grid cols-12 settings-grid">
       <label class="field col-3"><span>CST IBS/CBS</span><input maxlength="3" inputmode="numeric" name="tax_config[ibs_cbs_cst]" value="{{ $val('ibs_cbs_cst') }}"></label>
       <label class="field col-3"><span>Classificação tributária</span><input maxlength="6" inputmode="numeric" name="tax_config[ibs_cbs_class]" value="{{ $val('ibs_cbs_class') }}"></label>
