@@ -43,23 +43,13 @@
         <td>{{ $entry->description }}</td>
         <td>{{ $entry->uf ?: 'Todas' }}</td>
         <td>{{ $entry->valid_until?->format('d/m/Y') ?? 'Sem prazo definido' }}</td>
-        <td><span class="status status-muted">{{ ['reference'=>'Disponível','template'=>'Padrão','revoked'=>'Revogada'][$entry->status] ?? $entry->status }}</span></td>
+        <td><span class="status status-muted">{{ ['reference'=>'Referência','template'=>'Não habilitado','revoked'=>'Revogada'][$entry->status] ?? $entry->status }}</span></td>
         <td>
-          @if(count($entry->conditions ?? []) || data_get($entry->source,'url'))
-          <details class="catalog-row-details">
-            <summary class="table-link">Ver detalhes</summary>
-            <div class="catalog-row-detail-body">
-              @foreach(($entry->conditions ?? []) as $condition)
-                @if(is_string($condition) && trim($condition)!=='')
-                  <p>{{ $condition }}</p>
-                @endif
-              @endforeach
-              @if(data_get($entry->source,'url'))
-                <a class="table-link" href="{{ data_get($entry->source,'url') }}" target="_blank" rel="noopener noreferrer">Consultar legislação</a>
-              @endif
-            </div>
-          </details>
-          @else <span class="table-subtitle">—</span> @endif
+          @if(data_get($entry->source,'url'))
+            <a class="table-link" href="{{ data_get($entry->source,'url') }}" target="_blank" rel="noopener noreferrer">Consultar legislação</a>
+          @else
+            <span class="table-subtitle">—</span>
+          @endif
         </td>
       </tr>
     @empty<tr><td colspan="6" class="empty-cell">Nenhum registro encontrado para esta tabela e versão.</td></tr>@endforelse</tbody>
@@ -79,16 +69,13 @@
   </form>
   @php($coverageLabels=['complete'=>'Completa','partial'=>'Parcial','not_bundled'=>'Sem tabela validada','unavailable'=>'Fonte indisponível'])
   <div class="table-scroll"><table class="cms-table">
-    <thead><tr><th>UF</th><th>NCM</th><th>CFOP</th><th>CEST</th><th>cBenef</th><th>Condições estaduais</th></tr></thead>
+    <thead><tr><th>UF</th><th>NCM</th><th>CFOP</th><th>CEST</th><th>cBenef</th><th>Observação</th></tr></thead>
     <tbody>@foreach($coverageByUf as $state=>$domains)<tr>
       <td><strong>{{ $state }}</strong></td>
       @foreach(['ncm','cfop','cest','benefit'] as $domain)
         <td><a class="table-link" href="{{ route('fiscal.catalog.index',['release'=>$release?->id,'kind'=>$domain,'uf'=>$state,'date'=>$coverageDate]) }}">{{ $coverageLabels[$domains[$domain]['status']] ?? 'Sem tabela validada' }}</a></td>
       @endforeach
-      <td>@if(!empty($domains['benefit']['note']) || !empty($domains['benefit']['conditions']))<details><summary class="table-link">Consultar</summary>
-        @if(!empty($domains['benefit']['note']))<p>{{ $domains['benefit']['note'] }}</p>@endif
-        @foreach(($domains['benefit']['conditions']??[]) as $condition)<p>{{ $condition }}</p>@endforeach
-      </details>@endif</td>
+      <td><span class="table-subtitle">{{ ($domains['benefit']['status'] ?? '')==='complete' ? 'Consulte os benefícios disponíveis' : 'Consulte a situação da UF' }}</span></td>
     </tr>@endforeach</tbody>
   </table></div>
 
