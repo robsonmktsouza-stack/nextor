@@ -8,9 +8,6 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('purchase_items', function (Blueprint $table) {
-            $table->dropUnique(['purchase_id', 'product_id']);
-        });
-        Schema::table('purchase_items', function (Blueprint $table) {
             $table->foreignId('product_id')->nullable()->change();
             $table->string('source_code', 80)->nullable();
             $table->string('source_description', 190)->nullable();
@@ -19,7 +16,6 @@ return new class extends Migration {
             $table->string('source_cfop', 4)->nullable();
             $table->string('source_ean', 32)->nullable();
             $table->unsignedInteger('source_number')->nullable();
-            $table->unique(['purchase_id', 'product_id']);
         });
     }
 
@@ -29,10 +25,8 @@ return new class extends Migration {
             throw new \RuntimeException('Vincule todos os itens importados antes de reverter esta migração.');
         }
         Schema::table('purchase_items', function (Blueprint $table) {
-            $table->dropUnique(['purchase_id', 'product_id']);
             $table->dropColumn(['source_code','source_description','source_unit','source_ncm','source_cfop','source_ean','source_number']);
             $table->foreignId('product_id')->nullable(false)->change();
-            $table->unique(['purchase_id', 'product_id']);
         });
     }
 };
