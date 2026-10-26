@@ -128,3 +128,53 @@
  .purchase-bottom-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
  .purchase-sum-total{grid-column:span 2}
 }
+
+
+/* Ações da compra: evitar conflito entre estilos globais de .btn e .grid-tool. */
+.sales-module-card > .grid-actionbar .grid-actions-left .purchase-action-edit,
+.sales-module-card > .grid-actionbar .grid-actions-left .purchase-action-receive,
+.sales-module-card > .grid-actionbar .grid-actions-left .purchase-action-cancel {
+  opacity:1;
+  visibility:visible;
+  text-shadow:none;
+  font-family:inherit;
+  font-size:12px;
+  font-weight:600;
+  line-height:1.3;
+  min-height:34px;
+  border-radius:4px;
+  box-shadow:none;
+}
+.sales-module-card > .grid-actionbar .grid-actions-left .purchase-action-edit {
+  color:#fff;
+  background-color:#287eae;
+  border:1px solid #216d98;
+}
+.sales-module-card > .grid-actionbar .grid-actions-left .purchase-action-edit:hover {
+  color:#fff;
+  background-color:#216d98;
+}
+.sales-module-card > .grid-actionbar .grid-actions-left .purchase-action-receive {
+  color:#fff;
+  background-color:#218357;
+  border:1px solid #1a6c47;
+}
+.sales-module-card > .grid-actionbar .grid-actions-left .purchase-action-receive:hover {
+  color:#fff;
+  background-color:#1a6c47;
+}
+.sales-module-card > .grid-actionbar .grid-actions-left .purchase-action-cancel {
+  color:#a23b39;
+  background-color:#fff;
+  border:1px solid #d5a6a3;
+}
+.sales-module-card > .grid-actionbar .grid-actions-left .purchase-action-cancel:hover {
+  color:#892b2a;
+  background-color:#fff4f3;
+  border-color:#b96b66;
+}
+.sales-module-card > .grid-actionbar .grid-actions-left :is(.purchase-action-edit,.purchase-action-receive,.purchase-action-cancel) svg {
+  color:inherit;
+  stroke:currentColor;
+  opacity:1;
+}
