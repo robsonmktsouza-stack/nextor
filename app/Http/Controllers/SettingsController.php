@@ -196,6 +196,10 @@ class SettingsController extends Controller
         [$rules,$booleanKeys,$secretKeys]=$this->groupRules($group);
         $data=$request->validate($rules);
 
+        if ($group==='accounting' && isset($data['sefaz_xml_authorized_cnpj'])) {
+            $data['sefaz_xml_authorized_cnpj']=preg_replace('/\\D/','',(string)$data['sefaz_xml_authorized_cnpj']);
+        }
+
         if ($group==='accounting' && isset($data['accountant_document'])) {
             $data['accountant_document']=preg_replace('/\D/','',$data['accountant_document']);
         }
@@ -638,7 +642,9 @@ class SettingsController extends Controller
                     if (!BrazilianTaxId::valid((string)$value)) $fail('Informe um CPF ou CNPJ válido para o contador.');
                 }],
                 'accountant_xml_authorized'=>['nullable','boolean'],
-                'nfe_ba_sefaz_xml_authorized'=>['nullable','boolean'],
+                'sefaz_xml_authorized_cnpj'=>['nullable','string','max:18',function($attribute,$value,$fail){
+                    if (trim((string)$value)!=='' && (!preg_match('/^\\d{14}$/',preg_replace('/\\D/','',(string)$value)) || !BrazilianTaxId::valid((string)$value))) $fail('Informe um CNPJ válido autorizado pela SEFAZ.');
+                }],
                 'crc'=>['nullable','string','max:40'],
                 'email'=>['nullable','email','max:255'],
                 'phone'=>['nullable','string','max:30'],
@@ -646,7 +652,7 @@ class SettingsController extends Controller
                 'cost_center_enabled'=>['nullable','boolean'],
                 'automatic_monthly_export'=>['nullable','boolean'],
                 'notes'=>['nullable','string','max:3000'],
-            ],['cost_center_enabled','automatic_monthly_export','accountant_xml_authorized','nfe_ba_sefaz_xml_authorized'],[]],
+            ],['cost_center_enabled','automatic_monthly_export','accountant_xml_authorized'],[]],
 
             'integrations'=>[[
                 'smtp_enabled'=>['nullable','boolean'],
