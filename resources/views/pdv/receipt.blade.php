@@ -159,7 +159,7 @@ body.receipt-pdf-source .receipt-copy+.receipt-copy{margin-top:0!important}
     <div class="receipt-alert">{{ session('error') }}</div>
   @endif
   @if($nfceDocument)
-    <strong>NFC-e da venda #{{ $sale->id }}: {{ $nfceDocument->status === 'prepared' ? 'preparada para revisão' : $nfceDocument->status }}</strong>
+    <strong>NFC-e da venda #{{ $sale->id }}: {{ match($nfceDocument->status) { 'prepared'=>'Preparada', 'authorized'=>'Autorizada', 'cancelled'=>'Cancelada', 'rejected'=>'Rejeitada', 'pending'=>'Aguardando confirmação', 'processing'=>'Processando', 'error','failed'=>'Falha na emissão', 'offline_print_pending'=>'Pendente de autorização', default=>'Em análise' } }}</strong>
     <p>A venda foi concluída e o documento fiscal está vinculado a ela. Cancelar a impressão não altera a NFC-e.</p>
     @if($canPrintDanfe)
       <p><a class="action" href="{{ route('pdv.nfce.danfe',$nfceDocument) }}" target="_blank" rel="noopener noreferrer">
@@ -172,7 +172,7 @@ body.receipt-pdf-source .receipt-copy+.receipt-copy{margin-top:0!important}
       <p>Solicite a um usuário com permissão fiscal que revise o documento.</p>
     @endif
   @else
-    <strong>Venda #{{ $sale->id }} concluída — NFC-e ainda não preparada</strong>
+    <strong>Venda #{{ $sale->id }} concluída — NFC-e pendente</strong>
     <p>O estoque e o financeiro desta venda já foram registrados. Não registre outra venda para tentar gerar a nota.</p>
     @if($canPrepareNfce)
       <form method="post" action="{{ route('pdv.receipt.nfce.prepare', $sale) }}">
