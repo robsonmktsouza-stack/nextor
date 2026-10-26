@@ -218,10 +218,10 @@ body{font-size:13.5px;font-weight:400;}
 
 .switch-field{height:39px;display:flex;align-items:center;gap:10px;border:1px solid #c9d0d8;border-radius:4px;background:#e8eaec;padding:0 12px;cursor:pointer}
 .switch-field input[type=checkbox]{position:absolute;opacity:0;pointer-events:none}
-.switch-track{position:relative;width:34px;height:18px;border-radius:999px;background:#c2c8cf;transition:.15s}
-.switch-track:after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0003;transition:.15s}
-.switch-field input:checked+.switch-track{background:#4f9ce9}
-.switch-field input:checked+.switch-track:after{transform:translateX(16px)}
+.switch-track{position:relative;width:var(--ui-switch-width);height:var(--ui-switch-height);border-radius:999px;background:var(--ui-switch-off);transition:.15s}
+.switch-track:after{content:'';position:absolute;top:var(--ui-switch-inset);left:var(--ui-switch-inset);width:var(--ui-switch-thumb);height:var(--ui-switch-thumb);border-radius:50%;background:#fff;box-shadow:var(--ui-switch-thumb-shadow);transition:.15s}
+.switch-field input:checked+.switch-track{background:var(--ui-switch-on)}
+.switch-field input:checked+.switch-track:after{transform:translateX(calc(var(--ui-switch-width) - var(--ui-switch-thumb) - 2 * var(--ui-switch-inset)))}
 .switch-field strong{font-size:12px;font-weight:600;color:#65717e}
 
 .editor-savebar{position:fixed;z-index:45;left:200px;right:0;bottom:0;display:flex;justify-content:flex-end;align-items:center;gap:8px;margin:0;padding:12px 18px;border-top:1px solid #d9e0e7;background:#ffffffee;backdrop-filter:blur(8px);box-shadow:0 -8px 24px #1424370a}
@@ -439,7 +439,7 @@ body.is-loading *{cursor:wait!important}
 .product-editor .field input,.product-editor .field textarea{min-height:39px;border:1px solid #c9d0d8;border-radius:4px;background:#fff;color:#4b5969;padding:8px 11px;font-size:13px}
 .product-editor .field textarea{min-height:90px}
 .product-editor .ui-select-trigger{height:39px;border-color:#c9d0d8;background:#fff;font-size:13px}
-.product-editor .switch-field input:checked+.switch-track{background:#19a39d}
+
 .product-editor .editor-panel h3{font-size:15px;font-weight:600;color:#596676;margin-bottom:20px}
 
 .input-prefix{display:flex;align-items:stretch;width:100%}
@@ -2993,7 +2993,7 @@ body{
   border-color:#cbd5de;
 }
 .nfe-workspace-dialog .switch-field input:checked + .switch-track{
-  background:#4f9ce9;
+  background:var(--ui-switch-on);
 }
 .nfe-workspace-dialog .switch-field input:checked ~ strong{
   color:#38566f;

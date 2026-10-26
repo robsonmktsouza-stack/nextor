@@ -13,6 +13,13 @@
   --ui-action-height:34px;
   --ui-icon-button-size:32px;
   --ui-icon-size:16px;
+  --ui-switch-width:34px;
+  --ui-switch-height:18px;
+  --ui-switch-thumb:14px;
+  --ui-switch-inset:2px;
+  --ui-switch-on:#4f9ce9;
+  --ui-switch-off:#c2c8cf;
+  --ui-switch-thumb-shadow:0 1px 2px rgba(0,0,0,.2);
   --pdv-checkout-control-height:42px;
   --pdv-money-control-height:56px;
   --pdv-money-control-font-size:24px;

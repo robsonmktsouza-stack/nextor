@@ -5,10 +5,10 @@
 .fiscal-purchases-switch-button{box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:9px;height:var(--ui-action-height,34px);min-height:var(--ui-action-height,34px);padding:0 10px;border:1px solid var(--ui-border,#cbd6df);border-radius:var(--ui-control-radius,4px);background:#fff;color:var(--ui-text,#43576c);font-size:var(--lumeron-small,12px);font-weight:600;white-space:nowrap;cursor:pointer}
 .fiscal-purchases-switch-button:hover{background:#f7f9fb;border-color:#bdcdd9}
 .fiscal-purchases-switch-button:focus-visible{outline:2px solid var(--ui-focus,#2f83bf);outline-offset:2px}
-.fiscal-purchases-switch-track{display:inline-flex;align-items:center;width:30px;height:17px;border-radius:20px;background:#b4c1cc;padding:3px;box-sizing:border-box;transition:background .15s}
-.fiscal-purchases-switch-thumb{display:block;width:11px;height:11px;background:#fff;border-radius:50%;box-shadow:0 1px 2px #12263830;transition:transform .15s}
-.fiscal-purchases-switch-button[aria-checked="true"] .fiscal-purchases-switch-track{background:#2c9a55}
-.fiscal-purchases-switch-button[aria-checked="true"] .fiscal-purchases-switch-thumb{transform:translateX(13px)}
+.fiscal-purchases-switch-track{display:inline-flex;align-items:center;width:var(--ui-switch-width);height:var(--ui-switch-height);border-radius:999px;background:var(--ui-switch-off);padding:var(--ui-switch-inset);box-sizing:border-box;transition:background .15s}
+.fiscal-purchases-switch-thumb{display:block;width:var(--ui-switch-thumb);height:var(--ui-switch-thumb);background:#fff;border-radius:50%;box-shadow:var(--ui-switch-thumb-shadow);transition:transform .15s}
+.fiscal-purchases-switch-button[aria-checked="true"] .fiscal-purchases-switch-track{background:var(--ui-switch-on)}
+.fiscal-purchases-switch-button[aria-checked="true"] .fiscal-purchases-switch-thumb{transform:translateX(calc(var(--ui-switch-width) - var(--ui-switch-thumb) - 2 * var(--ui-switch-inset)))}
 .fiscal-purchases-notice{display:flex;align-items:center;gap:7px;padding:8px 14px;background:#fff8ed;border-bottom:1px solid #ead6bd;color:#865824;font-size:var(--lumeron-small,12px)}
 .fiscal-purchases-notice svg{flex:none}
 .fiscal-purchases-toolbar-filters .table-search-group{flex:1 1 290px;width:420px}
