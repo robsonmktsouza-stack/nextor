@@ -1,3 +1,13 @@
+## 26/10/2026 — Lumeron Mobile: implementação PWA e responsividade na feature branch
+
+- Repositório `robsonmktsouza-stack/nextor`, branch `feature/lumeron-mobile`, origem `develop`. Implementação registrada no PR rascunho #23 para execução de CI, sem merge nem deploy.
+- Criados `public/manifest.webmanifest`, `public/sw.js`, página pública `public/pwa/offline.html`, `public/js/mobile-pwa.js`, `public/css/mobile.css`, `public/css/mobile-pdv.css`, navegação inferior Blade respeitando permissões/licenças, listas mobile para Produtos/Serviços/Clientes/Vendas/Estoque/Compras e adequação dos layouts administrativo/PDV/login.
+- A instalação é por origem/subdomínio e CNPJ isolado; o SW mantém somente a página genérica offline, nunca cacheia HTML autenticado, XML/PDF, contas, notas, estoque, API ou credenciais. Sem operação fiscal/comercial offline fictícia.
+- Ícones PNG oficiais 192/512, maskable 512 e Apple 180, além de SVG, versionados em `public/pwa`. Produzidos pela rotina `docs/mobile/generate-icons.py` a partir do elefante oficial sem substituí-lo. Manifest e Apple touch icon ajustados.
+- Testes `tests/Feature/LumeronMobilePwaTest.php` verificam manifesto, ícones/dimensões, segurança do SW, assets/layout e listagens. Workflow `Lumeron Mobile PWA` na revisão `550b2e6` **passou** (instalação Composer, sintaxe JS, manifesto e testes). Também passaram nessa revisão workflows de isolamento CNPJ e regressão RTC/NFC-e.
+- Suíte PHPUnit geral foi executada na revisão `50f03a3`: 609 testes, 4185 asserções, 4 falhas em `FiscalConciseLayoutTest` e `NfeEditorTest`; nenhum desses arquivos fiscais foi alterado pela branch mobile. Não demonstrado ainda se as falhas se reproduzem na `develop`; não corrigir módulo fora do escopo sem análise.
+- Sem testes reais em smartphones, Lighthouse, impressão/caixa/SEFAZ, homologação de instalação, mutação de banco, alteração de VPS, main, develop ou control-center. Antes de declarar pronto para produção, seguir `docs/mobile/implementation.md` e validar dispositivos, processos, regressões e aprovação do proprietário.
+
 ## 26/10/2026 — Lumeron Mobile: auditoria de arquitetura anterior à implementação (feature/lumeron-mobile)
 
 - Branch criada a partir de `develop` e confirmada sem divergência antes da auditoria; ambiente `main`, `develop`, `control-center` e VPS preservados.
