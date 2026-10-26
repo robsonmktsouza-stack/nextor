@@ -113,6 +113,11 @@ final class LumeronMobilePwaTest extends TestCase
         $this->get(route('customers.index'))->assertOk()->assertSee('lm-customers-list');
         $this->get(route('sales.index'))->assertOk()->assertSee('lm-sales-list');
         $this->get(route('finance.dashboard'))->assertOk()->assertSee('lm-finance-home');
+        $this->get(route('sales.create'))->assertOk()
+            ->assertSee('lm-sale-jump')
+            ->assertSee('lm-sale-customer')
+            ->assertSee('lm-sale-cart')
+            ->assertSee('lm-sale-checkout');
     }
 
     public function test_mobile_listing_cards_are_opt_in_only(): void
