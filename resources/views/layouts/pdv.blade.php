@@ -23,6 +23,7 @@
 <link rel="stylesheet" href="{{ asset('css/desktop-polish.css') }}?v={{ filemtime(public_path('css/desktop-polish.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/erp-typography.css') }}?v={{ filemtime(public_path('css/erp-typography.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/commercial-readonly.css') }}?v={{ filemtime(public_path('css/commercial-readonly.css')) }}">
+<link rel="stylesheet" href="{{ asset('css/mobile-pdv.css') }}?v={{ filemtime(public_path('css/mobile-pdv.css')) }}">
 <script defer src="{{ asset('js/commercial-readonly.js') }}?v={{ filemtime(public_path('js/commercial-readonly.js')) }}"></script>
 <script defer src="{{ asset('js/mobile-pwa.js') }}?v={{ filemtime(public_path('js/mobile-pwa.js')) }}"></script>
 <script defer src="{{ asset('js/erp.js') }}?v={{ filemtime(public_path('js/erp.js')) }}"></script>
