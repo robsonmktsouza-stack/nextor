@@ -42,6 +42,8 @@
 #nfeItemDialog .nfe-item-additional-federal-grid>.field>select{box-sizing:border-box!important;width:100%!important;min-width:0!important}
 @media(max-width:750px){#nfeItemDialog .nfe-item-additional-federal-grid>.field.col-2,#nfeItemDialog .nfe-item-additional-federal-grid>.field.col-3{grid-column:span 6!important}}
 
+/* Títulos internos: evitar repetição do nome do grupo e separar apenas subdivisões necessárias. */
+#nfeItemDialog .nfe-item-inline-caption{font-size:12px;font-weight:600;color:#446257;margin:18px 0 10px;padding:0 0 7px;border-bottom:1px solid #e1e8e3}
 /* Subpainéis RTC e separação das seções fiscais: evitar cabeçalhos colados. */
 #nfeItemDialog .nfe-rtc-extra-panel{display:block!important;margin:16px 0!important;padding:0!important;border:1px solid #dce5e0!important;border-radius:3px!important;background:#fff!important;overflow:hidden!important}
 #nfeItemDialog .nfe-rtc-extra-panel>summary{display:flex!important;align-items:center!important;min-height:46px!important;box-sizing:border-box!important;padding:12px 16px!important;margin:0!important;background:#f2f6f4!important;color:#36584c!important;font-size:12px!important;font-weight:600!important;line-height:1.4!important;cursor:pointer!important;list-style:none!important}
@@ -936,7 +938,7 @@ $origins=[
       </summary>
       <div class="nfe-item-section-content">
       <div class="editor-panel">
-        <h3>Identificação fiscal do produto</h3>
+        
         <div class="editor-grid cols-12">
           <label class="field col-3"><span>NCM *</span><input id="nfeItemNcm" maxlength="10"></label>
           <label class="field col-3"><span>CEST</span><input id="nfeItemCest" maxlength="10"></label>
@@ -956,7 +958,7 @@ $origins=[
       </div>
 
       <div class="editor-panel">
-        <h3>CFOP cadastrado no produto</h3>
+        <div class="nfe-item-inline-caption">CFOP cadastrado no produto</div>
         <div class="editor-grid cols-12">
           <label class="field col-3"><span>Saída interna</span><input id="nfeCfopOutboundInternal" maxlength="10"></label>
           <label class="field col-3"><span>Saída interestadual</span><input id="nfeCfopOutboundInterstate" maxlength="10"></label>
@@ -971,7 +973,7 @@ $origins=[
     </details>
 
     <div class="editor-panel nfe-tax-review" aria-label="Resumo dos códigos tributários">
-      <div class="nfe-tax-review-heading"><h3>Tributação do item</h3><span>Confira os códigos antes de salvar</span></div>
+      <div class="nfe-tax-review-heading"><span>Confira os códigos antes de salvar</span></div>
       <div class="nfe-tax-review-grid">
         <button type="button" data-nfe-open-section="item-icms"><small>ICMS</small><strong id="nfeTaxSummaryIcms">Não informado</strong></button>
         <button type="button" data-nfe-open-section="item-federal"><small>PIS</small><strong id="nfeTaxSummaryPis">Não informado</strong></button>
@@ -1077,7 +1079,7 @@ $origins=[
       </summary>
       <div class="nfe-item-section-content">
       <div class="editor-panel">
-        <h3>ICMS destino / FCP</h3>
+        
 
         <div class="editor-grid cols-12">
           <label class="field col-4"><span>ICMS interestadual %</span><input id="nfeTaxInterstateRate" type="number" step="0.0001"></label>
@@ -1100,7 +1102,7 @@ $origins=[
       </summary>
       <div class="nfe-item-section-content">
       <div class="editor-panel">
-        <h3>Combustível / ANP</h3>
+        
         <div class="editor-grid cols-12">
           <div class="field col-3"><span>Derivado de petróleo?</span>
             <label class="switch-field"><input type="checkbox" id="nfeSpecialPetroleum"><span class="switch-track"></span><strong data-switch-label>Sim</strong></label>
@@ -1115,7 +1117,7 @@ $origins=[
       </div>
 
       <div class="editor-panel">
-        <h3>Lote e produto específico</h3>
+        <div class="nfe-item-inline-caption">Lote e produto específico</div>
         <div class="editor-grid cols-12">
           <label class="field col-3"><span>Lote</span><input id="nfeSpecialBatch"></label>
           <label class="field col-3"><span>Vencimento</span><input id="nfeSpecialExpiry" type="date"></label>
