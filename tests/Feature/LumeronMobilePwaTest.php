@@ -107,8 +107,8 @@ final class LumeronMobilePwaTest extends TestCase
 
         $this->get(route('products.index'))->assertOk()
             ->assertSee('lm-products-list')
-            ->assertSee('lm-card-main')
-            ->assertSee('lm-native-list');
+            ->assertSee('lm-native-list')
+            ->assertSee('Nenhum produto encontrado.');
 
         $this->get(route('customers.index'))->assertOk()->assertSee('lm-customers-list');
         $this->get(route('sales.index'))->assertOk()->assertSee('lm-sales-list');
