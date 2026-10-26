@@ -6,6 +6,15 @@
 @push('styles')
 <style>
 /* Refinamento visual exclusivo do editor NF-e; sem alteração de regras fiscais. */
+#nfeEditorDialog .nfe-nature-combobox{position:relative;flex:1;min-width:0}
+#nfeEditorDialog .nfe-nature-combobox #nfeNatureSearch{width:100%;padding-right:28px;background:#fff}
+#nfeEditorDialog .nfe-nature-native{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;left:0;bottom:0;min-height:0!important;padding:0!important;border:0!important}
+#nfeEditorDialog .nfe-nature-options{position:absolute;z-index:150;top:calc(100% + 2px);left:0;right:0;max-height:225px;overflow-y:auto;background:#fff;border:1px solid #bacbd3;box-shadow:0 7px 20px rgba(30,51,62,.15);border-radius:3px}
+#nfeEditorDialog .nfe-nature-options[hidden]{display:none!important}
+#nfeEditorDialog .nfe-nature-option{display:block;width:100%;text-align:left;background:#fff;border:0;border-bottom:1px solid #e7edf0;padding:9px 11px;font:inherit;color:#263e50;cursor:pointer}
+#nfeEditorDialog .nfe-nature-option:hover,#nfeEditorDialog .nfe-nature-option[aria-selected="true"]{background:#e9f3f2;color:#09634f}
+#nfeEditorDialog .nfe-nature-empty{padding:12px;color:#667987;font-size:12px}
+
 #nfeEditorDialog .nfe-workspace-dialog{border-radius:5px;box-shadow:0 14px 38px rgba(17,38,45,.25)}
 #nfeEditorDialog .dialog-header{min-height:55px;padding:11px 20px;border-bottom:1px solid #e0e6e2}
 #nfeEditorDialog .dialog-header h2{font-size:16px;letter-spacing:-.15px}
@@ -221,14 +230,18 @@ $origins=[
                   <button type="button" class="nfe-clear-field" id="nfeClearNature">Limpar campo</button>
                 </span>
                 <div class="input-action-group">
-                  <select name="operation_nature_id" id="nfeNature" required>
+                  <div class="nfe-nature-combobox" data-nfe-nature-combobox>
+                    <input id="nfeNatureSearch" type="text" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="nfeNatureOptions" placeholder="Pesquisar natureza ou CFOP" aria-label="Pesquisar natureza da operação">
+                    <div class="nfe-nature-options" id="nfeNatureOptions" role="listbox" hidden></div>
+                    <select name="operation_nature_id" id="nfeNature" required class="nfe-nature-native">
                     <option value="">Selecione</option>
                     @foreach($natures as $nature)
                       <option value="{{ $nature->id }}" @selected((string)$nfeOld('operation_nature_id',$draft->operation_nature_id)===(string)$nature->id)>
                         {{ $nature->cfop_internal ? $nature->cfop_internal.' - ' : '' }}{{ $nature->name }}
                       </option>
                     @endforeach
-                  </select>
+                    </select>
+                  </div>
                   <a class="input-action-button" href="{{ route('fiscal.nfe.natures.index') }}" data-tooltip="Naturezas de Operação">
                     @include('partials.icon',['name'=>'settings','size'=>15])
                   </a>
