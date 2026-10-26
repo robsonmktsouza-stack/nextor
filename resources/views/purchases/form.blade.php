@@ -89,6 +89,13 @@
 $previousPurchaseItems=$editing
     ? $purchase->items->map(fn($item)=>[
         'product_id'=>$item->product_id,
+        'source_code'=>$item->source_code,
+        'source_description'=>$item->source_description,
+        'source_unit'=>$item->source_unit,
+        'source_ncm'=>$item->source_ncm,
+        'source_cfop'=>$item->source_cfop,
+        'source_ean'=>$item->source_ean,
+        'source_number'=>$item->source_number,
         'quantity'=>$item->quantity,
         'unit_cost'=>$item->unit_cost,
         'discount'=>$item->discount,
