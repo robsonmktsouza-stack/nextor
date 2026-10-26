@@ -34,7 +34,12 @@
           <td>{{ $row->year }} / {{ $row->series }}</td>
           <td>{{ $row->first_number }}–{{ $row->last_number }}</td>
           <td>{{ match($row->status){'authorized'=>'Inutilizado pela SEFAZ','prepared'=>'Não transmitido — conferir serviço','uncertain'=>'Resultado incerto — conferir SEFAZ','rejected'=>'Rejeitado',default=>'Em processamento'} }}
-            @if($row->error_message)<div class="text-muted">{{ $row->error_message }}</div>@endif
+            @php($inutilizationGuidance=app(\App\Services\Fiscal\SefazRejectionGuidance::class)->forInutilization($row))
+            @if($inutilizationGuidance)
+              <details class="sefaz-inutilization-guidance"><summary>Ver orientação</summary>
+                @include('fiscal.partials.sefaz-guidance',['guidance'=>$inutilizationGuidance])
+              </details>
+            @endif
           </td>
           <td>{{ $row->protocol ?: '—' }}</td>
           <td>{{ $row->created_at->format('d/m/Y H:i') }}</td>

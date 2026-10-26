@@ -36,7 +36,14 @@
         <td>{{ $row->environment==='production'?'Produção':'Homologação' }}</td>
         <td>{{ $row->year }} / {{ $row->series }}</td>
         <td>{{ $row->first_number }}–{{ $row->last_number }}</td>
-        <td><span class="status {{ $row->status==='authorized'?'status-ok':($row->status==='uncertain'?'status-danger':'status-blue') }}">{{ match($row->status){'authorized'=>'Inutilizado pela SEFAZ','rejected'=>'Rejeitado','uncertain'=>'Verificar na SEFAZ',default=>'Em processamento'} }}</span></td>
+        <td><span class="status {{ $row->status==='authorized'?'status-ok':($row->status==='uncertain'?'status-danger':'status-blue') }}">{{ match($row->status){'authorized'=>'Inutilizado pela SEFAZ','rejected'=>'Rejeitado','uncertain'=>'Verificar na SEFAZ',default=>'Em processamento'} }}</span>
+          @php($inutilizationGuidance=app(\App\Services\Fiscal\SefazRejectionGuidance::class)->forInutilization($row))
+          @if($inutilizationGuidance)
+            <details class="sefaz-inutilization-guidance"><summary>Ver orientação</summary>
+              @include('fiscal.partials.sefaz-guidance',['guidance'=>$inutilizationGuidance,'nfce'=>true])
+            </details>
+          @endif
+        </td>
         <td>{{ $row->protocol ?: '—' }}</td>
         <td>{{ $row->created_at->format('d/m/Y H:i') }}</td>
       </tr>

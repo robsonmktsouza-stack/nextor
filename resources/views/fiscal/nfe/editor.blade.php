@@ -108,6 +108,10 @@ $origins=[
   </div>
 
   <div class="dialog-body nfe-workspace-body" id="nfeScrollRegion" tabindex="0" aria-label="Conteúdo da NF-e">
+    @include('fiscal.partials.sefaz-guidance',[
+      'guidance'=>app(\App\Services\Fiscal\SefazRejectionGuidance::class)->forDocument($draft),
+      'originalStoredError'=>$draft->error_message,
+    ])
     @if($isEditing && $draft->validated_at && !$draftCanEmit)
       <p class="inline-note" role="alert">Confira a natureza da operação, o tipo de movimentação e o destino. Salve e valide novamente antes de emitir.</p>
     @endif

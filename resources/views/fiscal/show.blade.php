@@ -256,7 +256,9 @@
   </section>
 </div>
 
-@if($document->error_message)
+@php($documentGuidance=app(\App\Services\Fiscal\SefazRejectionGuidance::class)->forDocument($document))
+@include('fiscal.partials.sefaz-guidance',['guidance'=>$documentGuidance,'nfce'=>$tab==='nfce'])
+@if(!$documentGuidance && $document->error_message)
   <section class="fiscal-error-card">
     @include('partials.icon',['name'=>'alert','size'=>20])
     <div><strong>Retorno com problema</strong><p>{{ $document->error_message }}</p></div>

@@ -797,3 +797,12 @@ body.system-comfortable .app-root{
 @media(max-width:760px){
   #nfceEditor .nfce-sefaz-rejection{padding:12px;margin-bottom:12px}
 }
+
+/* Actionable fiscal feedback; original SEFAZ evidence stays available on demand. */
+.sefaz-guidance-content{width:100%;min-width:0;overflow-wrap:anywhere}
+.sefaz-guidance-content p{margin:4px 0;line-height:1.5}
+.sefaz-guidance-content .sefaz-guidance-fields{font-weight:600}
+.sefaz-guidance-steps{margin:6px 0;padding-left:20px;line-height:1.5}
+.sefaz-guidance-details{margin-top:7px;font-size:12px}
+.sefaz-guidance-details summary{cursor:pointer;max-width:100%}
+.sefaz-guidance-original{white-space:pre-wrap;overflow-wrap:anywhere}
