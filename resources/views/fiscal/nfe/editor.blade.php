@@ -42,6 +42,15 @@
 #nfeItemDialog .nfe-item-additional-federal-grid>.field>select{box-sizing:border-box!important;width:100%!important;min-width:0!important}
 @media(max-width:750px){#nfeItemDialog .nfe-item-additional-federal-grid>.field.col-2,#nfeItemDialog .nfe-item-additional-federal-grid>.field.col-3{grid-column:span 6!important}}
 
+/* Abas fiscais do item: os cinco cards substituem o conteúdo no mesmo local. */
+#nfeItemDialog .nfe-tax-review-grid button.nfe-tax-tab-active{background:#e7f3ec!important;border-color:#3b9874!important;box-shadow:inset 0 3px 0 #27845f!important}
+#nfeItemDialog .nfe-tax-tab-host{margin:14px 0 20px}
+#nfeItemDialog .nfe-tax-tab-host>.nfe-item-section{margin:0!important;border:1px solid #dce7e0!important;border-radius:3px!important}
+#nfeItemDialog .nfe-tax-tab-host>.nfe-item-section>summary{display:none!important}
+#nfeItemDialog .nfe-tax-tab-host>.nfe-item-section>.nfe-item-section-content{padding:16px!important}
+#nfeItemDialog .nfe-tax-tab-host .nfe-item-additional-federal-grid{margin-top:16px}
+#nfeItemDialog .nfe-tax-tab-host .nfe-rtc-extra-panel{margin-top:16px!important}
+
 /* Títulos internos: evitar repetição do nome do grupo e separar apenas subdivisões necessárias. */
 #nfeItemDialog .nfe-item-inline-caption{font-size:12px;font-weight:600;color:#446257;margin:18px 0 10px;padding:0 0 7px;border-bottom:1px solid #e1e8e3}
 /* Subpainéis RTC e separação das seções fiscais: evitar cabeçalhos colados. */
