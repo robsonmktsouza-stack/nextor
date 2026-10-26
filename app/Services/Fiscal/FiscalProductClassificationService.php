@@ -141,13 +141,16 @@ final class FiscalProductClassificationService
             if ($code === '') continue;
             $entry = $this->query($release, $kind, $date, $uf)->where('code', $code)->first();
             $known = !$entry && $this->scopedQuery($release, $kind, $uf)->where('code', $code)->exists();
-            if (!$entry && ($emission || $known || $this->complete($release, $kind, $date))) {
+            if (!$entry && ($emission || $known || $this->complete($release, $kind, $date, $uf))) {
                 $errors[$kind] = $emission && !$known
                     ? strtoupper($kind).' sem referência oficial vigente para aplicação automática no catálogo '.$release->version.'.'
                     : strtoupper($kind).' não consta como vigente no catálogo '.$release->version.'.';
             }
             if ($kind === 'cest' && $entry && $ncm !== '' && !$this->matchesNcm($entry, $ncm)) {
                 $errors['cest'] = 'O CEST informado não corresponde ao NCM nos vínculos oficiais do catálogo. Confira também a descrição legal da mercadoria.';
+            }
+            if ($kind === 'cest' && $entry && $emission && ($entry->parameters['requires_manual_ncm_review'] ?? false) === true) {
+                $errors['cest'] = 'O vínculo NCM deste CEST não está comprovado no catálogo. A descrição legal exige revisão fiscal e uma correspondência validada antes da emissão automática.';
             }
         }
         if ($errors) throw ValidationException::withMessages($errors);
@@ -156,6 +159,10 @@ final class FiscalProductClassificationService
     private function query(FiscalCatalogRelease $release, string $kind, ?string $date, ?string $uf = null): Builder
     {
         $day = $date ?? now()->toDateString();
+        $parsed = preg_match('/^\d{4}-\d{2}-\d{2}$/D', $day) ? \DateTimeImmutable::createFromFormat('!Y-m-d', $day) : false;
+        if (!$parsed || $parsed->format('Y-m-d') !== $day) {
+            throw ValidationException::withMessages(['ncm'=>'Data da classificação fiscal inválida.']);
+        }
         return $this->scopedQuery($release, $kind, $uf)->where('status', 'reference')
             ->where(fn (Builder $q) => $q->whereNull('valid_from')->orWhereDate('valid_from', '<=', $day))
             ->where(fn (Builder $q) => $q->whereNull('valid_until')->orWhereDate('valid_until', '>=', $day));
@@ -164,21 +171,46 @@ final class FiscalProductClassificationService
     private function scopedQuery(FiscalCatalogRelease $release, string $kind, ?string $uf = null): Builder
     {
         $scope = $this->scopeUf($uf);
-        return FiscalCatalogEntry::query()->where('release_id', $release->id)->where('kind', $kind)
-            ->where(fn (Builder $q) => $q->whereNull('uf')->orWhere('uf', $scope));
+        $query = FiscalCatalogEntry::query()->where('release_id', $release->id)->where('kind', $kind);
+        $nationalDomain = $kind === 'cest' && FiscalCatalogCoverage::national($release, $kind);
+        $query->where(function (Builder $q) use ($scope, $kind, $release, $nationalDomain): void {
+            $q->whereNull('uf')->orWhere(function (Builder $state) use ($scope, $kind, $release, $nationalDomain): void {
+                $state->where('uf', $scope);
+                if ($kind === 'cest') {
+                    $state->where(function (Builder $allowed) use ($release, $scope, $nationalDomain): void {
+                        // Only an explicit territorial exception can supplement
+                        // a complete national domain. Retained ST schedules do not.
+                        $allowed->whereExists(function ($national) use ($release, $scope): void {
+                            $national->selectRaw('1')->from('fiscal_catalog_entries as national_cest_exception')
+                                ->where('national_cest_exception.release_id', $release->id)->where('national_cest_exception.kind', 'cest')
+                                ->whereNull('national_cest_exception.uf')->whereColumn('national_cest_exception.code', 'fiscal_catalog_entries.code')
+                                ->whereJsonContains('national_cest_exception.parameters->excluded_ufs', $scope);
+                        });
+                        if (!$nationalDomain) {
+                            // A partial state table cannot revive a code already
+                            // represented (including revoked) in a national source.
+                            $allowed->orWhereNotExists(function ($national) use ($release): void {
+                                $national->selectRaw('1')->from('fiscal_catalog_entries as national_cest')
+                                    ->where('national_cest.release_id', $release->id)->where('national_cest.kind', 'cest')
+                                    ->whereNull('national_cest.uf')->whereColumn('national_cest.code', 'fiscal_catalog_entries.code');
+                            });
+                        }
+                    });
+                }
+            });
+        });
+        return FiscalCatalogService::constrainExcludedUfs($query, $scope)
+            ->orderByRaw('CASE WHEN uf IS NULL THEN 0 ELSE 1 END');
     }
 
     private function scopeUf(?string $uf): string
     {
-        return strtoupper(trim($uf ?? (string) CompanySetting::current()->state));
+        return strtoupper(trim($uf ?? (string) CompanySetting::query()->value('state')));
     }
 
-    private function complete(FiscalCatalogRelease $release, string $kind, ?string $date = null): bool
+    private function complete(FiscalCatalogRelease $release, string $kind, ?string $date = null, ?string $uf = null): bool
     {
-        $coverage = ($release->coverage ?? [])[$kind] ?? null;
-        $snapshotDate = is_array($coverage) ? ($coverage['snapshot_date'] ?? null) : null;
-        if ($date !== null && $snapshotDate !== null && $date < $snapshotDate) return false;
-        return $coverage === 'complete' || (is_array($coverage) && ($coverage['status'] ?? null) === 'complete');
+        return FiscalCatalogCoverage::scope($release, $kind, $this->scopeUf($uf), $date)['complete'];
     }
 
     private function matchesNcm(FiscalCatalogEntry $entry, string $ncm): bool

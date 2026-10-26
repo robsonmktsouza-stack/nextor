@@ -231,20 +231,37 @@ final class FiscalCatalogServiceTest extends TestCase
         $this->seed(\Database\Seeders\FiscalCatalogSeeder::class);
         $catalog = app(FiscalCatalogService::class);
         $release = $catalog->current();
-        self::assertSame('2026.10.26', $release->version);
-        self::assertSame(11063, $release->entry_count);
+        $manifest = json_decode(file_get_contents($catalog->bundledPath()), true, 512, JSON_THROW_ON_ERROR);
+        self::assertSame('2026.10.26.1', $release->version);
+        self::assertSame(count($manifest['entries']), $release->entry_count);
         self::assertSame(10516, $release->entries()->where('kind', 'ncm')->count());
         self::assertSame('01012100', $release->entries()->where('kind', 'ncm')->where('code', '01012100')->sole()->code);
-        self::assertSame(0, $catalog->entries('cest', '2026-10-26', 'BA')->count());
-        self::assertSame(207, $catalog->entries('cest', '2026-10-26', 'SP')->count());
-        self::assertSame('partial', $release->coverage['cfop']['status']);
-        self::assertSame('not_bundled', $release->coverage['benefit']['status']);
+        self::assertGreaterThan(1000, $catalog->entries('cest', '2026-10-26', 'BA')->count());
+        self::assertTrue($catalog->coverage('cest', 'SP', '2026-10-26')['complete']);
+        self::assertSame('complete', $release->coverage['cfop']['status']);
+        self::assertSame('partial', $release->coverage['benefit']['status']);
         $before = [FiscalCatalogEntry::query()->count(), FiscalTaxGroup::query()->count(), OperationNature::query()->count()];
         $this->seed(\Database\Seeders\FiscalCatalogSeeder::class);
         self::assertSame($before, [FiscalCatalogEntry::query()->count(), FiscalTaxGroup::query()->count(), OperationNature::query()->count()]);
         self::assertSame(1, FiscalCatalogRelease::query()->count());
         self::assertSame(0, FiscalTaxRule::query()->count());
         self::assertSame(0, OperationNature::query()->whereNotNull('catalog_version')->where('is_active', true)->count());
+    }
+
+    public function test_new_bundled_edition_preserves_the_previous_immutable_release_and_state_references(): void
+    {
+        $catalog = app(FiscalCatalogService::class);
+        $old = $catalog->importFile(resource_path('fiscal/catalog/2026.10.26.json'));
+        $hash = $old->sha256;
+        self::assertSame('33d89254c90bda4ff6e0855b374abb85570730c0b729d6fafff6c2f68dfa14ac', $hash);
+        self::assertSame(207, $old->entries()->where('kind','cest')->where('uf','SP')->where('status','reference')->count());
+        $new = $catalog->installBundled();
+        self::assertSame('2026.10.26.1', $new->version);
+        self::assertSame($new->id, $catalog->installBundled()->id);
+        self::assertSame(2, FiscalCatalogRelease::query()->count());
+        self::assertSame($hash, $old->fresh()->sha256);
+        self::assertSame(207, $old->entries()->where('kind','cest')->where('uf','SP')->where('status','reference')->count());
+        self::assertTrue($new->entries()->where('kind','cest')->whereNull('uf')->where('status','reference')->exists());
     }
 
     public function test_reference_rows_cannot_hide_behind_not_bundled_coverage(): void
@@ -258,5 +275,30 @@ final class FiscalCatalogServiceTest extends TestCase
             self::assertStringContainsString('contradiz', $exception->getMessage());
             self::assertSame(0, FiscalCatalogRelease::query()->count());
         }
+    }
+
+    public function test_streaming_hash_matches_the_original_canonical_json_for_all_supported_key_and_value_shapes(): void
+    {
+        $manifest = $this->manifest();
+        $manifest['digest_fixture'] = [
+            'z_last'=>null,
+            'unicode'=>'ação, São Paulo, ☃',
+            'slashes'=>'https://www.confaz.fazenda.gov.br/legislacao/convenios/',
+            'escaped'=>"Aspas \" barra \\ quebra\n tab\t",
+            'sparse_keys'=>[7=>'sete', 2=>'dois', '01'=>'zero-um', 'z'=>false],
+            'reordered_list'=>[1=>'segundo', 0=>'primeiro'],
+            'mixed_numeric_keys'=>['10'=>'dez', '2'=>'dois', '1.5'=>'fração', '01'=>'texto'],
+            'a_first'=>[true, false, 0, 1, null, [], ['b'=>2, 'a'=>1]],
+        ];
+        $originalCanonical = function (array $value) use (&$originalCanonical): array {
+            if (!array_is_list($value)) ksort($value);
+            foreach ($value as &$item) if (is_array($item)) $item = $originalCanonical($item);
+            return $value;
+        };
+        $expected = hash('sha256', json_encode($originalCanonical($manifest), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        $service = app(FiscalCatalogService::class);
+        $release = $service->import($manifest);
+        self::assertSame($expected, $release->sha256);
+        self::assertSame($release->id, $service->import($manifest)->id);
     }
 }

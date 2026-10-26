@@ -60,7 +60,7 @@ final class Nfe55TaxRuleApplicationService
                 throw new RuntimeException('Item '.$original->item_number.': o contexto da determinação fiscal mudou. Revalide a NF-e antes de emitir.');
             }
             if (!empty($before['catalog_version'])) {
-                foreach (['catalog_models','classification_catalog','cfop_reference'] as $proof) {
+                foreach (['catalog_models','classification_catalog','cfop_reference','benefit_reference'] as $proof) {
                     if (($before[$proof] ?? null) !== ($after[$proof] ?? null)) {
                         throw new RuntimeException('Item '.$original->item_number.': a revisão do modelo ou do catálogo fiscal mudou. Revalide a NF-e antes de emitir.');
                     }
@@ -196,6 +196,9 @@ final class Nfe55TaxRuleApplicationService
                 if ($managed && $rule) {
                     $tax['fiscal_rule_trace']['classification_catalog'] = app(FiscalProductClassificationService::class)->trace($item->toArray(), $date, (string) $company->state);
                     $tax['fiscal_rule_trace']['cfop_reference'] = $cfopReference;
+                    $tax['fiscal_rule_trace']['benefit_reference'] = $this->assertCatalogBenefit(
+                        (string) $item->fiscal_benefit_code, (string) $company->state, (string) $company->crt,
+                        $tax['icms_cst'] ?? null, $tax['icms_csosn'] ?? null, $date, $company->tax_regime);
                     $tax['fiscal_rule_trace']['catalog_models'] = ['nature' => $this->modelTrace($nature), 'group' => $this->modelTrace($group)];
                 }
                 $item->tax_data = $tax;
@@ -251,11 +254,7 @@ final class Nfe55TaxRuleApplicationService
 
     private function assertCatalogRule(\App\Models\FiscalTaxRule $rule, array $context, string $date): array
     {
-        $catalog = app(FiscalCatalogService::class);
-        $reference = $catalog->current() ? $catalog->entries('cfop', $date, $rule->origin_uf)->where('code', $rule->cfop)->first() : null;
-        if (!$reference) {
-            throw new RuntimeException('O CFOP da regra não está disponível no catálogo oficial instalado para esta vigência.');
-        }
+        $reference = $this->assertCatalogCfop((string) $rule->cfop, (string) $rule->origin_uf, $date);
         $codes = \App\Support\FiscalCodeCatalog::all();
         foreach (['csosn' => 'csosn', 'icms_cst' => 'icms_cst', 'pis_cst' => 'pis_cofins_cst', 'cofins_cst' => 'pis_cofins_cst'] as $field => $kind) {
             if ($rule->{$field} !== null && $rule->{$field} !== '' && !array_key_exists((string) $rule->{$field}, $codes[$kind])) {
@@ -271,7 +270,68 @@ final class Nfe55TaxRuleApplicationService
         $crt = (string) $rule->crt;
         if (in_array($crt, ['1','4'], true) && (!$rule->csosn || $rule->icms_cst)) throw new RuntimeException('A regra do Simples Nacional deve determinar CSOSN, sem CST ICMS.');
         if (in_array($crt, ['2','3'], true) && (!$rule->icms_cst || $rule->csosn)) throw new RuntimeException('A regra do regime normal/excesso de sublimite deve determinar CST ICMS, sem CSOSN.');
-        return $reference->trace();
+        return $reference;
+    }
+
+    /** Official availability never bypasses operation, CRT or XML-group validation. */
+    public function assertCatalogCfop(string $code, string $uf, string $date): array
+    {
+        $catalog = app(FiscalCatalogService::class);
+        $reference = $catalog->current() ? $catalog->entries('cfop', $date, $uf)->where('code', $code)->first() : null;
+        if (!$reference) throw new RuntimeException('O CFOP da regra não está disponível no catálogo oficial instalado para esta vigência.');
+        $flags = [];
+        foreach (['ind_nfe','indNFe'] as $key) {
+            if (!array_key_exists($key, $reference->parameters ?? [])) continue;
+            $value = $reference->parameters[$key];
+            if (!in_array($value, [true,false,0,1,'0','1'], true)) throw new RuntimeException('O indicador oficial de uso do CFOP na NF-e está inválido. Importe uma tabela validada.');
+            $flags[] = in_array($value, [true,1,'1'], true);
+        }
+        if (count(array_unique($flags, SORT_REGULAR)) > 1) throw new RuntimeException('Os indicadores oficiais de uso deste CFOP na NF-e estão conflitantes.');
+        if (in_array(false, $flags, true)) throw new RuntimeException('O CFOP '.$code.' não permite NF-e modelo 55 conforme o indicador oficial indNFe.');
+        $trace = $reference->trace();
+        if ($flags) $trace['document_eligibility'] = ['model'=>'55','ind_nfe'=>$flags[0]];
+        return $trace;
+    }
+
+    /** A code's existence is insufficient: its UF, legal period and tax-code links must be proven. */
+    public function assertCatalogBenefit(string $code, string $uf, string $crt, ?string $icmsCst, ?string $csosn, string $date, ?string $taxRegime = null): ?array
+    {
+        $code = trim($code);
+        if ($code === '') return null;
+        $uf = strtoupper($uf);
+        $catalog = app(FiscalCatalogService::class);
+        if (!$catalog->current()) throw new RuntimeException('Instale a tabela oficial de benefícios fiscais da UF antes da aplicação automática.');
+        // Benefits belong to the issuer's state. A national/null-UF record is not proof of eligibility.
+        $references = $catalog->entries('benefit', $date, $uf)->where('uf', $uf)->where('code', $code)->get();
+        if ($references->isEmpty()) {
+            throw new RuntimeException('O benefício fiscal '.$code.' está sem referência oficial vigente para '.$uf.' em '.$date.' no catálogo instalado. Importe a tabela estadual validada antes da aplicação automática.');
+        }
+        $simples = in_array($crt, ['1','4'], true);
+        if (!$simples && !in_array($crt, ['2','3'], true)) throw new RuntimeException('CRT inválido para conferir o benefício fiscal.');
+        $compatibility = $simples ? 'csosns' : 'icms_csts';
+        $classification = (string) ($simples ? $csosn : $icmsCst);
+        $matches = $references->filter(function ($reference) use ($crt, $taxRegime, $simples, $compatibility, $classification) {
+            if (!$reference->valid_from) return false;
+            $parameters = $reference->parameters ?? [];
+            foreach (['automatic_application','cst_mapping_verified'] as $flag) {
+                if (array_key_exists($flag, $parameters) && in_array($parameters[$flag], [false,0,'0'], true)) return false;
+            }
+            if ($simples && array_key_exists('applies_to_simples', $parameters)
+                && in_array($parameters['applies_to_simples'], [false,0,'0'], true)) return false;
+            if ($reference->regime !== null && !in_array((string) $reference->regime, [$crt,$taxRegime], true)) return false;
+            if (array_key_exists('crts', $parameters) && (!is_array($parameters['crts']) || !in_array($crt, $parameters['crts'], true))) return false;
+            // Never derive CSOSN from CST or from a generic "applies to Simples" flag.
+            return is_array($parameters[$compatibility] ?? null)
+                && array_is_list($parameters[$compatibility])
+                && $classification !== '' && in_array($classification, $parameters[$compatibility], true);
+        })->values();
+        if ($matches->isEmpty()) {
+            throw new RuntimeException('A referência oficial do benefício '.$code.' não comprova vigência inicial e compatibilidade com CRT '.$crt.' e '.($simples ? 'CSOSN ' : 'CST ').$classification.'. Revise a tabela e o enquadramento estadual antes da aplicação automática.');
+        }
+        if ($matches->count() !== 1) throw new RuntimeException('Há referências oficiais conflitantes para o benefício fiscal '.$code.' nesta UF e vigência.');
+        $reference = $matches->first();
+        return [...$reference->trace(), 'parameters'=>$reference->parameters ?? [],
+            'verified_context'=>['uf'=>$uf,'crt'=>$crt,'classification_type'=>$compatibility,'classification'=>$classification,'date'=>$date]];
     }
 
     private function modelTrace(?\Illuminate\Database\Eloquent\Model $model): ?array

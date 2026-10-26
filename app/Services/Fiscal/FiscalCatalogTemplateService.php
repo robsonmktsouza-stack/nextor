@@ -137,9 +137,9 @@ final class FiscalCatalogTemplateService
             'required_context'=>$required, 'conditions'=>$conditions,
             'limitations'=>'Definições de CFOP são referência classificatória; não comprovam enquadramento tributário, vigência de benefício ou direito à emissão própria de entrada.',
             'sources'=>[
-                ['reference'=>'Convênio SINIEF s/n de 15/12/1970, Anexo II; tabela CFOP publicada por SEFAZ-PE',
-                    'url'=>'https://www.sefaz.pe.gov.br/Legislacao/Tributaria/Documents/Legislacao/Tabelas/CFOP.htm',
-                    'version'=>'Publicação de referência da SEFAZ-PE; confirmar redação vigente na aprovação'],
+                ['reference'=>'Convênio SINIEF s/n de 15/12/1970, Anexo II; tabela nacional vigente publicada pelo Portal NF-e em 04/09/2026',
+                    'url'=>'https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=74KmX8poGpM=',
+                    'version'=>'IT_2023_002_v2_10_Tabela_CFOP_Descrição.xlsx'],
                 ['reference'=>'Ajuste SINIEF 03/2010 — CRT e CSOSN; LC 123/2006 — Simples Nacional',
                     'url'=>'https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp123.htm',
                     'version'=>'Texto consolidado; enquadramento individual sujeito a revisão'],

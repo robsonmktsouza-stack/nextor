@@ -196,9 +196,9 @@ final class FiscalCatalogAdministrationTest extends TestCase
                 ->assertRedirect()->assertSessionHasNoErrors();
         }
         self::assertSame(1, FiscalCatalogRelease::query()->count());
-        self::assertSame('2026.10.26', FiscalCatalogRelease::query()->sole()->version);
-        self::assertSame(16, OperationNature::query()->where('catalog_version', '2026.10.26')->count());
-        self::assertSame(13, FiscalTaxGroup::query()->where('catalog_version', '2026.10.26')->count());
+        self::assertSame('2026.10.26.1', FiscalCatalogRelease::query()->sole()->version);
+        self::assertSame(16, OperationNature::query()->where('catalog_version', '2026.10.26.1')->count());
+        self::assertSame(13, FiscalTaxGroup::query()->where('catalog_version', '2026.10.26.1')->count());
         self::assertSame(0, OperationNature::query()->whereNotNull('catalog_version')->where('is_active', true)->count());
         self::assertSame(0, FiscalTaxGroup::query()->whereNotNull('catalog_version')->where('is_active', true)->count());
         self::assertSame(0, FiscalTaxGroup::query()->whereNotNull('catalog_version')->where('is_default', true)->count());

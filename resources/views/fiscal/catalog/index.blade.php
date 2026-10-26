@@ -11,6 +11,7 @@
 @section('content')
 <nav class="sales-module-tabs" aria-label="Configurações fiscais">
   <a href="{{ route('fiscal.catalog.index') }}" class="{{ $tab==='entries'?'active':'' }}">Tabelas oficiais</a>
+  <a href="{{ route('fiscal.catalog.index',['tab'=>'coverage']) }}" class="{{ $tab==='coverage'?'active':'' }}">Cobertura por UF</a>
   <a href="{{ route('fiscal.nfe.natures.index') }}">Naturezas de operação</a>
   <a href="{{ route('fiscal.tax-groups.index') }}">Grupos tributários</a>
   <a href="{{ route('fiscal.tax-rules.index') }}">Regras e parâmetros</a>
@@ -54,6 +55,32 @@
     <p>Os códigos de referência e modelos não ativam regras tributárias. A aplicação depende das condições legais e das regras revisadas da instalação.</p>
     <pre style="white-space:pre-wrap">{{ json_encode($release?->coverage ?? [],JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) }}</pre>
   </details>
+</section>
+@elseif($tab==='coverage')
+<section class="cms-card">
+  <form method="get" action="{{ route('fiscal.catalog.index') }}" class="settings-editor">
+    <input type="hidden" name="tab" value="coverage">
+    <div class="editor-grid cols-12 settings-grid">
+      <label class="field col-4"><span>Versão consultada</span><select name="release"><option value="">Atual</option>@foreach($releases as $item)<option value="{{ $item->id }}" @selected($release?->id===$item->id)>{{ $item->version }}</option>@endforeach</select></label>
+      <label class="field col-3"><span>Data de referência</span><input type="date" name="date" value="{{ $coverageDate }}" required></label>
+      <div class="field col-2"><span>&nbsp;</span><button class="btn btn-secondary" type="submit">Consultar</button></div>
+    </div>
+  </form>
+  @php($coverageLabels=['complete'=>'Completa','partial'=>'Parcial','not_bundled'=>'Sem tabela validada','unavailable'=>'Fonte indisponível'])
+  <div class="table-scroll"><table class="cms-table">
+    <thead><tr><th>UF</th><th>NCM</th><th>CFOP</th><th>CEST</th><th>cBenef</th><th>Condições estaduais</th></tr></thead>
+    <tbody>@foreach($coverageByUf as $state=>$domains)<tr>
+      <td><strong>{{ $state }}</strong></td>
+      @foreach(['ncm','cfop','cest','benefit'] as $domain)
+        <td><a class="table-link" href="{{ route('fiscal.catalog.index',['release'=>$release?->id,'kind'=>$domain,'uf'=>$state,'date'=>$coverageDate]) }}">{{ $coverageLabels[$domains[$domain]['status']] ?? 'Sem tabela validada' }}</a></td>
+      @endforeach
+      <td>@if(!empty($domains['benefit']['note']) || !empty($domains['benefit']['conditions']))<details><summary class="table-link">Consultar</summary>
+        @if(!empty($domains['benefit']['note']))<p>{{ $domains['benefit']['note'] }}</p>@endif
+        @foreach(($domains['benefit']['conditions']??[]) as $condition)<p>{{ $condition }}</p>@endforeach
+      </details>@endif</td>
+    </tr>@endforeach</tbody>
+  </table></div>
+  <details class="erp-help-details"><summary>Alcance das referências</summary><p>A cobertura descreve os códigos e fontes disponíveis. Não habilita operações, alíquotas ou benefícios. Sem tabela validada não significa ausência de benefícios ou dispensa de cBenef na UF.</p></details>
 </section>
 @else
 <section class="cms-card">

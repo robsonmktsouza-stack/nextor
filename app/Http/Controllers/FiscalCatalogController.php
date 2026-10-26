@@ -7,6 +7,7 @@ use App\Models\FiscalCatalogEntry;
 use App\Models\FiscalCatalogRelease;
 use App\Services\Fiscal\FiscalCatalogService;
 use App\Services\Fiscal\FiscalCatalogTemplateService;
+use App\Services\Fiscal\FiscalCatalogCoverage;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -29,10 +30,10 @@ final class FiscalCatalogController extends Controller
             'kind' => ['nullable', Rule::in(array_keys(self::KINDS))],
             'q' => ['nullable', 'string', 'max:120'],
             'date' => ['nullable', 'date_format:Y-m-d'],
-            'uf' => ['nullable', 'regex:/^[A-Z]{2}$/'],
+            'uf' => ['nullable', Rule::in(FiscalCatalogCoverage::UFS)],
             'status' => ['nullable', Rule::in(['reference', 'template', 'revoked'])],
             'release' => ['nullable', 'integer', Rule::exists('fiscal_catalog_releases', 'id')],
-            'tab' => ['nullable', Rule::in(['entries', 'history'])],
+            'tab' => ['nullable', Rule::in(['entries', 'history', 'coverage'])],
         ]);
         $release = isset($filters['release'])
             ? FiscalCatalogRelease::query()->findOrFail($filters['release']) : $catalog->current();
@@ -53,11 +54,20 @@ final class FiscalCatalogController extends Controller
         }
         if (!empty($filters['status'])) $query->where('status', $filters['status']);
 
+        $coverageDate = $filters['date'] ?? $release?->consulted_at?->format('Y-m-d') ?? now()->toDateString();
+        $coverageByUf = [];
+        foreach (FiscalCatalogCoverage::UFS as $uf) {
+            $coverageByUf[$uf] = [];
+            foreach (['ncm','cfop','cest','benefit'] as $domain) {
+                $coverageByUf[$uf][$domain] = FiscalCatalogCoverage::scope($release, $domain, $uf, $coverageDate);
+            }
+        }
         return view('fiscal.catalog.index', [
             'release' => $release, 'current' => $catalog->current(),
             'releases' => FiscalCatalogRelease::query()->orderByDesc('id')->get(),
             'entries' => $query->orderBy('code')->paginate(AppSetting::tablePerPage($request))->withQueryString(),
             'kind' => $kind, 'kinds' => self::KINDS, 'tab' => $filters['tab'] ?? 'entries',
+            'coverageByUf' => $coverageByUf, 'coverageDate' => $coverageDate,
         ]);
     }
 

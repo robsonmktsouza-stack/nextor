@@ -84,6 +84,17 @@ final class FiscalTaxRuleController extends Controller
                 $rule->fiscal_reviewed_at = $request->boolean('fiscal_review_confirmed') ? now() : null;
                 $rule->fiscal_reviewed_by = $request->boolean('fiscal_review_confirmed') ? $request->user()?->id : null;
             }
+            if ($managed && $rule->is_active && $rule->document_type === 'nfe') {
+                $references = app(\App\Services\Fiscal\Nfe55TaxRuleApplicationService::class);
+                $day = $rule->valid_from?->format('Y-m-d') ?? now()->toDateString();
+                try { $references->assertCatalogCfop((string) $rule->cfop, (string) $rule->origin_uf, $day); }
+                catch (\RuntimeException $error) { $this->invalid('cfop', $error->getMessage()); }
+                if ($rule->fiscal_benefit_code) {
+                    try { $references->assertCatalogBenefit((string) $rule->fiscal_benefit_code, (string) $rule->origin_uf,
+                        (string) $rule->crt, $rule->icms_cst, $rule->csosn, $day, $rule->tax_regime); }
+                    catch (\RuntimeException $error) { $this->invalid('fiscal_benefit_code', $error->getMessage()); }
+                }
+            }
             $conflicts = app(FiscalTaxRuleResolver::class)->conflicts($rule);
             if ($conflicts) throw ValidationException::withMessages([
                 'priority' => 'Regra ativa conflitante na mesma vigência e precedência: '.implode(', ', $conflicts).'. Ajuste critérios, vigência ou prioridade.',
