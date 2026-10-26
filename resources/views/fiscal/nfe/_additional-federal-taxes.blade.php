@@ -2,7 +2,7 @@
   $additionalFederalRuleMode = (bool) ($ruleMode ?? false);
   $additionalFederalParameters = is_array($federalParameters ?? null) ? $federalParameters : [];
 @endphp
-<div class="editor-grid cols-12 settings-grid">
+<div class="editor-grid cols-12 settings-grid {{ $additionalFederalRuleMode ? '' : 'nfe-item-additional-federal-grid' }}">
   @foreach(['pis'=>'PIS','cofins'=>'COFINS'] as $additionalFederalTax=>$additionalFederalLabel)
     @php
       $additionalFederalPrefix = $additionalFederalTax.'_st_';
