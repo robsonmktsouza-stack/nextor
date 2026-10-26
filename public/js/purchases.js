@@ -62,10 +62,10 @@ document.addEventListener('DOMContentLoaded',()=>{
     line.dataset.purchaseItem='1';
     if(data.source_description)line.dataset.importedSource='1';
     line.innerHTML=
-      '<div class="purchase-item-source" data-purchase-source hidden></div>'+
       '<div class="purchase-item-primary">'+
-        '<label class="purchase-line-field purchase-product-field"><span>Produto *</span>'+
-          '<select required name="items['+index+'][product_id]" data-quick-create="products" data-product><option value="">Selecione um produto</option></select></label>'+
+        '<div class="purchase-product-cell"><div class="purchase-item-source" data-purchase-source hidden></div>'+
+          '<label class="purchase-line-field purchase-product-field"><span>Produto do estoque *</span>'+
+          '<select required name="items['+index+'][product_id]" data-quick-create="products" data-product><option value="">Selecione um produto</option></select></label></div>'+
         '<label class="purchase-line-field"><span>Quantidade *</span>'+
           '<input type="number" name="items['+index+'][quantity]" min="0.001" step="0.001" required data-qty value="1"></label>'+
         '<label class="purchase-line-field"><span>Custo unitário *</span>'+
@@ -73,7 +73,8 @@ document.addEventListener('DOMContentLoaded',()=>{
         '<div class="purchase-item-amount"><span>Total do produto</span><strong data-line-total>R$ 0,00</strong></div>'+
         '<button type="button" class="btn-icon purchase-remove" data-purchase-remove aria-label="Remover item" data-tooltip="Remover produto"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg></button>'+
       '</div>'+
-      '<div class="purchase-item-charges">'+        field(index,'discount','Desconto',data.discount)+
+      '<div class="purchase-item-options"><button type="button" class="purchase-details-toggle" data-purchase-toggle aria-expanded="false">▸ Custos e tributos <span data-purchase-charge-hint></span></button><span class="purchase-link-status" data-purchase-link-status></span></div>'+
+      '<div class="purchase-item-charges" data-purchase-charges hidden>'+        field(index,'discount','Desconto',data.discount)+
         field(index,'other_costs','Outros custos',data.other_costs)+
         field(index,'external_costs','Custos externos',data.external_costs)+
         field(index,'ipi','IPI',data.ipi)+
@@ -96,11 +97,20 @@ document.addEventListener('DOMContentLoaded',()=>{
     mapButton.type='button';mapButton.className='purchase-map-button';
     mapButton.textContent='Vincular / cadastrar';
     mapButton.setAttribute('aria-label','Vincular ou cadastrar produto do estoque');
-    if(data.source_description){
-      sourceBar.appendChild(mapButton);
-    }else{
-      productLabel.appendChild(mapButton);
-    }
+    productLabel.appendChild(mapButton);
+    const chargesPanel=line.querySelector('[data-purchase-charges]');
+    const toggle=line.querySelector('[data-purchase-toggle]');
+    toggle.addEventListener('click',()=>{
+      const expanded=toggle.getAttribute('aria-expanded')!=='true';
+      toggle.setAttribute('aria-expanded',String(expanded));
+      toggle.firstChild.textContent=(expanded?'▾':'▸')+' Custos e tributos ';
+      chargesPanel.hidden=!expanded;
+    });
+    const updateLinkStatus=()=>{
+      const status=line.querySelector('[data-purchase-link-status]');
+      status.textContent=select.value?'Vinculado ao estoque':'Pendente de vínculo';
+      status.classList.toggle('is-pending',!select.value);
+    };
     const selectProduct=product=>{
       if(!productMap.has(String(product.id)))products.push(product);
       productMap.set(String(product.id),product);
@@ -119,10 +129,12 @@ document.addEventListener('DOMContentLoaded',()=>{
     });
     for(const p of products)select.add(new Option(p.sku+' — '+p.name+' ('+p.unit+')',p.id));
     select.value=String(data.product_id??'');
+    updateLinkStatus();
     line.querySelector('[data-qty]').value=data.quantity??'1';
     line.querySelector('[data-cost]').value=data.unit_cost??(productMap.get(select.value)?.cost_price??'0.00');
 
     select.addEventListener('change',()=>{
+      updateLinkStatus();
       if(!line.dataset.importedSource)
         moneyAssign(line.querySelector('[data-cost]'),productMap.get(select.value)?.cost_price??0);
       calculate();
@@ -147,6 +159,10 @@ document.addEventListener('DOMContentLoaded',()=>{
       subtotal+=amount;
       qtyTotal+=quantity;
       line.querySelector('[data-line-total]').textContent=display(amount);
+      const extra=charges.other_costs+charges.external_costs+charges.ipi+charges.icms_st-charges.discount;
+      const hint=line.querySelector('[data-purchase-charge-hint]');
+      if(hint)hint.textContent=extra!==0?' · '+(extra>0?'+':'−')+display(Math.abs(extra)):'';
+
     });
     const freight=cents(form.querySelector('[name="freight"],[data-money-name="freight"]'));
     const otherExpenses=cents(form.querySelector('[name="other_expenses"],[data-money-name="other_expenses"]'));
