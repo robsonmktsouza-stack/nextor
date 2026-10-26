@@ -9,6 +9,35 @@
     }, { once: true });
   }
 
+  // Browser-native installation only. Never display a simulated install action.
+  const installButton = document.querySelector('[data-pwa-install]');
+  let installEvent = null;
+  window.addEventListener('beforeinstallprompt', (event) => {
+    if (!installButton) return;
+    event.preventDefault();
+    installEvent = event;
+    installButton.hidden = false;
+  });
+  installButton?.addEventListener('click', async () => {
+    if (!installEvent) return;
+    const event = installEvent;
+    installEvent = null;
+    installButton.disabled = true;
+    try {
+      await event.prompt();
+      await event.userChoice;
+    } catch (_) {
+      // If unsupported/denied, Chrome's own install controls remain available.
+    } finally {
+      installButton.hidden = true;
+      installButton.disabled = false;
+    }
+  });
+  window.addEventListener('appinstalled', () => {
+    installEvent = null;
+    if (installButton) installButton.hidden = true;
+  });
+
   const app = document.getElementById('appRoot');
   if (!app || !app.classList.contains('app-root')) return;
 
