@@ -107,6 +107,7 @@
          @if(auth()->user()->canAccess('fiscal') && !$hasModule('fiscal'))
          <a href="{{ route('fiscal.index') }}">Regularizações fiscais</a>
          @endif
+         <button type="button" data-pwa-install hidden>Instalar Lumeron neste dispositivo</button>
          <form method="post" action="{{ route('logout') }}">@csrf
            <button type="submit">@include('partials.icon',['name'=>'logout','size'=>16]) Sair do Lumeron</button>
          </form>
