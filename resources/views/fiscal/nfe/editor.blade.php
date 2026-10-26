@@ -33,6 +33,15 @@
  #nfeItemDialog .nfe-federal-section .editor-grid.cols-12>.field.col-3{grid-column:span 6!important}
 }
 
+/* Grade de PIS-ST/COFINS-ST: antes havia seis campos espremidos por linha. */
+#nfeItemDialog .nfe-item-additional-federal-grid{display:grid!important;grid-template-columns:repeat(12,minmax(0,1fr))!important;gap:18px 14px!important;margin:18px 0 22px!important;padding:17px 14px!important;border:1px solid #e0e8e2!important;background:#fafcfb!important}
+#nfeItemDialog .nfe-item-additional-federal-grid>.field.col-2,
+#nfeItemDialog .nfe-item-additional-federal-grid>.field.col-3{grid-column:span 4!important;display:flex!important;flex-direction:column!important;gap:8px!important;min-width:0!important;margin:0!important}
+#nfeItemDialog .nfe-item-additional-federal-grid>.field>span{display:block!important;min-height:18px!important;line-height:1.45!important;margin:0!important;white-space:normal!important}
+#nfeItemDialog .nfe-item-additional-federal-grid>.field>input,
+#nfeItemDialog .nfe-item-additional-federal-grid>.field>select{box-sizing:border-box!important;width:100%!important;min-width:0!important}
+@media(max-width:750px){#nfeItemDialog .nfe-item-additional-federal-grid>.field.col-2,#nfeItemDialog .nfe-item-additional-federal-grid>.field.col-3{grid-column:span 6!important}}
+
 /* Cabeçalhos das seções expansíveis do item da NF-e. */
 #nfeItemDialog details.nfe-item-section>summary.nfe-item-section-heading{display:flex!important;align-items:center!important;gap:12px!important;min-height:50px!important;padding:8px 13px!important;background:#edf3ef!important;border:1px solid #d8e4dd!important;border-left:3px solid #36846b!important;border-radius:3px!important;cursor:pointer!important;list-style:none!important}
 #nfeItemDialog details.nfe-item-section>summary.nfe-item-section-heading::-webkit-details-marker{display:none!important}
