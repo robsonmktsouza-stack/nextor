@@ -84,12 +84,12 @@ class PurchaseController extends Controller
         $supplierCnpj=preg_replace('/\\D/','',(string)($defaults['supplier_cnpj']??''));
         $supplierName=trim((string)($defaults['supplier_name']??''));
         if(!$supplierId && preg_match('/^\\d{14}$/',$supplierCnpj) && $supplierName!=='') {
-            $supplier=\\App\\Models\\Customer::query()->get(['id','document','is_supplier'])
+            $supplier=\App\Models\Customer::query()->get(['id','document','is_supplier'])
                 ->first(fn($row)=>preg_replace('/\\D/','',(string)$row->document)===$supplierCnpj);
             if($supplier) {
                 $supplierId=$supplier->id;
             } else {
-                $supplier=\\App\\Models\\Customer::query()->create([
+                $supplier=\App\Models\Customer::query()->create([
                     'name'=>$supplierName,
                     'document'=>$supplierCnpj,
                     'is_supplier'=>true,
@@ -102,7 +102,7 @@ class PurchaseController extends Controller
             }
         }
         if($supplierId) {
-            $supplier=\\App\\Models\\Customer::query()->find($supplierId);
+            $supplier=\App\Models\Customer::query()->find($supplierId);
             if($supplier && !$supplier->is_supplier) {
                 $supplier->update(['is_supplier'=>true]);
             }
