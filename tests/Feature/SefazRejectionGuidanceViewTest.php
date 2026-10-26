@@ -207,4 +207,15 @@ final class SefazRejectionGuidanceViewTest extends TestCase
         $buttons=(new \DOMXPath($dom))->query('//button[@form="nfeRetryForm"]');
         self::assertSame(0,$buttons->length,'Uma orientação não pode liberar o botão de retransmissão.');
     }
+
+    public function test_a_local_diagnostic_is_not_exposed_in_the_editor_or_its_details_and_is_preserved_internally(): void
+    {
+        Storage::fake('local');
+        $raw='Falha ao preparar: SQLSTATE fixture-private-path /workspace/private/file.php';
+        $note=NfeDraft::query()->create(['status'=>'prepared','issue_date'=>'2026-10-26',
+            'environment'=>'homologation','error_message'=>$raw]);
+        $this->actingAs($this->admin())->get(route('fiscal.nfe.edit',$note))->assertOk()
+            ->assertSee('data-sefaz-guidance',false)->assertDontSee('SQLSTATE')->assertDontSee('fixture-private-path');
+        self::assertSame($raw,$note->fresh()->error_message);
+    }
 }

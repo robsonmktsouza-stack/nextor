@@ -76,7 +76,7 @@ final class FiscalCatalogController extends Controller
         $request->validate(['install_templates' => ['nullable', 'boolean']]);
         $release = $catalog->installBundled();
         if ($request->boolean('install_templates')) $templates->install($release->version);
-        return redirect()->route('fiscal.catalog.index')->with('success', 'Tabelas fiscais atualizadas.');
+        return redirect()->route('fiscal.catalog.index')->with('success', 'Catálogo fiscal atualizado.');
     }
 
     public function import(Request $request, FiscalCatalogService $catalog)
@@ -87,19 +87,19 @@ final class FiscalCatalogController extends Controller
         ]);
         $bytes = $request->file('catalog_file')->getContent();
         if (!hash_equals(strtolower($request->string('sha256')->toString()), hash('sha256', $bytes))) {
-            throw ValidationException::withMessages(['sha256' => 'Não foi possível validar o arquivo selecionado.']);
+            throw ValidationException::withMessages(['sha256' => 'O código de verificação não corresponde ao arquivo. Confira o pacote recebido.']);
         }
         try {
             $manifest = json_decode($bytes, true, 64, JSON_THROW_ON_ERROR);
         } catch (\JsonException) {
-            throw ValidationException::withMessages(['catalog_file' => 'O arquivo selecionado não é válido.']);
+            throw ValidationException::withMessages(['catalog_file' => 'O arquivo do catálogo está inválido. Selecione novamente o pacote aprovado.']);
         }
         if (!is_array($manifest) || array_is_list($manifest)) {
-            throw ValidationException::withMessages(['catalog_file' => 'O arquivo selecionado não possui o formato esperado.']);
+            throw ValidationException::withMessages(['catalog_file' => 'O arquivo não possui o formato de catálogo esperado. Selecione o pacote aprovado.']);
         }
         $release = $catalog->import($manifest);
 
         return redirect()->route('fiscal.catalog.index', ['release' => $release->id, 'tab' => 'history'])
-            ->with('success', 'Tabelas fiscais atualizadas.');
+            ->with('success', 'Catálogo fiscal importado.');
     }
 }

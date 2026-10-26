@@ -78,7 +78,7 @@
 </details>
 <details style="margin-top:12px" @if(!$rule) open @endif><summary>Fundamento e condições de aplicação</summary>
   <div class="editor-grid cols-12 settings-grid" style="margin-top:10px">
-    <label class="field col-3"><span>Versão de referência</span><input name="catalog_version" maxlength="32" value="{{ $value('catalog_version') }}"></label>
+    <input type="hidden" name="catalog_version" value="{{ $value('catalog_version') }}">
     <label class="field col-3"><span>Situação da configuração</span><select name="catalog_status"><option value="">Configuração existente</option>@foreach(['template'=>'Modelo para revisão','reviewed'=>'Revisada','custom'=>'Exceção personalizada revisada'] as $code=>$label)<option value="{{ $code }}" @selected($value('catalog_status')===$code)>{{ $label }}</option>@endforeach</select></label>
     <div class="field col-6"><span>Revisão fiscal</span><label class="settings-switch"><input type="checkbox" name="fiscal_review_confirmed" value="1"><span><strong>Revisei os critérios e o fundamento desta regra</strong></span></label>@if($rule?->fiscal_reviewed_at)<small>Última revisão {{ $rule->fiscal_reviewed_at->format('d/m/Y H:i') }}</small>@endif</div>
     <label class="field col-6"><span>Endereço da fonte oficial</span><input name="legal_source" type="url" maxlength="2000" value="{{ $value('legal_source') }}"></label>

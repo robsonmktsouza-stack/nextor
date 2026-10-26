@@ -36,7 +36,6 @@
   <section class="editor-panel settings-panel">
     <div class="settings-panel-head">
       <div><h2>Dados gerais</h2></div>
-      
     </div>
     <div class="editor-grid cols-12 settings-grid">
       <label class="field col-6"><span>Descrição</span><input required maxlength="160" name="name" value="{{ old('name',$group->name) }}" placeholder="Ex.: Venda de mercadorias — revisão contábil"></label>

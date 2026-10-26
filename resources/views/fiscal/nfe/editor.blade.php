@@ -82,7 +82,12 @@ $origins=[
  '7'=>'7 - Estrangeira: mercado interno sem similar nacional',
  '8'=>'8 - Nacional com conteúdo de importação > 70%',
 ];
+  $displayTotals=$draft->totals??[];
+  if(isset($displayTotals['tax_errors']) && is_array($displayTotals['tax_errors'])){
+    $displayTotals['tax_errors']=array_map(fn($message)=>\App\Support\UserFacingMessage::fromText((string)$message,'Confira os parâmetros tributários dos itens e valide novamente a nota.'),$displayTotals['tax_errors']);
+  }
 @endphp
+
 
 <div class="nextor-modal-layer nfe-modal-layer is-open" id="nfeEditorDialog" data-nfe-modal data-nfe-readonly="{{ $draft->status!=='draft'?'1':'0' }}" aria-hidden="false">
   <div class="erp-dialog nfe-workspace-dialog nextor-modal-window" role="dialog" aria-modal="true" aria-labelledby="nfeEditorTitle">
@@ -123,8 +128,7 @@ $origins=[
       <button type="button" class="editor-tab" data-nfe-jump="nfe-section-other">Informações adicionais</button>
     </nav>
 
-    <section class="editor-tab-panel nfe-form-section cms-card" id="nfe-section-general">
-      <header class="card-header nfe-flow-heading"><div><h2>Dados gerais</h2><p>Natureza da operação, emitente e destinatário</p></div></header>
+    <section class="editor-tab-panel nfe-form-section cms-card" id="nfe-section-general" aria-label="Dados gerais">
       <div class="nfe-emitter-summary">
         <div class="nfe-emitter-logo">
           @if($company->logo_path)
@@ -395,8 +399,7 @@ $origins=[
       </div>
     </section>
 
-    <section class="editor-tab-panel nfe-form-section cms-card" id="nfe-section-items">
-      <header class="card-header nfe-flow-heading"><div><h2>Produtos e valores</h2><p>Mercadorias, tributação e totais</p></div></header>
+    <section class="editor-tab-panel nfe-form-section cms-card" id="nfe-section-items" aria-label="Produtos e valores">
       <div class="cms-card">
         <div class="grid-actionbar">
           <div class="grid-actions-left">
@@ -457,7 +460,7 @@ $origins=[
             @foreach($draft->items as $item)
               @php($trace=data_get($item->tax_data,'fiscal_rule_trace',[]))
               @if(!empty($trace['id']))
-                <div>Item {{ $item->item_number }}: {{ data_get($trace,'snapshot.name','Regra fiscal') }} .
+                <div>Item {{ $item->item_number }}: {{ data_get($trace,'snapshot.name','Regra fiscal') }}. {{ $trace['legal_reference']??'' }}
                   CFOP {{ $item->cfop }}.
                   @if(data_get($item->tax_data,'icms_csosn'))
                     CSOSN {{ data_get($item->tax_data,'icms_csosn') }}.
@@ -465,7 +468,7 @@ $origins=[
                     CST ICMS {{ data_get($item->tax_data,'icms_cst') }}.
                   @endif
                   @if(!empty($trace['overrides']))
-                    Valores manuais diferentes: {{ implode(', ',array_keys($trace['overrides'])) }}. Revise o enquadramento.
+                    Existem valores informados manualmente. Confira os tributos deste item.
                   @endif
                 </div>
               @endif
@@ -475,8 +478,7 @@ $origins=[
       </div>
     </section>
 
-    <section class="editor-tab-panel nfe-form-section cms-card" id="nfe-section-payment">
-      <header class="card-header nfe-flow-heading"><div><h2>Pagamento</h2><p>Forma de pagamento e vencimentos</p></div></header>
+    <section class="editor-tab-panel nfe-form-section cms-card" id="nfe-section-payment" aria-label="Pagamento">
       <div class="editor-panel">
         <div class="editor-grid cols-12">
           <label class="field col-4"><span>Tipo de pagamento *</span>
@@ -588,8 +590,7 @@ $origins=[
       </div>
     </section>
 
-    <section class="editor-tab-panel nfe-form-section cms-card" id="nfe-section-transport">
-      <header class="card-header nfe-flow-heading"><div><h2>Transporte</h2><p>Frete, transportador e volumes</p></div></header>
+    <section class="editor-tab-panel nfe-form-section cms-card" id="nfe-section-transport" aria-label="Transporte">
       @include('fiscal.nfe._foreign-trade-header')
       <div class="editor-panel">
         <h3>Transportadora e volumes</h3>
@@ -630,8 +631,7 @@ $origins=[
       </div>
     </section>
 
-    <section class="editor-tab-panel nfe-form-section cms-card" id="nfe-section-other">
-      <header class="card-header nfe-flow-heading"><div><h2>Informações adicionais</h2><p>Documentos referenciados e observações</p></div></header>
+    <section class="editor-tab-panel nfe-form-section cms-card" id="nfe-section-other" aria-label="Informações adicionais">
       <div class="editor-panel">
         <div class="delivery-card-title">
           <div><h3>Documentos referenciados</h3></div>
@@ -1089,7 +1089,7 @@ $origins=[
 <script type="application/json" id="nfe-customers-data">@json($customerData)</script>
 <script type="application/json" id="nfe-natures-data">@json($natureData)</script>
 <script type="application/json" id="nfe-tax-defaults-data">@json($taxDefaults)</script>
-<script type="application/json" id="nfe-stored-totals-data">@json($draft->totals??[])</script>
+<script type="application/json" id="nfe-stored-totals-data">@json($displayTotals)</script>
 <script type="application/json" id="nfe-emitter-state">@json($company->state)</script>
 <script type="application/json" id="nfe-emitter-crt">@json($company->crt)</script>
 @endsection

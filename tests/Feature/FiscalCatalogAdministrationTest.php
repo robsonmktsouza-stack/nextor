@@ -62,7 +62,7 @@ final class FiscalCatalogAdministrationTest extends TestCase
     {
         app(FiscalCatalogService::class)->import($this->manifest());
         $this->actingAs($this->admin())->get(route('fiscal.catalog.index', ['kind' => 'ncm', 'q' => '01012100']))
-            ->assertOk()->assertSee('ui-test-1')->assertSee('Reprodutores de raça pura — catálogo de teste')
+            ->assertOk()->assertDontSee('ui-test-1')->assertSee('Reprodutores de raça pura — catálogo de teste')
             ->assertDontSee('Venda de mercadoria — catálogo de teste')
             ->assertSee('Naturezas de operação')->assertSee('Grupos tributários')
             ->assertSee('Regras e parâmetros')->assertSee('Fonte oficial')->assertSee('Histórico e vigência');
@@ -79,7 +79,7 @@ final class FiscalCatalogAdministrationTest extends TestCase
         $this->get(route('fiscal.catalog.index', ['release' => $first->id, 'date' => '2026-01-01']))
             ->assertOk()->assertSee('Venda de mercadoria — catálogo de teste')->assertDontSee('Nova descrição do código');
         $this->get(route('fiscal.catalog.index', ['tab' => 'history']))->assertOk()
-            ->assertSee('ui-test-1')->assertSee('ui-test-2')->assertSee('SHA-256');
+            ->assertDontSee('ui-test-1')->assertDontSee('ui-test-2')->assertDontSee('SHA-256')->assertSee('Código de verificação do arquivo');
     }
 
     public function test_json_import_is_idempotent_and_does_not_enable_rules_or_change_production_settings(): void
@@ -211,6 +211,6 @@ final class FiscalCatalogAdministrationTest extends TestCase
         $this->get(route('fiscal.catalog.index', ['kind' => 'ncm', 'q' => '01012100']))
             ->assertOk()->assertSee('01012100')->assertSee('Fonte oficial');
         $this->get(route('fiscal.catalog.index', ['tab' => 'history']))->assertOk()
-            ->assertSee('2026.10.26')->assertSee('SHA-256 do conteúdo canônico');
+            ->assertSee('Fontes oficiais')->assertDontSee('SHA-256 do conteúdo canônico');
     }
 }

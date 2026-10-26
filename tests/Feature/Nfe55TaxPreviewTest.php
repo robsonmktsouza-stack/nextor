@@ -58,7 +58,10 @@ final class Nfe55TaxPreviewTest extends TestCase
         $data['items_json']=json_encode($items,JSON_THROW_ON_ERROR);
         $this->postJson(route('fiscal.nfe.preview-taxes'),$data)->assertOk()
             ->assertJsonPath('totals.icms',null)
-            ->assertJsonPath('totals.tax_calculation_complete',false);
+            ->assertJsonPath('totals.tax_calculation_complete',false)
+            ->assertSee('CST 61')
+            ->assertDontSee('implementado')
+            ->assertDontSee('icms_cst');
         self::assertSame(0,NfeDraft::query()->count());
     }
 

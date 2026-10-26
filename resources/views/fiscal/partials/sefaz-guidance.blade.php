@@ -2,6 +2,10 @@
   @php
     $isNfceGuidance=(bool)($nfce ?? false);
     $guidanceCategory=(string)$guidance['category'];
+    $storedError=trim((string)($originalStoredError ?? ''));
+    $storedAuthority=preg_match('/^(?:Retorno (?:da )?SEFAZ|Consulta SEFAZ|Rejei[cç][aã]o(?: SEFAZ)?)\s*:\s*\d{3,4}\b/iu',$storedError)===1;
+    $storedError=$storedAuthority ? $storedError : \App\Support\UserFacingMessage::fromText($storedError,
+      'Ocorrência registrada. Confira os dados da nota e solicite suporte se necessário.');
     $guidanceInformational=in_array($guidanceCategory,[
       'authorized','authorization','cancelled','pending','processing','inutilized',
       'event_recorded','event_unlinked','event_pending','service_status',
@@ -69,10 +73,9 @@
           <p>{{ $originalRejection['code'] }} — {{ preg_replace('/^(?:\d+\s*[-—:]\s*)?Rejei(?:c|ç)(?:a|ã)o\s*:\s*/iu','Rejeição: ',(string)$originalRejection['reason']) }}</p>
         @endif
         <p class="sefaz-guidance-original">{{ $guidance['technical_message'] }}</p>
-        @if(($originalStoredError ?? '')!=='' && trim((string)$originalStoredError)!==trim($guidance['technical_message']))
-          <p>{{ $originalStoredError }}</p>
+        @if(trim((string)($originalStoredError ?? ''))!=='' && $storedError!==trim($guidance['technical_message']))
+          <p>{{ $storedError }}</p>
         @endif
-        
         @foreach($guidance['sources'] as $guidanceSource)
           @php
             $sourceUrl=(string)($guidanceSource['url'] ?? '');

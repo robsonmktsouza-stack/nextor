@@ -84,6 +84,10 @@ final class SefazRejectionGuidance
         $entry = $code !== null ? ($catalog['codes'][$code] ?? null) : null;
         $known = is_array($entry) && is_string($entry['message'] ?? null);
         $message = mb_substr(mb_convert_encoding($technicalMessage, 'UTF-8', 'UTF-8'), 0, 4000);
+        if ($code === null) {
+            $message = \App\Support\UserFacingMessage::fromText($message,
+                'Não foi possível concluir a operação fiscal. Confira os dados da nota e solicite suporte se o problema continuar.');
+        }
         if ($known) $entry = $this->matchingEntry($entry, $message);
         $guide = $known ? $this->actions->describe($code, $entry['message']) : [
             'title' => $code === null ? 'Confira o retorno fiscal' : 'Retorno SEFAZ '.$code,

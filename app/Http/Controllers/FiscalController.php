@@ -330,7 +330,7 @@ class FiscalController extends Controller
         $error = (string) $fiscalDocumentJob->fresh()?->error_message;
         if ($error !== '') {
             return redirect()->route('fiscal.show', $fiscalDocumentJob)
-                ->with('error', $error);
+                ->with('error', \App\Support\UserFacingMessage::fromText($error));
         }
 
         return redirect()->route('fiscal.show', $fiscalDocumentJob)
@@ -348,7 +348,7 @@ class FiscalController extends Controller
 
         $problems = $preflight->validate($fiscalDocumentJob);
         if ($problems) {
-            return back()->with('error', implode(' | ', $problems));
+            return back()->with('error', implode(' | ', array_map(\App\Support\UserFacingMessage::fromText(...), $problems)));
         }
 
         \App\Jobs\ProcessNFCeJob::dispatch($fiscalDocumentJob->id)->onConnection($queueConnection);
@@ -430,7 +430,7 @@ class FiscalController extends Controller
         $problems=app(\App\Services\Fiscal\NFCePreflightService::class)->validate($copy);
         if ($problems) {
             return redirect()->route('fiscal.show',$copy)
-                ->with('error','Correção salva. Verifique as pendências: '.implode(' | ',$problems));
+                ->with('error','Correção salva. Verifique as pendências: '.implode(' | ',array_map(\App\Support\UserFacingMessage::fromText(...),$problems)));
         }
         $queue=(string) config('queue.default','sync');
         if (in_array($queue,['','sync','null'],true)) {

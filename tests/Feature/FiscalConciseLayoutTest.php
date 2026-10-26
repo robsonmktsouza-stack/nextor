@@ -51,6 +51,10 @@ final class FiscalConciseLayoutTest extends TestCase
         self::assertStringNotContainsString('<h3>Dados gerais</h3>',$nfe);
         self::assertStringNotContainsString('<h3>Pagamento</h3>',$nfe);
         self::assertStringNotContainsString('<h3>IBS / CBS — estrutura Lumeron</h3>',$nfe);
+        foreach(['Dados gerais','Produtos e valores','Pagamento','Transporte','Informações adicionais'] as $section){
+            self::assertStringNotContainsString('<h2>'.$section.'</h2>',$nfe);
+        }
+        self::assertStringNotContainsString('nfe-flow-heading',$nfe);
 
         $settings=file_get_contents(resource_path('views/settings/index.blade.php'));
         self::assertStringContainsString('name="production_csc_token"',$settings);

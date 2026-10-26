@@ -251,7 +251,7 @@
       <div><dt>Cliente</dt><dd>{{ $document->sale?->customer?->name ?? 'Consumidor não identificado' }}</dd></div>
       <div><dt>Responsável</dt><dd>{{ $document->sale?->user?->name ?? '—' }}</dd></div>
       <div><dt>Valor da operação</dt><dd>{{ $document->sale ? 'R$ '.number_format((float)$document->sale->total,2,',','.') : '—' }}</dd></div>
-      <div><dt>Forma(s) de pagamento</dt><dd>{{ $document->sale?->payments?->pluck('payment_method')->filter()->unique()->implode(', ') ?: '—' }}</dd></div>
+      <div><dt>Forma(s) de pagamento</dt><dd>{{ $document->sale?->payments?->pluck('payment_method')->filter()->unique()->map(fn($method)=>\App\Support\FiscalPresentation::value($method))->implode(', ') ?: '—' }}</dd></div>
     </dl>
   </section>
 </div>
@@ -261,13 +261,13 @@
 @if(!$documentGuidance && $document->error_message)
   <section class="fiscal-error-card">
     @include('partials.icon',['name'=>'alert','size'=>20])
-    <div><strong>Retorno com problema</strong><p>{{ $document->error_message }}</p></div>
+    <div><strong>Retorno com problema</strong><p>{{ \App\Support\UserFacingMessage::fromText((string)$document->error_message,'Não foi possível concluir o processamento fiscal. Solicite a conferência desta ocorrência ao suporte.') }}</p></div>
   </section>
 @endif
 
 @if($tab==='nfce' && $correctedFromNfce)
   @if($correctionRevision)
-    @php($revisionFields = (array)(json_decode($correctionRevision->changed_fields ?? '{}', true)['fields'] ?? []))
+    @php($revisionFields = collect((array)(json_decode($correctionRevision->changed_fields ?? '{}', true)['fields'] ?? []))->map(fn($field)=>\App\Support\FiscalPresentation::label((string)$field))->filter()->all())
     <section class="fiscal-info-card">
       <strong>Registro da revisão fiscal</strong>
       <p>Rejeição original {{ $correctionRevision->rejection_code }} ·
@@ -331,7 +331,7 @@
   <section class="cms-card fiscal-detail-card">
     <div class="card-header"><div><h2>Cancelamento</h2><p>Estado do evento de cancelamento.</p></div></div>
     <dl class="fiscal-data-list">
-      <div><dt>Status</dt><dd>{{ $document->cancellation_status ?: ($document->cancelled_at?'Concluído':'—') }}</dd></div>
+      <div><dt>Situação</dt><dd>{{ $document->cancellation_status ? \App\Support\FiscalPresentation::value($document->cancellation_status) : ($document->cancelled_at?'Concluído':'—') }}</dd></div>
       <div><dt>Solicitado em</dt><dd>{{ $document->cancellation_requested_at?->format($dateFormat.' H:i:s') ?? '—' }}</dd></div>
       <div><dt>Cancelado em</dt><dd>{{ $document->cancelled_at?->format($dateFormat.' H:i:s') ?? '—' }}</dd></div>
       <div><dt>Motivo</dt><dd>{{ $document->cancellation_reason ?: '—' }}</dd></div>

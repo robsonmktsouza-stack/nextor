@@ -24,10 +24,10 @@
 <details class="editor-panel">
   <summary>Histórico de alterações</summary>
   <div class="table-scroll"><table class="cms-table">
-    <thead><tr><th>Alteração</th><th>Data</th><th>Origem</th><th>Situação</th></tr></thead>
+    <thead><tr><th>Alteração</th><th>Data</th><th>Responsável</th><th>Dados registrados</th></tr></thead>
     <tbody>@foreach($catalogModel->revisions as $change)
-      <tr><td>{{ $change->revision }}</td><td>{{ $change->created_at?->format('d/m/Y H:i') }}</td><td>{{ $change->user_id ? 'Usuário' : 'Sistema' }}</td>
-        <td>Alteração registrada</td></tr>
+      <tr><td>{{ $change->revision }}</td><td>{{ $change->created_at?->format('d/m/Y H:i') }}</td><td>{{ $change->user_id ? (\App\Models\User::query()->find($change->user_id)?->name ?? 'Responsável não informado') : 'Catálogo' }}</td>
+        <td><details><summary>Consultar</summary>@include('fiscal.partials.readable-values',['values'=>$change->snapshot])</details></td></tr>
     @endforeach</tbody>
   </table></div>
 </details>

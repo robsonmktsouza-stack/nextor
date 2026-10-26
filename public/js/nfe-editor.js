@@ -436,11 +436,11 @@
           (rule.cfop?' CFOP '+rule.cfop+'.':'')+
           (rule.csosn?' CSOSN '+rule.csosn+'.':rule.icms_cst?' CST ICMS '+rule.icms_cst+'.':'')+
           (rule.pis_cst?' PIS '+rule.pis_cst+'.':'')+(rule.cofins_cst?' COFINS '+rule.cofins_cst+'.':'')+
-          (rule.overrides.length?' Valores manuais diferentes: '+rule.overrides.join(', ')+'. Revise o enquadramento.':'')
+          (rule.overrides.length?' Existem valores informados manualmente. Confira os tributos deste item.':'')
         ).join('\n');
       }catch(error){
         if(error.name!=='AbortError'&&version===taxPreviewVersion&&status){
-          status.textContent='Não foi possível atualizar o cálculo. Confira os dados e tente novamente.';
+          status.textContent='Cálculo pendente: '+window.LumeronUserMessage.fromError(error,'Não foi possível atualizar os tributos. Confira a conexão e tente novamente.');
         }
       }
     },350);
@@ -569,7 +569,7 @@
     if(extraPayments.length && byId('nfeSplitPayments'))byId('nfeSplitPayments').open=true;
     if(body){
       body.innerHTML=extraPayments.length ? extraPayments.map((p,i)=>`
-        <tr><td>${esc(p.type||'')}</td><td>${esc(p.condition||'a_vista')}</td>
+        <tr><td>${esc([...byId('nfeExtraPaymentType').options].find(option=>option.value===p.type)?.textContent||'Forma não informada')}</td><td>${esc(({a_vista:'À vista','30_dias':'30 dias',personalizado:'Personalizado'})[p.condition]||'À vista')}</td>
         <td class="nowrap">${money(p.amount)}</td>
         <td class="action-cell"><button type="button" class="btn-icon row-action-danger"
           data-nfe-remove-payment="${i}" aria-label="Remover pagamento"

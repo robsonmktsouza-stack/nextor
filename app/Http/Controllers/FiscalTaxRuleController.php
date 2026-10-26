@@ -53,7 +53,7 @@ final class FiscalTaxRuleController extends Controller
             CompanySetting::query()->whereKey($company->id)->lockForUpdate()->firstOrFail();
             $rule = $id ? FiscalTaxRule::query()->lockForUpdate()->findOrFail($id) : new FiscalTaxRule;
             if ($rule->exists && $rule->document_type === 'nfe' && !$request->filled('revision')) {
-                throw ValidationException::withMessages(['revision' => 'Atualize o cadastro antes de salvar esta regra.']);
+                throw ValidationException::withMessages(['revision' => 'Reabra o cadastro desta regra antes de salvar as alterações.']);
             }
             if ($rule->exists && $request->filled('revision') && (int) $request->input('revision') !== $rule->revision) {
                 throw ValidationException::withMessages(['revision' => 'Esta regra foi alterada por outro usuário. Reabra o cadastro antes de salvar.']);
@@ -196,7 +196,7 @@ final class FiscalTaxRuleController extends Controller
             if (!(str_ends_with($sourceHost, '.gov.br') || str_ends_with($sourceHost, '.leg.br')
                 || $sourceHost === 'acbr.sourceforge.io' || $sourceHost === 'projetoacbr.com.br'
                 || str_ends_with($sourceHost, '.projetoacbr.com.br')) || str_contains($sourcePath, '/forum')) {
-                $this->invalid('legal_source', 'Use uma fonte oficial governamental ou documentação oficial ACBr. Fóruns não são fundamento normativo.');
+                $this->invalid('legal_source', 'Informe o endereço da fonte oficial desta regra fiscal.');
             }
             $prefix = substr($data['cfop'], 0, 1);
             if (($data['operation_type'] ?? null) === 'inbound' && !in_array($prefix, ['1','2','3'], true)) $this->invalid('cfop', 'Operação de entrada exige CFOP iniciado por 1, 2 ou 3.');
@@ -208,8 +208,8 @@ final class FiscalTaxRuleController extends Controller
         $parameters = array_filter($data['tax_parameters'] ?? [], static fn ($value) => $value !== null && $value !== '');
         if (!empty($data['tax_parameters_json'])) {
             try { $parameters = json_decode($data['tax_parameters_json'], true, 32, JSON_THROW_ON_ERROR); }
-            catch (\JsonException) { $this->invalid('tax_parameters_json', 'Confira os parâmetros tributários informados.'); }
-            if (!is_array($parameters) || array_is_list($parameters)) $this->invalid('tax_parameters_json', 'Confira os parâmetros tributários informados.');
+            catch (\JsonException) { $this->invalid('tax_parameters_json', 'Os parâmetros tributários estão inválidos. Revise a configuração.'); }
+            if (!is_array($parameters) || array_is_list($parameters)) $this->invalid('tax_parameters_json', 'Revise os parâmetros tributários informados.');
         }
         foreach ($parameters as $key => $value) {
                 if(in_array($key,['is_legal_source','rtc_regular_legal_source'],true)){
@@ -246,7 +246,7 @@ final class FiscalTaxRuleController extends Controller
                     continue;
                 }
                 if (in_array($key, ['ipi_calculation_type','pis_calculation_type','cofins_calculation_type','pis_st_calculation_type','cofins_st_calculation_type'], true)) {
-                    if (!in_array($value, ['percent','quantity'], true)) $this->invalid('tax_parameters_json', 'Tipo de cálculo inválido: '.$key.'.');
+                    if (!in_array($value, ['percent','quantity'], true)) $this->invalid('tax_parameters_json', 'Forma de cálculo inválida para '.(\App\Support\FiscalPresentation::label($key) ?? 'o tributo informado').'.');
                     continue;
                 }
                 if (str_ends_with($key,'_st_add_to_total') && !in_array((string)$value,['0','1'],true)) $this->invalid('tax_parameters_json','Indicador de soma ST deve ser 0 ou 1.');
@@ -259,11 +259,11 @@ final class FiscalTaxRuleController extends Controller
                 if ($key === 'icms_st_base_mode' && !in_array((string)$value,['0','1','2','3','4','5','6'],true)) $this->invalid('tax_parameters_json', 'Modalidade da base ICMS ST inválida.');
                 if ($key === 'icms_desoneration_deduct' && !in_array((string) $value, ['0','1'], true)) $this->invalid('tax_parameters_json', 'A dedução do ICMS desonerado deve ser Sim ou Não.');
                 if (!in_array($key, self::TAX_PARAMETERS, true) || !is_scalar($value) || is_bool($value)
-                    || !preg_match('/^\d{1,12}(?:\.\d{1,4})?$/', (string) $value)) $this->invalid('tax_parameters_json', 'Confira os valores dos parâmetros tributários.');
-                if ($key!=='is_rate' && (str_ends_with($key, '_rate') && !str_ends_with($key, '_unit_rate') || str_ends_with($key, '_reduction')) && (float) $value > 100) $this->invalid('tax_parameters_json', 'Percentual superior a 100: '.$key.'.');
+                    || !preg_match('/^\d{1,12}(?:\.\d{1,4})?$/', (string) $value)) $this->invalid('tax_parameters_json', 'Valor inválido para '.(\App\Support\FiscalPresentation::label($key) ?? 'o parâmetro tributário informado').'. Informe um valor não negativo.');
+                if ($key!=='is_rate' && (str_ends_with($key, '_rate') && !str_ends_with($key, '_unit_rate') || str_ends_with($key, '_reduction')) && (float) $value > 100) $this->invalid('tax_parameters_json', 'O percentual de '.(\App\Support\FiscalPresentation::label($key) ?? 'tributação').' não pode ultrapassar 100.');
         }
         if ($data['document_type'] === 'nfce' && $parameters !== []) {
-            $this->invalid('tax_parameters_json', 'Os parâmetros ampliados são exclusivos do motor NF-e 55. Mantenha a parametrização NFC-e em seus grupos fiscais existentes.');
+            $this->invalid('tax_parameters_json', 'Configure os tributos da NFC-e no grupo tributário correspondente.');
         }
         unset($data['tax_parameters_json'], $data['fiscal_review_confirmed']);
         $data['tax_parameters'] = $parameters ?: null;

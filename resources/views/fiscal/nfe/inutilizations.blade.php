@@ -10,7 +10,7 @@
   <form method="post" action="{{ route('fiscal.nfe.inutilizations.store') }}" class="dialog-body">
     @csrf
     <div class="form-grid">
-      <label class="field"><span>Ambiente</span><input readonly value="{{ $environment==='homologation'?'Homologação — teste':'Produção — indisponível' }}"></label>
+      <label class="field"><span>Ambiente</span><input readonly value="{{ $environment==='homologation'?'Homologação — teste':'Produção — operação indisponível' }}"></label>
       <label class="field"><span>Ano</span><input type="number" name="year" min="2020" max="{{ now()->year }}" value="{{ old('year',now()->year) }}" required></label>
       <label class="field"><span>Série</span><input type="number" name="series" min="0" max="999" value="{{ old('series',$series) }}" required></label>
       <label class="field"><span>Número inicial</span><input type="number" name="first_number" min="1" max="{{ max(1,$nextNumber-1) }}" value="{{ old('first_number') }}" required></label>

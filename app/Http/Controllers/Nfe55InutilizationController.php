@@ -49,7 +49,9 @@ final class Nfe55InutilizationController extends Controller
         $path = 'fiscal/nfe55/inutilizations/'.$nfe55Inutilization->id.'/authorized.xml';
         abort_unless($nfe55Inutilization->status === 'authorized' && $nfe55Inutilization->xml_path === $path
             && Storage::disk('local')->exists($path), 404);
-        return Storage::disk('local')->download($path, 'Inutilizacao-NFe-'.$nfe55Inutilization->id.'.xml', [
+        return Storage::disk('local')->download($path, 'Inutilizacao-NFe-'.(int)$nfe55Inutilization->year
+            .'-'.(int)$nfe55Inutilization->series.'-'.(int)$nfe55Inutilization->first_number
+            .'-'.(int)$nfe55Inutilization->last_number.'.xml', [
             'Content-Type' => 'application/xml', 'Cache-Control' => 'private, no-store',
             'X-Content-Type-Options' => 'nosniff',
         ]);

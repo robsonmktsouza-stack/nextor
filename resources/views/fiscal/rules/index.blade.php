@@ -18,8 +18,8 @@
     <thead><tr><th>Regra</th><th>Critérios</th><th>CFOP</th><th>Tributação</th><th>Prioridade</th><th>Vigência</th><th>Situação</th><th></th></tr></thead>
     <tbody>@forelse($rules as $rule)
       <tr>
-        <td><strong>{{ $rule->name }}</strong><small class="table-subtitle">{{ strtoupper($rule->document_type) }}</small></td>
-        <td>{{ $rule->origin_uf }} → {{ $rule->destination_uf }} · CRT {{ $rule->crt }}<small class="table-subtitle">@if($rule->product_id)Produto vinculado @endif @if($rule->ncm_prefix)NCM {{ $rule->ncm_prefix }}* @endif {{ ['inbound'=>'Entrada','outbound'=>'Saída'][$rule->operation_type] ?? '' }} {{ ['normal'=>'Normal','return'=>'Devolução','complementary'=>'Complementar','adjustment'=>'Ajuste'][$rule->purpose] ?? '' }} {{ ['contributor'=>'Contribuinte','exempt'=>'Isento de IE','non_contributor'=>'Não contribuinte'][$rule->recipient_profile] ?? '' }}</small></td>
+        <td><strong>{{ $rule->name }}</strong><small class="table-subtitle">{{ \App\Support\FiscalPresentation::value($rule->document_type) }}</small></td>
+        <td>{{ $rule->origin_uf }} → {{ $rule->destination_uf }} · CRT {{ $rule->crt }}<small class="table-subtitle">@if($rule->product_id){{ $products->firstWhere('id',$rule->product_id)?->name ?? 'Produto específico' }} @endif @if($rule->ncm_prefix)NCM {{ $rule->ncm_prefix }}* @endif {{ \App\Support\FiscalPresentation::value($rule->operation_type) }} · {{ \App\Support\FiscalPresentation::value($rule->purpose) }} · {{ \App\Support\FiscalPresentation::value($rule->recipient_profile) }}</small></td>
         <td>{{ $rule->cfop }}</td>
         <td>{{ $rule->icms_cst ? 'CST '.$rule->icms_cst : 'CSOSN '.$rule->csosn }}<small class="table-subtitle">PIS {{ $rule->pis_cst }} · COFINS {{ $rule->cofins_cst }}</small></td>
         <td>{{ $rule->priority }}</td>
@@ -35,7 +35,7 @@
           <button type="submit" class="btn btn-success">Salvar alterações</button>
         </form>
         <details><summary>Histórico de alterações</summary>
-          @forelse($rule->revisions as $revision)<details><summary>Alteração em {{ $revision->created_at?->format('d/m/Y H:i') }}</summary><p>Consulte o histórico administrativo para conferir os dados anteriores.</p></details>@empty<p>Nenhuma alteração anterior registrada.</p>@endforelse
+          @forelse($rule->revisions as $revision)<details><summary>Revisão {{ $revision->revision }} · {{ $revision->created_at?->format('d/m/Y H:i') }} · {{ $revision->changed_by ? (\App\Models\User::query()->find($revision->changed_by)?->name ?? 'Responsável não informado') : 'Sistema' }}</summary>@include('fiscal.partials.readable-values',['values'=>$revision->snapshot])</details>@empty<p>Nenhuma alteração registrada.</p>@endforelse
         </details>
       </details></td></tr>
     @empty<tr><td colspan="8" class="empty-cell">Nenhuma regra cadastrada.</td></tr>@endforelse</tbody>

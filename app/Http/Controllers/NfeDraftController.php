@@ -161,8 +161,8 @@ class NfeDraftController extends Controller
             $draft->setRelation('items',collect($items)->map(fn($item)=>new NfeDraftItem($item)));
             app(\App\Services\Fiscal\Nfe55IniBuilder::class)->build($draft,$company,1,12345678);
         }catch(ValidationException $error){
-            $documentErrors=array_values(array_unique(array_merge(...array_values($error->errors()))));
-        }catch(\RuntimeException $error){$documentErrors[]=$error->getMessage();}
+            $documentErrors=array_map(\App\Support\UserFacingMessage::fromText(...),array_values(array_unique(array_merge(...array_values($error->errors())))));
+        }catch(\RuntimeException $error){$documentErrors[]=\App\Support\UserFacingMessage::fromThrowable($error,'Não foi possível conferir os tributos. Revise os dados da nota.');}
         $rules=[];
         foreach($items as $index=>$item){
             $trace=data_get($item,'tax_data.fiscal_rule_trace',[]);
@@ -179,7 +179,9 @@ class NfeDraftController extends Controller
                 'cofins_cst'=>data_get($item,'tax_data.cofins_cst'),
                 'overrides'=>array_keys($trace['overrides']??[])];
         }
-        return response()->json(['totals'=>$totals,'document_errors'=>$documentErrors,'applied_rules'=>$rules]);
+        $previewTotals=$totals;
+        $previewTotals['tax_errors']=array_map(\App\Support\UserFacingMessage::fromText(...),$totals['tax_errors']??[]);
+        return response()->json(['totals'=>$previewTotals,'document_errors'=>$documentErrors,'applied_rules'=>$rules]);
     }
 
     public function update(Request $request, NfeDraft $nfeDraft)
@@ -378,7 +380,7 @@ class NfeDraftController extends Controller
                 'original_value'=>round($totals['total']+$totals['discount'],2),
                 'discount'=>$totals['discount'],'net_value'=>$totals['total'],
             ])]);
-        }catch(\RuntimeException $error){$errors[]=$error->getMessage();}
+        }catch(\RuntimeException $error){$errors[]=\App\Support\UserFacingMessage::fromThrowable($error,'Não foi possível conferir os tributos. Revise os dados da nota.');}
 
         if(!$draft->operationNature) $errors[]='Selecione uma natureza de operação.';
         elseif($draft->operation_type!==$draft->operationNature->operation_type){
@@ -422,7 +424,7 @@ class NfeDraftController extends Controller
         }
         try {
             app(\App\Services\Fiscal\Nfe55OperationPolicy::class)->validate($draft,CompanySetting::current());
-        }catch(\RuntimeException $error){$errors[]=$error->getMessage();}
+        }catch(\RuntimeException $error){$errors[]=\App\Support\UserFacingMessage::fromThrowable($error,'Não foi possível conferir os tributos. Revise os dados da nota.');}
 
         if($draft->items->isEmpty()) $errors[]='Adicione pelo menos um produto.';
 
@@ -465,8 +467,8 @@ class NfeDraftController extends Controller
                     'draft_id'=>$draft->id,
                     'type'=>get_class($error),
                 ]);
-                $errors[]=$error instanceof \RuntimeException?$error->getMessage():
-                    'Confira a classificação fiscal e os impostos dos produtos antes de emitir. Esta combinação ainda não está pronta para envio.';
+                $errors[]=\App\Support\UserFacingMessage::fromThrowable($error,
+                    'Confira a classificação fiscal e os impostos dos produtos antes de emitir.');
             }
         }
 
@@ -872,7 +874,7 @@ class NfeDraftController extends Controller
                 $unitPrice=NfeTaxMath::format(NfeTaxMath::scaled($item['unit_price']??0,4,'Preço unitário'),4);
                 $line=NfeTaxMath::line($quantity,$dimensionQuantity,$unitPrice);
             }catch(\RuntimeException $error){
-                throw ValidationException::withMessages(['items_json'=>$error->getMessage()]);
+                throw ValidationException::withMessages(['items_json'=>\App\Support\UserFacingMessage::fromThrowable($error,'Não foi possível conferir os dados fiscais dos produtos. Revise os itens.')]);
             }
             $parts=[];$partsCents=[];
             foreach(['freight','insurance','other_expenses','discount'] as $part){
@@ -881,7 +883,7 @@ class NfeDraftController extends Controller
                     throw ValidationException::withMessages(['items_json'=>'Confira os valores adicionais dos itens da NF-e.']);
                 }
                 try {$partsCents[$part]=NfeTaxMath::scaled($value,2,'Valor adicional do item');}
-                catch(\RuntimeException $error){throw ValidationException::withMessages(['items_json'=>$error->getMessage()]);}
+                catch(\RuntimeException $error){throw ValidationException::withMessages(['items_json'=>\App\Support\UserFacingMessage::fromThrowable($error,'Não foi possível conferir os dados fiscais dos produtos. Revise os itens.')]);}
                 $parts[$part]=$partsCents[$part]/100;
             }
             $gross=$line['gross_cents']/100;
@@ -939,7 +941,7 @@ class NfeDraftController extends Controller
         try {
             app(Nfe55TaxRuleApplicationService::class)->apply($draft,$company,true,true);
         }catch(\RuntimeException $error){
-            throw ValidationException::withMessages(['items_json'=>$error->getMessage()]);
+            throw ValidationException::withMessages(['items_json'=>\App\Support\UserFacingMessage::fromThrowable($error,'Não foi possível conferir os dados fiscais dos produtos. Revise os itens.')]);
         }
         $storedItems=$draft->items->map(fn($item)=>[
             'quantity'=>$item->quantity,
@@ -995,7 +997,7 @@ class NfeDraftController extends Controller
         try {
             app(Nfe55TaxRuleApplicationService::class)->apply($draft,$company,false);
         }catch(\RuntimeException $error){
-            throw ValidationException::withMessages(['items_json'=>$error->getMessage()]);
+            throw ValidationException::withMessages(['items_json'=>\App\Support\UserFacingMessage::fromThrowable($error,'Não foi possível conferir os dados fiscais dos produtos. Revise os itens.')]);
         }
         return $draft->items->map(fn($item)=>$item->toArray())->all();
     }
@@ -1061,7 +1063,7 @@ class NfeDraftController extends Controller
             ]);
         }catch(\RuntimeException $error){
             $field=str_contains(mb_strtolower($error->getMessage()),'desconto geral')?'discount':'items_json';
-            throw ValidationException::withMessages([$field=>$error->getMessage()]);
+            throw ValidationException::withMessages([$field=>\App\Support\UserFacingMessage::fromThrowable($error,'Não foi possível conferir os valores da nota. Revise os itens e os descontos.')]);
         }
     }
 
