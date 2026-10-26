@@ -149,6 +149,51 @@ final class SefazRejectionGuidanceViewTest extends TestCase
         self::assertStringNotContainsString('<xml>',$html);
     }
 
+    public function test_guidance_links_open_existing_get_registrations_for_the_subject_and_user_permissions(): void
+    {
+        $this->actingAs($this->admin());
+        foreach([
+            'accountant'=>[route('settings.index',['tab'=>'accounting'])],
+            'authorized_xml'=>[route('settings.index',['tab'=>'accounting'])],
+            'ncm'=>[route('products.index')],
+            'cfop'=>[route('fiscal.tax-rules.index')],
+            'rtc'=>[route('fiscal.tax-rules.index')],
+            'taxpayer_identity'=>[route('customers.index'),route('settings.index',['tab'=>'general'])],
+        ] as $category=>$urls){
+            $guidance=$this->linkGuidance($category);
+            $html=view('fiscal.partials.sefaz-guidance',compact('guidance'))->render();
+            foreach($urls as $url)self::assertStringContainsString('href="'.$url.'"',$html);
+            self::assertStringNotContainsString('<form',$html);
+        }
+
+        $operator=User::query()->create([
+            'name'=>'Operador fiscal','email'=>'fiscal-only@example.com','password'=>'senhaSegura123',
+            'role'=>'employee','is_active'=>true,'permissions'=>['fiscal'],
+        ]);
+        $this->actingAs($operator);
+        foreach(['accountant','ncm','cfop','rtc','taxpayer_identity'] as $category){
+            $guidance=$this->linkGuidance($category);
+            $html=view('fiscal.partials.sefaz-guidance',compact('guidance'))->render();
+            self::assertStringNotContainsString('sefaz-guidance-links',$html);
+        }
+
+        $operator->update(['permissions'=>['fiscal','customers']]);
+        $guidance=$this->linkGuidance('taxpayer_identity');
+        $html=view('fiscal.partials.sefaz-guidance',compact('guidance'))->render();
+        self::assertStringContainsString('href="'.route('customers.index').'"',$html);
+        self::assertStringNotContainsString('href="'.route('settings.index',['tab'=>'general']).'"',$html);
+    }
+
+    private function linkGuidance(string $category): array
+    {
+        return [
+            'code'=>'778','title'=>'Confira o cadastro','summary'=>'Dados a revisar.',
+            'steps'=>['Confira o campo indicado.'],'fields'=>[],'item'=>null,
+            'technical_message'=>'Retorno original','known_code'=>true,'category'=>$category,
+            'catalog_version'=>'2026.10.26','sources'=>[],
+        ];
+    }
+
     private function assertNoRetryButton(string $html): void
     {
         $dom=new \DOMDocument();

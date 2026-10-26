@@ -8,6 +8,36 @@
       'registration_query','distribution','epec',
     ],true);
     $guidanceClass=$guidanceInformational ? 'fiscal-info-card' : ($isNfceGuidance ? 'nfce-sefaz-rejection' : 'fiscal-error-card');
+    $guidanceDestinations=match($guidanceCategory){
+      'accountant','authorized_xml'=>[
+        ['settings.index',['tab'=>'accounting'],'settings','Abrir contabilidade'],
+      ],
+      'ncm','cest','gtin','product'=>[
+        ['products.index',[],'products','Abrir produtos'],
+      ],
+      'benefit','cfop','rtc','regime','tax_code','fcp','difal','icms_st','icms','ipi','pis_cofins'=>[
+        ['fiscal.tax-rules.index',[],'settings','Abrir regras fiscais'],
+      ],
+      'registration','state_registration','taxpayer_identity','address'=>[
+        ['customers.index',[],'customers','Abrir clientes'],
+        ['settings.index',['tab'=>'general'],'settings','Abrir dados da empresa'],
+      ],
+      'recipient'=>[
+        ['customers.index',[],'customers','Abrir clientes'],
+      ],
+      'issuer'=>[
+        ['settings.index',['tab'=>'general'],'settings','Abrir dados da empresa'],
+      ],
+      default=>[],
+    };
+    $guidanceLinks=[];
+    foreach($guidanceDestinations as [$guidanceRoute,$guidanceParameters,$guidancePermission,$guidanceLabel]){
+      if(auth()->user()?->canAccess($guidancePermission)
+          && \Illuminate\Support\Facades\Route::has($guidanceRoute)
+          && in_array('GET',\Illuminate\Support\Facades\Route::getRoutes()->getByName($guidanceRoute)->methods(),true)){
+        $guidanceLinks[]=['url'=>route($guidanceRoute,$guidanceParameters),'label'=>$guidanceLabel];
+      }
+    }
   @endphp
   <div class="{{ $guidanceClass }}" role="{{ $guidanceInformational?'status':'alert' }}"
        data-sefaz-guidance data-sefaz-category="{{ $guidanceCategory }}" @if($isNfceGuidance && !$guidanceInformational) data-nfce-rejection @endif>
@@ -25,6 +55,13 @@
         <ul class="sefaz-guidance-steps">
           @foreach($guidance['steps'] as $step)<li>{{ $step }}</li>@endforeach
         </ul>
+      @endif
+      @if(count($guidanceLinks))
+        <nav class="sefaz-guidance-links" aria-label="Cadastros relacionados ao retorno fiscal">
+          @foreach($guidanceLinks as $guidanceLink)
+            <a href="{{ $guidanceLink['url'] }}" target="_blank" rel="noopener noreferrer">{{ $guidanceLink['label'] }}</a>
+          @endforeach
+        </nav>
       @endif
       <details class="sefaz-guidance-details">
         <summary>Detalhes técnicos</summary>

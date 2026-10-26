@@ -127,6 +127,35 @@ final class SefazRejectionActionsTest extends TestCase
         self::assertStringContainsString('antes de qualquer reenvio', implode(' ', $result['steps']));
     }
 
+    #[DataProvider('additionalExactCodes')]
+    public function test_remaining_official_codes_have_specific_explanations(string $code, string $category): void
+    {
+        $catalog = json_decode(file_get_contents(__DIR__.'/../../resources/fiscal/rejections/2026.10.26.json'), true, 512, JSON_THROW_ON_ERROR);
+        $result = (new SefazRejectionActions())->describe($code, $catalog['codes'][$code]['message']);
+
+        self::assertSame($category, $result['category']);
+        self::assertNotSame('review', $result['category']);
+        self::assertNotEmpty($result['summary']);
+        self::assertCount(2, $result['steps']);
+        self::assertNotEmpty($result['fields']);
+        self::assertStringNotContainsString('reenvie automaticamente', mb_strtolower(implode(' ', $result['steps'])));
+    }
+
+    public static function additionalExactCodes(): array
+    {
+        return [
+            ['219', 'circulation'], ['224', 'inutilization'], ['241', 'inutilization'],
+            ['268', 'reference'], ['686', 'reference'], ['373', 'homologation'],
+            ['393', 'supplementary_group'], ['467', 'epec_reconciliation'], ['661', 'epec_reconciliation'],
+            ['475', 'recipient'], ['640', 'extension_request'], ['783', 'contingency'],
+            ['814', 'foreign_trade'], ['858', 'tax_group'], ['912', 'replacement'], ['919', 'replacement'],
+            ['926', 'foreign_country'], ['927', 'item_reference'], ['1096', 'item_reference'],
+            ['941', 'special_regime'], ['949', 'tax_authority_info'],
+            ['1152', 'credit_debit_operation'], ['1161', 'credit_debit_operation'], ['1162', 'credit_debit_operation'],
+            ['1153', 'delivery_forecast'], ['1154', 'delivery_forecast'], ['1155', 'delivery_forecast'],
+        ];
+    }
+
     public function test_historical_denial_is_not_confused_with_current_registration_rejection(): void
     {
         $actions = new SefazRejectionActions();
