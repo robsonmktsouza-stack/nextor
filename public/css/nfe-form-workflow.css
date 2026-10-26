@@ -1026,3 +1026,42 @@
 /* Fiscal calculation evidence stays readable on demand inside the existing ERP form. */
 .nfe-modal-layer #nfeAppliedRulesBody,.nfe-modal-layer #nfeTaxPreviewErrorsBody{white-space:pre-line;padding:8px 0;line-height:1.5}
 .nfe-modal-layer #nfeImportDeclarations .editor-panel{border:1px solid #d8dee5;margin:10px 0;padding:10px}
+
+
+/* Experimento reversível: linguagem de portal fiscal clássico, só no editor NF-e 55. */
+@media screen {
+  .app-root #nfeEditorDialog.nfe-modal-layer,
+  .app-root .nfe-modal-layer {
+    --nfe-border:#d9c7a9;
+    --nfe-text:#46505a;
+    --nfe-muted:#6c7580;
+    --nfe-surface:#fff;
+  }
+  .app-root #nfeEditorDialog .dialog-header {
+    background:#f8f5ef;
+    border-bottom:2px solid #d49b50;
+    border-left:0;
+    color:#5b4934;
+    min-height:50px;
+  }
+  .app-root #nfeEditorDialog .dialog-header h2 {color:#5b4934;}
+  .app-root #nfeEditorDialog .nfe-workspace-dialog {
+    border:1px solid #cbbfae;
+    border-radius:3px;
+    box-shadow:0 10px 26px rgba(23,43,37,.15);
+  }
+  .app-root #nfeEditorDialog .dialog-footer {
+    background:#f7f5f0!important;
+    border-top:1px solid #dfd1bc;
+  }
+  .app-root #nfeEditorDialog :is(.nfe-workspace-body,.nfe-item-body) .field :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]),select,textarea,.ui-select-trigger) {
+    border-color:#d4cabb;
+    border-radius:3px;
+    box-shadow:none;
+  }
+  .app-root #nfeEditorDialog :is(.nfe-workspace-body,.nfe-item-body) .field :is(input,select,textarea,.ui-select-trigger):focus-visible {
+    border-color:#bb8238;
+    box-shadow:0 0 0 2px rgba(202,144,65,.15);
+  }
+  .app-root #nfeEditorDialog .dialog-footer :is(.btn,.btn-icon) {border-radius:3px;}
+}
