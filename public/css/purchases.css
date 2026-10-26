@@ -252,3 +252,14 @@
 .purchase-show-charges span{font-size:11px;color:#71879a}
 .purchase-show-charges strong{display:block;color:#294c64;font-size:12px;margin-top:4px}
 @media(max-width:850px){.purchase-show-table{min-width:680px}.purchase-show-charges{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+
+/* Ações da visualização de compra: botões alinhados, sem mistura de padrões. */
+.sales-module-card>.grid-actionbar .grid-actions-left{display:flex;align-items:center;flex-wrap:wrap;gap:7px;min-width:0}
+.sales-module-card>.grid-actionbar .grid-actions-left>.grid-tool{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:34px;box-sizing:border-box;white-space:nowrap;line-height:1.2}
+.sales-module-card>.grid-actionbar .grid-actions-left>.purchase-action-edit{background:#2b8bce;border-color:#2b8bce;color:#fff;font-weight:600}
+.sales-module-card>.grid-actionbar .grid-actions-left>.purchase-action-edit:hover{background:#2378b3;border-color:#2378b3;color:#fff}
+.purchase-show-table .purchase-show-detail-btn{display:inline-flex;align-items:center;justify-content:center;min-width:58px;min-height:28px;padding:4px 9px;border:1px solid #cddbe5;border-radius:4px;background:#fff;color:#2d6385;font-size:11px;font-weight:600;text-decoration:none;line-height:1.2;box-shadow:none;cursor:pointer}
+.purchase-show-table .purchase-show-detail-btn:hover{background:#eef5f9;border-color:#a8c7db;text-decoration:none}
+.purchase-show-table .purchase-show-detail-btn[aria-expanded="true"]{background:#e7f1f7;border-color:#a8c7db}
+@media(max-width:780px){.sales-module-card>.grid-actionbar .grid-actions-left>.grid-tool{white-space:normal}}
