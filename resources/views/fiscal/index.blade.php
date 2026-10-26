@@ -71,14 +71,10 @@
           </a>
         @endif
         @if(auth()->user()->canAccess('settings'))
-          <a class="grid-tool grid-tool-wide" href="{{ route('fiscal.catalog.index') }}" data-tooltip="Catálogo e regras fiscais">
-            @include('partials.icon',['name'=>'layers','size'=>18]) <span>Configurações fiscais</span>
-          </a>
           <a class="grid-tool" href="{{ route('settings.index',['tab'=>$configuration['settings_tab']]) }}" data-tooltip="Configurações">
             @include('partials.icon',['name'=>'settings','size'=>18])
           </a>
         @endif
-        @if($tab!=='nfe')
         <details class="fiscal-utilities" data-fiscal-utilities>
           <summary class="grid-tool grid-tool-wide" aria-label="Abrir utilitários fiscais">
             @include('partials.icon',['name'=>'layers','size'=>16])
@@ -86,6 +82,16 @@
             @include('partials.icon',['name'=>'down','size'=>13])
           </summary>
           <div class="fiscal-utilities-dropdown">
+            @if($tab==='nfe')
+              <a href="{{ route('fiscal.nfe.inutilizations.index') }}">
+                @include('partials.icon',['name'=>'file-minus','size'=>16])
+                <span>Inutilização de numeração</span>
+              </a>
+              <a href="{{ route('fiscal.nfe.natures.index') }}">
+                @include('partials.icon',['name'=>'tag','size'=>16])
+                <span>Naturezas de operação</span>
+              </a>
+            @else
             <button type="button" data-fiscal-download-xml disabled>
               @include('partials.icon',['name'=>'download','size'=>16])
               <span>Baixar XML</span>
@@ -104,9 +110,9 @@
                 <span>Inutilização</span>
               </a>
             @endif
+            @endif
           </div>
         </details>
-        @endif
       </div>
 
       @if($tab!=='nfe')
