@@ -234,9 +234,9 @@ document.addEventListener('DOMContentLoaded',()=>{
     node.addEventListener('change',()=>requestAnimationFrame(calculate));
   });
   const payable=form.querySelector('[data-purchase-payable]');
-  const due=form.querySelector('[data-purchase-due]');
   payable?.addEventListener('change',()=>{
-    if(payable.checked && !due.value)due.focus();
+    const label=payable.closest('.switch-field')?.querySelector('[data-switch-label]');
+    if(label)label.textContent=payable.checked?'Sim':'Não';
   });
 
   // Delegação especial para inputs monetários aprimorados pelo erp.js.
