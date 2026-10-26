@@ -83,8 +83,36 @@ final class LumeronMobilePwaTest extends TestCase
         $this->actingAs($user)->get('/dashboard')->assertOk()
             ->assertSee('manifest.webmanifest')
             ->assertSee('mobile.css')
+            ->assertSee('mobile-native.css')
+            ->assertSee('lm-appbar')
+            ->assertSee('lm-home')
+            ->assertSee('lm-desktop-dashboard')
             ->assertSee('Navegação rápida')
-            ->assertSee('data-mobile-more');
+            ->assertSee('data-mobile-more')
+            ->assertSee('lm-sidebar-account');
+    }
+
+    public function test_native_mobile_pages_reuse_existing_business_routes(): void
+    {
+        $user = User::query()->create([
+            'name' => 'Usuario de teste mobile',
+            'username' => 'tester_mobile',
+            'email' => 'mobile-native-test@example.com',
+            'password' => 'SenhaSeguraMobile123',
+            'role' => 'admin',
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($user);
+
+        $this->get(route('products.index'))->assertOk()
+            ->assertSee('lm-products-list')
+            ->assertSee('lm-card-main')
+            ->assertSee('lm-native-list');
+
+        $this->get(route('customers.index'))->assertOk()->assertSee('lm-customers-list');
+        $this->get(route('sales.index'))->assertOk()->assertSee('lm-sales-list');
+        $this->get(route('finance.dashboard'))->assertOk()->assertSee('lm-finance-home');
     }
 
     public function test_mobile_listing_cards_are_opt_in_only(): void
