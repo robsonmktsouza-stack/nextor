@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AppSetting;
 use App\Models\FiscalDocumentJob;
+use App\Models\NfeDraft;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -51,6 +52,70 @@ class FiscalController extends Controller
                 ->limit(50)
                 ->get()
                 ->each(fn($document)=>$reconciler->reconcile($document));
+        }
+
+        if($tab==='nfe') {
+            $query=NfeDraft::query()
+                ->with(['customer','operationNature','items'])
+                ->where(function($q) {
+                    $q->whereNotIn('status',['draft','prepared'])
+                        ->orWhereNotNull('transmission_attempted_at')
+                        ->orWhereNotNull('authorized_at')
+                        ->orWhereNotNull('cancelled_at');
+                })
+                ->where(function($q) use($period,$periodEnd) {
+                    $q->whereBetween('issue_date',[$period->toDateString(),$periodEnd->toDateString()])
+                        ->orWhere(function($fallback) use($period,$periodEnd) {
+                            $fallback->whereNull('issue_date')->whereBetween('created_at',[$period,$periodEnd]);
+                        });
+                });
+            if($term!=='') {
+                $like='%'.$term.'%';
+                $query->where(function($q) use($like,$term) {
+                    $q->where('access_key','like',$like)
+                        ->orWhere('protocol','like',$like)
+                        ->orWhereHas('customer',fn($c)=>$c->where('name','like',$like))
+                        ->orWhereHas('operationNature',fn($n)=>$n->where('name','like',$like));
+                    if(ctype_digit($term)) {
+                        $q->orWhere('document_number',(int)$term)
+                            ->orWhere('id',(int)$term);
+                    }
+                });
+            }
+            if($status!=='') {
+                if($status==='cancelled') {
+                    $query->where(fn($q)=>$q->where('status','cancelled')
+                        ->orWhere('cancellation_status','authorized')
+                        ->orWhereNotNull('cancelled_at'));
+                } elseif($status==='authorized') {
+                    $query->where('status','authorized')
+                        ->whereNull('cancelled_at')
+                        ->where(fn($q)=>$q->whereNull('cancellation_status')
+                            ->orWhere('cancellation_status','!=','authorized'));
+                } else {
+                    $query->where('status',$status);
+                }
+            }
+            if(in_array($environment,['homologation','production'],true)) {
+                $query->where('environment',$environment);
+            } else {
+                $environment='';
+            }
+            $documents=$query->orderByDesc('issue_date')->orderByDesc('id')
+                ->paginate(AppSetting::tablePerPage($request))->withQueryString();
+            $monthNames=[1=>'Janeiro',2=>'Fevereiro',3=>'Março',4=>'Abril',
+                5=>'Maio',6=>'Junho',7=>'Julho',8=>'Agosto',
+                9=>'Setembro',10=>'Outubro',11=>'Novembro',12=>'Dezembro'];
+            return view('fiscal.index',[
+                'tab'=>$tab,'tabs'=>self::TABS,'tabMeta'=>self::TABS[$tab],
+                'documents'=>$documents,'term'=>$term,'status'=>$status,
+                'environment'=>$environment,'month'=>$month,
+                'monthLabel'=>$monthNames[(int)$period->month].' '.$period->year,
+                'prevMonth'=>$period->copy()->subMonth()->format('Y-m'),
+                'nextMonth'=>$period->copy()->addMonth()->format('Y-m'),
+                'dateFormat'=>AppSetting::dateFormat(),
+                'configuration'=>app(\\App\\Services\\Fiscal\\FiscalDocumentSettings::class)->configuration('nfe'),
+            ]);
         }
 
         $query=FiscalDocumentJob::query()
