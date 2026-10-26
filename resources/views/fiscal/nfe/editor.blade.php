@@ -239,14 +239,14 @@ $origins=[
                   <div class="nfe-nature-combobox" data-nfe-nature-combobox>
                     <input id="nfeNatureSearch" type="text" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="nfeNatureOptions" placeholder="Pesquisar natureza ou CFOP" aria-label="Pesquisar natureza da operação">
                     <div class="nfe-nature-options" id="nfeNatureOptions" role="listbox" hidden></div>
-                    <select name="operation_nature_id" id="nfeNature" required class="nfe-nature-native" tabindex="-1" aria-hidden="true" style="display:none!important">
+                    <span hidden style="display:none!important"><select name="operation_nature_id" id="nfeNature" required class="nfe-nature-native" tabindex="-1" aria-hidden="true" style="display:none!important">
                     <option value="">Selecione</option>
                     @foreach($natures as $nature)
                       <option value="{{ $nature->id }}" @selected((string)$nfeOld('operation_nature_id',$draft->operation_nature_id)===(string)$nature->id)>
                         {{ $nature->cfop_internal ? $nature->cfop_internal.' - ' : '' }}{{ $nature->name }}
                       </option>
                     @endforeach
-                    </select>
+                    </select></span>
                   </div>
                   <a class="input-action-button" href="{{ route('fiscal.nfe.natures.index') }}" data-tooltip="Naturezas de Operação">
                     @include('partials.icon',['name'=>'settings','size'=>15])
