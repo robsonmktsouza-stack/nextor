@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     const line=document.createElement('div');
     line.className='purchase-item-line purchase-grid-row';
     line.dataset.purchaseItem='1';
-    if(data.source_description)line.dataset.importedSource='1';
+    if(data.source_description){line.dataset.importedSource='1';line.classList.add('purchase-imported-row');}
     line.innerHTML=
       '<div class="purchase-item-primary">'+
         '<div class="purchase-product-cell"><div class="purchase-item-source" data-purchase-source hidden></div>'+
@@ -98,12 +98,19 @@ document.addEventListener('DOMContentLoaded',()=>{
       const badge=document.createElement('strong');
       badge.textContent='Item da NF-e';
       sourceBar.append(badge,source);
+      const linked=document.createElement('small');linked.className='purchase-product-link';sourceBar.appendChild(linked);
     }
     const mapButton=document.createElement('button');
     mapButton.type='button';mapButton.className='purchase-map-button';
-    mapButton.textContent='Vincular / cadastrar';
+    mapButton.textContent=data.source_description?'Vincular ao estoque':'Selecionar / cadastrar';
     mapButton.setAttribute('aria-label','Vincular ou cadastrar produto do estoque');
-    productLabel.appendChild(mapButton);
+    if(data.source_description){
+      const actions=document.createElement('div');actions.className='purchase-product-actions';
+      actions.appendChild(mapButton);line.querySelector('.purchase-product-cell').appendChild(actions);
+      const showSelector=document.createElement('button');showSelector.type='button';showSelector.className='purchase-choose-existing';showSelector.textContent='Escolher existente';
+      showSelector.addEventListener('click',()=>{productLabel.classList.toggle('purchase-select-open');select.focus();});
+      actions.appendChild(showSelector);
+    }else{productLabel.appendChild(mapButton);}
     const chargesPanel=line.querySelector('[data-purchase-charges]');
     const toggle=line.querySelector('[data-purchase-toggle]');
     toggle.addEventListener('click',()=>{
@@ -114,7 +121,13 @@ document.addEventListener('DOMContentLoaded',()=>{
     });
     const updateLinkStatus=()=>{
       const status=line.querySelector('[data-purchase-link-status]');
-      status.textContent=select.value?'Vinculado ao estoque':(data.source_description?'Item importado · vínculo opcional no rascunho':'Selecione um produto');
+      status.textContent=select.value?'Vinculado ao estoque':(data.source_description?'':'Selecione um produto');
+      status.hidden=!status.textContent;
+      if(data.source_description){
+        const product=productMap.get(select.value);
+        const badge=line.querySelector('.purchase-product-link');
+        if(badge)badge.textContent=product?'Estoque: '+product.name:'';
+      }
       status.classList.toggle('is-pending',!select.value);
     };
     const selectProduct=product=>{
