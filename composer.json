@@ -11,7 +11,9 @@
     "ext-libxml": "*",
     "ext-openssl": "*",
     "laravel/framework": "^13.8",
-    "laravel/tinker": "^3.0"
+    "laravel/tinker": "^3.0",
+    "setasign/fpdf": "^1.8",
+    "setasign/fpdi": "^2.6"
   },
   "require-dev": {
     "mockery/mockery": "^1.6",

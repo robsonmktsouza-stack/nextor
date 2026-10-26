@@ -20,6 +20,22 @@ final class FiscalCatalogAdministrationTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // These import/install tests deliberately model an installation before
+        // catalog provisioning. Only this test class resets migrated fixtures;
+        // the automatic provisioning migration has its own regression below.
+        $natureIds=DB::table('operation_natures')->whereNotNull('catalog_version')->pluck('id');
+        $groupIds=DB::table('fiscal_tax_groups')->whereNotNull('catalog_version')->pluck('id');
+        DB::table('fiscal_operation_nature_revisions')->whereIn('operation_nature_id',$natureIds)->delete();
+        DB::table('fiscal_tax_group_revisions')->whereIn('fiscal_tax_group_id',$groupIds)->delete();
+        DB::table('operation_natures')->whereIn('id',$natureIds)->delete();
+        DB::table('fiscal_tax_groups')->whereIn('id',$groupIds)->delete();
+        DB::table('fiscal_catalog_entries')->delete();
+        DB::table('fiscal_catalog_releases')->delete();
+    }
+
     private function admin(): User
     {
         return User::query()->create(['name' => 'Admin catálogo', 'email' => 'catalog-admin@example.test',
@@ -65,7 +81,7 @@ final class FiscalCatalogAdministrationTest extends TestCase
             ->assertOk()->assertDontSee('ui-test-1')->assertSee('Reprodutores de raça pura — catálogo de teste')
             ->assertDontSee('Venda de mercadoria — catálogo de teste')
             ->assertSee('Naturezas de operação')->assertSee('Grupos tributários')
-            ->assertSee('Regras e parâmetros')->assertSee('Fonte oficial')->assertSee('Histórico e vigência');
+            ->assertSee('Regras tributárias')->assertSee('Fonte oficial')->assertSee('Atualizações');
     }
 
     public function test_catalog_filters_date_and_preserves_historical_version_visibility(): void
@@ -79,7 +95,7 @@ final class FiscalCatalogAdministrationTest extends TestCase
         $this->get(route('fiscal.catalog.index', ['release' => $first->id, 'date' => '2026-01-01']))
             ->assertOk()->assertSee('Venda de mercadoria — catálogo de teste')->assertDontSee('Nova descrição do código');
         $this->get(route('fiscal.catalog.index', ['tab' => 'history']))->assertOk()
-            ->assertDontSee('ui-test-1')->assertDontSee('ui-test-2')->assertDontSee('SHA-256')->assertSee('Código de verificação do arquivo');
+            ->assertDontSee('ui-test-1')->assertDontSee('ui-test-2')->assertDontSee('SHA-256')->assertSee('Fontes oficiais')->assertDontSee('catalog_file',false);
     }
 
     public function test_json_import_is_idempotent_and_does_not_enable_rules_or_change_production_settings(): void
@@ -213,4 +229,23 @@ final class FiscalCatalogAdministrationTest extends TestCase
         $this->get(route('fiscal.catalog.index', ['tab' => 'history']))->assertOk()
             ->assertSee('Fontes oficiais')->assertDontSee('SHA-256 do conteúdo canônico');
     }
+    public function test_automatic_catalog_migration_provisions_references_and_preserves_customized_inactive_models(): void
+    {
+        $beforeSettings=AppSetting::query()->orderBy('id')->get()->toArray();
+        $migration=require database_path('migrations/2026_10_26_235959_install_bundled_fiscal_catalog_automatically.php');
+        $migration->up();
+        $release=FiscalCatalogRelease::query()->sole();
+        self::assertSame('2026.10.26.1',$release->version);
+        self::assertSame(10516,$release->entries()->where('kind','ncm')->count());
+        self::assertSame(16,OperationNature::query()->where('catalog_version',$release->version)->count());
+        self::assertSame(13,FiscalTaxGroup::query()->where('catalog_version',$release->version)->count());
+        self::assertSame(0,FiscalTaxGroup::query()->whereNotNull('catalog_version')->where('is_active',true)->count());
+        $group=FiscalTaxGroup::query()->where('catalog_version',$release->version)->firstOrFail();
+        $group->update(['notes'=>'Revisão personalizada preservada']);
+        $migration->up();
+        self::assertSame(1,FiscalCatalogRelease::query()->count());
+        self::assertSame('Revisão personalizada preservada',$group->fresh()->notes);
+        self::assertSame($beforeSettings,AppSetting::query()->orderBy('id')->get()->toArray());
+    }
+
 }

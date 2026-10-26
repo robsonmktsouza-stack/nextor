@@ -11,6 +11,15 @@ final class FiscalNationalCoverageViewTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // Matrix tests own their small reference snapshot. Keep unrelated
+        // company models; automatic migration provisioning is tested separately.
+        \Illuminate\Support\Facades\DB::table('fiscal_catalog_entries')->delete();
+        \Illuminate\Support\Facades\DB::table('fiscal_catalog_releases')->delete();
+    }
+
     private function admin(): User
     {
         return User::query()->create(['name'=>'Fiscal teste','email'=>'national-coverage@example.test',
@@ -40,7 +49,7 @@ final class FiscalNationalCoverageViewTest extends TestCase
                     'parameters'=>['icms_csts'=>['40']]],
             ]]);
         $this->actingAs($this->admin())->get(route('fiscal.catalog.index',['tab'=>'coverage']))
-            ->assertOk()->assertSee('Cobertura por UF')->assertSee('Data de referência')
+            ->assertOk()->assertSee('Consulta por estado')->assertSee('Data de referência')
             ->assertSee('Sem tabela validada')->assertSee('Benefícios fiscais não disponíveis para utilização automática nesta UF.')->assertDontSee('Não foi incorporada tabela estadual verificada.')
             ->assertViewHas('coverageByUf',function(array $rows): bool {
                 return count($rows)===27 && $rows['BA']['cfop']['complete']

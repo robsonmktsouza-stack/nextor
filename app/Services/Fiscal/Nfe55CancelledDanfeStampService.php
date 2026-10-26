@@ -5,21 +5,25 @@ use App\Models\NfeDraft;
 use RuntimeException;
 use setasign\Fpdi\Fpdi;
 
-final class Nfe55StampPdf extends Fpdi
-{
-    public function diagonalStamp(float $x,float $y,string $text): void
+// Keep this file loadable during an incomplete dependency installation. The
+// service below can then return an operational error instead of a class fatal.
+if (class_exists(\FPDF::class) && class_exists(Fpdi::class)) {
+    final class Nfe55StampPdf extends Fpdi
     {
-        // PDF uses bottom-left coordinates. Render text in the rotated local
-        // coordinate system, rather than calling FPDF::Text with page coords.
-        $rad=deg2rad(35);
-        $c=cos($rad);
-        $sin=sin($rad);
-        $this->_out('q');
-        $this->_out(sprintf('%.5F %.5F %.5F %.5F %.5F %.5F cm',
-            $c,$sin,-$sin,$c,$x*$this->k,($this->h-$y)*$this->k));
-        $width=$this->GetStringWidth($text)*$this->k;
-        $this->_out(sprintf('BT %.3F 0 Td (%s) Tj ET',-$width/2,$this->_escape($text)));
-        $this->_out('Q');
+        public function diagonalStamp(float $x,float $y,string $text): void
+        {
+            // PDF uses bottom-left coordinates. Render text in the rotated local
+            // coordinate system, rather than calling FPDF::Text with page coords.
+            $rad=deg2rad(35);
+            $c=cos($rad);
+            $sin=sin($rad);
+            $this->_out('q');
+            $this->_out(sprintf('%.5F %.5F %.5F %.5F %.5F %.5F cm',
+                $c,$sin,-$sin,$c,$x*$this->k,($this->h-$y)*$this->k));
+            $width=$this->GetStringWidth($text)*$this->k;
+            $this->_out(sprintf('BT %.3F 0 Td (%s) Tj ET',-$width/2,$this->_escape($text)));
+            $this->_out('Q');
+        }
     }
 }
 
@@ -38,8 +42,8 @@ final class Nfe55CancelledDanfeStampService
             ||!preg_match('/^\\d{15}$/D',(string)$draft->cancellation_protocol)){
             throw new RuntimeException('Cancelamento não comprovado.');
         }
-        if(!class_exists(Fpdi::class)){
-            throw new RuntimeException('Biblioteca de impressão fiscal não instalada.');
+        if(!class_exists(\FPDF::class)||!class_exists(Fpdi::class)){
+            throw new RuntimeException('Impressão da NF-e cancelada indisponível. Solicite a verificação ao responsável pelo sistema.');
         }
         $file=tempnam(sys_get_temp_dir(),'danfe55-');
         if($file===false)throw new RuntimeException('Arquivo temporário indisponível.');
