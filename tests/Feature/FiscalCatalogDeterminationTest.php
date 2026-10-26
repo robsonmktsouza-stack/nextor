@@ -17,11 +17,19 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use RuntimeException;
 use Tests\Concerns\WithConfiguredCompany;
+use Tests\Concerns\WithIsolatedFiscalCatalog;
 use Tests\TestCase;
 
 final class FiscalCatalogDeterminationTest extends TestCase
 {
-    use RefreshDatabase, WithConfiguredCompany;
+    use RefreshDatabase, WithIsolatedFiscalCatalog;
+    use WithConfiguredCompany { setUp as private setUpConfiguredCompany; }
+
+    protected function setUp(): void
+    {
+        $this->setUpConfiguredCompany();
+        $this->isolateFiscalCatalog();
+    }
 
     private function install(): void
     {

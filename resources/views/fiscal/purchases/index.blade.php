@@ -59,7 +59,7 @@
   @if($state->last_error)
     <div class="fiscal-purchases-notice" role="status">
       @include('partials.icon',['name'=>'alert','size'=>16])
-      <span>{{ $state->last_error }}</span>
+      <span>{{ \App\Support\UserFacingMessage::fromText((string)$state->last_error,'Não foi possível consultar as notas. Confira o certificado e a conexão fiscal; solicite suporte se o problema continuar.') }}</span>
     </div>
   @endif
   <div class="grid-filter-panel" id="purchases-filters" @if(!$search && !$status) hidden @endif>

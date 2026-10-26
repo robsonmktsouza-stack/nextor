@@ -11,16 +11,18 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 use RuntimeException;
 use Tests\Concerns\WithConfiguredCompany;
+use Tests\Concerns\WithIsolatedFiscalCatalog;
 use Tests\TestCase;
 
 final class FiscalProductClassificationTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, WithIsolatedFiscalCatalog;
     use WithConfiguredCompany { setUp as private setUpConfiguredCompany; }
 
     protected function setUp(): void
     {
         $this->setUpConfiguredCompany();
+        $this->isolateFiscalCatalog();
         $this->travelTo(\Illuminate\Support\Carbon::parse('2026-10-26 12:00:00'));
     }
 

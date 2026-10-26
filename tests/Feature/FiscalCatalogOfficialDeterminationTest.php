@@ -9,11 +9,19 @@ use Illuminate\Support\Carbon;
 use PHPUnit\Framework\Attributes\DataProvider;
 use RuntimeException;
 use Tests\Concerns\WithConfiguredCompany;
+use Tests\Concerns\WithIsolatedFiscalCatalog;
 use Tests\TestCase;
 
 final class FiscalCatalogOfficialDeterminationTest extends TestCase
 {
-    use RefreshDatabase, WithConfiguredCompany;
+    use RefreshDatabase, WithIsolatedFiscalCatalog;
+    use WithConfiguredCompany { setUp as private setUpConfiguredCompany; }
+
+    protected function setUp(): void
+    {
+        $this->setUpConfiguredCompany();
+        $this->isolateFiscalCatalog();
+    }
 
     private function manifest(array $benefits = [], array $cfops = [], string $version = 'official-flow-test-1'): array
     {

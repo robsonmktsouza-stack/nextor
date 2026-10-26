@@ -6,11 +6,19 @@ use App\Models\{CompanySetting,Customer,FiscalTaxGroup,FiscalTaxRule,NfeDraft,Nf
 use App\Services\Fiscal\{FiscalCatalogService,Nfe55TaxRuleApplicationService};
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\WithConfiguredCompany;
+use Tests\Concerns\WithIsolatedFiscalCatalog;
 use Tests\TestCase;
 
 final class Nfe55CatalogFormIntegrationTest extends TestCase
 {
-    use RefreshDatabase, WithConfiguredCompany;
+    use RefreshDatabase, WithIsolatedFiscalCatalog;
+    use WithConfiguredCompany { setUp as private setUpConfiguredCompany; }
+
+    protected function setUp(): void
+    {
+        $this->setUpConfiguredCompany();
+        $this->isolateFiscalCatalog();
+    }
 
     private function fixture(): array
     {

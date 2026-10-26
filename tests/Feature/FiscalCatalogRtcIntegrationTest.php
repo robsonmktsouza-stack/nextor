@@ -12,6 +12,13 @@ use Tests\TestCase;
 final class FiscalCatalogRtcIntegrationTest extends TestCase
 {
     use RefreshDatabase;
+    use \Tests\Concerns\WithIsolatedFiscalCatalog;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->isolateFiscalCatalog();
+    }
 
     /** Small, exact subset of the real official snapshot; no inferred flags or rates. */
     private function manifest(string $version = 'rtc.test.1'): array

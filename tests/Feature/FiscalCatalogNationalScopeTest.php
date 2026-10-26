@@ -13,6 +13,13 @@ use Tests\TestCase;
 final class FiscalCatalogNationalScopeTest extends TestCase
 {
     use RefreshDatabase;
+    use \Tests\Concerns\WithIsolatedFiscalCatalog;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->isolateFiscalCatalog();
+    }
 
     private function manifest(string $version = 'national.fixture.1'): array
     {

@@ -37,7 +37,7 @@ final class SefazRejectionGuidanceViewTest extends TestCase
         $original=$note->refresh()->getRawOriginal();
         $response=$this->actingAs($this->admin())->get(route('fiscal.nfe.edit',$note));
         $response->assertOk()->assertSee('data-sefaz-guidance',false)
-            ->assertSee('778 —')->assertSee('Item 2')->assertSee('Detalhes técnicos')
+            ->assertSee('778 —')->assertSee('Item 2')->assertSee('Informações do retorno fiscal')
             ->assertSee('Informado NCM inexistente');
         $this->assertNoRetryButton($response->getContent());
         self::assertSame($original,$note->fresh()->getRawOriginal());

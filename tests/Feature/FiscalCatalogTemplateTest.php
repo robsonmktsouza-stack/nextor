@@ -16,7 +16,14 @@ use Tests\TestCase;
 final class FiscalCatalogTemplateTest extends TestCase
 {
     use RefreshDatabase;
-    use \Tests\Concerns\WithConfiguredCompany;
+    use \Tests\Concerns\WithIsolatedFiscalCatalog;
+    use \Tests\Concerns\WithConfiguredCompany { setUp as protected setUpConfiguredCompany; }
+
+    protected function setUp(): void
+    {
+        $this->setUpConfiguredCompany();
+        $this->isolateFiscalCatalog();
+    }
 
     private function install(string $version='2026.10.26'): array
     {
