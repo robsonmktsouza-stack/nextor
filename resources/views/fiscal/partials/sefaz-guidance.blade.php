@@ -64,7 +64,7 @@
         </nav>
       @endif
       <details class="sefaz-guidance-details">
-        <summary>Detalhes técnicos</summary>
+        <summary>Informações do retorno fiscal</summary>
         @if($originalRejection ?? null)
           <p>{{ $originalRejection['code'] }} — {{ preg_replace('/^(?:\d+\s*[-—:]\s*)?Rejei(?:c|ç)(?:a|ã)o\s*:\s*/iu','Rejeição: ',(string)$originalRejection['reason']) }}</p>
         @endif
@@ -72,7 +72,7 @@
         @if(($originalStoredError ?? '')!=='' && trim((string)$originalStoredError)!==trim($guidance['technical_message']))
           <p>{{ $originalStoredError }}</p>
         @endif
-        @if($guidance['catalog_version'])<p>Catálogo {{ $guidance['catalog_version'] }}</p>@endif
+        
         @foreach($guidance['sources'] as $guidanceSource)
           @php
             $sourceUrl=(string)($guidanceSource['url'] ?? '');
