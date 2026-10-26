@@ -6,7 +6,7 @@
     <div class="grid-actions-left">
       <a class="grid-tool grid-tool-wide" href="{{ route('purchases.index') }}">@include('partials.icon',['name'=>'arrow-left','size'=>17]) Voltar às compras</a>
       @if($purchase->status==='draft')
-      <a class="grid-primary-action" href="{{ route('purchases.edit',$purchase) }}">@include('partials.icon',['name'=>'edit','size'=>17]) Editar</a>
+      <a class="grid-tool grid-tool-wide purchase-action-edit" href="{{ route('purchases.edit',$purchase) }}">@include('partials.icon',['name'=>'edit','size'=>17]) Editar</a>
       <button class="grid-tool grid-tool-wide" type="button" data-dialog-open="purchase-receive">@include('partials.icon',['name'=>'check','size'=>17]) Confirmar recebimento</button>
       @endif
       @if($purchase->status!=='cancelled')<button class="grid-tool grid-tool-wide" type="button" data-dialog-open="purchase-cancel">@include('partials.icon',['name'=>'x','size'=>16]) Cancelar compra</button>@endif
@@ -61,7 +61,7 @@
             <td class="purchase-show-num purchase-show-amount">R$ {{ number_format((float)$item->line_total,2,',','.') }}</td>
             <td class="purchase-show-center">
               @if($hasCharges)
-                <button type="button" class="purchase-show-detail-btn" aria-label="Ver custos do produto" aria-expanded="false" onclick="const row=this.closest('tr').nextElementSibling;row.hidden=!row.hidden;this.setAttribute('aria-expanded',String(!row.hidden));this.textContent=row.hidden?'Ver':'Ocultar'">Ver</button>
+                <button type="button" class="grid-tool purchase-show-detail-btn" aria-label="Ver custos do produto" aria-expanded="false" onclick="const row=this.closest('tr').nextElementSibling;row.hidden=!row.hidden;this.setAttribute('aria-expanded',String(!row.hidden));this.textContent=row.hidden?'Ver':'Ocultar'">Ver</button>
               @else
                 <span class="purchase-show-nocharge">—</span>
               @endif
