@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       '<div class="purchase-item-primary">'+
         '<div class="purchase-product-cell"><div class="purchase-item-source" data-purchase-source hidden></div>'+
           '<label class="purchase-line-field purchase-product-field"><span class="purchase-mobile-label">Produto do estoque *</span>'+
-          '<select required name="items['+index+'][product_id]" data-quick-create="products" data-product><option value="">Selecione um produto</option></select></label></div>'+
+          '<select name="items['+index+'][product_id]" data-quick-create="products" data-product><option value="">Selecione um produto</option></select></label></div>'+
         '<label class="purchase-line-field"><span class="purchase-mobile-label">Quantidade *</span>'+
           '<input type="number" name="items['+index+'][quantity]" min="0.001" step="0.001" required data-qty value="1"></label>'+
         '<label class="purchase-line-field"><span class="purchase-mobile-label">Custo unitário *</span>'+
@@ -82,6 +82,12 @@ document.addEventListener('DOMContentLoaded',()=>{
       '</div>';
 
     const select=line.querySelector('[data-product]');
+    for(const key of ['source_code','source_description','source_unit','source_ncm','source_cfop','source_ean','source_number']){
+      if(data[key]===undefined||data[key]===null)continue;
+      const input=document.createElement('input');
+      input.type='hidden';input.name='items['+index+']['+key+']';input.value=String(data[key]);
+      line.appendChild(input);
+    }
     const productLabel=line.querySelector('.purchase-product-field');
     const sourceBar=line.querySelector('[data-purchase-source]');
     if(data.source_description){
@@ -108,7 +114,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     });
     const updateLinkStatus=()=>{
       const status=line.querySelector('[data-purchase-link-status]');
-      status.textContent=select.value?'Vinculado ao estoque':'Pendente de vínculo';
+      status.textContent=select.value?'Vinculado ao estoque':(data.source_description?'Item importado · vínculo opcional no rascunho':'Selecione um produto');
       status.classList.toggle('is-pending',!select.value);
     };
     const selectProduct=product=>{
@@ -231,8 +237,12 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(!rows.length){
       event.preventDefault();notify('Inclua pelo menos um produto.');return;
     }
-    if(ids.some(id=>!id)||ids.length!==new Set(ids).size){
-      event.preventDefault();notify('Selecione um produto diferente em cada linha.');return;
+    if(rows.some((row,index)=>!ids[index]&&!row.dataset.importedSource)){
+      event.preventDefault();notify('Selecione um produto para os itens adicionados manualmente.');return;
+    }
+    const linked=ids.filter(Boolean);
+    if(linked.length!==new Set(linked).size){
+      event.preventDefault();notify('Selecione um produto diferente em cada linha vinculada.');return;
     }
     const invalid=rows.some(row=>mills(row.querySelector('[data-qty]'))<=0);
     if(invalid){
