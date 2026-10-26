@@ -873,8 +873,4 @@ body.system-comfortable .app-root{
     font-weight:700;
   }
 
-  /* Preservar formas que têm significado próprio. */
-  .app-root :is(.status,.badge,.switch,.toggle-switch,.avatar,.pager-dot) {
-    border-radius:inherit;
-  }
 }
