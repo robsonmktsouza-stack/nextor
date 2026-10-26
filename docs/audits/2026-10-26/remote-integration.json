@@ -1,0 +1,50 @@
+{
+  "scope": "Revisão de integração das alterações fiscais recebidas durante a auditoria",
+  "review_method": "Leitura dos novos serviços/listagem/migração e teste executável do DANFE histórico cancelado.",
+  "reviewed_files": [
+    "app/Services/Fiscal/Nfe55CancelledDanfeStampService.php",
+    "app/Services/Fiscal/Nfe55DanfeService.php",
+    "app/Http/Controllers/FiscalController.php",
+    "resources/views/fiscal/nfe/_document_rows.blade.php",
+    "database/migrations/2026_10_26_235959_install_bundled_fiscal_catalog_automatically.php",
+    "composer.json",
+    "composer.lock"
+  ],
+  "findings": [
+    {
+      "id": "REM-001",
+      "severity": "high",
+      "file": "app/Services/Fiscal/Nfe55CancelledDanfeStampService.php",
+      "line": 10,
+      "before": "Classe auxiliar herdava de FPDI ao carregar o arquivo, antes da verificação de disponibilidade; FPDI/FPDF também não estavam declarados no Composer.",
+      "after": "FPDF/FPDI declarados no Composer e a classe auxiliar só é declarada quando ambas as dependências existem. Instalação incompleta retorna mensagem operacional, sem falha fatal de classe.",
+      "status": "corrected",
+      "reason": "Preserva o DANFE cancelado e seu desenho, os controles de autorização/cancelamento e o diagnóstico anterior de erros de leitura. Bibliotecas são dependências PHP do servidor, sem DLL ou programa novo no computador do cliente."
+    }
+  ],
+  "retained_notes": [
+    "O nfeProc autorizado original permanece preservado; a cópia histórica recebe o aviso de cancelamento em todas as páginas.",
+    "A verificação do XML autorizado, CNPJ, chave, ambiente e protocolo permanece no serviço gerador; a confirmação e o protocolo de cancelamento continuam obrigatórios.",
+    "A listagem remota utiliza NfeDraft e a tela de rascunhos contempla documentos preparados sem tentativa de transmissão. Não foram alteradas essas funcionalidades nesta revisão.",
+    "A migração de instalação automática do catálogo foi mantida integralmente. Seu impacto no baseline dos testes deve ser acomodado sem desativar a instalação normal."
+  ],
+  "tests": [
+    {
+      "command": "php vendor/bin/phpunit tests/Unit/Nfe55CancelledDanfeStampTest.php --log-junit /evidence/audit-remote-cancelled-danfe.xml",
+      "result": "4 testes, 21 asserções, zero falhas/erros.",
+      "evidence": "/workspace/scratch/audit-remote-cancelled-danfe.log",
+      "cases": [
+        "PDF sintético de duas páginas mantém ambas, o conteúdo original e três avisos de cancelamento por página.",
+        "PDF original e dados do documento não são modificados.",
+        "Arquivo inválido retorna mensagem operacional e mantém a exceção original como causa.",
+        "Cancelamento inconclusivo continua bloqueado.",
+        "Processo separado sem dependências de impressão não gera erro fatal de carregamento."
+      ]
+    }
+  ],
+  "test_environment": "PHP 8.5.12/PHPUnit 12.5.40, Docker Linux, documento e PDF sintéticos, sem banco real.",
+  "pending": [
+    "Não foi renderizado um PDF real retornado pela ACBr nem inspecionada visualmente sua sobreposição. O FPDI aberto possui limitações de formatos de compressão/objetos que precisam ser verificadas com o PDF efetivamente produzido na instalação.",
+    "Nenhuma nova transmissão ou homologação ACBr/SEFAZ foi executada nesta revisão."
+  ]
+}

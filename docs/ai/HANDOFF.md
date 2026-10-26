@@ -1,3 +1,29 @@
+## Auditoria geral de apresentação — 26/10/2026
+
+Branch `feature/nfe55-motor-fiscal-completo`; base `bf73a66`, 42 commits
+remotos até `b3159d4` integrados e preservados sem force-push. Commits locais:
+`e137508`, `7109255`, `fb702b2`, `fe69811`, `595ca3b`.
+
+372 arquivos/64.797 linhas varridos; 99 problemas corrigidos e seis retenções
+funcionais justificadas. Nenhuma exposição desnecessária pendente identificada
+na varredura final. Fonte fiscal/histórico e cálculos preservados. Erros comuns,
+validações, mensagens de módulos e componentes foram padronizados.
+
+Suíte final em `595ca3b`: 1.249 testes/8.478 asserções, zero falhas/erros,
+dois PDFs com navegador ignorados no container. PHP 8.5.12/SQLite; sintaxe de
+453 PHP, 105 Blade compilados, 16 JS válida. Cinco testes JS de login passaram.
+Chromium real: 23 capturas/15 rotas, quatro retestes integrados, sem dados reais.
+
+Composer agora declara FPDF/FPDI exigidos pelo DANFE cancelado remoto e previne
+falha fatal de carregamento. Verificar PDF real ACBr localmente: compressão e
+posição do carimbo/rodapé; não foi homologado aqui. A migration automática
+remota do catálogo foi mantida e testada; fixtures pequenas se isolam só nos
+testes, sem desativar provisionamento. Atualização local: composer install,
+artisan migrate, optimize:clear após pull da branch. Sem merge/deploy.
+
+Relatório completo, arquivos, métricas, limites e provas:
+[docs/audits/2026-10-26/REPORT.md](../audits/2026-10-26/REPORT.md).
+
 ## Tratamento amigável dos retornos SEFAZ — 26/10/2026
 
 Branch `feature/nfe55-motor-fiscal-completo`; commits `ae6acdf`, `21eef04` e

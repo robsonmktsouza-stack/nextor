@@ -1,0 +1,18 @@
+./composer.json has been updated
+Running composer update setasign/fpdf setasign/fpdi
+Loading composer repositories with package information
+Updating dependencies
+Lock file operations: 2 installs, 0 updates, 0 removals
+  - Locking setasign/fpdf (1.8.2)
+  - Locking setasign/fpdi (v2.6.9)
+Writing lock file
+Installing dependencies from lock file (including require-dev)
+Package operations: 2 installs, 0 updates, 0 removals
+  - Downloading setasign/fpdf (1.8.2)
+  - Downloading setasign/fpdi (v2.6.9)
+  - Installing setasign/fpdf (1.8.2): Extracting archive
+  - Installing setasign/fpdi (v2.6.9): Extracting archive
+Generating optimized autoload files
+80 packages you are using are looking for funding.
+Use the `composer fund` command to find out more!
+No security vulnerability advisories found.

@@ -1,0 +1,109 @@
+{
+  "scope": "Fronteiras comuns, notificações, validações e respostas de integração",
+  "reviewed_files": [
+    "bootstrap/app.php",
+    "app/Http/Controllers/ApiController.php",
+    "app/Http/Controllers/QuickCatalogController.php",
+    "app/Http/Middleware/RequireApiToken.php",
+    "app/Providers/AppServiceProvider.php",
+    "app/Support/UserFacingMessage.php",
+    "app/Support/FiscalPresentation.php",
+    "app/Support/FiscalUserMessage.php",
+    "app/Support/ValidationFieldNames.php",
+    "app/Models/Sale.php",
+    "app/Services/WebhookService.php",
+    "app/Services/Fiscal/SefazRejectionGuidance.php",
+    "app/Services/Fiscal/IncomingNfeSyncService.php",
+    "public/js/erp.js",
+    "public/js/quick-catalog.js",
+    "public/js/user-messages.js",
+    "public/css/user-message-page.css",
+    "resources/views/errors/message.blade.php",
+    "resources/views/fiscal/purchases/index.blade.php",
+    "resources/views/fiscal/partials/sefaz-guidance.blade.php",
+    "tests/Feature/UserFacingErrorsTest.php",
+    "tests/Feature/SefazRejectionGuidanceViewTest.php"
+  ],
+  "findings": [
+    {
+      "id": "GLO-001",
+      "severity": "high",
+      "file": "bootstrap/app.php",
+      "line": 49,
+      "before": "Exceções inesperadas podiam incluir classe, caminho e trace nas páginas e respostas JSON em modo de diagnóstico.",
+      "after": "Respostas HTML/JSON operacionais em português, com status e cabeçalhos preservados; diagnóstico continua no registro privado.",
+      "status": "corrected",
+      "reason": "Projeção de apresentação; regras, dados e evidências internos preservados. Testes de HTTP, validação e persistência cobrem a fronteira."
+    },
+    {
+      "id": "GLO-002",
+      "severity": "medium",
+      "file": "public/js/erp.js",
+      "line": 66,
+      "before": "Notificações compartilhadas e consulta de CNPJ podiam mostrar erros nativos de rede e leitura da resposta.",
+      "after": "Normalizador compartilhado preserva mensagens úteis e oferece ação contextual para falhas técnicas; erro original não é alterado.",
+      "status": "corrected",
+      "reason": "Projeção de apresentação; regras, dados e evidências internos preservados. Testes de HTTP, validação e persistência cobrem a fronteira."
+    },
+    {
+      "id": "GLO-003",
+      "severity": "medium",
+      "file": "public/js/quick-catalog.js",
+      "line": 248,
+      "before": "Falhas sem lista de validação descartavam a mensagem útil enviada pelo servidor; erros nativos podiam aparecer no cadastro rápido.",
+      "after": "Mensagem útil do servidor é preservada e erros nativos são apresentados com orientação para salvar o cadastro.",
+      "status": "corrected",
+      "reason": "Projeção de apresentação; regras, dados e evidências internos preservados. Testes de HTTP, validação e persistência cobrem a fronteira."
+    },
+    {
+      "id": "GLO-004",
+      "severity": "high",
+      "file": "app/Http/Controllers/ApiController.php",
+      "line": 47,
+      "before": "Listagem de vendas da API incluía chave e hash privados de confirmação do PDV.",
+      "after": "Esses dois campos não integram a resposta; IDs comerciais, paginação e evidência persistida permanecem intactos.",
+      "status": "corrected",
+      "reason": "Projeção de apresentação; regras, dados e evidências internos preservados. Testes de HTTP, validação e persistência cobrem a fronteira."
+    },
+    {
+      "id": "GLO-005",
+      "severity": "medium",
+      "file": "app/Http/Controllers/ApiController.php",
+      "line": 14,
+      "before": "Filtro de data inválido podia atingir a consulta sem indicar o campo a corrigir.",
+      "after": "As três consultas da API validam a data com erro 422 e nome de campo legível.",
+      "status": "corrected",
+      "reason": "Projeção de apresentação; regras, dados e evidências internos preservados. Testes de HTTP, validação e persistência cobrem a fronteira."
+    },
+    {
+      "id": "GLO-006",
+      "severity": "high",
+      "file": "bootstrap/app.php",
+      "line": 24,
+      "before": "Campos de integração podiam voltar como entrada anterior após falha de validação.",
+      "after": "Certificado, senha A1, CSC, senha SMTP e segredo do cliente entram na lista de campos que não retornam ao formulário; teste cobre os segredos.",
+      "status": "corrected",
+      "reason": "Projeção de apresentação; regras, dados e evidências internos preservados. Testes de HTTP, validação e persistência cobrem a fronteira."
+    },
+    {
+      "id": "GLO-007",
+      "severity": "high",
+      "file": "app/Services/Fiscal/SefazRejectionGuidance.php",
+      "line": 87,
+      "before": "Erro local persistido podia aparecer cru no editor NF-e/NFC-e e em seus detalhes, mesmo com resumo amigável.",
+      "after": "Resumo e detalhe de erro local recebem projeção segura; retorno SEFAZ com código continua íntegro e o diagnóstico no banco é preservado.",
+      "status": "corrected",
+      "reason": "Projeção de apresentação; regras, dados e evidências internos preservados. Testes de HTTP, validação e persistência cobrem a fronteira."
+    },
+    {
+      "id": "GLO-008",
+      "severity": "high",
+      "file": "resources/views/fiscal/purchases/index.blade.php",
+      "line": 62,
+      "before": "Ocorrências antigas da consulta de notas recebidas eram apresentadas diretamente a partir do diagnóstico persistido.",
+      "after": "A página apresenta ação útil sem expor SQL/caminhos; o dado original continua armazenado e testado.",
+      "status": "corrected",
+      "reason": "Projeção de apresentação; regras, dados e evidências internos preservados. Testes de HTTP, validação e persistência cobrem a fronteira."
+    }
+  ]
+}

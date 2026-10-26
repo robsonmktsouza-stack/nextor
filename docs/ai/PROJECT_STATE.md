@@ -116,3 +116,13 @@ para cadastros. Não modifica o protocolo fiscal ou libera reenvios. Suíte
 completa: 1.179 testes/8.142 asserções, zero falhas, dois PDFs opcionais ignorados;
 28 testes Python passaram. Sem nova transmissão SEFAZ. Ver
 [operação e evidências](../fiscal/sefaz-rejections-friendly.md).
+
+
+## Auditoria geral de apresentação — 26/10/2026
+
+Revisão integrada de todos os módulos na branch fiscal: 372 arquivos varridos,
+99 problemas corrigidos e seis retenções funcionais documentadas. Suíte final:
+1.249 testes/8.478 asserções, zero falhas/erros, dois PDFs opcionais ignorados.
+Dados fiscais, cálculos, evidências e 42 commits remotos preservados. FPDF/FPDI
+passam a compor a instalação para DANFE cancelado; PDF real da ACBr ainda
+precisa de validação visual. Ver [relatório](../audits/2026-10-26/REPORT.md).

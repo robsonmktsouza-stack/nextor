@@ -1,0 +1,66 @@
+{
+  "baseline": "bf73a66",
+  "files": [
+    {
+      "file": "resources/fiscal/catalog/2026.10.26.1.json",
+      "sha256_before": "9cabe5db8c4e7be86406c96d8db08d984d6261fce3bc74369480a87612375ce8",
+      "sha256_after": "9cabe5db8c4e7be86406c96d8db08d984d6261fce3bc74369480a87612375ce8",
+      "unchanged": true
+    },
+    {
+      "file": "resources/fiscal/catalog/2026.10.26.json",
+      "sha256_before": "8942c3161093b9c2177ed5bdef737257b89f9b252f996855831490b40d5d8b07",
+      "sha256_after": "8942c3161093b9c2177ed5bdef737257b89f9b252f996855831490b40d5d8b07",
+      "unchanged": true
+    },
+    {
+      "file": "resources/fiscal/catalog/current.json",
+      "sha256_before": "8db5fdc6b25c9a030485f45738481a590d4d1c8b92403fe2a59f7bfa6a902242",
+      "sha256_after": "8db5fdc6b25c9a030485f45738481a590d4d1c8b92403fe2a59f7bfa6a902242",
+      "unchanged": true
+    },
+    {
+      "file": "resources/fiscal/catalog/schema-v1.json",
+      "sha256_before": "4d9858af2e7b767bab6763c90e88b508c1d185d102c8a0e486092bcc23154636",
+      "sha256_after": "4d9858af2e7b767bab6763c90e88b508c1d185d102c8a0e486092bcc23154636",
+      "unchanged": true
+    },
+    {
+      "file": "resources/fiscal/rejections/2026.10.26.json",
+      "sha256_before": "c5edaf663f36deea4c0d1818c65a1122aa121c7b5c1d16d826d9dde82e716981",
+      "sha256_after": "c5edaf663f36deea4c0d1818c65a1122aa121c7b5c1d16d826d9dde82e716981",
+      "unchanged": true
+    },
+    {
+      "file": "resources/fiscal/rejections/nt-sources.json",
+      "sha256_before": "7380a64ebd46d2b65486b90731b37b3bb76fba1c9adc95cfd806ad32d8805781",
+      "sha256_after": "7380a64ebd46d2b65486b90731b37b3bb76fba1c9adc95cfd806ad32d8805781",
+      "unchanged": true
+    },
+    {
+      "file": "resources/fiscal/rtc-classifications.json",
+      "sha256_before": "a8cd2d091734b3e52e1b3998765188df8c51b3aff43c4675ad639d67a1f0e080",
+      "sha256_after": "a8cd2d091734b3e52e1b3998765188df8c51b3aff43c4675ad639d67a1f0e080",
+      "unchanged": true
+    },
+    {
+      "file": "resources/fiscal/sources/confaz-cest-107-2026-10-26.txt",
+      "sha256_before": "9787fcd18018abcf67d782797c8c1624a970c643d462f50e5cb3ecb1a99514f0",
+      "sha256_after": "9787fcd18018abcf67d782797c8c1624a970c643d462f50e5cb3ecb1a99514f0",
+      "unchanged": true
+    },
+    {
+      "file": "resources/fiscal/sources/confaz-cest-2026-10-26.txt",
+      "sha256_before": "8adbcc949d12ce29a67fc0b08ce75f93f7e9dee6c6a7def905906296eb7b07f2",
+      "sha256_after": "8adbcc949d12ce29a67fc0b08ce75f93f7e9dee6c6a7def905906296eb7b07f2",
+      "unchanged": true
+    },
+    {
+      "file": "resources/fiscal/sources/nfe-cfop-2026-09-04.xlsx",
+      "sha256_before": "577e05eec452294945d0e9df1f9bb9b21a4af115938e75ec74cf6a541ae4dacf",
+      "sha256_after": "577e05eec452294945d0e9df1f9bb9b21a4af115938e75ec74cf6a541ae4dacf",
+      "unchanged": true
+    }
+  ],
+  "all_unchanged": true
+}

@@ -1,0 +1,110 @@
+{
+  "area": "Validação e nomes de campos de todos os módulos",
+  "review_method": "Extração de chaves literais de regras PHP em app/, confronto com rótulos atuais dos formulários e aliases de tradução, seguido de validação automática do resolvedor. Campos dinâmicos adicionais têm fallback seguro. Integração do resolvedor global é responsabilidade do agente principal.",
+  "reviewed_files": [
+    "app/Console/Commands/BootstrapManagedAccount.php",
+    "app/Console/Commands/MakeAdmin.php",
+    "app/Http/Controllers/ApiController.php",
+    "app/Http/Controllers/AuthController.php",
+    "app/Http/Controllers/CustomerController.php",
+    "app/Http/Controllers/FinanceController.php",
+    "app/Http/Controllers/FinancialReceiptController.php",
+    "app/Http/Controllers/FinancialReconciliationController.php",
+    "app/Http/Controllers/FinancialRecurrenceController.php",
+    "app/Http/Controllers/FinancialTransferController.php",
+    "app/Http/Controllers/FiscalCatalogController.php",
+    "app/Http/Controllers/FiscalFcpRuleController.php",
+    "app/Http/Controllers/FiscalPurchasesController.php",
+    "app/Http/Controllers/FiscalTaxGroupController.php",
+    "app/Http/Controllers/FiscalTaxRuleController.php",
+    "app/Http/Controllers/FiscalUtilitiesController.php",
+    "app/Http/Controllers/NFCeFiscalEventsController.php",
+    "app/Http/Controllers/NFCeInutilizationController.php",
+    "app/Http/Controllers/NFCeManualController.php",
+    "app/Http/Controllers/Nfe55EmissionController.php",
+    "app/Http/Controllers/Nfe55InutilizationController.php",
+    "app/Http/Controllers/NfeDraftController.php",
+    "app/Http/Controllers/OperationNatureController.php",
+    "app/Http/Controllers/PasswordRecoveryController.php",
+    "app/Http/Controllers/PdvCashReportController.php",
+    "app/Http/Controllers/PdvCashWorkflowController.php",
+    "app/Http/Controllers/PdvController.php",
+    "app/Http/Controllers/ProductController.php",
+    "app/Http/Controllers/PurchaseController.php",
+    "app/Http/Controllers/QuickCatalogController.php",
+    "app/Http/Controllers/SaleController.php",
+    "app/Http/Controllers/SaleReturnController.php",
+    "app/Http/Controllers/ServiceController.php",
+    "app/Http/Controllers/SettingsController.php",
+    "app/Http/Controllers/StockController.php",
+    "app/Services/Fiscal/FiscalCatalogModelReviewService.php",
+    "app/Services/Fiscal/NFCeRejectionCorrectionService.php",
+    "lang/pt_BR/validation.php",
+    "app/Support/ValidationFieldNames.php"
+  ],
+  "modified_files": [
+    "lang/pt_BR/validation.php",
+    "app/Support/ValidationFieldNames.php",
+    "tests/Unit/ValidationFieldNamesTest.php"
+  ],
+  "findings": [
+    {
+      "id": "VAL-001",
+      "severity": "medium",
+      "file": "lang/pt_BR/validation.php",
+      "line": 192,
+      "before": "Campos comuns sem aliases retornavam nomes de armazenamento em inglês nas mensagens de validação.",
+      "after": "ValidationFieldNames resolve rótulos explícitos dos formulários e preserva preferência pelos aliases existentes; itens não presume venda em telas de compra.",
+      "status": "corrected",
+      "reason": "585 rótulos explícitos; varredura verificou os 530 campos literais de regras encontrados, sem fallback entre eles. As regras, chaves de erro e valores de entrada permanecem inalterados. Campos futuros desconhecidos recebem campo informado, sem ecoar identificadores."
+    },
+    {
+      "id": "VAL-002",
+      "severity": "medium",
+      "file": "app/Support/ValidationFieldNames.php",
+      "line": 598,
+      "before": "Caminhos como tax_config.state_variations.0.ibs_uf_rate ou delivery_addresses.3.zip_code podiam aparecer na mensagem.",
+      "after": "Rótulos por campo e contexto (item, pagamento, endereço de entrega, variação estadual/municipal), sem índices de armazenamento.",
+      "status": "corrected",
+      "reason": "A normalização afeta apenas o nome apresentado; mantém a chave original para o formulário e a API."
+    },
+    {
+      "id": "VAL-003",
+      "severity": "medium",
+      "file": "lang/pt_BR/validation.php",
+      "line": 180,
+      "before": "Validações condicionais podiam citar payable, inbound, homologation e outros valores internos.",
+      "after": "Tradução contextual dos valores de tipo, operação, ambiente, destino, finalidade, situação e contribuinte.",
+      "status": "corrected",
+      "reason": "Os valores armazenados não são alterados; apenas substituições de apresentação nas mensagens condicionais."
+    },
+    {
+      "id": "VAL-004",
+      "severity": "low",
+      "file": "lang/pt_BR/validation.php",
+      "line": 75,
+      "before": "Mensagens nativas exigiam JSON, UUID ou ULID válidos.",
+      "after": "Mensagens orientam conferir o formato dos dados ou o identificador informado.",
+      "status": "corrected",
+      "reason": "Preserva a rejeição do formato e o campo envolvido sem expor formatos de transporte/identificação internos."
+    }
+  ],
+  "coverage": {
+    "fields": 530,
+    "missing": []
+  },
+  "explicit_labels": 585,
+  "tests": {
+    "command": "vendor/bin/phpunit --filter=ValidationFieldNamesTest",
+    "tests": 17,
+    "assertions": 57,
+    "failures": 0,
+    "errors": 0,
+    "runtime": "PHP 8.5.12 / PHPUnit 12.5.40 / Docker composer:2 Linux",
+    "evidence": "/workspace/scratch/audit-validation-field-names.log",
+    "evidence_junit": "/workspace/scratch/audit-validation-field-names.xml"
+  },
+  "limitations": [
+    "Esta subtarefa não modifica nem testa isoladamente a integração no provider; o agente principal executará a regressão integrada."
+  ]
+}

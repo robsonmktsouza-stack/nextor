@@ -122,3 +122,7 @@ a classificação nacional CEST consolidada, com períodos e exceções por UF.
 Os editores NF-e/NFC-e e as inutilizações apresentam orientação dos retornos
 SEFAZ a partir de 1.025 códigos oficiais, preservando o motivo e as políticas
 de correção existentes: [uso e atualização](docs/fiscal/sefaz-rejections-friendly.md).
+
+
+A revisão de mensagens e apresentação de todos os módulos, com inventário,
+provas de regressão e limites, está na [auditoria geral](docs/audits/2026-10-26/REPORT.md).
