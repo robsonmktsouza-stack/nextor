@@ -544,7 +544,6 @@ foreach($primaryTabs as $key=>$item){
           <label class="field col-4"><span>E-mail do contador</span><input type="email" name="accountant_email" value="{{ $fiscal['accountant_email'] }}"></label>
           <label class="field col-4"><span>Perfil tributário</span><input name="tax_profile" value="{{ $fiscal['tax_profile'] }}" placeholder="Ex.: padrão Simples Nacional"></label>
         </div>
-        <a class="btn btn-secondary" href="{{ route('settings.index',['tab'=>'accounting']) }}">Contador e autorização de acesso ao XML da NF-e</a>
         <div class="settings-switch-grid">
           <label class="settings-switch"><input type="checkbox" name="enabled" value="1" @checked($fiscal['enabled'])><span><strong>Mostrar opções de notas fiscais</strong></span></label>
           <label class="settings-switch"><input type="checkbox" name="send_xml_email" value="1" @checked($fiscal['send_xml_email'])><span><strong>Enviar XML por e-mail</strong><small>Preferência padrão para documentos autorizados.</small></span></label>
@@ -585,34 +584,7 @@ foreach($primaryTabs as $key=>$item){
       </form>
     </section>
 
-    <section class="editor-panel settings-panel">
-      <div class="settings-panel-head">
-        <div><h2>Últimos documentos fiscais</h2></div>
-      </div>
-      <div class="table-scroll">
-        <table class="cms-table">
-          <thead><tr><th>Tipo</th><th>Origem</th><th>Ambiente</th><th>Emissão</th><th>Série</th><th>Número</th><th>Status</th><th>Cancelamento</th><th>Preparado em</th></tr></thead>
-          <tbody>
-          @forelse($fiscalJobs as $job)
-            <tr>
-              <td><strong>{{ match($job->document_type){'nfe'=>'NF-e','nfce'=>'NFC-e','nfse'=>'NFS-e','cte'=>'CT-e','mdfe'=>'MDF-e',default=>'Documento fiscal'} }}</strong></td>
-              <td>@if($job->sale)<a class="table-link" href="{{ route('sales.show',$job->sale) }}">Venda #{{ str_pad((string)$job->sale_id,5,'0',STR_PAD_LEFT) }}</a>@else—@endif</td>
-              <td>{{ $job->environment==='production'?'Produção':'Homologação' }}</td>
-              <td>{{ $job->emission_mode==='offline'?'Contingência':'Normal' }}</td>
-              <td>{{ $job->series ?? '—' }}</td>
-              <td>{{ $job->document_number ?? '—' }}</td>
-              <td><span class="status {{ match($job->status){'authorized'=>'status-ok','rejected','failed','error'=>'status-danger','cancelled'=>'status-muted',default=>'status-blue'} }}">{{ match($job->status){'draft'=>'Rascunho','prepared'=>'Preparada','queued'=>'Aguardando envio','processing'=>'Em processamento','pending'=>'Aguardando confirmação','authorized'=>'Autorizada','rejected'=>'Rejeitada','cancelled'=>'Cancelada','offline_signed'=>'Contingência assinada','offline_print_pending'=>'Impressão pendente','offline_sending'=>'Transmitindo contingência','failed','error'=>'Falha',default=>'A verificar'} }}</span></td>
-              <td>{{ $job->cancelled_at ? 'Cancelada' : match($job->cancellation_status){'pending'=>'Solicitado','processing'=>'Em processamento','authorized'=>'Confirmado','rejected'=>'Rejeitado','uncertain'=>'Conferência necessária','prepared'=>'Não enviado',default=>'—'} }}</td>
-              <td>{{ $job->prepared_at?->format(\App\Models\AppSetting::dateFormat().' H:i') ?? '—' }}</td>
-            </tr>
-          @empty
-            <tr><td colspan="9" class="empty-cell">Nenhum documento fiscal preparado ainda.</td></tr>
-          @endforelse
-          </tbody>
-        </table>
-      </div>
-      
-    </section>
+
   </div>
 
 @elseif($tab==='tax')
