@@ -1,3 +1,11 @@
+## 26/10/2026 — Lumeron Mobile: auditoria de arquitetura anterior à implementação (feature/lumeron-mobile)
+
+- Branch criada a partir de `develop` e confirmada sem divergência antes da auditoria; ambiente `main`, `develop`, `control-center` e VPS preservados.
+- Análise estática dos layouts Blade, CSS mobile existente, scripts de navegação, autenticação, middlewares comerciais, PDV, fluxos principais e política de release. Achados e matriz de aceitação registrados em `docs/mobile/architecture-and-plan.md` no commit `4ed0fa737741fe824b6194a3a2bb6fd1bb43c4e0`.
+- Decisão: web responsiva + PWA sobre o Laravel existente, sem segundo backend; Service Worker não deve armazenar HTML autenticado, respostas de API, documentos fiscais nem dados privados. Nenhuma operação comercial/fiscal offline deve ser simulada.
+- Arquivos de aplicação **não modificados** nesta etapa; mudança restrita à documentação técnica. Sem execução de PHPUnit, navegador, dispositivo físico, instalações PWA ou deployment. A implementação e os testes seguem pendentes.
+- Respeitar os padrões existentes, o isolamento por CNPJ e os limites de permissão/licença no backend. Validar instalação mobile em Android e iOS antes de declarar funcionalidade concluída.
+
 ## 23/10/2026 — NF-e 55: cancelamento auditável e CT-e referenciado (develop)
 
 - Pedido do proprietário: concluir integralmente NF-e, não somente campos da interface. **Esta entrega é incremental e NÃO representa NF-e 100% pronta ou produção homologada.**
