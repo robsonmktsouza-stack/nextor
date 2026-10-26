@@ -11,22 +11,28 @@
   "theme_color": "#142437",
   "icons": [
     {
-      "src": "/pwa/lumeron-icon.svg",
-      "sizes": "any 192x192 512x512",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "/images/lumeron/elephant.png",
-      "sizes": "450x372",
+      "src": "/pwa/icons/lumeron-192.png",
+      "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/pwa/lumeron-maskable.svg",
-      "sizes": "any 192x192 512x512",
-      "type": "image/svg+xml",
+      "src": "/pwa/icons/lumeron-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa/icons/lumeron-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "maskable"
+    },
+    {
+      "src": "/pwa/lumeron-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
     }
   ]
 }
