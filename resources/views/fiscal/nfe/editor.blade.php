@@ -2,6 +2,46 @@
 @section('title','Fiscal')
 @section('titleMeta','NF-e')
 @section('content')
+
+@push('styles')
+<style>
+/* Refinamento visual exclusivo do editor NF-e; sem alteração de regras fiscais. */
+#nfeEditorDialog .nfe-workspace-dialog{border-radius:5px;box-shadow:0 14px 38px rgba(17,38,45,.25)}
+#nfeEditorDialog .dialog-header{min-height:55px;padding:11px 20px;border-bottom:1px solid #e0e6e2}
+#nfeEditorDialog .dialog-header h2{font-size:16px;letter-spacing:-.15px}
+#nfeEditorDialog .nfe-workspace-body{padding:12px 20px 16px}
+#nfeEditorDialog .nfe-flow-nav{margin:0 0 12px;padding:0 2px;border-bottom:1px solid #dce5df;gap:3px}
+#nfeEditorDialog .nfe-flow-nav .editor-tab{min-height:37px;padding:9px 14px;border-radius:4px 4px 0 0;font-weight:600}
+#nfeEditorDialog .nfe-form-section{border:0;box-shadow:none;background:transparent;padding:0;margin:0}
+#nfeEditorDialog .nfe-emitter-summary{padding:12px 6px 13px;margin-bottom:12px;gap:15px;align-items:center;border-bottom:1px solid #e4eae6}
+#nfeEditorDialog .nfe-emitter-logo{width:74px;min-width:74px;display:flex;align-items:center;justify-content:center}
+#nfeEditorDialog .nfe-emitter-logo img{max-width:70px;max-height:54px;object-fit:contain}
+#nfeEditorDialog .nfe-emitter-identity{min-width:0;line-height:1.35}
+#nfeEditorDialog .nfe-emitter-name strong{font-size:14px}
+#nfeEditorDialog .nfe-emitter-address,#nfeEditorDialog .nfe-emitter-docs{font-size:11px;line-height:1.45}
+#nfeEditorDialog .nfe-emitter-edit{margin-top:5px;display:inline-flex;align-items:center;gap:4px}
+#nfeEditorDialog .nfe-document-summary{min-width:170px;max-width:185px;padding:10px 12px;border-radius:4px}
+#nfeEditorDialog .nfe-document-summary>strong{font-size:14px}
+#nfeEditorDialog .nfe-general-actions{min-height:26px;margin:0 0 6px}
+#nfeEditorDialog .nfe-general-layout{gap:10px}
+#nfeEditorDialog .nfe-general-fields .editor-grid{row-gap:10px;column-gap:12px}
+#nfeEditorDialog .field>span,#nfeEditorDialog .nfe-field-title{font-size:11.5px;line-height:1.35;margin-bottom:5px;font-weight:600}
+#nfeEditorDialog .nfe-general-fields .field :is(input:not([type="checkbox"]):not([type="hidden"]),select){min-height:36px;height:36px;border-radius:3px;font-size:12px}
+#nfeEditorDialog .nfe-general-fields .input-action-button{height:36px;min-height:36px}
+#nfeEditorDialog .nfe-flag-field .switch-field{min-height:36px;border-radius:3px}
+#nfeEditorDialog .nfe-general-fields .field{min-width:0}
+#nfeEditorDialog .dialog-footer{min-height:58px;padding:9px 18px;border-top:1px solid #e0e6e2}
+#nfeEditorDialog .dialog-footer .btn{min-height:36px;border-radius:4px}
+@media(max-width:850px){
+ #nfeEditorDialog .nfe-workspace-body{padding:10px 12px}
+ #nfeEditorDialog .nfe-emitter-summary{gap:8px;flex-wrap:wrap}
+ #nfeEditorDialog .nfe-document-summary{min-width:155px}
+ #nfeEditorDialog .nfe-flow-nav{overflow-x:auto;flex-wrap:nowrap}
+ #nfeEditorDialog .nfe-flow-nav .editor-tab{white-space:nowrap}
+}
+</style>
+@endpush
+
 @include('fiscal._nav',['tab'=>'nfe','tabs'=>[
   'nfe'=>['label'=>'NF-e'],'nfse'=>['label'=>'NFS-e'],'cte'=>['label'=>'CT-e'],'nfce'=>['label'=>'NFC-e']
 ]])
