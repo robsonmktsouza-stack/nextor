@@ -38,7 +38,7 @@
    <form method="get" action="{{ route('products.index') }}" class="toolbar-filters" data-live-search data-live-target="products-live-results"><div class="table-search-group"><input type="search" autocomplete="off" name="search" value="{{ $term }}" placeholder="Buscar por nome ou código..." aria-label="Buscar produtos"><button type="submit" class="table-search-submit" data-tooltip="Pesquisar" aria-label="Pesquisar">@include('partials.icon',['name'=>'search','size'=>17])</button></div>@if($term)<a class="btn btn-light" href="{{ route('products.index') }}">Limpar</a>@endif</form>
  </div>
  <div id="products-live-results" data-live-search-results>
- <div class="table-scroll"><table class="cms-table"><thead><tr><th class="select-cell"><input type="checkbox" data-check-all aria-label="Selecionar todos"></th><th>Código / SKU</th><th>Produto</th><th>Un.</th><th>Preço de custo</th><th>Preço de venda</th><th>Estoque</th><th>Status</th><th class="action-cell">Ações</th></tr></thead><tbody>
+ <div class="table-scroll"><table class="cms-table" data-mobile-cards><thead><tr><th class="select-cell"><input type="checkbox" data-check-all aria-label="Selecionar todos"></th><th>Código / SKU</th><th>Produto</th><th>Un.</th><th>Preço de custo</th><th>Preço de venda</th><th>Estoque</th><th>Status</th><th class="action-cell">Ações</th></tr></thead><tbody>
  @forelse($products as $product)
  <tr><td class="select-cell"><input type="checkbox" data-row-select value="{{ $product->id }}" aria-label="Selecionar {{ $product->name }}"></td><td><span class="code-tag">{{ $product->sku }}</span></td>
  <td><strong class="table-title">{{ $product->name }}</strong>@if($product->category)<small class="table-subtitle">{{ $product->category }}</small>@endif</td>
