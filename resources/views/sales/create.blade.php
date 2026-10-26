@@ -5,8 +5,13 @@
 @include('sales._nav')
 <form id="sale-form" class="sale-editor" action="{{ route('sales.store') }}" method="post">
 @csrf
+<nav class="lm-sale-jump" aria-label="Etapas da venda">
+  <a href="#lm-sale-customer"><span>1</span> Dados</a>
+  <a href="#lm-sale-cart"><span>2</span> Itens</a>
+  <a href="#lm-sale-checkout"><span>3</span> Finalizar</a>
+</nav>
 
-<section class="sale-order-head editor-panel">
+<section id="lm-sale-customer" class="sale-order-head editor-panel">
   <div class="editor-grid cols-12">
     <label class="field col-6">
       <span>Nome do cliente</span>
@@ -59,7 +64,7 @@
   </div>
 </section>
 
-<section class="sale-cart-section">
+<section id="lm-sale-cart" class="sale-cart-section">
   <div class="sale-section-title">
     <div>
       <h2>Carrinho</h2>
@@ -136,7 +141,7 @@
   </div>
 </section>
 
-<div class="editor-savebar sale-savebar">
+<div id="lm-sale-checkout" class="editor-savebar sale-savebar">
   <div class="sale-save-summary">
     <span id="saleOperationLabel">Venda</span>
     <strong id="saleSaveTotal">R$ 0,00</strong>
