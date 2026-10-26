@@ -432,8 +432,7 @@
         const rules=payload.applied_rules||[];
         if(byId('nfeAppliedRules'))byId('nfeAppliedRules').hidden=rules.length===0;
         if(byId('nfeAppliedRulesBody'))byId('nfeAppliedRulesBody').textContent=rules.map(rule=>
-          'Item '+rule.item+': '+rule.name+' (revisão '+rule.revision+'). '+rule.legal_reference+
-          (rule.catalog_version?' Catálogo '+rule.catalog_version+'.':'')+
+          'Item '+rule.item+': '+rule.name+'. '+(rule.legal_reference||'')+
           (rule.cfop?' CFOP '+rule.cfop+'.':'')+
           (rule.csosn?' CSOSN '+rule.csosn+'.':rule.icms_cst?' CST ICMS '+rule.icms_cst+'.':'')+
           (rule.pis_cst?' PIS '+rule.pis_cst+'.':'')+(rule.cofins_cst?' COFINS '+rule.cofins_cst+'.':'')+
@@ -441,7 +440,7 @@
         ).join('\n');
       }catch(error){
         if(error.name!=='AbortError'&&version===taxPreviewVersion&&status){
-          status.textContent='Cálculo pendente: '+error.message;
+          status.textContent='Não foi possível atualizar o cálculo. Confira os dados e tente novamente.';
         }
       }
     },350);
