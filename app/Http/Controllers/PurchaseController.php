@@ -78,9 +78,39 @@ class PurchaseController extends Controller
                 'month'=>$incomingNfe->issued_at?->format('Y-m')??now()->format('Y-m'),
             ])->withErrors(['xml'=>'Não foi possível conferir o XML desta NF-e.']);
         }
+        // A NF-e já foi validada pelo parser. O emitente é localizado por CNPJ,
+        // inclusive quando existe apenas como cliente.
+        $supplierId=$defaults['supplier_id'];
+        $supplierCnpj=preg_replace('/\\D/','',(string)($defaults['supplier_cnpj']??''));
+        $supplierName=trim((string)($defaults['supplier_name']??''));
+        if(!$supplierId && preg_match('/^\\d{14}$/',$supplierCnpj) && $supplierName!=='') {
+            $supplier=\\App\\Models\\Customer::query()->get(['id','document','is_supplier'])
+                ->first(fn($row)=>preg_replace('/\\D/','',(string)$row->document)===$supplierCnpj);
+            if($supplier) {
+                $supplierId=$supplier->id;
+            } else {
+                $supplier=\\App\\Models\\Customer::query()->create([
+                    'name'=>$supplierName,
+                    'document'=>$supplierCnpj,
+                    'is_supplier'=>true,
+                    'is_customer'=>false,
+                    'is_carrier'=>false,
+                    'country_code'=>'1058',
+                    'country_name'=>'BRASIL',
+                ]);
+                $supplierId=$supplier->id;
+            }
+        }
+        if($supplierId) {
+            $supplier=\\App\\Models\\Customer::query()->find($supplierId);
+            if($supplier && !$supplier->is_supplier) {
+                $supplier->update(['is_supplier'=>true]);
+            }
+        }
+        $defaults['supplier_id']=$supplierId;
         $purchase=new Purchase(array_merge([
             'due_date'=>null,'generate_payable'=>false,
-        ],array_diff_key($defaults,['items'=>true])));
+        ],array_diff_key($defaults,['items'=>true,'supplier_name'=>true,'supplier_cnpj'=>true])));
         return view('purchases.form',array_merge(
             $this->formData($purchase,false,$request),
             ['importItems'=>$defaults['items'],'sourceInvoice'=>$incomingNfe],
