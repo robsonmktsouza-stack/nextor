@@ -59,7 +59,7 @@ final class IncomingNfePurchasePrefill
                 'source_cfop'=>$item['cfop'],
                 'source_ean'=>$item['ean'],
                 'source_number'=>$item['number'],
-                'quantity'=>$item['quantity'],
+                'quantity'=>$this->purchaseQuantity((string)$item['quantity']),
                 'unit_cost'=>number_format((float)$item['unit_price'],2,'.',''),
                 'discount'=>number_format($discount,2,'.',''),
                 'other_costs'=>number_format($other,2,'.',''),
@@ -83,6 +83,23 @@ final class IncomingNfePurchasePrefill
             'discount'=>number_format($generalDiscount,2,'.',''),
             'items'=>$lines,
         ];
+    }
+
+    private function purchaseQuantity(string $quantity): string
+    {
+        // XML pode trazer 12.0000; compras trabalha com até três decimais.
+        // Remover somente zeros finais, sem arredondar quantidades reais.
+        $quantity=trim($quantity);
+        if(preg_match('/^\\d+(?:\\.\\d+)?$/',$quantity)!==1) {
+            throw ValidationException::withMessages(['items'=>'Quantidade inválida no XML da NF-e.']);
+        }
+        if(str_contains($quantity,'.')) {
+            $quantity=rtrim(rtrim($quantity,'0'),'.');
+        }
+        if(preg_match('/^\\d+(?:\\.\\d{1,3})?$/',$quantity)!==1) {
+            throw ValidationException::withMessages(['items'=>'A quantidade da NF-e possui mais de três casas decimais significativas.']);
+        }
+        return $quantity;
     }
 
     private function amount(mixed $value): float
