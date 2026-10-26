@@ -7,7 +7,8 @@
 $primaryTabs=[
   'general'=>['label'=>'Minha empresa','icon'=>'settings','members'=>['general','printing','catalog']],
   'operations'=>['label'=>'Vendas e estoque','icon'=>'sales','members'=>['operations','inventory','pdv']],
-  'chart'=>['label'=>'Financeiro','icon'=>'money','members'=>['chart','accounts','payments','billing','accounting']],
+  'chart'=>['label'=>'Financeiro','icon'=>'money','members'=>['chart','accounts','payments','billing']],
+  'accounting'=>['label'=>'Contabilidade','icon'=>'services','members'=>['accounting']],
   'fiscal'=>['label'=>'Notas fiscais','icon'=>'receipt','members'=>['fiscal','nfe','nfce','nfse','cte','tax']],
   'users'=>['label'=>'Equipe e acessos','icon'=>'customers','members'=>['users']],
   'system'=>['label'=>'Outras opções','icon'=>'settings','members'=>['system','integrations']],
@@ -28,7 +29,6 @@ $subTabs=[
     'accounts'=>['Caixa e bancos','money'],
     'payments'=>['Formas de pagamento','receipt'],
     'billing'=>['Cobranças e PIX','money'],
-    'accounting'=>['Contabilidade','services'],
   ],
   'fiscal'=>[
     'fiscal'=>['Informações fiscais','shield'],
@@ -761,9 +761,7 @@ foreach($primaryTabs as $key=>$item){
   <form method="post" action="{{ route('settings.group.update','accounting') }}" class="settings-editor">
     @csrf
     <section class="editor-panel settings-panel">
-      <div class="settings-panel-head">
-        <a class="btn btn-secondary" href="{{ route('settings.index',['tab'=>'nfe']) }}">Configuração da NF-e</a>
-      </div>
+      <div class="settings-panel-head"><div><h2>Dados e integração contábil</h2></div></div>
       <div class="editor-grid cols-12 settings-grid">
         <label class="field col-6"><span>Escritório contábil</span><input name="office_name" value="{{ old('office_name',$accounting['office_name']) }}"></label>
         <label class="field col-6"><span>Contador responsável</span><input name="accountant_name" value="{{ old('accountant_name',$accounting['accountant_name']) }}"></label>
