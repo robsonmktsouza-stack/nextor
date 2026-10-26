@@ -78,12 +78,12 @@
 </details>
 <details style="margin-top:12px" @if(!$rule) open @endif><summary>Fundamento e condições de aplicação</summary>
   <div class="editor-grid cols-12 settings-grid" style="margin-top:10px">
-    <label class="field col-3"><span>Referência do catálogo</span><input name="catalog_version" maxlength="32" value="{{ $value('catalog_version') }}"></label>
+    <label class="field col-3"><span>Versão de referência</span><input name="catalog_version" maxlength="32" value="{{ $value('catalog_version') }}"></label>
     <label class="field col-3"><span>Situação da configuração</span><select name="catalog_status"><option value="">Configuração existente</option>@foreach(['template'=>'Modelo para revisão','reviewed'=>'Revisada','custom'=>'Exceção personalizada revisada'] as $code=>$label)<option value="{{ $code }}" @selected($value('catalog_status')===$code)>{{ $label }}</option>@endforeach</select></label>
-    <div class="field col-6"><span>Aplicação automática do catálogo</span><label class="settings-switch"><input type="checkbox" name="fiscal_review_confirmed" value="1"><span><strong>Revisei os critérios e o fundamento desta regra</strong></span></label>@if($rule?->fiscal_reviewed_at)<small>Última revisão {{ $rule->fiscal_reviewed_at->format('d/m/Y H:i') }}</small>@endif</div>
-    <label class="field col-6"><span>Fonte oficial (URL HTTPS)</span><input name="legal_source" type="url" maxlength="2000" value="{{ $value('legal_source') }}"></label>
+    <div class="field col-6"><span>Revisão fiscal</span><label class="settings-switch"><input type="checkbox" name="fiscal_review_confirmed" value="1"><span><strong>Revisei os critérios e o fundamento desta regra</strong></span></label>@if($rule?->fiscal_reviewed_at)<small>Última revisão {{ $rule->fiscal_reviewed_at->format('d/m/Y H:i') }}</small>@endif</div>
+    <label class="field col-6"><span>Endereço da fonte oficial</span><input name="legal_source" type="url" maxlength="2000" value="{{ $value('legal_source') }}"></label>
     <label class="field col-6"><span>Norma ou tabela</span><input name="legal_reference" maxlength="255" value="{{ $value('legal_reference') }}"></label>
-    <label class="field col-4"><span>Versão do leiaute / norma</span><input name="layout_version" maxlength="80" value="{{ $value('layout_version') }}"></label>
+    <label class="field col-4"><span>Identificação da norma</span><input name="layout_version" maxlength="80" value="{{ $value('layout_version') }}"></label>
     <label class="field col-2"><span>Data da consulta</span><input name="consulted_at" type="date" value="{{ $rule?->consulted_at?->format('Y-m-d') ?? old('consulted_at') }}"></label>
     <label class="field col-6"><span>Condições e limitações</span><textarea name="application_conditions" rows="2" maxlength="4000">{{ $value('application_conditions') }}</textarea></label>
     <label class="field col-12"><span>Observações internas</span><textarea name="notes" rows="2" maxlength="2000">{{ $value('notes') }}</textarea></label>
