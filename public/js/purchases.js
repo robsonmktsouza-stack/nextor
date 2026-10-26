@@ -62,6 +62,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     line.dataset.purchaseItem='1';
     if(data.source_description)line.dataset.importedSource='1';
     line.innerHTML=
+      '<div class="purchase-item-source" data-purchase-source hidden></div>'+
       '<div class="purchase-item-primary">'+
         '<label class="purchase-line-field purchase-product-field"><span>Produto *</span>'+
           '<select required name="items['+index+'][product_id]" data-quick-create="products" data-product><option value="">Selecione um produto</option></select></label>'+
@@ -81,17 +82,25 @@ document.addEventListener('DOMContentLoaded',()=>{
 
     const select=line.querySelector('[data-product]');
     const productLabel=line.querySelector('.purchase-product-field');
+    const sourceBar=line.querySelector('[data-purchase-source]');
     if(data.source_description){
-      const source=document.createElement('small');
+      sourceBar.hidden=false;
+      const source=document.createElement('span');
       source.className='purchase-import-product';
-      source.textContent='NF-e: '+(data.source_code?data.source_code+' — ':'')+data.source_description;
-      productLabel.appendChild(source);
+      source.textContent=(data.source_code?data.source_code+' — ':'')+data.source_description;
+      const badge=document.createElement('strong');
+      badge.textContent='Item da NF-e';
+      sourceBar.append(badge,source);
     }
     const mapButton=document.createElement('button');
     mapButton.type='button';mapButton.className='purchase-map-button';
-    mapButton.textContent='Selecionar / cadastrar';
-    mapButton.setAttribute('aria-label','Selecionar ou cadastrar produto');
-    productLabel.appendChild(mapButton);
+    mapButton.textContent='Vincular / cadastrar';
+    mapButton.setAttribute('aria-label','Vincular ou cadastrar produto do estoque');
+    if(data.source_description){
+      sourceBar.appendChild(mapButton);
+    }else{
+      productLabel.appendChild(mapButton);
+    }
     const selectProduct=product=>{
       if(!productMap.has(String(product.id)))products.push(product);
       productMap.set(String(product.id),product);
