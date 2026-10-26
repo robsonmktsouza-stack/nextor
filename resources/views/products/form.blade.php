@@ -96,7 +96,7 @@ $origins=[
            <option value="">Selecione um grupo tributário</option>
            @foreach($fiscalTaxGroups as $fiscalGroup)
              <option value="{{ $fiscalGroup->id }}" @selected((string)old('fiscal_tax_group_id',$product->fiscal_tax_group_id)===(string)$fiscalGroup->id) @disabled($fiscalGroup->catalog_version && (!$fiscalGroup->is_active || $fiscalGroup->catalog_status!=='reviewed' || !$fiscalGroup->fiscal_reviewed_at))>
-               {{ $fiscalGroup->name }}{{ $fiscalGroup->is_default ? ' · Padrão' : '' }}{{ !$fiscalGroup->is_active ? ' · Inativo' : '' }}{{ $fiscalGroup->catalog_version && $fiscalGroup->catalog_status!=='reviewed' ? ' · Modelo pendente de revisão' : '' }}
+               {{ $fiscalGroup->name }}{{ $fiscalGroup->is_default ? ' · Padrão' : '' }}{{ !$fiscalGroup->is_active ? ' · Inativo' : '' }}{{ $fiscalGroup->catalog_version && $fiscalGroup->catalog_status!=='reviewed' ? ' · Não habilitado' : '' }}
              </option>
            @endforeach
          </select>
