@@ -31,7 +31,7 @@ final class IncomingNfePurchasePrefill
             throw ValidationException::withMessages(['xml'=>'O XML não corresponde à NF-e selecionada.']);
         }
         $cnpj=fn($value)=>preg_replace('/\D/','',(string)$value);
-        $supplier=Customer::query()->where('is_supplier',true)->get(['id','document'])
+        $supplier=Customer::query()->get(['id','document'])
             ->first(fn($row)=>$cnpj($row->document)!==''&&$cnpj($row->document)===$cnpj($detail['supplier_cnpj']));
         $products=Product::query()->where('is_active',true)->get(['id','sku','ean_gtin']);
         $lines=[];$sumOther=0;$sumDiscount=0;
@@ -73,6 +73,8 @@ final class IncomingNfePurchasePrefill
         $otherExpenses=max(0,$this->amount($summary['other_expenses']??null)-$sumOther);
         return [
             'supplier_id'=>$supplier?->id,
+            'supplier_name'=>$detail['supplier_name'],
+            'supplier_cnpj'=>$detail['supplier_cnpj'],
             'incoming_nfe_id'=>$invoice->id,
             'operation_date'=>substr((string)$detail['issued_at'],0,10),
             'document_number'=>$summary['number']??null,
