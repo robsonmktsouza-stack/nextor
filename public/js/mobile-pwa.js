@@ -65,6 +65,33 @@
     root.querySelectorAll('table[data-mobile-cards]').forEach((table) => {
       const headings = Array.from(table.querySelectorAll('thead tr:first-child > th'))
         .map((th) => th.textContent.trim().replace(/\s+/g, ' '));
+      // Keep the existing bulk-select behavior available on a small screen.
+      const master = table.querySelector('thead input[data-check-all]');
+      const holder = table.parentElement;
+      if (master && holder && !holder.querySelector('.lumeron-mobile-select-all')) {
+        const label = document.createElement('label');
+        label.className = 'lumeron-mobile-select-all';
+        const mirror = document.createElement('input');
+        mirror.type = 'checkbox';
+        mirror.setAttribute('aria-label', 'Selecionar todos nesta página');
+        const sync = () => {
+          mirror.checked = master.checked;
+          mirror.indeterminate = master.indeterminate;
+        };
+        sync();
+        mirror.addEventListener('change', () => {
+          master.checked = mirror.checked;
+          master.dispatchEvent(new Event('change', { bubbles: true }));
+          sync();
+        });
+        holder.addEventListener('change', (event) => {
+          if (event.target.matches('[data-row-select], [data-check-all]')) {
+            queueMicrotask(sync);
+          }
+        });
+        label.append(mirror, document.createTextNode('Selecionar todos'));
+        holder.insertBefore(label, table);
+      }
       table.querySelectorAll('tbody > tr').forEach((row) => {
         const cells = Array.from(row.children).filter((cell) => cell.tagName === 'TD');
         if (cells.some((cell) => cell.colSpan > 1) || cells.length !== headings.length) {
