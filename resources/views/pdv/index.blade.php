@@ -837,9 +837,9 @@
     @endif
     <button type="button" data-pdv-operation="suspend"><span><strong>Suspender venda</strong><small>Guarda o carrinho para atender depois.</small></span><kbd>Alt+0</kbd></button>
     <button type="button" data-pdv-operation="resume"><span><strong>Recuperar venda</strong><small>Retoma uma venda suspensa sem movimentar estoque antes da conclusão.</small></span><kbd>Alt+R</kbd></button>
-    <button type="button" data-pdv-operation="electronic"><span><strong>Dados de cartão e PIX</strong><small>Integração, autorização e dados da instituição de pagamento.</small></span><kbd>Alt+T</kbd></button>
-    <button type="button" data-pdv-operation="contingency"><span><strong>Contingência NFC-e</strong><small>Ativa ou encerra a preparação offline de novas NFC-e.</small></span><kbd>Alt+C</kbd></button>
-    <button type="button" data-pdv-operation="cancel-nfce"><span><strong>Cancelamento NFC-e</strong><small>Coloca uma NFC-e autorizada na fila de cancelamento fiscal.</small></span><kbd>Alt+X</kbd></button>
+    <button type="button" data-pdv-operation="electronic"><span><strong>Dados de cartão e PIX</strong><small>Dados da transação e da instituição de pagamento.</small></span><kbd>Alt+T</kbd></button>
+    <button type="button" data-pdv-operation="contingency"><span><strong>Contingência NFC-e</strong><small>Emite novas NFC-e em contingência quando necessário.</small></span><kbd>Alt+C</kbd></button>
+    <button type="button" data-pdv-operation="cancel-nfce"><span><strong>Cancelamento NFC-e</strong><small>Solicita o cancelamento de uma NFC-e autorizada.</small></span><kbd>Alt+X</kbd></button>
     @if($pdvSettings['require_cash_opening'])
       @if($cashSession)
         <button type="button" data-pdv-operation="handover"><span><strong>Trocar turno</strong><small>Passar o caixa ao próximo operador após conferência e identificação de ambos.</small></span><kbd>—</kbd></button>
@@ -948,7 +948,7 @@
         <div class="pdv-operation-note">Encerrar a contingência afeta apenas novas vendas. As NFC-e já preparadas offline permanecem identificadas para transmissão posterior.</div>
         <button class="pdv-modal-primary" type="submit">Encerrar contingência <kbd>Ctrl+Enter</kbd></button>
       @else
-        <label><span>Motivo técnico *</span><textarea name="reason" id="pdvContingencyReason" rows="4" minlength="15" maxlength="255" required placeholder="Ex.: indisponibilidade de comunicação com o autorizador..."></textarea></label>
+        <label><span>Motivo da contingência *</span><textarea name="reason" id="pdvContingencyReason" rows="4" minlength="15" maxlength="255" required placeholder="Ex.: indisponibilidade de comunicação com o autorizador..."></textarea></label>
         <div class="pdv-operation-note">Use contingência somente quando houver problema técnico que impeça a autorização normal.</div>
         <button class="pdv-modal-primary" type="submit">Ativar contingência offline <kbd>Ctrl+Enter</kbd></button>
       @endif
@@ -960,7 +960,7 @@
   <form method="post" id="pdvCancelNfceForm" action="">
     @csrf
     <div class="pdv-modal-head">
-      <div><span>Alt+X</span><h2>Cancelar NFC-e</h2><p>Somente documentos já autorizados podem entrar na fila de cancelamento.</p></div>
+      <div><span>Alt+X</span><h2>Cancelar NFC-e</h2><p>Selecione uma NFC-e autorizada para solicitar o cancelamento.</p></div>
       <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
     </div>
     <div class="pdv-operation-body">
@@ -985,7 +985,7 @@
         <label><span>Justificativa *</span><textarea name="reason" id="pdvCancelNfceReason" rows="4" minlength="15" maxlength="255" required></textarea></label>
         <label class="pdv-operation-note"><input type="checkbox" name="no_circulation" value="1" required> Confirmo que a mercadoria não circulou e a operação não foi concluída fisicamente.</label>
         <div class="pdv-operation-note">Solicitação de cancelamento normal: verifique o prazo aplicável à UF. A situação só mudará após resposta oficial da SEFAZ.</div>
-        <button class="pdv-modal-primary" type="submit">Colocar cancelamento na fila <kbd>Ctrl+Enter</kbd></button>
+        <button class="pdv-modal-primary" type="submit">Solicitar cancelamento <kbd>Ctrl+Enter</kbd></button>
       @else
         <div class="pdv-operation-empty">Nenhuma NFC-e autorizada disponível para cancelamento.</div>
       @endif
