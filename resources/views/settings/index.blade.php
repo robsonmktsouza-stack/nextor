@@ -632,6 +632,9 @@ foreach($primaryTabs as $key=>$item){
       <div class="settings-panel-head">
         <div><h2>Impostos e códigos fiscais</h2></div>
         <div class="row" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <a class="btn btn-secondary" href="{{ route('fiscal.catalog.index') }}">
+            @include('partials.icon',['name'=>'layers','size'=>15]) Catálogo fiscal
+          </a>
           <a class="btn btn-secondary" href="{{ route('fiscal.tax-groups.index') }}">
             @include('partials.icon',['name'=>'layers','size'=>15]) Grupos de tributação
           </a>
