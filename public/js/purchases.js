@@ -58,19 +58,19 @@ document.addEventListener('DOMContentLoaded',()=>{
   function addItem(data={}){
     const index=rowId++;
     const line=document.createElement('div');
-    line.className='purchase-item-line';
+    line.className='purchase-item-line purchase-grid-row';
     line.dataset.purchaseItem='1';
     if(data.source_description)line.dataset.importedSource='1';
     line.innerHTML=
       '<div class="purchase-item-primary">'+
         '<div class="purchase-product-cell"><div class="purchase-item-source" data-purchase-source hidden></div>'+
-          '<label class="purchase-line-field purchase-product-field"><span>Produto do estoque *</span>'+
+          '<label class="purchase-line-field purchase-product-field"><span class="purchase-mobile-label">Produto do estoque *</span>'+
           '<select required name="items['+index+'][product_id]" data-quick-create="products" data-product><option value="">Selecione um produto</option></select></label></div>'+
-        '<label class="purchase-line-field"><span>Quantidade *</span>'+
+        '<label class="purchase-line-field"><span class="purchase-mobile-label">Quantidade *</span>'+
           '<input type="number" name="items['+index+'][quantity]" min="0.001" step="0.001" required data-qty value="1"></label>'+
-        '<label class="purchase-line-field"><span>Custo unitário *</span>'+
+        '<label class="purchase-line-field"><span class="purchase-mobile-label">Custo unitário *</span>'+
           '<input type="number" name="items['+index+'][unit_cost]" data-number-kind="money" min="0" step="0.01" required data-cost value="0.00"></label>'+
-        '<div class="purchase-item-amount"><span>Total do produto</span><strong data-line-total>R$ 0,00</strong></div>'+
+        '<div class="purchase-item-amount"><span class="purchase-mobile-label">Total do produto</span><strong data-line-total>R$ 0,00</strong></div>'+
         '<button type="button" class="btn-icon purchase-remove" data-purchase-remove aria-label="Remover item" data-tooltip="Remover produto"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg></button>'+
       '</div>'+
       '<div class="purchase-item-options"><button type="button" class="purchase-details-toggle" data-purchase-toggle aria-expanded="false">▸ Custos e tributos <span data-purchase-charge-hint></span></button><span class="purchase-link-status" data-purchase-link-status></span></div>'+
