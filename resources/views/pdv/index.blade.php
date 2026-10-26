@@ -255,7 +255,7 @@
       'prepared' => 'NFC-e preparada, mas ainda não autorizada. Revise e emita a partir da última venda.',
       'rejected' => 'NFC-e rejeitada. Corrija o documento da venda; não registre outra venda.',
       'offline_signed', 'offline_sending' => 'NFC-e em contingência: autorização da SEFAZ ainda pendente.',
-      'offline_print_pending' => 'XML da contingência assinado, mas o DANFE ainda não está pronto. Não refaça a venda.',
+      'offline_print_pending' => 'NFC-e em contingência; o DANFE ainda não está disponível. Não refaça a venda.',
       'cancelled' => 'NFC-e cancelada. Consulte o histórico fiscal da venda.',
       default => 'NFC-e ainda não preparada. Consulte a última venda antes de emitir.',
     };

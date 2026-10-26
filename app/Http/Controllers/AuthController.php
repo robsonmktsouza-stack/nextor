@@ -48,7 +48,7 @@ final class AuthController extends Controller
         $expected=LoginSubdomain::current();
         if ($subdomain!==$expected) {
             throw ValidationException::withMessages([
-                'subdomain'=>'Este endereço pertence a outra empresa. Confira o subdomínio informado.',
+                'subdomain'=>'Este endereço pertence a outra empresa. Confira a empresa informada.',
             ]);
         }
 

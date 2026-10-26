@@ -59,16 +59,16 @@ footer{margin-top:24px;border-top:1px solid #aab7c0;padding-top:10px;color:#5e6a
 @endif
 </table></section>
 <section><h2>Vendas e meios de pagamento</h2>
-<p>{{ $breakdown['sales_count'] ?? 0 }} vendas vinculadas ou históricas do turno; {{ $breakdown['cancelled_count'] ?? 0 }} canceladas. Valores de pagamentos recebidos, não somados integralmente ao numerário.</p>
+<p>{{ $breakdown['sales_count'] ?? 0 }} vendas no turno; {{ $breakdown['cancelled_count'] ?? 0 }} canceladas. Somente os pagamentos em dinheiro compõem o saldo do caixa.</p>
 <table><thead><tr><th>Meio</th><th class="number">Valor</th></tr></thead><tbody>
 @forelse($breakdown['payments'] ?? [] as $code=>$cents)
-<tr><td>{{ $methods[$code] ?? $code }}</td><td class="number">R$ {{ number_format($cents/100,2,',','.') }}</td></tr>
+<tr><td>{{ $methods[$code] ?? 'Forma de pagamento não cadastrada' }}</td><td class="number">R$ {{ number_format($cents/100,2,',','.') }}</td></tr>
 @empty<tr><td colspan="2">Sem pagamentos registrados.</td></tr>@endforelse
 </tbody></table></section>
 <section><h2>Movimentações manuais</h2><table><thead><tr><th>Horário</th><th>Tipo / Origem</th><th>Responsável / Motivo</th><th class="number">Valor</th></tr></thead><tbody>
 @forelse($session->movements->sortBy('created_at') as $movement)
 <tr><td>{{ $movement->created_at?->format('d/m H:i') }}</td>
-<td>{{ match($movement->type){'supply'=>'Suprimento','withdrawal'=>'Sangria','refund'=>'Reembolso',default=>$movement->type} }}
+<td>{{ match($movement->type){'supply'=>'Suprimento','withdrawal'=>'Sangria','refund'=>'Reembolso',default=>'Outra movimentação'} }}
 @if($movement->sale_id) · Venda #{{ $movement->sale_id }}@endif
 @if($movement->sale_return_id) · Devolução #{{ $movement->sale_return_id }}@endif</td>
 <td>{{ $movement->user?->name }} · {{ $movement->reason }}

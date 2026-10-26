@@ -96,19 +96,17 @@ $origins=[
            <option value="">Selecione um grupo tributário</option>
            @foreach($fiscalTaxGroups as $fiscalGroup)
              <option value="{{ $fiscalGroup->id }}" @selected((string)old('fiscal_tax_group_id',$product->fiscal_tax_group_id)===(string)$fiscalGroup->id) @disabled($fiscalGroup->catalog_version && (!$fiscalGroup->is_active || $fiscalGroup->catalog_status!=='reviewed' || !$fiscalGroup->fiscal_reviewed_at))>
-               {{ $fiscalGroup->name }}{{ $fiscalGroup->is_default ? ' · Padrão' : '' }}{{ !$fiscalGroup->is_active ? ' · Inativo' : '' }}{{ $fiscalGroup->catalog_version && $fiscalGroup->catalog_status!=='reviewed' ? ' · Não habilitado' : '' }}
+               {{ $fiscalGroup->name }}{{ $fiscalGroup->is_default ? ' · Padrão' : '' }}{{ !$fiscalGroup->is_active ? ' · Inativo' : '' }}{{ $fiscalGroup->catalog_version && $fiscalGroup->catalog_status!=='reviewed' ? ' · Aguardando revisão fiscal' : '' }}
              </option>
            @endforeach
          </select>
        </label>
-       <div class="field col-4">
-         <span>Administração</span>
-         @if(auth()->user()->canAccess('settings'))
+       @if(auth()->user()->canAccess('settings'))
+         <div class="field col-4">
+           <span>Grupos tributários</span>
            <a class="btn btn-secondary" href="{{ route('fiscal.tax-groups.index') }}">Gerenciar grupos</a>
-         @else
-           
-         @endif
-       </div>
+         </div>
+       @endif
      </div>
      
      @if($product->tax_group)
@@ -151,7 +149,7 @@ $origins=[
      </div>
    </div>
 
-   <details class="editor-panel"><summary>Classificações e exceções fiscais</summary><p>Pesquise pelo código ou pela descrição oficial. O vínculo NCM/CEST exige conferir a descrição legal do produto e não determina incidência de ICMS-ST. Os parâmetros abaixo são exceções próprias deste produto; a determinação da NF-e considera também a operação e suas regras aprovadas.</p></details>
+   <details class="editor-panel"><summary>Classificações e exceções fiscais</summary><p>Confira o NCM e o CEST pela descrição da mercadoria. O CEST não determina, por si só, a incidência de ICMS-ST. Revise as exceções deste produto com o responsável fiscal.</p></details>
 
    <div class="editor-panel">
      <h3>CFOP padrão da NF-e</h3>

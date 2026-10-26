@@ -13,7 +13,6 @@
 <input type="hidden" name="type" id="financeEntryType" value="{{ old('type',$entry->type) }}">
 
 <section class="finance-entry-banner {{ $entry->type==='payable'?'payable':'receivable' }}">
-  <strong>{{ $entry->type==='payable'?'Conta a pagar':'Conta a receber' }}</strong>
   <span data-finance-attachment-label>{{ $entry->attachment_name ?: 'Nenhum arquivo anexado' }}</span>
 </section>
 

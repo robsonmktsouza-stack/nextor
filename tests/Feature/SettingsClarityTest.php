@@ -39,7 +39,6 @@ final class SettingsClarityTest extends TestCase
             'Notas fiscais',
             'Equipe e acessos',
             'Outras opções',
-            'settings-section-guide',
             'Áreas de configurações',
         ] as $label) {
             self::assertStringContainsString($label, $html);
@@ -65,7 +64,7 @@ final class SettingsClarityTest extends TestCase
         ] as $tab) {
             $response = $this->get(route('settings.index', ['tab' => $tab]))->assertOk();
             $response->assertSee('settings-main-tabs', false);
-            $response->assertSee('settings-section-guide', false);
+            $response->assertDontSee('settings-section-guide', false);
         }
     }
 
@@ -120,11 +119,10 @@ final class SettingsClarityTest extends TestCase
             ->assertSee('name="api_enabled"', false);
     }
 
-    public function test_visual_styles_show_group_guides_and_keep_secondary_navigation_readable(): void
+    public function test_secondary_navigation_stays_readable_without_redundant_introductions(): void
     {
         $css = file_get_contents(public_path('css/desktop-polish.css'));
         self::assertNotFalse($css);
-        self::assertStringContainsString('.app-root .settings-section-guide', $css);
         self::assertStringContainsString('.app-root .settings-subtabs > a[aria-current="page"]', $css);
         self::assertStringContainsString('overflow-x:auto', $css);
     }

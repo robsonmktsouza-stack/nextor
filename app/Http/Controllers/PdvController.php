@@ -1064,7 +1064,7 @@ class PdvController extends Controller
             ]);
 
             return redirect()->route('pdv.receipt', ['sale' => $sale->id, 'print' => 0, 'status' => 1])
-                ->with('error', 'Não foi possível preparar a NFC-e desta venda. Consulte o log do Lumeron.');
+                ->with('error', 'Não foi possível preparar a NFC-e desta venda. Confira as pendências fiscais da venda ou solicite suporte.');
         }
 
         $document = FiscalDocumentJob::query()
@@ -1090,7 +1090,8 @@ class PdvController extends Controller
             try {
                 $bytes=$pdf->render($sale);
             } catch (\RuntimeException $e) {
-                abort(503,$e->getMessage());
+                abort(503,\App\Support\UserFacingMessage::fromThrowable($e,
+                    'Não foi possível gerar o comprovante. Tente novamente ou solicite suporte.'));
             }
             $name='Comprovante-Venda-'.str_pad((string)$sale->id,5,'0',STR_PAD_LEFT).'.pdf';
             $mode=$request->boolean('download')?'attachment':'inline';

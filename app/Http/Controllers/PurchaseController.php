@@ -73,6 +73,7 @@ class PurchaseController extends Controller
                 'month'=>$incomingNfe->issued_at?->format('Y-m')??now()->format('Y-m'),
             ])->withErrors($error->errors());
         } catch (\InvalidArgumentException | \RuntimeException $error) {
+            report($error);
             return redirect()->route('fiscal.purchases.index',[
                 'month'=>$incomingNfe->issued_at?->format('Y-m')??now()->format('Y-m'),
             ])->withErrors(['xml'=>'Não foi possível conferir o XML desta NF-e.']);
@@ -126,7 +127,7 @@ class PurchaseController extends Controller
     {
         $purchase=$service->cancel($purchase,(int)$request->user()->id);
         return redirect()->route('purchases.show',$purchase)
-            ->with('success','Compra cancelada. Movimentações e títulos vinculados tratados.');
+            ->with('success','Compra cancelada. Estoque e contas a pagar foram estornados, quando aplicáveis.');
     }
 
     private function formData(Purchase $purchase,bool $editing,Request $request): array

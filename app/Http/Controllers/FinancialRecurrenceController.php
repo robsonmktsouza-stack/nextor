@@ -86,7 +86,7 @@ class FinancialRecurrenceController extends Controller
     public function generate(FinancialRecurrenceService $service)
     {
         $count=$service->generateDue();
-        return back()->with('success',$count.' lançamento(s) recorrente(s) gerado(s).');
+        return back()->with('success',$count.($count===1?' lançamento recorrente gerado.':' lançamentos recorrentes gerados.'));
     }
 
     public function toggle(FinancialRecurrence $recurrence)

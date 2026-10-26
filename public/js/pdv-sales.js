@@ -135,7 +135,7 @@
         }
       }catch(error){
         if(error.name!=='AbortError' && request===previewSequence && button.isConnected)
-          showPreviewError(button.parentElement,error.message||'Não foi possível abrir o comprovante.');
+          showPreviewError(button.parentElement,window.LumeronUserMessage?.fromError(error,'Não foi possível abrir o comprovante. Tente novamente.')||'Não foi possível abrir o comprovante. Tente novamente.');
       }finally{
         if(request===previewSequence && button.isConnected){
           button.disabled=false;
@@ -262,7 +262,7 @@
         setPager(data.pagination);
       }catch(error){
         if(error.name==='AbortError'||request!==sequence)return;
-        showMessage(error.message||'Falha na consulta.','error');
+        showMessage(window.LumeronUserMessage?.fromError(error,'Não foi possível consultar as vendas. Tente novamente.')||'Não foi possível consultar as vendas. Tente novamente.','error');
         setPager(null);
       }finally{
         if(request===sequence)modal.removeAttribute('aria-busy');
@@ -343,7 +343,7 @@
         actionStatus.hidden=false;
         load(currentPage);
       }catch(error){
-        cancelError.textContent=error.message||'Não foi possível cancelar a venda.';
+        cancelError.textContent=window.LumeronUserMessage?.fromError(error,'Não foi possível cancelar a venda. Tente novamente.')||'Não foi possível cancelar a venda. Tente novamente.';
         cancelError.hidden=false;
       }finally{
         cancelBusy=false;

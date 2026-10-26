@@ -32,7 +32,7 @@ class SettingsController extends Controller
     ];
 
     public const PERMISSIONS=[
-        'dashboard'=>'Dashboard',
+        'dashboard'=>'Visão geral',
         'finance'=>'Financeiro',
         'products'=>'Produtos',
         'services'=>'Serviços',
@@ -304,7 +304,7 @@ class SettingsController extends Controller
 
         return redirect()
             ->route('settings.index',['tab'=>'integrations'])
-            ->with('success','Novo token da API gerado.')
+            ->with('success','Chave de acesso gerada.')
             ->with('api_token_plain',$token);
     }
 
@@ -332,8 +332,9 @@ class SettingsController extends Controller
         $expiresAt=null;
 
         if(!function_exists('openssl_pkcs12_read')) {
+            \Illuminate\Support\Facades\Log::error('Validação de A1 indisponível: extensão OpenSSL não habilitada.');
             throw ValidationException::withMessages([
-                'certificate'=>'A extensão OpenSSL precisa estar habilitada para validar o certificado A1.',
+                'certificate'=>'Não foi possível validar o certificado. Contate o suporte e tente novamente.',
             ]);
         }
 
@@ -341,7 +342,7 @@ class SettingsController extends Controller
             $certs=[];
             if(!@openssl_pkcs12_read($bytes,$certs,$data['certificate_password'])) {
                 throw ValidationException::withMessages([
-                    'certificate'=>'Certificado PKCS#12 inválido ou senha incorreta. Confira o arquivo .pfx/.p12 e a senha.',
+                    'certificate'=>'Certificado inválido ou senha incorreta. Confira o arquivo .pfx/.p12 e a senha.',
                 ]);
             }
 
@@ -366,7 +367,7 @@ class SettingsController extends Controller
             'certificate_expires_at'=>$expiresAt,
         ]);
 
-        return redirect()->route('settings.index',['tab'=>'fiscal'])->with('success','Certificado A1 armazenado com segurança.');
+        return redirect()->route('settings.index',['tab'=>'fiscal'])->with('success','Certificado A1 salvo.');
     }
 
     public function removeCertificate()

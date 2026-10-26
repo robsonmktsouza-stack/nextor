@@ -145,7 +145,8 @@ class SaleController extends Controller
         try {
             $bytes=$pdf->render($sale);
         } catch (RuntimeException $e) {
-            abort(503,$e->getMessage());
+            abort(503,\App\Support\UserFacingMessage::fromThrowable($e,
+                'Não foi possível gerar o comprovante. Tente novamente ou solicite suporte.'));
         }
         $name='Comprovante-Venda-'.str_pad((string)$sale->id,5,'0',STR_PAD_LEFT).'.pdf';
         $mode=$request->boolean('download')?'attachment':'inline';
@@ -163,7 +164,8 @@ class SaleController extends Controller
         try {
             $bytes=$pdf->render($sale);
         } catch (RuntimeException $e) {
-            abort(503,$e->getMessage());
+            abort(503,\App\Support\UserFacingMessage::fromThrowable($e,
+                'Não foi possível gerar o PDF do orçamento. Tente novamente ou solicite suporte.'));
         }
         $name='Orcamento-'.str_pad((string)$sale->id,5,'0',STR_PAD_LEFT).'.pdf';
         $mode=$request->boolean('download')?'attachment':'inline';

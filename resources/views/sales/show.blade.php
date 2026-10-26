@@ -90,7 +90,7 @@
             <td>{{ $payment->installment }}/{{ $sale->payments->count() }}</td>
             <td class="price-strong">R$ {{ number_format((float)$payment->amount,2,',','.') }}</td>
             <td>{{ $payment->due_date?->format(\App\Models\AppSetting::dateFormat()) ?? '—' }}</td>
-            <td>{{ $paymentLabels[$payment->payment_method] ?? ($payment->payment_method ?: 'Não informado') }}</td>
+            <td>{{ $paymentLabels[$payment->payment_method] ?? ($payment->payment_method ? 'Forma de pagamento não cadastrada' : 'Não informado') }}</td>
             <td>{{ $payment->receivable?'A receber':'Recebido' }}</td>
           </tr>
         @endforeach
@@ -125,7 +125,7 @@
   </section>
 
   <aside class="cms-card">
-    <div class="card-header"><div><h2>Dados da operação</h2><p>Informações de registro</p></div></div>
+    <div class="card-header"><div><h2>Dados da operação</h2></div></div>
     <div class="detail-meta">
       <div><span>Tipo</span><strong>{{ $sale->operation_type==='quote'?'Orçamento':'Venda' }}</strong></div>
       <div><span>Cliente</span><strong>{{ $sale->customer?->name ?? 'Consumidor não identificado' }}</strong></div>
@@ -136,7 +136,7 @@
       <div><span>Consumidor final</span><strong>{{ $sale->final_consumer?'Sim':'Não' }}</strong></div>
       @if($sale->keyword)<div><span>Palavra-chave</span><strong>{{ $sale->keyword }}</strong></div>@endif
       <div><span>Responsável</span><strong>{{ $sale->user?->name ?? '—' }}</strong></div>
-      <div><span>Status</span><strong>{{ match($sale->status){'converted'=>'Convertido em venda','cancelled'=>'Cancelado',default=>$sale->operation_type==='quote'?'Em aberto':'Concluída'} }}</strong></div>
+      <div><span>Situação</span><strong>{{ match($sale->status){'converted'=>'Convertido em venda','cancelled'=>'Cancelado',default=>$sale->operation_type==='quote'?'Em aberto':'Concluída'} }}</strong></div>
       @if($sale->operation_type==='quote' && $sale->convertedSale)
         <div><span>Venda gerada</span><strong><a href="{{ route('sales.show',$sale->convertedSale) }}">#{{ str_pad((string)$sale->convertedSale->id,5,'0',STR_PAD_LEFT) }}</a></strong></div>
       @elseif($sale->sourceQuote)
@@ -152,7 +152,7 @@
 <dialog class="erp-dialog small-dialog" id="sale-cancel">
   <form action="{{ route('sales.cancel',$sale) }}" method="post">@csrf
     <div class="dialog-header">
-      <div><h2>Cancelar {{ $sale->operation_type==='quote'?'orçamento':'venda' }} #{{ $sale->id }}?</h2><p>Confirmação da operação</p></div>
+      <div><h2>Cancelar {{ $sale->operation_type==='quote'?'orçamento':'venda' }} #{{ $sale->id }}?</h2></div>
       <button type="button" data-dialog-close class="close-dialog">@include('partials.icon',['name'=>'x'])</button>
     </div>
     <div class="dialog-body">

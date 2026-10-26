@@ -1,6 +1,5 @@
 @extends('layouts.app')
 @section('title','Visão geral')
-@section('description','Acompanhe as operações de estoque e vendas em um só lugar.')
 @section('actions')@if($licensedPdv)<a class="btn btn-primary" href="{{ route('sales.create') }}">@include('partials.icon',['name'=>'plus','size'=>16]) Nova venda</a>@endif @endsection
 @section('content')
 <div class="stats-grid">
@@ -10,7 +9,7 @@
  <a class="stat-card" href="{{ route('products.index') }}"><span class="stat-icon orange">@include('partials.icon',['name'=>'alert','size'=>21])</span><span class="stat-label">Estoque baixo</span><strong>{{ $lowStock }}</strong><small>Produtos no mínimo ou abaixo</small></a>
  @endif
  @if($licensedPdv)
- <a class="stat-card" href="{{ route('sales.index') }}"><span class="stat-icon green">@include('partials.icon',['name'=>'money','size'=>21])</span><span class="stat-label">Vendas concluídas</span><strong>R$ {{ number_format((float)$salesTotal,2,',','.') }}</strong><small>{{ $salesCount }} venda(s) ativa(s)</small></a>
+ <a class="stat-card" href="{{ route('sales.index') }}"><span class="stat-icon green">@include('partials.icon',['name'=>'money','size'=>21])</span><span class="stat-label">Vendas concluídas</span><strong>R$ {{ number_format((float)$salesTotal,2,',','.') }}</strong><small>{{ $salesCount }} {{ $salesCount===1?'venda concluída':'vendas concluídas' }}</small></a>
  @endif
 </div>
 <div class="dashboard-grid">

@@ -120,7 +120,7 @@ $paymentCodes=$quote->payments->pluck('payment_method')->filter()->unique()->val
 $paymentCatalog=$paymentCodes->isNotEmpty()
     ? \App\Models\PaymentMethod::query()->whereIn('code',$paymentCodes->all())->pluck('name','code')
     : collect();
-$paymentTerms=$paymentCodes->map(fn($code)=>$paymentCatalog->get($code) ?? $code)->implode(', ') ?: 'A combinar';
+$paymentTerms=$paymentCodes->map(fn($code)=>$paymentCatalog->get($code) ?? 'Forma de pagamento a confirmar')->unique()->implode(', ') ?: 'A combinar';
 $createdDate=($quote->operation_date ?? $quote->created_at)->format('d/m/Y');
 $expired=$quote->quote_expires_at && $quote->quote_expires_at->copy()->startOfDay()->lt(today());
 $state=match(true) {

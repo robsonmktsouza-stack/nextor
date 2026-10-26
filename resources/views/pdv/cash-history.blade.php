@@ -20,7 +20,7 @@ small{color:#667982}nav{padding:16px 0}
 <tr>
 <td><a href="{{ route('pdv.cash.report',$session) }}" data-cash-report-open
     data-cash-report-url="{{ route('pdv.cash.report',['cashSession'=>$session,'embed'=>1]) }}">#{{ $session->id }}</a></td>
-<td>{{ $session->register?->name ?? 'Legado' }}</td>
+<td>{{ $session->register?->name ?? 'Caixa não informado' }}</td>
 <td>{{ $session->user?->name ?? '—' }}</td><td>{{ $session->opened_at?->format('d/m/Y H:i') }}</td>
 <td>{{ $session->closed_at?->format('d/m/Y H:i') ?? 'Aberto' }}</td>
 <td class="num">{{ $session->expected_amount===null ? '—' : number_format((float)$session->expected_amount,2,',','.') }}</td>
@@ -32,7 +32,7 @@ small{color:#667982}nav{padding:16px 0}
 <tr><td colspan="9">Nenhum turno registrado.</td></tr>
 @endforelse
 </tbody></table><nav>{{ $sessions->links() }}</nav>
-<small>Os fechamentos novos preservam o resumo calculado na hora da conferência. Movimentações posteriores pertencem ao turno em que foram efetivamente realizadas.</small>
+<small>Cada fechamento registra a apuração do turno correspondente.</small>
 </main>
 @include('pdv.partials.cash-report-modal', [
   'autoCashReportId'=>0,

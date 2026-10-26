@@ -159,7 +159,14 @@ body.receipt-pdf-source .receipt-copy+.receipt-copy{margin-top:0!important}
     <div class="receipt-alert">{{ session('error') }}</div>
   @endif
   @if($nfceDocument)
-    <strong>NFC-e da venda #{{ $sale->id }}: {{ match($nfceDocument->status) { 'prepared'=>'Preparada', 'authorized'=>'Autorizada', 'cancelled'=>'Cancelada', 'rejected'=>'Rejeitada', 'pending'=>'Aguardando confirmação', 'processing'=>'Processando', 'error','failed'=>'Falha na emissão', 'offline_print_pending'=>'Pendente de autorização', default=>'Em análise' } }}</strong>
+    <strong>NFC-e da venda #{{ $sale->id }}: {{ match($nfceDocument->status){
+      'prepared'=>'preparada para revisão','processing'=>'em processamento',
+      'pending'=>'aguardando confirmação','authorized'=>'autorizada',
+      'rejected'=>'rejeitada','cancelled'=>'cancelada',
+      'offline_signed'=>'em contingência','offline_print_pending'=>'DANFE de contingência pendente',
+      'offline_sending'=>'contingência aguardando autorização',
+      'failed','error'=>'requer atenção',default=>'situação a verificar',
+    } }}</strong>
     <p>A venda foi concluída e o documento fiscal está vinculado a ela. Cancelar a impressão não altera a NFC-e.</p>
     @if($canPrintDanfe)
       <p><a class="action" href="{{ route('pdv.nfce.danfe',$nfceDocument) }}" target="_blank" rel="noopener noreferrer">
