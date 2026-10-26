@@ -56,6 +56,10 @@ class NfeDraftController extends Controller
         $term=trim((string)$request->query('search',''));
 
         $drafts=NfeDraft::query()
+            ->whereIn('status',['draft','prepared'])
+            ->whereNull('transmission_attempted_at')
+            ->whereNull('authorized_at')
+            ->whereNull('cancelled_at')
             ->with(['customer','operationNature','user'])
             ->when($term,fn($query)=>$query->where(function($where) use($term) {
                 $like='%'.$term.'%';
