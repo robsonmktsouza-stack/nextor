@@ -1,4 +1,5 @@
 /* Lumeron Mobile — extra visual layer. Desktop, fiscal printouts and business logic untouched. */
+.user-dropdown [data-pwa-install][hidden]{display:none!important}
 .lumeron-mobile-nav{display:none}
 .lumeron-mobile-select-all{display:none}
 @media screen and (max-width:760px){
