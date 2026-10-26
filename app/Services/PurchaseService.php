@@ -79,8 +79,12 @@ class PurchaseService
             else { $purchase->update($attributes); $purchase->items()->delete(); }
             foreach($items as $item) {
                 $purchase->items()->create([
-                    'product_id'=>$item['product']->id,'product_name'=>$item['product']->name,
-                    'product_sku'=>$item['product']->sku,'unit'=>$item['product']->unit,
+                    'product_id'=>$item['product']?->id,'product_name'=>$item['source_description'] ?: $item['product']?->name,
+                    'product_sku'=>$item['source_code'] ?: ($item['product']?->sku ?? ''),'unit'=>$item['source_unit'] ?: ($item['product']?->unit ?? 'UN'),
+                    'source_code'=>$item['source_code'],'source_description'=>$item['source_description'],
+                    'source_unit'=>$item['source_unit'],'source_ncm'=>$item['source_ncm'],
+                    'source_cfop'=>$item['source_cfop'],'source_ean'=>$item['source_ean'],
+                    'source_number'=>$item['source_number'],
                     'quantity'=>InventoryService::formatMills($item['mills']),
                     'unit_cost'=>$this->money($item['unit_cents']),
                     'line_total'=>$this->money($item['line_cents']),
@@ -108,6 +112,9 @@ class PurchaseService
                 throw ValidationException::withMessages(['due_date'=>'Informe o vencimento antes de receber.']);
             }
             foreach($items as $item) {
+                if(!$item->product_id) {
+                    throw ValidationException::withMessages(['items'=>'Vincule todos os itens da NF-e a produtos do estoque antes de confirmar o recebimento.']);
+                }
                 $product=Product::query()->lockForUpdate()->findOrFail($item->product_id);
                 if(!$product->is_active) {
                     throw ValidationException::withMessages(['items'=>'Produto inativo: '.$product->name]);
@@ -180,16 +187,19 @@ class PurchaseService
         if(count($items)<1||count($items)>80) {
             throw ValidationException::withMessages(['items'=>'Informe de 1 a 80 itens.']);
         }
-        $ids=array_map(fn($i)=>(int)$i['product_id'],$items);
+        $ids=array_values(array_filter(array_map(fn($i)=>(int)($i['product_id']??0),$items)));
         if(count($ids)!==count(array_unique($ids))) {
             throw ValidationException::withMessages(['items'=>'Não repita um produto: ajuste a quantidade na mesma linha.']);
         }
         $products=Product::query()->whereIn('id',$ids)->get()->keyBy('id');
         $result=[];
         foreach($items as $item) {
-            $product=$products->get((int)$item['product_id']);
-            if(!$product||!$product->is_active) {
+            $product=$products->get((int)($item['product_id']??0));
+            if($product && !$product->is_active) {
                 throw ValidationException::withMessages(['items'=>'Selecione apenas produtos ativos.']);
+            }
+            if(!$product && (empty($item['source_description']) || empty($item['source_code']))) {
+                throw ValidationException::withMessages(['items'=>'Vincule o produto ou informe os dados do item importado.']);
             }
             $mills=InventoryService::toMills((string)$item['quantity']);
             $price=$this->cents((string)$item['unit_cost']);
@@ -206,7 +216,8 @@ class PurchaseService
             if($line<0)throw ValidationException::withMessages([
                 'items'=>'O desconto do item não pode ultrapassar o valor da linha com seus acréscimos.'
             ]);
-            $result[]=array_merge(['product'=>$product,'mills'=>$mills,'unit_cents'=>$price,'line_cents'=>$line],$extras);
+            $source=array_intersect_key($item,array_flip(['source_code','source_description','source_unit','source_ncm','source_cfop','source_ean','source_number']));
+            $result[]=array_merge(['product'=>$product,'mills'=>$mills,'unit_cents'=>$price,'line_cents'=>$line],$extras,array_replace(array_fill_keys(['source_code','source_description','source_unit','source_ncm','source_cfop','source_ean','source_number'],null),$source));
         }
         return $result;
     }
