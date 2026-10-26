@@ -142,6 +142,24 @@ class SaleController extends Controller
         // Comprovante comercial: o Chrome recebe um PDF inline, como no orçamento.
         // Não preparar NFC-e nem movimentar venda, caixa, estoque ou financeiro.
         abort_unless($sale->operation_type==='sale',404);
+        if ($request->query('format') === 'a4') {
+            try {
+                $html = $pdf->renderHtml($sale);
+                // O HTML do comprovante utiliza a mesma fonte de dados da via térmica.
+                // Remover o ajuste automático de bobina e aplicar papel A4.
+                $html = preg_replace('~<script id="receipt-paper-fit">.*?</script>~s', '', $html);
+                $a4Styles = '<style id="sale-a4-print">@page{size:A4 portrait;margin:12mm!important}html,body{background:#fff!important;font-size:12px!important}.receipt,.receipt-copy{width:100%!important;max-width:186mm!important;margin:0 auto 12mm!important;padding:5mm!important}.receipt .brand{font-size:18px!important}.receipt .items th,.receipt .items td{font-size:11px!important}.receipt .meta,.receipt .row,.receipt .section{font-size:11px!important}.screen-actions,.post-sale-status{display:none!important}@media print{.receipt{box-shadow:none!important;break-inside:auto!important}}</style>';
+                $html = str_replace('</head>', $a4Styles.'</head>', $html);
+                return response($html, 200, [
+                    'Content-Type'=>'text/html; charset=UTF-8',
+                    'Cache-Control'=>'private, no-store, max-age=0',
+                    'X-Content-Type-Options'=>'nosniff',
+                ]);
+            } catch (RuntimeException $e) {
+                abort(503, \App\Support\UserFacingMessage::fromThrowable($e,
+                    'Não foi possível gerar o comprovante A4.'));
+            }
+        }
         try {
             $bytes=$pdf->render($sale);
         } catch (RuntimeException $e) {
