@@ -82,3 +82,5 @@
     <textarea name="additional_info" rows="4" placeholder="Texto padrão que deve acompanhar esta natureza">{{ old('additional_info',$nature->additional_info) }}</textarea>
   </label>
 </div>
+
+@include('fiscal._catalog-review',['catalogModel'=>$nature])

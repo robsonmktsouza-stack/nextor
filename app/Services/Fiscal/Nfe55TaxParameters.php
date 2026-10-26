@@ -6,6 +6,32 @@ use RuntimeException;
 
 final class Nfe55TaxParameters
 {
+    public const RULE_PARAMETERS = [
+        'icms_rate','icms_base','icms_base_mode','icms_base_reduction','icms_deferment_rate','fcp_rate','fcp_base',
+        'icms_credit_rate','icms_st_base','icms_st_rate','icms_st_base_mode','fcp_st_rate',
+        'icms_st_deduction','icms_st_mva','icms_st_base_reduction',
+        'ipi_cst','ipi_enq','ipi_rate','ipi_base','ipi_quantity','ipi_unit_rate',
+        'ipi_calculation_type','pis_calculation_type','cofins_calculation_type',
+        'pis_rate','pis_base','pis_quantity','pis_unit_rate',
+        'cofins_rate','cofins_base','cofins_quantity','cofins_unit_rate',
+        'st_retained_amount_scope','icms_st_retained_base','st_retained_rate',
+        'icms_substitutor_value','icms_st_retained_value','fcp_st_retained_base',
+        'fcp_st_retained_rate','fcp_st_retained_value','icms_effective_base',
+        'icms_effective_rate','icms_effective_value','icms_effective_reduction',
+        'icms_desoneration_amount','icms_desoneration_reason','icms_desoneration_deduct',
+        'difal_base','difal_fcp_base','difal_internal_rate','difal_interstate_rate',
+        'difal_share_rate','difal_fcp_rate',
+        'pis_st_calculation_type','pis_st_base','pis_st_rate','pis_st_quantity','pis_st_unit_rate','pis_st_add_to_total',
+        'cofins_st_calculation_type','cofins_st_base','cofins_st_rate','cofins_st_quantity','cofins_st_unit_rate','cofins_st_add_to_total',
+        'ipi_returned_percentage','ipi_returned_original_amount',
+        'ibs_uf_deferral_rate','ibs_municipal_deferral_rate','cbs_deferral_rate',
+        'rtc_regular_cst','rtc_regular_class','rtc_regular_base','rtc_regular_ibs_uf_rate','rtc_regular_ibs_municipal_rate','rtc_regular_cbs_rate','rtc_regular_legal_source','rtc_regular_legal_reference',
+        'rtc_transfer_ibs','rtc_transfer_cbs','rtc_adjustment_period','rtc_adjustment_ibs','rtc_adjustment_cbs',
+        'is_cst','is_class','is_calculation_type','is_base','is_rate','is_unit_rate','is_quantity','is_unit','is_valid_from','is_valid_until','is_legal_source','is_legal_reference',
+        'ibs_cbs_cst','ibs_cbs_class','ibs_cbs_base','ibs_uf_rate','ibs_municipal_rate','cbs_rate',
+        'ibs_uf_reduction_rate','ibs_municipal_reduction_rate','cbs_reduction_rate',
+    ];
+
     public static function forDirection(array $tax, string $direction): array
     {
         if ($direction === 'inbound') {

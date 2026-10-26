@@ -454,6 +454,15 @@ $origins=[
               @php($trace=data_get($item->tax_data,'fiscal_rule_trace',[]))
               @if(!empty($trace['id']))
                 <div>Item {{ $item->item_number }}: {{ data_get($trace,'snapshot.name','Regra fiscal') }} (revisão {{ $trace['revision']??'—' }}). {{ $trace['legal_reference']??'' }}
+                  @if(data_get($trace,'snapshot.catalog_version'))
+                    Catálogo {{ data_get($trace,'snapshot.catalog_version') }}.
+                  @endif
+                  CFOP {{ $item->cfop }}.
+                  @if(data_get($item->tax_data,'icms_csosn'))
+                    CSOSN {{ data_get($item->tax_data,'icms_csosn') }}.
+                  @elseif(data_get($item->tax_data,'icms_cst'))
+                    CST ICMS {{ data_get($item->tax_data,'icms_cst') }}.
+                  @endif
                   @if(!empty($trace['overrides']))
                     Valores manuais diferentes: {{ implode(', ',array_keys($trace['overrides'])) }}. Revise o enquadramento.
                   @endif

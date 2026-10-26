@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('title','Naturezas de Operação')
-@section('titleMeta')NF-e
+@section('titleMeta','NF-e')
 @section('content')
 @include('fiscal._nav',['tab'=>'nfe','tabs'=>[
   'nfe'=>['label'=>'NF-e'],'nfse'=>['label'=>'NFS-e'],'cte'=>['label'=>'CT-e'],'nfce'=>['label'=>'NFC-e']
@@ -38,6 +38,7 @@
         <tr>
           <td>
             <strong class="table-title">{{ $nature->name }}</strong>
+            @if($nature->catalog_version)<small class="table-subtitle">Catálogo {{ $nature->catalog_version }} · {{ $nature->catalog_status==='reviewed' ? 'Revisada' : 'Modelo' }}</small>@endif
             <small class="table-subtitle">Padrão: {{ $nature->operation_type==='outbound'?'Saída':'Entrada' }}</small>
           </td>
           <td>{{ ['normal'=>'1 - Normal','complementary'=>'2 - Complementar','adjustment'=>'3 - Ajuste','return'=>'4 - Devolução','credit_note'=>'5 - Nota de crédito','debit_note'=>'6 - Nota de débito'][$nature->purpose] ?? $nature->purpose }}</td>

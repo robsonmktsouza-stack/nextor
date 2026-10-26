@@ -71,6 +71,9 @@
           </a>
         @endif
         @if(auth()->user()->canAccess('settings'))
+          <a class="grid-tool grid-tool-wide" href="{{ route('fiscal.catalog.index') }}" data-tooltip="Catálogo e regras fiscais">
+            @include('partials.icon',['name'=>'layers','size'=>18]) <span>Configurações fiscais</span>
+          </a>
           <a class="grid-tool" href="{{ route('settings.index',['tab'=>$configuration['settings_tab']]) }}" data-tooltip="Configurações">
             @include('partials.icon',['name'=>'settings','size'=>18])
           </a>

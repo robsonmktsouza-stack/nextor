@@ -106,3 +106,11 @@ A instalação de clientes usa apenas SHAs explicitamente aprovados;
 nenhum git pull publica no servidor. Comandos de aprovação, deploy, atualização
 por CNPJ, rollback de código e limpeza segura:
 [Arquitetura de releases compartilhados](docs/deployment/shared-immutable-releases.md).
+
+### Catálogo fiscal padrão
+
+Referências oficiais versionadas, modelos de natureza/grupo e determinação revisada
+integrada ao emissor: [instalação, cobertura e atualização](docs/fiscal/catalogo-fiscal-padrao.md).
+Instalação explícita: `php artisan fiscal:catalog --install --templates` após as
+migrações. Modelos novos permanecem inativos até revisão fiscal; CFOP/CEST têm
+cobertura parcial declarada. Não modifica configurações de produção automaticamente.

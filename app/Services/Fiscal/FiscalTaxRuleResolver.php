@@ -33,6 +33,7 @@ final class FiscalTaxRuleResolver
             ->where('destination_uf', strtoupper($destinationUf))
             ->where('crt', $crt)
             ->where('is_active', true)
+            ->where(fn ($query) => $query->whereNull('catalog_status')->orWhereIn('catalog_status', ['reviewed','custom']))
             ->where(fn ($query) => $query->whereNull('valid_from')->orWhereDate('valid_from', '<=', $day))
             ->where(fn ($query) => $query->whereNull('valid_until')->orWhereDate('valid_until', '>=', $day))
             ->get()
@@ -68,6 +69,9 @@ final class FiscalTaxRuleResolver
                 || !$winner->consulted_at || !$winner->valid_from)) {
             throw new RuntimeException('A regra NF-e aplicável está sem fonte normativa, versão, consulta ou início de vigência.');
         }
+        if ($winner && $documentType === 'nfe' && $winner->catalog_version && !$winner->fiscal_reviewed_at) {
+            throw new RuntimeException('A regra do catálogo fiscal aplicável ainda não foi revisada por usuário autorizado.');
+        }
         return $winner;
     }
 
@@ -77,6 +81,9 @@ final class FiscalTaxRuleResolver
         'fiscal_operation' => 'fiscal_operation',
         'recipient_profile' => 'recipient_profile', 'tax_regime' => 'tax_regime',
         'final_consumer' => 'final_consumer',
+        'operation_nature_id' => 'operation_nature_id', 'fiscal_tax_group_id' => 'fiscal_tax_group_id',
+        'origin_municipality' => 'origin_municipality', 'destination_municipality' => 'destination_municipality',
+        'recipient_icms_indicator' => 'recipient_icms_indicator',
     ];
 
     /** NFC-e preserves its existing product/NCM precedence. NF-e uses explicit priority first. */
@@ -92,10 +99,11 @@ final class FiscalTaxRuleResolver
     /** Overlap at the same rank is rejected both during editing and at emission. */
     public function conflicts(FiscalTaxRule $candidate): array
     {
-        if (!$candidate->is_active) return [];
+        if (!$candidate->is_active || $candidate->catalog_status === 'template') return [];
         return FiscalTaxRule::query()->where('document_type', $candidate->document_type)
             ->where('origin_uf', $candidate->origin_uf)->where('destination_uf', $candidate->destination_uf)
-            ->where('crt', $candidate->crt)->where('is_active', true)->get()
+            ->where('crt', $candidate->crt)->where('is_active', true)
+            ->where(fn ($query) => $query->whereNull('catalog_status')->orWhereIn('catalog_status', ['reviewed','custom']))->get()
             ->filter(function (FiscalTaxRule $other) use ($candidate) {
                 if ($other->id === $candidate->id || self::rank($other) !== self::rank($candidate)) return false;
                 if ($other->valid_until && $candidate->valid_from && $other->valid_until < $candidate->valid_from) return false;

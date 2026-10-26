@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\OperationNature;
+use App\Services\Fiscal\FiscalCatalogModelReviewService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -11,19 +13,31 @@ class OperationNatureController extends Controller
     public function index()
     {
         return view('fiscal.nfe.natures',[
-            'natures'=>OperationNature::query()->orderByDesc('is_active')->orderBy('name')->get(),
+            'natures'=>OperationNature::query()->with(['revisions'])->orderByDesc('is_active')->orderBy('name')->get(),
         ]);
     }
 
     public function store(Request $request)
     {
-        OperationNature::query()->create($this->validated($request));
+        DB::transaction(function () use ($request): void {
+            $nature=OperationNature::query()->create($this->validated($request));
+            app(FiscalCatalogModelReviewService::class)->record($nature,$request->user()?->id);
+        });
         return back()->with('success','Natureza de operação cadastrada.');
     }
 
     public function update(Request $request, OperationNature $operationNature)
     {
-        $operationNature->update($this->validated($request));
+        $data=$this->validated($request);
+        DB::transaction(function () use ($request,$operationNature,$data): void {
+            $nature=OperationNature::query()->lockForUpdate()->findOrFail($operationNature->id);
+            $review=app(FiscalCatalogModelReviewService::class);
+            $data=$review->apply($request,$nature,$data);
+            $review->record($nature,$request->user()?->id);
+            $data['revision']=$nature->revision+1;
+            $nature->update($data);
+            $review->record($nature,$request->user()?->id);
+        });
         return back()->with('success','Natureza de operação atualizada.');
     }
 
@@ -47,7 +61,6 @@ class OperationNatureController extends Controller
         $data['override_product_cfop']=$request->boolean('override_product_cfop');
         $data['move_stock']=$request->boolean('move_stock');
         $data['is_active']=$request->boolean('is_active');
-        $data['presence_default']='presential';
 
         return $data;
     }

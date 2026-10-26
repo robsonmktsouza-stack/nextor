@@ -24,7 +24,7 @@
         <td>{{ $rule->icms_cst ? 'CST '.$rule->icms_cst : 'CSOSN '.$rule->csosn }}<small class="table-subtitle">PIS {{ $rule->pis_cst }} · COFINS {{ $rule->cofins_cst }}</small></td>
         <td>{{ $rule->priority }}</td>
         <td>{{ $rule->valid_from?->format('d/m/Y') ?? 'Sem início' }}<small class="table-subtitle">até {{ $rule->valid_until?->format('d/m/Y') ?? 'indefinido' }}</small></td>
-        <td>{{ $rule->is_active ? 'Ativa' : 'Inativa' }}</td><td><a class="table-link" href="#regra-{{ $rule->id }}">Editar / histórico</a></td>
+        <td>{{ $rule->is_active ? 'Ativa' : 'Inativa' }}@if($rule->catalog_version)<small class="table-subtitle">Catálogo {{ $rule->catalog_version }} · {{ $rule->catalog_status }}</small>@endif</td><td><a class="table-link" href="#regra-{{ $rule->id }}">Editar / histórico</a></td>
       </tr>
       <tr id="regra-{{ $rule->id }}"><td colspan="8"><details>
         <summary class="table-link">Editar {{ $rule->name }}</summary>

@@ -32,6 +32,7 @@
         <tr>
           <td class="nowrap">{{ $group->id }}</td>
           <td><a class="table-link" href="{{ route('fiscal.tax-groups.edit',$group) }}">{{ $group->name }}</a>
+            @if($group->catalog_version)<small class="table-subtitle">Catálogo {{ $group->catalog_version }} · {{ $group->catalog_status==='reviewed' ? 'Revisado' : 'Modelo' }}</small>@endif
             <small class="table-subtitle">Revisão {{ $group->revision }} @if($group->is_default) · Padrão para {{ $group->kind==='products' ? 'produtos' : 'serviços' }} @endif</small>
           </td>
           <td><span class="code-tag">{{ $group->kind==='products' ? 'Produtos' : 'Serviços' }}</span></td>

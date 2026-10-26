@@ -191,6 +191,7 @@
       <label class="field col-3"><span>CST IS</span><input name="tax_config[is_cst]" maxlength="3" value="{{ $val('is_cst') }}"></label>
       <label class="field col-3"><span>Classificação IS</span><input name="tax_config[is_class]" maxlength="6" value="{{ $val('is_class') }}"></label>
       <label class="field col-3"><span>CST IPI</span><input name="ipi_cst" maxlength="2" inputmode="numeric" value="{{ old('ipi_cst',$group->ipi_cst) }}"></label>
+      <label class="field col-3"><span>Enquadramento legal IPI (cEnq)</span><input name="tax_config[ipi_enq]" maxlength="3" pattern="[0-9]{3}" inputmode="numeric" value="{{ $val('ipi_enq') }}"></label>
       @foreach([['is_rate','Alíquota IS (%)'],['ipi_rate','Alíquota IPI (%)'],['iss_rate','Alíquota ISS (%)']] as [$key,$label])
         <label class="field col-2"><span>{{ $label }}</span><input type="number" min="0" max="100" step="0.0001" name="tax_config[{{ $key }}]" value="{{ $val($key) }}"></label>
       @endforeach
@@ -210,6 +211,7 @@
       <textarea name="notes" rows="3" maxlength="3000" placeholder="Referência legal, orientação do contador, data da conferência...">{{ old('notes',$group->notes) }}</textarea>
     </label>
   </section>
+  @include('fiscal._catalog-review',['catalogModel'=>$group])
   <script>
     (function () {
       const kind = document.querySelector('select[name="kind"]');

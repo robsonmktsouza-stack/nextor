@@ -433,6 +433,10 @@
         if(byId('nfeAppliedRules'))byId('nfeAppliedRules').hidden=rules.length===0;
         if(byId('nfeAppliedRulesBody'))byId('nfeAppliedRulesBody').textContent=rules.map(rule=>
           'Item '+rule.item+': '+rule.name+' (revisão '+rule.revision+'). '+rule.legal_reference+
+          (rule.catalog_version?' Catálogo '+rule.catalog_version+'.':'')+
+          (rule.cfop?' CFOP '+rule.cfop+'.':'')+
+          (rule.csosn?' CSOSN '+rule.csosn+'.':rule.icms_cst?' CST ICMS '+rule.icms_cst+'.':'')+
+          (rule.pis_cst?' PIS '+rule.pis_cst+'.':'')+(rule.cofins_cst?' COFINS '+rule.cofins_cst+'.':'')+
           (rule.overrides.length?' Valores manuais diferentes: '+rule.overrides.join(', ')+'. Revise o enquadramento.':'')
         ).join('\n');
       }catch(error){

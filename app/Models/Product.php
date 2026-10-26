@@ -3,6 +3,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Product extends Model {
     protected $fillable=[
@@ -19,11 +20,15 @@ class Product extends Model {
             'stock_quantity'=>'decimal:3','minimum_stock'=>'decimal:3',
             'net_weight'=>'decimal:3','gross_weight'=>'decimal:3',
             'control_stock'=>'boolean','different_tax_unit'=>'boolean','is_active'=>'boolean',
-            'tax_defaults'=>'array',
+            'tax_defaults'=>'array','fiscal_tax_group_id'=>'integer',
         ];
     }
 
     public function movements(): HasMany {
         return $this->hasMany(StockMovement::class);
+    }
+
+    public function fiscalTaxGroup(): BelongsTo {
+        return $this->belongsTo(FiscalTaxGroup::class);
     }
 }

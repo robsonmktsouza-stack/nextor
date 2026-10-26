@@ -167,6 +167,12 @@ class NfeDraftController extends Controller
                 'name'=>data_get($trace,'snapshot.name','Regra fiscal'),
                 'revision'=>$trace['revision'],'legal_reference'=>$trace['legal_reference']??'',
                 'legal_source'=>$trace['legal_source']??'',
+                'catalog_version'=>data_get($trace,'snapshot.catalog_version'),
+                'cfop'=>$item['cfop']??null,
+                'icms_cst'=>data_get($item,'tax_data.icms_cst'),
+                'csosn'=>data_get($item,'tax_data.icms_csosn'),
+                'pis_cst'=>data_get($item,'tax_data.pis_cst'),
+                'cofins_cst'=>data_get($item,'tax_data.cofins_cst'),
                 'overrides'=>array_keys($trace['overrides']??[])];
         }
         return response()->json(['totals'=>$totals,'document_errors'=>$documentErrors,'applied_rules'=>$rules]);
@@ -927,7 +933,7 @@ class NfeDraftController extends Controller
 
         $draft->load('items');
         try {
-            app(Nfe55TaxRuleApplicationService::class)->apply($draft,$company);
+            app(Nfe55TaxRuleApplicationService::class)->apply($draft,$company,true,true);
         }catch(\RuntimeException $error){
             throw ValidationException::withMessages(['items_json'=>$error->getMessage()]);
         }
@@ -961,6 +967,7 @@ class NfeDraftController extends Controller
     {
         $draft=new NfeDraft([
             'status'=>'draft','operation_type'=>$data['operation_type']??'outbound',
+            'operation_nature_id'=>$data['operation_nature_id']??null,
             'destination'=>$data['destination']??($customer?$this->resolveDestination($customer,$company):'internal'),
             'purpose'=>$data['purpose']??'normal','issue_date'=>$data['issue_date']??now()->toDateString(),
             'recipient_snapshot'=>$customer?->toArray()??[],
@@ -969,6 +976,7 @@ class NfeDraftController extends Controller
         ]);
         $draft->setRelation('customer',$customer);
         $nature=isset($data['operation_nature_id'])?OperationNature::query()->find($data['operation_nature_id']):null;
+        $draft->setRelation('operationNature',$nature);
         $draft->setRelation('items',collect($items)->map(function($item,$index)use($draft,$nature){
             if(!is_array($item))throw ValidationException::withMessages(['items_json'=>'Confira os produtos da NF-e.']);
             $product=isset($item['product_id'])?Product::query()->find($item['product_id']):null;

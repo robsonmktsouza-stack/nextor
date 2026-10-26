@@ -11,6 +11,7 @@ use App\Http\Controllers\NFCeFiscalEventsController;
 use App\Http\Controllers\NFCeInutilizationController;
 use App\Http\Controllers\FiscalUtilitiesController;
 use App\Http\Controllers\FiscalCodeCatalogController;
+use App\Http\Controllers\FiscalCatalogController;
 use App\Http\Controllers\FiscalTaxRuleController;
 use App\Http\Controllers\FiscalTaxGroupController;
 use App\Http\Controllers\FiscalFcpRuleController;
@@ -89,6 +90,7 @@ Route::middleware(['auth','control.license'])->group(function () {
         ->middleware(['permission:customers','company.configured','throttle:20,1']);
     Route::get('/products',[ProductController::class,'index'])->name('products.index')->middleware('permission:products');
     Route::get('/products/create',[ProductController::class,'create'])->name('products.create')->middleware('permission:products');
+    Route::get('/products/fiscal-classifications',[ProductController::class,'classificationLookup'])->name('products.fiscal-classifications')->middleware(['permission:products','throttle:60,1']);
     Route::post('/products',[ProductController::class,'store'])->name('products.store')->middleware('permission:products');
     Route::get('/products/{product}/edit',[ProductController::class,'edit'])->name('products.edit')->middleware('permission:products');
     Route::put('/products/{product}',[ProductController::class,'update'])->name('products.update')->middleware('permission:products');
@@ -179,6 +181,9 @@ Route::middleware(['auth','control.license'])->group(function () {
     Route::post('/fiscal/utilities/xml',[FiscalUtilitiesController::class,'xml'])->name('fiscal.utilities.xml')->middleware(['permission:fiscal','company.configured']);
     Route::get('/fiscal/utilities/{fiscalDocumentJob}/auxiliary',[FiscalUtilitiesController::class,'auxiliary'])->name('fiscal.utilities.auxiliary')->middleware(['permission:fiscal','company.configured']);
     Route::get('/fiscal/fcp',[FiscalFcpRuleController::class,'index'])->name('fiscal.fcp.index')->middleware('permission:settings');
+    Route::get('/fiscal/catalog',[FiscalCatalogController::class,'index'])->name('fiscal.catalog.index')->middleware('permission:settings');
+    Route::post('/fiscal/catalog/install',[FiscalCatalogController::class,'install'])->name('fiscal.catalog.install')->middleware(['permission:settings','throttle:3,1']);
+    Route::post('/fiscal/catalog/import',[FiscalCatalogController::class,'import'])->name('fiscal.catalog.import')->middleware(['permission:settings','throttle:3,1']);
     Route::post('/fiscal/fcp',[FiscalFcpRuleController::class,'store'])->name('fiscal.fcp.store')->middleware('permission:settings');
     Route::put('/fiscal/fcp/{fiscalFcpRule}',[FiscalFcpRuleController::class,'update'])->name('fiscal.fcp.update')->middleware('permission:settings');
     Route::get('/fiscal/tax-groups',[FiscalTaxGroupController::class,'index'])->name('fiscal.tax-groups.index')->middleware('permission:settings');

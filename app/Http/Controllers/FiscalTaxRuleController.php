@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\CompanySetting;
 use App\Models\FiscalTaxRule;
 use App\Models\Product;
+use App\Models\OperationNature;
+use App\Models\FiscalTaxGroup;
 use App\Services\Fiscal\FiscalTaxRuleResolver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,31 +16,7 @@ use Illuminate\Validation\ValidationException;
 final class FiscalTaxRuleController extends Controller
 {
     private const UFS = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
-    public const TAX_PARAMETERS = [
-        'icms_rate','icms_base','icms_base_mode','icms_base_reduction','icms_deferment_rate','fcp_rate','fcp_base',
-        'icms_credit_rate','icms_st_base','icms_st_rate','icms_st_base_mode','fcp_st_rate',
-        'icms_st_deduction','icms_st_mva','icms_st_base_reduction',
-        'ipi_cst','ipi_enq','ipi_rate','ipi_base','ipi_quantity','ipi_unit_rate',
-        'ipi_calculation_type','pis_calculation_type','cofins_calculation_type',
-        'pis_rate','pis_base','pis_quantity','pis_unit_rate',
-        'cofins_rate','cofins_base','cofins_quantity','cofins_unit_rate',
-        'st_retained_amount_scope','icms_st_retained_base','st_retained_rate',
-        'icms_substitutor_value','icms_st_retained_value','fcp_st_retained_base',
-        'fcp_st_retained_rate','fcp_st_retained_value','icms_effective_base',
-        'icms_effective_rate','icms_effective_value','icms_effective_reduction',
-        'icms_desoneration_amount','icms_desoneration_reason','icms_desoneration_deduct',
-        'difal_base','difal_fcp_base','difal_internal_rate','difal_interstate_rate',
-        'difal_share_rate','difal_fcp_rate',
-        'pis_st_calculation_type','pis_st_base','pis_st_rate','pis_st_quantity','pis_st_unit_rate','pis_st_add_to_total',
-        'cofins_st_calculation_type','cofins_st_base','cofins_st_rate','cofins_st_quantity','cofins_st_unit_rate','cofins_st_add_to_total',
-        'ipi_returned_percentage','ipi_returned_original_amount',
-        'ibs_uf_deferral_rate','ibs_municipal_deferral_rate','cbs_deferral_rate',
-        'rtc_regular_cst','rtc_regular_class','rtc_regular_base','rtc_regular_ibs_uf_rate','rtc_regular_ibs_municipal_rate','rtc_regular_cbs_rate','rtc_regular_legal_source','rtc_regular_legal_reference',
-        'rtc_transfer_ibs','rtc_transfer_cbs','rtc_adjustment_period','rtc_adjustment_ibs','rtc_adjustment_cbs',
-        'is_cst','is_class','is_calculation_type','is_base','is_rate','is_unit_rate','is_quantity','is_unit','is_valid_from','is_valid_until','is_legal_source','is_legal_reference',
-        'ibs_cbs_cst','ibs_cbs_class','ibs_cbs_base','ibs_uf_rate','ibs_municipal_rate','cbs_rate',
-        'ibs_uf_reduction_rate','ibs_municipal_reduction_rate','cbs_reduction_rate',
-    ];
+    public const TAX_PARAMETERS = \App\Services\Fiscal\Nfe55TaxParameters::RULE_PARAMETERS;
 
     public function index()
     {
@@ -49,6 +27,8 @@ final class FiscalTaxRuleController extends Controller
             'products' => Product::query()->where('is_active', true)->orderBy('name')->get(['id','name','sku']),
             'ufs' => self::UFS, 'issuerUf' => strtoupper((string) $company->state),
             'issuerCrt' => (string) $company->crt,
+            'operationNatures' => OperationNature::query()->orderBy('name')->get(['id','name','catalog_version']),
+            'fiscalTaxGroups' => FiscalTaxGroup::query()->where('kind', 'products')->orderBy('name')->get(['id','name','catalog_version']),
         ]);
     }
 
@@ -79,7 +59,31 @@ final class FiscalTaxRuleController extends Controller
                 throw ValidationException::withMessages(['revision' => 'Esta regra foi alterada por outro usuário. Reabra o cadastro antes de salvar.']);
             }
             if ($rule->exists) $this->recordRevision($rule, null);
+            // Catalog provenance cannot be removed by omitting metadata from an update.
+            if ($rule->exists && $rule->catalog_version && empty($data['catalog_version'])) {
+                $data['catalog_version'] = $rule->catalog_version;
+                $data['catalog_status'] = $data['catalog_status'] ?? $rule->catalog_status;
+            }
             $rule->fill($data);
+            $managed = (bool) $rule->catalog_version;
+            if ($managed && $rule->is_active && (!$request->boolean('fiscal_review_confirmed')
+                || !in_array($rule->catalog_status, ['reviewed','custom'], true))) {
+                $this->invalid('fiscal_review_confirmed', 'Revise os critérios, os tributos e a fonte normativa antes de habilitar esta regra do catálogo.');
+            }
+            if ($managed && in_array($rule->cfop, ['6101','6102'], true) && !in_array($rule->recipient_profile, ['contributor','exempt'], true)) {
+                $this->invalid('recipient_profile', 'O CFOP do catálogo exige regra específica para destinatário contribuinte.');
+            }
+            if ($managed && in_array($rule->cfop, ['6107','6108'], true) && $rule->recipient_profile !== 'non_contributor') {
+                $this->invalid('recipient_profile', 'O CFOP do catálogo exige regra específica para destinatário não contribuinte.');
+            }
+            if ($managed) {
+                $codes = \App\Support\FiscalCodeCatalog::all();
+                foreach (['csosn'=>'csosn','icms_cst'=>'icms_cst','pis_cst'=>'pis_cofins_cst','cofins_cst'=>'pis_cofins_cst'] as $field => $kind) {
+                    if ($rule->{$field} !== null && $rule->{$field} !== '' && !array_key_exists((string) $rule->{$field}, $codes[$kind])) $this->invalid($field, 'Código tributário não reconhecido no catálogo.');
+                }
+                $rule->fiscal_reviewed_at = $request->boolean('fiscal_review_confirmed') ? now() : null;
+                $rule->fiscal_reviewed_by = $request->boolean('fiscal_review_confirmed') ? $request->user()?->id : null;
+            }
             $conflicts = app(FiscalTaxRuleResolver::class)->conflicts($rule);
             if ($conflicts) throw ValidationException::withMessages([
                 'priority' => 'Regra ativa conflitante na mesma vigência e precedência: '.implode(', ', $conflicts).'. Ajuste critérios, vigência ou prioridade.',
@@ -108,6 +112,14 @@ final class FiscalTaxRuleController extends Controller
             'destination_uf' => ['required',Rule::in([...self::UFS,'EX'])],
             'crt' => ['required',Rule::in(['1','2','3','4'])],
             'product_id' => ['nullable','integer','exists:products,id'],
+            'operation_nature_id' => ['nullable','integer','exists:operation_natures,id'],
+            'fiscal_tax_group_id' => ['nullable','integer',Rule::exists('fiscal_tax_groups','id')->where('kind','products')],
+            'origin_municipality' => ['nullable','regex:/^\d{7}$/D'],
+            'destination_municipality' => ['nullable','regex:/^\d{7}$/D'],
+            'recipient_icms_indicator' => ['nullable',Rule::in(['1','2','9'])],
+            'catalog_version' => ['nullable','string','max:32','regex:/^[a-zA-Z0-9._-]+$/D'],
+            'catalog_status' => ['nullable',Rule::in(['template','reviewed','custom'])],
+            'fiscal_review_confirmed' => ['nullable','boolean'],
             'ncm_prefix' => ['nullable','regex:/^[0-9]{2,8}$/'],
             'cfop' => ['required','regex:/^[123567][0-9]{3}$/'],
             'input_cfop' => ['nullable','regex:/^[123567][0-9]{3}$/'],
@@ -142,10 +154,24 @@ final class FiscalTaxRuleController extends Controller
             if (!str_starts_with($data['cfop'], '5')) $this->invalid('cfop', 'A NFC-e exige CFOP de saída interna.');
             if (empty($data['csosn'])) $this->invalid('csosn', 'Informe o CSOSN da regra NFC-e.');
             if (!empty($data['icms_cst'])) $this->invalid('icms_cst', 'O cadastro NFC-e atual utiliza CSOSN. CST ICMS é parametrizado no fluxo NF-e 55.');
-            foreach (['input_cfop','cest','origin','operation_type','fiscal_operation','purpose','recipient_profile','tax_regime','final_consumer','fiscal_benefit_code'] as $field) {
+            foreach (['input_cfop','cest','origin','operation_type','fiscal_operation','purpose','recipient_profile','tax_regime','final_consumer','fiscal_benefit_code','operation_nature_id','fiscal_tax_group_id','origin_municipality','destination_municipality','recipient_icms_indicator','catalog_version','catalog_status'] as $field) {
                 if (isset($data[$field]) && $data[$field] !== '') $this->invalid($field, 'Este critério adicional é exclusivo das regras NF-e modelo 55.');
             }
         } else {
+            $nature = !empty($data['operation_nature_id']) ? OperationNature::query()->find($data['operation_nature_id']) : null;
+            $group = !empty($data['fiscal_tax_group_id']) ? FiscalTaxGroup::query()->find($data['fiscal_tax_group_id']) : null;
+            if (empty($data['catalog_version']) && ($nature?->catalog_version || $group?->catalog_version)) {
+                $data['catalog_version'] = $nature?->catalog_version ?: $group?->catalog_version;
+            }
+            if (!empty($data['catalog_version']) && empty($data['catalog_status'])) $data['catalog_status'] = 'template';
+            if (!empty($data['catalog_version']) && in_array($data['cfop'], ['6101','6102'], true)
+                && !in_array($data['recipient_profile'] ?? null, ['contributor','exempt'], true)) $this->invalid('recipient_profile', 'Este CFOP do catálogo exige destinatário contribuinte; configure uma regra específica para não contribuinte.');
+            if (!empty($data['catalog_version']) && in_array($data['cfop'], ['6107','6108'], true)
+                && ($data['recipient_profile'] ?? null) !== 'non_contributor') $this->invalid('recipient_profile', 'Este CFOP do catálogo exige destinatário não contribuinte.');
+            if (isset($data['recipient_icms_indicator']) && !empty($data['recipient_profile'])) {
+                $expected = ['contributor'=>'1','exempt'=>'2','non_contributor'=>'9'][$data['recipient_profile']];
+                if ($data['recipient_icms_indicator'] !== $expected) $this->invalid('recipient_icms_indicator', 'O indicador de ICMS conflita com o perfil do destinatário.');
+            }
             if (in_array($data['crt'], ['1','4'], true)) {
                 if (empty($data['csosn']) || !empty($data['icms_cst'])) $this->invalid('csosn', 'Informe somente CSOSN para este CRT.');
             } elseif (empty($data['icms_cst']) || !empty($data['csosn'])) {
@@ -228,7 +254,7 @@ final class FiscalTaxRuleController extends Controller
         if ($data['document_type'] === 'nfce' && $parameters !== []) {
             $this->invalid('tax_parameters_json', 'Os parâmetros ampliados são exclusivos do motor NF-e 55. Mantenha a parametrização NFC-e em seus grupos fiscais existentes.');
         }
-        unset($data['tax_parameters_json']);
+        unset($data['tax_parameters_json'], $data['fiscal_review_confirmed']);
         $data['tax_parameters'] = $parameters ?: null;
         $data['csosn'] = $data['csosn'] ?? '';
         $data['ncm_prefix'] = trim((string) ($data['ncm_prefix'] ?? '')) ?: null;
