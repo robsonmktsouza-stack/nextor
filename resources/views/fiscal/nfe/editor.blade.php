@@ -16,6 +16,23 @@
 #nfeItemDialog .nfe-retained-details>.editor-grid{padding:13px}
 #nfeItemDialog .nfe-retained-heading:focus-visible{outline:2px solid #2b9271;outline-offset:-2px}
 
+/* Espaçamento e leitura dos campos tributários no modal de item. */
+#nfeItemDialog .nfe-item-section-content{padding:16px 14px 20px!important}
+#nfeItemDialog .nfe-item-section-content>.editor-panel{margin:0!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important}
+#nfeItemDialog .nfe-item-section-content .editor-grid{row-gap:17px!important;column-gap:13px!important}
+#nfeItemDialog .nfe-item-section-content .field{display:flex;flex-direction:column;gap:7px;min-width:0;margin:0!important}
+#nfeItemDialog .nfe-item-section-content .field>span{display:block;line-height:1.35!important;min-height:17px;overflow-wrap:break-word}
+#nfeItemDialog .nfe-item-section-content .field>input,
+#nfeItemDialog .nfe-item-section-content .field>select{min-width:0;width:100%;box-sizing:border-box}
+#nfeItemDialog .nfe-federal-section .editor-grid.cols-12>.field.col-2{grid-column:span 4!important}
+#nfeItemDialog .nfe-federal-section .editor-grid.cols-12>.field.col-3{grid-column:span 4!important}
+#nfeItemDialog .nfe-retained-details{margin-top:18px!important;margin-bottom:16px!important}
+#nfeItemDialog .nfe-retained-details>.editor-grid{padding:16px!important}
+@media(max-width:850px){
+ #nfeItemDialog .nfe-federal-section .editor-grid.cols-12>.field.col-2,
+ #nfeItemDialog .nfe-federal-section .editor-grid.cols-12>.field.col-3{grid-column:span 6!important}
+}
+
 /* Cabeçalhos das seções expansíveis do item da NF-e. */
 #nfeItemDialog details.nfe-item-section>summary.nfe-item-section-heading{display:flex!important;align-items:center!important;gap:12px!important;min-height:50px!important;padding:8px 13px!important;background:#edf3ef!important;border:1px solid #d8e4dd!important;border-left:3px solid #36846b!important;border-radius:3px!important;cursor:pointer!important;list-style:none!important}
 #nfeItemDialog details.nfe-item-section>summary.nfe-item-section-heading::-webkit-details-marker{display:none!important}
@@ -990,7 +1007,7 @@ $origins=[
       </div>
     </details>
 
-    <details class="editor-panel nfe-item-section" data-nfe-item-panel="item-federal">
+    <details class="editor-panel nfe-item-section nfe-federal-section" data-nfe-item-panel="item-federal">
       <summary class="nfe-item-section-heading">
         <span class="nfe-section-index">04</span>
         <span class="nfe-section-label"><strong>PIS, COFINS e IPI</strong><small>Classificação tributária federal</small></span>
