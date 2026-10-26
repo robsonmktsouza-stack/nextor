@@ -114,7 +114,7 @@ class FiscalController extends Controller
                 'prevMonth'=>$period->copy()->subMonth()->format('Y-m'),
                 'nextMonth'=>$period->copy()->addMonth()->format('Y-m'),
                 'dateFormat'=>AppSetting::dateFormat(),
-                'configuration'=>app(\\App\\Services\\Fiscal\\FiscalDocumentSettings::class)->configuration('nfe'),
+                'configuration'=>$this->configurationFor($tab),
             ]);
         }
 
