@@ -28,6 +28,31 @@
  </tbody></table></div></section>
  @endif
 </div>
+@if($licensedPdv)
+@php
+  $trendMax = max(1, (float) $salesTrend->max('total'));
+  $trendPoints = $salesTrend->values()->map(fn ($item,$index) => ($index * 100).','.round(100-((float)$item['total']/$trendMax)*85,2))->implode(' ');
+@endphp
+<section class="cms-card lumeron-chart-card" aria-label="Evolução das vendas dos últimos seis meses">
+  <div class="card-header"><div><h2>Evolução das vendas</h2><p>Vendas concluídas nos últimos seis meses</p></div><a class="minor-link" href="{{ route('sales.index') }}">Ver vendas →</a></div>
+  <div class="lumeron-chart-content">
+    <div class="lumeron-chart-plot">
+      <svg viewBox="0 0 500 120" preserveAspectRatio="none" role="img" aria-label="Linha de evolução mensal das vendas">
+        <line x1="0" y1="115" x2="500" y2="115" stroke="#dce6ed" stroke-width="1" vector-effect="non-scaling-stroke"/>
+        <polyline points="{{ $salesTrend->values()->map(fn ($item,$index) => ($index * 100).','.round(100-((float)$item['total']/$trendMax)*85,2))->implode(' ') }}" fill="none" stroke="#287fa9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+        @foreach($salesTrend->values() as $index=>$item)
+          <circle cx="{{ $index*100 }}" cy="{{ round(100-((float)$item['total']/$trendMax)*85,2) }}" r="4" fill="#287fa9" stroke="white" stroke-width="2" vector-effect="non-scaling-stroke"/>
+        @endforeach
+      </svg>
+    </div>
+    <div class="lumeron-chart-labels">
+      @foreach($salesTrend as $item)
+        <div><strong>{{ ucfirst($item['label']) }}</strong><span>R$ {{ number_format($item['total'],2,',','.') }}</span></div>
+      @endforeach
+    </div>
+  </div>
+</section>
+@endif
 <div class="quick-row"><span>ACESSOS RÁPIDOS</span>
 @if($licensedProducts)
 <a href="{{ route('products.index') }}">Produtos @include('partials.icon',['name'=>'chevron','size'=>14])</a>
@@ -44,6 +69,18 @@
 </div>
 @push('styles')
 <style>
+.lumeron-dashboard .lumeron-chart-card{margin-top:16px;border:1px solid #d5dfe8;border-radius:4px;background:#fff;overflow:hidden}
+.lumeron-dashboard .lumeron-chart-card .card-header{display:flex;justify-content:space-between;align-items:center;padding:13px 16px;border-bottom:1px solid #e3eaf0}
+.lumeron-dashboard .lumeron-chart-card .card-header h2{margin:0;font-size:14px}
+.lumeron-dashboard .lumeron-chart-card .card-header p{margin:3px 0 0;font-size:11px;color:#708398}
+.lumeron-dashboard .lumeron-chart-content{padding:18px 20px 15px}
+.lumeron-dashboard .lumeron-chart-plot{height:155px;padding:8px 8px 0}
+.lumeron-dashboard .lumeron-chart-plot svg{display:block;width:100%;height:100%;overflow:visible}
+.lumeron-dashboard .lumeron-chart-labels{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin-top:12px;text-align:center}
+.lumeron-dashboard .lumeron-chart-labels div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.lumeron-dashboard .lumeron-chart-labels strong{font-size:11px;color:#516d83}
+.lumeron-dashboard .lumeron-chart-labels span{font-size:11px;color:#203b50;white-space:nowrap}
+@media(max-width:700px){.lumeron-dashboard .lumeron-chart-content{overflow-x:auto}.lumeron-dashboard .lumeron-chart-plot,.lumeron-dashboard .lumeron-chart-labels{min-width:580px}}
 /* Dashboard: acabamento compacto e consistente, restrito à visão geral. */
 .lumeron-dashboard{--dash-border:#d5dfe8;--dash-text:#17334b;--dash-muted:#708398}
 .lumeron-dashboard .stats-grid{gap:14px;margin-bottom:18px;align-items:stretch}
