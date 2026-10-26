@@ -88,3 +88,13 @@ nfe:verify-flow de homologação usando a fila/ACBr existentes. A configuração
 local informada (Windows/Laragon,PHP8.3,ACBr1.5.0.490,BA/CRT1,A1) não é acessível
 na nuvem; [procedimento local](../fiscal/nfe55-laragon-real-validation.md).
 Não houve acesso ao Windows, transmissão SEFAZ real ou deploy nesta sessão.
+
+## Catálogo fiscal padrão — 26/10/2026
+
+A branch `feature/nfe55-motor-fiscal-completo` acrescenta referências versionadas,
+modelos inativos e determinação revisada integrada ao emissor existente. Instalação
+explícita; nada ativado em produção. NCM completo do download oficial consultado;
+CFOP e CEST parciais, cBenef BA ausente. Veja
+[catálogo fiscal padrão](../fiscal/catalogo-fiscal-padrao.md) para comandos,
+cobertura, resultados de testes e limites. O proprietário relatou NF-e autorizada
+em homologação no Windows; esta alteração não foi transmitida pela sessão Linux.

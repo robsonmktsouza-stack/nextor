@@ -1,3 +1,35 @@
+## Catálogo fiscal padrão — 26/10/2026
+
+Branch `feature/nfe55-motor-fiscal-completo`; base remota atualizada por fast-forward
+até `1117bc6`, preservando as correções 487/321, CFOP 6108 e DFeReferenciado por item.
+Não houve merge em main/develop nem deploy.
+
+Catálogo `2026.10.26`: 11.063 referências com proveniência oficial e cobertura
+explícita; NCM 10.516 completo do download Siscomex, CFOP 64 documental/parcial,
+CEST 207 parcial de SP, domínios CST/CSOSN e RTC 18/173. Não há benefício BA,
+MVA, pauta ou alíquota presumida. 16 naturezas e 13 grupos novos, inativos;
+instalação/atualização preserva legados, personalizados e revisados.
+
+Migrações 2026_10_26_000001/2/3: releases e códigos, mutex por banco,
+metadados/histórico de natureza/grupo e contexto adicional de regra. Reutilizados
+models, vínculos de produto e emissor existentes. Administração Fiscal →
+Configurações fiscais, CLI fiscal:catalog, seeder explícito e contrato JSON.
+Motor gerenciado exige revisão/vigência e prova dos códigos; contexto considera
+natureza, grupo, município, indicador ICMS e critérios existentes. Prévia e
+rascunhos integrados; documento incompleto fica salvo e bloqueado para emitir.
+Não reinterpreta documentos autorizados nem força migração fiscal dos legados.
+
+Commits de implementação: `721fe1b`, `38c9c9e`, `ea542a8`, publicados na branch.
+Validação final: **989 testes/7060 assertions, zero falhas/erros, dois ignorados**
+por falta de Chromium (PDF); PHP 8.5.12/SQLite. Fixture antiga de IPI devolvido
+atualizada ao DFeReferenciado por item já exigido pela branch; nenhuma
+validação removida. CFOP 6107 integrado para produção própria/não contribuinte.
+Resultado final e evidências: `docs/fiscal/evidence/fiscal-catalog-*`.
+Instruções, arquivos, limites e cobertura: `docs/fiscal/catalogo-fiscal-padrao.md`;
+fontes oficiais/hashes: `docs/fiscal/catalog-sources.md`.
+Proprietário relatou autorização real em homologação anterior. Esta entrega não
+realizou nova transmissão ACBr/SEFAZ: Windows/Laragon/A1 não acessíveis da nuvem.
+
 ## Contador integrado e rejeição 486 — 25/10/2026
 
 Código integrado publicado em `277c6b4`: cadastro Contabilidade ligado ao INI/XML

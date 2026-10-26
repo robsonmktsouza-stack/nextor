@@ -2,6 +2,8 @@
 
 Entrega na branch `feature/nfe55-motor-fiscal-completo`. Código para revisão, sem deploy ou alterações nas configurações de produção. A autorização em homologação relatada pelo proprietário pertence ao fluxo anterior; não foi repetida pela sessão Linux para esta mudança.
 
+Inventário de arquivos e commits: [catalog-changes-2026-10-26.md](catalog-changes-2026-10-26.md).
+
 ## Estrutura e integração
 
 O catálogo reutiliza `OperationNature`, `FiscalTaxGroup`, `FiscalTaxRule`, o vínculo `products.fiscal_tax_group_id` e o motor NF-e existente. Não cria um segundo emissor, não altera documentos autorizados e não troca a ACBrLibNFe. Valores decimais importados são strings; os cálculos continuam nos serviços existentes de precisão decimal.
@@ -27,7 +29,7 @@ Versão `2026.10.26`, com **11.063 referências**:
 | CST PIS/COFINS / IPI | 33 / 14 | Classificações; não atribuem regime, alíquota ou direito a crédito |
 | CST IBS/CBS / cClassTrib | 18 / 173 | Snapshot SVRS; indicadores e condições oficiais preservados |
 
-Há **16 modelos de natureza** (vendas de terceiros e produção própria por perfil do destinatário, consumidor final, compras, devoluções, remessa/retorno de conserto e bonificação) e **13 modelos de grupo** (Simples, ST, monofásico, tratamento específico, imunidade, não tributação, isenção, devolução, interestadual, normal, sublimite e reforma). Todos começam inativos e sem alíquotas padrão. Os modelos legados existentes não são alterados.
+Há **16 modelos de natureza** (vendas de terceiros e produção própria por perfil do destinatário, consumidor final, compras, devoluções, remessa/retorno de conserto e bonificação) e **13 modelos de grupo** (Simples, ST, monofásico, tratamento específico, imunidade, não tributação, isenção, devolução, interestadual, normal, sublimite e reforma). Todos começam inativos e sem alíquotas padrão. Os modelos legados existentes não são alterados. O CFOP 6107 está conectado à política de venda interestadual de produção própria a não contribuinte, com testes de INI/IPI e bloqueio de contribuinte ou prefixo interno indevido.
 
 Fontes, hashes dos downloads, condições e impedimentos de pesquisa: [catalog-sources.md](catalog-sources.md). Contrato do pacote: [schema-v1.json](../../resources/fiscal/catalog/schema-v1.json).
 
@@ -66,7 +68,7 @@ A interface também exige o hash. Hash e URL oficial verificam integridade e ide
 
 ## Verificação e limites
 
-Resultados reais estão em `docs/fiscal/evidence/fiscal-catalog-*`. Os testes executados usam PHP 8.5.12 e SQLite neste ambiente, não MySQL/PHP 8.3 do Laragon. Validar também a atualização em MySQL e a interface no navegador local antes de publicar um release.
+Resultado final: **989 testes e 7.060 assertions, zero falhas/erros, dois testes de PDF ignorados por falta de Chromium**. Inclui regressão NF-e/NFC-e, migrações, seeds, atualização, permissões e determinação. Resultado, logs e hashes estão em `docs/fiscal/evidence/fiscal-catalog-*`. Os testes executados usam PHP 8.5.12 e SQLite neste ambiente, não MySQL/PHP 8.3 do Laragon. Validar também a atualização em MySQL e a interface no navegador local antes de publicar um release.
 
 ```bash
 php artisan test --filter='FiscalCatalog|FiscalProductClassification|Nfe55CatalogForm'
