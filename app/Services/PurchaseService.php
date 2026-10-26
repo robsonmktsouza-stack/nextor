@@ -8,13 +8,14 @@ use App\Models\IncomingNfe;
 use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\StockMovement;
+use App\Services\Fiscal\IncomingNfePurchasePrefill;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 /** Transições de compras transacionais, com totais calculados no servidor. */
 class PurchaseService
 {
-    public function __construct(private readonly InventoryService $inventory) {}
+    public function __construct(private readonly InventoryService $inventory,private readonly IncomingNfePurchasePrefill $invoicePrefill) {}
 
     public function saveDraft(array $data,int $userId,?Purchase $purchase=null): Purchase
     {
@@ -53,6 +54,20 @@ class PurchaseService
                 if(Purchase::query()->where('incoming_nfe_id',$invoiceId)
                     ->when($purchase,fn($q)=>$q->whereKeyNot($purchase->id))->exists()) {
                     throw ValidationException::withMessages(['incoming_nfe_id'=>'Essa NF-e já está vinculada a outra compra.']);
+                }
+            }
+            $unlinked=array_filter($items,fn($item)=>$item['product']===null);
+            if($unlinked){
+                if(!$invoiceId){
+                    throw ValidationException::withMessages(['items'=>'Itens sem vínculo só podem ser salvos quando importados de uma NF-e.']);
+                }
+                $canonical=$this->invoicePrefill->fromInvoice($invoice);
+                $sourceItems=collect($canonical['items'])->keyBy('source_number');
+                foreach($unlinked as $item){
+                    $source=$sourceItems->get($item['source_number']);
+                    if(!$source || $source['source_code']!==$item['source_code'] || $source['source_description']!==$item['source_description']){
+                        throw ValidationException::withMessages(['items'=>'Um item sem vínculo não corresponde ao XML da NF-e.']);
+                    }
                 }
             }
             $attributes=[
