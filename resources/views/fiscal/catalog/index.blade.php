@@ -10,7 +10,7 @@
 @push('styles')
 <style>
 .catalog-filterbar{display:grid;grid-template-columns:minmax(135px,1.1fr) minmax(200px,2fr) minmax(145px,1fr) 74px minmax(135px,1fr) minmax(135px,1fr) auto;gap:10px;align-items:end;padding:12px;border-bottom:1px solid var(--border,#d8e0e7);background:var(--panel,#fff)}
-.catalog-filterbar .field{min-width:0;margin:0}.catalog-filterbar .field input,.catalog-filterbar .field select{width:100%;min-width:0}.catalog-filterbar .field>span{display:block;white-space:nowrap}.catalog-filter-submit{height:36px;white-space:nowrap}.catalog-filterbar+.table-scroll{margin-top:0}.catalog-filterbar~.erp-help-details{margin:12px}
+.catalog-filterbar .field{min-width:0;margin:0}.catalog-filterbar .field input,.catalog-filterbar .field select{width:100%;min-width:0}.catalog-filterbar .field>span{display:block;white-space:nowrap}.catalog-filter-submit{height:36px;white-space:nowrap}.catalog-filterbar+.table-scroll{margin-top:0}.catalog-filterbar~.erp-help-details{margin:12px}.catalog-row-details{max-width:260px}.catalog-row-details summary{cursor:pointer;white-space:nowrap}.catalog-row-detail-body{max-height:180px;overflow:auto;padding:7px 0;line-height:1.45;overflow-wrap:anywhere}.catalog-row-detail-body p{margin:0 0 7px}.catalog-row-detail-body a{display:inline-block;margin-top:4px}
 @media(max-width:1250px){.catalog-filterbar{grid-template-columns:repeat(3,minmax(0,1fr))}.catalog-filter-search{grid-column:span 2}}
 @media(max-width:700px){.catalog-filterbar{grid-template-columns:repeat(2,minmax(0,1fr))}.catalog-filter-search{grid-column:span 2}}
 </style>
@@ -44,13 +44,23 @@
         <td>{{ $entry->uf ?: 'Todas' }}</td>
         <td>{{ $entry->valid_until?->format('d/m/Y') ?? 'Sem prazo definido' }}</td>
         <td><span class="status status-muted">{{ ['reference'=>'Disponível','template'=>'Padrão','revoked'=>'Revogada'][$entry->status] ?? $entry->status }}</span></td>
-        <td><details><summary class="table-link">Ver detalhes</summary>
-          <p>{{ data_get($entry->source,'reference') }}</p>
-          @if(data_get($entry->source,'url'))<a class="table-link" href="{{ data_get($entry->source,'url') }}" target="_blank" rel="noopener noreferrer">Fonte oficial</a>@endif
-          <small class="table-subtitle">Versão {{ data_get($entry->source,'version','não declarada') }} · Consulta {{ data_get($entry->source,'consulted_at',$release?->consulted_at?->format('Y-m-d')) }}</small>
-          @foreach(($entry->conditions ?? []) as $condition)<p>{{ $condition }}</p>@endforeach
-          @if($entry->parameters)<pre style="white-space:pre-wrap">{{ json_encode($entry->parameters,JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) }}</pre>@endif
-        </details></td>
+        <td>
+          @if(count($entry->conditions ?? []) || data_get($entry->source,'url'))
+          <details class="catalog-row-details">
+            <summary class="table-link">Ver detalhes</summary>
+            <div class="catalog-row-detail-body">
+              @foreach(($entry->conditions ?? []) as $condition)
+                @if(is_string($condition) && trim($condition)!=='')
+                  <p>{{ $condition }}</p>
+                @endif
+              @endforeach
+              @if(data_get($entry->source,'url'))
+                <a class="table-link" href="{{ data_get($entry->source,'url') }}" target="_blank" rel="noopener noreferrer">Consultar legislação</a>
+              @endif
+            </div>
+          </details>
+          @else <span class="table-subtitle">—</span> @endif
+        </td>
       </tr>
     @empty<tr><td colspan="6" class="empty-cell">Nenhum registro encontrado para esta tabela e versão.</td></tr>@endforelse</tbody>
   </table></div>
@@ -91,9 +101,9 @@
       <td><a class="table-link" href="{{ route('fiscal.catalog.index',['release'=>$item->id]) }}">{{ $item->version }}</a>@if($current?->id===$item->id)<small class="table-subtitle">Atual</small>@endif</td>
       <td>{{ $item->consulted_at?->format('d/m/Y') }}</td><td>{{ $item->installed_at?->format('d/m/Y H:i') }}</td><td>{{ $item->entry_count }}</td>
       <td><details><summary class="table-link">Ver detalhes</summary>
-        <small class="table-subtitle">SHA-256 do conteúdo canônico {{ $item->sha256 }}</small>
+        <small class="table-subtitle">Identificação da versão: {{ $item->version }}</small>
         @foreach(($item->sources ?? []) as $source)<p>{{ $source['reference'] ?? $source['id'] ?? '' }}<br><a class="table-link" href="{{ $source['url'] ?? '' }}" target="_blank" rel="noopener noreferrer">{{ $source['url'] ?? '' }}</a></p>@endforeach
-        <pre style="white-space:pre-wrap">{{ json_encode($item->coverage,JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) }}</pre>
+        
       </details></td>
     </tr>@empty<tr><td colspan="5" class="empty-cell">Nenhuma versão instalada.</td></tr>@endforelse</tbody>
   </table></div>
