@@ -238,6 +238,94 @@
   .app-root .editor-panel{border-radius:11px;box-shadow:none}
   .app-root .field{gap:6px}
   .app-root .field>span{font-size:12px;color:#4d6375}
+  /* Sale creation: vertical, task-focused instead of a 980px desktop table. */
+  .lm-sale-jump{
+    display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;
+    padding:0 0 4px;max-width:100%;white-space:nowrap;
+  }
+  .lm-sale-jump a{
+    flex:1 1 0;min-width:0;min-height:42px;display:flex;align-items:center;justify-content:center;
+    gap:7px;padding:7px 6px;background:#fff;border:1px solid #dce7ef;border-radius:10px;
+    font-size:12px;font-weight:750;color:#47677f;
+  }
+  .lm-sale-jump a span{
+    flex:0 0 21px;width:21px;height:21px;border-radius:50%;
+    display:grid;place-items:center;background:#e9f4fb;color:#176da9;font-size:11px;
+  }
+  .sale-editor{gap:14px}
+  .sale-editor>:is(#lm-sale-customer,#lm-sale-cart,#saleFinanceSection,#lm-sale-checkout){
+    scroll-margin-top:17px;min-width:0;max-width:100%;
+  }
+  .sale-editor #lm-sale-customer,.sale-editor #lm-sale-cart,.sale-editor #saleFinanceSection{
+    border:1px solid #dfe7ee;border-radius:12px;background:#fff;
+    padding:14px;box-shadow:none;
+  }
+  .sale-editor .sale-section-title{align-items:center;gap:10px}
+  .sale-editor .sale-section-title h2{font-size:15px;font-weight:800}
+  .sale-editor #addSaleItem,.sale-editor #addSalePayment{min-height:42px;padding:0 12px;font-size:12px}
+  .sale-editor .sale-cart-table-wrap,.sale-editor .sale-finance-table-wrap{
+    width:100%;overflow:visible;border:0;background:transparent;
+  }
+  .sale-editor .sale-cart-table,.sale-editor .sale-finance-table{
+    display:block;min-width:0!important;width:100%;table-layout:auto;
+  }
+  .sale-editor .sale-cart-table thead,.sale-editor .sale-finance-table thead{
+    display:none!important;
+  }
+  .sale-editor .sale-cart-table tbody,.sale-editor .sale-finance-table tbody{
+    display:block;min-width:0;width:100%;
+  }
+  .sale-editor .sale-cart-table tbody>tr,.sale-editor .sale-finance-table tbody>tr{
+    display:block;min-width:0;width:100%;background:#f9fbfd!important;
+    border:1px solid #dfe8ef;border-radius:11px;margin-bottom:10px;
+    padding:6px 10px;overflow:visible;box-shadow:none;
+  }
+  .sale-editor .sale-cart-table tbody>tr>td,.sale-editor .sale-finance-table tbody>tr>td{
+    display:block;box-sizing:border-box;width:100%!important;min-width:0;
+    height:auto;padding:9px 0!important;border:0!important;
+  }
+  .sale-editor .sale-cart-table tbody>tr>td+td,
+  .sale-editor .sale-finance-table tbody>tr>td+td{
+    border-top:1px solid #e7edf2!important;
+  }
+  .sale-editor .sale-cart-table tbody>tr>td:nth-child(2):before{content:"Preço";display:block}
+  .sale-editor .sale-cart-table tbody>tr>td:nth-child(3):before{content:"Quantidade";display:block}
+  .sale-editor .sale-cart-table tbody>tr>td:nth-child(4):before{content:"Desconto";display:block}
+  .sale-editor .sale-cart-table tbody>tr>td:nth-child(5):before{content:"Total";display:block}
+  .sale-editor .sale-finance-table tbody>tr>td:nth-child(2):before{content:"Valor";display:block}
+  .sale-editor .sale-finance-table tbody>tr>td:nth-child(3):before{content:"Data de pagamento";display:block}
+  .sale-editor .sale-finance-table tbody>tr>td:nth-child(4):before{content:"Forma de pagamento";display:block}
+  .sale-editor .sale-finance-table tbody>tr>td:nth-child(5):before{content:"A receber";display:block}
+  .sale-editor .sale-cart-table tbody>tr>td:before,
+  .sale-editor .sale-finance-table tbody>tr>td:before{
+    color:#758a9c;font-size:11px;font-weight:700;margin-bottom:5px;
+  }
+  .sale-editor .sale-cart-table tbody input,.sale-editor .sale-cart-table tbody select,
+  .sale-editor .sale-finance-table tbody input,.sale-editor .sale-finance-table tbody select{
+    max-width:100%;min-width:0;font-size:16px;
+  }
+  .sale-editor .sale-item-picker{grid-template-columns:minmax(0,1fr)!important;gap:7px}
+  .sale-editor .sale-item-picker .ui-select-trigger,
+  .sale-editor .sale-item-search{border:1px solid #ccd8e3;border-radius:7px}
+  .sale-editor .sale-cart-table tfoot{display:none!important}
+  .sale-editor .sale-finance-table tfoot,.sale-editor .sale-finance-table tfoot tr{
+    display:block;min-width:0;width:100%;background:none;
+  }
+  .sale-editor .sale-finance-table tfoot td{display:block;width:100%;padding:8px!important;border:0;background:none}
+  .sale-editor .payment-add-cell{width:100%!important}
+  .sale-editor .sale-savebar{
+    display:flex;flex-wrap:wrap;gap:8px!important;align-items:center;
+    position:sticky!important;bottom:calc(69px + env(safe-area-inset-bottom,0px))!important;
+    left:auto!important;right:auto!important;width:100%;max-width:100%;
+    margin:0;padding:10px;background:#fff;border:1px solid #dce7ef;border-radius:12px;
+    box-shadow:0 -2px 13px rgba(20,49,74,.06);z-index:15;
+  }
+  .sale-editor .sale-save-summary{display:flex;flex:1 1 100%;gap:8px;align-items:baseline}
+  .sale-editor .sale-save-summary strong{font-size:20px}
+  .sale-editor .sale-savebar .btn{min-height:44px;min-width:0;padding:9px 12px;font-size:12px}
+  .sale-editor .sale-savebar #submitSale{flex:1 1 45%}
+  .sale-editor .sale-savebar #saveQuotePdf:not([hidden]){flex:1 1 45%}
+  .sale-editor .sale-savebar>a{flex:0 0 auto}
 }
 @media screen and (max-width:370px){
   .lm-action{min-height:112px;padding:12px}
