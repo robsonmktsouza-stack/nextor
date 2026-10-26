@@ -33,7 +33,7 @@
 <div class="grid-filter-panel" id="customer-filters" @if(!$term) hidden @endif>
 <form class="toolbar-filters" method="get" action="{{ route('customers.index') }}" data-live-search data-live-target="customers-live-results"><div class="table-search-group"><input type="search" autocomplete="off" name="search" value="{{ $term }}" placeholder="Buscar cliente ou CPF/CNPJ..." aria-label="Buscar clientes"><button type="submit" class="table-search-submit" data-tooltip="Pesquisar" aria-label="Pesquisar">@include('partials.icon',['name'=>'search','size'=>17])</button></div>@if($term)<a class="btn btn-light" href="{{ route('customers.index') }}">Limpar</a>@endif</form>
 </div>
-<div id="customers-live-results" data-live-search-results><div class="table-scroll"><table class="cms-table"><thead><tr><th class="select-cell"><input type="checkbox" data-check-all aria-label="Selecionar todos"></th><th>Cód.</th><th>Nome</th><th>Documento</th><th>Fone</th><th>Palavras-chave</th><th>Cidade/UF</th><th class="action-cell">Ações</th></tr></thead><tbody>
+<div id="customers-live-results" data-live-search-results><div class="table-scroll"><table class="cms-table" data-mobile-cards><thead><tr><th class="select-cell"><input type="checkbox" data-check-all aria-label="Selecionar todos"></th><th>Cód.</th><th>Nome</th><th>Documento</th><th>Fone</th><th>Palavras-chave</th><th>Cidade/UF</th><th class="action-cell">Ações</th></tr></thead><tbody>
 @forelse($customers as $customer)<tr>
 <td class="select-cell"><input type="checkbox" data-row-select value="{{ $customer->id }}" aria-label="Selecionar {{ $customer->name }}"></td>
 <td class="nowrap">{{ $customer->id }}</td>
