@@ -1,4 +1,4 @@
-<details class="editor-panel">
+<details class="editor-panel {{ ($ruleMode ?? false) ? '' : 'nfe-rtc-extra-panel' }}">
   <summary>Diferimento e tributação regular IBS/CBS</summary>
   <div class="editor-grid cols-12 settings-grid">
     <label class="field col-3"><span>IBS estadual diferido %</span>
@@ -36,7 +36,7 @@
     </label>
   </div>
 </details>
-<details class="editor-panel">
+<details class="editor-panel {{ ($ruleMode ?? false) ? '' : 'nfe-rtc-extra-panel' }}">
   <summary>Imposto Seletivo</summary>
   <div class="editor-grid cols-12 settings-grid">
     <label class="field col-3"><span>CST IS</span>
