@@ -76,7 +76,7 @@ final class FiscalCatalogController extends Controller
         $request->validate(['install_templates' => ['nullable', 'boolean']]);
         $release = $catalog->installBundled();
         if ($request->boolean('install_templates')) $templates->install($release->version);
-        return redirect()->route('fiscal.catalog.index')->with('success', 'Catálogo '.$release->version.' instalado.');
+        return redirect()->route('fiscal.catalog.index')->with('success', 'Tabelas fiscais atualizadas.');
     }
 
     public function import(Request $request, FiscalCatalogService $catalog)
@@ -87,19 +87,19 @@ final class FiscalCatalogController extends Controller
         ]);
         $bytes = $request->file('catalog_file')->getContent();
         if (!hash_equals(strtolower($request->string('sha256')->toString()), hash('sha256', $bytes))) {
-            throw ValidationException::withMessages(['sha256' => 'O SHA-256 não corresponde ao arquivo aprovado.']);
+            throw ValidationException::withMessages(['sha256' => 'Não foi possível validar o arquivo selecionado.']);
         }
         try {
             $manifest = json_decode($bytes, true, 64, JSON_THROW_ON_ERROR);
         } catch (\JsonException) {
-            throw ValidationException::withMessages(['catalog_file' => 'O arquivo deve conter um catálogo JSON válido.']);
+            throw ValidationException::withMessages(['catalog_file' => 'O arquivo selecionado não é válido.']);
         }
         if (!is_array($manifest) || array_is_list($manifest)) {
-            throw ValidationException::withMessages(['catalog_file' => 'O catálogo deve conter um objeto JSON versionado.']);
+            throw ValidationException::withMessages(['catalog_file' => 'O arquivo selecionado não possui o formato esperado.']);
         }
         $release = $catalog->import($manifest);
 
         return redirect()->route('fiscal.catalog.index', ['release' => $release->id, 'tab' => 'history'])
-            ->with('success', 'Catálogo '.$release->version.' importado.');
+            ->with('success', 'Tabelas fiscais atualizadas.');
     }
 }
