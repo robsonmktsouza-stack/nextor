@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<title>Orçamento {{ str_pad((string)$quote->id,5,'0',STR_PAD_LEFT) }}</title>
+<title>{{ $quote->operation_type === 'sale' ? 'Venda' : 'Orçamento' }} {{ str_pad((string)$quote->id,5,'0',STR_PAD_LEFT) }}</title>
 <style>
 /* Reprodução do modelo A4 aprovado no Excel do proprietário (20/10/2026).
    Não importar CSS do painel: este documento possui identidade de impressão. */
@@ -126,6 +126,8 @@ $expired=$quote->quote_expires_at && $quote->quote_expires_at->copy()->startOfDa
 $state=match(true) {
     $quote->status==='cancelled'=>'Cancelado',
     $quote->status==='converted'=>'Convertido em venda',
+    $quote->operation_type==='sale' && $quote->status==='completed'=>'Concluída',
+    $quote->operation_type==='sale'=>'Venda',
     $expired=>'Vencido',
     default=>'Aguardando aprovação',
 };
@@ -160,16 +162,16 @@ $serviceSubtotal=$quote->items->where('item_type','service')
     </div>
   </td>
   <td class="document">
-    <div class="document-kind">ORÇAMENTO COMERCIAL</div>
+    <div class="document-kind">{{ $quote->operation_type === 'sale' ? 'COMPROVANTE DE VENDA' : 'ORÇAMENTO COMERCIAL' }}</div>
     <div class="document-number">Nº {{ $number }}</div>
-    <div class="document-dates">Emissão {{ $createdDate }} · Válido até {{ $validDate ?: 'a combinar' }}</div>
+    <div class="document-dates">Emissão {{ $createdDate }}@if($quote->operation_type==='quote') · Válido até {{ $validDate ?: 'a combinar' }}@endif</div>
   </td>
 </tr>
 </table>
 </header>
 
 <div class="accent-band"></div>
-<div class="proposal-line">PROPOSTA DE FORNECIMENTO | PRODUTOS E SERVIÇOS</div>
+<div class="proposal-line">{{ $quote->operation_type === 'sale' ? 'COMPROVANTE COMERCIAL NÃO FISCAL | PRODUTOS E SERVIÇOS' : 'PROPOSTA DE FORNECIMENTO | PRODUTOS E SERVIÇOS' }}</div>
 
 <section class="customer-section no-break">
   <h2 class="section-title">Dados do cliente</h2>
@@ -185,8 +187,8 @@ $serviceSubtotal=$quote->items->where('item_type','service')
     <tr>
       <td colspan="2"><span class="label">Endereço de entrega / atendimento</span>
           <span class="value">{{ $customerAddressFull ?: '—' }}</span></td>
-      <td><span class="label">Validade da proposta</span>
-          <span class="value">{{ $validDate ?: 'A combinar' }}@if($validDate && $validDays!==null && $validDays>=0) ({{ $validDays }} {{ $validDays===1 ? 'dia' : 'dias' }})@endif</span></td>
+      <td><span class="label">{{ $quote->operation_type === 'sale' ? 'Data da venda' : 'Validade da proposta' }}</span>
+          <span class="value">{{ $quote->operation_type === 'sale' ? $createdDate : ($validDate ?: 'A combinar') }}@if($quote->operation_type==='quote' && $validDate && $validDays!==null && $validDays>=0) ({{ $validDays }} {{ $validDays===1 ? 'dia' : 'dias' }})@endif</span></td>
     </tr>
     <tr>
       <td><span class="label">Responsável comercial</span><span class="value">{{ $quote->user?->name ?? '—' }}</span></td>
@@ -241,8 +243,8 @@ $serviceSubtotal=$quote->items->where('item_type','service')
     <div class="conditions">
       <p>Pagamento: {{ $paymentTerms }}.</p>
       <p>Prazo de entrega / execução: a combinar.</p>
-      <p>Disponibilidade sujeita à confirmação.</p>
-      @if($validDate)<p>Preços e condições válidos até {{ $validDate }}.</p>@endif
+      @if($quote->operation_type==='quote')<p>Disponibilidade sujeita à confirmação.</p>@endif
+      @if($quote->operation_type==='quote' && $validDate)<p>Preços e condições válidos até {{ $validDate }}.</p>@endif
     </div>
   </div>
   <div class="tail-right">
@@ -265,7 +267,7 @@ $serviceSubtotal=$quote->items->where('item_type','service')
 
 <section class="signature-row">
   <div class="signature"><div class="signature-line"></div>
-    <div class="signature-label">Responsável pela proposta</div></div>
+    <div class="signature-label">Responsável pela {{ $quote->operation_type === 'sale' ? 'venda' : 'proposta' }}</div></div>
   <div class="signature"><div class="signature-line"></div>
     <div class="signature-label">Aceite do cliente</div></div>
 </section>
