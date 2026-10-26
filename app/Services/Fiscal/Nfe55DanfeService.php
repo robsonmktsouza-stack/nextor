@@ -52,6 +52,9 @@ class Nfe55DanfeService
         if($v('n:emit/n:CNPJ',$info)!==$cnpj)throw new RuntimeException('Emitente do XML não coincide com a empresa.');
         $pdf=$this->render($xml,CompanySetting::current());
         if(!str_starts_with($pdf,'%PDF-')||strlen($pdf)>12582912)throw new RuntimeException('PDF fiscal inválido.');
+        if($cancelled){
+            $pdf=app(Nfe55CancelledDanfeStampService::class)->stamp($pdf,$draft);
+        }
         return $pdf;
     }
 
