@@ -234,10 +234,36 @@ document.addEventListener('DOMContentLoaded',()=>{
     node.addEventListener('change',()=>requestAnimationFrame(calculate));
   });
   const payable=form.querySelector('[data-purchase-payable]');
-  payable?.addEventListener('change',()=>{
-    const label=payable.closest('.switch-field')?.querySelector('[data-switch-label]');
-    if(label)label.textContent=payable.checked?'Sim':'Não';
-  });
+  if(payable){
+    // O editor tem rolagem interna. Alterar o switch não deve deslocar o
+    // formulário para fora da área central, inclusive com scroll anchoring.
+    const scroller=form.closest('.main-content');
+    let previousPosition=null;
+    const rememberPosition=()=>{
+      previousPosition={
+        pageX:window.scrollX,pageY:window.scrollY,
+        mainX:scroller?.scrollLeft??0,mainY:scroller?.scrollTop??0
+      };
+    };
+    const restorePosition=()=>{
+      if(!previousPosition)return;
+      const position=previousPosition;
+      if(scroller)scroller.scrollTo(position.mainX,position.mainY);
+      window.scrollTo(position.pageX,position.pageY);
+    };
+    payable.addEventListener('pointerdown',rememberPosition,{passive:true});
+    payable.addEventListener('keydown',event=>{
+      if(event.key===' '||event.key==='Enter')rememberPosition();
+    });
+    payable.addEventListener('change',()=>{
+      const label=payable.closest('.switch-field')?.querySelector('[data-switch-label]');
+      if(label)label.textContent=payable.checked?'Sim':'Não';
+      if(!previousPosition)rememberPosition();
+      restorePosition();
+      requestAnimationFrame(restorePosition);
+      setTimeout(()=>{restorePosition();previousPosition=null;},60);
+    });
+  }
 
   // Delegação especial para inputs monetários aprimorados pelo erp.js.
   // Os campos ficam nomeados no hidden; o input visível continua atualizando o resumo.
