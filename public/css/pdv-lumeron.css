@@ -647,16 +647,15 @@
 /* Lista de vendas do PDV: usa o diálogo do caixa, sem navegar ao administrativo. */
 .lumeron-pdv-page .pdv-sales-modal{display:flex;flex-direction:column;width:min(1180px,calc(100vw - 30px));max-width:1180px;height:min(780px,calc(100dvh - 36px));max-height:calc(100dvh - 36px);overflow:hidden}
 .lumeron-pdv-page .pdv-sales-modal:not([open]){display:none!important}
-.lumeron-pdv-page .pdv-sales-modal>.pdv-modal-head{flex-shrink:0;min-height:66px}
-.lumeron-pdv-page .pdv-sales-modal>.pdv-modal-head h2{font-size:17px}
+.lumeron-pdv-page .pdv-sales-modal>.pdv-modal-head{flex-shrink:0}
 .lumeron-pdv-page .pdv-sales-filters{display:grid;grid-template-columns:minmax(150px,2fr) repeat(5,minmax(100px,1fr)) auto;gap:8px;align-items:end;padding:12px;border-bottom:1px solid #dde5ec;background:#fff;flex-shrink:0}
 .lumeron-pdv-page .pdv-sales-filters label{min-width:0;display:grid;gap:5px}
 .lumeron-pdv-page .pdv-sales-filters label>span{font-size:10.5px;color:#60778b;font-weight:650}
 .lumeron-pdv-page .pdv-sales-filters input,.lumeron-pdv-page .pdv-sales-filters select,.lumeron-pdv-page .pdv-sales-filters .ui-select-trigger{width:100%;min-width:0;height:var(--ui-control-height);border:1px solid var(--ui-border);border-radius:var(--ui-control-radius);padding:0 8px;background:#fff;color:#30485e;font-size:var(--ui-control-font-size);font-family:var(--lumeron-font)}
 .lumeron-pdv-page .pdv-sales-filters input:focus,.lumeron-pdv-page .pdv-sales-filters select:focus{outline:2px solid #2d8bd22a;border-color:#3986bc}
 .lumeron-pdv-page .pdv-sales-filter-actions{display:flex;flex-direction:column;gap:4px}
-.lumeron-pdv-page .pdv-sales-filter-actions button{height:28px;min-width:72px;border:1px solid #cbd8e2;border-radius:var(--ui-control-radius);background:#f7f9fb;color:#506b7d;font:600 10px Arial,sans-serif;cursor:pointer}
-.lumeron-pdv-page .pdv-sales-filter-actions button:first-child{color:#fff;background:#2b7cb5;border-color:#2673a5}
+.lumeron-pdv-page .pdv-sales-filter-actions button{height:var(--ui-action-height);min-height:var(--ui-action-height);min-width:72px;border:1px solid var(--ui-border);border-radius:var(--ui-control-radius);background:var(--ui-secondary-bg);color:var(--ui-text);font:650 var(--ui-control-font-size)/var(--ui-control-line-height) var(--lumeron-font);cursor:pointer}
+.lumeron-pdv-page .pdv-sales-filter-actions button:first-child{color:#fff;background:var(--ui-primary-bg);border-color:var(--ui-primary-border)}
 .lumeron-pdv-page .pdv-sales-list-scroll{min-height:0;flex:1 1 auto;overflow:auto;background:#fff;scrollbar-width:thin}
 .lumeron-pdv-page .pdv-sales-table{width:100%;table-layout:fixed;border-collapse:collapse;color:#364f63;font-size:var(--lumeron-list)}
 .lumeron-pdv-page .pdv-sales-table th{position:sticky;top:0;z-index:1;height:37px;padding:8px;text-align:left;background:#f3f6f8;border-bottom:1px solid #d7e0e9;color:#62798d;font-size:10px;white-space:nowrap}
@@ -689,7 +688,7 @@
 .lumeron-pdv-page .pdv-sales-message.is-error{color:#b44f51}
 .lumeron-pdv-page .pdv-sales-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px 12px;background:#f7f9fb;border-top:1px solid #dce5ec;color:#60788a;font-size:11px;flex-shrink:0}
 .lumeron-pdv-page .pdv-sales-pages{display:flex;gap:8px;align-items:center}
-.lumeron-pdv-page .pdv-sales-pages button{height:29px;padding:0 10px;border:1px solid #ccd9e5;border-radius:var(--ui-control-radius);background:#fff;color:#326d97;font-size:10px;cursor:pointer}
+.lumeron-pdv-page .pdv-sales-pages button{height:var(--ui-action-height);min-height:var(--ui-action-height);padding:0 10px;border:1px solid var(--ui-border);border-radius:var(--ui-control-radius);background:var(--ui-secondary-bg);color:var(--ui-text);font:650 var(--ui-control-font-size)/var(--ui-control-line-height) var(--lumeron-font);cursor:pointer}
 .lumeron-pdv-page .pdv-sales-pages button:disabled{opacity:.4;cursor:default}
 @media(max-width:1160px){.lumeron-pdv-page .pdv-sales-filters{grid-template-columns:repeat(3,minmax(0,1fr))}.lumeron-pdv-page .pdv-sales-filter-wide,.lumeron-pdv-page .pdv-sales-filter-actions{grid-column:1/-1}.lumeron-pdv-page .pdv-sales-filter-actions{flex-direction:row}.lumeron-pdv-page .pdv-sales-table{min-width:880px}}
 @media(max-width:650px){.lumeron-pdv-page .pdv-sales-modal{width:calc(100vw - 12px);height:calc(100dvh - 16px);max-height:calc(100dvh - 16px)}.lumeron-pdv-page .pdv-sales-filters{grid-template-columns:repeat(2,minmax(0,1fr));padding:9px}.lumeron-pdv-page .pdv-sales-filter-wide,.lumeron-pdv-page .pdv-sales-filter-actions{grid-column:1/-1}}
@@ -719,10 +718,10 @@
   justify-content:space-between;
   gap:12px;
   flex-shrink:0;
-  min-height:66px;
-  padding:11px 17px;
-  border-bottom:1px solid #e0e7ed;
-  background:#fff;
+  padding:var(--ui-header-padding);
+  border-bottom:1px solid var(--ui-dialog-header-border);
+  background:var(--ui-dialog-header-bg);
+  color:var(--ui-dialog-header-text);
 }
 .pdv-body .pdv-receipt-title{display:flex;align-items:center;gap:11px;min-width:0}
 .pdv-body .pdv-receipt-title-icon{
@@ -739,25 +738,23 @@
 .pdv-body .pdv-receipt-title>div>span{
   display:block;
   margin-bottom:3px;
-  color:#778b99;
-  font-size:11px;
+  color:inherit;
+  font-size:var(--lumeron-small);
   font-weight:700;
   letter-spacing:.3px;
   text-transform:uppercase;
 }
 .pdv-body .pdv-receipt-title h2{
   margin:0;
-  color:#29495e;
-  font-size:17px;
-  font-weight:750;
-  line-height:1.25;
+  color:inherit;
+  font:650 var(--lumeron-heading)/1.35 var(--lumeron-font);
 }
 .pdv-body .pdv-receipt-header .pdv-modal-close{
   flex-shrink:0;
-  border:1px solid #d6e1e9;
+  border:1px solid transparent;
   border-radius:var(--ui-control-radius);
-  background:#f9fbfc;
-  color:#5a7487;
+  background:transparent;
+  color:inherit;
 }
 .pdv-body .pdv-receipt-toolbar{
   flex:0 0 auto;
@@ -1022,7 +1019,6 @@
     height:calc(100dvh - 12px);
     max-height:calc(100dvh - 12px);
   }
-  .pdv-body .pdv-receipt-header{padding:10px 12px}
   .pdv-body .pdv-receipt-toolbar{padding:10px 12px}
   .pdv-body .pdv-receipt-content{padding:14px 12px 30px}
   .pdv-body .pdv-receipt-document{padding:18px 14px 15px}
@@ -1394,11 +1390,6 @@
   max-height:calc(100dvh - 24px);
   overflow-y:auto;
 }
-.pdv-body #pdvCashOpenDialog .pdv-modal-head{
-  min-height:62px;
-  padding:12px 16px;
-}
-.pdv-body #pdvCashOpenDialog .pdv-modal-head h2{font-size:17px}
 .pdv-body #pdvCashOpenDialog .pdv-cash-open-body{
   display:flex;
   flex-direction:column;
@@ -1485,12 +1476,12 @@
   cursor:pointer;
 }
 .pdv-body #pdvCashOpenDialog .pdv-cash-open-actions .pdv-cash-open-cancel{
-  border:1px solid #c7d7e2;
-  background:#fff;
-  color:#45657d;
+  border:1px solid var(--ui-border);
+  background:var(--ui-secondary-bg);
+  color:var(--ui-text);
 }
 .pdv-body #pdvCashOpenDialog .pdv-cash-open-actions .pdv-modal-primary{
-  border:1px solid #2877c7;
+  border:1px solid var(--ui-success-border);
 }
 @media(max-width:560px){
   .pdv-body #pdvCashOpenDialog .pdv-cash-open-body{padding:12px;gap:11px}

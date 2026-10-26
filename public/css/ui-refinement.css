@@ -18,7 +18,7 @@
 :is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.editor-grid,.settings-form-grid,.settings-grid,.cms-card,.grid-actionbar,.grid-actions-left,.grid-actions-right,.editor-panel,.dialog-body,.table-scroll){min-width:0;max-width:100%;box-sizing:border-box}
 
 :is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.field,.purchase-line-field)>span{font:500 var(--lumeron-label)/1.35 var(--lumeron-font)}
-:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.field,.purchase-line-field) :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]),select:not(.ui-select-native),textarea),
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.field,.purchase-line-field) :is(input,select,textarea):where(:not([type="checkbox"],[type="radio"],[type="hidden"],[type="file"],.ui-select-native)),
 :is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.field,.purchase-line-field) .ui-select-trigger{
   box-sizing:border-box;width:100%;max-width:100%;min-width:0;height:var(--ui-control-height);min-height:var(--ui-control-height);
   border:1px solid var(--ui-border);border-radius:var(--ui-control-radius);background:var(--ui-surface);color:var(--ui-text);
@@ -27,11 +27,11 @@
 :is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.field,.purchase-line-field)>textarea{height:auto;min-height:84px;padding:9px 11px;resize:vertical}
 :is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.numeric-input,.money-input,.input-prefix,.input-icon-group,.input-action-group){box-sizing:border-box;min-width:0;max-width:100%;height:var(--ui-control-height);min-height:var(--ui-control-height);border:1px solid var(--ui-border);border-radius:var(--ui-control-radius);background:var(--ui-surface)}
 :is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.numeric-input,.money-input,.input-prefix,.input-icon-group,.input-action-group)>input{box-sizing:border-box;flex:1;width:100%;padding:0 11px;margin:0;min-width:0;max-width:100%;height:100%;min-height:0;border:0;border-radius:0;background:transparent;font:400 var(--ui-control-font-size)/var(--ui-control-line-height) var(--lumeron-font);box-shadow:none}
-:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.field,.purchase-line-field) :is(input,select,textarea,.ui-select-trigger):hover:not(:disabled):not([readonly]){border-color:var(--ui-border-hover)}
-:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.field,.purchase-line-field) :is(input,select,textarea,.ui-select-trigger):focus-visible{outline:0;border-color:var(--ui-focus);box-shadow:var(--ui-focus-ring)}
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.field,.purchase-line-field) :is(input,select,textarea,.ui-select-trigger):hover:where(:not(:disabled):not([readonly]):not(:focus)){border-color:var(--ui-border-hover)}
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.field,.purchase-line-field) :is(input,select,textarea,.ui-select-trigger):focus{outline:0;border-color:var(--ui-focus);box-shadow:var(--ui-focus-ring)}
 :is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.numeric-input,.money-input,.input-prefix,.input-icon-group,.input-action-group):focus-within{border-color:var(--ui-focus);box-shadow:var(--ui-focus-ring)}
-:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.field,.purchase-line-field) :is(input,textarea)[readonly]{background:#f3f6f8;border-color:#d9e1e8;color:#64788a}
-:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.field,.purchase-line-field) :is(input,select,textarea,.ui-select-trigger):disabled{background:#f4f6f8;border-color:#e0e5e9;color:#8998a6;cursor:not-allowed}
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.field,.purchase-line-field) :is(input,textarea)[readonly]{background:var(--ui-readonly-bg);border-color:var(--ui-readonly-border);color:var(--ui-readonly-text)}
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.field,.purchase-line-field) :is(input,select,textarea,.ui-select-trigger):disabled{background:var(--ui-disabled-bg);border-color:var(--ui-disabled-border);color:var(--ui-disabled-text);cursor:not-allowed}
 :is(.app-root,.pdv-body,.pdv-cash-document,.pdv-receipt-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) .btn{
   box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:7px;
   min-height:var(--ui-control-height);height:var(--ui-control-height);padding:0 12px;border:1px solid var(--ui-border);border-radius:var(--ui-control-radius);
@@ -44,10 +44,10 @@
 :is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.cms-card,.sales-module-card,.editor-panel,.settings-panel){border:1px solid var(--ui-card-border);border-radius:var(--ui-card-radius);box-shadow:var(--ui-card-shadow)}
 :is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.erp-dialog,.nextor-modal-window,.nextor-modal,.modal-dialog,.nextor-confirm-dialog){border:1px solid var(--ui-card-border);border-radius:var(--ui-dialog-radius);box-shadow:var(--ui-dialog-shadow)}
 .erp-catalog-dialog{border:1px solid var(--ui-card-border);border-radius:var(--ui-dialog-radius);box-shadow:var(--ui-dialog-shadow)}
-:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) .dialog-header{padding:var(--ui-header-padding);background:var(--ui-dialog-header-bg);border-bottom:1px solid var(--ui-dialog-header-border);color:var(--ui-dialog-header-text)}
-:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) .dialog-header :is(h2,p,.close-dialog){color:inherit}
-:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) .dialog-header h2{font:650 var(--lumeron-heading)/1.35 var(--lumeron-font)}
-:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) .dialog-footer{padding:var(--ui-footer-padding);background:var(--ui-dialog-footer-bg);border-top:1px solid var(--ui-divider);box-shadow:none;gap:var(--ui-gap-small)}
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.dialog-header,.pdv-modal-head,.pdv-receipt-header,.pdv-cash-report-toolbar){padding:var(--ui-header-padding);background:var(--ui-dialog-header-bg);border-bottom:1px solid var(--ui-dialog-header-border);color:var(--ui-dialog-header-text)}
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.dialog-header,.pdv-modal-head,.pdv-receipt-header,.pdv-cash-report-toolbar) :is(h2,p,.close-dialog,.pdv-modal-close){color:inherit}
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.dialog-header,.pdv-modal-head,.pdv-receipt-header,.pdv-cash-report-toolbar) h2{font:650 var(--lumeron-heading)/1.35 var(--lumeron-font)}
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.dialog-footer,.pdv-modal-footer){padding:var(--ui-footer-padding);background:var(--ui-dialog-footer-bg);border-top:1px solid var(--ui-divider);box-shadow:none;gap:var(--ui-gap-small)}
 :is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.cms-table,.purchase-show-table){font:400 var(--lumeron-list)/1.4 var(--lumeron-font)}
 :is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.cms-table,.purchase-show-table) thead th{font:700 var(--ui-list-header-font-size)/1.3 var(--lumeron-font)}
 :is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) .close-dialog{background:transparent;color:inherit;border-color:transparent}
@@ -55,6 +55,9 @@
 .app-root input[type="number"]:not(.keep-native-spinner)::-webkit-outer-spin-button,
 .app-root input[type="number"]:not(.keep-native-spinner)::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 
+/* The full compound surface communicates the same state as a simple field. */
+:is(.app-root,.pdv-body,.erp-catalog-dialog,.nextor-modal-layer) :is(.numeric-input,.money-input,.input-prefix,.input-icon-group,.input-action-group):has(>input[readonly]){background:var(--ui-readonly-bg);border-color:var(--ui-readonly-border);color:var(--ui-readonly-text);box-shadow:none}
+:is(.app-root,.pdv-body,.erp-catalog-dialog,.nextor-modal-layer) :is(.numeric-input,.money-input,.input-prefix,.input-icon-group,.input-action-group):has(>input:disabled){background:var(--ui-disabled-bg);border-color:var(--ui-disabled-border);color:var(--ui-disabled-text);box-shadow:none;cursor:not-allowed}
 /* A prefixed field has one shared surface, with borderless inner controls. */
 :is(.app-root,.pdv-body,.erp-catalog-dialog,.nextor-modal-layer) :is(.input-prefix,.input-icon-group) > :is(span,.input-icon),
 :is(.app-root,.pdv-body,.erp-catalog-dialog,.nextor-modal-layer) .numeric-input-prefix{
@@ -63,6 +66,8 @@
 :is(.app-root,.pdv-body,.erp-catalog-dialog,.nextor-modal-layer) .input-action-group > .input-action-button{
   align-self:stretch;width:auto;min-width:var(--ui-control-height);height:100%;min-height:0;border:0;border-left:1px solid var(--ui-divider);border-radius:0;padding:0 10px;
 }
+
+:is(.app-root,.pdv-body,.erp-catalog-dialog,.nextor-modal-layer) :is(.numeric-input,.input-prefix,.input-icon-group):has(>input:is([readonly],:disabled))>:is(.numeric-input-prefix,.input-icon,span){background:inherit;color:inherit}
 
 /* The slightly raised surface belongs to actions, not to every card. */
 :is(.app-root,.pdv-body,.pdv-cash-document,.pdv-receipt-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.btn,.grid-primary-action,.grid-filter-button,.bulk-apply,.btn-icon,.input-action-button,
@@ -215,6 +220,7 @@
  * financial forms, document/item tables or intentionally large empty states.
  * Height is a minimum: wrapped content stays visible instead of clipping. */
 .app-root .table-scroll .cms-table thead th{
+  font-size:var(--ui-list-header-font-size);
   height:var(--ui-list-header-height);
   padding-top:7px;
   padding-bottom:7px;
@@ -222,6 +228,7 @@
   vertical-align:middle;
 }
 .app-root .table-scroll .cms-table tbody td:not(.empty-cell){
+  font-size:var(--lumeron-list);
   height:var(--ui-list-row-height);
   padding-top:var(--ui-list-cell-pad-y);
   padding-bottom:var(--ui-list-cell-pad-y);
@@ -301,11 +308,11 @@
   transform:translateY(1px);
 }
 .pdv-body .pdv-modal-primary{
-  background-image:linear-gradient(180deg,#4bcf1b,#33a80d);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 2px 5px rgba(30,104,43,.2);
+  background:var(--ui-success-bg);
+  box-shadow:var(--ui-success-shadow);
 }
 .pdv-body .pdv-modal-primary:hover:not(:disabled){
-  background-image:linear-gradient(180deg,#52d823,#2a990b);
+  background:var(--ui-success-hover-bg);
 }
 .pdv-body .pdv-search-box:focus-within{
   box-shadow:0 0 0 3px rgba(47,131,191,.12);
@@ -323,7 +330,7 @@
   .app-root .editor-grid.cols-12>*{min-width:0}
   #nfceEditor .nfce-savebar{height:72px;padding:9px 12px;gap:8px}
   #nfceEditor .nfe-workspace-body{bottom:72px!important}
-  #nfceEditor .nfce-save-total strong{font-size:17px}
+
 }
 @media(prefers-reduced-motion:reduce){
   :is(.app-root,.pdv-body,.pdv-cash-document,.pdv-receipt-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.btn,.editor-tab,.grid-tool,.grid-primary-action,.btn-icon),

@@ -988,14 +988,14 @@
 }
 
 .pdv-modal-head{
-  min-height:82px;
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:16px;
-  padding:14px 18px;
-  border-bottom:1px solid #dce3e9;
-  background:#f8fafc;
+  padding:var(--ui-header-padding);
+  border-bottom:1px solid var(--ui-dialog-header-border);
+  background:var(--ui-dialog-header-bg);
+  color:var(--ui-dialog-header-text);
 }
 
 .pdv-modal-head>div>span{
@@ -1015,14 +1015,14 @@
 
 .pdv-modal-head h2{
   margin:0;
-  color:#20364c;
-  font-size:19px;
+  color:inherit;
+  font:650 var(--lumeron-heading)/1.35 var(--lumeron-font);
 }
 
 .pdv-modal-head p{
   margin:3px 0 0;
-  color:#8795a4;
-  font-size:10.5px;
+  color:inherit;
+  font-size:var(--lumeron-small);
 }
 
 .pdv-modal-close{
@@ -1030,44 +1030,46 @@
   height:var(--ui-icon-button-size);
   display:grid;
   place-items:center;
-  border:1px solid #d5dee6;
+  border:1px solid transparent;
   border-radius:var(--ui-control-radius);
-  background:#fff;
-  color:#6f8092;
+  background:transparent;
+  color:inherit;
 }
 
 .pdv-modal-close:hover{
-  background:#f2f5f8;
+  background:rgba(255,255,255,.12);
 }
 
 .pdv-modal-search{
-  height:54px;
+  position:relative;
   display:flex;
   align-items:center;
   gap:9px;
+  height:var(--ui-control-height);
   margin:14px 16px 10px;
-  padding:0 13px;
-  border:2px solid #91b9df;
-  border-radius:var(--ui-dialog-radius);
-  background:#fff;
   color:#637f9a;
 }
-
-.pdv-modal-search:focus-within{
-  border-color:#2877c7;
+.pdv-modal-search>svg{
+  position:absolute;
+  left:11px;
+  pointer-events:none;
 }
-
-.pdv-modal-search input{
+.pdv-body .pdv-modal-search input{
   flex:1;
   min-width:0;
-  height:100%;
-  padding:0;
-  border:0!important;
-  outline:0!important;
-  box-shadow:none!important;
-  background:transparent!important;
-  color:#263c52;
-  font-size:14px;
+  width:100%;
+  height:var(--ui-control-height);
+  padding:0 11px 0 37px;
+  border:1px solid var(--ui-border);
+  border-radius:var(--ui-control-radius);
+  outline:0;
+  background:var(--ui-surface);
+  color:var(--ui-text);
+  font:400 var(--ui-control-font-size)/var(--ui-control-line-height) var(--lumeron-font);
+}
+.pdv-body .pdv-modal-search input:focus{
+  border-color:var(--ui-focus);
+  box-shadow:var(--ui-focus-ring);
 }
 
 .pdv-client-list{
@@ -1592,22 +1594,21 @@
   font-weight:700;
 }
 
-#pdvCashModalInput{
+.pdv-body .pdv-money-control{
   width:100%;
-  height:62px;
+  height:var(--pdv-money-control-height);
   padding:0 16px;
-  border:2px solid #90b9df;
-  border-radius:var(--ui-dialog-radius);
+  border:2px solid var(--ui-border);
+  border-radius:var(--ui-control-radius);
   outline:0;
-  background:#fff;
+  background:var(--ui-surface);
   color:#173a56;
   text-align:right;
-  font-size:26px;
-  font-weight:700;
+  font:700 var(--pdv-money-control-font-size)/1.35 var(--lumeron-font);
 }
-
-#pdvCashModalInput:focus{
-  border-color:#2877c7;
+.pdv-body .pdv-money-control:focus{
+  border-color:var(--ui-focus);
+  box-shadow:var(--ui-focus-ring);
 }
 
 .pdv-notes-modal-body{
@@ -1631,17 +1632,17 @@
   border-color:#2877c7;
 }
 
-.pdv-modal-primary{
+.pdv-body .pdv-modal-primary{
   min-height:var(--ui-control-height);
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  gap:8px;
+  gap:7px;
   justify-self:end;
-  padding:0 18px;
-  border:1px solid #2877c7;
+  padding:0 12px;
+  border:1px solid var(--ui-success-border);
   border-radius:var(--ui-control-radius);
-  background:#2877c7;
+  background:var(--ui-success-bg);
   color:#fff;
   font-size:var(--ui-control-font-size);
   font-weight:650;
@@ -1650,7 +1651,7 @@
 }
 
 .pdv-modal-primary:hover{
-  background:#2169af;
+  background:var(--ui-success-hover-bg);
 }
 
 /* O antigo bloco de campos/atalhos do checkout não participa mais do layout */
@@ -1861,24 +1862,6 @@
   color:#53697e;
   font-size:10.5px;
   font-weight:700;
-}
-
-#pdvDiscountModalInput{
-  width:100%;
-  height:58px;
-  padding:0 15px;
-  border:2px solid #91b9df;
-  border-radius:var(--ui-dialog-radius);
-  outline:0;
-  background:#fff;
-  color:#173a56;
-  text-align:right;
-  font-size:24px;
-  font-weight:700;
-}
-
-#pdvDiscountModalInput:focus{
-  border-color:#2877c7;
 }
 
 /* Carrinho PDV sem rolagem horizontal */
@@ -2284,11 +2267,11 @@
 .pdv-consumer-question span{font-size:10px;color:#82909e}
 .pdv-consumer-modal-body label{display:grid;gap:7px}
 .pdv-consumer-modal-body label>span{font-size:10.5px;font-weight:700;color:#53697e}
-#pdvConsumerDocumentInput{
-  width:100%;height:52px;border:2px solid #91b9df;border-radius:var(--ui-control-radius);padding:0 13px;
+.pdv-body .pdv-checkout-identification{
+  width:100%;height:var(--pdv-checkout-control-height);border:2px solid #91b9df;border-radius:var(--ui-control-radius);padding:0 13px;
   outline:0;color:#203c56;font-size:18px;font-weight:700;letter-spacing:.04em
 }
-#pdvConsumerDocumentInput:focus{border-color:#2877c7}
+.pdv-body .pdv-checkout-identification:focus{border-color:#2877c7}
 .pdv-consumer-customer{
   min-height:36px;border:1px solid #cbd7e1;border-radius:var(--ui-control-radius);background:#fff;color:#4d657c;
   font-size:10.5px;font-weight:650
@@ -2296,9 +2279,9 @@
 .pdv-consumer-actions{
   display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px
 }
-.pdv-consumer-skip{
-  min-height:46px;border:1px solid #ccd6df;border-radius:var(--ui-control-radius);background:#fff;color:#566b80;
-  font-size:11px;font-weight:700
+.pdv-body .pdv-consumer-skip{
+  min-height:var(--ui-control-height);padding:0 12px;border:1px solid var(--ui-border);border-radius:var(--ui-control-radius);background:var(--ui-secondary-bg);color:var(--ui-text);
+  font:650 var(--ui-control-font-size)/var(--ui-control-line-height) var(--lumeron-font)
 }
 
 @media(max-width:760px){
@@ -2332,8 +2315,8 @@
   outline:0;border-color:#8eb7dd;background:#f5faff
 }
 .pdv-operations-list>button>span{display:flex;min-width:0;flex-direction:column;gap:2px}
-.pdv-operations-list>button strong{font-size:11px;color:#334a61}
-.pdv-operations-list>button small{font-size:9.5px;color:#83919f;line-height:1.35}
+.pdv-operations-list>button strong{font-size:var(--ui-control-font-size);color:#334a61}
+.pdv-operations-list>button small{font-size:var(--lumeron-small);color:#83919f;line-height:1.35}
 .pdv-operations-list>button kbd{
   padding:4px 6px;border:1px solid #ccd7e1;border-radius:var(--ui-control-radius);background:#f7f9fb;color:#526a81;
   font-size:9px;font-weight:800;white-space:nowrap

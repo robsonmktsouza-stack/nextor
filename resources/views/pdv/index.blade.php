@@ -530,7 +530,7 @@
     </div>
     <label>
       <span>CPF / CNPJ</span>
-      <input type="text" maxlength="18" id="pdvConsumerDocumentInput" autocomplete="off" placeholder="Digite somente se solicitado">
+      <input type="text" maxlength="18" id="pdvConsumerDocumentInput" class="pdv-checkout-identification" autocomplete="off" placeholder="Digite somente se solicitado">
     </label>
     <button type="button" class="pdv-consumer-customer" id="pdvConsumerUseCustomer" hidden>Usar documento do cliente selecionado <kbd>C</kbd></button>
     <div class="pdv-consumer-actions">
@@ -558,7 +558,7 @@
 
     <label>
       <span>Desconto em reais</span>
-      <input type="text" inputmode="decimal" id="pdvDiscountModalInput" autocomplete="off" value="0,00">
+      <input type="text" inputmode="decimal" id="pdvDiscountModalInput" class="pdv-money-control" autocomplete="off" value="0,00">
     </label>
 
     <button type="button" class="pdv-modal-primary" id="pdvDiscountApply">
@@ -590,7 +590,7 @@
 
     <label>
       <span>Valor recebido</span>
-      <input type="text" inputmode="decimal" id="pdvCashModalInput" autocomplete="off" value="0,00">
+      <input type="text" inputmode="decimal" id="pdvCashModalInput" class="pdv-money-control" autocomplete="off" value="0,00">
     </label>
 
     <button type="button" class="pdv-cash-exact" id="pdvCashExact">

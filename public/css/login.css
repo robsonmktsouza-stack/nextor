@@ -15,10 +15,10 @@ button{cursor:pointer}
 .login-label{display:block;margin:0 0 9px;color:#48576a;font-size:var(--lumeron-label);font-weight:600}
 .login-subdomain-field,.login-password-field{display:flex;align-items:stretch;width:100%;height:var(--ui-control-height);margin-bottom:23px;border:1px solid var(--ui-border);border-radius:var(--ui-control-radius);background:#fff;overflow:hidden;transition:border-color .15s,box-shadow .15s}
 .login-subdomain-field:focus-within,.login-password-field:focus-within{border-color:var(--ui-focus);box-shadow:var(--ui-focus-ring)}
-.login-subdomain-field input,.login-password-field input{display:block;min-width:0;flex:1;padding:0 14px;background:transparent;outline:0;border:0;color:var(--ui-text);font-size:13.5px}
+.login-subdomain-field input,.login-password-field input{display:block;min-width:0;flex:1;padding:0 11px;background:transparent;outline:0;border:0;color:var(--ui-text);font-size:var(--ui-control-font-size);line-height:var(--ui-control-line-height)}
 .login-subdomain-field input::placeholder,.login-password-field input::placeholder,.login-input::placeholder{color:#a2aebb}
 .login-subdomain-suffix{display:flex;align-items:center;padding:0 13px;flex:0 0 auto;border-left:1px solid #dce3eb;background:#f5f7fa;color:#728296;font-size:13px}
-.login-input{display:block;width:100%;height:var(--ui-control-height);border:1px solid var(--ui-border);border-radius:var(--ui-control-radius);padding:0 14px;outline:0;background:#fff;color:var(--ui-text);font-size:13.5px;margin:0 0 23px;transition:border-color .15s,box-shadow .15s}
+.login-input{display:block;width:100%;height:var(--ui-control-height);border:1px solid var(--ui-border);border-radius:var(--ui-control-radius);padding:0 11px;outline:0;background:#fff;color:var(--ui-text);font-size:var(--ui-control-font-size);line-height:var(--ui-control-line-height);margin:0 0 23px;transition:border-color .15s,box-shadow .15s}
 .login-input:focus{border-color:var(--ui-focus);box-shadow:var(--ui-focus-ring)}
 .login-password-field{margin-bottom:16px}
 .login-password-field button{width:var(--ui-control-height);flex:0 0 var(--ui-control-height);background:transparent;border:0;color:#7b8b9d;display:grid;place-items:center}
@@ -26,7 +26,7 @@ button{cursor:pointer}
 .login-password-field button:focus-visible,.login-submit:focus-visible,.login-forgot:focus-visible{outline:2px solid var(--ui-focus);outline-offset:2px}
 .login-remember{display:flex;gap:9px;align-items:center;margin:0 0 27px;font-size:12px;color:#6b7b8e;cursor:pointer}
 .login-remember input{width:16px;height:16px;accent-color:#2d6f9f;margin:0}
-.login-submit{display:flex;justify-content:center;align-items:center;gap:9px;width:100%;height:var(--ui-control-height);padding:0 12px;border:1px solid var(--ui-primary-border);border-radius:var(--ui-control-radius);background:var(--ui-primary-bg);color:#fff;font-size:13.5px;font-weight:650;box-shadow:var(--ui-primary-shadow);transition:background .15s,transform .15s}
+.login-submit{display:flex;justify-content:center;align-items:center;gap:9px;width:100%;height:var(--ui-control-height);padding:0 12px;border:1px solid var(--ui-primary-border);border-radius:var(--ui-control-radius);background:var(--ui-primary-bg);color:#fff;font-size:var(--ui-control-font-size);line-height:var(--ui-control-line-height);font-weight:650;box-shadow:var(--ui-primary-shadow);transition:background .15s,transform .15s}
 .login-submit:hover:not(:disabled){background:var(--ui-primary-hover-bg);border-color:var(--ui-primary-hover-border)}
 .login-submit:disabled{opacity:.7;cursor:wait}
 .login-submit-spinner{width:15px;height:15px;border:2px solid #ffffff70;border-top-color:#fff;border-radius:50%;animation:login-spin .7s linear infinite}
@@ -43,3 +43,8 @@ button{cursor:pointer}
 .login-back-link:hover{text-decoration:underline}
 .login-panel .login-label+input.login-input{margin-bottom:21px}
 @media(max-width:520px){.lumeron-login{padding:20px 12px}.login-shell{width:100%}.login-brand{margin-bottom:23px}.login-panel{padding:26px 21px 24px}.login-subdomain-suffix{font-size:11px;padding:0 8px}.login-panel-header{margin-bottom:25px}.login-panel-header h1{font-size:17px}}
+
+/* Authentication uses the same field states as operational forms. */
+:is(.login-input,.login-password-field,.login-subdomain-field):is([readonly],:has(>input[readonly])){background:var(--ui-readonly-bg);border-color:var(--ui-readonly-border);color:var(--ui-readonly-text);box-shadow:none}
+:is(.login-input,.login-password-field,.login-subdomain-field):is(:disabled,:has(>input:disabled)){background:var(--ui-disabled-bg);border-color:var(--ui-disabled-border);color:var(--ui-disabled-text);box-shadow:none;cursor:not-allowed}
+:is(.login-password-field,.login-subdomain-field):has(>input:is([readonly],:disabled))>:is(input,span){background:inherit;color:inherit}

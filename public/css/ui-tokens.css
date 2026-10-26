@@ -13,6 +13,9 @@
   --ui-action-height:34px;
   --ui-icon-button-size:32px;
   --ui-icon-size:16px;
+  --pdv-checkout-control-height:42px;
+  --pdv-money-control-height:56px;
+  --pdv-money-control-font-size:24px;
   --ui-control-radius:4px;
   --ui-card-radius:4px;
   --ui-dialog-radius:4px;
@@ -23,6 +26,12 @@
   --ui-divider:#dfe6ec;
   --ui-text:#43576c;
   --ui-muted:#6c8191;
+  --ui-readonly-bg:#f3f6f8;
+  --ui-readonly-border:#d9e1e8;
+  --ui-readonly-text:#64788a;
+  --ui-disabled-bg:#f4f6f8;
+  --ui-disabled-border:#e0e5e9;
+  --ui-disabled-text:#8998a6;
   --ui-surface:#fff;
   --ui-surface-muted:#f9fbfc;
   --ui-panel-header-bg:#f8fafc;
