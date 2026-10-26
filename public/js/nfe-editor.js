@@ -873,45 +873,28 @@
   };
   itemDialog?.addEventListener('input',updateItemTaxSummary);
   itemDialog?.addEventListener('change',updateItemTaxSummary);
+  // As abas representam painéis exclusivos, não atalhos de rolagem.
+  // Manter os painéis montados preserva todos os campos e dados preenchidos.
   const flowButtons=[...document.querySelectorAll('[data-nfe-jump]')];
   const flowBody=document.querySelector('.nfe-workspace-body');
-  const markFlowButton=active=>{
-    flowButtons.forEach(button=>{
-      const selected=button===active;
-      button.classList.toggle('active',selected);
-      if(selected)button.setAttribute('aria-current','location');
-      else button.removeAttribute('aria-current');
+  const flowPanels=flowButtons.map(button=>byId(button.dataset.nfeJump)).filter(Boolean);
+  const activateFlow=(button,resetScroll=true)=>{
+    const target=byId(button?.dataset.nfeJump);
+    if(!target)return;
+    flowPanels.forEach(panel=>{
+      panel.hidden=panel!==target;
+      panel.setAttribute('aria-hidden',String(panel!==target));
     });
+    flowButtons.forEach(tab=>{
+      const active=tab===button;
+      tab.classList.toggle('active',active);
+      tab.setAttribute('aria-selected',String(active));
+      tab.setAttribute('tabindex',active?'0':'-1');
+    });
+    if(resetScroll&&flowBody)flowBody.scrollTop=0;
   };
-  flowButtons.forEach(button=>button.addEventListener('click',()=>{
-    const section=byId(button.dataset.nfeJump);
-    if(!section||!flowBody)return;
-    markFlowButton(button);
-    // A NF-e é uma janela com rolagem própria: nunca tentar rolar o
-    // documento externo (que permanece bloqueado enquanto o modal abre).
-    const containerTop=flowBody.getBoundingClientRect().top;
-    const targetTop=section.getBoundingClientRect().top;
-    const navHeight=flowBody.querySelector('.nfe-flow-nav')?.getBoundingClientRect().height||0;
-    const top=Math.max(0,flowBody.scrollTop+targetTop-containerTop-navHeight-18);
-    flowBody.scrollTo({top,behavior:'smooth'});
-  }));
-  if(flowBody && flowButtons.length){
-    let scheduled=false;
-    flowBody.addEventListener('scroll',()=>{
-      if(scheduled)return;
-      scheduled=true;
-      requestAnimationFrame(()=>{
-        scheduled=false;
-        const boundary=flowBody.getBoundingClientRect().top+125;
-        let current=flowButtons[0];
-        for(const button of flowButtons){
-          const section=byId(button.dataset.nfeJump);
-          if(section && section.getBoundingClientRect().top<=boundary)current=button;
-        }
-        markFlowButton(current);
-      });
-    },{passive:true});
-  }
+  flowButtons.forEach(button=>button.addEventListener('click',()=>activateFlow(button)));
+  if(flowButtons.length)activateFlow(flowButtons[0],false);
 
   const clearItemDialog=()=>{
     Object.values(itemFields).forEach(id=>setField(id,''));
