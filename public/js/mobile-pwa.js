@@ -45,6 +45,7 @@
   const overlay = document.getElementById('mobileOverlay');
   const sidebar = document.getElementById('sidebar');
   const bottomMenu = app.querySelector('[data-mobile-more]');
+  const topMenu = app.querySelector('[data-mobile-top-menu]');
   const isMobile = () => window.matchMedia('(max-width: 760px)').matches;
   const syncMenu = () => {
     const open = isMobile() && app.classList.contains('mobile-menu-open');
@@ -53,6 +54,7 @@
       menuButton.setAttribute('aria-controls', 'sidebar');
     }
     if (bottomMenu) bottomMenu.setAttribute('aria-expanded', String(open));
+    if (topMenu) topMenu.setAttribute('aria-expanded', String(open));
     if (sidebar) sidebar.setAttribute('aria-label', 'Menu principal');
   };
   const closeMenu = () => {
@@ -62,6 +64,7 @@
   };
   menuButton?.addEventListener('click', () => queueMicrotask(syncMenu));
   overlay?.addEventListener('click', syncMenu);
+  topMenu?.addEventListener('click', () => bottomMenu?.click());
   bottomMenu?.addEventListener('click', () => {
     if (!isMobile()) return;
     if (app.classList.contains('mobile-menu-open')) {
