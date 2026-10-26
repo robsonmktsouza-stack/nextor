@@ -16,7 +16,13 @@ class Nfe55DanfeService
     public function generate(NfeDraft $draft): string
     {
         $path='fiscal/nfe55/'.$draft->id.'/authorized.xml';
-        if($draft->status!=='authorized'||$draft->xml_path!==$path
+        // Cancelamento é evento posterior: o nfeProc autorizado original permanece
+        // válido para impressão histórica, desde que a prova de autorização confira.
+        $cancelled=$draft->status==='cancelled'
+            && $draft->cancellation_status==='authorized'
+            && $draft->cancelled_at!==null
+            && preg_match('/^\\d{15}$/D',(string)$draft->cancellation_protocol)===1;
+        if(!($draft->status==='authorized'||$cancelled)||$draft->xml_path!==$path
             ||!Storage::disk('local')->exists($path))throw new RuntimeException('NF-e sem XML autorizado para impressão.');
         $xml=Storage::disk('local')->get($path);
         if(strlen($xml)>6291456||preg_match('/<!DOCTYPE|<!ENTITY/i',$xml)){
