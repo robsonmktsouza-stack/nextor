@@ -78,6 +78,7 @@
             @include('partials.icon',['name'=>'settings','size'=>18])
           </a>
         @endif
+        @if($tab!=='nfe')
         <details class="fiscal-utilities" data-fiscal-utilities>
           <summary class="grid-tool grid-tool-wide" aria-label="Abrir utilitários fiscais">
             @include('partials.icon',['name'=>'layers','size'=>16])
@@ -105,13 +106,17 @@
             @endif
           </div>
         </details>
+        @endif
       </div>
 
+      @if($tab!=='nfe')
       <form id="fiscal-xml-download" action="{{ route('fiscal.utilities.xml') }}" method="post" data-no-loading hidden>
         @csrf
         <input type="hidden" name="document_type" value="{{ $tab }}">
       </form>
+      @endif
 
+      @if($tab!=='nfe')
       <div class="bulk-actions">
         <select class="bulk-action-select" data-bulk-menu disabled aria-label="Ações em massa">
           <option value="">Ações em massa</option>
@@ -187,6 +192,9 @@
           </tr>
         </thead>
         <tbody>
+        @if($tab==='nfe')
+          @include('fiscal.nfe._document_rows')
+        @else
         @forelse($documents as $document)
           @php
             $statusInfo=match($document->status){
@@ -288,6 +296,7 @@
             </td>
           </tr>
         @endforelse
+        @endif
         </tbody>
       </table>
     </div>
