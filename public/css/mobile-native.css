@@ -42,7 +42,7 @@
   }
   .lm-appbar-actions .lm-appbar-new{background:#176da9;color:#fff;border-color:#176da9}
   .app-root .cms-sidebar{top:calc(64px + env(safe-area-inset-top,0px));height:auto;bottom:0}
-  .app-root .lm-sidebar-account{margin-top:auto;border-top:1px solid rgba(255,255,255,.08);padding:14px 14px 20px}
+  .app-root .lm-sidebar-account{display:block;margin-top:auto;border-top:1px solid rgba(255,255,255,.08);padding:14px 14px 20px}
   .lm-sidebar-account>span{display:block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#b9c6d2;font-size:12px;margin-bottom:9px}
   .lm-sidebar-account form,.lm-sidebar-account button{width:100%}
   .lm-sidebar-account button{display:flex;align-items:center;gap:9px;min-height:44px;padding:0 10px;border:1px solid #52687a;border-radius:8px;background:#263d50;color:#f4f7fa;text-align:left;font-weight:650}
@@ -58,7 +58,10 @@
     padding:14px 14px calc(96px + env(safe-area-inset-bottom,0px))!important;
     height:100%;overflow-y:auto;overscroll-behavior:contain;
   }
-  .app-root .page-heading{display:none!important}
+  .app-root .main-content:has(.lm-home)>.page-heading,
+  .app-root .main-content:has(.lm-finance-home)>.page-heading,
+  .app-root .main-content:has(.lm-native-list)>.page-heading{display:none!important}
+  .app-root .main-content:has(.lm-finance-home)>.finance-module-tabs{display:none!important}
   .app-root .cms-card{
     border:1px solid var(--lm-line);border-radius:12px;
     overflow:visible;box-shadow:0 1px 4px rgba(30,58,83,.025);
@@ -218,7 +221,9 @@
     color:#1c70a8;border:1px solid #cfe3f2;
   }
   .lm-action-duo a:first-child{background:#176da9;border-color:#176da9;color:white}
-  .app-root .page-actions{display:none!important}
+  .app-root .main-content:has(.lm-home) .page-actions,
+  .app-root .main-content:has(.lm-finance-home) .page-actions,
+  .app-root .main-content:has(.lm-native-list) .page-actions{display:none!important}
   /* Adjust the old generic desktop forms for native keyboard + tab behavior. */
   .app-root .product-editor .editor-tabs,
   .app-root .customer-editor .editor-tabs{
