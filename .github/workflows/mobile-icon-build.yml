@@ -1,0 +1,36 @@
+name: Generate Lumeron PWA icons
+on:
+  push:
+    branches:
+      - feature/lumeron-mobile
+    paths:
+      - '.github/workflows/mobile-icon-build.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  png-icons:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Prepare Pillow
+        run: python3 -m pip install --user Pillow
+      - name: Build branded PNG assets
+        run: python3 docs/mobile/generate-icons.py
+      - name: Commit assets only to feature branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/pwa/icons/
+          if git diff --cached --quiet; then
+            echo "Icon files already up to date."
+          else
+            git commit -m "build(mobile): commit square PNG PWA icons from official mark"
+            git push origin HEAD:feature/lumeron-mobile
+          fi
