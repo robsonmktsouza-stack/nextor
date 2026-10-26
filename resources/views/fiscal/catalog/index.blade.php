@@ -32,7 +32,7 @@
     <label class="field"><span>Data da operação</span><input name="date" type="date" value="{{ request('date') }}"></label>
     <label class="field catalog-filter-uf"><span>UF</span><input name="uf" value="{{ request('uf') }}" maxlength="2" pattern="[A-Za-z]{2}" placeholder="Todas"></label>
     <label class="field"><span>Situação</span><select name="status"><option value="">Todas</option><option value="reference" @selected(request('status')==='reference')>Referência</option><option value="template" @selected(request('status')==='template')>Modelo</option><option value="revoked" @selected(request('status')==='revoked')>Revogada</option></select></label>
-    <label class="field"><span>Versão</span><select name="release"><option value="">Atual</option>@foreach($releases as $item)<option value="{{ $item->id }}" @selected((string)request('release')===(string)$item->id)>{{ $item->version }}</option>@endforeach</select></label>
+    <label class="field"><span>Referência</span><select name="release"><option value="">Atual</option>@foreach($releases as $item)<option value="{{ $item->id }}" @selected((string)request('release')===(string)$item->id)>{{ $item->version }}</option>@endforeach</select></label>
     <button class="btn btn-secondary catalog-filter-submit" type="submit">@include('partials.icon',['name'=>'search','size'=>15]) Filtrar</button>
   </form>
   <div class="table-scroll"><table class="cms-table">
@@ -83,28 +83,17 @@
 @else
 <section class="cms-card">
   <div class="table-scroll"><table class="cms-table">
-    <thead><tr><th>Versão</th><th>Consulta</th><th>Instalação</th><th>Registros</th><th>Detalhes</th></tr></thead>
+    <thead><tr><th>Referência</th><th>Consulta</th><th>Atualização</th><th>Registros</th><th>Detalhes</th></tr></thead>
     <tbody>@forelse($releases as $item)<tr>
       <td><a class="table-link" href="{{ route('fiscal.catalog.index',['release'=>$item->id]) }}">{{ $item->version }}</a>@if($current?->id===$item->id)<small class="table-subtitle">Atual</small>@endif</td>
       <td>{{ $item->consulted_at?->format('d/m/Y') }}</td><td>{{ $item->installed_at?->format('d/m/Y H:i') }}</td><td>{{ $item->entry_count }}</td>
       <td><details><summary class="table-link">Ver detalhes</summary>
-        <small class="table-subtitle">Identificação da versão: {{ $item->version }}</small>
+        
         @foreach(($item->sources ?? []) as $source)<p>{{ $source['reference'] ?? $source['id'] ?? '' }}<br><a class="table-link" href="{{ $source['url'] ?? '' }}" target="_blank" rel="noopener noreferrer">{{ $source['url'] ?? '' }}</a></p>@endforeach
         
       </details></td>
     </tr>@empty<tr><td colspan="5" class="empty-cell">Nenhuma versão instalada.</td></tr>@endforelse</tbody>
   </table></div>
-</section>
-<section class="editor-panel settings-panel" style="margin-top:14px">
-  <form method="post" action="{{ route('fiscal.catalog.import') }}" enctype="multipart/form-data" class="settings-editor">
-    @csrf
-    <div class="editor-grid cols-12 settings-grid">
-      <label class="field col-5"><span>Pacote fiscal validado (.json)</span><input type="file" name="catalog_file" accept=".json,application/json" required></label>
-      <label class="field col-5"><span>SHA-256 do arquivo aprovado</span><input name="sha256" maxlength="64" minlength="64" pattern="[a-fA-F0-9]{64}" required value="{{ old('sha256') }}"></label>
-      <div class="field col-2"><span>&nbsp;</span><button class="btn btn-secondary" type="submit">Importar versão</button></div>
-    </div>
-    <details class="erp-help-details"><summary>Atualização do catálogo</summary><p>A importação preserva versões anteriores, regras e personalizações da instalação. Um pacote com a mesma versão e conteúdo diferente é recusado. Revogações devem constar na nova versão.</p></details>
-  </form>
 </section>
 @endif
 @endsection
