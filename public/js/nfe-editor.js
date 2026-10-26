@@ -916,6 +916,7 @@
 
   // Cards fiscais funcionam como abas no mesmo espaço, sem rolagem automática.
   // Os campos continuam no DOM e mantêm seus valores ao alternar.
+  const itemSections=[...itemDialog?.querySelectorAll('[data-nfe-item-panel]')||[]];
   const taxCards=[...itemDialog?.querySelectorAll('[data-nfe-open-section]')||[]];
   const taxReview=itemDialog?.querySelector('.nfe-tax-review');
   const taxHost=document.createElement('div');
