@@ -39,113 +39,68 @@
 
 @section('content')
 @include('sales._nav')
-<div class="detail-grid">
-  <section class="cms-card">
-    <div class="card-header">
-      <div>
-        <h2>Itens da operação</h2>
-        <p>{{ $sale->items->count() }} item(ns)</p>
-      </div>
-      <span class="status {{ $sale->status==='completed'?'status-ok':'status-muted' }}">{{ match($sale->status){'converted'=>'Convertido', 'cancelled'=>'Cancelado', default=>$sale->operation_type==='quote'?'Em aberto':'Concluída'} }}</span>
+<div class="sale-editor sale-view-editor" aria-label="Formulário de visualização da operação">
+  <section class="sale-order-head editor-panel">
+    <div class="sale-section-title"><div><h2>Dados da operação</h2><p>Visualização da operação registrada</p></div><span class="status {{ $sale->status==='completed'?'status-ok':'status-muted' }}">{{ match($sale->status){'converted'=>'Convertido','cancelled'=>'Cancelado',default=>$sale->operation_type==='quote'?'Em aberto':'Concluída'} }}</span></div>
+    <div class="editor-grid cols-12">
+      <label class="field col-6"><span>Nome do cliente</span><input readonly value="{{ $sale->customer?->name ?? 'Consumidor não identificado' }}"></label>
+      <label class="field col-3"><span>Venda ou orçamento?</span><input readonly value="{{ $sale->operation_type==='quote'?'Orçamento':'Venda' }}"></label>
+      <label class="field col-3"><span>Data</span><input readonly value="{{ ($sale->operation_date ?? $sale->created_at)->format(\App\Models\AppSetting::dateFormat()) }}"></label>
+      @if($sale->operation_type==='quote')
+      <label class="field col-3"><span>Validade do orçamento</span><input readonly value="{{ $sale->quote_expires_at?->format(\App\Models\AppSetting::dateFormat()) ?? '—' }}"></label>
+      @endif
+      <label class="field col-3"><span>Consumidor final?</span><input readonly value="{{ $sale->final_consumer?'Sim':'Não' }}"></label>
+      <label class="field col-4"><span>Palavra-chave</span><input readonly value="{{ $sale->keyword ?: '—' }}"></label>
+      <label class="field col-3"><span>Responsável</span><input readonly value="{{ $sale->user?->name ?? '—' }}"></label>
     </div>
-
-    <div class="table-scroll">
-      <table class="cms-table">
-        <thead>
-          <tr><th>Tipo</th><th>Código</th><th>Item</th><th>Quantidade</th><th>Preço unit.</th><th>Desconto</th><th>Total</th></tr>
-        </thead>
-        <tbody>
-        @foreach($sale->items as $item)
-          <tr>
-            <td>{{ match($item->item_type){'service'=>'Serviço','freight'=>'Frete','expense'=>'Despesa',default=>'Produto'} }}</td>
-            <td><span class="code-tag">{{ $item->product_sku ?: '—' }}</span></td>
-            <td>
-              <strong class="table-title">{{ $item->product_name }}</strong>
-              @if($item->notes)<small class="table-subtitle">{{ $item->notes }}</small>@endif
-            </td>
-            <td>{{ number_format((float)$item->quantity,3,',','.') }}</td>
-            <td>R$ {{ number_format((float)$item->unit_price,2,',','.') }}</td>
-            <td>R$ {{ number_format((float)$item->discount,2,',','.') }}</td>
-            <td class="price-strong">R$ {{ number_format((float)$item->line_total,2,',','.') }}</td>
-          </tr>
-        @endforeach
-        </tbody>
-      </table>
-    </div>
-
-    <div class="detail-total">
-      <span>Subtotal R$ {{ number_format((float)$sale->subtotal,2,',','.') }}</span>
-      @if((float)$sale->discount_total>0)<span>Descontos R$ {{ number_format((float)$sale->discount_total,2,',','.') }}</span>@endif
-      Total <strong>R$ {{ number_format((float)$sale->total,2,',','.') }}</strong>
-    </div>
-
-    @if($sale->payments->isNotEmpty())
-    <div class="card-header"><div><h2>Financeiro</h2><p>{{ $sale->payments->count() }} parcela(s)</p></div></div>
-    <div class="table-scroll">
-      <table class="cms-table">
-        <thead><tr><th>Parcela</th><th>Valor</th><th>Vencimento</th><th>Forma</th><th>Situação</th></tr></thead>
-        <tbody>
-        @foreach($sale->payments as $payment)
-          <tr>
-            <td>{{ $payment->installment }}/{{ $sale->payments->count() }}</td>
-            <td class="price-strong">R$ {{ number_format((float)$payment->amount,2,',','.') }}</td>
-            <td>{{ $payment->due_date?->format(\App\Models\AppSetting::dateFormat()) ?? '—' }}</td>
-            <td>{{ $paymentLabels[$payment->payment_method] ?? ($payment->payment_method ? 'Forma de pagamento não cadastrada' : 'Não informado') }}</td>
-            <td>{{ $payment->receivable?'A receber':'Recebido' }}</td>
-          </tr>
-        @endforeach
-        </tbody>
-      </table>
-    </div>
-    @endif
-
-    @if(auth()->user()->canAccess('returns') && $saleReturns->isNotEmpty())
-    <div class="card-header">
-      <div><h2>Devoluções</h2><p>{{ $saleReturns->count() }} registro(s) vinculados a esta venda</p></div>
-      <a class="minor-link" href="{{ route('sales.returns.index',['search'=>$sale->id]) }}">Ver todas</a>
-    </div>
-    <div class="table-scroll">
-      <table class="cms-table">
-        <thead><tr><th>Cód.</th><th>Data</th><th>Itens</th><th>Valor</th><th>Situação</th><th class="action-cell"></th></tr></thead>
-        <tbody>
-        @foreach($saleReturns as $return)
-          <tr>
-            <td><a class="table-link" href="{{ route('sales.returns.show',$return) }}">#{{ str_pad((string)$return->id,5,'0',STR_PAD_LEFT) }}</a></td>
-            <td>{{ $return->return_date->format(\App\Models\AppSetting::dateFormat()) }}</td>
-            <td>{{ $return->items_count }}</td>
-            <td class="price-strong">R$ {{ number_format((float)$return->total,2,',','.') }}</td>
-            <td><span class="status {{ $return->status==='completed'?'status-ok':'status-muted' }}">{{ $return->status==='completed'?'Concluída':'Cancelada' }}</span></td>
-            <td class="action-cell"><a class="btn-icon" href="{{ route('sales.returns.show',$return) }}" data-tooltip="Abrir devolução">@include('partials.icon',['name'=>'chevron','size'=>16])</a></td>
-          </tr>
-        @endforeach
-        </tbody>
-      </table>
-    </div>
+    @if($sale->operation_type==='quote' && $sale->convertedSale)
+      <p>Venda gerada: <a href="{{ route('sales.show',$sale->convertedSale) }}">#{{ str_pad((string)$sale->convertedSale->id,5,'0',STR_PAD_LEFT) }}</a></p>
+    @elseif($sale->sourceQuote)
+      <p>Originada do orçamento: <a href="{{ route('sales.show',$sale->sourceQuote) }}">#{{ str_pad((string)$sale->sourceQuote->id,5,'0',STR_PAD_LEFT) }}</a></p>
     @endif
   </section>
 
-  <aside class="cms-card">
-    <div class="card-header"><div><h2>Dados da operação</h2></div></div>
-    <div class="detail-meta">
-      <div><span>Tipo</span><strong>{{ $sale->operation_type==='quote'?'Orçamento':'Venda' }}</strong></div>
-      <div><span>Cliente</span><strong>{{ $sale->customer?->name ?? 'Consumidor não identificado' }}</strong></div>
-      <div><span>Data</span><strong>{{ ($sale->operation_date ?? $sale->created_at)->format(\App\Models\AppSetting::dateFormat()) }}</strong></div>
-      @if($sale->operation_type==='quote' && $sale->quote_expires_at)
-        <div><span>Validade</span><strong>{{ $sale->quote_expires_at->format(\App\Models\AppSetting::dateFormat()) }}</strong></div>
-      @endif
-      <div><span>Consumidor final</span><strong>{{ $sale->final_consumer?'Sim':'Não' }}</strong></div>
-      @if($sale->keyword)<div><span>Palavra-chave</span><strong>{{ $sale->keyword }}</strong></div>@endif
-      <div><span>Responsável</span><strong>{{ $sale->user?->name ?? '—' }}</strong></div>
-      <div><span>Situação</span><strong>{{ match($sale->status){'converted'=>'Convertido em venda','cancelled'=>'Cancelado',default=>$sale->operation_type==='quote'?'Em aberto':'Concluída'} }}</strong></div>
-      @if($sale->operation_type==='quote' && $sale->convertedSale)
-        <div><span>Venda gerada</span><strong><a href="{{ route('sales.show',$sale->convertedSale) }}">#{{ str_pad((string)$sale->convertedSale->id,5,'0',STR_PAD_LEFT) }}</a></strong></div>
-      @elseif($sale->sourceQuote)
-        <div><span>Originada do orçamento</span><strong><a href="{{ route('sales.show',$sale->sourceQuote) }}">#{{ str_pad((string)$sale->sourceQuote->id,5,'0',STR_PAD_LEFT) }}</a></strong></div>
-      @endif
-      @if($sale->cancelled_at)<div><span>Cancelada em</span><strong>{{ $sale->cancelled_at->format(\App\Models\AppSetting::dateFormat().' H:i') }}</strong></div>@endif
-      @if($sale->notes)<div><span>Observações</span><strong>{{ $sale->notes }}</strong></div>@endif
+  <section class="sale-cart-section">
+    <div class="sale-section-title"><div><h2>Carrinho</h2><p>{{ $sale->items->count() }} item(ns)</p></div></div>
+    <div class="sale-cart-table-wrap">
+      <table class="sale-cart-table">
+        <thead><tr><th>Produto ou serviço</th><th>Preço de venda</th><th>Quantidade</th><th>Desconto</th><th>Total</th></tr></thead>
+        <tbody>
+        @foreach($sale->items as $item)
+          <tr>
+            <td><strong>{{ $item->product_name }}</strong><br><small>{{ $item->product_sku ?: match($item->item_type){'service'=>'Serviço','freight'=>'Frete','expense'=>'Despesa',default=>'Produto'} }}</small>@if($item->notes)<br><small>{{ $item->notes }}</small>@endif</td>
+            <td>R$ {{ number_format((float)$item->unit_price,2,',','.') }}</td>
+            <td>{{ number_format((float)$item->quantity,3,',','.') }}</td>
+            <td>R$ {{ number_format((float)$item->discount,2,',','.') }}</td>
+            <td><strong>R$ {{ number_format((float)$item->line_total,2,',','.') }}</strong></td>
+          </tr>
+        @endforeach
+        </tbody>
+        <tfoot><tr><td><strong>TOTAL</strong></td><td></td><td>{{ number_format((float)$sale->items->sum('quantity'),3,',','.') }}</td><td>R$ {{ number_format((float)$sale->discount_total,2,',','.') }}</td><td><strong>R$ {{ number_format((float)$sale->total,2,',','.') }}</strong></td></tr></tfoot>
+      </table>
     </div>
-  </aside>
+    <label class="field sale-general-notes"><span>Observações gerais</span><textarea readonly rows="3">{{ $sale->notes }}</textarea></label>
+  </section>
+
+  @if($sale->payments->isNotEmpty())
+  <section class="sale-finance-section">
+    <div class="sale-section-title"><div><h2>Financeiro</h2><p>{{ $sale->payments->count() }} parcela(s)</p></div></div>
+    <div class="sale-finance-table-wrap">
+      <table class="sale-finance-table">
+        <thead><tr><th>Parcela</th><th>Valor</th><th>Data de pagamento</th><th>Forma de pagamento</th><th>Situação</th></tr></thead>
+        <tbody>
+        @foreach($sale->payments as $payment)
+          <tr><td>{{ $payment->installment }}/{{ $sale->payments->count() }}</td><td><strong>R$ {{ number_format((float)$payment->amount,2,',','.') }}</strong></td><td>{{ $payment->due_date?->format(\App\Models\AppSetting::dateFormat()) ?? '—' }}</td><td>{{ $paymentLabels[$payment->payment_method] ?? 'Não informado' }}</td><td>{{ $payment->status==='paid'?'Recebido':($payment->status==='cancelled'?'Cancelado':'Pendente') }}</td></tr>
+        @endforeach
+        </tbody>
+        <tfoot><tr><td><strong>TOTAL</strong></td><td><strong>R$ {{ number_format((float)$sale->payments->sum('amount'),2,',','.') }}</strong></td><td colspan="3"></td></tr></tfoot>
+      </table>
+    </div>
+  </section>
+  @endif
+  @if(isset($saleReturns) && $saleReturns->isNotEmpty())
+  <section class="sale-finance-section"><div class="sale-section-title"><div><h2>Devoluções</h2></div><a href="{{ route('sales.returns.index',['search'=>$sale->id]) }}">Ver todas</a></div><div class="sale-finance-table-wrap"><table class="sale-finance-table"><thead><tr><th>Código</th><th>Data</th><th>Itens</th><th>Valor</th><th>Situação</th></tr></thead><tbody>@foreach($saleReturns as $return)<tr><td><a href="{{ route('sales.returns.show',$return) }}">#{{ str_pad((string)$return->id,5,'0',STR_PAD_LEFT) }}</a></td><td>{{ $return->return_date->format(\App\Models\AppSetting::dateFormat()) }}</td><td>{{ $return->items_count }}</td><td>R$ {{ number_format((float)$return->total,2,',','.') }}</td><td>{{ $return->status==='completed'?'Concluída':'Cancelada' }}</td></tr>@endforeach</tbody></table></div></section>
+  @endif
 </div>
 
 @if($sale->status==='completed')
