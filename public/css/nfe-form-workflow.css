@@ -1065,3 +1065,11 @@
   }
   .app-root #nfeEditorDialog .dialog-footer :is(.btn,.btn-icon) {border-radius:3px;}
 }
+
+
+/* Painéis de abas e seções condicionais devem respeitar o atributo hidden,
+   inclusive quando estilos globais definirem display:grid/flex. */
+#nfeEditorDialog .nfe-form-section[hidden],
+#nfeEditorDialog #nfeReferencedDocumentsPanel[hidden] {
+  display:none!important;
+}
