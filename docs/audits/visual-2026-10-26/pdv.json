@@ -1,0 +1,288 @@
+{
+  "scope": "PDV, caixas, relatórios, modais, configurações do PDV e controles de tela dos recibos",
+  "branch": "feature/nfe55-motor-fiscal-completo",
+  "baseline": "5e81321",
+  "date": "2026-10-26",
+  "review_method": [
+    "All PDV Blade and modular stylesheets scanned; exact-selector CSS cascade reviewed.",
+    "Runtime feature regression tests; Blade compilation and php -l.",
+    "Shared browser matrix is maintained separately by the browser/root agents."
+  ],
+  "reviewed_files": [
+    "resources/views/pdv/cash-history.blade.php",
+    "resources/views/pdv/cash-registers.blade.php",
+    "resources/views/pdv/cash-report.blade.php",
+    "resources/views/pdv/index.blade.php",
+    "resources/views/pdv/partials/cash-report-modal.blade.php",
+    "resources/views/pdv/partials/receipt-modal.blade.php",
+    "resources/views/pdv/receipt.blade.php",
+    "public/css/pdv-cash-admin.css",
+    "public/css/pdv-cash-document.css",
+    "public/css/pdv-cash-report-modal.css",
+    "public/css/pdv-lumeron.css",
+    "public/css/pdv-receipt-screen.css",
+    "public/css/pdv-settings.css",
+    "public/css/pdv.css"
+  ],
+  "reviewed_file_count": 14,
+  "finding_count": 18,
+  "corrected_count": 18,
+  "findings": [
+    {
+      "id": "VP-01",
+      "severity": "high",
+      "component": "Cash register forms",
+      "file": "resources/views/pdv/cash-registers.blade.php",
+      "before": "Inputs used .form-control without the shared field component, local 12px descriptions and inline grids.",
+      "after": "Uses shared .field/.btn/.cms-card, consistent label association and responsive modular layout.",
+      "status": "implemented; validated by the shared browser matrix and targeted rechecks recorded in this audit"
+    },
+    {
+      "id": "VP-02",
+      "severity": "medium",
+      "component": "Cash register responsiveness",
+      "file": "public/css/pdv-cash-admin.css",
+      "before": "Inline four-column form could squeeze register name and administrator credential.",
+      "after": "Grid collapses to two columns at1050px and one at600px; all children have min-width0.",
+      "status": "implemented; validated by the shared browser matrix and targeted rechecks recorded in this audit"
+    },
+    {
+      "id": "VP-03",
+      "severity": "medium",
+      "component": "Cash history shell/table/pagination",
+      "file": "resources/views/pdv/cash-history.blade.php",
+      "before": "Local standalone table CSS and native pagination differed from the rest of ERP.",
+      "after": "Uses app layout, cms-table/table-scroll and existing partials.pagination; per-page behavior unchanged.",
+      "status": "implemented; validated by the shared browser matrix and targeted rechecks recorded in this audit"
+    },
+    {
+      "id": "VP-04",
+      "severity": "medium",
+      "component": "Cash report screen controls",
+      "file": "resources/views/pdv/cash-report.blade.php",
+      "before": "Standalone report had native buttons/fields, all CSS inline and embed-dependent style blocks.",
+      "after": "Extracted pdv-cash-document.css, .field/.btn controls and screen-only shared assets; A4 print retained.",
+      "status": "implemented; validated by the shared browser matrix and targeted rechecks recorded in this audit"
+    },
+    {
+      "id": "VP-05",
+      "severity": "medium",
+      "component": "Cash report dialog",
+      "file": "public/css/pdv-cash-report-modal.css",
+      "before": "Dialog actions34px/12px, shrinking to11px mobile; radius7px and close34px/textglyph23px.",
+      "after": "Actions38px/font token, dialog/control radius4px, close32px/SVG16px; responsive wrapping retained.",
+      "status": "implemented; validated by the shared browser matrix and targeted rechecks recorded in this audit"
+    },
+    {
+      "id": "VP-06",
+      "severity": "medium",
+      "component": "PDV CSS cascade",
+      "file": "public/css/pdv.css",
+      "before": "72 declarations superseded by later exact-selector declarations in the same at-rule context.",
+      "after": "Removed only declarations proven overridden by same-property declarations, respecting !important.",
+      "status": "implemented; validated by the shared browser matrix and targeted rechecks recorded in this audit"
+    },
+    {
+      "id": "VP-07",
+      "severity": "medium",
+      "component": "PDV Lumeron CSS cascade",
+      "file": "public/css/pdv-lumeron.css",
+      "before": "40 declarations superseded by later exact-selector declarations in the same at-rule context.",
+      "after": "Removed exact-selector duplicates; consumed centralized geometry and appearance tokens in place.",
+      "status": "implemented; validated by the shared browser matrix and targeted rechecks recorded in this audit"
+    },
+    {
+      "id": "VP-08",
+      "severity": "medium",
+      "component": "Cash opening/cancellation/overdue fields",
+      "file": "public/css/pdv-lumeron.css",
+      "before": "High-specificity local input rules forced35/36px heights and11–12.5px fonts, incompatible border radii and double custom-select borders.",
+      "after": "Normal operational fields use shared height/font/border/radius; custom-select wrapper has no redundant border.",
+      "status": "implemented; validated by the shared browser matrix and targeted rechecks recorded in this audit"
+    },
+    {
+      "id": "VP-09",
+      "severity": "medium",
+      "component": "PDV modal close/actions",
+      "file": "public/css/pdv.css",
+      "before": "Generic close38px versus application32px; regular submit46px versus application38px.",
+      "after": "Generic dialog close32px/SVG16px and normal actions38px; POS-specific search/keypad/checkout geometry preserved.",
+      "status": "implemented; validated by the shared browser matrix and targeted rechecks recorded in this audit"
+    },
+    {
+      "id": "VP-10",
+      "severity": "low",
+      "component": "PDV settings cards and labels",
+      "file": "public/css/pdv-settings.css",
+      "before": "Independent radius6px, label12.5px and helper11px settings styling.",
+      "after": "Shared control-radius/border, label13px and helper12px; existing switch components and grid behavior preserved.",
+      "status": "implemented; validated by the shared browser matrix and targeted rechecks recorded in this audit"
+    },
+    {
+      "id": "VP-11",
+      "severity": "low",
+      "component": "PDV inline layout",
+      "file": "resources/views/pdv/index.blade.php",
+      "before": "Cash-count help and cash-report menu entry used inline styles.",
+      "after": "Named modular layout classes and font token replace the inline declarations.",
+      "status": "implemented; validated by the shared browser matrix and targeted rechecks recorded in this audit"
+    },
+    {
+      "id": "VP-12",
+      "severity": "medium",
+      "component": "Receipt screen toolbar",
+      "file": "resources/views/pdv/receipt.blade.php",
+      "before": "Thermal screen controls used Arial11px/radius5px, potentially squeezing multiple actions into thermal-width navigation.",
+      "after": "Shared button classes and screen-only tokens; wrapping layout extends screen toolbar independently of print width58/80mm.",
+      "status": "implemented; validated by the shared browser matrix and targeted rechecks recorded in this audit"
+    },
+    {
+      "id": "VP-13",
+      "severity": "medium",
+      "component": "Receipt modal return/print/fiscal actions",
+      "file": "public/css/pdv-lumeron.css",
+      "before": "Return was orange, with unrelated locally hardcoded blue/green action colors and12px fonts.",
+      "after": "Return uses shared secondary tokens; print/fiscal actions shared primary tokens,38px/font13.5px.",
+      "status": "implemented; validated by the shared browser matrix and targeted rechecks recorded in this audit"
+    },
+    {
+      "id": "VP-14",
+      "severity": "low",
+      "component": "Receipt modal markup",
+      "file": "resources/views/pdv/partials/receipt-modal.blade.php",
+      "before": "Stray greater-than text after the receipt section rendered an unwanted character.",
+      "after": "Removed stray character; fiscal status, warnings, totals, print and footer content unchanged.",
+      "status": "implemented; validated by the shared browser matrix and targeted rechecks recorded in this audit"
+    },
+    {
+      "id": "VP-15",
+      "severity": "medium",
+      "component": "PDV custom select triggers and dialog shells",
+      "file": "public/css/pdv-lumeron.css",
+      "before": "Browser detected custom select trigger font14px/border#c8d3dc, diverging from the canonical13.5px/#cbd6df; high-specificity dialog shells used control-border.",
+      "after": "Existing rules include .ui-select-trigger in discount approval, sales, cash opening, overdue cash, cancellation, operations and electronic forms; fonts/borders use common tokens. Dialog shells consume --ui-card-border.",
+      "status": "implemented; validated by the shared browser matrix and targeted rechecks recorded in this audit"
+    },
+    {
+      "id": "VP-16",
+      "severity": "medium",
+      "component": "PDV modal primary and sales filter/pager actions",
+      "file": "public/css/pdv.css;public/css/pdv-lumeron.css",
+      "before": "Browser detected modal primary font14px because .pdv-body button inherited font over the less-specific component selector; sales Apply/Today used28px/font10 and Previous/Next29px/font10. Green primary had a blue local border.",
+      "after": "Original modal-primary selector has explicit PDV specificity, shared13.5px font,12px horizontal padding,7px gap and success border/background tokens. Existing sales filter/pager rules use34px and shared13.5px font. Checkout-specific sizes preserved. No pdv-modal-secondary component exists in Blade/CSS/JS sources.",
+      "status": "implemented; validated by the shared browser matrix and targeted rechecks recorded in this audit"
+    },
+    {
+      "id": "VP-17",
+      "severity": "medium",
+      "component": "PDV customer search, checkout identification and prominent monetary inputs",
+      "file": "public/css/pdv.css;resources/views/pdv/index.blade.php",
+      "before": "Browser detected customer search50px/radius0/font14, identification52px, and equivalent prominent money inputs58px/font24 and62px/font26.",
+      "after": "Customer search uses regular38px/radius4/font13.5 without ID-specific appearance. Checkout identification uses a42px component. Both money fields share .pdv-money-control with56px/font24 tokens. IDs/handlers/alignment retained; normal confirmation and skip actions38px.",
+      "status": "implemented; validated by the shared browser matrix and targeted rechecks recorded in this audit"
+    },
+    {
+      "id": "VP-18",
+      "severity": "medium",
+      "component": "PDV common dialog headers and operation rows",
+      "file": "public/css/pdv.css;public/css/pdv-lumeron.css;public/css/pdv-cash-report-modal.css",
+      "before": "Browser screenshot showed gray PDV dialog header/title18 while shared ERP header is teal/title15; operation title/helper11/9.5px. High-specificity sales/cash-opening title overrides prevented shared typography.",
+      "after": "Existing common headers, receipt header and cash-report toolbar consume shared teal/white/header tokens. Removed high-specificity cash-opening/sales title overrides. Headings15px/helpers12px; operation titles13.5px/helpers12px. Close controls transparent/white with12% white hover. Payment workspace .pdv-checkout-head remains a distinct functional component.",
+      "status": "implemented; validated by the shared browser matrix and targeted rechecks recorded in this audit"
+    }
+  ],
+  "duplicate_cleanup": [
+    {
+      "file": "public/css/pdv.css",
+      "duplicate_declarations_removed": 72,
+      "declarations_using_tokens": 66,
+      "sha256_before": "d20a6cc0af960b2c69932bc61acc946b5d359705842276bb599834c67c7ae7ab",
+      "sha256_after": "75fdf581728790b6d30727107bd4c61739a91488d970ff438dff56e3b855e649"
+    },
+    {
+      "file": "public/css/pdv-lumeron.css",
+      "duplicate_declarations_removed": 40,
+      "declarations_using_tokens": 53,
+      "sha256_before": "8a21c749e742ce6c146b2c24f637a0d592beb03f03daa4ef0b39b314e855d56d",
+      "sha256_after": "726f31eb101eb1bd8e69d9eab2cf56a7be6be492664e4cc0427c0cf2a3f32f4f"
+    },
+    {
+      "file": "public/css/pdv-cash-report-modal.css",
+      "duplicate_declarations_removed": 0,
+      "declarations_using_tokens": 2,
+      "sha256_before": "977ffb48642fd8918f4a549602125482438f5323039e27c8763407c0589a7d39",
+      "sha256_after": "7d5e919f6ca5f14334d45f2e37e1c5428e05a7db73a6c3c5ddb1778b00ac7fe3"
+    },
+    {
+      "file": "public/css/pdv-settings.css",
+      "duplicate_declarations_removed": 0,
+      "declarations_using_tokens": 2,
+      "sha256_before": "d03d2a781c8b107e58a4564c1026990972152f3bc59c80262141d57cda0ccb05",
+      "sha256_after": "72ee78685d8f93a8fc85f23163bff11fae7207e5553038a86ccbb2989c357c0f"
+    }
+  ],
+  "preserved": [
+    "All routes, form methods/names, credentials and permission checks.",
+    "Cash registers, shifts, sales, reconciliation and pagination behavior.",
+    "Fiscal authorization/protocol guards, cancellation and NFC-e actions.",
+    "POS-specific large search/keypad/checkout controls remain purpose-specific.",
+    "Receipt dynamic58/80mm @page, @media print, .receipt width/padding and height calculation compared to HEAD byte-for-byte.",
+    "Cash report A4 @page and print geometry; no shared ERP style asset applied to print.",
+    "Company logos, fiscal warnings, receipt notes and footers."
+  ],
+  "validation": {
+    "pdv_regression": {
+      "status": "passed",
+      "tests": 61,
+      "assertions": 497,
+      "runtime": "PHP8.5.12",
+      "classes": [
+        "PdvCashReportModalTest",
+        "PdvCashOpeningLayoutTest",
+        "PdvSettingsLayoutTest",
+        "PdvSalesHistoryTest",
+        "PdvCashShiftSecurityTest",
+        "PdvOverdueCashTest",
+        "PdvCashReconciliationTest",
+        "PdvOperationsVisibilityTest",
+        "PdvFiscalCheckoutFlowTest"
+      ]
+    },
+    "receipt_regression": {
+      "status": "17 passed; 1 skipped",
+      "tests": 18,
+      "assertions": 222,
+      "classes": [
+        "SaleReceiptReuseTest",
+        "NFCePrintSettingsTest"
+      ],
+      "skip": "NFCePrintSettingsTest::test_original_danfe_can_render_real_pdf_with_local_chrome_when_installed: Chromium not installed in the isolated PHPUnit container. Browser audit uses a separate host Chromium."
+    },
+    "blade_syntax": {
+      "status": "passed",
+      "files": 7,
+      "method": "Blade compileString followed by PHP -l"
+    },
+    "css_syntax": {
+      "status": "Lexical scan passed; browser CSS validation is separate",
+      "files": 7,
+      "rule_counts": {
+        "pdv.css": 410,
+        "pdv-lumeron.css": 369,
+        "pdv-settings.css": 22,
+        "pdv-cash-report-modal.css": 23,
+        "pdv-cash-admin.css": 12,
+        "pdv-cash-document.css": 40,
+        "pdv-receipt-screen.css": 6
+      }
+    },
+    "diff_check": "passed",
+    "browser": "Pending consolidated browser matrix; no claim of complete visual acceptance in this module report.",
+    "browser_corrections": "VP-15 through VP-18 arose from actual browser measurements. Their final CSS is covered by the root final suite/matrix; targeted PDV tests above preceded these CSS-only refinements."
+  },
+  "limitations": [
+    "PHPUnit ran with PHP8.5.12/SQLite in Docker; no separate PHP8.3/Windows run.",
+    "Print/PDF and external fiscal validation limits are recorded in REPORT.md."
+  ],
+  "integrated_validation": "See full-suite.json and the shared browser evidence; no new fiscal homologation is asserted."
+}

@@ -1,3 +1,25 @@
+## Auditoria visual integrada — 26/10/2026
+
+Branch `feature/nfe55-motor-fiscal-completo`, base `5e81321`; commits de aplicação
+`ef6a5e9`, `7a6e5eb`, `d2eb35e` e `8474fda`, publicados sem merge/deploy.
+108 fontes de interface auditadas (85 Blade/23 CSS); 46 grupos de problemas
+corrigidos. Tokens e componentes centralizados; nenhuma duplicata/conflito
+exato de CSS ou estilo local operacional identificado pelo inventário final.
+
+Chromium 154: 684 observações/550 estados únicos/97 variantes de rota em quatro
+resoluções, sem divergências nos papéis medidos; 81/85 views renderizadas.
+Dados sintéticos, somente GET, hashes do banco preservados; foco, teclado,
+Roboto real, densidade e switches comprovados. Suíte integrada em 7a6e5eb:
+1.249 testes/8.616 asserções, zero falhas/erros, dois PDFs ignorados; após ajustes dos
+switches, 13 testes/383 asserções aprovados e regressão visual direcionada.
+Sintaxe em 552 arquivos de aplicação + 8 ferramentas válida. PHP 8.5.12/SQLite.
+
+Não houve modificação de lógica fiscal/financeira, rotas, migrations ou
+integrações. Sem novas dependências. Atualização: pull da branch e
+`php artisan optimize:clear`. Windows/PHP 8.3, ACBr/SEFAZ e PDFs finais não
+revalidados; quatro templates sem prova visual estão identificados no relatório.
+[Relatório e evidências](../audits/visual-2026-10-26/REPORT.md).
+
 ## Auditoria geral de apresentação — 26/10/2026
 
 Branch `feature/nfe55-motor-fiscal-completo`; base `bf73a66`, 42 commits
@@ -131,7 +153,7 @@ com lock/claim atômico. Consulta e verificação do XML/protocolo/DANFE continu
 iguais. Não consome outros jobs; job original posterior é no-op após o claim.
 Teste com fila real preserva outra nota de produção e comprova falha preparada
 sem tentativa externa; outro teste preserva pending sem retransmissão.
-Validação: 26 testes, 149 assertions, aprovados em PHP8.5.12/SQLite (comando e
+Validação: 26 testes, 149 assertions, aprovados em PHP 8.5.12/SQLite (comando e
 concorrência). Suíte completa anterior:850/5330; não repetida nesta mudança
 restrita. Evidência: docs/fiscal/evidence/nfe55-single-terminal-tests.txt.
 Usuário relatou sucesso nativo do preflight da nota4 no Laragon, com XML e
@@ -149,7 +171,7 @@ existente e conferir XML/protocolo/DANFE com resumo privado. Não inicia worker.
 Testes direcionados aprovados: 105/730 e 8/72. Suíte final: 850 testes,
 5330 assertions, zero falhas/erros, dois ignorados por falta de Chromium.
 Runtime PHP 8.5.12/SQLite; evidências em docs/fiscal/evidence/.
-Windows real não acessível daqui; usuário informou Laragon/ACBr1.5.0.490/PHP8.3/A1
+Windows real não acessível daqui; usuário informou Laragon/ACBr1.5.0.490/PHP 8.3/A1
 existentes. [Comandos locais](../fiscal/nfe55-laragon-real-validation.md).
 Nenhuma homologação real ou implantação foi realizada pela sessão Linux.
 

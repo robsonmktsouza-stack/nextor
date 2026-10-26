@@ -1,0 +1,27 @@
+{
+  "tested_commit": "7a6e5eb",
+  "command": "php -d memory_limit=1024M vendor/bin/phpunit --log-junit /evidence/visual-full-final.xml --colors=never",
+  "environment": "PHP8.5.12/PHPUnit12.5.40/SQLite in composer:2; no external fiscal transmission",
+  "suite": {
+    "name": "/app/phpunit.xml",
+    "tests": "1249",
+    "assertions": "8616",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "2",
+    "time": "181.978751"
+  },
+  "skips": [
+    {
+      "class": "Tests.Feature.NFCePrintSettingsTest",
+      "name": "test_original_danfe_can_render_real_pdf_with_local_chrome_when_installed",
+      "reason": "A prova de conversão real em PDF exige Chromium no runner."
+    },
+    {
+      "class": "Tests.Feature.QuoteCommercialDocumentTest",
+      "name": "test_real_chromium_generates_valid_pdf_when_installed",
+      "reason": "Chrome/Chromium não instalado no runner Linux."
+    }
+  ],
+  "junit_sha256": "eb2984233fc154748ea26e698982d37c676ea679d2709255f37dccfe6e2cf5ee"
+}

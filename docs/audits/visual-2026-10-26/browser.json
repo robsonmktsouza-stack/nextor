@@ -1,0 +1,1278 @@
+{
+  "date": "2026-10-26",
+  "branch": "feature/nfe55-motor-fiscal-completo",
+  "environment": {
+    "browser": {
+      "protocolVersion": "1.3",
+      "product": "Chrome/154.0.8037.57",
+      "revision": "@73c14f6228d7cd537c855007e8f88678969cc0eb",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+      "jsVersion": "15.4.80.11"
+    },
+    "node": "v24.19.0",
+    "php": "8.5.12 (imagem composer:2)",
+    "database": "SQLite isolado com fixtures sintéticas; 52 migrations aplicadas",
+    "network": "Somente HTTP loopback; APIs cadastrais e Google Fonts bloqueados",
+    "production_accessed": false,
+    "sefaz_or_acbr_executed": false
+  },
+  "baseline": {
+    "commit": "5e81321",
+    "immutable_archive": true,
+    "states": 10,
+    "overflow_before": [
+      {
+        "screen": "product-create",
+        "width": 1366,
+        "document_width": 1630
+      },
+      {
+        "screen": "sale-create",
+        "width": 1366,
+        "document_width": 1624
+      },
+      {
+        "screen": "purchase-create",
+        "width": 1366,
+        "document_width": 1611
+      },
+      {
+        "screen": "entry-create",
+        "width": 1366,
+        "document_width": 1992
+      },
+      {
+        "screen": "product-create",
+        "width": 390,
+        "document_width": 437
+      },
+      {
+        "screen": "sale-create",
+        "width": 390,
+        "document_width": 436
+      },
+      {
+        "screen": "purchase-create",
+        "width": 390,
+        "document_width": 431
+      },
+      {
+        "screen": "entry-create",
+        "width": 390,
+        "document_width": 450
+      }
+    ],
+    "cause": "Checkboxes invisíveis absolutos herdavam largura da viewport; campos compostos e ações tinham estilos locais conflitantes."
+  },
+  "matrices": {
+    "complete": {
+      "states": 514,
+      "routes": 96,
+      "widths": [
+        1920,
+        1366,
+        1024,
+        390
+      ],
+      "components": 10322,
+      "fingerprintsStable": true,
+      "unknown": [],
+      "problems": [],
+      "source_commit": "7a6e5eb199a48cbb9a5bf693935827104186b21e",
+      "css_sha256": {
+        "branding.css": "b24b42472f0b1e8d051d8c6b669936c02a246c764f330a64b4760e7d85185ca7",
+        "commercial-readonly.css": "d039a514f99b1a54cd37bfce104cafe2a7a30fed668aaae4a971da74e6be95af",
+        "commercial-workspace.css": "29b5dd806ab5eff2acd86a01f44ca27342e9033d0fbaef49a9810dbb29e24a1f",
+        "desktop-polish.css": "deb9b53da73dd95431acd0291a813c6beb53eab4a8a09e37c18090e6c001042d",
+        "erp-typography.css": "89141c32f7de592387d453648c7828c0ac2035f92520688b381ec758f0ccf968",
+        "erp.css": "9ae00af4f2453a5b5a4692c7a30489468ef6eeb774c9672b70446e8fdb08a002",
+        "fiscal-purchases.css": "3963e28b7ddc171eed72cc72374d06af2eaee5e15f2dc96bc27d9c68df87b72f",
+        "fiscal-workspace.css": "4d6899bf120264d02da0820e164fee6620c1c979a5a38a0f5d6bab28856bee26",
+        "login.css": "d8402f12b56afb5d9b6f6b35a6485358840c747979a359525704249a6d3a3d35",
+        "nfce-danfe.css": "fd5ebfed29d3dfb316cb46df7614cb76f3226f1f7fb38dfca7c7a6681bafc36c",
+        "nfe-form-workflow.css": "ed38839f34b09753739c4b3d6f23e9d7d4a2d0934b4771fa608d50f20615d6c2",
+        "pdv-cash-admin.css": "6b3a940dcf861d910cf2ef623cddc12eb685ff5993e51383ca71970534612665",
+        "pdv-cash-document.css": "199561ffe3694099b5e4bc47b433802bca46adbcdb1fa028216274d4f62a86ab",
+        "pdv-cash-report-modal.css": "7d5e919f6ca5f14334d45f2e37e1c5428e05a7db73a6c3c5ddb1778b00ac7fe3",
+        "pdv-lumeron.css": "726f31eb101eb1bd8e69d9eab2cf56a7be6be492664e4cc0427c0cf2a3f32f4f",
+        "pdv-receipt-screen.css": "f2d8952a808e65f6f407cc97287dffa209f85cfe44f6df1c0396eb09c0ac9e22",
+        "pdv-settings.css": "72ee78685d8f93a8fc85f23163bff11fae7207e5553038a86ccbb2989c357c0f",
+        "pdv.css": "75fdf581728790b6d30727107bd4c61739a91488d970ff438dff56e3b855e649",
+        "purchases.css": "cf308b16373e7e7e8104d1c23f859c26b053e6225bf37386e74559ecd0fdb280",
+        "quick-catalog.css": "776d2dcebe8780a483db5d1c7d16953b94e3e5ee8aea5afed2bf8f13e3b01a24",
+        "ui-refinement.css": "81ded70d71c2497288f558ad3f5ecf5a4c50b57c95368954fe49af664b38562f",
+        "ui-tokens.css": "9f4c4d3ff80490d583017fd141e3a5837cc602c3fa37708e66d5fc1580b36307",
+        "user-message-page.css": "a73a4b62990a2576e8b1dc5caa718d6cc15649e590283173270bf1eda75ba631"
+      }
+    },
+    "additional": {
+      "states": 54,
+      "routes": 2,
+      "widths": [
+        1920,
+        1366,
+        1024,
+        390
+      ],
+      "components": 1187,
+      "fingerprintsStable": true,
+      "unknown": [],
+      "problems": [],
+      "source_commit": "7a6e5eb199a48cbb9a5bf693935827104186b21e",
+      "css_sha256": {
+        "branding.css": "b24b42472f0b1e8d051d8c6b669936c02a246c764f330a64b4760e7d85185ca7",
+        "commercial-readonly.css": "d039a514f99b1a54cd37bfce104cafe2a7a30fed668aaae4a971da74e6be95af",
+        "commercial-workspace.css": "29b5dd806ab5eff2acd86a01f44ca27342e9033d0fbaef49a9810dbb29e24a1f",
+        "desktop-polish.css": "deb9b53da73dd95431acd0291a813c6beb53eab4a8a09e37c18090e6c001042d",
+        "erp-typography.css": "89141c32f7de592387d453648c7828c0ac2035f92520688b381ec758f0ccf968",
+        "erp.css": "d42db8693612df53d2f7def3dc7a811fffe82c0a5a0ad6ba2815b22aaaa68e1d",
+        "fiscal-purchases.css": "65815eb00d9381b7058d4a57b5754a7a8e94ea9bd731aee019ee9195b337f4e2",
+        "fiscal-workspace.css": "4d6899bf120264d02da0820e164fee6620c1c979a5a38a0f5d6bab28856bee26",
+        "login.css": "d8402f12b56afb5d9b6f6b35a6485358840c747979a359525704249a6d3a3d35",
+        "nfce-danfe.css": "fd5ebfed29d3dfb316cb46df7614cb76f3226f1f7fb38dfca7c7a6681bafc36c",
+        "nfe-form-workflow.css": "ed38839f34b09753739c4b3d6f23e9d7d4a2d0934b4771fa608d50f20615d6c2",
+        "pdv-cash-admin.css": "6b3a940dcf861d910cf2ef623cddc12eb685ff5993e51383ca71970534612665",
+        "pdv-cash-document.css": "199561ffe3694099b5e4bc47b433802bca46adbcdb1fa028216274d4f62a86ab",
+        "pdv-cash-report-modal.css": "7d5e919f6ca5f14334d45f2e37e1c5428e05a7db73a6c3c5ddb1778b00ac7fe3",
+        "pdv-lumeron.css": "726f31eb101eb1bd8e69d9eab2cf56a7be6be492664e4cc0427c0cf2a3f32f4f",
+        "pdv-receipt-screen.css": "f2d8952a808e65f6f407cc97287dffa209f85cfe44f6df1c0396eb09c0ac9e22",
+        "pdv-settings.css": "72ee78685d8f93a8fc85f23163bff11fae7207e5553038a86ccbb2989c357c0f",
+        "pdv.css": "75fdf581728790b6d30727107bd4c61739a91488d970ff438dff56e3b855e649",
+        "purchases.css": "cf308b16373e7e7e8104d1c23f859c26b053e6225bf37386e74559ecd0fdb280",
+        "quick-catalog.css": "776d2dcebe8780a483db5d1c7d16953b94e3e5ee8aea5afed2bf8f13e3b01a24",
+        "ui-refinement.css": "81ded70d71c2497288f558ad3f5ecf5a4c50b57c95368954fe49af664b38562f",
+        "ui-tokens.css": "aed270087ef90f47e5fe26ba53090ac0f7b055320165f036aa3b2c827a662b1a",
+        "user-message-page.css": "a73a4b62990a2576e8b1dc5caa718d6cc15649e590283173270bf1eda75ba631"
+      }
+    },
+    "retarget": {
+      "states": 116,
+      "routes": 9,
+      "widths": [
+        1920,
+        1366,
+        1024,
+        390
+      ],
+      "components": 2430,
+      "fingerprintsStable": true,
+      "unknown": [],
+      "problems": [],
+      "source_commit": "8474fda3fb7e42d5e77edd6bdb659a0588b239e1",
+      "css_sha256": {
+        "branding.css": "b24b42472f0b1e8d051d8c6b669936c02a246c764f330a64b4760e7d85185ca7",
+        "commercial-readonly.css": "d039a514f99b1a54cd37bfce104cafe2a7a30fed668aaae4a971da74e6be95af",
+        "commercial-workspace.css": "29b5dd806ab5eff2acd86a01f44ca27342e9033d0fbaef49a9810dbb29e24a1f",
+        "desktop-polish.css": "deb9b53da73dd95431acd0291a813c6beb53eab4a8a09e37c18090e6c001042d",
+        "erp-typography.css": "89141c32f7de592387d453648c7828c0ac2035f92520688b381ec758f0ccf968",
+        "erp.css": "24ee38eb47e5e43744d75f5108f464330540ee198f407cda02121f7043949769",
+        "fiscal-purchases.css": "65815eb00d9381b7058d4a57b5754a7a8e94ea9bd731aee019ee9195b337f4e2",
+        "fiscal-workspace.css": "4d6899bf120264d02da0820e164fee6620c1c979a5a38a0f5d6bab28856bee26",
+        "login.css": "d8402f12b56afb5d9b6f6b35a6485358840c747979a359525704249a6d3a3d35",
+        "nfce-danfe.css": "fd5ebfed29d3dfb316cb46df7614cb76f3226f1f7fb38dfca7c7a6681bafc36c",
+        "nfe-form-workflow.css": "ed38839f34b09753739c4b3d6f23e9d7d4a2d0934b4771fa608d50f20615d6c2",
+        "pdv-cash-admin.css": "6b3a940dcf861d910cf2ef623cddc12eb685ff5993e51383ca71970534612665",
+        "pdv-cash-document.css": "199561ffe3694099b5e4bc47b433802bca46adbcdb1fa028216274d4f62a86ab",
+        "pdv-cash-report-modal.css": "7d5e919f6ca5f14334d45f2e37e1c5428e05a7db73a6c3c5ddb1778b00ac7fe3",
+        "pdv-lumeron.css": "726f31eb101eb1bd8e69d9eab2cf56a7be6be492664e4cc0427c0cf2a3f32f4f",
+        "pdv-receipt-screen.css": "f2d8952a808e65f6f407cc97287dffa209f85cfe44f6df1c0396eb09c0ac9e22",
+        "pdv-settings.css": "72ee78685d8f93a8fc85f23163bff11fae7207e5553038a86ccbb2989c357c0f",
+        "pdv.css": "75fdf581728790b6d30727107bd4c61739a91488d970ff438dff56e3b855e649",
+        "purchases.css": "cf308b16373e7e7e8104d1c23f859c26b053e6225bf37386e74559ecd0fdb280",
+        "quick-catalog.css": "776d2dcebe8780a483db5d1c7d16953b94e3e5ee8aea5afed2bf8f13e3b01a24",
+        "ui-refinement.css": "81ded70d71c2497288f558ad3f5ecf5a4c50b57c95368954fe49af664b38562f",
+        "ui-tokens.css": "aed270087ef90f47e5fe26ba53090ac0f7b055320165f036aa3b2c827a662b1a",
+        "user-message-page.css": "a73a4b62990a2576e8b1dc5caa718d6cc15649e590283173270bf1eda75ba631"
+      }
+    }
+  },
+  "aggregated": {
+    "observations_executed": 684,
+    "unique_states": 550,
+    "unique_route_variants": 97,
+    "component_observations": 13939,
+    "route_inventory_get": 97,
+    "view_files": 85,
+    "rendered_own_views": 81,
+    "rendered_vendor_views": [
+      "pagination::tailwind"
+    ],
+    "rendered_view_paths": [
+      "resources/views/auth/login.blade.php",
+      "resources/views/auth/password-request.blade.php",
+      "resources/views/auth/password-reset.blade.php",
+      "resources/views/customers/form.blade.php",
+      "resources/views/customers/index.blade.php",
+      "resources/views/dashboard.blade.php",
+      "resources/views/errors/license-blocked.blade.php",
+      "resources/views/errors/message.blade.php",
+      "resources/views/finance/_nav.blade.php",
+      "resources/views/finance/dashboard.blade.php",
+      "resources/views/finance/form.blade.php",
+      "resources/views/finance/index.blade.php",
+      "resources/views/finance/receipts/form.blade.php",
+      "resources/views/finance/receipts/index.blade.php",
+      "resources/views/finance/receipts/print.blade.php",
+      "resources/views/finance/reconciliation/import.blade.php",
+      "resources/views/finance/reconciliation/index.blade.php",
+      "resources/views/finance/recurrences/form.blade.php",
+      "resources/views/finance/recurrences/index.blade.php",
+      "resources/views/finance/show.blade.php",
+      "resources/views/finance/transfers/form.blade.php",
+      "resources/views/finance/transfers/index.blade.php",
+      "resources/views/fiscal/_catalog-review.blade.php",
+      "resources/views/fiscal/_nav.blade.php",
+      "resources/views/fiscal/catalog/index.blade.php",
+      "resources/views/fiscal/fcp/index.blade.php",
+      "resources/views/fiscal/index.blade.php",
+      "resources/views/fiscal/nfce/_readonly_panels.blade.php",
+      "resources/views/fiscal/nfce/correct-rejection.blade.php",
+      "resources/views/fiscal/nfce/create.blade.php",
+      "resources/views/fiscal/nfce/inutilizations.blade.php",
+      "resources/views/fiscal/nfe/_additional-federal-taxes.blade.php",
+      "resources/views/fiscal/nfe/_document_rows.blade.php",
+      "resources/views/fiscal/nfe/_foreign-trade-header.blade.php",
+      "resources/views/fiscal/nfe/_foreign-trade-item.blade.php",
+      "resources/views/fiscal/nfe/_nature_form.blade.php",
+      "resources/views/fiscal/nfe/_rtc-extra-fields.blade.php",
+      "resources/views/fiscal/nfe/drafts.blade.php",
+      "resources/views/fiscal/nfe/editor.blade.php",
+      "resources/views/fiscal/nfe/inutilizations.blade.php",
+      "resources/views/fiscal/nfe/natures.blade.php",
+      "resources/views/fiscal/partials/readable-values.blade.php",
+      "resources/views/fiscal/partials/sefaz-guidance.blade.php",
+      "resources/views/fiscal/purchases/index.blade.php",
+      "resources/views/fiscal/purchases/show.blade.php",
+      "resources/views/fiscal/rules/_fields.blade.php",
+      "resources/views/fiscal/rules/index.blade.php",
+      "resources/views/fiscal/show.blade.php",
+      "resources/views/fiscal/tax-groups/_advanced.blade.php",
+      "resources/views/fiscal/tax-groups/form.blade.php",
+      "resources/views/fiscal/tax-groups/index.blade.php",
+      "resources/views/layouts/app.blade.php",
+      "resources/views/layouts/pdv.blade.php",
+      "resources/views/partials/commercial-readonly.blade.php",
+      "resources/views/partials/icon.blade.php",
+      "resources/views/partials/pagination.blade.php",
+      "resources/views/partials/quick-catalog.blade.php",
+      "resources/views/partials/table-footer.blade.php",
+      "resources/views/pdv/cash-history.blade.php",
+      "resources/views/pdv/cash-registers.blade.php",
+      "resources/views/pdv/cash-report.blade.php",
+      "resources/views/pdv/index.blade.php",
+      "resources/views/pdv/partials/cash-report-modal.blade.php",
+      "resources/views/pdv/partials/receipt-modal.blade.php",
+      "resources/views/pdv/receipt.blade.php",
+      "resources/views/products/form.blade.php",
+      "resources/views/products/index.blade.php",
+      "resources/views/purchases/form.blade.php",
+      "resources/views/purchases/index.blade.php",
+      "resources/views/purchases/show.blade.php",
+      "resources/views/sales/_nav.blade.php",
+      "resources/views/sales/create.blade.php",
+      "resources/views/sales/index.blade.php",
+      "resources/views/sales/returns/create.blade.php",
+      "resources/views/sales/returns/index.blade.php",
+      "resources/views/sales/returns/show.blade.php",
+      "resources/views/sales/show.blade.php",
+      "resources/views/services/form.blade.php",
+      "resources/views/services/index.blade.php",
+      "resources/views/settings/index.blade.php",
+      "resources/views/stock/index.blade.php"
+    ],
+    "not_rendered": [
+      {
+        "path": "resources/views/finance/settings.blade.php",
+        "reason": "A rota /finance/settings redireciona para /settings?tab=chart; view histórica sem rota ativa."
+      },
+      {
+        "path": "resources/views/fiscal/nfce-danfe.blade.php",
+        "reason": "Depende de arquivo/DANFE fiscal gerado; não foi criada emissão nem PDF fictício."
+      },
+      {
+        "path": "resources/views/fiscal/nfce-danfe-wait.blade.php",
+        "reason": "Depende do fluxo de espera de geração do DANFE; não foi executado ACBr."
+      },
+      {
+        "path": "resources/views/sales/quote-pdf.blade.php",
+        "reason": "A rota entrega PDF; a geração e a inspeção visual de PDFs não fizeram parte desta matriz de telas HTML. Template preservado e auditado no código."
+      }
+    ]
+  },
+  "focus": {
+    "submitted": false,
+    "results": [
+      {
+        "name": "product-plain",
+        "route": "/products/create",
+        "selector": "input[name=name]",
+        "normal": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(203, 214, 223)",
+          "borderColor": "rgb(203, 214, 223)",
+          "shadow": "rgba(27, 53, 75, 0.035) 0px 1px 2px 0px inset",
+          "background": "rgb(255, 255, 255)",
+          "inputBackground": "rgb(255, 255, 255)",
+          "color": "rgb(67, 87, 108)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        },
+        "focus": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(47, 131, 191)",
+          "borderColor": "rgb(47, 131, 191)",
+          "shadow": "rgba(47, 131, 191, 0.14) 0px 0px 0px 3px",
+          "background": "rgb(255, 255, 255)",
+          "inputBackground": "rgb(255, 255, 255)",
+          "color": "rgb(67, 87, 108)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": true
+        },
+        "readonly": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(217, 225, 232)",
+          "borderColor": "rgb(217, 225, 232)",
+          "shadow": "rgba(27, 53, 75, 0.035) 0px 1px 2px 0px inset",
+          "background": "rgb(243, 246, 248)",
+          "inputBackground": "rgb(243, 246, 248)",
+          "color": "rgb(100, 120, 138)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        },
+        "disabled": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(224, 229, 233)",
+          "borderColor": "rgb(224, 229, 233)",
+          "shadow": "rgba(27, 53, 75, 0.035) 0px 1px 2px 0px inset",
+          "background": "rgb(244, 246, 248)",
+          "inputBackground": "rgb(244, 246, 248)",
+          "color": "rgb(137, 152, 166)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        }
+      },
+      {
+        "name": "product-prefix",
+        "route": "/products/create",
+        "selector": "[data-cost-price]",
+        "normal": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(203, 214, 223)",
+          "borderColor": "rgb(203, 214, 223)",
+          "shadow": "none",
+          "background": "rgb(255, 255, 255)",
+          "inputBackground": "rgba(0, 0, 0, 0)",
+          "color": "rgb(67, 87, 108)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        },
+        "focus": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(47, 131, 191)",
+          "borderColor": "rgb(47, 131, 191)",
+          "shadow": "rgba(47, 131, 191, 0.14) 0px 0px 0px 3px",
+          "background": "rgb(255, 255, 255)",
+          "inputBackground": "rgba(0, 0, 0, 0)",
+          "color": "rgb(67, 87, 108)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": true
+        },
+        "readonly": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(217, 225, 232)",
+          "borderColor": "rgb(217, 225, 232)",
+          "shadow": "none",
+          "background": "rgb(243, 246, 248)",
+          "inputBackground": "rgb(243, 246, 248)",
+          "color": "rgb(100, 120, 138)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        },
+        "disabled": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(224, 229, 233)",
+          "borderColor": "rgb(224, 229, 233)",
+          "shadow": "none",
+          "background": "rgb(244, 246, 248)",
+          "inputBackground": "rgb(244, 246, 248)",
+          "color": "rgb(137, 152, 166)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        }
+      },
+      {
+        "name": "product-numeric",
+        "route": "/products/create",
+        "selector": "input[name=stock_quantity]",
+        "normal": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(203, 214, 223)",
+          "borderColor": "rgb(203, 214, 223)",
+          "shadow": "none",
+          "background": "rgb(255, 255, 255)",
+          "inputBackground": "rgba(0, 0, 0, 0)",
+          "color": "rgb(67, 87, 108)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        },
+        "focus": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(47, 131, 191)",
+          "borderColor": "rgb(47, 131, 191)",
+          "shadow": "rgba(47, 131, 191, 0.14) 0px 0px 0px 3px",
+          "background": "rgb(255, 255, 255)",
+          "inputBackground": "rgba(0, 0, 0, 0)",
+          "color": "rgb(67, 87, 108)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": true
+        },
+        "readonly": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(217, 225, 232)",
+          "borderColor": "rgb(217, 225, 232)",
+          "shadow": "none",
+          "background": "rgb(243, 246, 248)",
+          "inputBackground": "rgb(243, 246, 248)",
+          "color": "rgb(100, 120, 138)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        },
+        "disabled": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(224, 229, 233)",
+          "borderColor": "rgb(224, 229, 233)",
+          "shadow": "none",
+          "background": "rgb(244, 246, 248)",
+          "inputBackground": "rgb(244, 246, 248)",
+          "color": "rgb(137, 152, 166)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        }
+      },
+      {
+        "name": "customer-action",
+        "route": "/customers/create",
+        "selector": "input[name=document]",
+        "normal": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(203, 214, 223)",
+          "borderColor": "rgb(203, 214, 223)",
+          "shadow": "none",
+          "background": "rgb(255, 255, 255)",
+          "inputBackground": "rgba(0, 0, 0, 0)",
+          "color": "rgb(67, 87, 108)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        },
+        "focus": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(47, 131, 191)",
+          "borderColor": "rgb(47, 131, 191)",
+          "shadow": "rgba(47, 131, 191, 0.14) 0px 0px 0px 3px",
+          "background": "rgb(255, 255, 255)",
+          "inputBackground": "rgba(0, 0, 0, 0)",
+          "color": "rgb(67, 87, 108)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": true
+        },
+        "readonly": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(217, 225, 232)",
+          "borderColor": "rgb(217, 225, 232)",
+          "shadow": "none",
+          "background": "rgb(243, 246, 248)",
+          "inputBackground": "rgb(243, 246, 248)",
+          "color": "rgb(100, 120, 138)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        },
+        "disabled": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(224, 229, 233)",
+          "borderColor": "rgb(224, 229, 233)",
+          "shadow": "none",
+          "background": "rgb(244, 246, 248)",
+          "inputBackground": "rgb(244, 246, 248)",
+          "color": "rgb(137, 152, 166)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        }
+      },
+      {
+        "name": "service-plain",
+        "route": "/services/create",
+        "selector": "input[name=name]",
+        "normal": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(203, 214, 223)",
+          "borderColor": "rgb(203, 214, 223)",
+          "shadow": "rgba(27, 53, 75, 0.035) 0px 1px 2px 0px inset",
+          "background": "rgb(255, 255, 255)",
+          "inputBackground": "rgb(255, 255, 255)",
+          "color": "rgb(67, 87, 108)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        },
+        "focus": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(47, 131, 191)",
+          "borderColor": "rgb(47, 131, 191)",
+          "shadow": "rgba(47, 131, 191, 0.14) 0px 0px 0px 3px",
+          "background": "rgb(255, 255, 255)",
+          "inputBackground": "rgb(255, 255, 255)",
+          "color": "rgb(67, 87, 108)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": true
+        },
+        "readonly": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(217, 225, 232)",
+          "borderColor": "rgb(217, 225, 232)",
+          "shadow": "rgba(27, 53, 75, 0.035) 0px 1px 2px 0px inset",
+          "background": "rgb(243, 246, 248)",
+          "inputBackground": "rgb(243, 246, 248)",
+          "color": "rgb(100, 120, 138)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        },
+        "disabled": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(224, 229, 233)",
+          "borderColor": "rgb(224, 229, 233)",
+          "shadow": "rgba(27, 53, 75, 0.035) 0px 1px 2px 0px inset",
+          "background": "rgb(244, 246, 248)",
+          "inputBackground": "rgb(244, 246, 248)",
+          "color": "rgb(137, 152, 166)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        }
+      },
+      {
+        "name": "sale-icon",
+        "route": "/sales/create",
+        "selector": "input[name=keyword]",
+        "normal": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(203, 214, 223)",
+          "borderColor": "rgb(203, 214, 223)",
+          "shadow": "none",
+          "background": "rgb(255, 255, 255)",
+          "inputBackground": "rgba(0, 0, 0, 0)",
+          "color": "rgb(67, 87, 108)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        },
+        "focus": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(47, 131, 191)",
+          "borderColor": "rgb(47, 131, 191)",
+          "shadow": "rgba(47, 131, 191, 0.14) 0px 0px 0px 3px",
+          "background": "rgb(255, 255, 255)",
+          "inputBackground": "rgba(0, 0, 0, 0)",
+          "color": "rgb(67, 87, 108)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": true
+        },
+        "readonly": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(217, 225, 232)",
+          "borderColor": "rgb(217, 225, 232)",
+          "shadow": "none",
+          "background": "rgb(243, 246, 248)",
+          "inputBackground": "rgb(243, 246, 248)",
+          "color": "rgb(100, 120, 138)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        },
+        "disabled": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(224, 229, 233)",
+          "borderColor": "rgb(224, 229, 233)",
+          "shadow": "none",
+          "background": "rgb(244, 246, 248)",
+          "inputBackground": "rgb(244, 246, 248)",
+          "color": "rgb(137, 152, 166)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        }
+      },
+      {
+        "name": "return-icon",
+        "route": "/sales/returns/create",
+        "selector": "input[name=sale]",
+        "normal": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(203, 214, 223)",
+          "borderColor": "rgb(203, 214, 223)",
+          "shadow": "none",
+          "background": "rgb(255, 255, 255)",
+          "inputBackground": "rgba(0, 0, 0, 0)",
+          "color": "rgb(67, 87, 108)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        },
+        "focus": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(47, 131, 191)",
+          "borderColor": "rgb(47, 131, 191)",
+          "shadow": "rgba(47, 131, 191, 0.14) 0px 0px 0px 3px",
+          "background": "rgb(255, 255, 255)",
+          "inputBackground": "rgba(0, 0, 0, 0)",
+          "color": "rgb(67, 87, 108)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": true
+        },
+        "readonly": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(217, 225, 232)",
+          "borderColor": "rgb(217, 225, 232)",
+          "shadow": "none",
+          "background": "rgb(243, 246, 248)",
+          "inputBackground": "rgb(243, 246, 248)",
+          "color": "rgb(100, 120, 138)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        },
+        "disabled": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(224, 229, 233)",
+          "borderColor": "rgb(224, 229, 233)",
+          "shadow": "none",
+          "background": "rgb(244, 246, 248)",
+          "inputBackground": "rgb(244, 246, 248)",
+          "color": "rgb(137, 152, 166)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        }
+      },
+      {
+        "name": "nfe-numeric",
+        "route": "/fiscal/nfe/create",
+        "selector": "input[name=discount]",
+        "normal": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(203, 214, 223)",
+          "borderColor": "rgb(203, 214, 223)",
+          "shadow": "none",
+          "background": "rgb(255, 255, 255)",
+          "inputBackground": "rgba(0, 0, 0, 0)",
+          "color": "rgb(67, 87, 108)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        },
+        "focus": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(47, 131, 191)",
+          "borderColor": "rgb(47, 131, 191)",
+          "shadow": "rgba(47, 131, 191, 0.14) 0px 0px 0px 3px",
+          "background": "rgb(255, 255, 255)",
+          "inputBackground": "rgba(0, 0, 0, 0)",
+          "color": "rgb(67, 87, 108)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": true
+        },
+        "readonly": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(217, 225, 232)",
+          "borderColor": "rgb(217, 225, 232)",
+          "shadow": "none",
+          "background": "rgb(243, 246, 248)",
+          "inputBackground": "rgb(243, 246, 248)",
+          "color": "rgb(100, 120, 138)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        },
+        "disabled": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(224, 229, 233)",
+          "borderColor": "rgb(224, 229, 233)",
+          "shadow": "none",
+          "background": "rgb(244, 246, 248)",
+          "inputBackground": "rgb(244, 246, 248)",
+          "color": "rgb(137, 152, 166)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        }
+      },
+      {
+        "name": "login-plain",
+        "route": "/login",
+        "selector": "input[name=username]",
+        "normal": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(203, 214, 223)",
+          "borderColor": "rgb(203, 214, 223)",
+          "shadow": "none",
+          "background": "rgb(255, 255, 255)",
+          "inputBackground": "rgb(255, 255, 255)",
+          "color": "rgb(67, 87, 108)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        },
+        "focus": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(47, 131, 191)",
+          "borderColor": "rgb(47, 131, 191)",
+          "shadow": "rgba(47, 131, 191, 0.14) 0px 0px 0px 3px",
+          "background": "rgb(255, 255, 255)",
+          "inputBackground": "rgb(255, 255, 255)",
+          "color": "rgb(67, 87, 108)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": true
+        },
+        "readonly": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(217, 225, 232)",
+          "borderColor": "rgb(217, 225, 232)",
+          "shadow": "none",
+          "background": "rgb(243, 246, 248)",
+          "inputBackground": "rgb(243, 246, 248)",
+          "color": "rgb(100, 120, 138)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        },
+        "disabled": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(224, 229, 233)",
+          "borderColor": "rgb(224, 229, 233)",
+          "shadow": "none",
+          "background": "rgb(244, 246, 248)",
+          "inputBackground": "rgb(244, 246, 248)",
+          "color": "rgb(137, 152, 166)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        }
+      },
+      {
+        "name": "login-password",
+        "route": "/login",
+        "selector": "input[name=password]",
+        "normal": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(203, 214, 223)",
+          "borderColor": "rgb(203, 214, 223)",
+          "shadow": "none",
+          "background": "rgb(255, 255, 255)",
+          "inputBackground": "rgba(0, 0, 0, 0)",
+          "color": "rgb(67, 87, 108)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        },
+        "focus": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(47, 131, 191)",
+          "borderColor": "rgb(47, 131, 191)",
+          "shadow": "rgba(47, 131, 191, 0.14) 0px 0px 0px 3px",
+          "background": "rgb(255, 255, 255)",
+          "inputBackground": "rgba(0, 0, 0, 0)",
+          "color": "rgb(67, 87, 108)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": true
+        },
+        "readonly": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(217, 225, 232)",
+          "borderColor": "rgb(217, 225, 232)",
+          "shadow": "none",
+          "background": "rgb(243, 246, 248)",
+          "inputBackground": "rgb(243, 246, 248)",
+          "color": "rgb(100, 120, 138)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        },
+        "disabled": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(224, 229, 233)",
+          "borderColor": "rgb(224, 229, 233)",
+          "shadow": "none",
+          "background": "rgb(244, 246, 248)",
+          "inputBackground": "rgb(244, 246, 248)",
+          "color": "rgb(137, 152, 166)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        }
+      },
+      {
+        "name": "reset-plain",
+        "route": "/reset-password/visual-fixture-token?email=visual@example.test",
+        "selector": "input[name=password]",
+        "normal": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(203, 214, 223)",
+          "borderColor": "rgb(203, 214, 223)",
+          "shadow": "none",
+          "background": "rgb(255, 255, 255)",
+          "inputBackground": "rgb(255, 255, 255)",
+          "color": "rgb(67, 87, 108)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        },
+        "focus": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(47, 131, 191)",
+          "borderColor": "rgb(47, 131, 191)",
+          "shadow": "rgba(47, 131, 191, 0.14) 0px 0px 0px 3px",
+          "background": "rgb(255, 255, 255)",
+          "inputBackground": "rgb(255, 255, 255)",
+          "color": "rgb(67, 87, 108)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": true
+        },
+        "readonly": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(217, 225, 232)",
+          "borderColor": "rgb(217, 225, 232)",
+          "shadow": "none",
+          "background": "rgb(243, 246, 248)",
+          "inputBackground": "rgb(243, 246, 248)",
+          "color": "rgb(100, 120, 138)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        },
+        "disabled": {
+          "height": 38,
+          "radius": "4px",
+          "border": "1px solid rgb(224, 229, 233)",
+          "borderColor": "rgb(224, 229, 233)",
+          "shadow": "none",
+          "background": "rgb(244, 246, 248)",
+          "inputBackground": "rgb(244, 246, 248)",
+          "color": "rgb(137, 152, 166)",
+          "fontSize": "13.5px",
+          "font": "Roboto, Arial, Helvetica, sans-serif",
+          "padding": "0px 11px",
+          "lineHeight": "18.225px",
+          "focused": false
+        }
+      }
+    ]
+  },
+  "keyboard": {
+    "before": true,
+    "afterLabel": false,
+    "keyboard": {
+      "checked": true,
+      "focused": true,
+      "outline": "rgb(47, 131, 191) solid 2px",
+      "outlineWidth": "2px",
+      "documentWidth": 1366
+    },
+    "labelToggles": true,
+    "spaceToggles": true,
+    "focusVisible": true,
+    "noDocumentOverflow": true,
+    "submitted": false
+  },
+  "density": {
+    "phase": "density-final",
+    "states": 5,
+    "routes": 2,
+    "widths": [
+      1366
+    ],
+    "components": 124,
+    "roles": {
+      "command-search": 5,
+      "compact-field-select": 4,
+      "field-composite": 5,
+      "field-input": 11,
+      "field-select": 6,
+      "icon-action": 9,
+      "inner-field-input": 5,
+      "menu-trigger": 5,
+      "modal": 1,
+      "panel": 9,
+      "primary-action": 1,
+      "savebar": 3,
+      "secondary-action": 2,
+      "shell-action": 5,
+      "tab-navigation": 9,
+      "table-cell": 6,
+      "table-container": 2,
+      "table-header": 18,
+      "toolbar": 2,
+      "toolbar-primary-action": 2,
+      "toolbar-secondary-action": 14
+    },
+    "fingerprintsStable": true,
+    "unknown": [],
+    "problems": []
+  },
+  "platform_fonts": {
+    "method": "CSS.getPlatformFontsForNode; input inclui texto da árvore interna quando necessário",
+    "remoteFontsBlocked": true,
+    "results": [
+      {
+        "route": "/products/1/edit",
+        "selector": "body",
+        "fonts": [],
+        "shadowTextFonts": [
+          {
+            "familyName": "Roboto",
+            "postScriptName": "Roboto-Regular",
+            "isCustomFont": true,
+            "glyphCount": 605
+          },
+          {
+            "familyName": "DejaVu Sans Mono",
+            "postScriptName": "DejaVuSansMono",
+            "isCustomFont": false,
+            "glyphCount": 6
+          }
+        ]
+      },
+      {
+        "route": "/products/1/edit",
+        "selector": "input[name=name]",
+        "fonts": [
+          {
+            "familyName": "Roboto",
+            "postScriptName": "Roboto-Regular",
+            "isCustomFont": true,
+            "glyphCount": 23
+          }
+        ]
+      },
+      {
+        "route": "/fiscal/nfe/create",
+        "selector": "body",
+        "fonts": [],
+        "shadowTextFonts": [
+          {
+            "familyName": "Roboto",
+            "postScriptName": "Roboto-Regular",
+            "isCustomFont": true,
+            "glyphCount": 2267
+          },
+          {
+            "familyName": "DejaVu Sans Mono",
+            "postScriptName": "DejaVuSansMono",
+            "isCustomFont": false,
+            "glyphCount": 6
+          },
+          {
+            "familyName": "DejaVu Sans Mono",
+            "postScriptName": "DejaVuSansMono-Bold",
+            "isCustomFont": false,
+            "glyphCount": 13
+          }
+        ]
+      },
+      {
+        "route": "/fiscal/nfe/create",
+        "selector": "#nfeEditorTitle",
+        "fonts": [
+          {
+            "familyName": "Roboto",
+            "postScriptName": "Roboto-Regular",
+            "isCustomFont": true,
+            "glyphCount": 15
+          }
+        ]
+      }
+    ]
+  },
+  "database_integrity": {
+    "at": "2026-10-26T17:21:09.368849+00:00",
+    "unchanged": true,
+    "changed_tables": []
+  },
+  "switch_parity": {
+    "families": [
+      "switch-track",
+      "permission-switch-track",
+      "fiscal-purchases-switch-track"
+    ],
+    "checked_and_unchecked_tested": true,
+    "track": [
+      34,
+      18
+    ],
+    "thumb": [
+      14,
+      14
+    ],
+    "inset": 2,
+    "translation": 16,
+    "on": "rgb(79, 156, 233)",
+    "off": "rgb(194, 200, 207)"
+  },
+  "intentional_variants": [
+    "Ações de listagem e filtros: 34 px; ações de página/formulário: 38 px.",
+    "Modo confortável: campos 41 px; linhas de tabela 50 px e cabeçalhos 40 px.",
+    "Ícones independentes: 32 px; segmentos internos seguem a altura do campo/grupo.",
+    "Entradas de valor no caixa: 56 px/fonte 24; identificação do consumidor no checkout: 42 px/fonte 18.",
+    "Workspace fiscal em tela cheia no celular: raio zero; submodais mantêm 4 px.",
+    "Ações do comprovante podem crescer com rótulos em duas linhas no celular; mínimo 38 px, tipografia e bordas compartilhadas.",
+    "Tabelas largas têm rolagem confinada; linhas crescem quando o conteúdo exige.",
+    "Papel do comprovante/PDF e atalhos monoespaçados preservam suas funções próprias."
+  ],
+  "limitations": [
+    "Inspeção manual visual por amostragem das capturas; navegação, presença de painéis e estilos foram medidos automaticamente na matriz.",
+    "Windows/Laragon, outros navegadores e DPI do cliente não foram acessados.",
+    "Nenhuma emissão, assinatura, transmissão ou homologação fiscal foi executada nesta auditoria visual.",
+    "Quatro templates não foram renderizados pelos motivos identificados; não se declara validação visual de PDF/DANFE."
+  ],
+  "artifacts": [
+    {
+      "file": "docs/audits/visual-2026-10-26/screenshots/before-product-1366.png",
+      "phase": "baseline-clean",
+      "sha256": "ca05b8c9217100b941f1915bd4f0f7a50fb1d268491276dda9157c3d8a922681",
+      "bytes": 81641
+    },
+    {
+      "file": "docs/audits/visual-2026-10-26/screenshots/before-product-390.png",
+      "phase": "baseline-clean",
+      "sha256": "22301d89fc77cd999b1d2980660b8e2051b7fbea973e5e5b0e9b7ca0c2884881",
+      "bytes": 37632
+    },
+    {
+      "file": "docs/audits/visual-2026-10-26/screenshots/after-product-1366.png",
+      "phase": "retarget",
+      "sha256": "94c419255dc0332ef1e82ea632ff90186b0bdd58a8dfb63466fdb1f2d0227e08",
+      "bytes": 80541
+    },
+    {
+      "file": "docs/audits/visual-2026-10-26/screenshots/after-product-390.png",
+      "phase": "retarget",
+      "sha256": "1007405b65ca9d4d118cd476486025e2ec93c226327ccec2450391209ec466ac",
+      "bytes": 36505
+    },
+    {
+      "file": "docs/audits/visual-2026-10-26/screenshots/sale-quick-catalog-1366.png",
+      "phase": "retarget",
+      "sha256": "2045ef4bac5eee390ccd8d4b66a80542c7aaacc47e5613c636904962731b9f0e",
+      "bytes": 101049
+    },
+    {
+      "file": "docs/audits/visual-2026-10-26/screenshots/nfe-item-1366.png",
+      "phase": "complete",
+      "sha256": "f49d48a907fe97ba4aa9fe811c941ab3ba7b85c3e3bb41e91e7e2653b82e65a7",
+      "bytes": 86115
+    },
+    {
+      "file": "docs/audits/visual-2026-10-26/screenshots/nfe-item-390.png",
+      "phase": "complete",
+      "sha256": "bc5b769b315b3e1faed249aabab60c1b041396c3233a6ab0f7e6cb123789310c",
+      "bytes": 45542
+    },
+    {
+      "file": "docs/audits/visual-2026-10-26/screenshots/pdv-operations-1366.png",
+      "phase": "retarget",
+      "sha256": "624cce5cfc09d1d39453477a8f2e565ad6816856d3b260e5b27d55c4f058be7a",
+      "bytes": 111622
+    },
+    {
+      "file": "docs/audits/visual-2026-10-26/screenshots/pdv-receipt-390.png",
+      "phase": "retarget",
+      "sha256": "3d0d7957d1c23a27075e18e6bf5f5eb4d736b781c840c0c6f3825c9600d9c276",
+      "bytes": 57434
+    },
+    {
+      "file": "docs/audits/visual-2026-10-26/screenshots/fiscal-utilities-390.png",
+      "phase": "complete",
+      "sha256": "cd2b0d7a5c2b5cf29bb360618862c0519fd61c31b6015616e0caaa37865c347e",
+      "bytes": 39194
+    },
+    {
+      "file": "docs/audits/visual-2026-10-26/screenshots/settings-general-1366.png",
+      "phase": "retarget",
+      "sha256": "37468757550419dce1e718f27915a86f46e89e65a5e44daf74e05463915f1577",
+      "bytes": 98101
+    },
+    {
+      "file": "docs/audits/visual-2026-10-26/screenshots/login-390.png",
+      "phase": "complete",
+      "sha256": "d229e2dcd26630a626a38b2e486896a1f289774f8faa187f67bbf46993069b0a",
+      "bytes": 55383
+    }
+  ],
+  "raw_evidence_directory": "/workspace/scratch/visual-standardization",
+  "reproduce": "tools/visual-audit/README.md",
+  "verification_tools": {
+    "php_lint": [
+      "tools/visual-audit/router.php",
+      "tools/visual-audit/fixtures.php"
+    ],
+    "node_check": [
+      "tools/visual-audit/capture.mjs",
+      "tools/visual-audit/gate.mjs",
+      "tools/visual-audit/focus.mjs",
+      "tools/visual-audit/keyboard.mjs",
+      "tools/visual-audit/fonts.mjs"
+    ],
+    "git_diff_check": "pass"
+  }
+}

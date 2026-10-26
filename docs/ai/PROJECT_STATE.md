@@ -1,5 +1,27 @@
 # Estado do projeto — Lumeron ERP
 
+## Auditoria visual integrada — 26/10/2026
+
+Branch `feature/nfe55-motor-fiscal-completo`, base `5e81321`; commits de aplicação
+`ef6a5e9`, `7a6e5eb`, `d2eb35e` e `8474fda`, publicados sem merge/deploy.
+108 fontes de interface auditadas (85 Blade/23 CSS); 46 grupos de problemas
+corrigidos. Tokens e componentes centralizados; nenhuma duplicata/conflito
+exato de CSS ou estilo local operacional identificado pelo inventário final.
+
+Chromium 154: 684 observações/550 estados únicos/97 variantes de rota em quatro
+resoluções, sem divergências nos papéis medidos; 81/85 views renderizadas.
+Dados sintéticos, somente GET, hashes do banco preservados; foco, teclado,
+Roboto real, densidade e switches comprovados. Suíte integrada em 7a6e5eb:
+1.249 testes/8.616 asserções, zero falhas/erros, dois PDFs ignorados; após ajustes dos
+switches, 13 testes/383 asserções aprovados e regressão visual direcionada.
+Sintaxe em 552 arquivos de aplicação + 8 ferramentas válida. PHP 8.5.12/SQLite.
+
+Não houve modificação de lógica fiscal/financeira, rotas, migrations ou
+integrações. Sem novas dependências. Atualização: pull da branch e
+`php artisan optimize:clear`. Windows/PHP 8.3, ACBr/SEFAZ e PDFs finais não
+revalidados; quatro templates sem prova visual estão identificados no relatório.
+[Relatório e evidências](../audits/visual-2026-10-26/REPORT.md).
+
 **Retrato de referência:** 19/10/2026, inspeção do código remoto da branch `feature/acbr-nfe-bootstrap` no repositório `robsonmktsouza-stack/nextor`. **Não é um atestado de funcionamento em produção**; não foram executados testes locais ou chamadas reais à SEFAZ para elaborar este retrato.
 
 ## Decisão de gestão de releases — 20/10/2026 (não é deploy)
@@ -85,7 +107,7 @@ A branch `feature/nfe55-motor-fiscal-completo` recebeu motor fiscal integrado, r
 Na mesma branch feature, commits cfe8fbb/68bcdae corrigem bloqueios incondicionais
 de produção, completam configuração de série/numeração por ambiente e adicionam
 nfe:verify-flow de homologação usando a fila/ACBr existentes. A configuração
-local informada (Windows/Laragon,PHP8.3,ACBr1.5.0.490,BA/CRT1,A1) não é acessível
+local informada (Windows/Laragon,PHP 8.3,ACBr1.5.0.490,BA/CRT1,A1) não é acessível
 na nuvem; [procedimento local](../fiscal/nfe55-laragon-real-validation.md).
 Não houve acesso ao Windows, transmissão SEFAZ real ou deploy nesta sessão.
 
