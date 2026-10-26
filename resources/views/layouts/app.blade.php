@@ -184,6 +184,13 @@
     <a href="{{ route('settings.index') }}" class="sidebar-link sidebar-settings-link {{ request()->routeIs('settings.*') ? 'active' : '' }}">
       @include('partials.icon',['name'=>'settings'])<span>Configurações</span></a>
     @endif
+    <div class="lm-sidebar-account">
+      <span>{{ auth()->user()->name }}</span>
+      <form method="post" action="{{ route('logout') }}">
+        @csrf
+        <button type="submit">@include('partials.icon',['name'=>'logout','size'=>17]) Sair do Lumeron</button>
+      </form>
+    </div>
   </aside>
   <main class="cms-page-shell @yield('pageShellClass')" id="pageShell">
     <div class="main-content">
