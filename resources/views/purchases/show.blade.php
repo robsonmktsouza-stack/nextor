@@ -42,8 +42,10 @@
         <div class="purchase-item-primary purchase-readonly-primary">
           <div class="purchase-readonly-data purchase-product-field">
             <span>Produto</span>
-            <strong>{{ $item->product_name }}</strong>
-            <small>{{ $item->product_sku }} · {{ $item->unit }}</small>
+            <strong>{{ $item->source_description ?: $item->product_name }}</strong>
+            @if($item->source_code)<small>Código NF-e: {{ $item->source_code }}</small>@endif
+            @if(!$item->product_id)<small class="purchase-unlinked">Pendente de vínculo com o estoque</small>@endif
+            <small>{{ $item->product_id ? $item->product_sku.' · '.$item->unit : ($item->source_unit ?: 'UN') }}</small>
           </div>
           <div class="purchase-readonly-data">
             <span>Quantidade</span>
