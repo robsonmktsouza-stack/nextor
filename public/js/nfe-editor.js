@@ -257,6 +257,82 @@
     renderItems();
   };
 
+
+  // Pesquisa de naturezas: mantém o select original como fonte de verdade
+  // para validação, envio do formulário e regras fiscais existentes.
+  (() => {
+    const native=byId('nfeNature');
+    const search=byId('nfeNatureSearch');
+    const list=byId('nfeNatureOptions');
+    const root=search?.closest('[data-nfe-nature-combobox]');
+    if(!native||!search||!list||!root)return;
+    const options=Array.from(native.options).filter(option=>option.value);
+    const normalize=value=>String(value||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().trim();
+    const selectedText=()=>native.selectedOptions[0]?.value?native.selectedOptions[0].textContent.trim():'';
+    const close=()=>{list.hidden=true;search.setAttribute('aria-expanded','false');};
+    const render=()=>{
+      const term=normalize(search.value);
+      const matching=options.filter(option=>normalize(option.textContent).includes(term)).slice(0,80);
+      list.replaceChildren();
+      if(!matching.length){
+        const empty=document.createElement('div');
+        empty.className='nfe-nature-empty';
+        empty.textContent='Nenhuma natureza encontrada.';
+        list.appendChild(empty);
+      }
+      matching.forEach(option=>{
+        const button=document.createElement('button');
+        button.type='button';
+        button.className='nfe-nature-option';
+        button.setAttribute('role','option');
+        button.setAttribute('aria-selected',String(native.value===option.value));
+        button.textContent=option.textContent.trim();
+        button.addEventListener('mousedown',event=>event.preventDefault());
+        button.addEventListener('click',()=>{
+          native.value=option.value;
+          search.value=option.textContent.trim();
+          native.dispatchEvent(new Event('change',{bubbles:true}));
+          close();
+        });
+        list.appendChild(button);
+      });
+      list.hidden=false;
+      search.setAttribute('aria-expanded','true');
+    };
+    search.value=selectedText();
+    search.addEventListener('focus',()=>{search.select();render();});
+    search.addEventListener('input',()=>{
+      if(native.value){
+        native.value='';
+        native.dispatchEvent(new Event('change',{bubbles:true}));
+      }
+      render();
+    });
+    search.addEventListener('keydown',event=>{
+      if(event.key==='Escape'){close();search.value=selectedText();}
+      if(event.key==='ArrowDown'){
+        if(list.hidden)render();
+        const first=list.querySelector('button');
+        if(first){event.preventDefault();first.focus();}
+      }
+      if(event.key==='Enter'&&!list.hidden){
+        const first=list.querySelector('button');
+        if(first){event.preventDefault();first.click();}
+      }
+    });
+    list.addEventListener('keydown',event=>{
+      const buttons=Array.from(list.querySelectorAll('button'));
+      const index=buttons.indexOf(document.activeElement);
+      if(event.key==='ArrowDown'){event.preventDefault();buttons[Math.min(index+1,buttons.length-1)]?.focus();}
+      if(event.key==='ArrowUp'){event.preventDefault();index<=0?search.focus():buttons[index-1]?.focus();}
+      if(event.key==='Escape'){close();search.focus();}
+    });
+    native.addEventListener('change',()=>{search.value=selectedText();});
+    document.addEventListener('pointerdown',event=>{if(!root.contains(event.target))close();});
+    const clear=byId('nfeClearNature');
+    clear?.addEventListener('click',()=>{search.value='';close();});
+  })();
+
   byId('nfeNature')?.addEventListener('change',()=>{
     const nature=selectedNature();
     if(nature){
