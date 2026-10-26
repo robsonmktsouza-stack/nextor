@@ -1,3 +1,18 @@
+## 26/10/2026 — Revisão mobile-first após teste de usuário
+
+O primeiro teste em celular mostrou que a entrega anterior se comportava como desktop reduzido. Esta revisão substitui a apresentação, **sem criar backend paralelo**:
+
+- Dashboard `resources/views/partials/mobile-home.blade.php`: saudação, valor vendido, indicadores de produtos/estoque, ações rápidas e listas operacionais. Dados vêm do mesmo `DashboardController`.
+- Cabeçalho `lm-appbar`: identidade Lumeron, nome da tela e ação contextual de novo cadastro/venda; utiliza o menu atual com estado sincronizado.
+- Vendas, Produtos e Clientes: componentes Blade próprios para listagens no celular (dados de paginação e rotas existentes); tabelas desktop preservadas e ocultas somente na viewport mobile. Live search mantém o componente dentro do alvo de atualização.
+- Financeiro: visão móvel específica com recebimentos/pagamentos, vencimentos e contas, utilizando variáveis já fornecidas pela rota `finance.dashboard`.
+- Nova venda/orçamento: navegação por seções, campos verticais, linhas do carrinho e parcelas em blocos responsivos. **Não altera o serviço de vendas, cálculo de totais ou fluxo de salvamento.**
+- Novo CSS `public/css/mobile-native.css` é carregado **depois** da primeira camada responsiva e atua somente no `@media screen (max-width:760px)`. A navegação de etapas da venda fica oculta no desktop.
+- O menu mobile mantém identificação de usuário e logout. Cabeçalhos e ações de Fiscal/Estoque e dos módulos ainda não convertidos foram preservados.
+- Testes `LumeronMobilePwaTest` ampliados para renderizar Dashboard, Produtos, Clientes, Vendas, Financeiro e Nova venda.
+- **Pendente:** validação visual no celular real (incluindo edição, teclado, modais e seleção); outros módulos ainda usam a camada de responsividade herdada e precisarão de interfaces próprias.
+
+
 # Lumeron Mobile — entrega técnica na branch de desenvolvimento
 
 **Branch:** `feature/lumeron-mobile`  
