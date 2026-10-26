@@ -2,13 +2,19 @@
 @section('title','Configurações fiscais')
 @section('titleMeta', $current ? 'Catálogo '.$current->version : 'Catálogo não instalado')
 @section('actions')
-  <a href="{{ route('fiscal.index') }}" class="btn btn-secondary">@include('partials.icon',['name'=>'arrow-left','size'=>16]) Fiscal</a>
-  <form method="post" action="{{ route('fiscal.catalog.install') }}">@csrf
-    <label><input type="checkbox" name="install_templates" value="1" checked> Incluir modelos inativos</label>
-    <button class="btn btn-secondary" type="submit">Instalar versão do sistema</button>
-  </form>
+  <a href="{{ route('settings.index',['tab'=>'tax']) }}" class="btn btn-secondary">
+    @include('partials.icon',['name'=>'arrow-left','size'=>16]) Impostos e tributação
+  </a>
 @endsection
 @section('content')
+@push('styles')
+<style>
+.catalog-filterbar{display:grid;grid-template-columns:minmax(135px,1.1fr) minmax(200px,2fr) minmax(145px,1fr) 74px minmax(135px,1fr) minmax(135px,1fr) auto;gap:10px;align-items:end;padding:12px;border-bottom:1px solid var(--border,#d8e0e7);background:var(--panel,#fff)}
+.catalog-filterbar .field{min-width:0;margin:0}.catalog-filterbar .field input,.catalog-filterbar .field select{width:100%;min-width:0}.catalog-filterbar .field>span{display:block;white-space:nowrap}.catalog-filter-submit{height:36px;white-space:nowrap}.catalog-filterbar+.table-scroll{margin-top:0}.catalog-filterbar~.erp-help-details{margin:12px}
+@media(max-width:1250px){.catalog-filterbar{grid-template-columns:repeat(3,minmax(0,1fr))}.catalog-filter-search{grid-column:span 2}}
+@media(max-width:700px){.catalog-filterbar{grid-template-columns:repeat(2,minmax(0,1fr))}.catalog-filter-search{grid-column:span 2}}
+</style>
+@endpush
 <nav class="sales-module-tabs" aria-label="Configurações fiscais">
   <a href="{{ route('fiscal.catalog.index') }}" class="{{ $tab==='entries'?'active':'' }}">Tabelas oficiais</a>
   <a href="{{ route('fiscal.catalog.index',['tab'=>'coverage']) }}" class="{{ $tab==='coverage'?'active':'' }}">Cobertura por UF</a>
@@ -20,16 +26,14 @@
 </nav>
 @if($tab==='entries')
 <section class="cms-card">
-  <form method="get" action="{{ route('fiscal.catalog.index') }}" class="settings-editor">
-    <div class="editor-grid cols-12 settings-grid">
-      <label class="field col-3"><span>Tabela</span><select name="kind">@foreach($kinds as $value=>$label)<option value="{{ $value }}" @selected($kind===$value)>{{ $label }}</option>@endforeach</select></label>
-      <label class="field col-3"><span>Código ou descrição</span><input name="q" value="{{ request('q') }}" maxlength="120"></label>
-      <label class="field col-2"><span>Data da operação</span><input name="date" type="date" value="{{ request('date') }}"></label>
-      <label class="field col-1"><span>UF</span><input name="uf" value="{{ request('uf') }}" maxlength="2" pattern="[A-Z]{2}"></label>
-      <label class="field col-2"><span>Situação</span><select name="status"><option value="">Todas</option><option value="reference" @selected(request('status')==='reference')>Referência</option><option value="template" @selected(request('status')==='template')>Modelo</option><option value="revoked" @selected(request('status')==='revoked')>Revogada</option></select></label>
-      <div class="field col-1"><span>&nbsp;</span><button class="btn btn-secondary" type="submit">Filtrar</button></div>
-      <label class="field col-3"><span>Versão consultada</span><select name="release"><option value="">Atual</option>@foreach($releases as $item)<option value="{{ $item->id }}" @selected((string)request('release')===(string)$item->id)>{{ $item->version }}</option>@endforeach</select></label>
-    </div>
+  <form method="get" action="{{ route('fiscal.catalog.index') }}" class="catalog-filterbar">
+    <label class="field"><span>Tabela</span><select name="kind">@foreach($kinds as $value=>$label)<option value="{{ $value }}" @selected($kind===$value)>{{ $label }}</option>@endforeach</select></label>
+    <label class="field catalog-filter-search"><span>Código ou descrição</span><input name="q" value="{{ request('q') }}" maxlength="120" placeholder="Pesquisar código ou descrição"></label>
+    <label class="field"><span>Data da operação</span><input name="date" type="date" value="{{ request('date') }}"></label>
+    <label class="field catalog-filter-uf"><span>UF</span><input name="uf" value="{{ request('uf') }}" maxlength="2" pattern="[A-Za-z]{2}" placeholder="Todas"></label>
+    <label class="field"><span>Situação</span><select name="status"><option value="">Todas</option><option value="reference" @selected(request('status')==='reference')>Referência</option><option value="template" @selected(request('status')==='template')>Modelo</option><option value="revoked" @selected(request('status')==='revoked')>Revogada</option></select></label>
+    <label class="field"><span>Versão</span><select name="release"><option value="">Atual</option>@foreach($releases as $item)<option value="{{ $item->id }}" @selected((string)request('release')===(string)$item->id)>{{ $item->version }}</option>@endforeach</select></label>
+    <button class="btn btn-secondary catalog-filter-submit" type="submit">@include('partials.icon',['name'=>'search','size'=>15]) Filtrar</button>
   </form>
   <div class="table-scroll"><table class="cms-table">
     <thead><tr><th>Código</th><th>Descrição</th><th>Abrangência</th><th>Vigência</th><th>Situação</th><th>Fundamento / condições</th></tr></thead>
