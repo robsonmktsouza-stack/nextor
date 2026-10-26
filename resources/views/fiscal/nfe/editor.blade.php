@@ -632,7 +632,7 @@ $origins=[
     </section>
 
     <section class="editor-tab-panel nfe-form-section cms-card" id="nfe-section-other" aria-label="Informações adicionais">
-      <div class="editor-panel">
+      <div class="editor-panel" id="nfeReferencedDocumentsPanel" @if(!$nfeOld('has_referenced_document',$draft->has_referenced_document || !empty($draft->references))) hidden @endif>
         <div class="delivery-card-title">
           <div><h3>Documentos referenciados</h3></div>
           <button type="button" class="btn btn-secondary" data-nfe-modal-open="nfeReferenceDialog">@include('partials.icon',['name'=>'plus','size'=>15]) Referenciar documento</button>
