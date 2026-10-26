@@ -807,3 +807,74 @@ body.system-comfortable .app-root{
 .sefaz-guidance-details{margin-top:7px;font-size:12px}
 .sefaz-guidance-details summary{cursor:pointer;max-width:100%}
 .sefaz-guidance-original{white-space:pre-wrap;overflow-wrap:anywhere}
+
+
+/*
+ * Contrato visual administrativo: aplicado por último no layout principal.
+ * Mesma função = mesma geometria, independentemente do módulo.
+ * Não atinge PDV em tela cheia, DANFE, impressões nem elementos circulares.
+ */
+@media screen {
+  .app-root {
+    --ui-radius:4px;
+    --ui-control-radius:4px;
+    --ui-card-radius:4px;
+    --ui-control-height:38px;
+    --ui-action-height:34px;
+  }
+
+  /* Contêineres: evitar cartões com cantos e sombras diferentes. */
+  .app-root :is(.cms-card,.sales-module-card,.editor-panel,.settings-panel,.purchase-editor,.purchase-show-table-wrap) {
+    border-radius:var(--ui-card-radius);
+  }
+  .app-root :is(.cms-card,.sales-module-card,.editor-panel,.settings-panel) {
+    box-shadow:0 1px 2px rgba(26,54,75,.045);
+  }
+
+  /* Ações: mesmo raio, altura e tipografia em listagens e detalhes. */
+  .app-root :is(.grid-actionbar,.dialog-footer,.editor-savebar,.purchase-savebar) :is(.btn,.grid-tool,.grid-primary-action,.grid-filter-button),
+  .app-root :is(.grid-tool,.grid-primary-action,.grid-filter-button,.btn,.btn-icon,.input-action-button,.table-search-submit,.purchase-show-detail-btn) {
+    border-radius:var(--ui-control-radius);
+    font-family:inherit;
+  }
+  .app-root .grid-actionbar :is(.grid-tool,.grid-primary-action,.grid-filter-button,.btn) {
+    min-height:var(--ui-action-height);
+    box-sizing:border-box;
+    line-height:1.2;
+    align-items:center;
+    justify-content:center;
+  }
+  .app-root .grid-actionbar :is(.grid-actions-left,.grid-actions-right) {
+    align-items:center;
+    gap:6px;
+  }
+  .app-root :is(.grid-tool,.btn,.btn-icon,.purchase-show-detail-btn):focus-visible {
+    outline:2px solid #2f83bf;
+    outline-offset:2px;
+  }
+
+  /* Campos: não modificar grupos monetários com prefixos R$ nem switches. */
+  .app-root .field :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),select,textarea,.ui-select-trigger),
+  .app-root :is(.input-filter,.bulk-action-select,.table-search input) {
+    border-radius:var(--ui-control-radius);
+  }
+  .app-root .field :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]),select,.ui-select-trigger) {
+    min-height:var(--ui-control-height);
+  }
+
+  /* Tabelas e modais com o mesmo acabamento. */
+  .app-root :is(.table-scroll,.purchase-show-table-wrap) {
+    border-radius:var(--ui-card-radius);
+  }
+  .app-root :is(.erp-dialog,.nextor-modal,.modal-dialog) {
+    border-radius:var(--ui-card-radius);
+  }
+  .app-root :is(.cms-table,.purchase-show-table) thead th {
+    font-weight:700;
+  }
+
+  /* Preservar formas que têm significado próprio. */
+  .app-root :is(.status,.badge,.switch,.toggle-switch,.avatar,.pager-dot) {
+    border-radius:inherit;
+  }
+}
