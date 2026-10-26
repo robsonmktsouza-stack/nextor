@@ -3,10 +3,13 @@
 @section('actions')
 <a class="btn btn-success" href="{{ route('finance.entries.create',['type'=>'receivable']) }}">@include('partials.icon',['name'=>'plus','size'=>16]) Conta a receber</a>
 <a class="btn btn-secondary" href="{{ route('finance.entries.create',['type'=>'payable']) }}">@include('partials.icon',['name'=>'plus','size'=>16]) Conta a pagar</a>
+</div>
 @endsection
 
 @section('content')
 @include('finance._nav')
+@include('partials.mobile-finance-dashboard')
+<div class="lm-desktop-finance">
 
 <div class="finance-periodbar">
   <a class="period-current" href="{{ route('finance.dashboard',['month'=>now()->format('Y-m')]) }}">Mês atual</a>
