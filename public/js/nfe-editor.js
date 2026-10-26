@@ -530,6 +530,14 @@
     renderTotals();
   };
 
+  const syncReferencePanel=()=>{
+    const toggle=byId('nfeHasReferencedDocument');
+    const panel=byId('nfeReferencedDocumentsPanel');
+    if(panel && toggle) panel.hidden=!toggle.checked;
+  };
+  byId('nfeHasReferencedDocument')?.addEventListener('change',syncReferencePanel);
+  syncReferencePanel();
+
   const renderReferences=()=>{
     const body=byId('nfeReferenceBody');
     if(!body) return;
