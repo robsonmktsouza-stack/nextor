@@ -123,3 +123,35 @@
 .purchase-import-product{display:block;margin-top:3px;color:#668399;font-size:11px;line-height:1.4;font-weight:400;overflow-wrap:anywhere}
 .purchase-map-button{align-self:flex-start;padding:3px 0;border:0;background:transparent;color:#237bae;font-size:11px;font-weight:600;cursor:pointer}
 .purchase-map-button:hover{text-decoration:underline}
+
+/* Editor de compras: alinhamento consistente com itens importados da NF-e. */
+.purchase-editor .purchase-items-panel{padding-top:16px!important;padding-bottom:16px!important}
+.purchase-editor .purchase-items-panel>.purchase-section-heading{margin-bottom:8px}
+.purchase-item-line{padding:10px 0 12px}
+.purchase-item-line+.purchase-item-line{padding-top:12px}
+.purchase-item-source{display:flex;align-items:center;gap:9px;min-width:0;padding:6px 9px;margin:0 0 9px;background:#f4f8fb;border-left:3px solid #91b7cf;border-radius:2px}
+.purchase-item-source[hidden]{display:none!important}
+.purchase-item-source>strong{flex:0 0 auto;font-size:10px;font-weight:700;color:#47667b}
+.purchase-item-source .purchase-import-product{flex:1;min-width:0;margin:0;font-size:11px;color:#405d71;line-height:1.35;overflow-wrap:anywhere}
+.purchase-item-source .purchase-map-button{flex:0 0 auto;margin:0;padding:3px 5px;white-space:nowrap}
+.purchase-item-primary{align-items:start;grid-template-columns:minmax(230px,2.6fr) minmax(120px,.8fr) minmax(145px,.9fr) minmax(115px,.72fr) 32px}
+.purchase-item-primary>.purchase-line-field,.purchase-item-primary>.purchase-item-amount{margin:0}
+.purchase-item-primary .purchase-item-amount strong{min-height:38px;align-items:center}
+.purchase-item-primary .purchase-remove{align-self:start;margin-top:20px}
+.purchase-item-charges{margin-top:9px;padding-top:9px}
+.purchase-item-charges .purchase-line-field{gap:4px}
+.purchase-item-charges .purchase-line-field>input{height:33px}
+.purchase-item-primary .purchase-map-button{margin-top:3px}
+.purchase-bottom-grid{padding-top:13px}
+@media(max-width:1100px){
+ .purchase-item-primary{grid-template-columns:minmax(180px,2fr) minmax(95px,.8fr) minmax(110px,.9fr) minmax(95px,.8fr) 30px}
+}
+@media(max-width:780px){
+ .purchase-item-primary{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 32px}
+ .purchase-item-primary .purchase-product-field{grid-column:1/-1}
+ .purchase-item-primary .purchase-item-amount{grid-column:2}
+ .purchase-item-primary .purchase-remove{grid-column:3;margin-top:20px}
+ .purchase-item-source{flex-wrap:wrap}
+ .purchase-item-source .purchase-import-product{flex-basis:calc(100% - 110px)}
+ .purchase-item-source .purchase-map-button{margin-left:auto}
+}
