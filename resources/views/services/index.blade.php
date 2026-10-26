@@ -70,7 +70,7 @@
 
   <div id="services-live-results" data-live-search-results>
   <div class="table-scroll">
-    <table class="cms-table">
+    <table class="cms-table" data-mobile-cards>
       <thead>
         <tr>
           <th class="select-cell"><input type="checkbox" data-check-all aria-label="Selecionar todos"></th>
