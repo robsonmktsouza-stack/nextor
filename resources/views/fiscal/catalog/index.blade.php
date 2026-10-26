@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('title','Configurações fiscais')
-@section('titleMeta', $current ? 'Catálogo '.$current->version : 'Catálogo não instalado')
+@section('titleMeta', '')
 @section('actions')
   <a href="{{ route('settings.index',['tab'=>'tax']) }}" class="btn btn-secondary">
     @include('partials.icon',['name'=>'arrow-left','size'=>16]) Impostos e tributação
@@ -17,12 +17,12 @@
 @endpush
 <nav class="sales-module-tabs" aria-label="Configurações fiscais">
   <a href="{{ route('fiscal.catalog.index') }}" class="{{ $tab==='entries'?'active':'' }}">Tabelas oficiais</a>
-  <a href="{{ route('fiscal.catalog.index',['tab'=>'coverage']) }}" class="{{ $tab==='coverage'?'active':'' }}">Cobertura por UF</a>
+  <a href="{{ route('fiscal.catalog.index',['tab'=>'coverage']) }}" class="{{ $tab==='coverage'?'active':'' }}">Consulta por estado</a>
   <a href="{{ route('fiscal.nfe.natures.index') }}">Naturezas de operação</a>
   <a href="{{ route('fiscal.tax-groups.index') }}">Grupos tributários</a>
-  <a href="{{ route('fiscal.tax-rules.index') }}">Regras e parâmetros</a>
+  <a href="{{ route('fiscal.tax-rules.index') }}">Regras tributárias</a>
   <a href="{{ route('fiscal.fcp.index') }}">FCP</a>
-  <a href="{{ route('fiscal.catalog.index',['tab'=>'history']) }}" class="{{ $tab==='history'?'active':'' }}">Histórico e vigência</a>
+  <a href="{{ route('fiscal.catalog.index',['tab'=>'history']) }}" class="{{ $tab==='history'?'active':'' }}">Atualizações</a>
 </nav>
 @if($tab==='entries')
 <section class="cms-card">
@@ -36,15 +36,15 @@
     <button class="btn btn-secondary catalog-filter-submit" type="submit">@include('partials.icon',['name'=>'search','size'=>15]) Filtrar</button>
   </form>
   <div class="table-scroll"><table class="cms-table">
-    <thead><tr><th>Código</th><th>Descrição</th><th>Abrangência</th><th>Vigência</th><th>Situação</th><th>Fundamento / condições</th></tr></thead>
+    <thead><tr><th>Código</th><th>Descrição</th><th>UF</th><th>Validade</th><th>Situação</th><th>Detalhes</th></tr></thead>
     <tbody>@forelse($entries as $entry)
       <tr>
         <td><strong>{{ $entry->code }}</strong></td>
         <td>{{ $entry->description }}</td>
-        <td>{{ $entry->uf ?: 'Nacional' }}<small class="table-subtitle">{{ $entry->regime ?: 'Conforme condições' }}</small></td>
-        <td>{{ $entry->valid_from?->format('d/m/Y') ?? 'Não informada' }}<small class="table-subtitle">{{ $entry->valid_until ? 'até '.$entry->valid_until->format('d/m/Y') : 'Sem término informado' }}</small></td>
-        <td><span class="status status-muted">{{ ['reference'=>'Referência','template'=>'Modelo','revoked'=>'Revogada'][$entry->status] ?? $entry->status }}</span></td>
-        <td><details><summary class="table-link">Consultar</summary>
+        <td>{{ $entry->uf ?: 'Todas' }}</td>
+        <td>{{ $entry->valid_until?->format('d/m/Y') ?? 'Sem prazo definido' }}</td>
+        <td><span class="status status-muted">{{ ['reference'=>'Disponível','template'=>'Padrão','revoked'=>'Revogada'][$entry->status] ?? $entry->status }}</span></td>
+        <td><details><summary class="table-link">Ver detalhes</summary>
           <p>{{ data_get($entry->source,'reference') }}</p>
           @if(data_get($entry->source,'url'))<a class="table-link" href="{{ data_get($entry->source,'url') }}" target="_blank" rel="noopener noreferrer">Fonte oficial</a>@endif
           <small class="table-subtitle">Versão {{ data_get($entry->source,'version','não declarada') }} · Consulta {{ data_get($entry->source,'consulted_at',$release?->consulted_at?->format('Y-m-d')) }}</small>
@@ -55,10 +55,7 @@
     @empty<tr><td colspan="6" class="empty-cell">Nenhum registro encontrado para esta tabela e versão.</td></tr>@endforelse</tbody>
   </table></div>
   @include('partials.table-footer',['paginator'=>$entries])
-  <details class="erp-help-details"><summary>Cobertura e aplicação</summary>
-    <p>Os códigos de referência e modelos não ativam regras tributárias. A aplicação depende das condições legais e das regras revisadas da instalação.</p>
-    <pre style="white-space:pre-wrap">{{ json_encode($release?->coverage ?? [],JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) }}</pre>
-  </details>
+
 </section>
 @elseif($tab==='coverage')
 <section class="cms-card">
@@ -84,16 +81,16 @@
       </details>@endif</td>
     </tr>@endforeach</tbody>
   </table></div>
-  <details class="erp-help-details"><summary>Alcance das referências</summary><p>A cobertura descreve os códigos e fontes disponíveis. Não habilita operações, alíquotas ou benefícios. Sem tabela validada não significa ausência de benefícios ou dispensa de cBenef na UF.</p></details>
+
 </section>
 @else
 <section class="cms-card">
   <div class="table-scroll"><table class="cms-table">
-    <thead><tr><th>Versão</th><th>Consulta</th><th>Instalação</th><th>Registros</th><th>Fontes e integridade</th></tr></thead>
+    <thead><tr><th>Versão</th><th>Consulta</th><th>Instalação</th><th>Registros</th><th>Detalhes</th></tr></thead>
     <tbody>@forelse($releases as $item)<tr>
       <td><a class="table-link" href="{{ route('fiscal.catalog.index',['release'=>$item->id]) }}">{{ $item->version }}</a>@if($current?->id===$item->id)<small class="table-subtitle">Atual</small>@endif</td>
       <td>{{ $item->consulted_at?->format('d/m/Y') }}</td><td>{{ $item->installed_at?->format('d/m/Y H:i') }}</td><td>{{ $item->entry_count }}</td>
-      <td><details><summary class="table-link">Ver fontes</summary>
+      <td><details><summary class="table-link">Ver detalhes</summary>
         <small class="table-subtitle">SHA-256 do conteúdo canônico {{ $item->sha256 }}</small>
         @foreach(($item->sources ?? []) as $source)<p>{{ $source['reference'] ?? $source['id'] ?? '' }}<br><a class="table-link" href="{{ $source['url'] ?? '' }}" target="_blank" rel="noopener noreferrer">{{ $source['url'] ?? '' }}</a></p>@endforeach
         <pre style="white-space:pre-wrap">{{ json_encode($item->coverage,JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) }}</pre>
