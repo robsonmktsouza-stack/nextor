@@ -98,3 +98,11 @@ CFOP e CEST parciais, cBenef BA ausente. Veja
 [catálogo fiscal padrão](../fiscal/catalogo-fiscal-padrao.md) para comandos,
 cobertura, resultados de testes e limites. O proprietário relatou NF-e autorizada
 em homologação no Windows; esta alteração não foi transmitida pela sessão Linux.
+
+## Ampliação nacional de referências — 26/10/2026
+
+Edição `2026.10.26.1`: CFOP com 619 códigos completos da tabela oficial vigente;
+CEST com 1.054 códigos nacionais, períodos e exceções; 3.310 referências cBenef
+estaduais, com cobertura explícita nas 27 UFs. Não declara todos os benefícios
+ou tributações nacionais implementados. Fontes, atualização, testes reais e
+limites em [entrega nacional](../fiscal/catalog-national-delivery-2026-10-26.md).

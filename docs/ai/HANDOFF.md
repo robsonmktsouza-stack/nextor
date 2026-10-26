@@ -1,3 +1,32 @@
+## Ampliação nacional do catálogo — 26/10/2026
+
+Branch `feature/nfe55-motor-fiscal-completo`; commits de implementação `c539f16`
+(fontes/dados) e `a55be2f` (integração), publicados sem merge ou deploy.
+Edição `2026.10.26.1`, selecionada por `current.json` com SHA-256:
+15.986 referências. CFOP: 619 códigos completos da planilha oficial vigente,
+585 permitidos para NF-e e 34 vedados. CEST: 1.054 códigos em 25 anexos,
+1.041 atuais, 10 revogados e três inclusões futuras. Convênio 107/2026 com
+efeitos em 01/11/2026 e exclusão expressa de SP. Quatro vínculos NCM manuais
+bloqueiam aplicação automática.
+
+Benefícios: 3.310 registros estaduais; cinco tabelas completas publicadas,
+recortes DF/RN, históricos RS/RJ/AC bloqueados e 17 UFs sem tabela verificada,
+explicitados no painel. Não equivale a catálogo completo de todas as
+legislações, benefícios ou MVA do país.
+
+Consulta por UF, regras e emissão verificam referência territorial, vigência
+CST/CSOSN e CRT, sem conversões presumidas. Edição anterior preservada integralmente;
+modelos revisados/personalizados e documentos autorizados não são alterados.
+Hash canônico calculado incrementalmente, compatível com a edição antiga.
+Instalação, atualização e repetição do pacote com 128 MB passaram. Atributos Git
+preservam SHA-256 no checkout com `core.autocrlf=true`; quatro arquivos conferidos.
+
+Validação final: 1.024 testes, 7.261 assertions, zero falhas/erros, dois testes
+PDF ignorados por falta de Chromium; 14 testes Python aprovados. PHP 8.5.12/SQLite;
+MySQL/PHP 8.3, nova transmissão ACBr/SEFAZ e QA nativo Windows não executados.
+Logs, hashes e cobertura em `docs/fiscal/evidence/fiscal-national-*`.
+Instalação, fontes e limites: `docs/fiscal/catalog-national-delivery-2026-10-26.md`.
+
 ## Catálogo fiscal padrão — 26/10/2026
 
 Branch `feature/nfe55-motor-fiscal-completo`; base remota atualizada por fast-forward

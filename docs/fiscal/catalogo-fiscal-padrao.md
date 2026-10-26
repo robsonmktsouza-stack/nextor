@@ -16,7 +16,10 @@ A determinação existente passou a considerar natureza, grupo, município e ind
 
 O formulário usa essa determinação na prévia e na validação; mostra regra, versão e códigos. Um rascunho incompleto pode ser salvo com a pendência, mas não passa à emissão. Classificações legadas inalteradas são preservadas no cadastro; produtos gerenciados pelo catálogo exigem classificação válida antes da emissão. Consultas, cancelamentos, numeração, fila, protocolo, XML e DANFE mantêm o fluxo existente.
 
-## Conteúdo distribuído
+## Conteúdo da primeira edição
+
+A versão atual distribuída é `2026.10.26.1`, com CFOP/CEST nacionais e dados estaduais de cBenef. Consulte [a ampliação nacional](catalog-national-delivery-2026-10-26.md). A tabela abaixo documenta a edição inicial preservada no histórico.
+
 
 Versão `2026.10.26`, com **11.063 referências**:
 
@@ -75,7 +78,7 @@ php artisan test --filter='FiscalCatalog|FiscalProductClassification|Nfe55Catalo
 php artisan test
 ```
 
-Impedimentos e cobertura remanescente:
+Impedimentos registrados na primeira edição (CFOP/CEST superados pela ampliação nacional; demais limites mantidos quando aplicáveis):
 
 - O acesso ao texto consolidado do CONFAZ e páginas SEFAZ-BA retornou erros HTTP nesta consulta. Não foi produzido um catálogo nacional completo de CEST ou CFOP vigente; a cobertura parcial consta no pacote e na interface. Códigos fora da cobertura parcial não são declarados inválidos por ausência.
 - Benefícios BA, protocolos ST, MVA, pautas, alíquotas estaduais/municipais, exceções jurídicas e enquadramentos individuais não vêm preenchidos. A estrutura de referências e regras admite importação/configuração fundamentada; sem regra revisada, não há aplicação automática segura.

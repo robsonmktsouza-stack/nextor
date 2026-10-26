@@ -114,3 +114,7 @@ integrada ao emissor: [instalação, cobertura e atualização](docs/fiscal/cata
 Instalação explícita: `php artisan fiscal:catalog --install --templates` após as
 migrações. Modelos novos permanecem inativos até revisão fiscal; CFOP/CEST têm
 cobertura parcial declarada. Não modifica configurações de produção automaticamente.
+
+A edição nacional `2026.10.26.1` inclui todos os CFOPs da planilha oficial vigente e
+a classificação nacional CEST consolidada, com períodos e exceções por UF.
+[Conteúdo nacional, fontes estaduais e atualização](docs/fiscal/catalog-national-delivery-2026-10-26.md).
