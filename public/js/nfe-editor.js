@@ -1000,9 +1000,15 @@
     const icmsField=simple?'nfeTaxCsosn':'nfeTaxIcmsCst';
     const icms=(inbound?getField(icmsField+'Inbound'):'')||getField(icmsField);
     summary('nfeTaxSummaryIcms',icms?(simple?'CSOSN ':'CST ')+icms:'');
+    const icmsRate=getField('nfeTaxIcmsRate')||getField('nfeTaxSimpleCreditRate');
+    const icmsSummary=byId('nfeTaxSummaryIcms');
+    if(icmsSummary&&icms&&icmsRate)icmsSummary.textContent+=' · '+icmsRate+'%';
     [['Pis','nfeTaxPisCst'],['Cofins','nfeTaxCofinsCst'],['Ipi','nfeTaxIpiCst']].forEach(([name,field])=>{
       const code=(inbound?getField(field+'Inbound'):'')||getField(field);
       summary('nfeTaxSummary'+name,code?'CST '+code:'');
+      const rate=getField('nfeTax'+name+'Rate');
+      const element=byId('nfeTaxSummary'+name);
+      if(element&&code&&rate)element.textContent+=' · '+rate+'%';
     });
     const ibs=getField('nfeTaxIbsCst'),cbs=getField('nfeTaxCbsCst');
     summary('nfeTaxSummaryIbs',ibs||cbs
@@ -1046,8 +1052,10 @@
     if(petroleum) petroleum.checked=false;
     updateItemSubtotal();
     updateItemTaxSummary();
+    selectTaxTab('icms');
     itemSections.forEach(section=>{
-      section.open=['item-general','item-fiscal','item-icms'].includes(section.dataset.nfeItemPanel);
+      if(section.classList.contains('nfe-tax-tab-panel'))return;
+      section.open=['item-general','item-fiscal'].includes(section.dataset.nfeItemPanel);
     });
   };
 
