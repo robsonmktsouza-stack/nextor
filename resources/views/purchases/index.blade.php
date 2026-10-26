@@ -44,7 +44,7 @@
     </form>
   </div>
   <div class="table-scroll">
-    <table class="cms-table">
+    <table class="cms-table" data-mobile-cards>
       <thead><tr><th>Número</th><th>Data</th><th>Fornecedor</th><th>Documento</th><th>Valor total</th><th>Situação</th><th>Financeiro</th><th class="action-cell">Ações</th></tr></thead>
       <tbody>
       @forelse($purchases as $purchase)
