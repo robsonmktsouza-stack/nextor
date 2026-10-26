@@ -10,7 +10,7 @@
 @push('styles')
 <style>
 .catalog-filterbar{display:grid;grid-template-columns:minmax(135px,1.1fr) minmax(200px,2fr) minmax(145px,1fr) 74px minmax(135px,1fr) minmax(135px,1fr) auto;gap:10px;align-items:end;padding:12px;border-bottom:1px solid var(--border,#d8e0e7);background:var(--panel,#fff)}
-.catalog-filterbar .field{min-width:0;margin:0}.catalog-filterbar .field input,.catalog-filterbar .field select{width:100%;min-width:0}.catalog-filterbar .field>span{display:block;white-space:nowrap}.catalog-filter-submit{height:36px;white-space:nowrap}.catalog-filterbar+.table-scroll{margin-top:0}.catalog-filterbar~.erp-help-details{margin:12px}.catalog-pagination{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 12px;border-top:1px solid #d8e0e7;font-size:12px;color:#4d6073;flex-wrap:wrap}.catalog-pagination-actions{display:flex;gap:8px;align-items:center}.catalog-pagination-actions .btn{min-height:30px;padding:5px 10px}.catalog-pagination-actions [aria-disabled=true]{opacity:.45;pointer-events:none}.catalog-page-number{min-width:48px;text-align:center;font-weight:600}
+.catalog-filterbar .field{min-width:0;margin:0}.catalog-filterbar .field input,.catalog-filterbar .field select{width:100%;min-width:0}.catalog-filterbar .field>span{display:block;white-space:nowrap}.catalog-filter-submit{height:36px;white-space:nowrap}.catalog-filterbar+.table-scroll{margin-top:0}.catalog-filterbar~.erp-help-details{margin:12px}
 @media(max-width:1250px){.catalog-filterbar{grid-template-columns:repeat(3,minmax(0,1fr))}.catalog-filter-search{grid-column:span 2}}
 @media(max-width:700px){.catalog-filterbar{grid-template-columns:repeat(2,minmax(0,1fr))}.catalog-filter-search{grid-column:span 2}}
 </style>
@@ -54,24 +54,7 @@
       </tr>
     @empty<tr><td colspan="6" class="empty-cell">Nenhum registro encontrado para esta tabela e versão.</td></tr>@endforelse</tbody>
   </table></div>
-  @if($entries->total() > 0)
-  <div class="catalog-pagination">
-    <span>{{ number_format($entries->firstItem(),0,',','.') }}–{{ number_format($entries->lastItem(),0,',','.') }} de {{ number_format($entries->total(),0,',','.') }} registros</span>
-    <div class="catalog-pagination-actions">
-      @if($entries->onFirstPage())
-        <span class="btn btn-secondary" aria-disabled="true">Anterior</span>
-      @else
-        <a class="btn btn-secondary" href="{{ $entries->previousPageUrl() }}" rel="prev">Anterior</a>
-      @endif
-      <span class="catalog-page-number">{{ $entries->currentPage() }} / {{ $entries->lastPage() }}</span>
-      @if($entries->hasMorePages())
-        <a class="btn btn-secondary" href="{{ $entries->nextPageUrl() }}" rel="next">Próximo</a>
-      @else
-        <span class="btn btn-secondary" aria-disabled="true">Próximo</span>
-      @endif
-    </div>
-  </div>
-  @endif
+  @include('partials.table-footer',['paginator'=>$entries])
   <details class="erp-help-details"><summary>Cobertura e aplicação</summary>
     <p>Os códigos de referência e modelos não ativam regras tributárias. A aplicação depende das condições legais e das regras revisadas da instalação.</p>
     <pre style="white-space:pre-wrap">{{ json_encode($release?->coverage ?? [],JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) }}</pre>
