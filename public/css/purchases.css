@@ -178,3 +178,25 @@
   stroke:currentColor;
   opacity:1;
 }
+
+/* Correção de contraste: regras globais sobrescrevem o fundo, mas não o texto. */
+.sales-module-card > .grid-actionbar .grid-actions-left a.purchase-action-edit,
+.sales-module-card > .grid-actionbar .grid-actions-left a.purchase-action-edit:visited {
+  background:#eaf4fb!important;
+  color:#155d87!important;
+  border-color:#82b5d2!important;
+}
+.sales-module-card > .grid-actionbar .grid-actions-left button.purchase-action-receive {
+  background:#e8f5ed!important;
+  color:#17613e!important;
+  border-color:#83bba0!important;
+}
+.sales-module-card > .grid-actionbar .grid-actions-left button.purchase-action-cancel {
+  background:#fff6f5!important;
+  color:#a03935!important;
+  border-color:#d9a29e!important;
+}
+.sales-module-card > .grid-actionbar .grid-actions-left :is(a.purchase-action-edit,button.purchase-action-receive,button.purchase-action-cancel) svg {
+  color:inherit!important;
+  stroke:currentColor!important;
+}
