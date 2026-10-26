@@ -6,6 +6,19 @@
 @push('styles')
 <style>
 /* Refinamento visual exclusivo do editor NF-e; sem alteração de regras fiscais. */
+
+/* Cabeçalhos das seções expansíveis do item da NF-e. */
+#nfeItemDialog details.nfe-item-section>summary.nfe-item-section-heading{display:flex!important;align-items:center!important;gap:12px!important;min-height:50px!important;padding:8px 13px!important;background:#edf3ef!important;border:1px solid #d8e4dd!important;border-left:3px solid #36846b!important;border-radius:3px!important;cursor:pointer!important;list-style:none!important}
+#nfeItemDialog details.nfe-item-section>summary.nfe-item-section-heading::-webkit-details-marker{display:none!important}
+#nfeItemDialog .nfe-item-section-heading .nfe-section-index{display:flex!important;align-items:center!important;justify-content:center!important;flex:0 0 28px!important;width:28px!important;height:28px!important;border-radius:3px!important;background:#d5e9df!important;color:#176b51!important;font-size:11px!important;font-weight:700!important}
+#nfeItemDialog .nfe-item-section-heading .nfe-section-label{display:flex!important;flex:1 1 auto!important;flex-direction:column!important;gap:2px!important;min-width:0!important}
+#nfeItemDialog .nfe-item-section-heading .nfe-section-label strong{font-size:13px!important;font-weight:700!important;color:#264e40!important;line-height:1.25!important}
+#nfeItemDialog .nfe-item-section-heading .nfe-section-label small{font-size:11px!important;font-weight:400!important;color:#647c70!important}
+#nfeItemDialog .nfe-item-section-heading .nfe-section-caret{flex:0 0 28px!important;width:28px!important;height:28px!important}
+#nfeItemDialog details.nfe-item-section[open]>summary.nfe-item-section-heading{background:#e8f2eb!important;border-color:#cbded1!important}
+#nfeItemDialog details.nfe-item-section>.nfe-item-section-content{padding-top:12px!important}
+#nfeItemDialog .nfe-item-section-heading:focus-visible{outline:2px solid #2b9271!important;outline-offset:2px!important}
+
 /* O formulario ocupa toda a janela; a rolagem fica somente no conteudo. */
 #nfeEditorDialog .nfe-workspace-dialog{display:flex!important;flex-direction:column!important;overflow:hidden!important}
 #nfeEditorDialog #nfeDraftForm{display:flex!important;flex-direction:column!important;flex:1 1 auto!important;min-height:0!important;height:100%!important;overflow:hidden!important}
