@@ -42,6 +42,18 @@
 #nfeItemDialog .nfe-item-additional-federal-grid>.field>select{box-sizing:border-box!important;width:100%!important;min-width:0!important}
 @media(max-width:750px){#nfeItemDialog .nfe-item-additional-federal-grid>.field.col-2,#nfeItemDialog .nfe-item-additional-federal-grid>.field.col-3{grid-column:span 6!important}}
 
+/* Subpainéis RTC e separação das seções fiscais: evitar cabeçalhos colados. */
+#nfeItemDialog .nfe-rtc-extra-panel{display:block!important;margin:16px 0!important;padding:0!important;border:1px solid #dce5e0!important;border-radius:3px!important;background:#fff!important;overflow:hidden!important}
+#nfeItemDialog .nfe-rtc-extra-panel>summary{display:flex!important;align-items:center!important;min-height:46px!important;box-sizing:border-box!important;padding:12px 16px!important;margin:0!important;background:#f2f6f4!important;color:#36584c!important;font-size:12px!important;font-weight:600!important;line-height:1.4!important;cursor:pointer!important;list-style:none!important}
+#nfeItemDialog .nfe-rtc-extra-panel>summary::-webkit-details-marker{display:none}
+#nfeItemDialog .nfe-rtc-extra-panel>summary::after{content:""!important;display:block!important;width:7px!important;height:7px!important;margin-left:auto!important;border-right:1.5px solid #607c71!important;border-bottom:1.5px solid #607c71!important;transform:rotate(45deg)!important}
+#nfeItemDialog .nfe-rtc-extra-panel[open]>summary::after{transform:rotate(225deg)!important}
+#nfeItemDialog .nfe-rtc-extra-panel>.editor-grid{padding:18px 15px!important;row-gap:16px!important;column-gap:14px!important}
+#nfeItemDialog .nfe-rtc-extra-panel+.nfe-rtc-extra-panel{margin-top:14px!important}
+#nfeItemDialog .nfe-rtc-extra-panel+details.nfe-item-section{margin-top:20px!important}
+#nfeItemDialog details.nfe-item-section+details.nfe-item-section{margin-top:14px!important}
+#nfeItemDialog .nfe-item-additional-federal-grid+.nfe-rtc-extra-panel{margin-top:20px!important}
+
 /* Cabeçalhos das seções expansíveis do item da NF-e. */
 #nfeItemDialog details.nfe-item-section>summary.nfe-item-section-heading{display:flex!important;align-items:center!important;gap:12px!important;min-height:50px!important;padding:8px 13px!important;background:#edf3ef!important;border:1px solid #d8e4dd!important;border-left:3px solid #36846b!important;border-radius:3px!important;cursor:pointer!important;list-style:none!important}
 #nfeItemDialog details.nfe-item-section>summary.nfe-item-section-heading::-webkit-details-marker{display:none!important}
