@@ -4,6 +4,10 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>@yield('title','Painel') — Lumeron</title>
 <link rel="icon" type="image/png" href="{{ asset('images/lumeron/elephant.png') }}">
+<link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
+<link rel="apple-touch-icon" href="{{ asset('images/lumeron/elephant.png') }}">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#12335b">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,8 +21,10 @@
 <link rel="stylesheet" href="{{ asset('css/nfe-form-workflow.css') }}?v={{ filemtime(public_path('css/nfe-form-workflow.css')) }}">
 @stack('styles')
 <link rel="stylesheet" href="{{ asset('css/commercial-readonly.css') }}?v={{ filemtime(public_path('css/commercial-readonly.css')) }}">
+<link rel="stylesheet" href="{{ asset('css/mobile.css') }}?v={{ filemtime(public_path('css/mobile.css')) }}">
 <script defer src="{{ asset('js/commercial-readonly.js') }}?v={{ filemtime(public_path('js/commercial-readonly.js')) }}"></script>
 <script defer src="{{ asset('js/erp.js') }}?v={{ filemtime(public_path('js/erp.js')) }}"></script>
+<script defer src="{{ asset('js/mobile-pwa.js') }}?v={{ filemtime(public_path('js/mobile-pwa.js')) }}"></script>
 <script defer src="{{ asset('js/desktop-polish.js') }}?v={{ filemtime(public_path('js/desktop-polish.js')) }}"></script>
 <script defer src="{{ asset('js/fiscal-codes.js') }}?v={{ filemtime(public_path('js/fiscal-codes.js')) }}"></script>
 </head>
@@ -194,6 +200,7 @@
       @yield('content')
     </div>
   </main>
+@include('partials.mobile-navigation')
 </div>
 @include('partials.quick-catalog')
 <script defer src="{{ asset('js/quick-catalog.js') }}?v={{ filemtime(public_path('js/quick-catalog.js')) }}"></script>
