@@ -33,7 +33,7 @@
           <td>{{ $row->environment==='homologation'?'Homologação':'Produção' }}</td>
           <td>{{ $row->year }} / {{ $row->series }}</td>
           <td>{{ $row->first_number }}–{{ $row->last_number }}</td>
-          <td>{{ match($row->status){'authorized'=>'Inutilizado pela SEFAZ','prepared'=>'Não transmitido — conferir serviço','uncertain'=>'Resultado incerto — conferir SEFAZ','rejected'=>'Rejeitado',default=>'Em processamento'} }}
+          <td>{{ match($row->status){'authorized'=>'Inutilizado pela SEFAZ','prepared'=>'Aguardando envio','uncertain'=>'Aguardando confirmação da SEFAZ','rejected'=>'Rejeitado',default=>'Em processamento'} }}
             @php($inutilizationGuidance=app(\App\Services\Fiscal\SefazRejectionGuidance::class)->forInutilization($row))
             @if($inutilizationGuidance)
               <details class="sefaz-inutilization-guidance"><summary>Ver orientação</summary>
@@ -47,7 +47,7 @@
             @if($row->status==='authorized' && $row->xml_path)
               <a href="{{ route('fiscal.nfe.inutilizations.xml',$row) }}">XML</a>
             @elseif($row->attempted_at===null && in_array($row->status,['prepared','pending','uncertain'],true) && auth()->user()?->canAccess('settings'))
-              <details><summary>Reagendar pedido</summary>
+              <details><summary>Solicitar novamente</summary>
                 <form method="post" action="{{ route('fiscal.nfe.inutilizations.retry',$row) }}">
                   @csrf
                   <label class="field"><span>Senha do responsável</span><input type="password" name="current_password" autocomplete="current-password" required></label>
