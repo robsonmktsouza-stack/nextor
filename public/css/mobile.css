@@ -1,5 +1,6 @@
 /* Lumeron Mobile — extra visual layer. Desktop, fiscal printouts and business logic untouched. */
 .lumeron-mobile-nav{display:none}
+.lumeron-mobile-select-all{display:none}
 @media screen and (max-width:760px){
   :root{--lumeron-mobile-bar:64px}
   html{scroll-padding-bottom:calc(var(--lumeron-mobile-bar) + env(safe-area-inset-bottom,0px))}
@@ -86,6 +87,13 @@
     outline:2px solid #2877c7;outline-offset:-2px;
   }
   /* Read-only lists may use structured cards; form grids and fiscal tables do not. */
+  .app-root .lumeron-mobile-select-all{
+    display:flex;align-items:center;gap:9px;
+    padding:10px 12px;margin:5px 8px 0;
+    border:1px solid #dce5ed;border-radius:5px;
+    background:#f8fafc;color:#52667b;font-size:12px;font-weight:650;
+  }
+  .app-root .lumeron-mobile-select-all input{width:19px;height:19px;accent-color:#2877c7}
   .app-root .table-scroll:has(table[data-mobile-cards]){overflow-x:visible}
   .app-root table[data-mobile-cards],
   .app-root table[data-mobile-cards] tbody{display:block;width:100%;border:0}
