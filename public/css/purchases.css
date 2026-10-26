@@ -263,3 +263,15 @@
 .purchase-show-table .purchase-show-detail-btn:hover{background:#eef5f9;border-color:#a8c7db;text-decoration:none}
 .purchase-show-table .purchase-show-detail-btn[aria-expanded="true"]{background:#e7f1f7;border-color:#a8c7db}
 @media(max-width:780px){.sales-module-card>.grid-actionbar .grid-actions-left>.grid-tool{white-space:normal}}
+
+
+/* Estados semânticos das ações: não depender do estilo genérico de grid-tool. */
+.sales-module-card>.grid-actionbar .purchase-action-receive{background:#eef8f0;border:1px solid #8ac5a0;color:#236b40;font-weight:600}
+.sales-module-card>.grid-actionbar .purchase-action-receive:hover{background:#dff1e4;border-color:#5da97a;color:#205c38}
+.sales-module-card>.grid-actionbar .purchase-action-cancel{background:#fff;border:1px solid #e4b6b6;color:#a44747;font-weight:600}
+.sales-module-card>.grid-actionbar .purchase-action-cancel:hover{background:#fff1f1;border-color:#ce9292;color:#923636}
+.sales-module-card>.grid-actionbar .purchase-action-edit{background:#2b8bce;border:1px solid #2b8bce;color:#fff}
+.sales-module-card>.grid-actionbar .purchase-action-edit:hover{background:#2378b3;border-color:#2378b3;color:#fff}
+.purchase-show-table button.purchase-show-detail-btn{appearance:none;display:inline-flex;align-items:center;justify-content:center;width:auto;min-width:64px;min-height:30px;padding:5px 12px;background:#f8fafc;border:1px solid #cbd9e4;border-radius:4px;color:#2a6487;font:600 11px/1.2 inherit;cursor:pointer}
+.purchase-show-table button.purchase-show-detail-btn:hover{background:#eaf3f8;border-color:#9ebed1}
+.purchase-show-table button.purchase-show-detail-btn:focus-visible{outline:2px solid #2b8bce;outline-offset:2px}
