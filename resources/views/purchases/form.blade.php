@@ -51,6 +51,7 @@
       <h2>Produtos</h2>
       <button type="button" class="btn btn-secondary" data-purchase-add>@include('partials.icon',['name'=>'plus','size'=>15]) Adicionar produto</button>
     </div>
+    <div class="purchase-list-head" aria-hidden="true"><span>Produto / referência da NF-e</span><span>Quantidade</span><span>Custo unitário</span><span>Total</span><span>Ações</span></div>
     <div class="purchase-items" data-purchase-items aria-label="Itens da compra"></div>
     <div class="purchase-empty-note" data-purchase-empty hidden>Inclua ao menos um produto na compra.</div>
 
