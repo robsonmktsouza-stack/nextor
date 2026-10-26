@@ -155,3 +155,34 @@
  .purchase-item-source .purchase-import-product{flex-basis:calc(100% - 110px)}
  .purchase-item-source .purchase-map-button{margin-left:auto}
 }
+
+/* Grade compacta de itens da compra: informações fiscais sob demanda. */
+.purchase-editor .purchase-items{border-top:1px solid #dfe8ef}
+.purchase-editor .purchase-item-line{padding:9px 0 8px}
+.purchase-editor .purchase-item-line+.purchase-item-line{padding-top:9px}
+.purchase-editor .purchase-item-primary{align-items:end;gap:10px;grid-template-columns:minmax(280px,3fr) minmax(110px,.85fr) minmax(140px,1fr) minmax(100px,.65fr) 32px}
+.purchase-editor .purchase-product-cell{min-width:0}
+.purchase-editor .purchase-product-cell .purchase-item-source{padding:0;margin:0 0 5px;background:transparent;border:0;gap:6px;line-height:1.2}
+.purchase-editor .purchase-product-cell .purchase-item-source>strong{font-size:10px;white-space:nowrap;color:#6c8293}
+.purchase-editor .purchase-product-cell .purchase-import-product{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#36566e}
+.purchase-editor .purchase-product-field{gap:4px}
+.purchase-editor .purchase-product-field .purchase-map-button{font-size:11px;padding:0;margin:3px 0 0}
+.purchase-editor .purchase-item-primary .purchase-remove{align-self:end;margin:0 0 2px}
+.purchase-editor .purchase-item-options{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:4px;min-height:18px}
+.purchase-editor .purchase-details-toggle{border:0;background:transparent;color:#3c718e;font-size:11px;font-weight:600;cursor:pointer;padding:2px 0}
+.purchase-editor .purchase-details-toggle:hover{text-decoration:underline}
+.purchase-editor .purchase-link-status{font-size:10px;color:#3f7960}
+.purchase-editor .purchase-link-status.is-pending{color:#a05d28}
+.purchase-editor .purchase-item-charges{margin:6px 0 2px;padding:9px 0 2px;gap:9px}
+.purchase-editor .purchase-item-charges[hidden]{display:none!important}
+.purchase-editor .purchase-item-amount strong{min-height:37px}
+@media(max-width:1100px){
+ .purchase-editor .purchase-item-primary{grid-template-columns:minmax(200px,2fr) minmax(90px,.85fr) minmax(105px,1fr) minmax(90px,.8fr) 30px;gap:8px}
+}
+@media(max-width:780px){
+ .purchase-editor .purchase-item-primary{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 32px}
+ .purchase-editor .purchase-product-cell{grid-column:1/-1}
+ .purchase-editor .purchase-item-amount{grid-column:2}
+ .purchase-editor .purchase-remove{grid-column:3}
+ .purchase-editor .purchase-item-charges{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
