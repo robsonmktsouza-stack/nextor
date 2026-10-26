@@ -8,7 +8,7 @@
 <title>PDV — Lumeron</title>
 <link rel="icon" type="image/png" href="{{ asset('images/lumeron/elephant.png') }}">
 <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
-<link rel="apple-touch-icon" href="{{ asset('images/lumeron/elephant.png') }}">
+<link rel="apple-touch-icon" sizes="180x180" href="{{ asset('pwa/icons/apple-touch-icon.png') }}">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
