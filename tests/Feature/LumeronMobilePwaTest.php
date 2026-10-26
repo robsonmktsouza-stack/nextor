@@ -35,6 +35,24 @@ final class LumeronMobilePwaTest extends TestCase
         }
     }
 
+    public function test_raster_installation_icons_have_real_square_dimensions(): void
+    {
+        foreach ([
+            'lumeron-192.png' => 192,
+            'lumeron-512.png' => 512,
+            'lumeron-maskable-512.png' => 512,
+            'apple-touch-icon.png' => 180,
+        ] as $filename => $size) {
+            $icon = public_path('pwa/icons/'.$filename);
+            $this->assertFileExists($icon);
+            $image = getimagesize($icon);
+            $this->assertIsArray($image);
+            $this->assertSame($size, $image[0], $filename);
+            $this->assertSame($size, $image[1], $filename);
+            $this->assertSame(IMAGETYPE_PNG, $image[2], $filename);
+        }
+    }
+
     public function test_pwa_offline_cache_only_contains_public_shell(): void
     {
         $serviceWorker = (string) file_get_contents(public_path('sw.js'));
