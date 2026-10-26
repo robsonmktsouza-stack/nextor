@@ -1,11 +1,11 @@
 @if($catalogModel->catalog_version)
 <section class="editor-panel settings-panel">
   <div class="settings-panel-head">
-    <span>Catálogo {{ $catalogModel->catalog_version }} · {{ $catalogModel->catalog_status==='reviewed' ? 'Revisado' : 'Modelo pendente de revisão' }}</span>
+    <span>{{ $catalogModel->catalog_status==='reviewed' ? 'Configuração fiscal revisada' : 'Configuração fiscal pendente de revisão' }}</span>
   </div>
   <details @if($catalogModel->catalog_status!=='reviewed') open @endif>
     <summary>Condições e revisão fiscal</summary>
-    <p>{{ data_get($catalogModel->catalog_metadata,'conditions') }}</p>
+    
     @foreach(data_get($catalogModel->catalog_metadata,'sources',[]) as $source)
       <p><a href="{{ $source['url'] }}" target="_blank" rel="noopener noreferrer">{{ $source['reference'] }}</a></p>
     @endforeach
@@ -27,7 +27,7 @@
     <thead><tr><th>Revisão</th><th>Data</th><th>Usuário</th><th>Parâmetros</th></tr></thead>
     <tbody>@foreach($catalogModel->revisions as $change)
       <tr><td>{{ $change->revision }}</td><td>{{ $change->created_at?->format('d/m/Y H:i') }}</td><td>{{ $change->user_id ?: 'Catálogo' }}</td>
-        <td><details><summary>Consultar</summary><pre>{{ json_encode($change->snapshot, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) }}</pre></details></td></tr>
+        <td>Alteração registrada</td></tr>
     @endforeach</tbody>
   </table></div>
 </details>
