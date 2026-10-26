@@ -7,6 +7,15 @@
 <style>
 /* Refinamento visual exclusivo do editor NF-e; sem alteração de regras fiscais. */
 
+/* Subseção fiscal interna com a mesma linguagem visual das seções principais. */
+#nfeItemDialog .nfe-retained-details{margin:10px 0 14px;border:1px solid #d8e4dd;border-radius:3px;background:#fff;overflow:hidden}
+#nfeItemDialog .nfe-retained-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:42px;padding:9px 13px;background:#f2f6f3;color:#315c4d;font-size:12px;font-weight:600;cursor:pointer;list-style:none}
+#nfeItemDialog .nfe-retained-heading::-webkit-details-marker{display:none}
+#nfeItemDialog .nfe-retained-chevron{display:block;flex:0 0 8px;width:8px;height:8px;border-right:1.5px solid #5c796e;border-bottom:1.5px solid #5c796e;transform:rotate(45deg);margin-right:4px}
+#nfeItemDialog .nfe-retained-details[open] .nfe-retained-chevron{transform:rotate(225deg)}
+#nfeItemDialog .nfe-retained-details>.editor-grid{padding:13px}
+#nfeItemDialog .nfe-retained-heading:focus-visible{outline:2px solid #2b9271;outline-offset:-2px}
+
 /* Cabeçalhos das seções expansíveis do item da NF-e. */
 #nfeItemDialog details.nfe-item-section>summary.nfe-item-section-heading{display:flex!important;align-items:center!important;gap:12px!important;min-height:50px!important;padding:8px 13px!important;background:#edf3ef!important;border:1px solid #d8e4dd!important;border-left:3px solid #36846b!important;border-radius:3px!important;cursor:pointer!important;list-style:none!important}
 #nfeItemDialog details.nfe-item-section>summary.nfe-item-section-heading::-webkit-details-marker{display:none!important}
@@ -967,8 +976,8 @@ $origins=[
           <label class="field col-3"><span>Motivo da desoneração (código)</span><input id="nfeTaxDesonerationReason" maxlength="2"></label>
           <label class="field col-3"><span>Deduzir desoneração do total</span><select id="nfeTaxDesonerationDeduct"><option value="">Selecione</option><option value="0">Não</option><option value="1">Sim</option></select></label>
         </div>
-        <details>
-          <summary>ICMS e FCP retidos anteriormente — CST 60 / CSOSN 500</summary>
+        <details class="nfe-retained-details">
+          <summary class="nfe-retained-heading"><span>ICMS e FCP retidos anteriormente — CST 60 / CSOSN 500</span><span class="nfe-retained-chevron" aria-hidden="true"></span></summary>
           <div class="editor-grid cols-12">
             <label class="field col-3"><span>Escopo dos valores documentados</span><select id="nfeTaxRetainedScope"><option value="">Selecione</option><option value="line">Total do item</option><option value="unit">Por unidade</option></select></label>
             @foreach(['nfeTaxRetainedBase'=>'Base ST retida','nfeTaxRetainedRate'=>'Alíquota ST retida %','nfeTaxSubstitutorValue'=>'ICMS do substituto','nfeTaxRetainedValue'=>'ICMS ST retido','nfeTaxRetainedFcpBase'=>'Base FCP ST retido','nfeTaxRetainedFcpRate'=>'FCP ST retido %','nfeTaxRetainedFcpValue'=>'FCP ST retido','nfeTaxEffectiveBase'=>'Base ICMS efetivo','nfeTaxEffectiveRate'=>'ICMS efetivo %','nfeTaxEffectiveValue'=>'ICMS efetivo documentado','nfeTaxEffectiveReduction'=>'Redução BC efetiva %'] as $id=>$label)
