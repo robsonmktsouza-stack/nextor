@@ -114,6 +114,9 @@ final class Nfe55AdditionalFederalIntegrationTest extends TestCase
         $draft->payments = [['type'=>'90','amount'=>0]];
         $draft->has_referenced_document = true;
         $draft->references = [['type'=>'nfe','key'=>self::REFERENCE]];
+        $draft->items->first()->special_data = [
+            'dfe_reference'=>['key'=>self::REFERENCE,'n_item'=>1],
+        ];
         $ini = $this->ini($draft, $company);
         $preview = $this->preview($draft);
         self::assertSame('4', $ini['Identificacao']['finNFe']);
@@ -123,7 +126,9 @@ final class Nfe55AdditionalFederalIntegrationTest extends TestCase
         self::assertSame('5.00', $ini['Total']['vIPIDevol']);
         self::assertSame('0.00', $ini['Total']['vIPI']);
         self::assertSame('105.00', $ini['Total']['vNF']);
-        self::assertSame(self::REFERENCE, $ini['NFRef001']['refNFe']);
+        self::assertSame(self::REFERENCE, $ini['DFeReferenciado001']['chaveAcesso']);
+        self::assertSame('1', $ini['DFeReferenciado001']['nItem']);
+        self::assertArrayNotHasKey('NFRef001', $ini);
         self::assertSame('90', $ini['pag001']['tPag']);
         self::assertSame(5.0, $preview['ipi_returned']);
         self::assertSame(105.0, $preview['total']);
