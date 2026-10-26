@@ -42,6 +42,25 @@
 #nfeItemDialog .nfe-item-additional-federal-grid>.field>select{box-sizing:border-box!important;width:100%!important;min-width:0!important}
 @media(max-width:750px){#nfeItemDialog .nfe-item-additional-federal-grid>.field.col-2,#nfeItemDialog .nfe-item-additional-federal-grid>.field.col-3{grid-column:span 6!important}}
 
+/* Painel tributário inspirado na hierarquia de leitura dos emissores tradicionais. */
+#nfeItemDialog .nfe-tax-review{margin-top:20px!important;padding:16px 0 0!important;border:0!important;border-top:1px solid #dce5df!important;background:transparent!important;box-shadow:none!important}
+#nfeItemDialog .nfe-tax-review-heading{margin:0 0 13px!important;font-size:13px!important;font-weight:700!important;color:#365348!important}
+#nfeItemDialog .nfe-tax-review-grid{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:12px!important}
+#nfeItemDialog .nfe-tax-review-grid>button{display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center!important;min-width:0!important;min-height:72px!important;padding:12px 13px!important;border:1px solid #d9e2dd!important;border-radius:4px!important;box-shadow:none!important;text-align:left!important;background:#f5f8f6!important;color:#365548!important;transition:border-color .15s,background .15s!important}
+#nfeItemDialog .nfe-tax-review-grid>button>small{display:block!important;margin-bottom:6px!important;font-size:12px!important;font-weight:700!important;letter-spacing:.02em!important;color:inherit!important}
+#nfeItemDialog .nfe-tax-review-grid>button>strong{display:block!important;font-size:12px!important;font-weight:500!important;line-height:1.45!important;white-space:normal!important;overflow-wrap:anywhere!important;color:inherit!important}
+#nfeItemDialog .nfe-tax-review-grid>button:nth-child(1){background:#e9f3ed!important}
+#nfeItemDialog .nfe-tax-review-grid>button:nth-child(2){background:#f7f3df!important}
+#nfeItemDialog .nfe-tax-review-grid>button:nth-child(3){background:#f7f3df!important}
+#nfeItemDialog .nfe-tax-review-grid>button:nth-child(4){background:#edf0f9!important}
+#nfeItemDialog .nfe-tax-review-grid>button:nth-child(5){background:#e9f2f3!important}
+#nfeItemDialog .nfe-tax-review-grid>button.nfe-tax-tab-active{border-color:#29845f!important;outline:2px solid #29845f!important;outline-offset:-2px!important;box-shadow:inset 0 -3px 0 #29845f!important}
+#nfeItemDialog .nfe-tax-tab-host{margin-top:0!important;padding:16px!important;background:#f7faf8!important;border:1px solid #d8e7dc!important;border-top:3px solid #29845f!important;border-radius:0 0 4px 4px!important}
+#nfeItemDialog .nfe-tax-tab-host>.nfe-item-section{border:0!important;background:transparent!important}
+#nfeItemDialog .nfe-tax-tab-host>.nfe-item-section>.nfe-item-section-content{padding:0!important}
+#nfeItemDialog .nfe-tax-tab-host .editor-panel{padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important}
+@media(max-width:800px){#nfeItemDialog .nfe-tax-review-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+
 /* Abas fiscais do item: os cinco cards substituem o conteúdo no mesmo local. */
 #nfeItemDialog .nfe-tax-review-grid button.nfe-tax-tab-active{background:#e7f3ec!important;border-color:#3b9874!important;box-shadow:inset 0 3px 0 #27845f!important}
 #nfeItemDialog .nfe-tax-tab-host{margin:14px 0 20px}
