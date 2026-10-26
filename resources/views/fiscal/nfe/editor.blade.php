@@ -6,7 +6,7 @@
 @push('styles')
 <style>
 /* Refinamento visual exclusivo do editor NF-e; sem alteração de regras fiscais. */
-#nfeEditorDialog .nfe-nature-combobox{position:relative;flex:1;min-width:0}
+#nfeEditorDialog .nfe-nature-combobox select#nfeNature{position:absolute!important;left:0!important;top:0!important;width:1px!important;min-width:1px!important;max-width:1px!important;height:1px!important;min-height:1px!important;max-height:1px!important;opacity:0!important;pointer-events:none!important;padding:0!important;margin:0!important;border:0!important;overflow:hidden!important}\n#nfeEditorDialog .nfe-nature-combobox{position:relative;flex:1;min-width:0}
 #nfeEditorDialog .nfe-nature-combobox #nfeNatureSearch{width:100%;padding-right:28px;background:#fff}
 #nfeEditorDialog .nfe-nature-native{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;left:0;bottom:0;min-height:0!important;padding:0!important;border:0!important}
 #nfeEditorDialog .nfe-nature-options{position:absolute;z-index:150;top:calc(100% + 2px);left:0;right:0;max-height:225px;overflow-y:auto;background:#fff;border:1px solid #bacbd3;box-shadow:0 7px 20px rgba(30,51,62,.15);border-radius:3px}
@@ -233,7 +233,7 @@ $origins=[
                   <div class="nfe-nature-combobox" data-nfe-nature-combobox>
                     <input id="nfeNatureSearch" type="text" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="nfeNatureOptions" placeholder="Pesquisar natureza ou CFOP" aria-label="Pesquisar natureza da operação">
                     <div class="nfe-nature-options" id="nfeNatureOptions" role="listbox" hidden></div>
-                    <select name="operation_nature_id" id="nfeNature" required class="nfe-nature-native">
+                    <select name="operation_nature_id" id="nfeNature" required class="nfe-nature-native" tabindex="-1" aria-hidden="true" style="position:absolute!important;left:0!important;top:0!important;width:1px!important;min-width:1px!important;max-width:1px!important;height:1px!important;min-height:1px!important;max-height:1px!important;opacity:0!important;pointer-events:none!important;padding:0!important;margin:0!important;border:0!important;overflow:hidden!important">
                     <option value="">Selecione</option>
                     @foreach($natures as $nature)
                       <option value="{{ $nature->id }}" @selected((string)$nfeOld('operation_nature_id',$draft->operation_nature_id)===(string)$nature->id)>
