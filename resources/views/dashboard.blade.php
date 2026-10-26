@@ -2,7 +2,8 @@
 @section('title','Visão geral')
 @section('actions')@if($licensedPdv)<a class="btn btn-success grid-primary-action" href="{{ route('sales.create') }}">@include('partials.icon',['name'=>'plus','size'=>16]) Nova venda</a>@endif @endsection
 @section('content')
-<div class="lumeron-dashboard">\n<div class="stats-grid">
+<div class="lumeron-dashboard">
+<div class="stats-grid">
  @if($licensedProducts)
  <a class="stat-card" href="{{ route('products.index') }}"><span class="stat-icon blue">@include('partials.icon',['name'=>'products','size'=>21])</span><span class="stat-label">Produtos ativos</span><strong>{{ number_format($productsCount,0,',','.') }}</strong><small>Itens cadastrados</small></a>
  <a class="stat-card" href="{{ route('stock.index') }}"><span class="stat-icon violet">@include('partials.icon',['name'=>'layers','size'=>21])</span><span class="stat-label">Valor do estoque (custo)</span><strong>R$ {{ number_format((float)$stockValue,2,',','.') }}</strong><small>Quantidade × custo</small></a>
