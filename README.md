@@ -118,3 +118,7 @@ cobertura parcial declarada. Não modifica configurações de produção automat
 A edição nacional `2026.10.26.1` inclui todos os CFOPs da planilha oficial vigente e
 a classificação nacional CEST consolidada, com períodos e exceções por UF.
 [Conteúdo nacional, fontes estaduais e atualização](docs/fiscal/catalog-national-delivery-2026-10-26.md).
+
+Os editores NF-e/NFC-e e as inutilizações apresentam orientação dos retornos
+SEFAZ a partir de 1.025 códigos oficiais, preservando o motivo e as políticas
+de correção existentes: [uso e atualização](docs/fiscal/sefaz-rejections-friendly.md).

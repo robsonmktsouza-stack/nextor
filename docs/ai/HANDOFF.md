@@ -1,3 +1,20 @@
+## Tratamento amigável dos retornos SEFAZ — 26/10/2026
+
+Branch `feature/nfe55-motor-fiscal-completo`; commits `ae6acdf`, `21eef04` e
+`3b262d4`, sem merge/deploy. Catálogo com 1.025 cStat/27 fontes oficiais,
+86 perfis de orientação e tratamento explícito para códigos desconhecidos.
+Integrado aos editores NF-e/NFC-e, cancelamento e duas telas de inutilização;
+atalhos GET respeitam permissões. Não altera decisão fiscal, numeração ou filas.
+Distingue autorização, lote, evento, EPEC, duplicidade e denegação histórica.
+
+Suíte completa no código `3b262d4`: 1.179 testes/8.142 asserções, zero falhas,
+dois testes opcionais Chrome/Chromium ignorados. PHP 8.5.12/PHPUnit 12.5.40/
+SQLite Docker Linux; 28 testes Python passaram. Não houve nova transmissão
+ACBr/SEFAZ ou acesso ao Laragon. Sem novas migrations/seeds.
+Ver [operação, atualização e limites](../fiscal/sefaz-rejections-friendly.md)
+e `docs/fiscal/evidence/sefaz-rejections-*` para fontes, cobertura e provas.
+Atualização: pull da branch e `php artisan optimize:clear`.
+
 ## Ampliação nacional do catálogo — 26/10/2026
 
 Branch `feature/nfe55-motor-fiscal-completo`; commits de implementação `c539f16`

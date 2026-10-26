@@ -106,3 +106,13 @@ CEST com 1.054 códigos nacionais, períodos e exceções; 3.310 referências cB
 estaduais, com cobertura explícita nas 27 UFs. Não declara todos os benefícios
 ou tributações nacionais implementados. Fontes, atualização, testes reais e
 limites em [entrega nacional](../fiscal/catalog-national-delivery-2026-10-26.md).
+
+
+## Retornos SEFAZ com orientação — 26/10/2026
+
+A mesma branch fiscal acrescenta interpretação de 1.025 códigos oficiais em
+86 perfis, integrada aos editores e às inutilizações, com atalhos autorizados
+para cadastros. Não modifica o protocolo fiscal ou libera reenvios. Suíte
+completa: 1.179 testes/8.142 asserções, zero falhas, dois PDFs opcionais ignorados;
+28 testes Python passaram. Sem nova transmissão SEFAZ. Ver
+[operação e evidências](../fiscal/sefaz-rejections-friendly.md).
