@@ -6,6 +6,13 @@
 @push('styles')
 <style>
 /* Refinamento visual exclusivo do editor NF-e; sem alteração de regras fiscais. */
+/* O formulario ocupa toda a janela; a rolagem fica somente no conteudo. */
+#nfeEditorDialog .nfe-workspace-dialog{display:flex!important;flex-direction:column!important;overflow:hidden!important}
+#nfeEditorDialog #nfeDraftForm{display:flex!important;flex-direction:column!important;flex:1 1 auto!important;min-height:0!important;height:100%!important;overflow:hidden!important}
+#nfeEditorDialog #nfeDraftForm>.dialog-header{flex:0 0 auto!important}
+#nfeEditorDialog #nfeDraftForm>.nfe-workspace-body{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important}
+#nfeEditorDialog #nfeDraftForm>.nfe-dialog-footer{flex:0 0 auto!important;margin-top:auto!important}
+
 #nfeEditorDialog .nfe-nature-combobox select#nfeNature{position:absolute!important;left:0!important;top:0!important;width:1px!important;min-width:1px!important;max-width:1px!important;height:1px!important;min-height:1px!important;max-height:1px!important;opacity:0!important;pointer-events:none!important;padding:0!important;margin:0!important;border:0!important;overflow:hidden!important}
 #nfeEditorDialog .input-action-group:has(.nfe-nature-combobox){display:flex!important;align-items:stretch!important;gap:0!important;width:100%!important}
 #nfeEditorDialog .nfe-nature-combobox{position:relative!important;display:block!important;flex:1 1 0!important;width:0!important;min-width:0!important;max-width:none!important}
