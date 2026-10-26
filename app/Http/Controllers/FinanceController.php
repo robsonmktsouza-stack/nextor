@@ -258,13 +258,13 @@ class FinanceController extends Controller
 
         if($data['action']==='settle') {
             if(empty($data['financial_account_id'])) {
-                throw ValidationException::withMessages(['financial_account_id'=>'Selecione a conta financeira para a baixa em massa.']);
+                throw ValidationException::withMessages(['financial_account_id'=>'Selecione a conta financeira para registrar os pagamentos.']);
             }
             if(empty($data['settled_at'])) {
-                throw ValidationException::withMessages(['settled_at'=>'Informe a data da baixa em massa.']);
+                throw ValidationException::withMessages(['settled_at'=>'Informe a data dos pagamentos.']);
             }
             if(empty($data['payment_method'])) {
-                throw ValidationException::withMessages(['payment_method'=>'Selecione a forma de pagamento da baixa em massa.']);
+                throw ValidationException::withMessages(['payment_method'=>'Selecione a forma de pagamento.']);
             }
 
             $account=FinancialAccount::query()
