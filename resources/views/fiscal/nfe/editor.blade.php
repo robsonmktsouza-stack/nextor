@@ -457,10 +457,7 @@ $origins=[
             @foreach($draft->items as $item)
               @php($trace=data_get($item->tax_data,'fiscal_rule_trace',[]))
               @if(!empty($trace['id']))
-                <div>Item {{ $item->item_number }}: {{ data_get($trace,'snapshot.name','Regra fiscal') }} (revisão {{ $trace['revision']??'—' }}). {{ $trace['legal_reference']??'' }}
-                  @if(data_get($trace,'snapshot.catalog_version'))
-                    Catálogo {{ data_get($trace,'snapshot.catalog_version') }}.
-                  @endif
+                <div>Item {{ $item->item_number }}: {{ data_get($trace,'snapshot.name','Regra fiscal') }} .
                   CFOP {{ $item->cfop }}.
                   @if(data_get($item->tax_data,'icms_csosn'))
                     CSOSN {{ data_get($item->tax_data,'icms_csosn') }}.
