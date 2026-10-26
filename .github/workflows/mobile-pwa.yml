@@ -1,0 +1,38 @@
+name: Lumeron Mobile PWA
+on:
+  push:
+    branches:
+      - feature/lumeron-mobile
+  pull_request:
+    paths:
+      - '.github/workflows/mobile-pwa.yml'
+      - 'public/manifest.webmanifest'
+      - 'public/sw.js'
+      - 'public/js/mobile-pwa.js'
+      - 'public/css/mobile*.css'
+      - 'resources/views/layouts/**'
+      - 'resources/views/partials/mobile-navigation.blade.php'
+      - 'tests/Feature/LumeronMobilePwaTest.php'
+
+jobs:
+  mobile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: curl, dom, libxml, openssl, pdo_sqlite
+          coverage: none
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Validate manifest and script syntax
+        run: |
+          php -r '$m=json_decode(file_get_contents("public/manifest.webmanifest"),true,512,JSON_THROW_ON_ERROR); if(($m["display"]??"")!=="standalone") exit(1);'
+          node --check public/js/mobile-pwa.js
+          node --check public/sw.js
+      - name: Run mobile PWA tests
+        run: vendor/bin/phpunit tests/Feature/LumeronMobilePwaTest.php
