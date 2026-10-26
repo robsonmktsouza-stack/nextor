@@ -5,6 +5,22 @@ use App\Models\NfeDraft;
 use RuntimeException;
 use setasign\Fpdi\Fpdi;
 
+final class Nfe55StampPdf extends Fpdi
+{
+    public function diagonalStamp(float $x,float $y,string $text): void
+    {
+        $angle=35;
+        $rad=deg2rad($angle);
+        $c=cos($rad);$sin=sin($rad);
+        $this->_out('q');
+        $this->_out(sprintf('%.5F %.5F %.5F %.5F %.5F %.5F cm',
+            $c,$sin,-$sin,$c,$x*$this->k,($this->h-$y)*$this->k));
+        $this->Text(-54,0,$text);
+        $this->_out('Q');
+    }
+}
+
+
 /**
  * Overlays a clearly marked historical copy. Never edits the authorized XML.
  * The cancellation event must already be confirmed before this service is called.
@@ -28,7 +44,7 @@ final class Nfe55CancelledDanfeStampService
             if(file_put_contents($file,$pdf,LOCK_EX)===false){
                 throw new RuntimeException('Não foi possível preparar o DANFE.');
             }
-            $out=new Fpdi('P','mm');
+            $out=new Nfe55StampPdf('P','mm');
             $out->SetAutoPageBreak(false);
             $count=$out->setSourceFile($file);
             if($count<1 || $count>100)throw new RuntimeException('DANFE inválido.');
@@ -57,16 +73,7 @@ final class Nfe55CancelledDanfeStampService
                 // light red to keep the original DANFE legible.
                 $out->SetTextColor(210,140,140);
                 $out->SetFont('Helvetica','B',26);
-                $angle=35;
-                $cx=$w/2;
-                $cy=$h/2;
-                $out->_out('q');
-                $rad=deg2rad($angle);
-                $c=cos($rad);$sin=sin($rad);
-                $out->_out(sprintf('%.5F %.5F %.5F %.5F %.5F %.5F cm',
-                    $c,$sin,-$sin,$c,$cx*$out->k,($h-$cy)*$out->k));
-                $out->Text(-54,0,'NF-e CANCELADA');
-                $out->_out('Q');
+                $out->diagonalStamp($w/2,$h/2,'NF-e CANCELADA');
                 $out->SetTextColor(0,0,0);
             }
             $result=$out->Output('S');
