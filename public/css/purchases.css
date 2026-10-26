@@ -220,3 +220,35 @@
 .purchase-editor .purchase-imported-row .purchase-item-primary{align-items:center}
 .purchase-editor .purchase-imported-row .purchase-item-source .purchase-import-product{font-size:12px;font-weight:600;color:#253e52}
 @media(max-width:780px){.purchase-editor .purchase-imported-row .purchase-product-cell{grid-column:1/-1}}
+
+
+/* Detalhe de compra: grade de leitura compacta, no padrão de listagens do ERP. */
+.purchase-show-table-wrap{width:100%;overflow-x:auto;border:1px solid #dfe7ed;border-radius:4px;margin-bottom:18px}
+.purchase-show-table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:12px;color:#29475c}
+.purchase-show-table th{background:#f1f5f8;text-align:left;color:#526d81;font-size:11px;font-weight:700;padding:12px 13px;border-bottom:1px solid #d9e4eb}
+.purchase-show-table th:first-child{width:52%}
+.purchase-show-table th:nth-child(2){width:14%}
+.purchase-show-table th:nth-child(3){width:13%}
+.purchase-show-table th:nth-child(4){width:14%}
+.purchase-show-table th:nth-child(5){width:7%}
+.purchase-show-table tbody tr:not(.purchase-show-charge-row){border-bottom:1px solid #e4ebf0}
+.purchase-show-table tbody tr:not(.purchase-show-charge-row):nth-of-type(even){background:#fafcfd}
+.purchase-show-table td{padding:11px 13px;vertical-align:middle}
+.purchase-show-product strong{display:block;font-size:12px;line-height:1.45;color:#203f55;font-weight:650;overflow-wrap:anywhere}
+.purchase-show-meta{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:4px;font-size:10px;color:#71869a}
+.purchase-show-linked{color:#27784c}
+.purchase-show-pending{color:#9a692d}
+.purchase-show-num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.purchase-show-num small{font-size:10px;color:#7b8d9d;margin-left:2px}
+.purchase-show-amount{font-weight:700;color:#214c68}
+.purchase-show-center{text-align:center}
+.purchase-show-detail-btn{border:0;background:transparent;color:#2676a4;font-size:11px;font-weight:600;cursor:pointer;padding:5px}
+.purchase-show-detail-btn:hover{text-decoration:underline}
+.purchase-show-nocharge{color:#a3b1bd}
+.purchase-show-charge-row{background:#f5f8fa}
+.purchase-show-charge-row[hidden]{display:none!important}
+.purchase-show-charge-row td{padding:12px 16px!important}
+.purchase-show-charges{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.purchase-show-charges span{font-size:11px;color:#71879a}
+.purchase-show-charges strong{display:block;color:#294c64;font-size:12px;margin-top:4px}
+@media(max-width:850px){.purchase-show-table{min-width:680px}.purchase-show-charges{grid-template-columns:repeat(3,minmax(0,1fr))}}
