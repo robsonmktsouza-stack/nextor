@@ -11,7 +11,7 @@ class QuotePdfService
 {
     public function renderHtml(Sale $quote): string
     {
-        if ($quote->operation_type!=='quote') {
+        if (!in_array($quote->operation_type,['quote','sale'],true)) {
             throw new RuntimeException('Este documento não é um orçamento.');
         }
 
