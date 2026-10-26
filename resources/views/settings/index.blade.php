@@ -778,8 +778,10 @@ foreach($primaryTabs as $key=>$item){
       <div class="settings-switch-grid">
         <input type="hidden" name="accountant_xml_authorized" value="0">
         <label class="settings-switch"><input type="checkbox" name="accountant_xml_authorized" value="1" @checked(old('accountant_xml_authorized',$accounting['accountant_xml_authorized']))><span><strong>Autorizar o contador a acessar o XML completo da NF-e</strong><small id="accountantXmlHelp">O CPF/CNPJ informado terá acesso aos dados completos das novas NF-e. Informe um documento válido para autorizar.</small></span></label>
+        @if(strtoupper(trim((string) $company->state)) === 'BA')
         <input type="hidden" name="nfe_ba_sefaz_xml_authorized" value="0">
         <label class="settings-switch"><input type="checkbox" name="nfe_ba_sefaz_xml_authorized" value="1" @checked(old('nfe_ba_sefaz_xml_authorized',$accounting['nfe_ba_sefaz_xml_authorized']))><span><strong>Autorizar acesso da SEFAZ-BA quando não houver contador autorizado</strong><small>Nas NF-e da Bahia, autoriza o CNPJ 13.937.073/0001-56 a acessar o XML completo.</small></span></label>
+        @endif
         <label class="settings-switch"><input type="checkbox" name="cost_center_enabled" value="1" @checked($accounting['cost_center_enabled'])><span><strong>Usar centros de custo</strong><small>Prepara classificações financeiras para detalhamento contábil.</small></span></label>
         <label class="settings-switch"><input type="checkbox" name="automatic_monthly_export" value="1" @checked($accounting['automatic_monthly_export'])><span><strong>Exportação mensal automática</strong><small>Gera automaticamente o CSV do mês anterior no primeiro dia de cada mês.</small></span></label>
       </div>
