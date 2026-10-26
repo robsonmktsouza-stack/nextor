@@ -1,6 +1,6 @@
 /* Lumeron Mobile — own interface, not the desktop scaled down.
    This last-loaded stylesheet is screen-only and never changes fiscal output. */
-.lm-appbar,.lm-home,.lm-finance-home,.lm-native-list{display:none}
+.lm-appbar,.lm-home,.lm-finance-home,.lm-native-list,.lm-sidebar-account{display:none}
 @media screen and (max-width:760px){
   :root{
     --lm-ink:#192c3c;--lm-sub:#758799;--lm-blue:#176da9;
@@ -42,6 +42,11 @@
   }
   .lm-appbar-actions .lm-appbar-new{background:#176da9;color:#fff;border-color:#176da9}
   .app-root .cms-sidebar{top:calc(64px + env(safe-area-inset-top,0px));height:auto;bottom:0}
+  .app-root .lm-sidebar-account{margin-top:auto;border-top:1px solid rgba(255,255,255,.08);padding:14px 14px 20px}
+  .lm-sidebar-account>span{display:block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#b9c6d2;font-size:12px;margin-bottom:9px}
+  .lm-sidebar-account form,.lm-sidebar-account button{width:100%}
+  .lm-sidebar-account button{display:flex;align-items:center;gap:9px;min-height:44px;padding:0 10px;border:1px solid #52687a;border-radius:8px;background:#263d50;color:#f4f7fa;text-align:left;font-weight:650}
+
   .app-root .mobile-overlay:not([hidden]){top:calc(64px + env(safe-area-inset-top,0px))}
   .app-root .cms-page-shell,
   .app-root.sidebar-collapsed .cms-page-shell{
