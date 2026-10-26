@@ -42,6 +42,24 @@
   data-company-settings-url="{{ auth()->user()->canAccess('settings') ? route('settings.index',['tab'=>'general']) : '' }}">
 <div class="app-root" id="appRoot">
   <header class="cms-topbar">
+    <div class="lm-appbar" aria-label="Cabeçalho do aplicativo">
+      <a class="lm-appbar-brand" href="{{ route(auth()->user()->canAccess('dashboard')?'dashboard':auth()->user()->licensedHomeRouteName()) }}" aria-label="Página inicial Lumeron">
+        <span class="lm-appbar-logo"><img src="{{ asset('images/lumeron/elephant.png') }}" alt="" width="28" height="28"></span>
+        <span class="lm-appbar-copy"><strong>Lumeron</strong><small>@yield('title','Painel')</small></span>
+      </a>
+      <div class="lm-appbar-actions">
+        @if(request()->routeIs('sales.index') && auth()->user()->canAccess('sales') && $hasModule('pdv'))
+          <a data-company-required href="{{ route('sales.create') }}" class="lm-appbar-new" aria-label="Nova venda">@include('partials.icon',['name'=>'plus','size'=>20])</a>
+        @elseif(request()->routeIs('products.index') && auth()->user()->canAccess('products') && $hasModule('products'))
+          <a href="{{ route('products.create') }}" class="lm-appbar-new" aria-label="Novo produto">@include('partials.icon',['name'=>'plus','size'=>20])</a>
+        @elseif(request()->routeIs('customers.index') && auth()->user()->canAccess('customers'))
+          <a href="{{ route('customers.create') }}" class="lm-appbar-new" aria-label="Novo cliente">@include('partials.icon',['name'=>'plus','size'=>20])</a>
+        @endif
+        <button type="button" class="lm-appbar-menu" data-mobile-top-menu aria-label="Abrir menu completo" aria-controls="sidebar" aria-expanded="false">
+          @include('partials.icon',['name'=>'menu','size'=>22])
+        </button>
+      </div>
+    </div>
     <div class="cms-topbar-brand">
       <button class="cms-topbar-icon" type="button" data-sidebar-toggle aria-label="Alternar menu">@include('partials.icon',['name'=>'menu','size'=>20])</button>
       <a class="brand-home-link" href="{{ route(auth()->user()->canAccess('dashboard') ? 'dashboard' : auth()->user()->homeRouteName()) }}" data-tooltip="Abrir dashboard" aria-label="Abrir dashboard">
