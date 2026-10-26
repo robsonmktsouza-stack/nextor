@@ -215,7 +215,7 @@
         </ul>
         @if(!$document->access_key && !$document->protocol && !$document->xml_path && !$document->response_path
           && !$document->authorized_at && auth()->user()->canAccess('fiscal'))
-          <form method="post" action="{{ route('fiscal.nfce.refresh-data',$document) }}" style="margin-top:12px">
+          <form method="post" action="{{ route('fiscal.nfce.refresh-data',$document) }}" class="fiscal-space-before">
             @csrf
             <button class="btn btn-secondary" type="submit">
               @include('partials.icon',['name'=>'refresh-cw','size'=>16]) Recarregar configuração fiscal

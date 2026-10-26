@@ -25,7 +25,7 @@
     <button class="btn btn-primary" type="submit">Solicitar inutilização à SEFAZ</button>
   </form>
 </section>
-<section class="cms-card" style="margin-top:16px">
+<section class="cms-card fiscal-section-before">
   <div class="card-header"><h2>Solicitações</h2></div>
   <div class="table-scroll">
     <table class="cms-table">

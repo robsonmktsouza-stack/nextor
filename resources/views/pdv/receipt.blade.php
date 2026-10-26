@@ -54,18 +54,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Comprovante de venda #{{ $sale->id }} — Lumeron</title>
 <link rel="icon" type="image/png" href="{{ asset('images/lumeron/elephant.png') }}">
+<link rel="stylesheet" href="{{ asset('css/ui-tokens.css') }}?v={{ filemtime(public_path('css/ui-tokens.css')) }}" media="screen">
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;background:#eef1f4;color:#111;font-family:Arial,Helvetica,sans-serif}
 body{font-size:9px}
 .screen-actions{width:{{ $receiptWidth }}mm;max-width:calc(100vw - 24px);margin:16px auto 10px;display:flex;gap:8px}
-.screen-actions a,.screen-actions button{flex:1;min-height:38px;display:flex;align-items:center;justify-content:center;border:1px solid #cbd4dc;border-radius:5px;background:#fff;color:#29455e;font:600 11px Arial,sans-serif;text-decoration:none;cursor:pointer}
-.screen-actions button{background:#2877c7;border-color:#2877c7;color:#fff}
 .post-sale-status{max-width:460px;margin:0 auto 14px;padding:12px 14px;background:#fff;border:1px solid #d2dae4;border-radius:5px;font-size:12px;line-height:1.5}
 .post-sale-status strong{display:block;margin-bottom:3px;font-size:13px}
 .post-sale-status p{margin:3px 0 10px}
 .post-sale-status form{margin:0}
-.post-sale-status button,.post-sale-status a.action{display:inline-block;padding:9px 12px;border:0;border-radius:4px;background:#2877c7;color:#fff;text-decoration:none;font:600 12px Arial,sans-serif;cursor:pointer}
 .post-sale-status .receipt-alert{margin-bottom:8px;color:#8f260f;font-weight:700}
 
 .receipt{width:{{ $receiptWidth }}mm;max-width:100%;margin:0 auto 24px;padding:{{ $receiptWidth==='58'?'3':'4' }}mm;background:#fff}
@@ -134,24 +132,26 @@ body.receipt-pdf-source.sales-receipt-preview .receipt{
 body.receipt-pdf-source .receipt-copy+.receipt-copy{margin-top:0!important}
 @endif
 </style>
+<link rel="stylesheet" href="{{ asset('css/ui-refinement.css') }}?v={{ filemtime(public_path('css/ui-refinement.css')) }}" media="screen">
+<link rel="stylesheet" href="{{ asset('css/pdv-receipt-screen.css') }}?v={{ filemtime(public_path('css/pdv-receipt-screen.css')) }}" media="screen">
 </head>
-<body class="{{ $receiptOrigin==='sales' ? 'sales-receipt-preview' : '' }}{{ request()->boolean('embed') ? ' pdv-receipt-embedded' : '' }}{{ ($receiptPdfMode ?? false) ? ' receipt-pdf-source' : '' }}">
+<body class="pdv-receipt-document {{ $receiptOrigin==='sales' ? 'sales-receipt-preview' : '' }}{{ request()->boolean('embed') ? ' pdv-receipt-embedded' : '' }}{{ ($receiptPdfMode ?? false) ? ' receipt-pdf-source' : '' }}">
 @if(!($receiptPdfMode ?? false) && !request()->boolean('embed'))
 <div class="screen-actions">
   @if($receiptOrigin==='sales')
-    <a href="{{ route('sales.show',$sale) }}">Voltar à venda</a>
+    <a class="btn btn-secondary" href="{{ route('sales.show',$sale) }}">Voltar à venda</a>
   @else
-  <a href="{{ route('pdv.index') }}">Voltar ao PDV</a>
+  <a class="btn btn-secondary" href="{{ route('pdv.index') }}">Voltar ao PDV</a>
   @if($nfceDocument && auth()->user()->canAccess('fiscal'))
-    <a href="{{ route('fiscal.show', $nfceDocument) }}">NFC-e {{ $nfceDocument->status==='authorized' ? 'autorizada' : 'da venda' }}</a>
+    <a class="btn btn-secondary" href="{{ route('fiscal.show', $nfceDocument) }}">NFC-e {{ $nfceDocument->status==='authorized' ? 'autorizada' : 'da venda' }}</a>
   @endif
   @if($canPrintDanfe)
-    <a href="{{ route('pdv.nfce.danfe',$nfceDocument) }}" target="_blank" rel="noopener noreferrer">
+    <a class="btn btn-secondary" href="{{ route('pdv.nfce.danfe',$nfceDocument) }}" target="_blank" rel="noopener noreferrer">
       {{ $canPrintOfflineDanfe ? 'DANFE contingência (2 vias)' : 'Imprimir DANFE NFC-e' }}
     </a>
   @endif
   @endif
-  <button type="button" data-reprint-receipt>Imprimir comprovante interno</button>
+  <button class="btn btn-primary" type="button" data-reprint-receipt>Imprimir comprovante interno</button>
 </div>
 @if($receiptOrigin!=='sales')
 <section class="post-sale-status" aria-live="polite">
@@ -169,12 +169,12 @@ body.receipt-pdf-source .receipt-copy+.receipt-copy{margin-top:0!important}
     } }}</strong>
     <p>A venda foi concluída e o documento fiscal está vinculado a ela. Cancelar a impressão não altera a NFC-e.</p>
     @if($canPrintDanfe)
-      <p><a class="action" href="{{ route('pdv.nfce.danfe',$nfceDocument) }}" target="_blank" rel="noopener noreferrer">
+      <p><a class="action btn btn-primary" href="{{ route('pdv.nfce.danfe',$nfceDocument) }}" target="_blank" rel="noopener noreferrer">
         {{ $canPrintOfflineDanfe ? 'Imprimir DANFE em contingência (2 vias; pendente de autorização)' : 'Imprimir DANFE NFC-e autorizado' }}
       </a></p>
     @endif
     @if(auth()->user()->canAccess('fiscal'))
-      <a class="action" href="{{ route('fiscal.show', $nfceDocument) }}">Abrir NFC-e da venda</a>
+      <a class="action btn btn-primary" href="{{ route('fiscal.show', $nfceDocument) }}">Abrir NFC-e da venda</a>
     @else
       <p>Solicite a um usuário com permissão fiscal que revise o documento.</p>
     @endif
@@ -184,12 +184,12 @@ body.receipt-pdf-source .receipt-copy+.receipt-copy{margin-top:0!important}
     @if($canPrepareNfce)
       <form method="post" action="{{ route('pdv.receipt.nfce.prepare', $sale) }}">
         @csrf
-        <button type="submit">Preparar NFC-e desta venda</button>
+        <button class="btn btn-primary" type="submit">Preparar NFC-e desta venda</button>
       </form>
     @else
       <p>Confira se os módulos Fiscal e NFC-e estão habilitados. Para preparar o documento, também é necessária permissão fiscal.</p>
       @if(auth()->user()->canAccess('settings'))
-        <a class="action" href="{{ route('settings.index', ['tab'=>'fiscal']) }}">Conferir configurações fiscais</a>
+        <a class="action btn btn-primary" href="{{ route('settings.index', ['tab'=>'fiscal']) }}">Conferir configurações fiscais</a>
       @endif
     @endif
   @endif

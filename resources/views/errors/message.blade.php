@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Não foi possível concluir — Lumeron</title>
   <link rel="icon" href="{{ asset('images/lumeron/elephant.png') }}">
-  <link rel="stylesheet" href="{{ asset('css/user-message-page.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/ui-tokens.css') }}?v={{ filemtime(public_path('css/ui-tokens.css')) }}">
+  <link rel="stylesheet" href="{{ asset('css/user-message-page.css') }}?v={{ filemtime(public_path('css/user-message-page.css')) }}">
 </head>
 <body>
   <main class="user-message-page">

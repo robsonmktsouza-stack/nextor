@@ -1,6 +1,11 @@
-body{margin:0;background:#f2f4f7;color:#243349;font:15px Arial,sans-serif}
-.user-message-page{max-width:540px;margin:12vh auto;padding:28px;background:#fff;border:1px solid #d8dfe8;border-radius:4px}
-.user-message-page h1{margin:26px 0 12px;font-size:21px}
+/* Standalone access/error pages use the same tokens as authenticated screens. */
+body{margin:0;min-width:0;background:#f2f4f7;color:var(--ui-text);font:var(--lumeron-text)/1.45 var(--lumeron-font)}
+.user-message-page{box-sizing:border-box;width:min(540px,calc(100% - 32px));margin:12vh auto;padding:28px;background:#fff;border:1px solid var(--ui-border);border-radius:var(--ui-card-radius)}
+.user-message-page h1{margin:26px 0 12px;font-size:17px;font-weight:700}
 .user-message-page p{line-height:1.6}
-.user-message-page a{display:inline-block;margin-top:12px;color:#164c80;font-weight:600}
+.user-message-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px}
+.user-message-page a{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;min-height:var(--ui-control-height);padding:0 12px;border:1px solid var(--ui-primary-border);border-radius:var(--ui-control-radius);background:var(--ui-primary-bg);color:#fff;font-size:13.5px;font-weight:650;text-decoration:none;box-shadow:var(--ui-primary-shadow)}
+.user-message-page a:hover{background:var(--ui-primary-hover-bg);border-color:var(--ui-primary-hover-border)}
+.user-message-page a:focus-visible{outline:2px solid var(--ui-focus);outline-offset:2px}
+.user-message-page a.outline{background:#fff;border-color:var(--ui-border);color:var(--ui-text);box-shadow:none}
 @media(max-width:600px){.user-message-page{margin:8vh 16px;padding:22px}}

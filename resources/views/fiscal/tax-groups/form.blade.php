@@ -167,8 +167,8 @@
     </div>
   </section>
 
-  <details data-group-kind="products" @if($selectedKind==='services') hidden @endif style="margin-bottom:14px">
-    <summary class="btn btn-secondary" style="cursor:pointer;display:inline-flex">Outros tributos</summary>
+  <details data-group-kind="products" @if($selectedKind==='services') hidden @endif class="fiscal-section-after">
+    <summary class="btn btn-secondary fiscal-summary-button">Outros tributos</summary>
   <section class="editor-panel settings-panel" data-group-kind="products" @if($selectedKind==='services') hidden @endif>
     <div class="settings-panel-head"><div><h2>IBS / CBS</h2></div></div>
     

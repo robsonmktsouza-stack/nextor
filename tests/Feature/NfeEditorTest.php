@@ -148,9 +148,10 @@ class NfeEditorTest extends TestCase
         $script=(string)file_get_contents(public_path('js/nfe-editor.js'));
 
         self::assertStringContainsString('width:min(1200px,calc(100vw - 36px))',$css);
-        self::assertStringContainsString('border-left:3px solid #2b8b6a',$css);
-        self::assertStringContainsString('border-bottom-color:#28896b',$css);
-        self::assertStringContainsString('background:#f1f8f4',$css);
+        self::assertStringContainsString('var(--ui-control-height,38px)',$css);
+        self::assertStringContainsString('var(--ui-border,#cbd6df)',$css);
+        self::assertStringNotContainsString('border-left:3px solid #2b8b6a',$css);
+        self::assertStringNotContainsString('border-bottom-color:#28896b',$css);
         self::assertStringContainsString('nfe-recipient-meta',$css);
         self::assertStringContainsString('nfe-recipient-address',$css);
         self::assertStringContainsString('nfe-recipient-meta',$script);

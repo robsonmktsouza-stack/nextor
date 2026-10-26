@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('title','Visão geral')
-@section('actions')@if($licensedPdv)<a class="btn btn-primary" href="{{ route('sales.create') }}">@include('partials.icon',['name'=>'plus','size'=>16]) Nova venda</a>@endif @endsection
+@section('actions')@if($licensedPdv)<a class="btn btn-success grid-primary-action" href="{{ route('sales.create') }}">@include('partials.icon',['name'=>'plus','size'=>16]) Nova venda</a>@endif @endsection
 @section('content')
 <div class="stats-grid">
  @if($licensedProducts)

@@ -1,0 +1,45 @@
+/* Cash report document: retain A4 print layout, share screen controls. */
+@page{size:A4;margin:15mm}
+*{box-sizing:border-box}
+body{font:12px/1.45 Arial,Helvetica,sans-serif;background:#eceff1;color:#26343d;margin:0}
+main{width:210mm;max-width:100%;margin:15px auto;background:white;padding:18mm;border:1px solid #c6ced3}
+@media screen{
+  .pdv-cash-document.is-embedded{background:#f0f3f5}
+  .pdv-cash-document.is-embedded main{width:min(100%,860px);margin:0 auto;padding:28px 32px;border:0;min-height:100%}
+}
+@media screen and (max-width:640px){
+  .pdv-cash-document.is-embedded main{padding:17px 14px}
+  .pdv-cash-document .meta{flex-wrap:wrap;gap:12px}
+  .pdv-cash-document .meta div{min-width:40%}
+}
+nav{display:flex;gap:12px;justify-content:flex-end;margin-bottom:15px}
+a,button{color:#17566e}button{cursor:pointer}h1{font-size:22px;margin:0}
+h2{font-size:13px;text-transform:uppercase;margin:21px 0 7px;padding-bottom:5px;border-bottom:1px solid #b7c3c9}
+.meta{display:flex;gap:28px;justify-content:space-between;margin:12px 0 20px}
+.meta div{flex:1}.meta span{display:block;color:#5d6d77;font-size:11px}
+table{border-collapse:collapse;width:100%}td,th{padding:7px 8px;border-bottom:1px solid #dbe1e5}
+th{text-align:left;background:#edf1f3;font-size:11px}.number{text-align:right;font-variant-numeric:tabular-nums}
+.total td{background:#e8eef0;font-size:14px;font-weight:bold;border-top:2px solid #7b929e}
+section{break-inside:avoid}p{white-space:pre-wrap;overflow-wrap:anywhere}
+footer{margin-top:24px;border-top:1px solid #aab7c0;padding-top:10px;color:#5e6a71}
+@media print{body{background:white}main{width:auto;margin:0;padding:0;border:0}nav,form{display:none!important}}
+
+/* Screen controls use the shared ERP component contract. Print geometry above is unchanged. */
+@media screen{
+  .pdv-cash-document{font-family:var(--lumeron-font);font-size:var(--lumeron-text);line-height:1.45}
+  .pdv-cash-document h1{font-size:var(--lumeron-heading)}
+  .pdv-cash-document main{min-width:0}
+  .pdv-cash-document nav{flex-wrap:wrap;align-items:center;gap:8px}
+  .pdv-cash-document form{display:grid;gap:12px;max-width:100%;margin:12px 0 0}
+  .pdv-cash-document .field{display:grid;gap:6px;margin:0;min-width:0}
+  .pdv-cash-document .field>span{font-size:var(--lumeron-label);font-weight:650}
+  .pdv-cash-document .field :is(input,textarea){box-sizing:border-box;width:100%}
+  .pdv-cash-document form>.btn{justify-self:start}
+}
+@media screen and (max-width:640px){
+  .pdv-cash-document main{margin:0;padding:16px 12px}
+  .pdv-cash-document h1{overflow-wrap:anywhere}
+  .pdv-cash-document .number{white-space:nowrap}
+  .pdv-cash-document td,.pdv-cash-document th{overflow-wrap:anywhere}
+}
+

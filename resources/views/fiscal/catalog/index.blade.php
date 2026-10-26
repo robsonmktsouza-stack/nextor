@@ -7,14 +7,6 @@
   </a>
 @endsection
 @section('content')
-@push('styles')
-<style>
-.catalog-filterbar{display:grid;grid-template-columns:minmax(135px,1.1fr) minmax(200px,2fr) minmax(145px,1fr) 74px minmax(135px,1fr) minmax(135px,1fr) auto;gap:10px;align-items:end;padding:12px;border-bottom:1px solid var(--border,#d8e0e7);background:var(--panel,#fff)}
-.catalog-filterbar .field{min-width:0;margin:0}.catalog-filterbar .field input,.catalog-filterbar .field select{width:100%;min-width:0}.catalog-filterbar .field>span{display:block;white-space:nowrap}.catalog-filter-submit{height:36px;white-space:nowrap}.catalog-filterbar+.table-scroll{margin-top:0}.catalog-filterbar~.erp-help-details{margin:12px}.catalog-row-details{max-width:260px}.catalog-row-details summary{cursor:pointer;white-space:nowrap}.catalog-row-detail-body{max-height:180px;overflow:auto;padding:7px 0;line-height:1.45;overflow-wrap:anywhere}.catalog-row-detail-body p{margin:0 0 7px}.catalog-row-detail-body a{display:inline-block;margin-top:4px}
-@media(max-width:1250px){.catalog-filterbar{grid-template-columns:repeat(3,minmax(0,1fr))}.catalog-filter-search{grid-column:span 2}}
-@media(max-width:700px){.catalog-filterbar{grid-template-columns:repeat(2,minmax(0,1fr))}.catalog-filter-search{grid-column:span 2}}
-</style>
-@endpush
 <nav class="sales-module-tabs" aria-label="Configurações fiscais">
   <a href="{{ route('fiscal.catalog.index') }}" class="{{ $tab==='entries'?'active':'' }}">Tabelas oficiais</a>
   <a href="{{ route('fiscal.catalog.index',['tab'=>'coverage']) }}" class="{{ $tab==='coverage'?'active':'' }}">Consulta por estado</a>

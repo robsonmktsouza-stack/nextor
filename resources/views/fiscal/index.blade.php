@@ -330,7 +330,7 @@
           placeholder="Informe o motivo (15 a 255 caracteres)"></textarea>
       </label>
       <label class="field wide">
-        <span style="display:flex;align-items:center;gap:8px;font-weight:400">
+        <span class="fiscal-selection-label">
           <input type="checkbox" name="no_circulation" value="1" required>
           Confirmo que a mercadoria não circulou.
         </span>

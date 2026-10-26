@@ -1,3 +1,5 @@
+/* Shared screen component contract. Tokens live exclusively in ui-tokens.css. */
+@media screen {
 /*
  * Lumeron — visual system refinement
  *
@@ -6,136 +8,128 @@
  * This stylesheet never changes business logic or clickable semantics.
  */
 
-:root{
-  --ui-control-height:38px;
-  --ui-control-height-comfortable:41px;
-  --ui-radius:5px;
-  --ui-border:#cbd6df;
-  --ui-border-hover:#9eb6c8;
-  --ui-text:#43576c;
-  --ui-action-blue:#2c7fb8;
-  --ui-action-green:#3cbd13;
-  --ui-focus:#2f83bf;
-  --ui-shadow:0 1px 2px rgba(21,44,65,.13);
-  --ui-shadow-raised:0 3px 7px rgba(21,44,65,.14);
-  --ui-inset:inset 0 1px 0 rgba(255,255,255,.8);
-}
-.system-comfortable{--ui-control-height:41px}
 
-/* Keep form grids from exceeding their own columns at normal zoom. */
-.app-root :is(.editor-grid,.settings-form-grid,.settings-grid,.cms-card,.grid-actionbar,.grid-actions-right,.grid-actions-left,.editor-panel,.dialog-body,.table-scroll){
-  min-width:0;
+/* Shared components. Modules own structure; this file owns their appearance. */
+/* Hidden native checkboxes must not inherit the viewport-wide form input width. */
+.switch-field{position:relative}
+.switch-field input[type="checkbox"]{position:absolute;inset:auto;left:0;top:50%;width:1px;height:1px;min-width:0;min-height:0;max-width:1px;margin:0;padding:0;border:0;opacity:0;clip-path:inset(50%);overflow:hidden}
+.switch-field:focus-within .switch-track{outline:2px solid var(--ui-focus);outline-offset:2px}
+:is(.app-root,.pdv-body,.pdv-cash-document,.pdv-receipt-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.field,.purchase-line-field){min-width:0}
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.editor-grid,.settings-form-grid,.settings-grid,.cms-card,.grid-actionbar,.grid-actions-left,.grid-actions-right,.editor-panel,.dialog-body,.table-scroll){min-width:0;max-width:100%;box-sizing:border-box}
+
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.field,.purchase-line-field)>span{font:500 var(--lumeron-label)/1.35 var(--lumeron-font)}
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.field,.purchase-line-field) :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]),select:not(.ui-select-native),textarea),
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.field,.purchase-line-field) .ui-select-trigger{
+  box-sizing:border-box;width:100%;max-width:100%;min-width:0;height:var(--ui-control-height);min-height:var(--ui-control-height);
+  border:1px solid var(--ui-border);border-radius:var(--ui-control-radius);background:var(--ui-surface);color:var(--ui-text);
+  padding:0 11px;font:400 var(--ui-control-font-size)/var(--ui-control-line-height) var(--lumeron-font);box-shadow:inset 0 1px 2px rgba(27,53,75,.035);
 }
-.app-root :is(.editor-grid,.settings-form-grid,.settings-grid) > *{min-width:0}
-.app-root .field{min-width:0}
-.app-root .field > span{line-height:1.35}
-.app-root .field :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]),select,textarea,.ui-select-trigger){
-  max-width:100%;
-  min-width:0;
-  border-radius:var(--ui-radius);
-  border-color:var(--ui-border);
-  box-shadow:inset 0 1px 2px rgba(27,53,75,.035);
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.field,.purchase-line-field)>textarea{height:auto;min-height:84px;padding:9px 11px;resize:vertical}
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.numeric-input,.money-input,.input-prefix,.input-icon-group,.input-action-group){box-sizing:border-box;min-width:0;max-width:100%;height:var(--ui-control-height);min-height:var(--ui-control-height);border:1px solid var(--ui-border);border-radius:var(--ui-control-radius);background:var(--ui-surface)}
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.numeric-input,.money-input,.input-prefix,.input-icon-group,.input-action-group)>input{box-sizing:border-box;flex:1;width:100%;padding:0 11px;margin:0;min-width:0;max-width:100%;height:100%;min-height:0;border:0;border-radius:0;background:transparent;font:400 var(--ui-control-font-size)/var(--ui-control-line-height) var(--lumeron-font);box-shadow:none}
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.field,.purchase-line-field) :is(input,select,textarea,.ui-select-trigger):hover:not(:disabled):not([readonly]){border-color:var(--ui-border-hover)}
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.field,.purchase-line-field) :is(input,select,textarea,.ui-select-trigger):focus-visible{outline:0;border-color:var(--ui-focus);box-shadow:var(--ui-focus-ring)}
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.numeric-input,.money-input,.input-prefix,.input-icon-group,.input-action-group):focus-within{border-color:var(--ui-focus);box-shadow:var(--ui-focus-ring)}
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.field,.purchase-line-field) :is(input,textarea)[readonly]{background:#f3f6f8;border-color:#d9e1e8;color:#64788a}
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.field,.purchase-line-field) :is(input,select,textarea,.ui-select-trigger):disabled{background:#f4f6f8;border-color:#e0e5e9;color:#8998a6;cursor:not-allowed}
+:is(.app-root,.pdv-body,.pdv-cash-document,.pdv-receipt-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) .btn{
+  box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  min-height:var(--ui-control-height);height:var(--ui-control-height);padding:0 12px;border:1px solid var(--ui-border);border-radius:var(--ui-control-radius);
+  font:650 var(--ui-control-font-size)/var(--ui-control-line-height) var(--lumeron-font);white-space:nowrap;text-decoration:none;cursor:pointer;
 }
-.app-root .field :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]),select,.ui-select-trigger){
-  min-height:var(--ui-control-height);
-}
-.app-root .field :is(input,select,textarea,.ui-select-trigger):hover:not(:disabled):not([readonly]){
-  border-color:var(--ui-border-hover);
-}
-.app-root .field :is(input,select,textarea,.ui-select-trigger):focus-visible{
-  outline:0;
-  border-color:var(--ui-focus);
-  box-shadow:0 0 0 3px rgba(47,131,191,.14),inset 0 1px 1px rgba(27,53,75,.025);
-}
-.app-root .field :is(input,textarea)[readonly]{
-  background:#f3f6f8;
-  border-color:#d9e1e8;
-  color:#64788a;
-}
-.app-root .field :is(input,select,textarea):disabled{
-  background:#f4f6f8;
-  border-color:#e0e5e9;
-  color:#8998a6;
-  cursor:not-allowed;
-}
-.app-root :is(.field,.editor-grid) textarea{height:auto;min-height:84px;resize:vertical}
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.btn-icon,.input-action-button,.close-dialog){box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;width:var(--ui-icon-button-size);height:var(--ui-icon-button-size);min-height:var(--ui-icon-button-size);padding:0;border:1px solid var(--ui-border);border-radius:var(--ui-control-radius);font:400 var(--ui-icon-size)/1 var(--lumeron-font)}
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.btn-icon,.input-action-button,.close-dialog)>svg{width:var(--ui-icon-size);height:var(--ui-icon-size)}
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.grid-primary-action,.grid-tool,.grid-filter-button,.period-current,.period-arrow,.bulk-action-select,.bulk-apply,.pager-button,.table-pager-button,.btn-sm){height:var(--ui-action-height);min-height:var(--ui-action-height);border-radius:var(--ui-control-radius);font-size:var(--ui-control-font-size);line-height:var(--ui-control-line-height)}
+.app-root .grid-actionbar :is(.btn,.table-search input,.table-search-group input,.input-filter,.ui-select-trigger,.finance-action-icon,.finance-action-main,.finance-action-split,.finance-action-caret){height:var(--ui-action-height);min-height:var(--ui-action-height);font-size:var(--ui-control-font-size)}
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.cms-card,.sales-module-card,.editor-panel,.settings-panel){border:1px solid var(--ui-card-border);border-radius:var(--ui-card-radius);box-shadow:var(--ui-card-shadow)}
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.erp-dialog,.nextor-modal-window,.nextor-modal,.modal-dialog,.nextor-confirm-dialog){border:1px solid var(--ui-card-border);border-radius:var(--ui-dialog-radius);box-shadow:var(--ui-dialog-shadow)}
+.erp-catalog-dialog{border:1px solid var(--ui-card-border);border-radius:var(--ui-dialog-radius);box-shadow:var(--ui-dialog-shadow)}
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) .dialog-header{padding:var(--ui-header-padding);background:var(--ui-dialog-header-bg);border-bottom:1px solid var(--ui-dialog-header-border);color:var(--ui-dialog-header-text)}
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) .dialog-header :is(h2,p,.close-dialog){color:inherit}
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) .dialog-header h2{font:650 var(--lumeron-heading)/1.35 var(--lumeron-font)}
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) .dialog-footer{padding:var(--ui-footer-padding);background:var(--ui-dialog-footer-bg);border-top:1px solid var(--ui-divider);box-shadow:none;gap:var(--ui-gap-small)}
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.cms-table,.purchase-show-table){font:400 var(--lumeron-list)/1.4 var(--lumeron-font)}
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.cms-table,.purchase-show-table) thead th{font:700 var(--ui-list-header-font-size)/1.3 var(--lumeron-font)}
+:is(.app-root,.pdv-body,.pdv-cash-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) .close-dialog{background:transparent;color:inherit;border-color:transparent}
 .app-root input[type="number"]:not(.keep-native-spinner){appearance:textfield;-moz-appearance:textfield}
 .app-root input[type="number"]:not(.keep-native-spinner)::-webkit-outer-spin-button,
-.app-root input[type="number"]:not(.keep-native-spinner)::-webkit-inner-spin-button{
-  -webkit-appearance:none;margin:0
+.app-root input[type="number"]:not(.keep-native-spinner)::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+
+/* A prefixed field has one shared surface, with borderless inner controls. */
+:is(.app-root,.pdv-body,.erp-catalog-dialog,.nextor-modal-layer) :is(.input-prefix,.input-icon-group) > :is(span,.input-icon),
+:is(.app-root,.pdv-body,.erp-catalog-dialog,.nextor-modal-layer) .numeric-input-prefix{
+  box-sizing:border-box;height:auto;min-height:0;align-self:stretch;border:0;border-right:1px solid var(--ui-divider);border-radius:0;background:var(--ui-surface-muted);font-size:var(--lumeron-small);
+}
+:is(.app-root,.pdv-body,.erp-catalog-dialog,.nextor-modal-layer) .input-action-group > .input-action-button{
+  align-self:stretch;width:auto;min-width:var(--ui-control-height);height:100%;min-height:0;border:0;border-left:1px solid var(--ui-divider);border-radius:0;padding:0 10px;
 }
 
 /* The slightly raised surface belongs to actions, not to every card. */
-.app-root :is(.btn,.grid-primary-action,.grid-filter-button,.bulk-apply,.btn-icon,.input-action-button,
+:is(.app-root,.pdv-body,.pdv-cash-document,.pdv-receipt-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.btn,.grid-primary-action,.grid-filter-button,.bulk-apply,.btn-icon,.input-action-button,
   .table-search-submit,.finance-action-icon,.finance-action-split,.finance-action-main,
   .finance-action-caret,.pager-button){
   box-shadow:var(--ui-inset),var(--ui-shadow);
   transition:background .13s ease,border-color .13s ease,box-shadow .13s ease,transform .13s ease,color .13s ease;
 }
-.app-root :is(.btn,.grid-primary-action,.grid-filter-button,.bulk-apply,.btn-icon,.input-action-button,
+:is(.app-root,.pdv-body,.pdv-cash-document,.pdv-receipt-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.btn,.grid-primary-action,.grid-filter-button,.bulk-apply,.btn-icon,.input-action-button,
   .table-search-submit,.finance-action-icon,.finance-action-split,.finance-action-main,
   .finance-action-caret,.pager-button):active:not(:disabled):not(.disabled){
   transform:translateY(1px);
   box-shadow:inset 0 2px 4px rgba(23,53,76,.18);
 }
-.app-root :is(.btn,.grid-primary-action,.grid-filter-button,.bulk-apply,.btn-icon,.input-action-button,
+:is(.app-root,.pdv-body,.pdv-cash-document,.pdv-receipt-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.btn,.grid-primary-action,.grid-filter-button,.bulk-apply,.btn-icon,.input-action-button,
   .table-search-submit,.finance-action-icon,.finance-action-split,.finance-action-main,
   .finance-action-caret,.pager-button):hover:not(:disabled):not(.disabled){
   box-shadow:var(--ui-inset),var(--ui-shadow-raised);
 }
-.app-root :is(.btn,.btn-icon,.finance-action-icon,.finance-action-main,.finance-action-caret,
+:is(.app-root,.pdv-body,.pdv-cash-document,.pdv-receipt-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.btn,.btn-icon,.finance-action-icon,.finance-action-main,.finance-action-caret,
   .finance-action-split,.grid-primary-action,.bulk-apply):disabled{
   opacity:.58;
   box-shadow:none;
   transform:none;
   cursor:not-allowed;
 }
-.app-root .btn{
-  border-radius:var(--ui-radius);
-  gap:7px;
-  font-weight:650;
-}
-.app-root :is(.btn-secondary,.btn-light,.btn-icon,.input-action-button,.table-search-submit,
+:is(.app-root,.pdv-body,.pdv-cash-document,.pdv-receipt-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.btn-secondary,.btn-light,.btn-icon,.input-action-button,.table-search-submit,
   .finance-action-icon,.finance-action-split,.finance-action-main,.finance-action-caret,
   .bulk-apply,.pager-button){
-  background:linear-gradient(180deg,#fff 0%,#f2f5f8 100%);
+  background:var(--ui-secondary-bg);
   border-color:var(--ui-border);
   color:var(--ui-text);
 }
-.app-root :is(.btn-secondary,.btn-light,.btn-icon,.input-action-button,.table-search-submit,
+:is(.app-root,.pdv-body,.pdv-cash-document,.pdv-receipt-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.btn-secondary,.btn-light,.btn-icon,.input-action-button,.table-search-submit,
   .finance-action-icon,.finance-action-split,.finance-action-main,.finance-action-caret,
   .bulk-apply,.pager-button):hover:not(:disabled):not(.disabled){
-  background:linear-gradient(180deg,#fff 0%,#e8f1f8 100%);
+  background:var(--ui-secondary-hover-bg);
   border-color:var(--ui-border-hover);
   color:#27658e;
 }
-.app-root :is(.btn-primary,.grid-filter-button){
+:is(.app-root,.pdv-body,.pdv-cash-document,.pdv-receipt-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.btn-primary,.grid-filter-button){
   color:#fff;
-  background:linear-gradient(180deg,#4096d1 0%,#2a78ad 100%);
-  border-color:#236b9e;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.23),0 2px 4px rgba(31,101,157,.18);
+  background:var(--ui-primary-bg);
+  border-color:var(--ui-primary-border);
+  box-shadow:var(--ui-primary-shadow);
 }
-.app-root :is(.btn-primary,.grid-filter-button):hover:not(:disabled){
+:is(.app-root,.pdv-body,.pdv-cash-document,.pdv-receipt-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.btn-primary,.grid-filter-button):hover:not(:disabled){
   color:#fff;
-  background:linear-gradient(180deg,#449dd8 0%,#236da2 100%);
-  border-color:#1f618e;
+  background:var(--ui-primary-hover-bg);
+  border-color:var(--ui-primary-hover-border);
 }
-.app-root :is(.btn-success,.grid-primary-action){
+:is(.app-root,.pdv-body,.pdv-cash-document,.pdv-receipt-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.btn-success,.grid-primary-action){
   color:#fff;
-  background:linear-gradient(180deg,#4bcf1b 0%,#32a909 100%);
-  border-color:#2d9810;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.27),0 2px 4px rgba(39,123,36,.18);
+  background:var(--ui-success-bg);
+  border-color:var(--ui-success-border);
+  box-shadow:var(--ui-success-shadow);
 }
-.app-root :is(.btn-success,.grid-primary-action):hover:not(:disabled){
+:is(.app-root,.pdv-body,.pdv-cash-document,.pdv-receipt-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.btn-success,.grid-primary-action):hover:not(:disabled){
   color:#fff;
-  background:linear-gradient(180deg,#53d821 0%,#2c9909 100%);
-  border-color:#24830b;
+  background:var(--ui-success-hover-bg);
+  border-color:var(--ui-success-hover-border);
 }
-.app-root .btn-danger{
-  background:linear-gradient(180deg,#e7686b,#c64048);
-  border-color:#b93640;color:#fff;
+:is(.app-root,.pdv-body,.pdv-cash-document,.pdv-receipt-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) .btn-danger{
+  background:var(--ui-danger-bg);
+  border-color:var(--ui-danger-border);color:#fff;
 }
-.app-root :is(.btn-danger-outline,.grid-tool-danger):hover:not(:disabled){
+:is(.app-root,.pdv-body,.pdv-cash-document,.pdv-receipt-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.btn-danger-outline,.grid-tool-danger):hover:not(:disabled){
   border-color:#d9a7aa;
   color:#a8363e;
   background:linear-gradient(180deg,#fff,#fff0ef);
@@ -144,7 +138,7 @@
 /* Segmented tabs: clear hit targets and an actual selected state. */
 .app-root .editor-tabs{
   min-width:0;
-  border-radius:7px;
+  border-radius:var(--ui-control-radius);
   background:linear-gradient(180deg,#e8edf1,#dce5ec);
   border-color:#cbd7e0;
   box-shadow:inset 0 1px 3px rgba(23,52,76,.09);
@@ -153,7 +147,7 @@
   min-width:0;
   cursor:pointer;
   border:1px solid #c9d6e0;
-  border-radius:5px;
+  border-radius:var(--ui-control-radius);
   background:linear-gradient(180deg,#fff,#f0f4f7);
   color:#425f73;
   box-shadow:inset 0 1px 0 #fff,0 1px 1px rgba(25,50,71,.045);
@@ -192,6 +186,7 @@
 .app-root :is(.grid-tool-group,.bulk-actions){min-width:0}
 .app-root .grid-tool-group{box-shadow:var(--ui-shadow);border-radius:var(--ui-radius)}
 .app-root .grid-tool{
+  border-radius:var(--ui-control-radius);border-color:var(--ui-border);
   min-width:37px;
   background:linear-gradient(180deg,#fff,#f2f5f8);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.8);
@@ -219,16 +214,6 @@
  * Apply only to read-only listing tables, not PDV baskets, editable sales,
  * financial forms, document/item tables or intentionally large empty states.
  * Height is a minimum: wrapped content stays visible instead of clipping. */
-.app-root{
-  --ui-list-header-height:38px;
-  --ui-list-row-height:46px;
-  --ui-list-cell-pad-y:6px;
-}
-body.system-comfortable .app-root{
-  --ui-list-header-height:40px;
-  --ui-list-row-height:50px;
-  --ui-list-cell-pad-y:7px;
-}
 .app-root .table-scroll .cms-table thead th{
   height:var(--ui-list-header-height);
   padding-top:7px;
@@ -263,10 +248,9 @@ body.system-comfortable .app-root{
 
 /* Editor panels stay flat: stop multiplying gradients and dark blocks. */
 .app-root :is(.editor-panel,.settings-panel,.cms-card){min-width:0}
-.app-root :is(.editor-panel,.settings-panel){border-color:#d7e1e9}
 .app-root :is(.dialog-header,.dialog-footer,.editor-savebar,.settings-savebar){min-width:0}
-.app-root :is(.dialog-footer,.editor-savebar,.settings-savebar){
-  border-top-color:#d3dfe7;
+.app-root :is(.editor-savebar,.settings-savebar){
+  border-top-color:var(--ui-divider);
   box-shadow:0 -3px 14px rgba(22,49,69,.065);
 }
 .app-root .nfe-modal-layer .nfe-workspace-body,
@@ -342,7 +326,7 @@ body.system-comfortable .app-root{
   #nfceEditor .nfce-save-total strong{font-size:17px}
 }
 @media(prefers-reduced-motion:reduce){
-  .app-root :is(.btn,.editor-tab,.grid-tool,.grid-primary-action,.btn-icon),
+  :is(.app-root,.pdv-body,.pdv-cash-document,.pdv-receipt-document,.erp-catalog-dialog,.nextor-modal-layer,.nextor-confirm) :is(.btn,.editor-tab,.grid-tool,.grid-primary-action,.btn-icon),
   .pdv-body :is(.pdv-topbar-button,.pdv-payment-options button,.pdv-modal-primary){
     transition:none!important;
     transform:none!important;
@@ -362,16 +346,16 @@ body.system-comfortable .app-root{
   display:block;
   box-sizing:border-box;
   width:100%;
-  height:38px;
-  min-height:38px;
+  height:var(--ui-control-height);
+  min-height:var(--ui-control-height);
   line-height:normal;
   padding:0 36px 0 11px;
   border:1px solid #cbd6df;
-  border-radius:5px;
+  border-radius:var(--ui-control-radius);
   background:#fff;
   color:#31445b;
   font-family:inherit;
-  font-size:12px;
+  font-size:var(--ui-control-font-size);
   font-weight:400;
   text-align:left;
   text-overflow:ellipsis;
@@ -384,7 +368,7 @@ body.system-comfortable .app-root{
 .ui-select.ui-searchable::after{
   content:'';
   position:absolute;
-  top:19px;
+  top:calc(var(--ui-control-height) / 2);
   right:13px;
   width:7px;
   height:7px;
@@ -411,14 +395,14 @@ body.system-comfortable .app-root{
   overflow-x:hidden;
   overflow-y:auto;
   padding:4px;
-  border-radius:5px;
+  border-radius:var(--ui-control-radius);
 }
 .ui-select.ui-searchable .ui-select-option{
   display:flex;
   align-items:center;
   min-height:35px;
   padding:8px 10px;
-  font-size:12px;
+  font-size:var(--ui-control-font-size);
   line-height:1.35;
   white-space:normal;
   overflow-wrap:anywhere;
@@ -445,15 +429,15 @@ body.system-comfortable .app-root{
   outline-offset:-2px;
 }
 .toolbar-filters .ui-select.ui-searchable .ui-select-trigger{
-  height:34px;
-  min-height:34px;
-  font-size:11px;
+  height:var(--ui-action-height);
+  min-height:var(--ui-action-height);
+  font-size:var(--ui-control-font-size);
 }
-.toolbar-filters .ui-select.ui-searchable::after{top:17px}
-.table-page-size-form .ui-select.ui-searchable::after{top:18px}
+.toolbar-filters .ui-select.ui-searchable::after{top:calc(var(--ui-action-height) / 2)}
+.table-page-size-form .ui-select.ui-searchable::after{top:calc(var(--ui-control-height) / 2)}
 .sale-items-table .ui-select.ui-searchable .ui-select-trigger{
-  height:37px;
-  min-height:37px;
+  height:var(--ui-control-height);
+  min-height:var(--ui-control-height);
 }
 
 
@@ -575,7 +559,7 @@ body.system-comfortable .app-root{
   padding:15px 16px;
   background:#fff;
   border:1px solid #d8e2eb;
-  border-radius:5px;
+  border-radius:var(--ui-control-radius);
   box-shadow:0 1px 3px rgba(21,44,65,.05);
 }
 #nfceEditor .editor-panel>.editor-panel{
@@ -716,7 +700,7 @@ body.system-comfortable .app-root{
   color:#28455d;
   font-size:13px;
 }
-#nfceEditor .nfce-list-count{font-size:12px;color:#64788c}
+#nfceEditor .nfce-list-count{font-size:var(--ui-control-font-size);color:#64788c}
 #nfceEditor .nfce-correction-product-list .table-scroll{
   width:100%;
   min-width:0;
@@ -783,7 +767,7 @@ body.system-comfortable .app-root{
   padding:15px 18px;
   border:1px solid #ef9898;
   border-left:4px solid #d92735;
-  border-radius:5px;
+  border-radius:var(--ui-control-radius);
   background:#fff0f1;
   color:#741922;
   overflow-wrap:anywhere;
@@ -807,70 +791,5 @@ body.system-comfortable .app-root{
 .sefaz-guidance-details{margin-top:7px;font-size:12px}
 .sefaz-guidance-details summary{cursor:pointer;max-width:100%}
 .sefaz-guidance-original{white-space:pre-wrap;overflow-wrap:anywhere}
-
-
-/*
- * Contrato visual administrativo: aplicado por último no layout principal.
- * Mesma função = mesma geometria, independentemente do módulo.
- * Não atinge PDV em tela cheia, DANFE, impressões nem elementos circulares.
- */
-@media screen {
-  .app-root {
-    --ui-radius:4px;
-    --ui-control-radius:4px;
-    --ui-card-radius:4px;
-    --ui-control-height:38px;
-    --ui-action-height:34px;
-  }
-
-  /* Contêineres: evitar cartões com cantos e sombras diferentes. */
-  .app-root :is(.cms-card,.sales-module-card,.editor-panel,.settings-panel,.purchase-editor,.purchase-show-table-wrap) {
-    border-radius:var(--ui-card-radius);
-  }
-  .app-root :is(.cms-card,.sales-module-card,.editor-panel,.settings-panel) {
-    box-shadow:0 1px 2px rgba(26,54,75,.045);
-  }
-
-  /* Ações: mesmo raio, altura e tipografia em listagens e detalhes. */
-  .app-root :is(.grid-actionbar,.dialog-footer,.editor-savebar,.purchase-savebar) :is(.btn,.grid-tool,.grid-primary-action,.grid-filter-button),
-  .app-root :is(.grid-tool,.grid-primary-action,.grid-filter-button,.btn,.btn-icon,.input-action-button,.table-search-submit,.purchase-show-detail-btn) {
-    border-radius:var(--ui-control-radius);
-    font-family:inherit;
-  }
-  .app-root .grid-actionbar :is(.grid-tool,.grid-primary-action,.grid-filter-button,.btn) {
-    min-height:var(--ui-action-height);
-    box-sizing:border-box;
-    line-height:1.2;
-    align-items:center;
-    justify-content:center;
-  }
-  .app-root .grid-actionbar :is(.grid-actions-left,.grid-actions-right) {
-    align-items:center;
-    gap:6px;
-  }
-  .app-root :is(.grid-tool,.btn,.btn-icon,.purchase-show-detail-btn):focus-visible {
-    outline:2px solid #2f83bf;
-    outline-offset:2px;
-  }
-
-  /* Campos: não modificar grupos monetários com prefixos R$ nem switches. */
-  .app-root .field :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),select,textarea,.ui-select-trigger),
-  .app-root :is(.input-filter,.bulk-action-select,.table-search input) {
-    border-radius:var(--ui-control-radius);
-  }
-  .app-root .field :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]),select,.ui-select-trigger) {
-    min-height:var(--ui-control-height);
-  }
-
-  /* Tabelas e modais com o mesmo acabamento. */
-  .app-root :is(.table-scroll,.purchase-show-table-wrap) {
-    border-radius:var(--ui-card-radius);
-  }
-  .app-root :is(.erp-dialog,.nextor-modal,.modal-dialog) {
-    border-radius:var(--ui-card-radius);
-  }
-  .app-root :is(.cms-table,.purchase-show-table) thead th {
-    font-weight:700;
-  }
 
 }

@@ -23,7 +23,7 @@
     <button class="btn btn-primary" type="submit" @disabled($environment!=='homologation')>Solicitar inutilização</button>
   </form>
 </section>
-<section class="cms-card" style="margin-top:12px">
+<section class="cms-card fiscal-space-before">
   <div class="table-scroll">
     <table class="cms-table">
       <thead><tr><th>Ambiente</th><th>Ano / Série</th><th>Faixa</th><th>Situação</th><th>Protocolo</th><th>Solicitada em</th><th>Documento</th></tr></thead>

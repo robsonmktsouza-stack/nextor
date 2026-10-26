@@ -1,62 +1,55 @@
 /* Compras usa a mesma barra, os mesmos filtros e a mesma tabela do Fiscal. */
 .fiscal-purchases-page .grid-actionbar form{margin:0}
-.fiscal-purchases-count{color:#657a8b;font-size:12px;white-space:nowrap}
+.fiscal-purchases-count{color:#657a8b;font-size:var(--lumeron-small,12px);white-space:nowrap}
 .fiscal-purchases-auto-form{flex:none}
-.fiscal-purchases-switch-button{box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:9px;height:36px;min-height:36px;padding:0 10px;border:1px solid #d5dbe2;border-radius:4px;background:#fff;color:#536a7f;font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer}
+.fiscal-purchases-switch-button{box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:9px;height:var(--ui-action-height,34px);min-height:var(--ui-action-height,34px);padding:0 10px;border:1px solid var(--ui-border,#cbd6df);border-radius:var(--ui-control-radius,4px);background:#fff;color:var(--ui-text,#43576c);font-size:var(--lumeron-small,12px);font-weight:600;white-space:nowrap;cursor:pointer}
 .fiscal-purchases-switch-button:hover{background:#f7f9fb;border-color:#bdcdd9}
-.fiscal-purchases-switch-button:focus-visible{outline:2px solid #2b85b9;outline-offset:2px}
+.fiscal-purchases-switch-button:focus-visible{outline:2px solid var(--ui-focus,#2f83bf);outline-offset:2px}
 .fiscal-purchases-switch-track{display:inline-flex;align-items:center;width:30px;height:17px;border-radius:20px;background:#b4c1cc;padding:3px;box-sizing:border-box;transition:background .15s}
 .fiscal-purchases-switch-thumb{display:block;width:11px;height:11px;background:#fff;border-radius:50%;box-shadow:0 1px 2px #12263830;transition:transform .15s}
 .fiscal-purchases-switch-button[aria-checked="true"] .fiscal-purchases-switch-track{background:#2c9a55}
 .fiscal-purchases-switch-button[aria-checked="true"] .fiscal-purchases-switch-thumb{transform:translateX(13px)}
-.fiscal-purchases-notice{display:flex;align-items:center;gap:7px;padding:8px 14px;background:#fff8ed;border-bottom:1px solid #ead6bd;color:#865824;font-size:12px}
+.fiscal-purchases-notice{display:flex;align-items:center;gap:7px;padding:8px 14px;background:#fff8ed;border-bottom:1px solid #ead6bd;color:#865824;font-size:var(--lumeron-small,12px)}
 .fiscal-purchases-notice svg{flex:none}
 .fiscal-purchases-toolbar-filters .table-search-group{flex:1 1 290px;width:420px}
 .fiscal-purchases-toolbar-filters .input-filter{flex:0 1 195px;min-width:155px}
-.fiscal-purchases-table td strong{display:block;color:#324d61;font-weight:600;font-size:13px}
-.fiscal-purchases-table td small{display:block;margin-top:3px;color:#7a8995;font-size:11px}
-.fiscal-purchases-key{font-size:12px;overflow-wrap:anywhere;color:#586e7e}
+.fiscal-purchases-table td strong{display:block;color:#324d61;font-weight:600;font-size:var(--lumeron-list,13px)}
+.fiscal-purchases-table td small{display:block;margin-top:3px;color:#7a8995;font-size:var(--lumeron-small,12px)}
+.fiscal-purchases-key{font-size:var(--lumeron-small,12px);overflow-wrap:anywhere;color:#586e7e}
 @media(max-width:820px){.fiscal-purchases-page .grid-actionbar .grid-actions-right{justify-content:flex-start;flex-wrap:wrap}}
-@media(max-width:620px){.fiscal-purchases-count{margin-right:auto}.fiscal-purchases-toolbar-filters .table-search-group,.fiscal-purchases-toolbar-filters .input-filter{flex:1 1 100%;width:100%;max-width:none;min-width:0}.fiscal-purchases-switch-label{font-size:11px}}
+@media(max-width:620px){.fiscal-purchases-count{margin-right:auto}.fiscal-purchases-toolbar-filters .table-search-group,.fiscal-purchases-toolbar-filters .input-filter{flex:1 1 100%;width:100%;max-width:none;min-width:0}.fiscal-purchases-switch-label{font-size:var(--lumeron-small,12px)}}
 @media(prefers-reduced-motion:reduce){.fiscal-purchases-switch-track,.fiscal-purchases-switch-thumb{transition:none}}
 .fiscal-purchases-detail{padding:20px 22px}
-.fiscal-purchases-detail h2{margin:0 0 20px;font-size:21px;color:#2d485d}
-.fiscal-purchases-detail h3{margin:24px 0 12px;font-size:14px;color:#344d60}
+.fiscal-purchases-detail h2{margin:0 0 20px;font-size:var(--lumeron-heading,15px);color:#2d485d}
+.fiscal-purchases-detail h3{margin:24px 0 12px;font-size:var(--lumeron-heading,15px);color:#344d60}
 .fiscal-purchases-info{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:17px}
 .fiscal-purchases-info>div{min-width:0}
 .fiscal-purchases-info>div.wide{grid-column:span 4}
-.fiscal-purchases-info span{display:block;color:#73869a;font-size:11px;margin-bottom:5px}
-.fiscal-purchases-info strong{font-size:13px;color:#263e52}
-.fiscal-purchases-alert{margin:22px 0 0;padding:12px 14px;border:1px solid #e1d4a8;background:#fffaf0;border-radius:4px;color:#745923;font-size:12px;line-height:1.6}
-.fiscal-purchases-help{margin:13px 0 0;color:#637588;font-size:12px;line-height:1.6}
+.fiscal-purchases-info span{display:block;color:#73869a;font-size:var(--lumeron-small,12px);margin-bottom:5px}
+.fiscal-purchases-info strong{font-size:var(--lumeron-list,13px);color:#263e52}
+.fiscal-purchases-alert{margin:22px 0 0;padding:12px 14px;border:1px solid #e1d4a8;background:#fffaf0;border-radius:var(--ui-control-radius,4px);color:#745923;font-size:var(--lumeron-small,12px);line-height:1.6}
+.fiscal-purchases-help{margin:13px 0 0;color:#637588;font-size:var(--lumeron-small,12px);line-height:1.6}
 @media(max-width:850px){.fiscal-purchases-info{grid-template-columns:repeat(2,minmax(0,1fr))}.fiscal-purchases-info>div.wide{grid-column:span 2}}
 @media(max-width:620px){.fiscal-purchases-detail{padding:15px}.fiscal-purchases-info{grid-template-columns:1fr}.fiscal-purchases-info>div.wide{grid-column:span 1}}
 
-/* Manifestação individual: seletor compacto, decisão sempre confirmada no modal. */
+/* Manifestação individual: a mesma altura dos campos; confirmação preservada no modal. */
 .fiscal-purchases-table th,.fiscal-purchases-table td{vertical-align:middle}
-.fiscal-purchases-table .fiscal-manifest-cell{min-width:167px;max-width:198px}
-.fiscal-manifest-select{display:block;box-sizing:border-box;max-width:100%;min-width:162px;width:100%;height:30px;padding:0 22px 0 8px;background:#fff;border:1px solid #cbd7e2;border-radius:3px;color:#465e72;font:600 11px Roboto,Arial,sans-serif;cursor:pointer}
-.fiscal-manifest-select:focus-visible{outline:2px solid #4a91c0;outline-offset:1px}
+.fiscal-manifest-select{display:block;box-sizing:border-box;max-width:100%;min-width:162px;width:100%;height:var(--ui-control-height,38px);padding:0 22px 0 8px;background:#fff;border:1px solid var(--ui-border,#cbd6df);border-radius:var(--ui-control-radius,4px);color:var(--ui-text,#43576c);font:400 var(--ui-control-font-size,13.5px) var(--lumeron-font,Roboto,Arial,sans-serif);cursor:pointer}
+.fiscal-manifest-select:focus-visible{outline:2px solid var(--ui-focus,#2f83bf);outline-offset:1px}
 .fiscal-manifest-select:disabled{cursor:not-allowed;background:#f4f6f8;color:#8d6b37}
-.fiscal-manifest-protocol{display:block;margin-top:4px;color:#73879a;font-size:10px;white-space:nowrap}
-.fiscal-manifest-key{font-size:11px;color:#728295;overflow-wrap:anywhere}
-.fiscal-manifest-confirmation{margin:10px 0 0;font-size:12px;color:#516579}
+.fiscal-manifest-protocol{display:block;margin-top:4px;color:#73879a;font-size:var(--lumeron-small,12px);white-space:nowrap}
+.fiscal-manifest-key{font-size:var(--lumeron-small,12px);color:#728295;overflow-wrap:anywhere}
+.fiscal-manifest-confirmation{margin:10px 0 0;font-size:var(--lumeron-small,12px);color:#516579}
 #purchaseManifestReasonBox[hidden]{display:none}
 
-.fiscal-manifest-cell .ui-select{display:block;width:100%;min-width:155px;max-width:195px}
-.fiscal-manifest-cell .ui-select .ui-select-trigger{box-sizing:border-box;min-height:30px;height:30px;width:100%;padding:0 23px 0 9px;border-radius:3px;font-size:11px;text-align:left}
-.fiscal-manifest-cell .ui-select .ui-select-value{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fiscal-manifest-cell .ui-select .ui-select-trigger{box-sizing:border-box;min-height:var(--ui-control-height,38px);height:var(--ui-control-height,38px);width:100%;padding:0 23px 0 9px;border-radius:var(--ui-control-radius,4px);font-size:var(--ui-control-font-size,13.5px);text-align:left}
+.fiscal-manifest-cell .ui-select .ui-select-value{font-size:var(--ui-control-font-size,13.5px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fiscal-manifest-cell .ui-select.disabled .ui-select-trigger{color:#8d6b37;background:#f4f6f8}
 
-/* Consulta de evento sem reenvio */
-.fiscal-manifest-verify{margin:5px 0 0}
-.fiscal-manifest-verify-button{display:inline-flex;align-items:center;gap:4px;min-height:25px;padding:2px 7px;border:1px solid #c5d6e4;border-radius:3px;background:#f8fafc;color:#376b8d;font-size:11px;font-weight:600;cursor:pointer}
-.fiscal-manifest-verify-button:hover{background:#eaf2f8}
-.fiscal-manifest-verify-button:focus-visible{outline:2px solid #2b85b9}
 .fiscal-purchases-alert form{margin-top:9px}
 .fiscal-purchases-alert p{margin:5px 0}
 
-.fiscal-manifest-response{display:block;max-width:390px;color:#708498;font-size:11px;line-height:1.35;margin-top:3px;white-space:normal;overflow-wrap:anywhere}
+.fiscal-manifest-response{display:block;max-width:390px;color:#708498;font-size:var(--lumeron-small,12px);line-height:1.35;margin-top:3px;white-space:normal;overflow-wrap:anywhere}
 
 /* Listagem de NF-e de entrada: colunas estáveis, sem quebras em valores e ações. */
 .fiscal-purchases-page .table-scroll{overflow-x:auto}
@@ -80,9 +73,9 @@
 .fiscal-purchases-table .price-strong{font-variant-numeric:tabular-nums}
 .fiscal-purchases-table td.action-cell,.fiscal-purchases-table th.action-cell{width:auto;min-width:0;text-align:center}
 .fiscal-purchase-actions{display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap}
-.fiscal-purchase-actions .btn-icon{display:inline-flex;justify-content:center;align-items:center;flex:0 0 28px;width:28px;height:28px;min-width:0;padding:0}
+.fiscal-purchase-actions .btn-icon{display:inline-flex;justify-content:center;align-items:center;flex:0 0 var(--ui-icon-button-size,32px);width:var(--ui-icon-button-size,32px);height:var(--ui-icon-button-size,32px);min-width:0;padding:0}
 .fiscal-purchase-actions .fiscal-purchase-action-disabled{opacity:.38;cursor:not-allowed}
-.fiscal-purchases-amount{font-size:12px;color:#6b7f8d;white-space:nowrap}
+.fiscal-purchases-amount{font-size:var(--lumeron-small,12px);color:#6b7f8d;white-space:nowrap}
 .fiscal-purchases-amount strong{color:#304c62;font-variant-numeric:tabular-nums}
 @media(max-width:1100px){.fiscal-purchases-table td,.fiscal-purchases-table th{padding-left:7px;padding-right:7px}.fiscal-purchases-table .col-supplier{width:22%}.fiscal-purchases-table .col-actions{width:11%}}
 @media(max-width:690px){.fiscal-purchases-table{min-width:950px}.fiscal-purchases-page .grid-actions-right{flex-wrap:wrap}}

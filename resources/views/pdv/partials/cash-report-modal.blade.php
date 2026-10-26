@@ -13,7 +13,7 @@
       <button type="button" data-cash-report-print class="pdv-cash-report-print" disabled>
         Imprimir / Salvar PDF
       </button>
-      <button type="button" data-cash-report-close class="pdv-cash-report-close" aria-label="Fechar relatório">×</button>
+      <button type="button" data-cash-report-close class="pdv-cash-report-close" aria-label="Fechar relatório">@include('partials.icon',['name'=>'x','size'=>16])</button>
     </div>
   </div>
   <div class="pdv-cash-report-content">

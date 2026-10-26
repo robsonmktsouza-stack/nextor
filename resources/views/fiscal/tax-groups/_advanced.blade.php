@@ -84,7 +84,7 @@
   <div class="settings-panel-head"><div><h2>IBS municipal — exceções por município</h2></div></div>
   <div data-variation-list="municipal">
     @foreach($municipalVariations as $rowIndex=>$row)
-      <div class="editor-grid cols-12 settings-grid" data-variation-row="municipal" style="margin-bottom:10px">
+      <div data-variation-row="municipal" class="editor-grid cols-12 settings-grid fiscal-variation-row">
         <label class="field col-3"><span>Município (IBGE)</span><input name="tax_config[municipal_variations][{{ $rowIndex }}][city_ibge]" value="{{ $row['city_ibge'] ?? '' }}" maxlength="7" inputmode="numeric" required placeholder="7 dígitos"></label>
         <label class="field col-2"><span>IBS municipal (%)</span><input type="number" step="0.0001" min="0" max="100" name="tax_config[municipal_variations][{{ $rowIndex }}][rate]" value="{{ $row['rate'] ?? '' }}"></label>
         <label class="field col-2"><span>Diferimento (%)</span><input type="number" step="0.0001" min="0" max="100" name="tax_config[municipal_variations][{{ $rowIndex }}][deferral_rate]" value="{{ $row['deferral_rate'] ?? '' }}"></label>
@@ -95,7 +95,7 @@
   </div>
   <button type="button" class="btn btn-secondary" data-add-variation="municipal">@include('partials.icon',['name'=>'plus','size'=>15]) Adicionar município</button>
   <template data-variation-template="municipal">
-    <div class="editor-grid cols-12 settings-grid" data-variation-row="municipal" style="margin-bottom:10px">
+    <div data-variation-row="municipal" class="editor-grid cols-12 settings-grid fiscal-variation-row">
       <label class="field col-3"><span>Município (IBGE)</span><input name="tax_config[municipal_variations][__INDEX__][city_ibge]" maxlength="7" inputmode="numeric" required placeholder="7 dígitos"></label>
       <label class="field col-2"><span>IBS municipal (%)</span><input type="number" step="0.0001" min="0" max="100" name="tax_config[municipal_variations][__INDEX__][rate]"></label>
       <label class="field col-2"><span>Diferimento (%)</span><input type="number" step="0.0001" min="0" max="100" name="tax_config[municipal_variations][__INDEX__][deferral_rate]"></label>
@@ -109,7 +109,7 @@
   <div class="settings-panel-head"><div><h2>Variações por estado</h2></div></div>
   <div data-variation-list="state">
     @foreach($stateVariations as $rowIndex=>$row)
-      <div class="editor-grid cols-12 settings-grid" data-variation-row="state" style="margin-bottom:10px">
+      <div data-variation-row="state" class="editor-grid cols-12 settings-grid fiscal-variation-row">
         <label class="field col-2"><span>Destino UF</span><select required name="tax_config[state_variations][{{ $rowIndex }}][uf]"><option value="">UF</option>
           @foreach($ufs as $uf)<option value="{{ $uf }}" @selected(($row['uf'] ?? '')===$uf)>{{ $uf }}</option>@endforeach
         </select></label>
@@ -124,7 +124,7 @@
   </div>
   <button type="button" class="btn btn-secondary" data-add-variation="state">@include('partials.icon',['name'=>'plus','size'=>15]) Adicionar variação por UF</button>
   <template data-variation-template="state">
-    <div class="editor-grid cols-12 settings-grid" data-variation-row="state" style="margin-bottom:10px">
+    <div data-variation-row="state" class="editor-grid cols-12 settings-grid fiscal-variation-row">
       <label class="field col-2"><span>Destino UF</span><select required name="tax_config[state_variations][__INDEX__][uf]"><option value="">UF</option>
         @foreach($ufs as $uf)<option value="{{ $uf }}">{{ $uf }}</option>@endforeach
       </select></label>

@@ -1,0 +1,13 @@
+/* Cash register administration uses the normal ERP components. */
+.pdv-register-list{display:grid;gap:16px;min-width:0}
+.pdv-register-card{padding:16px;min-width:0}
+.pdv-register-card>h2{margin:0 0 14px;font-size:var(--lumeron-heading);font-weight:700}
+.pdv-register-form{display:grid;grid-template-columns:minmax(160px,1.1fr) minmax(130px,.8fr) minmax(180px,1fr) auto;gap:12px;align-items:end}
+.pdv-register-form>.field{margin:0;min-width:0}
+.pdv-register-status{margin:10px 0 0;color:#607587;font-size:var(--lumeron-small)}
+@media(max-width:1050px){.pdv-register-form{grid-template-columns:repeat(2,minmax(0,1fr))}.pdv-register-form>.btn{justify-self:start}}
+@media(max-width:600px){.pdv-register-form{grid-template-columns:minmax(0,1fr)}.pdv-register-card{padding:12px}}
+
+/* Numeric amounts remain aligned while the history scrolls within its table. */
+.pdv-cash-history .cms-table{min-width:900px}
+.pdv-cash-history .pdv-cash-number{text-align:right;font-variant-numeric:tabular-nums}

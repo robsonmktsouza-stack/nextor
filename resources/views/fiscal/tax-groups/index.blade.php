@@ -15,7 +15,7 @@
 
     </div>
   </div>
-  <div class="grid-actionbar" style="margin-bottom:12px">
+  <div class="grid-actionbar fiscal-space-after">
     <div class="grid-actions-left">
       <a class="grid-primary-action" href="{{ route('fiscal.tax-groups.create',['kind'=>'products']) }}">@include('partials.icon',['name'=>'plus','size'=>16]) <span>Produtos</span></a>
       <a class="grid-tool grid-tool-wide" href="{{ route('fiscal.tax-groups.create',['kind'=>'services']) }}">@include('partials.icon',['name'=>'plus','size'=>16]) <span>Serviços</span></a>

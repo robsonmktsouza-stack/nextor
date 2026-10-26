@@ -6,10 +6,10 @@
     <div class="grid-actions-left">
       <a class="grid-tool grid-tool-wide" href="{{ route('purchases.index') }}">@include('partials.icon',['name'=>'arrow-left','size'=>17]) Voltar às compras</a>
       @if($purchase->status==='draft')
-      <a class="grid-tool grid-tool-wide purchase-action-edit" href="{{ route('purchases.edit',$purchase) }}">@include('partials.icon',['name'=>'edit','size'=>17]) Editar</a>
-      <button class="grid-tool grid-tool-wide purchase-action-receive" type="button" data-dialog-open="purchase-receive">@include('partials.icon',['name'=>'check','size'=>17]) Confirmar recebimento</button>
+      <a class="grid-tool grid-tool-wide btn-primary purchase-action-edit" href="{{ route('purchases.edit',$purchase) }}">@include('partials.icon',['name'=>'edit','size'=>17]) Editar</a>
+      <button class="grid-tool grid-tool-wide btn-success purchase-action-receive" type="button" data-dialog-open="purchase-receive">@include('partials.icon',['name'=>'check','size'=>17]) Confirmar recebimento</button>
       @endif
-      @if($purchase->status!=='cancelled')<button class="grid-tool grid-tool-wide purchase-action-cancel" type="button" data-dialog-open="purchase-cancel">@include('partials.icon',['name'=>'x','size'=>16]) Cancelar compra</button>@endif
+      @if($purchase->status!=='cancelled')<button class="grid-tool grid-tool-wide btn-danger-outline purchase-action-cancel" type="button" data-dialog-open="purchase-cancel">@include('partials.icon',['name'=>'x','size'=>16]) Cancelar compra</button>@endif
       <button class="grid-tool" type="button" data-print-page data-tooltip="Imprimir" aria-label="Imprimir">@include('partials.icon',['name'=>'print','size'=>17])</button>
     </div>
     <div class="grid-actions-right">
@@ -36,8 +36,8 @@
       </strong></div>
     </div>
     <div class="purchase-section-heading"><h2>Produtos ({{ $purchase->items->count() }})</h2></div>
-    <div class="purchase-show-table-wrap">
-      <table class="purchase-show-table">
+    <div class="table-scroll purchase-show-table-wrap">
+      <table class="cms-table purchase-show-table">
         <thead><tr><th>Produto</th><th class="purchase-show-num">Qtd.</th><th class="purchase-show-num">Unitário</th><th class="purchase-show-num">Total</th><th class="purchase-show-center">Detalhes</th></tr></thead>
         <tbody>
           @foreach($purchase->items as $item)
@@ -61,7 +61,7 @@
             <td class="purchase-show-num purchase-show-amount">R$ {{ number_format((float)$item->line_total,2,',','.') }}</td>
             <td class="purchase-show-center">
               @if($hasCharges)
-                <button type="button" class="purchase-show-detail-btn" aria-label="Ver custos do produto" aria-expanded="false" onclick="const row=this.closest('tr').nextElementSibling;row.hidden=!row.hidden;this.setAttribute('aria-expanded',String(!row.hidden));this.textContent=row.hidden?'Ver':'Ocultar'">Ver</button>
+                <button type="button" class="btn btn-secondary btn-sm purchase-show-detail-btn" aria-label="Ver custos do produto" aria-expanded="false" onclick="const row=this.closest('tr').nextElementSibling;row.hidden=!row.hidden;this.setAttribute('aria-expanded',String(!row.hidden));this.textContent=row.hidden?'Ver':'Ocultar'">Ver</button>
               @else
                 <span class="purchase-show-nocharge">—</span>
               @endif

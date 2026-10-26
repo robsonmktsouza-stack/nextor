@@ -1,0 +1,4 @@
+/* Small structural states shared by commercial forms; basic components are centralized. */
+#saleQuoteValidity[hidden],#saveQuotePdf[hidden]{display:none!important}
+.settings-panel-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+@media(max-width:760px){.settings-panel-actions{width:100%}}

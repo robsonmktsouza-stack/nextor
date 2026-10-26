@@ -24,7 +24,7 @@
 .settings-page .pdv-settings-editor .pdv-settings-section-head p {
   margin:3px 0 0;
   color:#718192;
-  font-size:11.5px;
+  font-size:var(--lumeron-small);
   line-height:1.4;
 }
 .settings-page .pdv-settings-editor .pdv-settings-options-grid {
@@ -47,8 +47,8 @@
   align-items:center;
   margin:0;
   padding:11px 12px;
-  border:1px solid #d1dbe4;
-  border-radius:4px;
+  border:1px solid var(--ui-border);
+  border-radius:var(--ui-control-radius);
   background:#fff;
   cursor:pointer;
 }
@@ -76,14 +76,14 @@
 }
 .settings-page .pdv-settings-editor .pdv-settings-options-grid > label.settings-switch strong {
   color:#354c60;
-  font-size:12.5px;
+  font-size:var(--lumeron-label);
   line-height:1.3;
   font-weight:650;
 }
 .settings-page .pdv-settings-editor .pdv-settings-options-grid > label.settings-switch small {
   display:block;
   color:#708292;
-  font-size:11px;
+  font-size:var(--lumeron-small);
   line-height:1.4;
   font-weight:400;
 }
@@ -94,8 +94,8 @@
   flex-direction:column;
   justify-content:center;
   padding:10px 12px;
-  border:1px solid #d1dbe4;
-  border-radius:4px;
+  border:1px solid var(--ui-border);
+  border-radius:var(--ui-control-radius);
   background:#fff;
 }
 .settings-page .pdv-settings-editor .pdv-settings-limit .field {
@@ -108,7 +108,7 @@
 }
 .settings-page .pdv-settings-editor .pdv-settings-limit .field > span {
   color:#354c60;
-  font-size:12px;
+  font-size:var(--lumeron-label);
   line-height:1.35;
   font-weight:650;
 }
@@ -118,7 +118,7 @@
 }
 .settings-page .pdv-settings-editor .pdv-settings-limit p {
   margin:6px 0 0;
-  font-size:11px;
+  font-size:var(--lumeron-small);
   line-height:1.4;
   color:#708292;
 }

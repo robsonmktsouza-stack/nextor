@@ -30,8 +30,8 @@
   <label class="field col-2"><span>Fim da vigência</span><input name="valid_until" type="date" value="{{ $rule?->valid_until?->format('Y-m-d') ?? old('valid_until') }}"></label>
   <div class="field col-2"><span>Situação</span><label class="settings-switch"><input type="checkbox" name="is_active" value="1" @checked($value('is_active',false))><span><strong>Ativa</strong></span></label></div>
 </div>
-<details style="margin-top:12px"><summary>Critérios adicionais da NF-e 55</summary>
-  <div class="editor-grid cols-12 settings-grid" style="margin-top:10px">
+<details class="fiscal-space-before"><summary>Critérios adicionais da NF-e 55</summary>
+  <div class="editor-grid cols-12 settings-grid fiscal-rule-grid">
     <label class="field col-4"><span>Natureza de operação</span><select name="operation_nature_id"><option value="">Qualquer natureza</option>@foreach($operationNatures as $nature)<option value="{{ $nature->id }}" @selected((string)$value('operation_nature_id')===(string)$nature->id)>{{ $nature->name }}</option>@endforeach</select></label>
     <label class="field col-4"><span>Grupo tributário do produto</span><select name="fiscal_tax_group_id"><option value="">Qualquer grupo</option>@foreach($fiscalTaxGroups as $group)<option value="{{ $group->id }}" @selected((string)$value('fiscal_tax_group_id')===(string)$group->id)>{{ $group->name }}</option>@endforeach</select></label>
     <label class="field col-2"><span>Município origem (IBGE)</span><input name="origin_municipality" maxlength="7" value="{{ $value('origin_municipality') }}"></label>
@@ -49,8 +49,8 @@
     <label class="field col-2"><span>Benefício fiscal (cBenef)</span><input name="fiscal_benefit_code" maxlength="10" value="{{ $value('fiscal_benefit_code') }}"></label>
   </div>
 </details>
-<details style="margin-top:12px"><summary>Parâmetros tributários aprovados</summary>
-  <div class="editor-grid cols-12 settings-grid" style="margin-top:10px">
+<details class="fiscal-space-before"><summary>Parâmetros tributários aprovados</summary>
+  <div class="editor-grid cols-12 settings-grid fiscal-rule-grid">
     @foreach(['icms_rate'=>'ICMS %','icms_base'=>'BC ICMS (R$)','icms_base_mode'=>'Modalidade BC ICMS','icms_base_reduction'=>'Redução BC ICMS %','icms_deferment_rate'=>'Diferimento ICMS %','fcp_rate'=>'FCP %','fcp_base'=>'BC FCP (R$)','icms_credit_rate'=>'Crédito SN %','icms_st_base'=>'BC ICMS ST (R$)','icms_st_rate'=>'ICMS ST %','icms_st_base_mode'=>'Modalidade BC ST','icms_st_deduction'=>'Dedução ICMS ST (R$)','icms_st_mva'=>'MVA ST %','icms_st_base_reduction'=>'Redução BC ST %','fcp_st_rate'=>'FCP ST %','ipi_cst'=>'CST IPI','ipi_enq'=>'Enquadramento IPI','ipi_rate'=>'IPI %','ipi_base'=>'BC IPI (R$)','ipi_quantity'=>'Quantidade IPI','ipi_unit_rate'=>'IPI por unidade (R$)','pis_rate'=>'PIS %','pis_base'=>'BC PIS (R$)','pis_quantity'=>'Quantidade PIS','pis_unit_rate'=>'PIS por unidade (R$)','cofins_rate'=>'COFINS %','cofins_base'=>'BC COFINS (R$)','cofins_quantity'=>'Quantidade COFINS','cofins_unit_rate'=>'COFINS por unidade (R$)'] as $field=>$label)
     <label class="field col-3"><span>{{ $label }}</span><input name="tax_parameters[{{ $field }}]" inputmode="decimal" value="{{ $parameters[$field] ?? '' }}"></label>
     @endforeach
@@ -60,8 +60,8 @@
 </details>
 @include('fiscal.nfe._additional-federal-taxes',['ruleMode'=>true,'federalParameters'=>$parameters])
 @include('fiscal.nfe._rtc-extra-fields',['ruleMode'=>true,'extraParameters'=>$parameters])
-<details style="margin-top:12px"><summary>Retenção anterior, desoneração e DIFAL</summary>
-  <div class="editor-grid cols-12 settings-grid" style="margin-top:10px">
+<details class="fiscal-space-before"><summary>Retenção anterior, desoneração e DIFAL</summary>
+  <div class="editor-grid cols-12 settings-grid fiscal-rule-grid">
     @foreach(['icms_st_retained_base'=>'BC ST retida (R$)','st_retained_rate'=>'ST retida %','icms_substitutor_value'=>'ICMS substituto (R$)','icms_st_retained_value'=>'ICMS ST retido (R$)','fcp_st_retained_base'=>'BC FCP retido (R$)','fcp_st_retained_rate'=>'FCP retido %','fcp_st_retained_value'=>'FCP retido (R$)','icms_effective_base'=>'BC ICMS efetivo (R$)','icms_effective_rate'=>'ICMS efetivo %','icms_effective_value'=>'ICMS efetivo (R$)','icms_effective_reduction'=>'Redução ICMS efetivo %','icms_desoneration_amount'=>'ICMS desonerado (R$)','icms_desoneration_reason'=>'Motivo desoneração','difal_base'=>'BC DIFAL (R$)','difal_fcp_base'=>'BC FCP destino (R$)','difal_internal_rate'=>'Alíquota interna destino %','difal_interstate_rate'=>'Alíquota interestadual %','difal_share_rate'=>'Partilha destino %','difal_fcp_rate'=>'FCP destino %'] as $field=>$label)
     <label class="field col-3"><span>{{ $label }}</span><input name="tax_parameters[{{ $field }}]" inputmode="decimal" value="{{ $parameters[$field] ?? '' }}"></label>
     @endforeach
@@ -69,15 +69,15 @@
     <label class="field col-3"><span>Deduzir desoneração do total</span><select name="tax_parameters[icms_desoneration_deduct]"><option value="">Não informado</option><option value="0" @selected((string)($parameters['icms_desoneration_deduct']??'')==='0')>Não</option><option value="1" @selected((string)($parameters['icms_desoneration_deduct']??'')==='1')>Sim</option></select></label>
   </div>
 </details>
-<details style="margin-top:12px"><summary>IBS estadual, IBS municipal e CBS</summary>
-  <div class="editor-grid cols-12 settings-grid" style="margin-top:10px">
+<details class="fiscal-space-before"><summary>IBS estadual, IBS municipal e CBS</summary>
+  <div class="editor-grid cols-12 settings-grid fiscal-rule-grid">
     @foreach(['ibs_cbs_cst'=>'CST IBS/CBS','ibs_cbs_class'=>'Classificação tributária','ibs_cbs_base'=>'Base final IBS/CBS (R$)','ibs_uf_rate'=>'IBS estadual %','ibs_municipal_rate'=>'IBS municipal %','cbs_rate'=>'CBS %','ibs_uf_reduction_rate'=>'Redução IBS estadual %','ibs_municipal_reduction_rate'=>'Redução IBS municipal %','cbs_reduction_rate'=>'Redução CBS %'] as $field=>$label)
     <label class="field col-3"><span>{{ $label }}</span><input name="tax_parameters[{{ $field }}]" inputmode="decimal" value="{{ $parameters[$field] ?? '' }}"></label>
     @endforeach
   </div>
 </details>
-<details style="margin-top:12px" @if(!$rule) open @endif><summary>Fundamento e condições de aplicação</summary>
-  <div class="editor-grid cols-12 settings-grid" style="margin-top:10px">
+<details class="fiscal-space-before" @if(!$rule) open @endif><summary>Fundamento e condições de aplicação</summary>
+  <div class="editor-grid cols-12 settings-grid fiscal-rule-grid">
     <input type="hidden" name="catalog_version" value="{{ $value('catalog_version') }}">
     <label class="field col-3"><span>Situação da configuração</span><select name="catalog_status"><option value="">Configuração existente</option>@foreach(['template'=>'Modelo para revisão','reviewed'=>'Revisada','custom'=>'Exceção personalizada revisada'] as $code=>$label)<option value="{{ $code }}" @selected($value('catalog_status')===$code)>{{ $label }}</option>@endforeach</select></label>
     <div class="field col-6"><span>Revisão fiscal</span><label class="settings-switch"><input type="checkbox" name="fiscal_review_confirmed" value="1"><span><strong>Revisei os critérios e o fundamento desta regra</strong></span></label>@if($rule?->fiscal_reviewed_at)<small>Última revisão {{ $rule->fiscal_reviewed_at->format('d/m/Y H:i') }}</small>@endif</div>

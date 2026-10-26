@@ -4,7 +4,7 @@
 <dialog class="pdv-quick-modal" id="pdvCashPinDialog">
   <form method="post" action="{{ route('pdv.cash.pin') }}">@csrf
     <div class="pdv-modal-head"><div><h2>Meu PIN de caixa</h2><p>PIN individual com seis dígitos.</p></div>
-    <button type="button" class="pdv-modal-close" onclick="this.closest('dialog').close()" aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button></div>
+    <button type="button" class="pdv-modal-close" onclick="this.closest('dialog').close()" aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>16])</button></div>
     <div class="pdv-cash-modal-body">
       <label><span>Senha de acesso *</span><input type="password" name="current_password" autocomplete="current-password" required></label>
       <label><span>Novo PIN *</span><input type="password" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" name="pin" required autocomplete="new-password"></label>
@@ -16,7 +16,7 @@
 <dialog class="pdv-quick-modal" id="pdvDiscountApprovalDialog">
   <div class="pdv-modal-head">
     <div><h2>Autorizar desconto</h2><p>Desconto acima do limite definido para o PDV.</p></div>
-    <button type="button" class="pdv-modal-close" onclick="this.closest('dialog').close()" aria-label="Voltar sem autorizar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+    <button type="button" class="pdv-modal-close" onclick="this.closest('dialog').close()" aria-label="Voltar sem autorizar">@include('partials.icon',['name'=>'x','size'=>16])</button>
   </div>
   <div class="pdv-cash-modal-body">
     <p class="pdv-cash-blind-notice">O gerente ou administrador precisa autorizar esta venda. A autorização será registrada.</p>
@@ -44,7 +44,7 @@
       <p>{{ $overdueCashSessions->count() }} {{ $overdueCashSessions->count()===1 ? 'turno pendente' : 'turnos pendentes' }} de conferência</p>
     </div>
     @unless($cashOverdueMustResolve)
-      <button type="button" class="pdv-modal-close" data-pdv-overdue-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+      <button type="button" class="pdv-modal-close" data-pdv-overdue-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>16])</button>
     @endunless
   </div>
   <div class="pdv-cash-modal-body pdv-overdue-cash-body">
@@ -118,7 +118,7 @@
     @csrf
     <div class="pdv-modal-head">
       <div><h2 id="pdvCashOpenTitle">Abrir caixa</h2></div>
-      <button type="button" class="pdv-modal-close" onclick="this.closest('dialog').close()" aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+      <button type="button" class="pdv-modal-close" onclick="this.closest('dialog').close()" aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>16])</button>
     </div>
     <div class="pdv-cash-modal-body pdv-cash-open-body">
       <label><span>Caixa físico *</span><select name="register_id" required>@foreach($cashRegisters as $register)<option value="{{ $register->id }}">{{ $register->name }} ({{ $register->code }})</option>@endforeach</select></label>
@@ -142,12 +142,12 @@
     @csrf
     <div class="pdv-modal-head">
       <div><h2>Fechar caixa</h2></div>
-      <button type="button" class="pdv-modal-close" onclick="this.closest('dialog').close()" aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+      <button type="button" class="pdv-modal-close" onclick="this.closest('dialog').close()" aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>16])</button>
     </div>
     <div class="pdv-cash-modal-body">
       <p class="pdv-cash-blind-notice">Fechamento cego: conte primeiro o dinheiro físico. O saldo esperado e as diferenças serão revelados no relatório após confirmar.</p>
       <label><span>Saldo contado</span><input type="number" step="0.01" min="0" name="closing_amount" value="{{ old('closing_amount','') }}" required autofocus></label>
-      <p style="margin:4px 0;font-size:12px">Conte o dinheiro físico antes de informar o valor. Divergências exigem justificativa e ficam registradas para conferência.</p>
+      <p class="pdv-cash-count-help">Conte o dinheiro físico antes de informar o valor. Divergências exigem justificativa e ficam registradas para conferência.</p>
       <label><span>Observação</span><textarea name="closing_notes" rows="3" maxlength="1000" placeholder="Obrigatória se houver diferença"></textarea></label>
       <label><span>Senha ou PIN *</span><input name="credential" type="password" autocomplete="off" required></label>
       <button class="pdv-modal-primary" type="submit">@include('partials.icon',['name'=>'check','size'=>18]) Fechar caixa</button>
@@ -158,7 +158,7 @@
   <form method="post" action="{{ route('pdv.cash.handover') }}">@csrf
     <div class="pdv-modal-head">
       <div><h2>Trocar turno</h2><p>{{ $cashSession->register?->name ?? 'Caixa' }} · {{ auth()->user()->name }}</p></div>
-      <button type="button" class="pdv-modal-close" onclick="this.closest('dialog').close()" aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+      <button type="button" class="pdv-modal-close" onclick="this.closest('dialog').close()" aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>16])</button>
     </div>
     <div class="pdv-cash-modal-body">
       <p class="pdv-cash-blind-notice">Conte o dinheiro antes de transferir. O turno anterior é fechado e o novo aberto na mesma operação.</p>
@@ -185,7 +185,7 @@
         <h2 id="pdvCashMovementTitle">Movimentar caixa</h2>
         <p id="pdvCashMovementHelp" data-tutorial>Registre uma entrada ou retirada manual.</p>
       </div>
-      <button type="button" class="pdv-modal-close" onclick="this.closest('dialog').close()" aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+      <button type="button" class="pdv-modal-close" onclick="this.closest('dialog').close()" aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>16])</button>
     </div>
     <div class="pdv-cash-modal-body">
       <div class="pdv-cash-total"><span>Conferência</span><strong>Valor apurado no fechamento</strong></div>
@@ -438,7 +438,7 @@
       <h2>Selecionar cliente</h2>
       
     </div>
-    <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+    <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>16])</button>
   </div>
   <div class="pdv-modal-search">
     @include('partials.icon',['name'=>'search','size'=>18])
@@ -477,7 +477,7 @@
       <h2>Forma de pagamento</h2>
       
     </div>
-    <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+    <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>16])</button>
   </div>
   <div class="pdv-payment-options" id="pdvPaymentOptions">
     @foreach($paymentMethods as $method)
@@ -521,7 +521,7 @@
       <h2>CPF/CNPJ na nota?</h2>
       <p>Identifique o consumidor somente quando ele solicitar ou quando a operação exigir.</p>
     </div>
-    <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+    <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>16])</button>
   </div>
   <div class="pdv-consumer-modal-body">
     <div class="pdv-consumer-question">
@@ -547,7 +547,7 @@
       <h2>Desconto do item</h2>
       <p id="pdvDiscountItemName">Item selecionado</p>
     </div>
-    <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+    <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>16])</button>
   </div>
 
   <div class="pdv-discount-modal-body">
@@ -579,7 +579,7 @@
       <h2>Valor recebido</h2>
       
     </div>
-    <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+    <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>16])</button>
   </div>
 
   <div class="pdv-cash-modal-body">
@@ -620,7 +620,7 @@
       <h2>Observação da venda</h2>
       
     </div>
-    <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+    <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>16])</button>
   </div>
 
   <div class="pdv-notes-modal-body">
@@ -651,7 +651,7 @@
       
     </div>
     <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar vendas">
-      @include('partials.icon',['name'=>'x','size'=>18])
+      @include('partials.icon',['name'=>'x','size'=>16])
     </button>
   </div>
 
@@ -704,7 +704,7 @@
       <div class="pdv-sales-cancel-head">
         <h3>Cancelar venda <span id="pdvSalesCancelNumber"></span></h3>
         <button type="button" class="pdv-modal-close" id="pdvSalesCancelClose" aria-label="Voltar sem cancelar">
-          @include('partials.icon',['name'=>'x','size'=>17])
+          @include('partials.icon',['name'=>'x','size'=>16])
         </button>
       </div>
       <div class="pdv-sales-cancel-body">
@@ -774,7 +774,7 @@
       <h2>Operações do caixa</h2>
       
     </div>
-    <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+    <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>16])</button>
   </div>
   @if($pdvSettings['require_cash_opening'] || $lastCompletedPdvSale)
     <div class="pdv-operations-overview" aria-label="Informações do caixa e da última venda">
@@ -844,7 +844,7 @@
       @if($cashSession)
         <button type="button" data-pdv-operation="handover"><span><strong>Trocar turno</strong><small>Passar o caixa ao próximo operador após conferência e identificação de ambos.</small></span><kbd>—</kbd></button>
         <button type="button" data-pdv-operation="close-cash"><span><strong>Fechar caixa</strong><small>Encerra o turno atual.</small></span><kbd>Alt+K</kbd></button>
-        <a href="{{ route('pdv.cash.report',$cashSession) }}" target="_blank" rel="noopener noreferrer" style="display:block;padding:10px 14px;color:inherit">Resumo do turno atual</a>
+        <a href="{{ route('pdv.cash.report',$cashSession) }}" target="_blank" rel="noopener noreferrer" class="pdv-cash-report-link">Resumo do turno atual</a>
         @if($pdvSettings['allow_cash_movements'])
           <button type="button" data-pdv-operation="supply"><span><strong>Suprimento</strong><small>Entrada manual de dinheiro para reforço de troco.</small></span><kbd>Alt+P</kbd></button>
           <button type="button" data-pdv-operation="withdrawal"><span><strong>Sangria</strong><small>Retirada manual de dinheiro do caixa.</small></span><kbd>Alt+S</kbd></button>
@@ -866,7 +866,7 @@
 <dialog class="pdv-quick-modal pdv-suspend-modal" id="pdvSuspendModal">
   <div class="pdv-modal-head">
     <div><span>Alt+0</span><h2>Suspender venda</h2><p>O estoque só será movimentado quando a venda for finalizada.</p></div>
-    <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+    <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>16])</button>
   </div>
   <div class="pdv-operation-body">
     <div class="pdv-operation-summary"><span>Itens</span><strong id="pdvSuspendItems">0</strong><span>Total</span><strong id="pdvSuspendTotal">R$ 0,00</strong></div>
@@ -878,7 +878,7 @@
 <dialog class="pdv-quick-modal pdv-recover-modal" id="pdvRecoverModal">
   <div class="pdv-modal-head">
     <div><span>Alt+R</span><h2>Recuperar venda suspensa</h2></div>
-    <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+    <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>16])</button>
   </div>
   <div class="pdv-suspended-list" id="pdvSuspendedList">
     @forelse($suspendedSales as $suspended)
@@ -903,7 +903,7 @@
 <dialog class="pdv-quick-modal pdv-electronic-modal" id="pdvElectronicPaymentModal">
   <div class="pdv-modal-head">
     <div><span>Alt+T</span><h2>Dados de cartão e PIX</h2></div>
-    <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+    <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>16])</button>
   </div>
   <div class="pdv-electronic-body">
     <div class="pdv-electronic-target" id="pdvElectronicTarget">Selecione uma forma de pagamento com cartão ou PIX.</div>
@@ -928,7 +928,7 @@
     <input type="hidden" name="action" value="{{ $nfceContingencyActive ? 'stop' : 'start' }}">
     <div class="pdv-modal-head">
       <div><span>Alt+C</span><h2>Contingência NFC-e</h2></div>
-      <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+      <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>16])</button>
     </div>
     <div class="pdv-operation-body">
       <label><span>Gerente ou administrador que autoriza *</span>
@@ -961,7 +961,7 @@
     @csrf
     <div class="pdv-modal-head">
       <div><span>Alt+X</span><h2>Cancelar NFC-e</h2><p>Selecione uma NFC-e autorizada para solicitar o cancelamento.</p></div>
-      <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>18])</button>
+      <button type="button" class="pdv-modal-close" data-pdv-modal-close aria-label="Fechar">@include('partials.icon',['name'=>'x','size'=>16])</button>
     </div>
     <div class="pdv-operation-body">
       <label><span>Gerente ou administrador que autoriza *</span>

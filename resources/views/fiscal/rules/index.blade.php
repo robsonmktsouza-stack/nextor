@@ -6,7 +6,7 @@
   <a class="btn btn-secondary" href="{{ route('fiscal.tax-groups.index') }}">@include('partials.icon',['name'=>'layers','size'=>16]) Grupos de tributação</a>
 @endsection
 @section('content')
-<section class="editor-panel settings-panel" style="margin-bottom:14px">
+<section class="editor-panel settings-panel fiscal-section-after">
   <form method="post" action="{{ route('fiscal.tax-rules.store') }}" class="settings-editor">
     @csrf
     @include('fiscal.rules._fields',['rule'=>null])
@@ -28,7 +28,7 @@
       </tr>
       <tr id="regra-{{ $rule->id }}"><td colspan="8"><details>
         <summary class="table-link">Editar {{ $rule->name }}</summary>
-        <form method="post" action="{{ route('fiscal.tax-rules.update',$rule) }}" class="settings-editor" style="padding-top:12px">
+        <form method="post" action="{{ route('fiscal.tax-rules.update',$rule) }}" class="settings-editor fiscal-edit-form-top">
           @csrf @method('PUT')
           <input type="hidden" name="revision" value="{{ $rule->revision }}">
           @include('fiscal.rules._fields',['rule'=>$rule])
