@@ -3,6 +3,8 @@
 @section('description','Acompanhe as operações de estoque e vendas em um só lugar.')
 @section('actions')@if($licensedPdv)<a class="btn btn-primary" href="{{ route('sales.create') }}">@include('partials.icon',['name'=>'plus','size'=>16]) Nova venda</a>@endif @endsection
 @section('content')
+@include('partials.mobile-home')
+<div class="lm-desktop-dashboard">
 <div class="stats-grid">
  @if($licensedProducts)
  <a class="stat-card" href="{{ route('products.index') }}"><span class="stat-icon blue">@include('partials.icon',['name'=>'products','size'=>21])</span><span class="stat-label">Produtos ativos</span><strong>{{ number_format($productsCount,0,',','.') }}</strong><small>Itens cadastrados</small></a>
@@ -41,5 +43,6 @@
 @if(\App\Support\CommercialModuleAccess::visible(request()->attributes->get('lumeron_commercial_license', []),'finance') && auth()->user()->canAccess('finance'))
 <a href="{{ route('finance.dashboard') }}">Financeiro @include('partials.icon',['name'=>'chevron','size'=>14])</a>
 @endif
+</div>
 </div>
 @endsection
