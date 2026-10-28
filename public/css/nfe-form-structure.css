@@ -311,6 +311,33 @@
 #nfeItemDialog .nfe-field-group-heading small{
   color:var(--nf-muted)!important;font-size:10.5px!important;line-height:1.3!important;font-weight:400!important;
 }
+/* Indicador discreto para blocos fiscais realmente expansíveis. */
+#nfeEditorDialog details.nfe-field-group>.nfe-field-group-heading,
+#nfeItemDialog details.nfe-field-group>.nfe-field-group-heading{
+  position:relative;cursor:pointer;
+  padding-right:22px!important;list-style:none;
+}
+#nfeEditorDialog details.nfe-field-group>.nfe-field-group-heading::-webkit-details-marker,
+#nfeItemDialog details.nfe-field-group>.nfe-field-group-heading::-webkit-details-marker{display:none}
+#nfeEditorDialog details.nfe-field-group>.nfe-field-group-heading:after,
+#nfeItemDialog details.nfe-field-group>.nfe-field-group-heading:after{
+  content:"";position:absolute;right:5px;top:6px;width:7px;height:7px;
+  border-right:1.5px solid #697e8b;border-bottom:1.5px solid #697e8b;
+  transform:rotate(45deg);
+}
+#nfeEditorDialog details.nfe-field-group[open]>.nfe-field-group-heading:after,
+#nfeItemDialog details.nfe-field-group[open]>.nfe-field-group-heading:after{
+  top:11px;transform:rotate(225deg);
+}
+#nfeItemDialog .nfe-retained-heading{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;
+}
+#nfeItemDialog .nfe-retained-chevron{
+  flex:0 0 7px;width:7px;height:7px;margin-right:4px;
+  border-right:1.5px solid #697e8b;border-bottom:1.5px solid #697e8b;
+  transform:rotate(45deg);
+}
+#nfeItemDialog .nfe-retained-details[open] .nfe-retained-chevron{transform:rotate(225deg)}
 #nfeEditorDialog .nfe-field-group-fields,
 #nfeItemDialog .nfe-field-group-fields{
   display:grid!important;
