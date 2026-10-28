@@ -302,7 +302,8 @@ $origins=[
 
   <div class="dialog-header">
     <div>
-      <h2 id="nfeEditorTitle">{{ $isEditing ? 'Editar NF-e em rascunho' : 'Criar nova NF-e' }}</h2>
+      <h2 id="nfeEditorTitle">{{ $isEditing ? 'Editar nota fiscal eletrônica' : 'Nova nota fiscal eletrônica' }}</h2>
+      <div class="nfe-editor-document-meta"><span>NF-e modelo 55</span><span>Série {{ str_pad((string)($draft->series ?? 1),3,'0',STR_PAD_LEFT) }}</span><span>Número {{ $draft->document_number ?: 'automático' }}</span><span class="nfe-editor-status">{{ $draft->status==='draft' ? 'Rascunho' : ( $draft->status==='authorized' ? 'Autorizada' : 'Em processamento' ) }}</span></div>
     </div>
     <a class="close-dialog" href="{{ route('fiscal.index',['tab'=>'nfe']) }}" aria-label="Fechar">
       @include('partials.icon',['name'=>'x','size'=>18])
@@ -319,7 +320,7 @@ $origins=[
     @endif
     <nav class="editor-tabs nfe-flow-nav" aria-label="Seções da nota">
       <button type="button" class="editor-tab active" data-nfe-jump="nfe-section-general" aria-current="location">Dados gerais</button>
-      <button type="button" class="editor-tab" data-nfe-jump="nfe-section-items">Produtos</button>
+      <button type="button" class="editor-tab" data-nfe-jump="nfe-section-items">Produtos e impostos</button>
       <button type="button" class="editor-tab" data-nfe-jump="nfe-section-payment">Pagamento</button>
       <button type="button" class="editor-tab" data-nfe-jump="nfe-section-transport">Transporte</button>
       <button type="button" class="editor-tab" data-nfe-jump="nfe-section-other">Informações adicionais</button>
@@ -623,7 +624,7 @@ $origins=[
       </div>
 
       <div class="editor-panel nfe-totals-panel">
-        <h3>Totais da nota</h3>
+        <h3>Totais da NF-e</h3>
         <div class="editor-grid cols-12 nfe-totals-grid">
           <div class="field col-2"><span>Produtos</span><div class="readonly-field" id="nfeTotalProducts">R$ 0,00</div></div>
           <div class="field col-2"><span>Frete</span><div class="readonly-field" id="nfeTotalFreight">R$ 0,00</div></div>
@@ -1042,16 +1043,17 @@ $origins=[
       </div>
     </details>
 
-    <div class="editor-panel nfe-tax-review" aria-label="Resumo dos códigos tributários">
-      <div class="nfe-tax-review-heading"><span>Confira os códigos antes de salvar</span></div>
-      <div class="nfe-tax-review-grid">
-        <button type="button" data-nfe-open-section="item-icms"><small>ICMS</small><strong id="nfeTaxSummaryIcms">Não informado</strong></button>
-        <button type="button" data-nfe-open-section="item-federal"><small>PIS</small><strong id="nfeTaxSummaryPis">Não informado</strong></button>
-        <button type="button" data-nfe-open-section="item-federal"><small>COFINS</small><strong id="nfeTaxSummaryCofins">Não informado</strong></button>
-        <button type="button" data-nfe-open-section="item-federal"><small>IPI</small><strong id="nfeTaxSummaryIpi">Não informado</strong></button>
-        <button type="button" data-nfe-open-section="item-ibscbs"><small>IBS / CBS</small><strong id="nfeTaxSummaryIbs">Não informado</strong></button>
+    <nav class="nfe-tax-review nfe-item-taxnav" aria-label="Detalhes e impostos do produto">
+      <div class="nfe-tax-review-grid" role="tablist" aria-label="Seções fiscais do item">
+        <button type="button" role="tab" data-nfe-open-section="item-general" data-nfe-tax-tab="item" aria-selected="true" aria-controls="nfeItemTaxPanel"><span>Dados do item</span></button>
+        <button type="button" role="tab" data-nfe-open-section="item-icms" data-nfe-tax-tab="icms" aria-selected="false" aria-controls="nfeItemTaxPanel"><span>ICMS</span><span id="nfeTaxSummaryIcms" class="nfe-tax-code">Não informado</span></button>
+        <button type="button" role="tab" data-nfe-open-section="item-federal" data-nfe-tax-tab="pis" aria-selected="false" aria-controls="nfeItemTaxPanel"><span>PIS</span><span id="nfeTaxSummaryPis" class="nfe-tax-code">Não informado</span></button>
+        <button type="button" role="tab" data-nfe-open-section="item-federal" data-nfe-tax-tab="cofins" aria-selected="false" aria-controls="nfeItemTaxPanel"><span>COFINS</span><span id="nfeTaxSummaryCofins" class="nfe-tax-code">Não informado</span></button>
+        <button type="button" role="tab" data-nfe-open-section="item-federal" data-nfe-tax-tab="ipi" aria-selected="false" aria-controls="nfeItemTaxPanel"><span>IPI</span><span id="nfeTaxSummaryIpi" class="nfe-tax-code">Não informado</span></button>
+        <button type="button" role="tab" data-nfe-open-section="item-ibscbs" data-nfe-tax-tab="ibscbs" aria-selected="false" aria-controls="nfeItemTaxPanel"><span>IBS / CBS</span><span id="nfeTaxSummaryIbs" class="nfe-tax-code">Não informado</span></button>
+        <button type="button" role="tab" data-nfe-open-section="item-specific" data-nfe-tax-tab="other" aria-selected="false" aria-controls="nfeItemTaxPanel"><span>Outros</span></button>
       </div>
-    </div>
+    </nav>
     <details class="editor-panel nfe-item-section" data-nfe-item-panel="item-icms" open>
       <summary class="nfe-item-section-heading">
         <span class="nfe-section-index">03</span>
