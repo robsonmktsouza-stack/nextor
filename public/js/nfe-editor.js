@@ -927,24 +927,25 @@
   const taxSections={
     icms:itemDialog?.querySelector('[data-nfe-item-panel="item-icms"]'),
     federal:itemDialog?.querySelector('[data-nfe-item-panel="item-federal"]'),
+    difal:itemDialog?.querySelector('[data-nfe-item-panel="item-difal"]'),
     ibscbs:itemDialog?.querySelector('[data-nfe-item-panel="item-ibscbs"]')
   };
-  Object.values(taxSections).forEach(section=>{
+  Object.entries(taxSections).forEach(([name,section])=>{
     if(!section)return;
     taxHost.append(section);
-    section.open=true;
+    section.open=name!=='difal';
     section.classList.add('nfe-tax-tab-panel');
     section.querySelector(':scope > summary')?.setAttribute('aria-hidden','true');
   });
   const federalGrid=taxSections.federal?.querySelector('.nfe-item-section-content .editor-grid');
-  federalGrid?.querySelectorAll(':scope > .field').forEach(field=>{
+  federalGrid?.querySelectorAll('.field').forEach(field=>{
     const id=field.querySelector('[id]')?.id||'';
     let group=/Pis/i.test(id)?'pis':/Cofins/i.test(id)?'cofins':/Ipi/i.test(id)?'ipi':'federal-common';
     field.dataset.nfeTaxGroup=group;
   });
   const additionalFederal=itemDialog?.querySelector('.nfe-item-additional-federal-grid');
   if(additionalFederal)taxSections.federal?.querySelector('.nfe-item-section-content')?.append(additionalFederal);
-  additionalFederal?.querySelectorAll(':scope > .field').forEach(field=>{
+  additionalFederal?.querySelectorAll('.field').forEach(field=>{
     const id=field.querySelector('[id]')?.id||'';
     field.dataset.nfeTaxGroup=/Cofins/i.test(id)?'cofins':/Pis/i.test(id)?'pis':'federal-common';
   });
@@ -964,10 +965,10 @@
     });
     Object.entries(taxSections).forEach(([name,section])=>{
       if(!section)return;
-      const visible=name===selected||(name==='federal'&&['pis','cofins','ipi'].includes(selected));
+      const visible=name===selected||(name==='federal'&&['pis','cofins','ipi'].includes(selected))||(name==='difal'&&selected==='icms');
       section.hidden=!visible;
       section.style.display=visible?'':'none';
-      if(visible)section.open=true;
+      if(visible&&name!=='difal')section.open=true;
     });
     federalGrid?.querySelectorAll('[data-nfe-tax-group]').forEach(field=>{
       field.hidden=field.dataset.nfeTaxGroup!==selected&&field.dataset.nfeTaxGroup!=='federal-common';
@@ -977,6 +978,7 @@
       field.hidden=field.dataset.nfeTaxGroup!==selected&&field.dataset.nfeTaxGroup!=='federal-common';
       field.style.display=field.hidden?'none':'';
     });
+    if(window.nfeStructureRefresh)window.nfeStructureRefresh();
   };
   taxCards.forEach(button=>button.addEventListener('click',()=>selectTaxTab(button.dataset.nfeTaxTab)));
   selectTaxTab('icms');
