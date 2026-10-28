@@ -303,7 +303,7 @@ $origins=[
   <div class="dialog-header">
     <div>
       <h2 id="nfeEditorTitle">{{ $isEditing ? 'Editar nota fiscal eletrônica' : 'Nova nota fiscal eletrônica' }}</h2>
-      <div class="nfe-editor-document-meta"><span>NF-e modelo 55</span><span>Série {{ str_pad((string)($draft->series ?? 1),3,'0',STR_PAD_LEFT) }}</span><span>Número {{ $draft->document_number ?: 'automático' }}</span><span class="nfe-editor-status">{{ $draft->status==='draft' ? 'Rascunho' : ( $draft->status==='authorized' ? 'Autorizada' : 'Em processamento' ) }}</span></div>
+      <div class="nfe-editor-document-meta"><span>NF-e modelo 55</span><span>Série {{ str_pad((string)($draft->series ?? 1),3,'0',STR_PAD_LEFT) }}</span><span>Número {{ $draft->document_number ?: 'automático' }}</span><span class="nfe-editor-status">{{ match($draft->status){'authorized'=>'Autorizada','cancelled'=>'Cancelada','pending'=>'Aguardando confirmação','queued'=>'Aguardando envio','processing'=>'Enviando','prepared'=>'Não enviada','rejected'=>'Não autorizada',default=>'Rascunho'} }}</span></div>
     </div>
     <a class="close-dialog" href="{{ route('fiscal.index',['tab'=>'nfe']) }}" aria-label="Fechar">
       @include('partials.icon',['name'=>'x','size'=>18])
