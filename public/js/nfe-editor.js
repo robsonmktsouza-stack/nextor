@@ -1009,6 +1009,8 @@
       field.style.display=visible?'':'none';
     });
     if(window.nfeStructureRefresh)window.nfeStructureRefresh();
+    const scrollArea=itemDialog?.querySelector('.nfe-item-body');
+    if(scrollArea)scrollArea.scrollTop=0;
   };
   taxCards.forEach((button,index)=>{
     button.addEventListener('click',()=>selectTaxTab(button.dataset.nfeTaxTab));
@@ -1042,7 +1044,7 @@
     const icmsField=simple?'nfeTaxCsosn':'nfeTaxIcmsCst';
     const icms=(inbound?getField(icmsField+'Inbound'):'')||getField(icmsField);
     summary('nfeTaxSummaryIcms',icms?(simple?'CSOSN ':'CST ')+icms:'');
-    const icmsRate=getField('nfeTaxIcmsRate')||getField('nfeTaxSimpleCreditRate');
+    const icmsRate=getField('nfeTaxIcmsRate')||getField('nfeTaxSimpleCredit');
     const icmsSummary=byId('nfeTaxSummaryIcms');
     if(icmsSummary&&icms&&icmsRate)icmsSummary.textContent+=' · '+icmsRate+'%';
     [['Pis','nfeTaxPisCst'],['Cofins','nfeTaxCofinsCst'],['Ipi','nfeTaxIpiCst']].forEach(([name,field])=>{
@@ -1271,6 +1273,8 @@
   };
 
   const openNewItem=()=>{
+    const title=byId('nfeItemTitle');
+    if(title)title.textContent='Adicionar item da NF-e';
     populateItemDialog(newItemDefaults(),'');
     openModal(itemDialog);
     setTimeout(()=>byId('nfeItemProductSearch')?.focus(),0);
@@ -1279,6 +1283,8 @@
   const openEditItem=index=>{
     const item=items[index];
     if(!item) return;
+    const title=byId('nfeItemTitle');
+    if(title)title.textContent='Editar item da NF-e';
     populateItemDialog(item,index);
     openModal(itemDialog);
   };
