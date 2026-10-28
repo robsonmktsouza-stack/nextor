@@ -88,6 +88,44 @@ const start=()=>{
     ['IBS e CBS',['nfeTotalIbsUf','nfeTotalIbsMunicipal','nfeTotalCbs']],
     ['Ajustes e valor final',['nfeTotalDiscount','nfeTotalSurcharge','nfeDiscount','nfeSurcharge','nfeTotalInvoice']]
   ],{compact:true,otherTitle:'Demais totalizadores'});
+  // Resumo da nota compacto: os quatro totais são os controles reais, sem cópias.
+  // Campos de ajuste continuam visíveis; somente o detalhamento fica recolhido.
+  const totalsPanel=editor.querySelector('#nfe-section-items .nfe-totals-panel');
+  const totalsGrid=totalsPanel?.querySelector('.nfe-totals-grid');
+  if(totalsPanel&&totalsGrid&&!totalsPanel.querySelector('.nfe-invoice-summary')){
+    const summary=document.createElement('div');
+    summary.className='nfe-invoice-summary';
+    const metrics=[
+      ['nfeTotalProducts','Produtos'],
+      ['nfeTotalFreight','Frete'],
+      ['nfeTotalDiscount','Descontos'],
+      ['nfeTotalInvoice','Total da NF-e']
+    ];
+    metrics.forEach(([id,label])=>{
+      const field=totalsGrid.querySelector('#'+id)?.closest('.field');
+      if(!field)return;
+      field.classList.add('nfe-invoice-metric');
+      if(id==='nfeTotalInvoice')field.classList.add('nfe-invoice-final');
+      field.querySelector(':scope > span')?.replaceChildren(document.createTextNode(label));
+      summary.append(field);
+    });
+    const adjustments=document.createElement('div');
+    adjustments.className='nfe-invoice-adjustments editor-grid cols-12';
+    ['nfeDiscount','nfeSurcharge'].forEach(id=>{
+      const field=totalsGrid.querySelector('#'+id)?.closest('.field');
+      if(field)adjustments.append(field);
+    });
+    const details=document.createElement('details');
+    details.className='nfe-invoice-details';
+    const label=document.createElement('summary');
+    label.textContent='Detalhamento dos impostos e totais';
+    totalsGrid.before(summary,adjustments);
+    details.append(label,totalsGrid);
+    adjustments.after(details);
+    totalsGrid.querySelectorAll('.nfe-field-group').forEach(group=>{
+      if(!group.querySelector('.field'))group.remove();
+    });
+  }
   const primary=editor.querySelector('#nfe-section-payment > .editor-panel');
   if(primary&&!primary.querySelector('h3')){
     const h=document.createElement('h3');h.className='nfe-standalone-title';h.textContent='Pagamento principal';primary.prepend(h);
@@ -156,6 +194,8 @@ const start=()=>{
     ['Lote e validade',['nfeSpecialBatch','nfeSpecialExpiry']],
     ['Veículo',['nfeSpecialRenavam','nfeSpecialChassis','nfeSpecialPlate','nfeSpecialFuel','nfeSpecialYearModel','nfeSpecialVehicleColor']]
   ],{compact:true});
+  // O editor novo usa abas textuais; os resumos CST/CSOSN seguem acessíveis
+  // aos scripts fiscais através dos IDs originais ocultos na navegação.
   const taxHeading=item.querySelector('.nfe-tax-review-heading span');
   if(taxHeading)taxHeading.textContent='Tributação do item';
   const refresh=()=>{
