@@ -914,81 +914,121 @@
   ['nfeItemFreight','nfeItemInsurance','nfeItemOtherExpenses','nfeItemDiscount']
     .forEach(id=>byId(id)?.addEventListener('input',updateItemSubtotal));
 
-  // Cards fiscais funcionam como abas no mesmo espaço, sem rolagem automática.
-  // Os campos continuam no DOM e mantêm seus valores ao alternar.
+  // Navegação única do item: dados e cada tributo ocupam o mesmo painel,
+  // no padrão de emissão de ERPs. Os controles originais são movidos, não clonados.
   const itemSections=[...itemDialog?.querySelectorAll('[data-nfe-item-panel]')||[]];
-  const taxCards=[...itemDialog?.querySelectorAll('[data-nfe-open-section]')||[]];
-  const taxReview=itemDialog?.querySelector('.nfe-tax-review');
+  const taxCards=[...itemDialog?.querySelectorAll('[data-nfe-tax-tab]')||[]];
+  const taxReview=itemDialog?.querySelector('.nfe-item-taxnav');
   const taxHost=document.createElement('div');
-  taxHost.className='nfe-tax-tab-host';
+  taxHost.className='nfe-tax-tab-host nfe-enterprise-item-host';
+  taxHost.id='nfeItemTaxPanel';
   taxHost.setAttribute('role','region');
-  taxHost.setAttribute('aria-label','Tributação do item');
+  taxHost.setAttribute('aria-label','Dados e tributos do item');
   taxReview?.after(taxHost);
+
+  const itemMain=document.createElement('div');
+  itemMain.className='nfe-item-main-panel nfe-tab-content';
+  const itemOther=document.createElement('div');
+  itemOther.className='nfe-item-other-panel nfe-tab-content';
+  const itemGeneral=itemDialog?.querySelector('[data-nfe-item-panel="item-general"]');
+  const itemFiscal=itemDialog?.querySelector('[data-nfe-item-panel="item-fiscal"]');
+  [itemGeneral,itemFiscal].forEach(section=>{if(section){itemMain.append(section);section.open=true;}});
+  const difal=itemDialog?.querySelector('[data-nfe-item-panel="item-difal"]');
+  const specific=itemDialog?.querySelector('[data-nfe-item-panel="item-specific"]');
+  const foreign=itemDialog?.querySelector('[data-nfe-item-panel="item-foreign"]');
+  [difal,specific,foreign].forEach(section=>{if(section)itemOther.append(section);});
   const taxSections={
+    item:itemMain,
     icms:itemDialog?.querySelector('[data-nfe-item-panel="item-icms"]'),
     federal:itemDialog?.querySelector('[data-nfe-item-panel="item-federal"]'),
-    difal:itemDialog?.querySelector('[data-nfe-item-panel="item-difal"]'),
-    ibscbs:itemDialog?.querySelector('[data-nfe-item-panel="item-ibscbs"]')
+    ibscbs:itemDialog?.querySelector('[data-nfe-item-panel="item-ibscbs"]'),
+    other:itemOther
   };
-  Object.entries(taxSections).forEach(([name,section])=>{
+  Object.values(taxSections).forEach(section=>{
     if(!section)return;
     taxHost.append(section);
-    section.open=name!=='difal';
     section.classList.add('nfe-tax-tab-panel');
-    section.querySelector(':scope > summary')?.setAttribute('aria-hidden','true');
+    if(section.tagName==='DETAILS')section.open=true;
+    if(section.matches('[data-nfe-item-panel="item-icms"],[data-nfe-item-panel="item-federal"],[data-nfe-item-panel="item-ibscbs"]')){
+      section.querySelector(':scope > summary')?.setAttribute('aria-hidden','true');
+    }
   });
+
+  // Campos de ISS não pertencem a nenhuma aba PIS/COFINS/IPI.
   const federalGrid=taxSections.federal?.querySelector('.nfe-item-section-content .editor-grid');
-  federalGrid?.querySelectorAll('.field').forEach(field=>{
+  const serviceFields=['nfeTaxIssRate','nfeTaxServiceListCode']
+    .map(id=>federalGrid?.querySelector('#'+id)?.closest('.field')).filter(Boolean);
+  if(serviceFields.length){
+    const servicePanel=document.createElement('details');
+    servicePanel.className='nfe-item-service-panel';
+    const heading=document.createElement('summary');
+    heading.textContent='Informações de serviço';
+    const serviceGrid=document.createElement('div');
+    serviceGrid.className='editor-grid cols-12 nfe-extra-grid';
+    serviceFields.forEach(field=>serviceGrid.append(field));
+    servicePanel.append(heading,serviceGrid);
+    itemOther.append(servicePanel);
+  }
+  federalGrid?.querySelectorAll(':scope > .field').forEach(field=>{
     const id=field.querySelector('[id]')?.id||'';
-    let group=/Pis/i.test(id)?'pis':/Cofins/i.test(id)?'cofins':/Ipi/i.test(id)?'ipi':'federal-common';
-    field.dataset.nfeTaxGroup=group;
+    field.dataset.nfeTaxGroup=/Cofins/i.test(id)?'cofins':/Pis/i.test(id)?'pis':/Ipi/i.test(id)?'ipi':'other';
   });
   const additionalFederal=itemDialog?.querySelector('.nfe-item-additional-federal-grid');
   if(additionalFederal)taxSections.federal?.querySelector('.nfe-item-section-content')?.append(additionalFederal);
-  additionalFederal?.querySelectorAll('.field').forEach(field=>{
+  additionalFederal?.querySelectorAll(':scope > .field').forEach(field=>{
     const id=field.querySelector('[id]')?.id||'';
-    field.dataset.nfeTaxGroup=/Cofins/i.test(id)?'cofins':/Pis/i.test(id)?'pis':'federal-common';
+    field.dataset.nfeTaxGroup=/Cofins/i.test(id)?'cofins':/Pis/i.test(id)?'pis':'other';
   });
   const rtcPanels=[...itemDialog?.querySelectorAll('.nfe-rtc-extra-panel')||[]];
   rtcPanels.forEach(panel=>taxSections.ibscbs?.querySelector('.nfe-item-section-content')?.append(panel));
-  const taxKeys=['icms','pis','cofins','ipi','ibscbs'];
-  taxCards.forEach((button,index)=>{
-    button.dataset.nfeTaxTab=taxKeys[index];
-    button.setAttribute('aria-pressed','false');
-  });
-  const selectTaxTab=(key)=>{
-    const selected=taxKeys.includes(key)?key:'icms';
+
+  const taxKeys=['item','icms','pis','cofins','ipi','ibscbs','other'];
+  const selectTaxTab=key=>{
+    const selected=taxKeys.includes(key)?key:'item';
     taxCards.forEach(button=>{
       const active=button.dataset.nfeTaxTab===selected;
       button.classList.toggle('nfe-tax-tab-active',active);
-      button.setAttribute('aria-pressed',String(active));
+      button.setAttribute('aria-selected',String(active));
+      button.tabIndex=active?0:-1;
     });
     Object.entries(taxSections).forEach(([name,section])=>{
       if(!section)return;
-      const visible=name===selected||(name==='federal'&&['pis','cofins','ipi'].includes(selected))||(name==='difal'&&selected==='icms');
+      const visible=name===selected||(name==='federal'&&['pis','cofins','ipi'].includes(selected));
       section.hidden=!visible;
       section.style.display=visible?'':'none';
-      if(visible&&name!=='difal')section.open=true;
+      if(visible&&section.tagName==='DETAILS')section.open=true;
     });
     federalGrid?.querySelectorAll('[data-nfe-tax-group]').forEach(field=>{
-      field.hidden=field.dataset.nfeTaxGroup!==selected&&field.dataset.nfeTaxGroup!=='federal-common';
-      field.style.display=field.hidden?'none':'';
+      const visible=field.dataset.nfeTaxGroup===selected;
+      field.hidden=!visible;
+      field.style.display=visible?'':'none';
     });
     additionalFederal?.querySelectorAll('[data-nfe-tax-group]').forEach(field=>{
-      field.hidden=field.dataset.nfeTaxGroup!==selected&&field.dataset.nfeTaxGroup!=='federal-common';
-      field.style.display=field.hidden?'none':'';
+      const visible=field.dataset.nfeTaxGroup===selected;
+      field.hidden=!visible;
+      field.style.display=visible?'':'none';
     });
     if(window.nfeStructureRefresh)window.nfeStructureRefresh();
   };
-  taxCards.forEach(button=>button.addEventListener('click',()=>selectTaxTab(button.dataset.nfeTaxTab)));
-  selectTaxTab('icms');
+  taxCards.forEach((button,index)=>{
+    button.addEventListener('click',()=>selectTaxTab(button.dataset.nfeTaxTab));
+    button.addEventListener('keydown',event=>{
+      if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+      event.preventDefault();
+      const next=event.key==='Home'?0:event.key==='End'?taxCards.length-1:
+        (index+(event.key==='ArrowRight'?1:-1)+taxCards.length)%taxCards.length;
+      taxCards[next]?.focus();
+      selectTaxTab(taxCards[next]?.dataset.nfeTaxTab);
+    });
+  });
+  selectTaxTab('item');
   const openItemSection=(target,scroll=false)=>{
-    const key=target==='item-icms'?'icms':target==='item-federal'?'pis':target==='item-ibscbs'?'ibscbs':null;
-    if(key){selectTaxTab(key);return;}
+    const key=target==='item-icms'?'icms':target==='item-federal'?'pis':
+      target==='item-ibscbs'?'ibscbs':
+      ['item-difal','item-specific','item-foreign'].includes(target)?'other':'item';
+    selectTaxTab(key);
     const section=itemDialog?.querySelector('[data-nfe-item-panel="'+target+'"]');
-    if(!section)return;
-    section.open=true;
-    if(scroll)section.scrollIntoView({behavior:'smooth',block:'nearest'});
+    if(section){section.open=true;if(scroll)section.scrollIntoView({behavior:'smooth',block:'nearest'});}
   };
   const updateItemTaxSummary=()=>{
     const summary=(id,value,optional=false)=>{
@@ -1054,7 +1094,7 @@
     if(petroleum) petroleum.checked=false;
     updateItemSubtotal();
     updateItemTaxSummary();
-    selectTaxTab('icms');
+    selectTaxTab('item');
     itemSections.forEach(section=>{
       if(section.classList.contains('nfe-tax-tab-panel'))return;
       section.open=['item-general','item-fiscal'].includes(section.dataset.nfeItemPanel);
