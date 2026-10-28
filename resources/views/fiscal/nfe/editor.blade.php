@@ -196,6 +196,7 @@
 }
 
 </style>
+<link rel="stylesheet" href="{{ asset('css/nfe-form-structure.css') }}?v={{ filemtime(public_path('css/nfe-form-structure.css')) }}">
 @endpush
 
 @include('fiscal._nav',['tab'=>'nfe','tabs'=>[
@@ -1296,6 +1297,7 @@ $origins=[
 
 @push('scripts')
 <script src="{{ asset('js/nfe-editor.js') }}?v={{ filemtime(public_path('js/nfe-editor.js')) }}"></script>
+<script src="{{ asset('js/nfe-form-structure.js') }}?v={{ filemtime(public_path('js/nfe-form-structure.js')) }}"></script>
 @if($isEditing)
 <script>
 document.addEventListener('DOMContentLoaded',()=>{
