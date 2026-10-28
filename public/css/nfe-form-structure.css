@@ -1,0 +1,86 @@
+/* Layout funcional NF-e: agrupamentos reais, não apenas espaçamento. */
+#nfeEditorDialog .nfe-structured-grid,
+#nfeItemDialog .nfe-structured-grid{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:14px!important;align-items:start}
+#nfeEditorDialog .nfe-structured-grid>.nfe-field-group,
+#nfeItemDialog .nfe-structured-grid>.nfe-field-group{grid-column:1/-1!important;min-width:0;margin:0}
+#nfeEditorDialog .nfe-field-group,
+#nfeItemDialog .nfe-field-group{border:1px solid #dbe5e0;border-radius:3px;background:#fff;min-width:0;overflow:visible}
+#nfeEditorDialog .nfe-field-group-heading,
+#nfeItemDialog .nfe-field-group-heading{display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;min-height:37px;padding:8px 12px;border-bottom:1px solid #e3eae6;background:#f3f7f5;color:#365d50;line-height:1.3}
+#nfeEditorDialog .nfe-field-group-heading strong,
+#nfeItemDialog .nfe-field-group-heading strong{font-weight:700;font-size:12px;letter-spacing:0}
+#nfeEditorDialog .nfe-field-group-heading small,
+#nfeItemDialog .nfe-field-group-heading small{font-size:11px;font-weight:400;color:#6c8077}
+#nfeEditorDialog .nfe-field-group-fields,
+#nfeItemDialog .nfe-field-group-fields{display:grid!important;grid-template-columns:repeat(12,minmax(0,1fr))!important;gap:14px 13px!important;align-items:start;padding:13px 14px 15px!important;margin:0!important;background:#fff;border:0!important;box-shadow:none!important;min-width:0}
+#nfeEditorDialog .nfe-field-group-fields>.field,
+#nfeItemDialog .nfe-field-group-fields>.field{margin:0!important;min-width:0}
+#nfeEditorDialog .nfe-field-group-fields>.field>span,
+#nfeItemDialog .nfe-field-group-fields>.field>span{display:block!important;margin-bottom:6px!important;line-height:1.35!important;min-height:0!important}
+#nfeEditorDialog .nfe-field-group-fields :is(input,textarea,select),
+#nfeItemDialog .nfe-field-group-fields :is(input,textarea,select){max-width:100%;box-sizing:border-box}
+#nfeEditorDialog .nfe-field-group[hidden],
+#nfeItemDialog .nfe-field-group[hidden],
+#nfeEditorDialog .nfe-field-group-fields>.field[hidden],
+#nfeItemDialog .nfe-field-group-fields>.field[hidden]{display:none!important}
+#nfeEditorDialog details.nfe-field-group>.nfe-field-group-heading,
+#nfeItemDialog details.nfe-field-group>.nfe-field-group-heading{cursor:pointer;list-style:none;user-select:none;padding-right:28px;position:relative}
+#nfeEditorDialog details.nfe-field-group>.nfe-field-group-heading::-webkit-details-marker,
+#nfeItemDialog details.nfe-field-group>.nfe-field-group-heading::-webkit-details-marker{display:none}
+#nfeEditorDialog details.nfe-field-group>.nfe-field-group-heading::after,
+#nfeItemDialog details.nfe-field-group>.nfe-field-group-heading::after{content:"";position:absolute;right:13px;top:14px;width:7px;height:7px;transform:rotate(45deg);border-right:1.5px solid #638277;border-bottom:1.5px solid #638277}
+#nfeEditorDialog details.nfe-field-group[open]>.nfe-field-group-heading::after,
+#nfeItemDialog details.nfe-field-group[open]>.nfe-field-group-heading::after{transform:rotate(225deg);top:17px}
+#nfeEditorDialog .nfe-group-compact,
+#nfeItemDialog .nfe-group-compact{border:0;border-top:1px solid #e0e8e4;border-radius:0;box-shadow:none}
+#nfeEditorDialog .nfe-group-compact>.nfe-field-group-heading,
+#nfeItemDialog .nfe-group-compact>.nfe-field-group-heading{background:transparent;border-bottom:0;padding:9px 0 3px;min-height:28px}
+#nfeEditorDialog .nfe-group-compact>.nfe-field-group-fields,
+#nfeItemDialog .nfe-group-compact>.nfe-field-group-fields{padding:8px 0 10px!important}
+#nfeEditorDialog .nfe-standalone-title{font-size:12px;line-height:1.35;font-weight:700;color:#365d50;margin:0 0 12px;border-bottom:1px solid #e0e9e3;padding:0 0 10px}
+#nfeEditorDialog .nfe-general-dates{align-self:start}
+#nfeEditorDialog .nfe-general-dates .nfe-standalone-title{margin-bottom:12px}
+#nfeEditorDialog .nfe-general-card{padding:13px 15px!important}
+#nfeEditorDialog .nfe-general-layout{align-items:start}
+#nfeEditorDialog .nfe-flag-field .switch-field{width:100%}
+#nfeEditorDialog .nfe-delivery-panel .nfe-structured-grid{margin-top:12px}
+#nfeEditorDialog #nfe-section-items>.cms-card{background:#fff;border:1px solid #dbe5e0;border-radius:3px;padding:14px;margin-bottom:15px}
+#nfeEditorDialog #nfe-section-items>.cms-card>.grid-actionbar{margin:0 0 10px}
+#nfeEditorDialog .nfe-totals-panel>.nfe-structured-grid{gap:8px!important}
+#nfeEditorDialog .nfe-totals-panel .nfe-field-group-fields{grid-template-columns:repeat(12,minmax(0,1fr))!important;gap:10px!important}
+#nfeEditorDialog .nfe-totals-panel .nfe-field-group>.nfe-field-group-heading strong{color:#435a50}
+#nfeEditorDialog #nfe-section-payment>.editor-panel{margin-bottom:13px!important}
+#nfeEditorDialog #nfe-section-payment .nfe-payment-optional{padding:0!important;border:0!important;background:transparent!important}
+#nfeEditorDialog #nfe-section-payment .nfe-payment-disclosure{margin:0 0 13px}
+#nfeEditorDialog #nfe-section-transport .nfe-structured-grid{gap:13px!important}
+#nfeEditorDialog #nfe-section-other .notes-panel{display:grid;gap:13px}
+#nfeEditorDialog #nfe-section-other .notes-panel>.nfe-field-group{width:100%}
+#nfeEditorDialog #nfe-section-other .notes-panel .nfe-field-group-fields>.field{grid-column:1/-1}
+#nfeItemDialog .nfe-item-section-content>.editor-panel{padding:0!important}
+#nfeItemDialog .nfe-item-section-content>.editor-panel+.editor-panel{border-top:1px solid #e0e8e4!important;margin-top:15px!important;padding-top:15px!important}
+#nfeItemDialog .nfe-structured-grid{gap:12px!important}
+#nfeItemDialog .nfe-field-group-heading{background:#f4f7f5}
+#nfeItemDialog .nfe-field-group-fields{gap:14px!important}
+#nfeItemDialog .nfe-tax-review{margin-top:15px!important;margin-bottom:15px!important}
+#nfeItemDialog .nfe-tax-tab-host{padding:12px!important}
+#nfeItemDialog .nfe-tax-tab-host [data-nfe-item-panel="item-federal"] .nfe-field-group:not(:has(.field:not([hidden]):not([style*="display: none"]))){display:none!important}
+#nfeItemDialog .nfe-tax-tab-host [data-nfe-item-panel="item-icms"] .nfe-structured-grid{gap:12px!important}
+#nfeItemDialog .nfe-retained-details{margin:14px 0!important}
+#nfeItemDialog .nfe-retained-details>.editor-grid{padding:13px!important}
+#nfeItemDialog .nfe-tax-review-grid>button{min-height:66px}
+@media(max-width:940px){
+ #nfeEditorDialog .nfe-general-layout{grid-template-columns:minmax(0,1fr)!important}
+ #nfeEditorDialog .nfe-general-dates{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ #nfeEditorDialog .nfe-general-dates>.nfe-standalone-title{grid-column:1/-1}
+}
+@media(max-width:650px){
+ #nfeEditorDialog .nfe-field-group-fields,
+ #nfeItemDialog .nfe-field-group-fields{gap:11px!important;padding:11px!important}
+ #nfeEditorDialog .nfe-field-group-fields>.field,
+ #nfeItemDialog .nfe-field-group-fields>.field{grid-column:span 12!important}
+ #nfeEditorDialog .nfe-totals-panel .nfe-field-group-fields>.field{grid-column:span 6!important}
+ #nfeEditorDialog .nfe-general-dates{grid-template-columns:minmax(0,1fr)}
+ #nfeItemDialog .nfe-tax-tab-host{padding:8px!important}
+ #nfeEditorDialog .nfe-field-group-heading,
+ #nfeItemDialog .nfe-field-group-heading{padding:9px 10px}
+}
