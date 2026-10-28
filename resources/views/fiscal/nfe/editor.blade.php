@@ -154,6 +154,47 @@
  #nfeEditorDialog .nfe-flow-nav{overflow-x:auto;flex-wrap:nowrap}
  #nfeEditorDialog .nfe-flow-nav .editor-tab{white-space:nowrap}
 }
+
+/* Sistema visual unificado do editor NF-e: todos os passos e subgrupos. */
+#nfeEditorDialog .nfe-workspace-body{background:#f8faf9}
+#nfeEditorDialog .nfe-form-section{padding:8px 0 16px!important}
+#nfeEditorDialog .nfe-form-section>.editor-panel,
+#nfeEditorDialog .nfe-recipient-panel,
+#nfeEditorDialog .nfe-delivery-panel,
+#nfeEditorDialog .nfe-totals-panel,
+#nfeEditorDialog .notes-panel{background:#fff!important;border:1px solid #dce6e1!important;border-radius:4px!important;padding:16px!important;margin:0 0 16px!important;box-shadow:none!important}
+#nfeEditorDialog .nfe-general-card{background:#fff;border:1px solid #dce6e1;border-radius:4px;padding:16px;margin-bottom:16px}
+#nfeEditorDialog .nfe-general-card .editor-grid,
+#nfeEditorDialog .nfe-form-section .editor-grid{row-gap:16px;column-gap:14px}
+#nfeEditorDialog .nfe-form-section .field{min-width:0}
+#nfeEditorDialog .nfe-form-section .field>span{display:block;margin-bottom:6px;line-height:1.45;white-space:normal;overflow-wrap:anywhere}
+#nfeEditorDialog .nfe-form-section :is(input,select,textarea){max-width:100%;box-sizing:border-box}
+#nfeEditorDialog .nfe-recipient-heading{margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #e4ece8}
+#nfeEditorDialog .nfe-totals-panel{border-left:3px solid #3b9178!important}
+#nfeEditorDialog .nfe-payment-disclosure{margin:14px 0;border:1px solid #dce6e1;border-radius:4px;overflow:hidden;background:#fff}
+#nfeEditorDialog .nfe-payment-disclosure-content{padding:14px}
+#nfeItemDialog .nfe-item-body{background:#f8faf9}
+#nfeItemDialog .nfe-item-section{margin:0 0 16px!important;border:1px solid #d9e5df!important;border-radius:4px!important;background:#fff!important;overflow:visible}
+#nfeItemDialog .nfe-item-section-heading{border-radius:3px 3px 0 0}
+#nfeItemDialog .nfe-item-section-content{padding:16px!important}
+#nfeItemDialog .nfe-item-section-content>.editor-panel+.editor-panel{margin-top:16px!important;padding-top:16px!important;border-top:1px solid #e1e9e5!important}
+#nfeItemDialog .nfe-item-inline-caption{font-size:12px;font-weight:700;color:#356655;line-height:1.45;margin:0 0 12px;padding:0 0 8px;border-bottom:1px solid #e2ebe6}
+#nfeItemDialog .nfe-item-section-content .editor-grid{row-gap:17px!important;column-gap:14px!important}
+#nfeItemDialog .nfe-item-section-content .field>span{margin:0 0 7px!important;line-height:1.4!important}
+#nfeItemDialog .nfe-tax-review{margin:18px 0 16px!important;padding:13px!important;border:1px solid #d9e5df!important;border-radius:4px!important;background:#fff}
+#nfeItemDialog .nfe-tax-review-heading{margin:0 0 11px}
+#nfeItemDialog .nfe-tax-review-grid{gap:10px!important}
+#nfeItemDialog .nfe-tax-review-grid>button{min-width:0;text-align:left;border-radius:3px}
+#nfeItemDialog .nfe-retained-details{margin:14px 0!important}
+#nfeItemDialog .nfe-retained-details+.nfe-retained-details{margin-top:16px!important}
+#nfeItemDialog .nfe-federal-section{padding-top:12px}
+@media(max-width:850px){
+ #nfeEditorDialog .nfe-form-section>.editor-panel,
+ #nfeEditorDialog .nfe-general-card{padding:12px!important}
+ #nfeItemDialog .nfe-item-section-content{padding:12px!important}
+ #nfeItemDialog .nfe-tax-review-grid{gap:6px!important}
+}
+
 </style>
 @endpush
 
