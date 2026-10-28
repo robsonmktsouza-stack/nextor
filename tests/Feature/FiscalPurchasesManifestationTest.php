@@ -297,7 +297,8 @@ final class FiscalPurchasesManifestationTest extends TestCase
         ])->assertSessionHas('error');
         $attempt=$invoice->manifestationAttempts()->firstOrFail();
         self::assertSame('uncertain',$attempt->status);
-        self::assertStringContainsString('NFE_CarregarEventoINI',$attempt->response_message);
+        self::assertStringContainsString('Consulte a situação do documento',$attempt->response_message);
+        self::assertStringNotContainsString('NFE_CarregarEventoINI',$attempt->response_message);
         self::assertStringNotContainsString('SenhaSenhaSecreta',$attempt->response_message);
     }
 

@@ -82,6 +82,16 @@
             @include('partials.icon',['name'=>'down','size'=>13])
           </summary>
           <div class="fiscal-utilities-dropdown">
+            @if($tab==='nfe')
+              <a href="{{ route('fiscal.nfe.inutilizations.index') }}">
+                @include('partials.icon',['name'=>'file-minus','size'=>16])
+                <span>Inutilização de numeração</span>
+              </a>
+              <a href="{{ route('fiscal.nfe.natures.index') }}">
+                @include('partials.icon',['name'=>'tag','size'=>16])
+                <span>Naturezas de operação</span>
+              </a>
+            @else
             <button type="button" data-fiscal-download-xml disabled>
               @include('partials.icon',['name'=>'download','size'=>16])
               <span>Baixar XML</span>
@@ -100,15 +110,19 @@
                 <span>Inutilização</span>
               </a>
             @endif
+            @endif
           </div>
         </details>
       </div>
 
+      @if($tab!=='nfe')
       <form id="fiscal-xml-download" action="{{ route('fiscal.utilities.xml') }}" method="post" data-no-loading hidden>
         @csrf
         <input type="hidden" name="document_type" value="{{ $tab }}">
       </form>
+      @endif
 
+      @if($tab!=='nfe')
       <div class="bulk-actions">
         <select class="bulk-action-select" data-bulk-menu disabled aria-label="Ações em massa">
           <option value="">Ações em massa</option>
@@ -117,6 +131,7 @@
         </select>
         <button class="bulk-apply" type="button" data-bulk-apply disabled>Aplicar</button>
       </div>
+      @endif
     </div>
 
     <div class="grid-actions-right">
@@ -184,6 +199,9 @@
           </tr>
         </thead>
         <tbody>
+        @if($tab==='nfe')
+          @include('fiscal.nfe._document_rows')
+        @else
         @forelse($documents as $document)
           @php
             $statusInfo=match($document->status){
@@ -285,6 +303,7 @@
             </td>
           </tr>
         @endforelse
+        @endif
         </tbody>
       </table>
     </div>
@@ -311,7 +330,7 @@
           placeholder="Informe o motivo (15 a 255 caracteres)"></textarea>
       </label>
       <label class="field wide">
-        <span style="display:flex;align-items:center;gap:8px;font-weight:400">
+        <span class="fiscal-selection-label">
           <input type="checkbox" name="no_circulation" value="1" required>
           Confirmo que a mercadoria não circulou.
         </span>

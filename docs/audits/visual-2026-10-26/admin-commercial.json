@@ -1,0 +1,237 @@
+{
+  "scope": "Commercial/admin views, authentication and standalone access/error pages. Shared component CSS and the complete browser matrix are maintained by the parent agent.",
+  "branch": "feature/nfe55-motor-fiscal-completo",
+  "baseline": "5e81321",
+  "date": "2026-10-26",
+  "review_method": [
+    "Source inventory of all owned Blade views, including forms, lists, detail screens, conditional sections and modals",
+    "Inline style and stylesheet cascade scan",
+    "Consolidation of duplicated module appearance without changes to business JS/controllers/models",
+    "Directed workflow tests and Blade compilation; browser matrix is reported separately"
+  ],
+  "reviewed_files": [
+    "resources/views/auth/login.blade.php",
+    "resources/views/auth/password-request.blade.php",
+    "resources/views/auth/password-reset.blade.php",
+    "resources/views/customers/form.blade.php",
+    "resources/views/customers/index.blade.php",
+    "resources/views/dashboard.blade.php",
+    "resources/views/errors/license-blocked.blade.php",
+    "resources/views/errors/message.blade.php",
+    "resources/views/finance/_nav.blade.php",
+    "resources/views/finance/dashboard.blade.php",
+    "resources/views/finance/form.blade.php",
+    "resources/views/finance/index.blade.php",
+    "resources/views/finance/receipts/form.blade.php",
+    "resources/views/finance/receipts/index.blade.php",
+    "resources/views/finance/receipts/print.blade.php",
+    "resources/views/finance/reconciliation/import.blade.php",
+    "resources/views/finance/reconciliation/index.blade.php",
+    "resources/views/finance/recurrences/form.blade.php",
+    "resources/views/finance/recurrences/index.blade.php",
+    "resources/views/finance/settings.blade.php",
+    "resources/views/finance/show.blade.php",
+    "resources/views/finance/transfers/form.blade.php",
+    "resources/views/finance/transfers/index.blade.php",
+    "resources/views/products/form.blade.php",
+    "resources/views/products/index.blade.php",
+    "resources/views/purchases/form.blade.php",
+    "resources/views/purchases/index.blade.php",
+    "resources/views/purchases/show.blade.php",
+    "resources/views/sales/_nav.blade.php",
+    "resources/views/sales/create.blade.php",
+    "resources/views/sales/index.blade.php",
+    "resources/views/sales/quote-pdf.blade.php",
+    "resources/views/sales/returns/create.blade.php",
+    "resources/views/sales/returns/index.blade.php",
+    "resources/views/sales/returns/show.blade.php",
+    "resources/views/sales/show.blade.php",
+    "resources/views/services/form.blade.php",
+    "resources/views/services/index.blade.php",
+    "resources/views/settings/index.blade.php",
+    "resources/views/stock/index.blade.php",
+    "public/css/purchases.css",
+    "public/css/login.css",
+    "public/css/user-message-page.css",
+    "public/css/commercial-workspace.css"
+  ],
+  "reviewed_file_count": 44,
+  "reviewed_markup_files": 40,
+  "reviewed_markup_lines": 4914,
+  "modules": [
+    "Dashboard",
+    "Products",
+    "Customers/suppliers",
+    "Services",
+    "Sales and quotations",
+    "Sales returns",
+    "Purchases",
+    "Stock",
+    "Finance and accounts",
+    "Receipts",
+    "Transfers",
+    "Reconciliation",
+    "Recurrences",
+    "Settings",
+    "Authentication and password recovery",
+    "Standalone access/licensing/error pages"
+  ],
+  "modified_files": [
+    "public/css/purchases.css",
+    "public/css/login.css",
+    "public/css/user-message-page.css",
+    "public/css/commercial-workspace.css",
+    "resources/views/auth/login.blade.php",
+    "resources/views/auth/password-request.blade.php",
+    "resources/views/auth/password-reset.blade.php",
+    "resources/views/dashboard.blade.php",
+    "resources/views/errors/license-blocked.blade.php",
+    "resources/views/errors/message.blade.php",
+    "resources/views/purchases/show.blade.php",
+    "resources/views/sales/create.blade.php",
+    "resources/views/settings/index.blade.php"
+  ],
+  "modified_file_count": 13,
+  "finding_count": 8,
+  "corrected_count": 8,
+  "findings": [
+    {
+      "id": "VA-01",
+      "severity": "medium",
+      "component": "Purchase editor CSS",
+      "problem": "Repeated appended selectors provided competing desktop and mobile grids, control sizes and action colors.",
+      "correction": "Consolidated the stylesheet, retained one grid definition with responsive overrides, and delegated ordinary component appearance to shared ERP CSS.",
+      "status": "implemented; browser evidence consolidated in shared matrix"
+    },
+    {
+      "id": "VA-02",
+      "severity": "medium",
+      "component": "Purchase item fields",
+      "problem": "Inputs, selectors and charge fields used different 32px, 33px and 35px heights.",
+      "correction": "Removed local field skins; shared 38px controls, typography, borders and radius apply to fields and enhanced widgets.",
+      "status": "implemented; browser evidence consolidated in shared matrix"
+    },
+    {
+      "id": "VA-03",
+      "severity": "medium",
+      "component": "Purchase detail actions and table",
+      "problem": "Custom toolbar variants and an independently styled item table diverged from other ERP actions and listings.",
+      "correction": "Added canonical btn-primary, btn-success, btn-danger-outline and btn-secondary modifiers while preserving all behavior hooks; table now uses table-scroll and cms-table.",
+      "status": "implemented; browser evidence consolidated in shared matrix"
+    },
+    {
+      "id": "VA-04",
+      "severity": "high",
+      "component": "Purchase item overflow",
+      "problem": "Long linked product names and a narrow detail-action column could overflow or clip controls.",
+      "correction": "Enabled safe wrapping for product names, fixed the action column at 104px, and contained narrow-screen table scrolling in the table wrapper.",
+      "status": "implemented; browser evidence consolidated in shared matrix"
+    },
+    {
+      "id": "VA-05",
+      "severity": "medium",
+      "component": "Login and password recovery",
+      "problem": "Controls were 47px/49px with separate corner radii, borders, button gradient and font sizing.",
+      "correction": "Loaded shared tokens in the three standalone views; controls and primary actions now consume shared dimensions and appearance while retaining brand shell and logo.",
+      "status": "implemented; browser evidence consolidated in shared matrix"
+    },
+    {
+      "id": "VA-06",
+      "severity": "medium",
+      "component": "Standalone access and error screens",
+      "problem": "License-blocked page embedded a separate style implementation and both error pages differed from common component geometry.",
+      "correction": "Reused user-message-page.css in both views and shared tokens for card, typography, controls and primary buttons.",
+      "status": "implemented; browser evidence consolidated in shared matrix"
+    },
+    {
+      "id": "VA-07",
+      "severity": "low",
+      "component": "Sales and settings layout",
+      "problem": "Operational layout rules were embedded in an inline style block/attribute.",
+      "correction": "Moved only structural visibility and action-row layout to commercial-workspace.css; field, button and card appearance remains centralized.",
+      "status": "implemented; browser evidence consolidated in shared matrix"
+    },
+    {
+      "id": "VA-08",
+      "severity": "low",
+      "component": "Dashboard create action",
+      "problem": "New-sale action differed from the existing green primary creation action used in module toolbars.",
+      "correction": "Applied the canonical btn-success and grid-primary-action modifiers.",
+      "status": "implemented; browser evidence consolidated in shared matrix"
+    }
+  ],
+  "operational_inline_styles": {
+    "before_attributes": 2,
+    "after_attributes": 0,
+    "before_blocks": 2,
+    "after_blocks": 0,
+    "print_templates_excluded": true
+  },
+  "stylesheet_line_counts": {
+    "public/css/purchases.css": {
+      "before": 277,
+      "after": 130
+    },
+    "public/css/login.css": {
+      "before": 48,
+      "after": 45
+    },
+    "public/css/user-message-page.css": {
+      "before": 6,
+      "after": 11
+    },
+    "public/css/commercial-workspace.css": {
+      "before": 0,
+      "after": 4
+    }
+  },
+  "tests": [
+    {
+      "command": "vendor/bin/phpunit --filter='ErpRemovalIconsTest|LumeronLoginTest|SettingsClarityTest|UserFacingErrorsTest|PurchaseModuleTest'",
+      "runtime": "PHP 8.5.12, Docker composer:2",
+      "tests": 27,
+      "assertions": 250,
+      "failures": 0,
+      "errors": 0,
+      "duration_seconds": 7.736,
+      "evidence_log": "admin-commercial-tests.txt"
+    },
+    {
+      "check": "BladeCompiler compileString and php -l of all modified Blade views",
+      "files": 9,
+      "failures": 0,
+      "result": "passed",
+      "evidence_log": "admin-commercial-blade.txt"
+    },
+    {
+      "check": "git diff --check",
+      "result": "passed"
+    }
+  ],
+  "preserved_print_files": [
+    "resources/views/sales/quote-pdf.blade.php",
+    "resources/views/finance/receipts/print.blade.php"
+  ],
+  "deliberate_variants": [
+    {
+      "component": "Authentication shell",
+      "reason": "Logo, background, 490px maximum shell width and panel spacing preserve the existing brand layout; controls consume the shared tokens."
+    },
+    {
+      "component": "Purchase composite form",
+      "reason": "Flat inner sections avoid nested card frames. Field grids, imported XML mappings and conditional product selectors remain functional structures."
+    },
+    {
+      "component": "Purchase item details",
+      "reason": "680px table minimum at narrow viewports is confined to table-scroll; data columns and actions remain usable without page-wide horizontal scroll."
+    },
+    {
+      "component": "Print layouts",
+      "reason": "Quotation PDF and receipt print geometry remain unchanged."
+    }
+  ],
+  "business_changes": "None: action IDs, event hooks, routes, validation, permissions, calculations, integration configuration and data remain unchanged.",
+  "remaining_validation": [
+    "Full regression suite and browser screenshots/computed-style comparisons are consolidated by the parent agent. This source/test report alone does not assert complete visual validation."
+  ]
+}

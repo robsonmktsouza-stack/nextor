@@ -148,9 +148,10 @@ class NfeEditorTest extends TestCase
         $script=(string)file_get_contents(public_path('js/nfe-editor.js'));
 
         self::assertStringContainsString('width:min(1200px,calc(100vw - 36px))',$css);
-        self::assertStringContainsString('border-left:3px solid #2b8b6a',$css);
-        self::assertStringContainsString('border-bottom-color:#28896b',$css);
-        self::assertStringContainsString('background:#f1f8f4',$css);
+        self::assertStringContainsString('var(--ui-control-height,38px)',$css);
+        self::assertStringContainsString('var(--ui-border,#cbd6df)',$css);
+        self::assertStringNotContainsString('border-left:3px solid #2b8b6a',$css);
+        self::assertStringNotContainsString('border-bottom-color:#28896b',$css);
         self::assertStringContainsString('nfe-recipient-meta',$css);
         self::assertStringContainsString('nfe-recipient-address',$css);
         self::assertStringContainsString('nfe-recipient-meta',$script);
@@ -247,7 +248,7 @@ class NfeEditorTest extends TestCase
             ->assertSee('dialog-header',false)
             ->assertSee('editor-tabs nfe-flow-nav',false)
             ->assertSee('nfe-form-section cms-card',false)
-            ->assertSee('card-header nfe-flow-heading',false)
+            ->assertDontSee('card-header nfe-flow-heading',false)
             ->assertSee('nfe-item-section',false)
             ->assertSee('nfe-tax-review-grid',false)
             ->assertDontSee('data-nfe-item-tab',false)
@@ -276,15 +277,15 @@ class NfeEditorTest extends TestCase
             ->assertSee('Informar previsão de entrega')
             ->assertSee('Compra governamental')
             ->assertSee('Pagamento antecipado')
-            ->assertSee('Data emissão NF (atual)')
-            ->assertSee('Hora emissão NF (atual)')
-            ->assertSee('Data saída/entrada (atual)')
-            ->assertSee('Hora saída/entrada (atual)')
+            ->assertSee('Data de emissão')
+            ->assertSee('id="nfeIssueTime"',false)
+            ->assertSee('Data de saída/entrada')
+            ->assertSee('id="nfeExitTime"',false)
             ->assertSee('Limpar campo')
-            ->assertSee('Ocultar campos')
-            ->assertSee('<h2>Dados gerais</h2>',false)
+            ->assertSee('Ocultar detalhes')
+            ->assertDontSee('<h2>Dados gerais</h2>',false)
             ->assertSee('Dados do destinatário')
-            ->assertSee('Produtos e valores')
+            ->assertSee('data-nfe-jump="nfe-section-items"',false)
             ->assertSee('Transporte')
             ->assertSee('Pagamento')
             ->assertSee('Informações adicionais')
@@ -301,8 +302,8 @@ class NfeEditorTest extends TestCase
             ->assertSee('Acréscimo da nota')
             ->assertSee('Modalidade do frete')
             ->assertSee('Tipo de pagamento')
-            ->assertSee('Duplicatas')
-            ->assertSee('NF-e referenciadas')
+            ->assertSee('Adicionar duplicata')
+            ->assertSee('Documentos referenciados')
             ->assertSee('Código benefício (cBenef)')
             ->assertSee('CSOSN exportação')
             ->assertSee('CSOSN entrada')
@@ -766,7 +767,7 @@ class NfeEditorTest extends TestCase
             ->assertSee('CST PIS entrada')
             ->assertSee('CST COFINS entrada')
             ->assertSee('CST IPI entrada')
-            ->assertSee('DIFAL e FCP')
+            ->assertSee('DIFAL / FCP')
             ->assertSee('Combustível / ANP')
             ->assertSee('IBS / CBS');
     }

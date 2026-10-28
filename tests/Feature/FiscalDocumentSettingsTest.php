@@ -68,7 +68,7 @@ final class FiscalDocumentSettingsTest extends TestCase
         $this->actingAs($this->admin());
 
         foreach ([
-            'nfe'=>['environment'=>'production','series'=>1,'next_number'=>1,'production_enabled'=>'1'],
+            'nfe'=>['environment'=>'production','series'=>1,'next_number'=>1,'production_series'=>1,'production_next_number'=>1,'production_enabled'=>'1'],
             'nfce'=>[
                 'environment'=>'production','series'=>1,'next_number'=>1,
                 'csc_id'=>'1','csc_token'=>'CSC-HOMOLOGACAO-TESTE',

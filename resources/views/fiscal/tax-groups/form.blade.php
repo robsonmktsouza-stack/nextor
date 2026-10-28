@@ -36,7 +36,6 @@
   <section class="editor-panel settings-panel">
     <div class="settings-panel-head">
       <div><h2>Dados gerais</h2></div>
-      @if($editing)<span class="status status-blue">Revisão {{ $group->revision }}</span>@endif
     </div>
     <div class="editor-grid cols-12 settings-grid">
       <label class="field col-6"><span>Descrição</span><input required maxlength="160" name="name" value="{{ old('name',$group->name) }}" placeholder="Ex.: Venda de mercadorias — revisão contábil"></label>
@@ -168,14 +167,11 @@
     </div>
   </section>
 
-  <details data-group-kind="products" @if($selectedKind==='services') hidden @endif style="margin-bottom:14px">
-    <summary class="btn btn-secondary" style="cursor:pointer;display:inline-flex">Outros tributos</summary>
+  <details data-group-kind="products" @if($selectedKind==='services') hidden @endif class="fiscal-section-after">
+    <summary class="btn btn-secondary fiscal-summary-button">Outros tributos</summary>
   <section class="editor-panel settings-panel" data-group-kind="products" @if($selectedKind==='services') hidden @endif>
     <div class="settings-panel-head"><div><h2>IBS / CBS</h2></div></div>
-    <details class="erp-help-details">
-      <summary>Regras de enquadramento IBS/CBS</summary>
-      <p>CST 000 / 000001: tributação integral. CST 200 / 200003: redução de 100% para produtos legalmente enquadrados no Anexo I. Confira a classificação com a contabilidade. Não atribua alíquotas presumidas ao Simples Nacional.</p>
-    </details>
+    
     <div class="editor-grid cols-12 settings-grid">
       <label class="field col-3"><span>CST IBS/CBS</span><input maxlength="3" inputmode="numeric" name="tax_config[ibs_cbs_cst]" value="{{ $val('ibs_cbs_cst') }}"></label>
       <label class="field col-3"><span>Classificação tributária</span><input maxlength="6" inputmode="numeric" name="tax_config[ibs_cbs_class]" value="{{ $val('ibs_cbs_class') }}"></label>
@@ -191,6 +187,7 @@
       <label class="field col-3"><span>CST IS</span><input name="tax_config[is_cst]" maxlength="3" value="{{ $val('is_cst') }}"></label>
       <label class="field col-3"><span>Classificação IS</span><input name="tax_config[is_class]" maxlength="6" value="{{ $val('is_class') }}"></label>
       <label class="field col-3"><span>CST IPI</span><input name="ipi_cst" maxlength="2" inputmode="numeric" value="{{ old('ipi_cst',$group->ipi_cst) }}"></label>
+      <label class="field col-3"><span>Enquadramento legal IPI (cEnq)</span><input name="tax_config[ipi_enq]" maxlength="3" pattern="[0-9]{3}" inputmode="numeric" value="{{ $val('ipi_enq') }}"></label>
       @foreach([['is_rate','Alíquota IS (%)'],['ipi_rate','Alíquota IPI (%)'],['iss_rate','Alíquota ISS (%)']] as [$key,$label])
         <label class="field col-2"><span>{{ $label }}</span><input type="number" min="0" max="100" step="0.0001" name="tax_config[{{ $key }}]" value="{{ $val($key) }}"></label>
       @endforeach
@@ -210,6 +207,7 @@
       <textarea name="notes" rows="3" maxlength="3000" placeholder="Referência legal, orientação do contador, data da conferência...">{{ old('notes',$group->notes) }}</textarea>
     </label>
   </section>
+  @include('fiscal._catalog-review',['catalogModel'=>$group])
   <script>
     (function () {
       const kind = document.querySelector('select[name="kind"]');

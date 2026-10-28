@@ -6,12 +6,22 @@ use App\Models\Product;
 use App\Models\CompanySetting;
 use App\Models\FiscalTaxGroup;
 use App\Models\StockMovement;
+use App\Services\Fiscal\FiscalProductClassificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class ProductController extends Controller {
+    public function classificationLookup(Request $request, FiscalProductClassificationService $classifications) {
+        $data=$request->validate([
+            'kind'=>['required',Rule::in(['ncm','cest'])],
+            'q'=>['required','string','max:80'],
+            'ncm'=>['nullable','string','max:10'],
+        ]);
+        return response()->json(['items'=>$classifications->search($data['kind'],$data['q'],$data['ncm'] ?? null)]);
+    }
+
     public function index(Request $r) {
         $term=trim((string)$r->query('search',''));
         $perPage=AppSetting::tablePerPage($r);
@@ -188,15 +198,7 @@ class ProductController extends Controller {
     private function persist(Request $request, ?Product $product=null): Product {
         $data=$request->validate($this->rules($product));
 
-        // Salvar NCM como oito dígitos, mesmo quando o usuário o informar
-        // com a máscara visual 6913.90.00. Não inventar NCM incompleto.
-        $enteredNcm = trim((string) ($data['ncm'] ?? ''));
-        if ($enteredNcm !== '' && preg_match('/^[0-9.\\s-]+$/', $enteredNcm) === 1) {
-            $ncmDigits = preg_replace('/\\D/', '', $enteredNcm);
-            if (strlen($ncmDigits) === 8) {
-                $data['ncm'] = $ncmDigits;
-            }
-        }
+        $data=app(FiscalProductClassificationService::class)->validate($data,$product);
 
         $requestedStock=(float)($data['stock_quantity'] ?? ($product?->stock_quantity ?? 0));
         $submittedTaxDefaults=$data['tax_defaults'] ?? [];

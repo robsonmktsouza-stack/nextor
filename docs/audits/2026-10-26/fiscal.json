@@ -1,0 +1,257 @@
+{
+  "area": "Fiscal",
+  "reviewed_files": [
+    "app/Http/Controllers/FiscalCatalogController.php",
+    "app/Http/Controllers/FiscalCodeCatalogController.php",
+    "app/Http/Controllers/FiscalFcpRuleController.php",
+    "app/Http/Controllers/FiscalTaxGroupController.php",
+    "app/Http/Controllers/FiscalTaxRuleController.php",
+    "app/Http/Controllers/OperationNatureController.php",
+    "app/Support/FiscalPresentation.php",
+    "public/js/fiscal-codes.js",
+    "public/js/fiscal-purchases-manifest.js",
+    "public/js/nfce-editor.js",
+    "public/js/nfe-editor.js",
+    "public/js/product-fiscal-catalog.js",
+    "resources/views/fiscal/_catalog-review.blade.php",
+    "resources/views/fiscal/_nav.blade.php",
+    "resources/views/fiscal/catalog/index.blade.php",
+    "resources/views/fiscal/fcp/index.blade.php",
+    "resources/views/fiscal/index.blade.php",
+    "resources/views/fiscal/nfce-danfe-wait.blade.php",
+    "resources/views/fiscal/nfce-danfe.blade.php",
+    "resources/views/fiscal/nfce/_readonly_panels.blade.php",
+    "resources/views/fiscal/nfce/correct-rejection.blade.php",
+    "resources/views/fiscal/nfce/create.blade.php",
+    "resources/views/fiscal/nfce/inutilizations.blade.php",
+    "resources/views/fiscal/nfe/_additional-federal-taxes.blade.php",
+    "resources/views/fiscal/nfe/_foreign-trade-header.blade.php",
+    "resources/views/fiscal/nfe/_foreign-trade-item.blade.php",
+    "resources/views/fiscal/nfe/_nature_form.blade.php",
+    "resources/views/fiscal/nfe/_rtc-extra-fields.blade.php",
+    "resources/views/fiscal/nfe/drafts.blade.php",
+    "resources/views/fiscal/nfe/editor.blade.php",
+    "resources/views/fiscal/nfe/inutilizations.blade.php",
+    "resources/views/fiscal/nfe/natures.blade.php",
+    "resources/views/fiscal/partials/readable-values.blade.php",
+    "resources/views/fiscal/partials/sefaz-guidance.blade.php",
+    "resources/views/fiscal/purchases/index.blade.php",
+    "resources/views/fiscal/purchases/show.blade.php",
+    "resources/views/fiscal/rules/_fields.blade.php",
+    "resources/views/fiscal/rules/index.blade.php",
+    "resources/views/fiscal/show.blade.php",
+    "resources/views/fiscal/tax-groups/_advanced.blade.php",
+    "resources/views/fiscal/tax-groups/form.blade.php",
+    "resources/views/fiscal/tax-groups/index.blade.php"
+  ],
+  "findings": [
+    {
+      "id": "FISC-001",
+      "severity": "medium",
+      "file": "resources/views/fiscal/_catalog-review.blade.php",
+      "line": 1,
+      "before": "Versão interna, condições técnicas e histórico em JSON com identificadores de usuários.",
+      "after": "Apresentação em linguagem comercial, sem metadados internos.",
+      "status": "corrected",
+      "reason": "Dados e controles fiscais preservados; alteração somente de apresentação."
+    },
+    {
+      "id": "FISC-002",
+      "severity": "medium",
+      "file": "resources/views/fiscal/rules/index.blade.php",
+      "line": 1,
+      "before": "Regras exibiam IDs de produto/usuário/regra, critérios em inglês, versão, JSON e hash de auditoria.",
+      "after": "Apresentação em linguagem comercial, sem metadados internos.",
+      "status": "corrected",
+      "reason": "Dados e controles fiscais preservados; alteração somente de apresentação."
+    },
+    {
+      "id": "FISC-003",
+      "severity": "medium",
+      "file": "resources/views/fiscal/rules/_fields.blade.php",
+      "line": 1,
+      "before": "Campo de versão interna editável na parametrização operacional.",
+      "after": "Apresentação em linguagem comercial, sem metadados internos.",
+      "status": "corrected",
+      "reason": "Dados e controles fiscais preservados; alteração somente de apresentação."
+    },
+    {
+      "id": "FISC-004",
+      "severity": "medium",
+      "file": "resources/views/fiscal/nfe/natures.blade.php",
+      "line": 1,
+      "before": "Listagem de naturezas mostrava versão interna de catálogo.",
+      "after": "Apresentação em linguagem comercial, sem metadados internos.",
+      "status": "corrected",
+      "reason": "Dados e controles fiscais preservados; alteração somente de apresentação."
+    },
+    {
+      "id": "FISC-005",
+      "severity": "medium",
+      "file": "resources/views/fiscal/tax-groups/index.blade.php",
+      "line": 1,
+      "before": "Listagem de grupos repetia título e texto genérico e exibia revisões e versões internas. Incluía código de banco sem necessidade e revisão de modelo fora do histórico.",
+      "after": "Apresentação em linguagem comercial, sem metadados internos.",
+      "status": "corrected",
+      "reason": "Dados e controles fiscais preservados; alteração somente de apresentação."
+    },
+    {
+      "id": "FISC-006",
+      "severity": "medium",
+      "file": "resources/views/fiscal/partials/sefaz-guidance.blade.php",
+      "line": 1,
+      "before": "Orientação de rejeição mostrava a versão interna do catálogo de mensagens.",
+      "after": "Apresentação em linguagem comercial, sem metadados internos.",
+      "status": "corrected",
+      "reason": "Dados e controles fiscais preservados; alteração somente de apresentação."
+    },
+    {
+      "id": "FISC-007",
+      "severity": "medium",
+      "file": "resources/views/fiscal/nfe/inutilizations.blade.php",
+      "line": 1,
+      "before": "Restrição de operação aparecia como aviso de versão em desenvolvimento.",
+      "after": "Apresentação em linguagem comercial, sem metadados internos.",
+      "status": "corrected",
+      "reason": "Dados e controles fiscais preservados; alteração somente de apresentação."
+    },
+    {
+      "id": "FISC-008",
+      "severity": "medium",
+      "file": "resources/views/fiscal/nfe/editor.blade.php",
+      "line": 1,
+      "before": "Editor exibia versões/revisões de regras e nomes de campos internos nas divergências manuais.",
+      "after": "Apresentação em linguagem comercial, sem metadados internos.",
+      "status": "corrected",
+      "reason": "Dados e controles fiscais preservados; alteração somente de apresentação."
+    },
+    {
+      "id": "FISC-009",
+      "severity": "medium",
+      "file": "public/js/nfe-editor.js",
+      "line": 1,
+      "before": "Prévia tributária e pagamentos exibiam versões internas, chaves de parâmetros e condição em inglês.",
+      "after": "Apresentação em linguagem comercial, sem metadados internos.",
+      "status": "corrected",
+      "reason": "Dados e controles fiscais preservados; alteração somente de apresentação."
+    },
+    {
+      "id": "FISC-010",
+      "severity": "medium",
+      "file": "app/Http/Controllers/FiscalFcpRuleController.php",
+      "line": 1,
+      "before": "Mensagem de sucesso incluía comentário sobre implementação interna.",
+      "after": "Apresentação em linguagem comercial, sem metadados internos.",
+      "status": "corrected",
+      "reason": "Dados e controles fiscais preservados; alteração somente de apresentação."
+    },
+    {
+      "id": "FISC-011",
+      "severity": "medium",
+      "file": "app/Http/Controllers/FiscalCatalogController.php",
+      "line": 1,
+      "before": "Retornos de importação e instalação exibiam versões internas e terminologia JSON/SHA.",
+      "after": "Apresentação em linguagem comercial, sem metadados internos.",
+      "status": "corrected",
+      "reason": "Dados e controles fiscais preservados; alteração somente de apresentação."
+    },
+    {
+      "id": "FISC-012",
+      "severity": "high",
+      "file": "resources/views/fiscal/catalog/index.blade.php",
+      "line": 1,
+      "before": "Catálogo mostrava JSON bruto de parâmetros/cobertura, hashes e versões internas; condições técnicas estaduais eram exibidas sem tradução.",
+      "after": "Disponibilidade em linguagem comercial, projeção de parâmetros fiscais, datas de atualização e consulta às fontes oficiais.",
+      "status": "corrected",
+      "reason": "Registros, fontes, versões, integridade e condições permanecem persistidos; interface apenas projeta informação útil."
+    },
+    {
+      "id": "FISC-013",
+      "severity": "medium",
+      "file": "app/Http/Controllers/FiscalTaxRuleController.php",
+      "line": 1,
+      "before": "Validações de regra fiscal exibiam JSON, nomes de campos internos e referência à arquitetura do motor.",
+      "after": "Mensagens orientam a revisão do parâmetro tributário com nome fiscal traduzido.",
+      "status": "corrected",
+      "reason": "Somente apresentação. Identificadores e evidências internas permanecem armazenados."
+    },
+    {
+      "id": "FISC-014",
+      "severity": "medium",
+      "file": "resources/views/fiscal/show.blade.php",
+      "line": 1,
+      "before": "Detalhe fiscal exibiu códigos de pagamento/nomes de campos de revisão e podia reproduzir exceção antiga. Situação de cancelamento aparecia em inglês.",
+      "after": "Valores de negócio traduzidos e erros locais projetados sem alterar o retorno arquivado. Situações de cancelamento traduzidas.",
+      "status": "corrected",
+      "reason": "Somente apresentação. Identificadores e evidências internas permanecem armazenados."
+    },
+    {
+      "id": "FISC-015",
+      "severity": "medium",
+      "file": "resources/views/fiscal/nfe/editor.blade.php",
+      "line": 1,
+      "before": "Prévia inicial podia reproduzir detalhes técnicos tributários persistidos.",
+      "after": "Mensagens projetadas para leitura antes de enviar dados da prévia à interface; banco preservado.",
+      "status": "corrected",
+      "reason": "Somente apresentação. Identificadores e evidências internas permanecem armazenados."
+    },
+    {
+      "id": "FISC-016",
+      "severity": "low",
+      "file": "resources/views/fiscal/catalog/index.blade.php",
+      "line": 104,
+      "before": "Código de verificação do pacote administrativo de atualização fiscal.",
+      "after": "O formulário técnico foi retirado das telas na integração remota. Atualização padrão ocorre pelo provisionamento; checksum continua exigido pelo endpoint administrativo de importação.",
+      "status": "corrected",
+      "reason": "Mudança remota preservada no rebase. Não há hash para o operador copiar; controles e contrato de integridade do backend permanecem."
+    },
+    {
+      "id": "FISC-017",
+      "severity": "low",
+      "file": "resources/views/fiscal/tax-groups/form.blade.php",
+      "line": 39,
+      "before": "Revisão interna do grupo aparecia como destaque no formulário.",
+      "after": "Formulário apresenta somente os dados do grupo; revisão permanece no histórico.",
+      "status": "corrected",
+      "reason": "Revisão de auditoria preservada em banco e histórico, sem ocupar o fluxo de cadastro."
+    },
+    {
+      "id": "FISC-018",
+      "severity": "low",
+      "file": "resources/views/fiscal/nfe/editor.blade.php",
+      "line": 131,
+      "before": "A navegação da NF-e repetia o nome da aba em cinco faixas com subtítulos genéricos.",
+      "after": "Cinco cabeçalhos redundantes removidos; navegação, campos e nomes acessíveis dos painéis preservados.",
+      "status": "corrected",
+      "reason": "Confirmado na inspeção Chromium do editor; não muda o fluxo nem os campos."
+    },
+    {
+      "id": "FISC-019",
+      "severity": "medium",
+      "file": "resources/views/fiscal/catalog/index.blade.php",
+      "line": 38,
+      "before": "Código de benefício AC30002 quebrava em duas linhas na tabela.",
+      "after": "Célula de código usa nowrap; conteúdo fiscal permanece idêntico.",
+      "status": "corrected",
+      "reason": "Confirmado na inspeção Chromium da tabela; teste DOM cobre célula com código integral."
+    }
+  ],
+  "verification": {
+    "targeted_tests": "28 tests, 228 assertions, zero failures, including supported-parameter labels, catalog screens, NF-e preview and rejection views",
+    "log": "/workspace/scratch/commercial-fiscal-presentation-final.log",
+    "javascript_syntax": "node --check public/js/nfe-editor.js passed",
+    "limitations": [
+      "No new ACBr/SEFAZ transmission; presentation audit only"
+    ],
+    "compiled_blade_syntax": "Explicit compile of NF-e editor and PHP lint passed after moving preview projection to existing initial PHP block.",
+    "junit": "/workspace/scratch/commercial-fiscal-presentation-final.xml",
+    "note": "Final minor label and grid-column refinements are delegated to the root full regression run.",
+    "visual_refinements": {
+      "screenshots": [
+        "/workspace/scratch/audit-visual/nfe-editor.png",
+        "/workspace/scratch/audit-visual/catalog-benefits.png"
+      ],
+      "targeted_log": "/workspace/scratch/commercial-fiscal-visual-refinements.log"
+    }
+  }
+}

@@ -1,0 +1,425 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Lumeron ERP — catálogo fiscal de referência v1",
+  "description": "Contrato estrutural. A revisão fiscal das fontes e condições é obrigatória; este contrato não comprova o enquadramento de uma empresa.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "version",
+    "consulted_at",
+    "sources",
+    "coverage",
+    "entries"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,31}$"
+    },
+    "consulted_at": {
+      "type": "string",
+      "format": "date"
+    },
+    "target_cnpj": {
+      "type": "string",
+      "pattern": "^[0-9]{14}$"
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 500,
+      "items": {
+        "$ref": "#/$defs/source"
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "$ref": "#/$defs/kind"
+      },
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "enum": [
+              "complete",
+              "partial",
+              "not_bundled"
+            ]
+          },
+          {
+            "type": "object",
+            "required": [
+              "status"
+            ],
+            "properties": {
+              "status": {
+                "enum": [
+                  "complete",
+                  "partial",
+                  "not_bundled"
+                ]
+              },
+              "scope": {
+                "enum": [
+                  "BR",
+                  "UF"
+                ]
+              },
+              "uf": {
+                "$ref": "#/$defs/uf"
+              },
+              "count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "snapshot_date": {
+                "type": "string",
+                "format": "date"
+              },
+              "source_ids": {
+                "type": "array",
+                "uniqueItems": true,
+                "items": {
+                  "type": "string"
+                }
+              },
+              "by_uf": {
+                "type": "object",
+                "minProperties": 1,
+                "propertyNames": {
+                  "$ref": "#/$defs/uf"
+                },
+                "additionalProperties": {
+                  "$ref": "#/$defs/stateCoverage"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 100000,
+      "items": {
+        "$ref": "#/$defs/entry"
+      }
+    }
+  },
+  "$defs": {
+    "kind": {
+      "enum": [
+        "cfop",
+        "icms_cst",
+        "csosn",
+        "pis_cofins_cst",
+        "ipi_cst",
+        "origin",
+        "crt",
+        "ncm",
+        "cest",
+        "ibs_cbs_cst",
+        "ibs_cbs_class",
+        "benefit",
+        "operation_nature",
+        "tax_group",
+        "tax_parameter"
+      ]
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "id",
+        "url",
+        "reference",
+        "consulted_at"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]{1,64}$"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 4000
+        },
+        "reference": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "version": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 500
+        },
+        "consulted_at": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    },
+    "parameter": {
+      "description": "Decimais devem ser strings; números binários de ponto flutuante são recusados.",
+      "anyOf": [
+        {
+          "type": [
+            "string",
+            "integer",
+            "boolean",
+            "null"
+          ]
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/parameter"
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/parameter"
+          }
+        }
+      ]
+    },
+    "entry": {
+      "type": "object",
+      "required": [
+        "kind",
+        "code",
+        "description",
+        "source_id"
+      ],
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/kind"
+        },
+        "code": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 10000
+        },
+        "source_id": {
+          "type": "string"
+        },
+        "valid_from": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "valid_until": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "uf": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^(AC|AL|AP|AM|BA|CE|DF|ES|GO|MA|MT|MS|MG|PA|PB|PR|PE|PI|RJ|RN|RS|RO|RR|SC|SP|SE|TO)$"
+        },
+        "regime": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 32
+        },
+        "status": {
+          "enum": [
+            "reference",
+            "template",
+            "revoked"
+          ]
+        },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 3000
+          }
+        },
+        "parameters": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/$defs/parameter"
+              },
+              "properties": {
+                "ncm_prefixes": {
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[0-9]{2,8}$"
+                  }
+                },
+                "ncm_link_validation": {
+                  "enum": [
+                    "manual",
+                    "prefix"
+                  ]
+                },
+                "icms_csts": {
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[0-9]{2}$"
+                  }
+                },
+                "csosns": {
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[0-9]{3}$"
+                  }
+                },
+                "crts": {
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[1-4]$"
+                  }
+                },
+                "ind_nfe": {
+                  "enum": [
+                    true,
+                    false,
+                    0,
+                    1,
+                    "0",
+                    "1"
+                  ]
+                },
+                "indNFe": {
+                  "enum": [
+                    true,
+                    false,
+                    0,
+                    1,
+                    "0",
+                    "1"
+                  ]
+                },
+                "excluded_ufs": {
+                  "type": "array",
+                  "uniqueItems": true,
+                  "maxItems": 27,
+                  "items": {
+                    "$ref": "#/$defs/uf"
+                  }
+                },
+                "requires_manual_ncm_review": {
+                  "type": "boolean"
+                }
+              }
+            },
+            {
+              "type": "array",
+              "maxItems": 0
+            }
+          ]
+        }
+      }
+    },
+    "uf": {
+      "enum": [
+        "AC",
+        "AL",
+        "AP",
+        "AM",
+        "BA",
+        "CE",
+        "DF",
+        "ES",
+        "GO",
+        "MA",
+        "MT",
+        "MS",
+        "MG",
+        "PA",
+        "PB",
+        "PR",
+        "PE",
+        "PI",
+        "RJ",
+        "RN",
+        "RS",
+        "RO",
+        "RR",
+        "SC",
+        "SP",
+        "SE",
+        "TO"
+      ]
+    },
+    "stateCoverage": {
+      "oneOf": [
+        {
+          "enum": [
+            "complete",
+            "partial",
+            "not_bundled",
+            "unavailable"
+          ]
+        },
+        {
+          "type": "object",
+          "required": [
+            "status"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "complete",
+                "partial",
+                "not_bundled",
+                "unavailable"
+              ]
+            },
+            "count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "snapshot_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "source_ids": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

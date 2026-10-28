@@ -2,6 +2,14 @@
 @section('title','Fiscal')
 @section('titleMeta','NF-e')
 @section('content')
+
+@push('styles')
+{{-- A identidade visual da NF-e é mantida em um único CSS específico,
+     sem regras concorrentes e remendos no template Blade. --}}
+
+<link rel="stylesheet" href="{{ asset('css/nfe-form-structure.css') }}?v={{ filemtime(public_path('css/nfe-form-structure.css')) }}">
+@endpush
+
 @include('fiscal._nav',['tab'=>'nfe','tabs'=>[
   'nfe'=>['label'=>'NF-e'],'nfse'=>['label'=>'NFS-e'],'cte'=>['label'=>'CT-e'],'nfce'=>['label'=>'NFC-e']
 ]])
@@ -82,11 +90,17 @@ $origins=[
  '7'=>'7 - Estrangeira: mercado interno sem similar nacional',
  '8'=>'8 - Nacional com conteúdo de importação > 70%',
 ];
+  $displayTotals=$draft->totals??[];
+  if(isset($displayTotals['tax_errors']) && is_array($displayTotals['tax_errors'])){
+    $displayTotals['tax_errors']=array_map(fn($message)=>\App\Support\UserFacingMessage::fromText((string)$message,'Confira os parâmetros tributários dos itens e valide novamente a nota.'),$displayTotals['tax_errors']);
+  }
 @endphp
+
 
 <div class="nextor-modal-layer nfe-modal-layer is-open" id="nfeEditorDialog" data-nfe-modal data-nfe-readonly="{{ $draft->status!=='draft'?'1':'0' }}" aria-hidden="false">
   <div class="erp-dialog nfe-workspace-dialog nextor-modal-window" role="dialog" aria-modal="true" aria-labelledby="nfeEditorTitle">
 <form id="nfeDraftForm" method="post"
+      data-tax-preview-url="{{ route('fiscal.nfe.preview-taxes') }}"
       action="{{ $isEditing ? route('fiscal.nfe.update',$draft) : route('fiscal.nfe.store') }}">
   @csrf
   @if($isEditing) @method('PUT') @endif
@@ -99,7 +113,8 @@ $origins=[
 
   <div class="dialog-header">
     <div>
-      <h2 id="nfeEditorTitle">{{ $isEditing ? 'Editar NF-e em rascunho' : 'Criar nova NF-e' }}</h2>
+      <h2 id="nfeEditorTitle">{{ $isEditing ? 'Editar nota fiscal eletrônica' : 'Nova nota fiscal eletrônica' }}</h2>
+      <div class="nfe-editor-document-meta"><span>NF-e modelo 55</span><span>Série {{ str_pad((string)($draft->series ?? 1),3,'0',STR_PAD_LEFT) }}</span><span>Número {{ $draft->document_number ?: 'automático' }}</span><span class="nfe-editor-status">{{ match($draft->status){'authorized'=>'Autorizada','cancelled'=>'Cancelada','pending'=>'Aguardando confirmação','queued'=>'Aguardando envio','processing'=>'Enviando','prepared'=>'Não enviada','rejected'=>'Não autorizada',default=>'Rascunho'} }}</span></div>
     </div>
     <a class="close-dialog" href="{{ route('fiscal.index',['tab'=>'nfe']) }}" aria-label="Fechar">
       @include('partials.icon',['name'=>'x','size'=>18])
@@ -107,19 +122,22 @@ $origins=[
   </div>
 
   <div class="dialog-body nfe-workspace-body" id="nfeScrollRegion" tabindex="0" aria-label="Conteúdo da NF-e">
+    @include('fiscal.partials.sefaz-guidance',[
+      'guidance'=>app(\App\Services\Fiscal\SefazRejectionGuidance::class)->forDocument($draft),
+      'originalStoredError'=>$draft->error_message,
+    ])
     @if($isEditing && $draft->validated_at && !$draftCanEmit)
       <p class="inline-note" role="alert">Confira a natureza da operação, o tipo de movimentação e o destino. Salve e valide novamente antes de emitir.</p>
     @endif
     <nav class="editor-tabs nfe-flow-nav" aria-label="Seções da nota">
       <button type="button" class="editor-tab active" data-nfe-jump="nfe-section-general" aria-current="location">Dados gerais</button>
-      <button type="button" class="editor-tab" data-nfe-jump="nfe-section-items">Produtos</button>
+      <button type="button" class="editor-tab" data-nfe-jump="nfe-section-items">Produtos e impostos</button>
       <button type="button" class="editor-tab" data-nfe-jump="nfe-section-payment">Pagamento</button>
       <button type="button" class="editor-tab" data-nfe-jump="nfe-section-transport">Transporte</button>
       <button type="button" class="editor-tab" data-nfe-jump="nfe-section-other">Informações adicionais</button>
     </nav>
 
-    <section class="editor-tab-panel nfe-form-section cms-card" id="nfe-section-general">
-      <header class="card-header nfe-flow-heading"><div><h2>Dados gerais</h2><p>Natureza da operação, emitente e destinatário</p></div></header>
+    <section class="editor-tab-panel nfe-form-section cms-card" id="nfe-section-general" aria-label="Dados gerais">
       <div class="nfe-emitter-summary">
         <div class="nfe-emitter-logo">
           @if($company->logo_path)
@@ -172,14 +190,18 @@ $origins=[
                   <button type="button" class="nfe-clear-field" id="nfeClearNature">Limpar campo</button>
                 </span>
                 <div class="input-action-group">
-                  <select name="operation_nature_id" id="nfeNature" required>
+                  <div class="nfe-nature-combobox" data-nfe-nature-combobox>
+                    <input id="nfeNatureSearch" type="text" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="nfeNatureOptions" placeholder="Pesquisar natureza ou CFOP" aria-label="Pesquisar natureza da operação">
+                    <div class="nfe-nature-options" id="nfeNatureOptions" role="listbox" hidden></div>
+                    <span hidden style="display:none!important"><select name="operation_nature_id" id="nfeNature" required class="nfe-nature-native" tabindex="-1" aria-hidden="true" style="display:none!important">
                     <option value="">Selecione</option>
                     @foreach($natures as $nature)
                       <option value="{{ $nature->id }}" @selected((string)$nfeOld('operation_nature_id',$draft->operation_nature_id)===(string)$nature->id)>
                         {{ $nature->cfop_internal ? $nature->cfop_internal.' - ' : '' }}{{ $nature->name }}
                       </option>
                     @endforeach
-                  </select>
+                    </select></span>
+                  </div>
                   <a class="input-action-button" href="{{ route('fiscal.nfe.natures.index') }}" data-tooltip="Naturezas de Operação">
                     @include('partials.icon',['name'=>'settings','size'=>15])
                   </a>
@@ -213,6 +235,23 @@ $origins=[
                   <option value="delivery_home" @selected($nfeOld('presence',$draft->presence)==='delivery_home')>NFC-e em operação com entrega a domicílio</option>
                   <option value="outside_establishment" @selected($nfeOld('presence',$draft->presence)==='outside_establishment')>Operação presencial, fora do estabelecimento</option>
                   <option value="other" @selected($nfeOld('presence',$draft->presence)==='other')>Operação não presencial, outros</option>
+                </select>
+              </label>
+
+              <label class="field col-6">
+                <span>Operação fiscal</span>
+                <select name="fiscal_operation" id="nfeFiscalOperation">
+                  @foreach(['sale'=>'Venda','devolution'=>'Devolução','remittance'=>'Remessa para conserto/reparo','return_of_remittance'=>'Retorno de conserto/reparo','transfer'=>'Transferência','bonus'=>'Bonificação','gift'=>'Brinde','sample'=>'Amostra grátis','export'=>'Exportação direta','import'=>'Importação direta'] as $value=>$label)
+                    <option value="{{ $value }}" @selected($nfeOld('fiscal_operation',data_get($draft->custom_fields,'fiscal_operation','sale'))===$value)>{{ $label }}</option>
+                  @endforeach
+                </select>
+              </label>
+
+              <label class="field col-3">
+                <span>Consumidor final</span>
+                <select name="final_consumer" id="nfeFinalConsumer">
+                  <option value="0" @selected(!(bool)$nfeOld('final_consumer',$draft->final_consumer))>Não</option>
+                  <option value="1" @selected((bool)$nfeOld('final_consumer',$draft->final_consumer))>Sim</option>
                 </select>
               </label>
 
@@ -373,8 +412,7 @@ $origins=[
       </div>
     </section>
 
-    <section class="editor-tab-panel nfe-form-section cms-card" id="nfe-section-items">
-      <header class="card-header nfe-flow-heading"><div><h2>Produtos e valores</h2><p>Mercadorias, tributação e totais</p></div></header>
+    <section class="editor-tab-panel nfe-form-section cms-card" id="nfe-section-items" aria-label="Produtos e valores">
       <div class="cms-card">
         <div class="grid-actionbar">
           <div class="grid-actions-left">
@@ -397,24 +435,63 @@ $origins=[
       </div>
 
       <div class="editor-panel nfe-totals-panel">
-        <h3>Totais da nota</h3>
+        <h3>Totais da NF-e</h3>
         <div class="editor-grid cols-12 nfe-totals-grid">
           <div class="field col-2"><span>Produtos</span><div class="readonly-field" id="nfeTotalProducts">R$ 0,00</div></div>
           <div class="field col-2"><span>Frete</span><div class="readonly-field" id="nfeTotalFreight">R$ 0,00</div></div>
           <div class="field col-2"><span>Seguro</span><div class="readonly-field" id="nfeTotalInsurance">R$ 0,00</div></div>
           <div class="field col-2"><span>Despesas dos itens</span><div class="readonly-field" id="nfeTotalOtherExpenses">R$ 0,00</div></div>
-          <div class="field col-2"><span>IPI estimado</span><div class="readonly-field" id="nfeTotalIpi">R$ 0,00</div></div>
+          <div class="field col-2"><span>IPI</span><div class="readonly-field" id="nfeTotalIpi">—</div></div>
+          <div class="field col-2"><span>ICMS</span><div class="readonly-field" id="nfeTotalIcms">—</div></div>
+          <div class="field col-2"><span>ICMS ST</span><div class="readonly-field" id="nfeTotalIcmsSt">—</div></div>
+          <div class="field col-2"><span>FCP ST</span><div class="readonly-field" id="nfeTotalFcpSt">—</div></div>
+          <div class="field col-2"><span>FCP próprio</span><div class="readonly-field" id="nfeTotalFcp">—</div></div>
+          <div class="field col-2"><span>PIS</span><div class="readonly-field" id="nfeTotalPis">—</div></div>
+          <div class="field col-2"><span>COFINS</span><div class="readonly-field" id="nfeTotalCofins">—</div></div>
+          <div class="field col-2"><span>IBS estadual</span><div class="readonly-field" id="nfeTotalIbsUf">—</div></div>
+          <div class="field col-2"><span>IBS municipal</span><div class="readonly-field" id="nfeTotalIbsMunicipal">—</div></div>
+          <div class="field col-2"><span>CBS</span><div class="readonly-field" id="nfeTotalCbs">—</div></div>
           <div class="field col-2"><span>Desconto</span><div class="readonly-field" id="nfeTotalDiscount">R$ 0,00</div></div>
           <div class="field col-2"><span>Acréscimo</span><div class="readonly-field" id="nfeTotalSurcharge">R$ 0,00</div></div>
           <label class="field col-2"><span>Desconto da nota</span><input type="number" name="discount" id="nfeDiscount" step="0.01" min="0" value="{{ $nfeOld('discount',$draft->discount ?? 0) }}"></label>
           <label class="field col-2"><span>Acréscimo da nota</span><input type="number" name="surcharge" id="nfeSurcharge" step="0.01" min="0" value="{{ $nfeOld('surcharge',$draft->surcharge ?? 0) }}"></label>
           <div class="field col-2 nfe-total-final"><span>Total NF-e</span><div class="readonly-field"><strong id="nfeTotalInvoice">R$ 0,00</strong></div></div>
         </div>
+        <details>
+          <summary>Outros totalizadores fiscais</summary>
+          <div class="editor-grid cols-12">
+            @foreach(['nfeTotalSelective'=>'Imposto Seletivo','nfeTotalPisSt'=>'PIS ST','nfeTotalCofinsSt'=>'COFINS ST','nfeTotalIpiReturned'=>'IPI devolvido','nfeTotalIi'=>'Imposto de Importação','nfeTotalDesonerated'=>'ICMS desonerado','nfeTotalDesonerationDeduction'=>'Desoneração deduzida','nfeTotalIcmsCredit'=>'Crédito de ICMS','nfeTotalDifalDestination'=>'DIFAL destino','nfeTotalFcpDestination'=>'FCP destino','nfeTotalFcpRetained'=>'FCP ST retido anteriormente'] as $id=>$label)
+              <div class="field col-3"><span>{{ $label }}</span><div class="readonly-field" id="{{ $id }}">—</div></div>
+            @endforeach
+          </div>
+        </details>
+        <div id="nfeTaxPreviewStatus" role="status" aria-live="polite"></div>
+        <details id="nfeTaxPreviewErrors" hidden><summary>Ver pendências fiscais</summary><div id="nfeTaxPreviewErrorsBody"></div></details>
+        <details id="nfeAppliedRules" @if(!$draft->items->contains(fn($item)=>data_get($item->tax_data,'fiscal_rule_trace.id'))) hidden @endif>
+          <summary>Regras fiscais aplicadas</summary>
+          <div id="nfeAppliedRulesBody">
+            @foreach($draft->items as $item)
+              @php($trace=data_get($item->tax_data,'fiscal_rule_trace',[]))
+              @if(!empty($trace['id']))
+                <div>Item {{ $item->item_number }}: {{ data_get($trace,'snapshot.name','Regra fiscal') }}. {{ $trace['legal_reference']??'' }}
+                  CFOP {{ $item->cfop }}.
+                  @if(data_get($item->tax_data,'icms_csosn'))
+                    CSOSN {{ data_get($item->tax_data,'icms_csosn') }}.
+                  @elseif(data_get($item->tax_data,'icms_cst'))
+                    CST ICMS {{ data_get($item->tax_data,'icms_cst') }}.
+                  @endif
+                  @if(!empty($trace['overrides']))
+                    Existem valores informados manualmente. Confira os tributos deste item.
+                  @endif
+                </div>
+              @endif
+            @endforeach
+          </div>
+        </details>
       </div>
     </section>
 
-    <section class="editor-tab-panel nfe-form-section cms-card" id="nfe-section-payment">
-      <header class="card-header nfe-flow-heading"><div><h2>Pagamento</h2><p>Forma de pagamento e vencimentos</p></div></header>
+    <section class="editor-tab-panel nfe-form-section cms-card" id="nfe-section-payment" aria-label="Pagamento">
       <div class="editor-panel">
         <div class="editor-grid cols-12">
           <label class="field col-4"><span>Tipo de pagamento *</span>
@@ -526,8 +603,8 @@ $origins=[
       </div>
     </section>
 
-    <section class="editor-tab-panel nfe-form-section cms-card" id="nfe-section-transport">
-      <header class="card-header nfe-flow-heading"><div><h2>Transporte</h2><p>Frete, transportador e volumes</p></div></header>
+    <section class="editor-tab-panel nfe-form-section cms-card" id="nfe-section-transport" aria-label="Transporte">
+      @include('fiscal.nfe._foreign-trade-header')
       <div class="editor-panel">
         <h3>Transportadora e volumes</h3>
         <div class="editor-grid cols-12">
@@ -567,9 +644,8 @@ $origins=[
       </div>
     </section>
 
-    <section class="editor-tab-panel nfe-form-section cms-card" id="nfe-section-other">
-      <header class="card-header nfe-flow-heading"><div><h2>Informações adicionais</h2><p>Documentos referenciados e observações</p></div></header>
-      <div class="editor-panel">
+    <section class="editor-tab-panel nfe-form-section cms-card" id="nfe-section-other" aria-label="Informações adicionais">
+      <div class="editor-panel" id="nfeReferencedDocumentsPanel" @if(!$nfeOld('has_referenced_document',$draft->has_referenced_document || !empty($draft->references))) hidden @endif>
         <div class="delivery-card-title">
           <div><h3>Documentos referenciados</h3></div>
           <button type="button" class="btn btn-secondary" data-nfe-modal-open="nfeReferenceDialog">@include('partials.icon',['name'=>'plus','size'=>15]) Referenciar documento</button>
@@ -586,6 +662,10 @@ $origins=[
         <label class="field">
           <span>Informação adicional</span>
           <textarea name="additional_info" rows="3" placeholder="Observação da operação">{{ $nfeOld('additional_info',$draft->additional_info) }}</textarea>
+        </label>
+        <label class="field">
+          <span>Informações de interesse do Fisco</span>
+          <textarea name="tax_authority_info" rows="2" maxlength="2000">{{ $nfeOld('tax_authority_info',$draft->tax_authority_info) }}</textarea>
         </label>
 
       </div>
@@ -607,9 +687,9 @@ $origins=[
       @if($isEditing && $draft->status==='draft')
         <button class="btn btn-success" type="submit" form="nfeEmitForm" id="nfeSubmitEmission"
           @disabled(!$draftCanEmit)>Emitir NF-e</button>
-      @elseif($isEditing && ($draft->status==='prepared' || ($draft->status==='processing' && !$draft->transmission_attempted_at && ($draft->xml_path===null || $draft->xml_path==='fiscal/nfe55/'.$draft->id.'/signed.xml') && $draft->updated_at?->lt(now()->subMinutes(15)))))
+      @elseif($isEditing && ($draft->status==='prepared' || (in_array($draft->status,['queued','processing'],true) && !$draft->transmission_attempted_at && ($draft->xml_path===null || $draft->xml_path==='fiscal/nfe55/'.$draft->id.'/signed.xml') && $draft->updated_at?->lt(now()->subMinutes(15)))))
         <button class="btn btn-secondary" type="submit" form="nfeRetryForm">Tentar novamente</button>
-      @elseif($isEditing && in_array($draft->status,['pending','processing','rejected','authorized'],true))
+      @elseif($isEditing && in_array($draft->status,['pending','processing','rejected','authorized','cancelled'],true))
         <button class="btn btn-secondary" type="submit" form="nfeConsultForm">Consultar SEFAZ</button>
         @if($draft->xml_path)
           <a class="btn btn-secondary" href="{{ route('fiscal.nfe.xml',$draft) }}">Baixar XML</a>
@@ -618,7 +698,7 @@ $origins=[
           <a class="btn btn-secondary" href="{{ route('fiscal.nfe.danfe',$draft) }}" target="_blank" rel="noopener">Imprimir DANFE</a>
         @endif
       @endif
-      @if($isEditing && $draft->status==='authorized' && !$draft->cancellation_status && auth()->user()->canAccess('settings'))
+      @if($isEditing && $draft->status==='authorized' && (!$draft->cancellation_status || ($draft->cancellation_status==='prepared' && !$draft->cancellation_attempted_at)) && auth()->user()->canAccess('settings'))
         <button class="btn btn-secondary" type="button" data-nfe-modal-open="nfeCancelDialog"
           data-nfe-allow-readonly>Solicitar cancelamento</button>
       @endif
@@ -630,7 +710,7 @@ $origins=[
     Cancelamento: {{ match($draft->cancellation_status){
       'pending'=>'Solicitado','processing'=>'Aguardando resposta da SEFAZ',
       'authorized'=>'Autorizado','rejected'=>'Rejeitado',
-      'uncertain'=>'Conferência necessária',default=>'Em análise'} }}
+      'uncertain'=>'Conferência necessária','prepared'=>'Não enviado. É possível solicitar novamente.',default=>'Em análise'} }}
   </div>
 @endif
 @if($isEditing)
@@ -641,7 +721,7 @@ $origins=[
   </div>
 </div>
 
-@if($isEditing && $draft->status==='authorized' && !$draft->cancellation_status && auth()->user()->canAccess('settings'))
+@if($isEditing && $draft->status==='authorized' && (!$draft->cancellation_status || ($draft->cancellation_status==='prepared' && !$draft->cancellation_attempted_at)) && auth()->user()->canAccess('settings'))
 <div class="nextor-modal-layer nfe-modal-layer" id="nfeCancelDialog" data-nfe-modal aria-hidden="true" hidden>
   <div class="erp-dialog small-dialog nextor-modal-window nfe-small-modal-window" role="dialog"
        aria-modal="true" aria-labelledby="nfeCancelDialogTitle">
@@ -740,7 +820,7 @@ $origins=[
       </summary>
       <div class="nfe-item-section-content">
       <div class="editor-panel">
-        <h3>Identificação fiscal do produto</h3>
+        
         <div class="editor-grid cols-12">
           <label class="field col-3"><span>NCM *</span><input id="nfeItemNcm" maxlength="10"></label>
           <label class="field col-3"><span>CEST</span><input id="nfeItemCest" maxlength="10"></label>
@@ -760,28 +840,31 @@ $origins=[
       </div>
 
       <div class="editor-panel">
-        <h3>CFOP cadastrado no produto</h3>
+        <div class="nfe-item-inline-caption">CFOP cadastrado no produto</div>
         <div class="editor-grid cols-12">
           <label class="field col-3"><span>Saída interna</span><input id="nfeCfopOutboundInternal" maxlength="10"></label>
           <label class="field col-3"><span>Saída interestadual</span><input id="nfeCfopOutboundInterstate" maxlength="10"></label>
           <label class="field col-3"><span>Entrada interna</span><input id="nfeCfopInboundInternal" maxlength="10"></label>
           <label class="field col-3"><span>Entrada interestadual</span><input id="nfeCfopInboundInterstate" maxlength="10"></label>
+          <label class="field col-3"><span>Saída para exterior</span><input id="nfeCfopOutboundForeign" maxlength="4"></label>
+          <label class="field col-3"><span>Entrada do exterior</span><input id="nfeCfopInboundForeign" maxlength="4"></label>
         </div>
       </div>
 
       </div>
     </details>
 
-    <div class="editor-panel nfe-tax-review" aria-label="Resumo dos códigos tributários">
-      <div class="nfe-tax-review-heading"><h3>Tributação do item</h3><span>Confira os códigos antes de salvar</span></div>
-      <div class="nfe-tax-review-grid">
-        <button type="button" data-nfe-open-section="item-icms"><small>ICMS</small><strong id="nfeTaxSummaryIcms">Não informado</strong></button>
-        <button type="button" data-nfe-open-section="item-federal"><small>PIS</small><strong id="nfeTaxSummaryPis">Não informado</strong></button>
-        <button type="button" data-nfe-open-section="item-federal"><small>COFINS</small><strong id="nfeTaxSummaryCofins">Não informado</strong></button>
-        <button type="button" data-nfe-open-section="item-federal"><small>IPI</small><strong id="nfeTaxSummaryIpi">Não informado</strong></button>
-        <button type="button" data-nfe-open-section="item-ibscbs"><small>IBS / CBS</small><strong id="nfeTaxSummaryIbs">Não informado</strong></button>
+    <nav class="nfe-tax-review nfe-item-taxnav" aria-label="Detalhes e impostos do produto">
+      <div class="nfe-tax-review-grid" role="tablist" aria-label="Seções fiscais do item">
+        <button type="button" role="tab" data-nfe-open-section="item-general" data-nfe-tax-tab="item" aria-selected="true" aria-controls="nfeItemTaxPanel"><span>Dados do item</span></button>
+        <button type="button" role="tab" data-nfe-open-section="item-icms" data-nfe-tax-tab="icms" aria-selected="false" aria-controls="nfeItemTaxPanel"><span>ICMS</span><span id="nfeTaxSummaryIcms" class="nfe-tax-code">Não informado</span></button>
+        <button type="button" role="tab" data-nfe-open-section="item-federal" data-nfe-tax-tab="pis" aria-selected="false" aria-controls="nfeItemTaxPanel"><span>PIS</span><span id="nfeTaxSummaryPis" class="nfe-tax-code">Não informado</span></button>
+        <button type="button" role="tab" data-nfe-open-section="item-federal" data-nfe-tax-tab="cofins" aria-selected="false" aria-controls="nfeItemTaxPanel"><span>COFINS</span><span id="nfeTaxSummaryCofins" class="nfe-tax-code">Não informado</span></button>
+        <button type="button" role="tab" data-nfe-open-section="item-federal" data-nfe-tax-tab="ipi" aria-selected="false" aria-controls="nfeItemTaxPanel"><span>IPI</span><span id="nfeTaxSummaryIpi" class="nfe-tax-code">Não informado</span></button>
+        <button type="button" role="tab" data-nfe-open-section="item-ibscbs" data-nfe-tax-tab="ibscbs" aria-selected="false" aria-controls="nfeItemTaxPanel"><span>IBS / CBS</span><span id="nfeTaxSummaryIbs" class="nfe-tax-code">Não informado</span></button>
+        <button type="button" role="tab" data-nfe-open-section="item-specific" data-nfe-tax-tab="other" aria-selected="false" aria-controls="nfeItemTaxPanel"><span>Outros</span></button>
       </div>
-    </div>
+    </nav>
     <details class="editor-panel nfe-item-section" data-nfe-item-panel="item-icms" open>
       <summary class="nfe-item-section-heading">
         <span class="nfe-section-index">03</span>
@@ -805,13 +888,32 @@ $origins=[
 
           <label class="field col-3"><span>ICMS ST %</span><input id="nfeTaxIcmsStRate" type="number" step="0.0001"></label>
           <label class="field col-3"><span>MVA %</span><input id="nfeTaxMvaRate" type="number" step="0.0001"></label>
+          <label class="field col-3"><span>Base ICMS explícita</span><input id="nfeTaxIcmsBase" type="number" min="0" step="0.01"></label>
+          <label class="field col-3"><span>Diferimento %</span><input id="nfeTaxIcmsDeferment" type="number" min="0" max="100" step="0.0001"></label>
+          <label class="field col-3"><span>FCP próprio %</span><input id="nfeTaxOwnFcp" type="number" min="0" max="100" step="0.0001"></label>
+          <label class="field col-3"><span>Base ST antes da MVA</span><input id="nfeTaxStBase" type="number" min="0" step="0.01"></label>
+          <label class="field col-3"><span>Dedução do ICMS ST</span><input id="nfeTaxStDeduction" type="number" min="0" step="0.01"></label>
+          <label class="field col-3"><span>Redução da BC ST %</span><input id="nfeTaxStReduction" type="number" min="0" max="100" step="0.0001"></label>
+          <label class="field col-3"><span>FCP ST %</span><input id="nfeTaxStFcp" type="number" min="0" max="100" step="0.0001"></label>
+          <label class="field col-3"><span>ICMS desonerado</span><input id="nfeTaxDesonerationAmount" type="number" min="0" step="0.01"></label>
+          <label class="field col-3"><span>Motivo da desoneração (código)</span><input id="nfeTaxDesonerationReason" maxlength="2"></label>
+          <label class="field col-3"><span>Deduzir desoneração do total</span><select id="nfeTaxDesonerationDeduct"><option value="">Selecione</option><option value="0">Não</option><option value="1">Sim</option></select></label>
         </div>
+        <details class="nfe-retained-details">
+          <summary class="nfe-retained-heading"><span>ICMS e FCP retidos anteriormente — CST 60 / CSOSN 500</span><span class="nfe-retained-chevron" aria-hidden="true"></span></summary>
+          <div class="editor-grid cols-12">
+            <label class="field col-3"><span>Escopo dos valores documentados</span><select id="nfeTaxRetainedScope"><option value="">Selecione</option><option value="line">Total do item</option><option value="unit">Por unidade</option></select></label>
+            @foreach(['nfeTaxRetainedBase'=>'Base ST retida','nfeTaxRetainedRate'=>'Alíquota ST retida %','nfeTaxSubstitutorValue'=>'ICMS do substituto','nfeTaxRetainedValue'=>'ICMS ST retido','nfeTaxRetainedFcpBase'=>'Base FCP ST retido','nfeTaxRetainedFcpRate'=>'FCP ST retido %','nfeTaxRetainedFcpValue'=>'FCP ST retido','nfeTaxEffectiveBase'=>'Base ICMS efetivo','nfeTaxEffectiveRate'=>'ICMS efetivo %','nfeTaxEffectiveValue'=>'ICMS efetivo documentado','nfeTaxEffectiveReduction'=>'Redução BC efetiva %'] as $id=>$label)
+              <label class="field col-3"><span>{{ $label }}</span><input id="{{ $id }}" type="number" min="0" step="0.0001"></label>
+            @endforeach
+          </div>
+        </details>
       </div>
 
       </div>
     </details>
 
-    <details class="editor-panel nfe-item-section" data-nfe-item-panel="item-federal">
+    <details class="editor-panel nfe-item-section nfe-federal-section" data-nfe-item-panel="item-federal">
       <summary class="nfe-item-section-heading">
         <span class="nfe-section-index">04</span>
         <span class="nfe-section-label"><strong>PIS, COFINS e IPI</strong><small>Classificação tributária federal</small></span>
@@ -830,14 +932,27 @@ $origins=[
           <label class="field col-2"><span>IPI %</span><input id="nfeTaxIpiRate" type="number" step="0.0001"></label>
           <label class="field col-2"><span>CST IPI entrada</span><input id="nfeTaxIpiCstInbound" maxlength="4"></label>
 
-          <label class="field col-3"><span>Enquadramento IPI (cEnq)</span><input id="nfeTaxIpiEnq" maxlength="10" value="999"></label>
+          <label class="field col-3"><span>Enquadramento IPI (cEnq)</span><input id="nfeTaxIpiEnq" maxlength="3"></label>
           <label class="field col-3"><span>ISS %</span><input id="nfeTaxIssRate" type="number" step="0.0001"></label>
           <label class="field col-3"><span>Item lista de serviço</span><input id="nfeTaxServiceListCode"></label>
+          <label class="field col-3"><span>Modo PIS residual</span><select id="nfeTaxPisCalculationType"><option value="">Selecione quando aplicável</option><option value="percent">Percentual explícito</option></select></label>
+          <label class="field col-3"><span>Base PIS explícita</span><input id="nfeTaxPisBase" type="number" min="0" step="0.01"></label>
+          <label class="field col-3"><span>Modo COFINS residual</span><select id="nfeTaxCofinsCalculationType"><option value="">Selecione quando aplicável</option><option value="percent">Percentual explícito</option></select></label>
+          <label class="field col-3"><span>Base COFINS explícita</span><input id="nfeTaxCofinsBase" type="number" min="0" step="0.01"></label>
+          <label class="field col-3"><span>Quantidade PIS</span><input id="nfeTaxPisQuantity" type="number" min="0" step="0.0001"></label>
+          <label class="field col-3"><span>PIS por unidade (R$)</span><input id="nfeTaxPisUnitRate" type="number" min="0" step="0.0001"></label>
+          <label class="field col-3"><span>Quantidade COFINS</span><input id="nfeTaxCofinsQuantity" type="number" min="0" step="0.0001"></label>
+          <label class="field col-3"><span>COFINS por unidade (R$)</span><input id="nfeTaxCofinsUnitRate" type="number" min="0" step="0.0001"></label>
+          <label class="field col-3"><span>Quantidade IPI</span><input id="nfeTaxIpiQuantity" type="number" min="0" step="0.0001"></label>
+          <label class="field col-3"><span>IPI por unidade (R$)</span><input id="nfeTaxIpiUnitRate" type="number" min="0" step="0.0001"></label>
         </div>
       </div>
 
       </div>
     </details>
+
+    @include('fiscal.nfe._additional-federal-taxes',['ruleMode'=>false,'federalParameters'=>[]])
+    @include('fiscal.nfe._rtc-extra-fields',['ruleMode'=>false,'extraParameters'=>[]])
 
     <details class="editor-panel nfe-item-section" data-nfe-item-panel="item-difal">
       <summary class="nfe-item-section-heading">
@@ -847,12 +962,15 @@ $origins=[
       </summary>
       <div class="nfe-item-section-content">
       <div class="editor-panel">
-        <h3>ICMS destino / FCP</h3>
+        
 
         <div class="editor-grid cols-12">
           <label class="field col-4"><span>ICMS interestadual %</span><input id="nfeTaxInterstateRate" type="number" step="0.0001"></label>
           <label class="field col-4"><span>ICMS interno destino %</span><input id="nfeTaxInternalRate" type="number" step="0.0001"></label>
           <label class="field col-4"><span>FCP interestadual %</span><input id="nfeTaxFcpRate" type="number" step="0.0001"></label>
+          <label class="field col-4"><span>Base DIFAL destino</span><input id="nfeTaxDifalBase" type="number" min="0" step="0.01"></label>
+          <label class="field col-4"><span>Base FCP destino</span><input id="nfeTaxDifalFcpBase" type="number" min="0" step="0.01"></label>
+          <label class="field col-4"><span>Partilha de destino %</span><input id="nfeTaxDifalShare" type="number" min="0" max="100" step="0.0001"></label>
         </div>
       </div>
 
@@ -867,7 +985,7 @@ $origins=[
       </summary>
       <div class="nfe-item-section-content">
       <div class="editor-panel">
-        <h3>Combustível / ANP</h3>
+        
         <div class="editor-grid cols-12">
           <div class="field col-3"><span>Derivado de petróleo?</span>
             <label class="switch-field"><input type="checkbox" id="nfeSpecialPetroleum"><span class="switch-track"></span><strong data-switch-label>Sim</strong></label>
@@ -882,7 +1000,7 @@ $origins=[
       </div>
 
       <div class="editor-panel">
-        <h3>Lote e produto específico</h3>
+        <div class="nfe-item-inline-caption">Lote e produto específico</div>
         <div class="editor-grid cols-12">
           <label class="field col-3"><span>Lote</span><input id="nfeSpecialBatch"></label>
           <label class="field col-3"><span>Vencimento</span><input id="nfeSpecialExpiry" type="date"></label>
@@ -898,6 +1016,8 @@ $origins=[
       </div>
     </details>
 
+    @include('fiscal.nfe._foreign-trade-item')
+
     <details class="editor-panel nfe-item-section" data-nfe-item-panel="item-ibscbs">
       <summary class="nfe-item-section-heading">
         <span class="nfe-section-index">07</span>
@@ -911,6 +1031,7 @@ $origins=[
           <label class="field col-3"><span>CST IBS</span><input id="nfeTaxIbsCst"></label>
           <label class="field col-3"><span>CST CBS</span><input id="nfeTaxCbsCst"></label>
           <label class="field col-6"><span>Classificação tributária</span><input id="nfeTaxClassification"></label>
+          <label class="field col-4"><span>Base IBS/CBS final explícita</span><input id="nfeTaxIbsCbsBase" type="number" min="0" step="0.01"></label>
           <label class="field col-4"><span>Alíquota IBS estadual %</span><input id="nfeIbsUfRate" type="number" min="0" step="0.0001"></label>
           <label class="field col-4"><span>Alíquota IBS municipal %</span><input id="nfeIbsMunicipalRate" type="number" min="0" step="0.0001"></label>
           <label class="field col-4"><span>Alíquota CBS %</span><input id="nfeCbsRate" type="number" min="0" step="0.0001"></label>
@@ -982,11 +1103,14 @@ $origins=[
 <script type="application/json" id="nfe-customers-data">@json($customerData)</script>
 <script type="application/json" id="nfe-natures-data">@json($natureData)</script>
 <script type="application/json" id="nfe-tax-defaults-data">@json($taxDefaults)</script>
+<script type="application/json" id="nfe-stored-totals-data">@json($displayTotals)</script>
 <script type="application/json" id="nfe-emitter-state">@json($company->state)</script>
+<script type="application/json" id="nfe-emitter-crt">@json($company->crt)</script>
 @endsection
 
 @push('scripts')
 <script src="{{ asset('js/nfe-editor.js') }}?v={{ filemtime(public_path('js/nfe-editor.js')) }}"></script>
+<script src="{{ asset('js/nfe-form-structure.js') }}?v={{ filemtime(public_path('js/nfe-form-structure.js')) }}"></script>
 @if($isEditing)
 <script>
 document.addEventListener('DOMContentLoaded',()=>{

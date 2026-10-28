@@ -1,0 +1,5 @@
+# Catalog checksums must remain identical on Windows/Laragon and Linux.
+resources/fiscal/catalog/*.json text eol=lf
+resources/fiscal/rejections/*.json text eol=lf
+resources/fiscal/sources/*.txt -text
+resources/fiscal/sources/*.xlsx binary

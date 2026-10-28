@@ -1,0 +1,238 @@
+{
+  "scope": "Fiscal screens and contextual quick catalog; integration with shared UI maintained by the root agent.",
+  "branch": "feature/nfe55-motor-fiscal-completo",
+  "baseline": "5e81321",
+  "date": "2026-10-26",
+  "review_method": [
+    "Repository-wide fiscal Blade/inline-style/component scan",
+    "Owned CSS cascade and duplicate-declaration inspection",
+    "Targeted presentation and fiscal workflow tests",
+    "Browser validation recorded separately by visual_browser_matrix agent"
+  ],
+  "reviewed_files": [
+    "resources/views/fiscal/_catalog-review.blade.php",
+    "resources/views/fiscal/_nav.blade.php",
+    "resources/views/fiscal/catalog/index.blade.php",
+    "resources/views/fiscal/fcp/index.blade.php",
+    "resources/views/fiscal/index.blade.php",
+    "resources/views/fiscal/nfce/_readonly_panels.blade.php",
+    "resources/views/fiscal/nfce/correct-rejection.blade.php",
+    "resources/views/fiscal/nfce/create.blade.php",
+    "resources/views/fiscal/nfce/inutilizations.blade.php",
+    "resources/views/fiscal/nfce-danfe-wait.blade.php",
+    "resources/views/fiscal/nfce-danfe.blade.php",
+    "resources/views/fiscal/nfe/_additional-federal-taxes.blade.php",
+    "resources/views/fiscal/nfe/_document_rows.blade.php",
+    "resources/views/fiscal/nfe/_foreign-trade-header.blade.php",
+    "resources/views/fiscal/nfe/_foreign-trade-item.blade.php",
+    "resources/views/fiscal/nfe/_nature_form.blade.php",
+    "resources/views/fiscal/nfe/_rtc-extra-fields.blade.php",
+    "resources/views/fiscal/nfe/drafts.blade.php",
+    "resources/views/fiscal/nfe/editor.blade.php",
+    "resources/views/fiscal/nfe/inutilizations.blade.php",
+    "resources/views/fiscal/nfe/natures.blade.php",
+    "resources/views/fiscal/partials/readable-values.blade.php",
+    "resources/views/fiscal/partials/sefaz-guidance.blade.php",
+    "resources/views/fiscal/purchases/index.blade.php",
+    "resources/views/fiscal/purchases/show.blade.php",
+    "resources/views/fiscal/rules/_fields.blade.php",
+    "resources/views/fiscal/rules/index.blade.php",
+    "resources/views/fiscal/show.blade.php",
+    "resources/views/fiscal/tax-groups/_advanced.blade.php",
+    "resources/views/fiscal/tax-groups/form.blade.php",
+    "resources/views/fiscal/tax-groups/index.blade.php",
+    "resources/views/partials/quick-catalog.blade.php",
+    "public/css/nfe-form-workflow.css",
+    "public/css/quick-catalog.css",
+    "public/css/fiscal-purchases.css",
+    "public/css/fiscal-workspace.css"
+  ],
+  "reviewed_file_count": 36,
+  "reviewed_markup_lines": 4693,
+  "modified_files": [
+    "public/css/fiscal-purchases.css",
+    "public/css/nfe-form-workflow.css",
+    "public/css/quick-catalog.css",
+    "resources/views/fiscal/catalog/index.blade.php",
+    "resources/views/fiscal/fcp/index.blade.php",
+    "resources/views/fiscal/index.blade.php",
+    "resources/views/fiscal/nfce/inutilizations.blade.php",
+    "resources/views/fiscal/nfe/inutilizations.blade.php",
+    "resources/views/fiscal/rules/_fields.blade.php",
+    "resources/views/fiscal/rules/index.blade.php",
+    "resources/views/fiscal/show.blade.php",
+    "resources/views/fiscal/tax-groups/_advanced.blade.php",
+    "resources/views/fiscal/tax-groups/form.blade.php",
+    "resources/views/fiscal/tax-groups/index.blade.php",
+    "resources/views/partials/quick-catalog.blade.php",
+    "tests/Feature/NfeEditorTest.php",
+    "public/css/fiscal-workspace.css"
+  ],
+  "finding_count": 11,
+  "corrected_count": 11,
+  "findings": [
+    {
+      "id": "VF-01",
+      "severity": "high",
+      "component": "NF-e editor",
+      "problem": "NF-e had its own green header, buttons, tabs, field borders and footer overriding shared ERP components.",
+      "correction": "Removed the separate skins; shared component stylesheet now controls appearance. Existing field IDs, conditional visibility, submit actions and validation remain intact.",
+      "status": "implemented; browser validation in shared matrix"
+    },
+    {
+      "id": "VF-02",
+      "severity": "medium",
+      "component": "NF-e fields",
+      "problem": "Several repeated control declarations fixed dimensions or small type locally.",
+      "correction": "Removed generic input/select/button appearance overrides and used shared height, border and typography tokens for domain-specific read-only fields.",
+      "status": "implemented; browser validation in shared matrix"
+    },
+    {
+      "id": "VF-03",
+      "severity": "medium",
+      "component": "NF-e sections",
+      "problem": "Historic append-only rules repeated or overrode the same selectors and properties.",
+      "correction": "Removed shadowed declarations within the same media scope, retaining form grids, disclosure geometry and mobile variants.",
+      "status": "implemented; browser validation in shared matrix"
+    },
+    {
+      "id": "VF-04",
+      "severity": "high",
+      "component": "Quick catalog modal",
+      "problem": "Two competing modal implementations defined different widths, radii, overflow behavior, headers and control heights.",
+      "correction": "Removed the obsolete skin and retained a single viewport-bounded editor grid; central dialog/header/footer/control styling is inherited.",
+      "status": "implemented; browser validation in shared matrix"
+    },
+    {
+      "id": "VF-05",
+      "severity": "medium",
+      "component": "Quick catalog actions",
+      "problem": "New-registration action used a module-specific visual button.",
+      "correction": "Added shared btn btn-secondary classes without changing its ID or event handler.",
+      "status": "implemented; browser validation in shared matrix"
+    },
+    {
+      "id": "VF-06",
+      "severity": "medium",
+      "component": "Quick catalog search",
+      "problem": "Result rows and search popovers mixed 36/37px rows, 11px detail text and hardcoded control radius/focus.",
+      "correction": "Standardized minimum result height and readable typography using shared tokens; preserved yellow result focus, top-layer positioning and keyboard behavior.",
+      "status": "implemented; browser validation in shared matrix"
+    },
+    {
+      "id": "VF-07",
+      "severity": "medium",
+      "component": "Fiscal purchases",
+      "problem": "Manifestation selectors were 30px high with 3px corners and 11px text, unlike equivalent ERP fields.",
+      "correction": "Selectors use the shared 38px height, 4px radius and 13.5px font; disabled/focus and manifestation confirmation behavior remain.",
+      "status": "implemented; browser validation in shared matrix"
+    },
+    {
+      "id": "VF-08",
+      "severity": "medium",
+      "component": "Fiscal purchases actions",
+      "problem": "Table action icons were 28px while standard icon buttons are 32px; superseded minimum widths impeded layout.",
+      "correction": "Use shared icon-button size and remove superseded manifestation widths while keeping document table scrolling inside its container.",
+      "status": "implemented; browser validation in shared matrix"
+    },
+    {
+      "id": "VF-09",
+      "severity": "medium",
+      "component": "Fiscal configuration and lists",
+      "problem": "Inline layout styles were repeated across configuration, tax groups, rules, FCP, cancellation and inutilization views.",
+      "correction": "Moved 27 inline style attributes and the catalog inline style block into fiscal-workspace.css without transferring generic component skins.",
+      "status": "implemented; browser validation in shared matrix"
+    },
+    {
+      "id": "VF-10",
+      "severity": "medium",
+      "component": "Fiscal catalog filters",
+      "problem": "Filter-submit height was 36px while adjacent inputs use 38px.",
+      "correction": "Shared field-height token aligns action with neighboring fields; responsive filter grid is preserved.",
+      "status": "implemented; browser validation in shared matrix"
+    },
+    {
+      "id": "VF-11",
+      "severity": "medium",
+      "component": "NF-e item heading",
+      "problem": "Item total labels had a fixed dark foreground within the shared colored dialog header.",
+      "correction": "Use inherited header foreground for total labels and amounts to preserve contrast.",
+      "status": "implemented; browser validation in shared matrix"
+    }
+  ],
+  "inline_style_attributes": {
+    "before": 27,
+    "after": 0,
+    "print_views_excluded": true
+  },
+  "stylesheet_line_counts": {
+    "public/css/nfe-form-workflow.css": {
+      "before": 1028,
+      "after": 744
+    },
+    "public/css/quick-catalog.css": {
+      "before": 457,
+      "after": 234
+    },
+    "public/css/fiscal-purchases.css": {
+      "before": 101,
+      "after": 94
+    },
+    "public/css/fiscal-workspace.css": {
+      "before": 0,
+      "after": 16
+    }
+  },
+  "tests": [
+    {
+      "command": "vendor/bin/phpunit --filter=NfeEditorTest|QuickCatalogTest|FiscalPurchasesTest|FiscalPurchasesManifestationTest|CommercialFiscalPresentationTest|FiscalConciseLayoutTest",
+      "runtime": "PHP 8.5.12, Docker composer:2",
+      "tests": 63,
+      "assertions": 588,
+      "failures": 0,
+      "errors": 0,
+      "duration_seconds": 12.229,
+      "evidence_log": "/workspace/scratch/visual-fiscal-tests.log",
+      "evidence_junit": "/workspace/scratch/visual-fiscal-tests.xml"
+    },
+    {
+      "check": "Owned stylesheet lexical balance",
+      "files": 4,
+      "result": "passed"
+    },
+    {
+      "check": "git diff --check (owned paths)",
+      "result": "passed"
+    }
+  ],
+  "deliberate_variants": [
+    {
+      "component": "Fiscal print/DANFE",
+      "reason": "Regulated print geometry is preserved, including nfce-danfe.blade.php and nfce-danfe-wait.blade.php."
+    },
+    {
+      "component": "NF-e section grid/disclosures/item editor",
+      "reason": "Domain-specific field layout is retained; component appearance is shared."
+    },
+    {
+      "component": "Quick catalog modal",
+      "reason": "820px maximum width and viewport-bounded internal scroll are a functional editor size, not a separate visual skin."
+    },
+    {
+      "component": "Fiscal purchases table",
+      "reason": "Document columns keep a 950px minimum width within .table-scroll to prevent key, currency and action clipping; horizontal scroll remains contained."
+    },
+    {
+      "component": "Search results",
+      "reason": "Two-line suggestions grow naturally beyond the shared minimum height; yellow focus state and keyboard interactions are preserved."
+    },
+    {
+      "component": "Switches/chevrons/badges",
+      "reason": "Functional circular/indicator geometry is intentionally preserved."
+    }
+  ],
+  "business_changes": "None: no fiscal calculations, controllers, services, emission JS, credentials or authorized-document data changed.",
+  "remaining_validation": [
+    "Shared browser matrix and full-suite evidence are consolidated by the root agent; this report does not claim fiscal homologation."
+  ]
+}

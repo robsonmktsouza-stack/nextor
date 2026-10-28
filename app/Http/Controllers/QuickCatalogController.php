@@ -40,7 +40,9 @@ class QuickCatalogController extends Controller
             $this->allowCreate($request,'products');
             // O formulário apresenta máscaras legíveis, mas os documentos
             // fiscais são persistidos apenas com seus algarismos.
-            $this->normalizeDigits($request,['ncm','cest','ean_gtin']);
+            $request->merge(app(\App\Services\Fiscal\FiscalProductClassificationService::class)
+                ->validate($request->only(['ncm','cest'])));
+            $this->normalizeDigits($request,['ean_gtin']);
             $data=$request->validate([
                 'name'=>['required','string','min:2','max:190'],
                 'sku'=>['nullable','string','max:80','unique:products,sku'],

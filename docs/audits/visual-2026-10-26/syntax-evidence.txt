@@ -1,0 +1,14 @@
+Final syntax validation: PASS
+Baseline: 5e81321bc7f2b2e1f4fc5771ca7bde3ae5080ac6
+Tested application commit: 7a6e5eb199a48cbb9a5bf693935827104186b21e
+PHP 8.5.12: 450 source files checked; 0 failures.
+Blade: 85 templates compiled and linted; 0 failures.
+Node v24.19.0: 17 public JavaScript files checked; 0 failures.
+Application total: 552 files.
+Visual-audit tooling: 2 PHP, 5 MJS, 1 Python sources checked; 0 failures.
+Final tool sources rechecked after evidence generation; SHA-256 snapshots in syntax.json.
+Committed and uncommitted business source changes (app/config/database/routes/bootstrap/public/js): 0.
+Dedicated print templates changed: 0/4.
+git diff --check: PASS.
+No full test suite or browser validation claimed by this syntax evidence.
+Final CSS application commit: 8474fda3fb7e42d5e77edd6bdb659a0588b239e1; unchanged PHP/Blade/public JavaScript since7a6e5eb.

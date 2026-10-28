@@ -1,0 +1,693 @@
+/*
+ * Lumeron ERP / NF-e — interface desktop unificada.
+ * Sem cartões aninhados, cores de imposto ou regras visuais em cascata no Blade.
+ * Os controles e a lógica fiscal permanecem nos componentes originais.
+ */
+#nfeEditorDialog,#nfeItemDialog{
+  --nf-accent:#176a9e;
+  --nf-accent-soft:#eaf4fb;
+  --nf-ink:#243746;
+  --nf-label:#536576;
+  --nf-muted:#748391;
+  --nf-rule:#dce4ea;
+  --nf-border:#c6d1da;
+  --nf-background:#fff;
+  --nf-neutral:#f6f8fa;
+  --nf-header:#edf2f6;
+  --nf-control-height:34px;
+  font-family:Roboto,Arial,sans-serif;
+}
+/* Janela de trabalho: cabeçalho e ações fixos; apenas o formulário rola. */
+#nfeEditorDialog .nfe-workspace-dialog{
+  width:min(1420px,calc(100vw - 28px))!important;
+  max-width:none!important;
+  height:calc(100dvh - 28px)!important;
+  max-height:calc(100dvh - 28px)!important;
+  min-height:0!important;
+  overflow:hidden!important;
+  display:flex!important;
+  flex-direction:column!important;
+  background:var(--nf-background)!important;
+  border:1px solid var(--nf-border)!important;
+  border-radius:4px!important;
+  box-shadow:0 10px 25px #172b3a25!important;
+}
+#nfeEditorDialog #nfeDraftForm{
+  height:100%!important;
+  min-height:0!important;
+  flex:1 1 auto!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+}
+#nfeEditorDialog #nfeDraftForm>.dialog-header,
+#nfeEditorDialog #nfeDraftForm>.nfe-dialog-footer{flex:0 0 auto!important}
+#nfeEditorDialog #nfeDraftForm>.nfe-workspace-body{
+  min-height:0!important;
+  flex:1 1 auto!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  scrollbar-gutter:stable;
+  background:#fff!important;
+  padding:0 22px 19px!important;
+}
+#nfeEditorDialog .dialog-header,
+#nfeItemDialog .dialog-header{
+  background:#fff!important;
+  color:var(--nf-ink)!important;
+  border:0!important;
+  border-bottom:1px solid var(--nf-rule)!important;
+  box-shadow:none!important;
+  min-height:57px!important;
+  padding:10px 20px!important;
+}
+#nfeEditorDialog .dialog-header h2,
+#nfeItemDialog .dialog-header h2{
+  margin:0!important;
+  font-size:16px!important;
+  font-weight:700!important;
+  letter-spacing:0!important;
+  color:var(--nf-ink)!important;
+  line-height:1.25!important;
+}
+#nfeEditorDialog .nfe-editor-document-meta{
+  display:flex;align-items:center;flex-wrap:wrap;gap:5px 11px;
+  margin-top:5px;font-size:11px;color:var(--nf-muted);
+}
+#nfeEditorDialog .nfe-editor-status{
+  padding:2px 7px;
+  border:1px solid var(--nf-rule);
+  color:#536b7a;
+  background:var(--nf-neutral);
+  border-radius:2px;
+  font-weight:700;
+}
+#nfeEditorDialog .dialog-footer,
+#nfeItemDialog .dialog-footer{
+  min-height:56px!important;
+  background:var(--nf-neutral)!important;
+  border-top:1px solid var(--nf-rule)!important;
+  padding:9px 18px!important;
+  box-shadow:none!important;
+  gap:8px!important;
+}
+#nfeEditorDialog .dialog-footer .btn,
+#nfeItemDialog .dialog-footer .btn{border-radius:3px!important;box-shadow:none!important;font-weight:600!important}
+#nfeEditorDialog .dialog-footer .btn-primary,
+#nfeItemDialog .dialog-footer .btn-success{
+  background:var(--nf-accent)!important;
+  border-color:var(--nf-accent)!important;
+  color:#fff!important;
+}
+/* Navegação principal em linha, sem botões coloridos, efeitos ou cartões. */
+#nfeEditorDialog .nfe-flow-nav{
+  position:sticky!important;top:0!important;z-index:25!important;
+  display:flex!important;flex-wrap:nowrap!important;align-items:stretch!important;
+  gap:1px!important;overflow:auto hidden!important;
+  min-height:44px!important;
+  padding:0 5px!important;
+  margin:0 -22px 20px!important;
+  border:0!important;border-bottom:1px solid var(--nf-rule)!important;
+  border-radius:0!important;
+  background:var(--nf-neutral)!important;box-shadow:none!important;
+}
+#nfeEditorDialog .nfe-flow-nav>.editor-tab{
+  flex:0 0 auto!important;
+  min-height:44px!important;height:44px!important;
+  white-space:nowrap!important;
+  margin:0!important;padding:0 15px!important;
+  background:transparent!important;
+  border:0!important;border-bottom:3px solid transparent!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  color:#607484!important;
+  font-size:12px!important;font-weight:600!important;letter-spacing:0!important;
+  transform:none!important;
+}
+#nfeEditorDialog .nfe-flow-nav>.editor-tab:hover{color:#205f88!important;background:#edf4f8!important}
+#nfeEditorDialog .nfe-flow-nav>.editor-tab.active,
+#nfeEditorDialog .nfe-flow-nav>.editor-tab[aria-selected=true]{
+  color:#0e669c!important;background:#fff!important;
+  border-bottom-color:var(--nf-accent)!important;
+  box-shadow:none!important;
+}
+/* Tipografia e campos — uma única densidade no editor inteiro. */
+#nfeEditorDialog .nfe-workspace-body .field,
+#nfeItemDialog .nfe-item-body .field{min-width:0;max-width:100%;margin:0}
+#nfeEditorDialog .nfe-workspace-body .field>span,
+#nfeItemDialog .nfe-item-body .field>span{
+  display:block;
+  margin:0 0 5px!important;
+  padding:0!important;
+  color:var(--nf-label)!important;
+  font-size:11px!important;
+  font-weight:600!important;
+  line-height:1.35!important;
+  min-height:0!important;
+  white-space:normal;
+}
+#nfeEditorDialog .nfe-workspace-body .field :is(input:not([type=checkbox]):not([type=radio]):not([type=hidden]),select,textarea,.ui-select-trigger),
+#nfeItemDialog .nfe-item-body .field :is(input:not([type=checkbox]):not([type=radio]):not([type=hidden]),select,textarea,.ui-select-trigger){
+  box-sizing:border-box!important;max-width:100%;min-width:0;
+  min-height:var(--nf-control-height)!important;
+  border:1px solid var(--nf-border)!important;
+  border-radius:3px!important;
+  background:#fff!important;color:var(--nf-ink)!important;
+  box-shadow:none!important;
+  font-size:12px!important;
+}
+#nfeEditorDialog .nfe-workspace-body .field :is(input,select,textarea,.ui-select-trigger):focus,
+#nfeItemDialog .nfe-item-body .field :is(input,select,textarea,.ui-select-trigger):focus{
+  border-color:var(--nf-accent)!important;
+  outline:2px solid #d7ebf8!important;
+  outline-offset:0!important;
+  box-shadow:none!important;
+}
+#nfeEditorDialog .nfe-workspace-body :is(.readonly-field,input[readonly]),
+#nfeItemDialog .nfe-item-body :is(.readonly-field,input[readonly]){
+  background:#f4f7f9!important;color:#526776!important;
+  border-color:#dfe5eb!important;box-shadow:none!important;
+}
+#nfeEditorDialog .nfe-form-section,
+#nfeEditorDialog .nfe-form-section.cms-card{
+  display:block;min-width:0;overflow:visible!important;
+  margin:0!important;padding:0!important;
+  border:0!important;box-shadow:none!important;
+  background:transparent!important;
+}
+#nfeEditorDialog .nfe-form-section[hidden]{display:none!important}
+#nfeEditorDialog .nfe-form-section>:is(.editor-panel,.cms-card,.nfe-general-card,.nfe-emitter-summary),
+#nfeEditorDialog .nfe-form-section .notes-panel{
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  padding:0 0 16px!important;
+  margin:0 0 17px!important;
+  min-width:0;
+  width:100%;
+  border-bottom:1px solid var(--nf-rule)!important;
+}
+#nfeEditorDialog .nfe-form-section>:last-child{border-bottom:0!important}
+#nfeEditorDialog .nfe-emitter-summary{
+  display:flex!important;
+  align-items:center!important;
+  gap:14px!important;
+  border:1px solid var(--nf-rule)!important;
+  background:#f9fbfc!important;
+  border-radius:3px!important;
+  padding:10px 13px!important;
+  margin-bottom:18px!important;
+}
+#nfeEditorDialog .nfe-emitter-logo{width:50px!important;min-width:50px!important}
+#nfeEditorDialog .nfe-emitter-logo img{max-height:45px!important;max-width:50px!important;object-fit:contain}
+#nfeEditorDialog .nfe-emitter-identity{min-width:0}
+#nfeEditorDialog .nfe-emitter-name strong{font-size:13px!important;color:var(--nf-ink)}
+#nfeEditorDialog .nfe-emitter-docs,
+#nfeEditorDialog .nfe-emitter-address{font-size:11px!important;line-height:1.4!important;color:var(--nf-muted)}
+#nfeEditorDialog .nfe-document-summary{
+  min-width:145px!important;max-width:165px!important;
+  padding:8px 10px!important;margin-left:auto!important;
+  border:1px solid var(--nf-rule)!important;
+  background:#fff!important;border-radius:3px!important;box-shadow:none!important;
+}
+#nfeEditorDialog .nfe-document-summary>strong{font-size:13px!important;color:var(--nf-ink)!important}
+/* Opções e datas ficam dentro do mesmo formulário, não em painéis coloridos. */
+#nfeEditorDialog .nfe-general-card{overflow:visible!important}
+#nfeEditorDialog .nfe-general-actions{min-height:23px!important;margin:0 0 6px!important}
+#nfeEditorDialog .nfe-general-layout{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 245px!important;
+  gap:20px!important;
+  border:0!important;align-items:start!important;
+}
+#nfeEditorDialog .nfe-general-fields{min-width:0!important;padding:0!important}
+#nfeEditorDialog .nfe-general-dates{
+  align-self:start!important;
+  background:#f7f9fb!important;
+  border:1px solid var(--nf-rule)!important;
+  padding:12px!important;
+  border-radius:3px!important;
+}
+#nfeEditorDialog .nfe-general-dates .nfe-standalone-title{margin-bottom:10px!important}
+#nfeEditorDialog .nfe-general-dates>.field{margin-bottom:10px!important}
+#nfeEditorDialog .nfe-general-dates>.field:last-child{margin-bottom:0!important}
+/* Combobox de natureza: select nativo segue sendo a origem do dado. */
+#nfeEditorDialog .input-action-group:has(.nfe-nature-combobox){
+  display:flex!important;align-items:stretch!important;gap:0!important;width:100%!important;
+}
+#nfeEditorDialog .nfe-nature-combobox{
+  position:relative!important;display:block!important;
+  flex:1 1 0!important;min-width:0!important;max-width:none!important;
+}
+#nfeEditorDialog select#nfeNature{
+  display:none!important;position:absolute!important;width:1px!important;
+  height:1px!important;opacity:0!important;pointer-events:none!important;
+}
+#nfeEditorDialog .nfe-nature-combobox input#nfeNatureSearch{
+  display:block!important;width:100%!important;height:34px!important;min-height:34px!important;
+  padding:0 9px!important;margin:0!important;background:#fff!important;
+  border:1px solid var(--nf-border)!important;border-radius:3px 0 0 3px!important;
+}
+#nfeEditorDialog .input-action-group:has(.nfe-nature-combobox)>.input-action-button{
+  width:36px!important;min-width:36px!important;height:34px!important;
+  min-height:34px!important;flex:0 0 36px!important;
+  border:1px solid var(--nf-border)!important;border-left:0!important;
+  border-radius:0 3px 3px 0!important;background:#f8fafb!important;
+}
+#nfeEditorDialog .nfe-nature-options{
+  position:absolute!important;z-index:200!important;
+  left:0;right:0;top:calc(100% + 2px);
+  max-height:220px;overflow:auto;
+  background:#fff;border:1px solid var(--nf-border);
+  border-radius:3px;box-shadow:0 8px 20px #1d34451f;
+}
+#nfeEditorDialog .nfe-nature-options[hidden]{display:none!important}
+#nfeEditorDialog .nfe-nature-option{
+  display:block;width:100%;text-align:left;border:0;
+  padding:9px 11px;background:#fff;color:var(--nf-ink);
+  font-size:12px;cursor:pointer;
+}
+#nfeEditorDialog .nfe-nature-option:hover,
+#nfeEditorDialog .nfe-nature-option[aria-selected=true]{
+  background:var(--nf-accent-soft);color:#105c8e;
+}
+#nfeEditorDialog .nfe-nature-empty{padding:12px;color:var(--nf-muted)}
+/* Grupos: linhas e colunas, sem bloco desenhado em volta de cada assunto. */
+#nfeEditorDialog .nfe-structured-grid,
+#nfeItemDialog .nfe-structured-grid{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  column-gap:23px!important;row-gap:12px!important;align-items:start!important;
+}
+#nfeEditorDialog .nfe-structured-grid>.nfe-field-group,
+#nfeItemDialog .nfe-structured-grid>.nfe-field-group{
+  grid-column:auto!important;
+  min-width:0!important;
+  margin:0!important;
+}
+#nfeEditorDialog .nfe-field-group,
+#nfeItemDialog .nfe-field-group{
+  min-width:0;
+  border:0!important;border-bottom:1px solid #e5eaee!important;
+  border-radius:0!important;
+  background:transparent!important;box-shadow:none!important;
+  padding:0 0 11px!important;
+}
+#nfeEditorDialog .nfe-field-group-heading,
+#nfeItemDialog .nfe-field-group-heading{
+  display:flex;align-items:baseline;flex-wrap:wrap;gap:5px 10px;
+  min-height:26px!important;
+  margin:0 0 5px!important;padding:0 0 8px!important;
+  border:0!important;border-bottom:1px solid var(--nf-rule)!important;
+  background:transparent!important;
+  color:#31556f!important;
+}
+#nfeEditorDialog .nfe-field-group-heading strong,
+#nfeItemDialog .nfe-field-group-heading strong{
+  color:#31556f!important;font-weight:700!important;font-size:12px!important;line-height:1.3!important;
+}
+#nfeEditorDialog .nfe-field-group-heading small,
+#nfeItemDialog .nfe-field-group-heading small{
+  color:var(--nf-muted)!important;font-size:10.5px!important;line-height:1.3!important;font-weight:400!important;
+}
+/* Indicador discreto para blocos fiscais realmente expansíveis. */
+#nfeEditorDialog details.nfe-field-group>.nfe-field-group-heading,
+#nfeItemDialog details.nfe-field-group>.nfe-field-group-heading{
+  position:relative;cursor:pointer;
+  padding-right:22px!important;list-style:none;
+}
+#nfeEditorDialog details.nfe-field-group>.nfe-field-group-heading::-webkit-details-marker,
+#nfeItemDialog details.nfe-field-group>.nfe-field-group-heading::-webkit-details-marker{display:none}
+#nfeEditorDialog details.nfe-field-group>.nfe-field-group-heading:after,
+#nfeItemDialog details.nfe-field-group>.nfe-field-group-heading:after{
+  content:"";position:absolute;right:5px;top:6px;width:7px;height:7px;
+  border-right:1.5px solid #697e8b;border-bottom:1.5px solid #697e8b;
+  transform:rotate(45deg);
+}
+#nfeEditorDialog details.nfe-field-group[open]>.nfe-field-group-heading:after,
+#nfeItemDialog details.nfe-field-group[open]>.nfe-field-group-heading:after{
+  top:11px;transform:rotate(225deg);
+}
+#nfeItemDialog .nfe-retained-heading{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;
+}
+#nfeItemDialog .nfe-retained-chevron{
+  flex:0 0 7px;width:7px;height:7px;margin-right:4px;
+  border-right:1.5px solid #697e8b;border-bottom:1.5px solid #697e8b;
+  transform:rotate(45deg);
+}
+#nfeItemDialog .nfe-retained-details[open] .nfe-retained-chevron{transform:rotate(225deg)}
+#nfeEditorDialog .nfe-field-group-fields,
+#nfeItemDialog .nfe-field-group-fields{
+  display:grid!important;
+  grid-template-columns:repeat(12,minmax(0,1fr))!important;
+  gap:11px 12px!important;
+  margin:0!important;padding:7px 0 5px!important;
+  border:0!important;background:transparent!important;
+  min-width:0!important;box-shadow:none!important;
+}
+#nfeEditorDialog .nfe-field-group-fields>.field,
+#nfeItemDialog .nfe-field-group-fields>.field{min-width:0!important}
+#nfeEditorDialog .nfe-field-group-fields>.field.col-2,
+#nfeItemDialog .nfe-field-group-fields>.field.col-2{grid-column:span 4!important}
+#nfeEditorDialog .nfe-field-group-fields>.field.col-3,
+#nfeItemDialog .nfe-field-group-fields>.field.col-3{grid-column:span 6!important}
+#nfeEditorDialog .nfe-field-group-fields>.field.col-4,
+#nfeItemDialog .nfe-field-group-fields>.field.col-4{grid-column:span 6!important}
+#nfeEditorDialog .nfe-field-group-fields>.field.col-6,
+#nfeItemDialog .nfe-field-group-fields>.field.col-6{grid-column:span 12!important}
+#nfeEditorDialog .nfe-field-group-fields>.field.col-8,
+#nfeItemDialog .nfe-field-group-fields>.field.col-8{grid-column:span 12!important}
+#nfeEditorDialog .nfe-field-group-fields>.field.col-12,
+#nfeItemDialog .nfe-field-group-fields>.field.col-12{grid-column:span 12!important}
+#nfeEditorDialog .nfe-field-group[hidden],
+#nfeItemDialog .nfe-field-group[hidden],
+#nfeEditorDialog .nfe-field-group-fields>.field[hidden],
+#nfeItemDialog .nfe-field-group-fields>.field[hidden]{display:none!important}
+/* Operação tem largura integral; grupos auxiliares dividem a segunda linha. */
+#nfeEditorDialog #nfe-section-general .nfe-general-fields .nfe-field-group[data-nfe-group="Natureza e operação"]{
+  grid-column:1/-1!important;
+}
+#nfeEditorDialog #nfe-section-general .nfe-general-fields .nfe-field-group[data-nfe-group="Controle de datas"]{
+  grid-column:1/-1!important;
+}
+#nfeEditorDialog #nfe-section-general .nfe-general-fields .nfe-field-group[data-nfe-group="Natureza e operação"] .field.col-6{
+  grid-column:span 6!important;
+}
+#nfeEditorDialog #nfe-section-general .nfe-general-fields .nfe-field-group[data-nfe-group="Natureza e operação"] .field.col-3{
+  grid-column:span 3!important;
+}
+#nfeEditorDialog #nfe-section-general .nfe-general-fields .nfe-field-group[data-nfe-group="Controle de datas"] .field{
+  grid-column:span 2!important;
+}
+#nfeEditorDialog .nfe-flag-field .switch-field{height:34px;min-height:34px}
+#nfeEditorDialog :is(.nfe-recipient-panel,.nfe-delivery-panel,.nfe-totals-panel) h3,
+#nfeEditorDialog .nfe-standalone-title,
+#nfeEditorDialog .nfe-recipient-heading h3{
+  margin:0 0 12px!important;
+  padding:0 0 9px!important;
+  border:0!important;border-bottom:1px solid var(--nf-rule)!important;
+  background:transparent!important;
+  color:#31556f!important;font-size:12px!important;font-weight:700!important;
+}
+#nfeEditorDialog .nfe-recipient-heading{margin:0 0 12px!important;padding:0!important;border:0!important}
+#nfeEditorDialog .nfe-recipient-heading h3{margin:0!important;flex:1}
+#nfeEditorDialog .nfe-delivery-panel .nfe-standalone-title{margin-bottom:9px!important}
+/* Grade de produtos: foco no conteúdo, não no contorno da tabela. */
+#nfeEditorDialog #nfe-section-items>.cms-card{
+  padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;margin:0 0 17px!important;
+}
+#nfeEditorDialog #nfe-section-items .grid-actionbar{margin:0 0 11px!important;min-height:32px}
+#nfeEditorDialog #nfe-section-items .grid-primary-action{
+  height:33px!important;min-height:33px!important;
+  padding:0 12px!important;border-radius:3px!important;
+  border:1px solid var(--nf-accent)!important;background:var(--nf-accent)!important;
+  color:#fff!important;font-size:12px!important;box-shadow:none!important;
+}
+#nfeEditorDialog #nfe-section-items .table-scroll{
+  border:1px solid var(--nf-rule)!important;border-radius:2px!important;
+  overflow-x:auto;box-shadow:none!important;
+}
+#nfeEditorDialog #nfe-section-items .cms-table{border-collapse:collapse!important;font-size:11.5px!important}
+#nfeEditorDialog #nfe-section-items .cms-table thead th{
+  color:#52697a!important;background:var(--nf-header)!important;
+  border-bottom:1px solid var(--nf-border)!important;
+  padding:9px 10px!important;
+  font-size:11px!important;font-weight:700!important;white-space:nowrap;
+}
+#nfeEditorDialog #nfe-section-items .cms-table tbody td{
+  padding:9px 10px!important;border-bottom:1px solid #e8edf0!important;
+  color:var(--nf-ink)!important;
+}
+#nfeEditorDialog #nfe-section-items .cms-table tbody tr:hover td{background:#e9f3fb!important}
+/* Totais da NF-e — faixa de indicadores, detalhes tributários expansíveis. */
+#nfeEditorDialog .nfe-totals-panel{border:0!important;margin:0!important;padding:0!important}
+#nfeEditorDialog .nfe-invoice-summary{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  margin:12px 0!important;
+  border:1px solid var(--nf-rule)!important;
+  background:#f9fbfc!important;
+}
+#nfeEditorDialog .nfe-invoice-metric{
+  min-width:0;grid-column:auto!important;
+  padding:10px 12px!important;
+  border:0!important;border-right:1px solid var(--nf-rule)!important;
+  background:transparent!important;
+}
+#nfeEditorDialog .nfe-invoice-metric:last-child{border-right:0!important}
+#nfeEditorDialog .nfe-invoice-metric>span{
+  display:block;color:var(--nf-muted)!important;font-size:10.5px!important;margin-bottom:4px!important;
+}
+#nfeEditorDialog .nfe-invoice-metric>.readonly-field{
+  background:transparent!important;border:0!important;box-shadow:none!important;
+  padding:0!important;min-height:0!important;font-size:15px!important;font-weight:700!important;
+  color:var(--nf-ink)!important;
+}
+#nfeEditorDialog .nfe-invoice-final{background:var(--nf-accent-soft)!important}
+#nfeEditorDialog .nfe-invoice-final strong{font-size:17px!important;color:#145e90!important}
+#nfeEditorDialog .nfe-invoice-adjustments{
+  display:grid!important;grid-template-columns:repeat(12,minmax(0,1fr))!important;
+  gap:12px!important;max-width:480px;margin:0 0 12px!important;
+}
+#nfeEditorDialog .nfe-invoice-adjustments>.field{grid-column:span 6!important}
+#nfeEditorDialog .nfe-invoice-details{
+  margin:0 0 14px!important;border:1px solid var(--nf-rule)!important;border-radius:3px!important;overflow:hidden;
+}
+#nfeEditorDialog .nfe-invoice-details>summary{
+  background:#f7f9fb!important;color:#385a71!important;
+  padding:10px 12px!important;font-size:11.5px!important;font-weight:700!important;cursor:pointer;
+}
+#nfeEditorDialog .nfe-invoice-details>.nfe-totals-grid{padding:12px!important}
+#nfeEditorDialog .nfe-totals-grid .nfe-structured-grid{gap:12px!important}
+#nfeEditorDialog .nfe-totals-grid .nfe-field-group{grid-column:auto!important}
+#nfeEditorDialog .nfe-totals-grid .nfe-field-group-fields>.field.col-2{grid-column:span 6!important}
+/* Pagamento, transporte e adicionais: seções operacionais sem cartões. */
+#nfeEditorDialog #nfe-section-payment>.editor-panel{
+  padding:0 0 16px!important;margin:0 0 16px!important;
+  border:0!important;border-bottom:1px solid var(--nf-rule)!important;
+  background:transparent!important;box-shadow:none!important;
+}
+#nfeEditorDialog #nfe-section-payment .nfe-payment-optional{border:0!important;padding:0!important}
+#nfeEditorDialog #nfe-section-payment .nfe-payment-disclosure{
+  border:1px solid var(--nf-rule)!important;border-radius:3px!important;
+  margin:0 0 12px!important;background:#fff!important;box-shadow:none!important;
+}
+#nfeEditorDialog #nfe-section-payment .nfe-payment-disclosure>summary{
+  background:#f7f9fb!important;color:#355971!important;min-height:39px!important;
+  padding:10px 12px!important;
+}
+#nfeEditorDialog #nfe-section-payment .nfe-payment-disclosure-content{padding:13px!important;background:#fff}
+#nfeEditorDialog #nfe-section-transport .nfe-structured-grid{row-gap:18px!important}
+#nfeEditorDialog #nfe-section-other .notes-panel{display:grid!important;gap:14px!important}
+#nfeEditorDialog #nfe-section-other .notes-panel>.nfe-field-group{width:100%}
+#nfeEditorDialog #nfe-section-other .notes-panel .nfe-field-group-fields>.field{grid-column:1/-1!important}
+/* Modal do item: sete abas textuais e conteúdo alinhado abaixo. */
+#nfeItemDialog .nfe-item-dialog{
+  width:min(1160px,calc(100vw - 44px))!important;
+  max-width:none!important;
+  height:min(850px,calc(100dvh - 36px))!important;
+  max-height:calc(100dvh - 36px)!important;
+  display:flex!important;flex-direction:column!important;min-height:0!important;
+  border:1px solid var(--nf-border)!important;
+  border-radius:4px!important;overflow:hidden!important;
+  background:#fff!important;
+  box-shadow:0 12px 30px #1d344531!important;
+}
+#nfeItemDialog .dialog-header{flex:0 0 auto!important}
+#nfeItemDialog .dialog-footer{flex:0 0 auto!important;margin-top:auto!important}
+#nfeItemDialog .nfe-item-body{
+  min-height:0!important;flex:1 1 auto!important;
+  overflow:auto!important;padding:0!important;
+  background:#fff!important;scrollbar-gutter:stable;
+}
+#nfeItemDialog .nfe-item-taxnav{
+  position:sticky!important;top:0!important;z-index:20!important;
+  display:block!important;
+  padding:0 14px!important;margin:0!important;
+  border:0!important;border-bottom:1px solid var(--nf-rule)!important;
+  background:var(--nf-neutral)!important;
+  border-radius:0!important;box-shadow:none!important;
+}
+#nfeItemDialog .nfe-item-taxnav>.nfe-tax-review-grid{
+  display:flex!important;grid-template-columns:none!important;
+  gap:1px!important;overflow:auto hidden!important;
+  flex-wrap:nowrap!important;background:transparent!important;
+}
+#nfeItemDialog .nfe-item-taxnav .nfe-tax-review-grid>button,
+#nfeItemDialog .nfe-item-taxnav .nfe-tax-review-grid>button:nth-child(n){
+  display:flex!important;flex:0 0 auto!important;
+  align-items:center!important;justify-content:center!important;
+  height:43px!important;min-height:43px!important;
+  width:auto!important;margin:0!important;padding:0 14px!important;
+  border:0!important;border-bottom:3px solid transparent!important;
+  border-radius:0!important;box-shadow:none!important;
+  background:transparent!important;color:#607484!important;
+  outline:0!important;transform:none!important;
+  font-size:12px!important;font-weight:600!important;
+  text-align:center!important;white-space:nowrap!important;
+}
+#nfeItemDialog .nfe-item-taxnav .nfe-tax-review-grid>button:hover{
+  background:#edf4f9!important;color:#206a9b!important;
+}
+#nfeItemDialog .nfe-item-taxnav .nfe-tax-review-grid>button.nfe-tax-tab-active,
+#nfeItemDialog .nfe-item-taxnav .nfe-tax-review-grid>button.nfe-tax-tab-active:nth-child(n){
+  background:#fff!important;color:#12699d!important;
+  border-bottom-color:var(--nf-accent)!important;box-shadow:none!important;
+}
+#nfeItemDialog .nfe-item-taxnav .nfe-tax-review-grid>button:focus-visible{
+  outline:2px solid #a4cbe5!important;outline-offset:-3px!important;
+}
+#nfeItemDialog .nfe-item-taxnav .nfe-tax-code{
+  position:absolute!important;width:1px!important;height:1px!important;
+  margin:-1px!important;padding:0!important;overflow:hidden!important;
+  clip:rect(0,0,0,0)!important;white-space:nowrap!important;
+}
+#nfeItemDialog .nfe-enterprise-item-host{
+  min-height:240px!important;margin:0!important;
+  border:0!important;border-radius:0!important;background:#fff!important;
+  padding:20px 21px 23px!important;
+}
+#nfeItemDialog .nfe-enterprise-item-host>.nfe-item-section,
+#nfeItemDialog .nfe-enterprise-item-host .nfe-tab-content>.nfe-item-section{
+  padding:0!important;margin:0 0 12px!important;
+  border:0!important;border-radius:0!important;
+  background:transparent!important;box-shadow:none!important;overflow:visible!important;
+}
+#nfeItemDialog .nfe-enterprise-item-host>.nfe-item-section>summary{display:none!important}
+#nfeItemDialog .nfe-enterprise-item-host .nfe-tab-content>.nfe-item-section>summary{
+  display:flex!important;
+  align-items:center!important;gap:8px!important;
+  min-height:30px!important;padding:0 0 9px!important;margin:0 0 12px!important;
+  border:0!important;border-bottom:1px solid var(--nf-rule)!important;
+  border-radius:0!important;background:transparent!important;box-shadow:none!important;
+}
+#nfeItemDialog .nfe-enterprise-item-host .nfe-tab-content .nfe-section-index{display:none!important}
+#nfeItemDialog .nfe-enterprise-item-host .nfe-tab-content .nfe-section-label strong{
+  font-size:12px!important;font-weight:700!important;color:#31556f!important;
+}
+#nfeItemDialog .nfe-enterprise-item-host .nfe-tab-content .nfe-section-label small,
+#nfeItemDialog .nfe-enterprise-item-host .nfe-tab-content .nfe-section-caret{
+  display:none!important;
+}
+#nfeItemDialog .nfe-enterprise-item-host .nfe-item-section-content{
+  padding:0!important;margin:0!important;background:transparent!important;
+}
+#nfeItemDialog .nfe-enterprise-item-host .nfe-item-section-content>.editor-panel{
+  padding:0!important;margin:0!important;border:0!important;
+  background:transparent!important;box-shadow:none!important;
+}
+#nfeItemDialog .nfe-item-main-panel{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:24px!important;align-items:start;
+}
+#nfeItemDialog .nfe-item-main-panel>.nfe-item-section{min-width:0}
+#nfeItemDialog .nfe-item-main-panel .nfe-structured-grid{
+  grid-template-columns:minmax(0,1fr)!important;
+  gap:10px!important;
+}
+#nfeItemDialog .nfe-enterprise-item-host>.nfe-item-section .nfe-structured-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:13px 25px!important;
+}
+#nfeItemDialog .nfe-item-other-panel{
+  display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:11px!important;
+}
+#nfeItemDialog .nfe-item-other-panel>.nfe-item-section{
+  padding:0!important;margin:0!important;
+  border:1px solid var(--nf-rule)!important;border-radius:3px!important;
+}
+#nfeItemDialog .nfe-item-other-panel>.nfe-item-section>summary{
+  margin:0!important;padding:10px 12px!important;
+  border:0!important;background:#f7f9fb!important;
+}
+#nfeItemDialog .nfe-item-other-panel>.nfe-item-section[open]>.nfe-item-section-content{
+  padding:13px!important;
+}
+#nfeItemDialog .nfe-enterprise-item-host .nfe-retained-details,
+#nfeItemDialog .nfe-enterprise-item-host .nfe-item-service-panel,
+#nfeItemDialog .nfe-enterprise-item-host .nfe-rtc-extra-panel{
+  display:block;
+  margin:12px 0!important;
+  padding:0!important;
+  border:1px solid var(--nf-rule)!important;
+  border-radius:3px!important;
+  background:#fff!important;
+  overflow:visible!important;
+}
+#nfeItemDialog .nfe-enterprise-item-host :is(.nfe-retained-heading,.nfe-item-service-panel>summary,.nfe-rtc-extra-panel>summary){
+  padding:10px 12px!important;margin:0!important;
+  background:#f7f9fb!important;
+  color:#345b74!important;font-size:11.5px!important;
+  cursor:pointer!important;
+}
+#nfeItemDialog .nfe-enterprise-item-host .nfe-retained-details>.editor-grid,
+#nfeItemDialog .nfe-enterprise-item-host .nfe-rtc-extra-panel>.editor-grid,
+#nfeItemDialog .nfe-enterprise-item-host .nfe-item-service-panel>.editor-grid{
+  padding:12px!important;
+}
+#nfeItemDialog .nfe-item-inline-caption{
+  padding:0 0 8px!important;margin:13px 0 10px!important;
+  font-size:11.5px!important;font-weight:700!important;
+  color:#45677c!important;border-bottom:1px solid var(--nf-rule)!important;
+}
+#nfeItemDialog .nfe-item-additional-federal-grid{
+  display:grid!important;
+  grid-template-columns:repeat(12,minmax(0,1fr))!important;
+  gap:11px 12px!important;padding:13px 0!important;
+  margin:12px 0!important;
+  border:0!important;border-top:1px solid var(--nf-rule)!important;
+  background:transparent!important;
+}
+#nfeItemDialog .nfe-item-additional-federal-grid>.field.col-2,
+#nfeItemDialog .nfe-item-additional-federal-grid>.field.col-3{
+  grid-column:span 4!important;
+}
+#nfeItemDialog .nfe-rtc-extra-panel>.editor-grid .field.col-3{grid-column:span 3!important}
+#nfeItemDialog .nfe-enterprise-item-host .nfe-field-group[hidden],
+#nfeItemDialog .nfe-enterprise-item-host .field[hidden],
+#nfeItemDialog .nfe-enterprise-item-host [hidden]{display:none!important}
+/* Atributos hidden sempre são respeitados, inclusive nos painéis movidos pelo JS. */
+#nfeEditorDialog [hidden],
+#nfeItemDialog [hidden]{display:none!important}
+/* Layout responsivo sem barras horizontais dentro de formulários. */
+@media(max-width:1100px){
+ #nfeEditorDialog .nfe-general-layout{grid-template-columns:minmax(0,1fr)!important}
+ #nfeEditorDialog .nfe-general-dates{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 12px}
+ #nfeEditorDialog .nfe-general-dates>.nfe-standalone-title{grid-column:1/-1}
+ #nfeEditorDialog .nfe-general-dates>.field{margin:0!important}
+}
+@media(max-width:800px){
+ #nfeEditorDialog .nfe-structured-grid,
+ #nfeItemDialog .nfe-structured-grid,
+ #nfeItemDialog .nfe-enterprise-item-host>.nfe-item-section .nfe-structured-grid,
+ #nfeItemDialog .nfe-item-main-panel{grid-template-columns:minmax(0,1fr)!important}
+ #nfeEditorDialog .nfe-invoice-summary{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #nfeEditorDialog .nfe-invoice-metric:nth-child(2){border-right:0!important}
+ #nfeEditorDialog .nfe-invoice-metric:nth-child(-n+2){border-bottom:1px solid var(--nf-rule)!important}
+ #nfeEditorDialog .nfe-general-dates{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #nfeEditorDialog #nfeDraftForm>.nfe-workspace-body{padding:0 13px 15px!important}
+ #nfeEditorDialog .nfe-flow-nav{margin:0 -13px 14px!important}
+ #nfeItemDialog .nfe-enterprise-item-host{padding:14px!important}
+}
+@media(max-width:550px){
+ #nfeEditorDialog .nfe-workspace-dialog,
+ #nfeItemDialog .nfe-item-dialog{width:100vw!important;height:100dvh!important;max-height:100dvh!important;border-radius:0!important}
+ #nfeEditorDialog .nfe-emitter-summary{gap:7px!important;flex-wrap:wrap}
+ #nfeEditorDialog .nfe-document-summary{margin-left:0!important}
+ #nfeEditorDialog .nfe-invoice-summary{gap:0}
+ #nfeEditorDialog .nfe-invoice-metric{padding:8px!important}
+ #nfeEditorDialog .nfe-invoice-metric>.readonly-field{font-size:12px!important}
+ #nfeEditorDialog .nfe-invoice-adjustments>.field{grid-column:span 12!important}
+ #nfeEditorDialog .nfe-general-dates{grid-template-columns:minmax(0,1fr)}
+ #nfeEditorDialog .nfe-field-group-fields>.field,
+ #nfeItemDialog .nfe-field-group-fields>.field{grid-column:span 12!important}
+ #nfeEditorDialog .nfe-general-fields .nfe-field-group[data-nfe-group="Natureza e operação"] .field{grid-column:span 12!important}
+ #nfeEditorDialog .nfe-general-fields .nfe-field-group[data-nfe-group="Controle de datas"] .field{grid-column:span 6!important}
+ #nfeItemDialog .nfe-item-additional-federal-grid>.field.col-2,
+ #nfeItemDialog .nfe-item-additional-federal-grid>.field.col-3{grid-column:span 6!important}
+ #nfeItemDialog .nfe-item-taxnav{padding:0 6px!important}
+ #nfeItemDialog .nfe-item-taxnav .nfe-tax-review-grid>button{padding:0 11px!important;font-size:11px!important}
+}

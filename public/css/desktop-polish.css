@@ -5,12 +5,12 @@
  */
 @media screen {
   .app-root {
-    --desktop-border:#d2dce4;
-    --desktop-divider:#dfe6ec;
-    --desktop-surface:#f9fbfc;
-    --desktop-muted:#6c8191;
-    --desktop-focus:#2d83b8;
-    --desktop-control:34px;
+    --desktop-border:var(--ui-card-border);
+    --desktop-divider:var(--ui-divider);
+    --desktop-surface:var(--ui-surface-muted);
+    --desktop-muted:var(--ui-muted);
+    --desktop-focus:var(--ui-focus);
+    --desktop-control:var(--ui-action-height);
   }
 
   /* Superfícies: preenchimento sem deslocamentos horizontais. */
@@ -32,9 +32,9 @@
 
   .app-root .cms-card {
     border:1px solid var(--desktop-border);
-    border-radius:4px;
+    border-radius:var(--ui-card-radius);
     background:#fff;
-    box-shadow:0 1px 3px rgba(31,54,71,.065);
+    box-shadow:var(--ui-card-shadow);
   }
   .app-root .cms-card:hover {
     border-color:var(--desktop-border);
@@ -74,16 +74,18 @@
   .app-root .grid-tool-group {
     display:inline-flex;
     align-items:stretch;
+    flex-wrap:wrap;
+    gap:3px;
     flex:0 1 auto;
     max-width:100%;
     box-shadow:0 1px 1px rgba(22,55,76,.08);
-    border-radius:3px;
+    border-radius:var(--ui-control-radius);
   }
   .app-root :is(.grid-primary-action,.grid-tool,.grid-filter-button,.period-current,.period-arrow,.bulk-action-select,.bulk-actions .ui-select-trigger,.bulk-apply) {
     box-sizing:border-box;
     height:var(--desktop-control);
     min-height:var(--desktop-control);
-    border-radius:3px;
+    border-radius:var(--ui-control-radius);
   }
   .app-root .grid-primary-action {
     display:inline-flex;
@@ -103,14 +105,6 @@
   }
   .app-root .grid-tool.grid-tool-wide {
     gap:5px;
-  }
-  .app-root .grid-tool-group > :is(button,a,summary):not(:first-child) {
-    border-top-left-radius:0;
-    border-bottom-left-radius:0;
-  }
-  .app-root .grid-tool-group > :is(button,a,summary):not(:last-child) {
-    border-top-right-radius:0;
-    border-bottom-right-radius:0;
   }
   .app-root .grid-filter-button {width:36px;min-width:36px}
   .app-root .period-arrow {width:30px;flex:0 0 30px}
@@ -232,7 +226,6 @@
     border-bottom:1px solid #cbd7df;
     background:#edf2f6;
     color:#526b7e;
-    font-size:10px;
     font-weight:700;
     letter-spacing:.035em;
     line-height:1.25;
@@ -244,7 +237,6 @@
     padding-inline:11px;
     border-bottom:1px solid #e8edf1;
     color:#405568;
-    font-size:12px;
     line-height:1.35;
     overflow-wrap:anywhere;
   }
@@ -313,7 +305,7 @@
     margin-top:5px;
     padding:0 12px;
     border:1px solid #b9cfdd;
-    border-radius:3px;
+    border-radius:var(--ui-control-radius);
     background:#f7fafc;
     color:#286f9b;
     font-weight:650;
@@ -352,7 +344,7 @@
     margin-left:auto;
     flex:0 0 auto;
     border-color:#cfdae3;
-    border-radius:3px;
+    border-radius:var(--ui-control-radius);
   }
   .app-root .table-pager-button,
   .app-root .table-pager-current {
@@ -476,7 +468,7 @@
     overflow-y:auto;
     overscroll-behavior:contain;
     border:1px solid #b9cad8;
-    border-radius:4px;
+    border-radius:var(--ui-card-radius);
     background:#fff;
     box-shadow:0 14px 32px rgba(20,39,55,.18);
     z-index:2147483647;
@@ -591,11 +583,12 @@
   }
   #nfceEditor .nfce-product-search-anchor{position:relative;min-width:0}
   #nfceEditor .nfce-product-search-anchor>input{
-    box-sizing:border-box;width:100%;height:36px;min-height:36px;
-    margin:0;border-radius:4px;
+    box-sizing:border-box;width:100%;height:var(--ui-control-height);min-height:var(--ui-control-height);
+    font-size:var(--ui-control-font-size);
+    margin:0;border-radius:var(--ui-control-radius);
   }
   #nfceEditor .nfce-product-toolbar>#nfceAddProduct{
-    height:36px;min-height:36px;min-width:106px;
+    height:var(--ui-control-height);min-height:var(--ui-control-height);min-width:106px;
     display:inline-flex;align-items:center;justify-content:center;
     gap:7px;margin:0;white-space:nowrap;padding:0 13px;
   }

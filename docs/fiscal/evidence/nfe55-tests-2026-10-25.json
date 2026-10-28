@@ -1,0 +1,17 @@
+{
+  "code_commit": "899ba66fe793167c2127efdb75cde4a19269b19a",
+  "command": "php -d memory_limit=1024M vendor/bin/phpunit --colors=never",
+  "runtime": "PHP 8.5.12; PHPUnit 12.5.40; SQLite; composer:2",
+  "tests": 824,
+  "assertions": 5181,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 2,
+  "skipped_tests": [
+    "Tests.Feature.NFCePrintSettingsTest::test_original_danfe_can_render_real_pdf_with_local_chrome_when_installed",
+    "Tests.Feature.QuoteCommercialDocumentTest::test_real_chromium_generates_valid_pdf_when_installed"
+  ],
+  "junit_sha256": "c81c1c8493e8297bc39a3c1aec2f8aff66965979806c47ae48989c3a96b02144",
+  "acbr_native_run": false,
+  "sefaz_homologation_run": false
+}

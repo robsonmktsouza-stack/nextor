@@ -95,20 +95,18 @@ $origins=[
          <select name="fiscal_tax_group_id">
            <option value="">Selecione um grupo tributário</option>
            @foreach($fiscalTaxGroups as $fiscalGroup)
-             <option value="{{ $fiscalGroup->id }}" @selected((string)old('fiscal_tax_group_id',$product->fiscal_tax_group_id)===(string)$fiscalGroup->id)>
-               {{ $fiscalGroup->name }}{{ $fiscalGroup->is_default ? ' · Padrão' : '' }}{{ !$fiscalGroup->is_active ? ' · Inativo' : '' }}
+             <option value="{{ $fiscalGroup->id }}" @selected((string)old('fiscal_tax_group_id',$product->fiscal_tax_group_id)===(string)$fiscalGroup->id) @disabled($fiscalGroup->catalog_version && (!$fiscalGroup->is_active || $fiscalGroup->catalog_status!=='reviewed' || !$fiscalGroup->fiscal_reviewed_at))>
+               {{ $fiscalGroup->name }}{{ $fiscalGroup->is_default ? ' · Padrão' : '' }}{{ !$fiscalGroup->is_active ? ' · Inativo' : '' }}{{ $fiscalGroup->catalog_version && $fiscalGroup->catalog_status!=='reviewed' ? ' · Aguardando revisão fiscal' : '' }}
              </option>
            @endforeach
          </select>
        </label>
-       <div class="field col-4">
-         <span>Administração</span>
-         @if(auth()->user()->canAccess('settings'))
+       @if(auth()->user()->canAccess('settings'))
+         <div class="field col-4">
+           <span>Grupos tributários</span>
            <a class="btn btn-secondary" href="{{ route('fiscal.tax-groups.index') }}">Gerenciar grupos</a>
-         @else
-           
-         @endif
-       </div>
+         </div>
+       @endif
      </div>
      
      @if($product->tax_group)
@@ -125,11 +123,11 @@ $origins=[
        <label class="field col-3"><span>Referência EAN/GTIN</span><input name="ean_gtin" value="{{ old('ean_gtin',$product->ean_gtin) }}" placeholder="EAN/GTIN"></label>
        <label class="field col-3"><span>Peso unitário líquido (kg)</span><input type="number" step="0.001" min="0" name="net_weight" value="{{ old('net_weight',$product->net_weight) }}"></label>
        <label class="field col-3"><span>Peso unitário bruto (kg)</span><input type="number" step="0.001" min="0" name="gross_weight" value="{{ old('gross_weight',$product->gross_weight) }}"></label>
-       <label class="field col-3"><span>NCM</span><input name="ncm" value="{{ old('ncm',$product->ncm) }}" maxlength="10" placeholder="00000000"></label>
+       <label class="field col-3"><span>NCM</span><input name="ncm" value="{{ old('ncm',$product->ncm) }}" maxlength="10" placeholder="00000000" list="product-ncm-codes" data-fiscal-code-kind="ncm" data-fiscal-code-url="{{ route('products.fiscal-classifications') }}" autocomplete="off"><datalist id="product-ncm-codes"></datalist></label>
 
        <label class="field col-3"><span>Unidade comercial</span><select name="unit">@foreach($units as $code=>$label)<option value="{{ $code }}" @selected(old('unit',$product->unit ?? 'UN')===$code)>{{ $label }}</option>@endforeach</select></label>
        <label class="field col-3"><span>Exceção tabela IPI</span><input name="ipi_exception" value="{{ old('ipi_exception',$product->ipi_exception) }}"></label>
-       <label class="field col-3"><span>Código CEST</span><input name="cest" value="{{ old('cest',$product->cest) }}" maxlength="10"></label>
+       <label class="field col-3"><span>Código CEST</span><input name="cest" value="{{ old('cest',$product->cest) }}" maxlength="10" list="product-cest-codes" data-fiscal-code-kind="cest" data-fiscal-code-url="{{ route('products.fiscal-classifications') }}" autocomplete="off"><datalist id="product-cest-codes"></datalist></label>
        <label class="field col-3"><span>Cód. benefício fiscal na UF</span><input name="fiscal_benefit_code" value="{{ old('fiscal_benefit_code',$product->fiscal_benefit_code) }}"></label>
 
        <div class="field col-3"><span>Unidade tributada diferente</span>
@@ -150,6 +148,8 @@ $origins=[
        </label>
      </div>
    </div>
+
+   <details class="editor-panel"><summary>Classificações e exceções fiscais</summary><p>Confira o NCM e o CEST pela descrição da mercadoria. O CEST não determina, por si só, a incidência de ICMS-ST. Revise as exceções deste produto com o responsável fiscal.</p></details>
 
    <div class="editor-panel">
      <h3>CFOP padrão da NF-e</h3>
@@ -307,3 +307,7 @@ $origins=[
  </div>
 </form>
 @endsection
+
+@push('scripts')
+<script defer src="{{ asset('js/product-fiscal-catalog.js') }}?v={{ filemtime(public_path('js/product-fiscal-catalog.js')) }}"></script>
+@endpush

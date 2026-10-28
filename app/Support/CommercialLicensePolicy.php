@@ -19,6 +19,10 @@ final class CommercialLicensePolicy
         'fiscal.nfce.offline.transmit',
         'fiscal.nfce.recover-xml',
         'fiscal.nfce.inutilizations.store',
+        'fiscal.nfe.consult',
+        'fiscal.nfe.cancel',
+        'fiscal.nfe.inutilizations.store',
+        'fiscal.nfe.inutilizations.retry',
         'pdv.nfce.cancel',
     ];
 

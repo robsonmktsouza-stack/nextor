@@ -10,7 +10,7 @@ use Illuminate\Validation\ValidationException;
 use RuntimeException;
 
 /**
- * Native NF-e validation on Windows with the configured A1 certificate.
+ * Native NF-e validation with the installation's ACBr and A1 certificate.
  * It does NOT reserve a number, mutate a draft, enqueue jobs or contact SEFAZ.
  *
  * The number is a provisional local simulation of the next invoice number.
@@ -33,11 +33,7 @@ final class Nfe55PreflightService
         }
         $company=CompanySetting::current();
         $this->emission->assertReady($draft,$company);
-        if ($draft->environment!=='homologation') {
-            throw ValidationException::withMessages(['nfe'=>'O teste fiscal está disponível somente em homologação.']);
-        }
-
-        $number=(int)AppSetting::value('nfe','next_number',1);
+        $number=app(FiscalDocumentSettings::class)->nfeNumbering((string)$draft->environment)['next_number'];
         if ($number<1 || $number>999999999) {
             throw ValidationException::withMessages(['nfe'=>'Confira a numeração de homologação da NF-e.']);
         }
@@ -60,8 +56,9 @@ final class Nfe55PreflightService
             $service->verifySignature();
             $xml=$service->getXml();
             $key=$this->emission->verifySignedXml($xml,$draft,$company,$number,$code);
+            app(Nfe55XmlTaxConsistency::class)->assertMatches($ini,$xml);
             return [
-                'ok'=>true,'model'=>'55','environment'=>'homologation',
+                'ok'=>true,'model'=>'55','environment'=>(string)$draft->environment,
                 'tested_number'=>$number,'signed_key_verified'=>strlen($key)===44,
             ];
         } finally {

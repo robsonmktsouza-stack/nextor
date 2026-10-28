@@ -6,6 +6,10 @@ use App\Models\AppSetting;
 use App\Models\CompanySetting;
 use App\Models\Customer;
 use App\Models\NfeDraft;
+use App\Models\NfeDraftItem;
+use App\Services\Fiscal\Nfe55DraftTotalsService;
+use App\Services\Fiscal\Nfe55TaxRuleApplicationService;
+use App\Services\Fiscal\NfeTaxMath;
 use App\Models\OperationNature;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -52,6 +56,10 @@ class NfeDraftController extends Controller
         $term=trim((string)$request->query('search',''));
 
         $drafts=NfeDraft::query()
+            ->whereIn('status',['draft','prepared'])
+            ->whereNull('transmission_attempted_at')
+            ->whereNull('authorized_at')
+            ->whereNull('cancelled_at')
             ->with(['customer','operationNature','user'])
             ->when($term,fn($query)=>$query->where(function($where) use($term) {
                 $like='%'.$term.'%';
@@ -68,6 +76,8 @@ class NfeDraftController extends Controller
 
     public function create()
     {
+        $environment=app(\App\Services\Fiscal\FiscalDocumentSettings::class)->environment('nfe');
+        $numbering=app(\App\Services\Fiscal\FiscalDocumentSettings::class)->nfeNumbering($environment);
         return $this->editor(new NfeDraft([
             'status'=>'draft',
             'operation_type'=>'outbound',
@@ -85,8 +95,8 @@ class NfeDraftController extends Controller
             'surcharge'=>0,
             'payment_type'=>(string)AppSetting::value('operations','default_payment_method','01'),
             'payment_condition'=>'a_vista',
-            'environment'=>AppSetting::value('nfe','environment',AppSetting::value('fiscal','default_environment','homologation')),
-            'series'=>(int)AppSetting::value('nfe','series',1),
+            'environment'=>$environment,
+            'series'=>$numbering['series'],
         ]));
     }
 
@@ -120,13 +130,67 @@ class NfeDraftController extends Controller
         return $this->editor($nfeDraft);
     }
 
+    /** Read-only calculation: it never creates a draft or reserves numbering. */
+    public function previewTaxes(Request $request)
+    {
+        $data=$request->validate([
+            'items_json'=>['required','string','max:400000'],
+            'operation_type'=>['required',Rule::in(['outbound','inbound'])],
+            'destination'=>['required',Rule::in(['internal','interstate','foreign'])],
+            'purpose'=>['required',Rule::in(['normal','complementary','adjustment','return','credit_note','debit_note'])],
+            'fiscal_operation'=>['nullable',Rule::in(['sale','devolution','transfer','bonus','gift','sample','remittance','return_of_remittance','export','import'])],
+            'customer_id'=>['nullable','integer','exists:customers,id'],
+            'operation_nature_id'=>['nullable','integer','exists:operation_natures,id'],
+            'issue_date'=>['nullable','date'],
+            'final_consumer'=>['nullable','boolean'],
+            'discount'=>['nullable','numeric','min:0','max:99999999'],
+            'surcharge'=>['nullable','numeric','min:0','max:99999999'],
+            'freight_value'=>['nullable','numeric','min:0','max:99999999'],
+        ]);
+        $company=CompanySetting::query()->first();
+        if(!$company)throw ValidationException::withMessages(['company'=>'Cadastre o emitente antes de calcular os tributos.']);
+        $customer=isset($data['customer_id'])?Customer::query()->find($data['customer_id']):null;
+        $items=$this->resolveFormTaxes($this->decodeArray($data['items_json'],'itens'),$data,$company,$customer);
+        $totals=$this->calculateTotals($items,(float)($data['discount']??0),
+            (float)($data['surcharge']??0),(float)($data['freight_value']??0),$data['operation_type'],$data['issue_date']??null,$data['purpose']??'normal');
+        $documentErrors=[];
+        try {
+            // The same builder checks operation semantics and base composition;
+            // transient models keep this preview free of database mutations.
+            $draft=new NfeDraft(['status'=>'draft']+$this->draftData($request));
+            $draft->setRelation('items',collect($items)->map(fn($item)=>new NfeDraftItem($item)));
+            app(\App\Services\Fiscal\Nfe55IniBuilder::class)->build($draft,$company,1,12345678);
+        }catch(ValidationException $error){
+            $documentErrors=array_map(\App\Support\UserFacingMessage::fromText(...),array_values(array_unique(array_merge(...array_values($error->errors())))));
+        }catch(\RuntimeException $error){$documentErrors[]=\App\Support\UserFacingMessage::fromThrowable($error,'Não foi possível conferir os tributos. Revise os dados da nota.');}
+        $rules=[];
+        foreach($items as $index=>$item){
+            $trace=data_get($item,'tax_data.fiscal_rule_trace',[]);
+            if(!is_array($trace)||!isset($trace['id']))continue;
+            $rules[]=['item'=>$index+1,'id'=>$trace['id'],
+                'name'=>data_get($trace,'snapshot.name','Regra fiscal'),
+                'revision'=>$trace['revision'],'legal_reference'=>$trace['legal_reference']??'',
+                'legal_source'=>$trace['legal_source']??'',
+                'catalog_version'=>data_get($trace,'snapshot.catalog_version'),
+                'cfop'=>$item['cfop']??null,
+                'icms_cst'=>data_get($item,'tax_data.icms_cst'),
+                'csosn'=>data_get($item,'tax_data.icms_csosn'),
+                'pis_cst'=>data_get($item,'tax_data.pis_cst'),
+                'cofins_cst'=>data_get($item,'tax_data.cofins_cst'),
+                'overrides'=>array_keys($trace['overrides']??[])];
+        }
+        $previewTotals=$totals;
+        $previewTotals['tax_errors']=array_map(\App\Support\UserFacingMessage::fromText(...),$totals['tax_errors']??[]);
+        return response()->json(['totals'=>$previewTotals,'document_errors'=>$documentErrors,'applied_rules'=>$rules]);
+    }
+
     public function update(Request $request, NfeDraft $nfeDraft)
     {
-        abort_unless($nfeDraft->status==='draft',409,'Esta NF-e não pode mais ser editada.');
         if($request->input('draft_action')!=='draft'){
             DB::transaction(function()use($request,$nfeDraft){
-                $nfeDraft->update($this->draftData($request)+['validated_at'=>null]);
-                $this->replaceItems($nfeDraft,$request);
+                $locked=$this->editableDraft($nfeDraft);
+                $locked->update($this->draftData($request,$locked)+['validated_at'=>null]);
+                $this->replaceItems($locked,$request);
             });
             return $request->input('after_save')==='validate'
                 ?$this->validateAndRedirect($nfeDraft->refresh())
@@ -147,7 +211,9 @@ class NfeDraftController extends Controller
      */
     private function savePartialDraft(Request $request,?NfeDraft $existing=null): NfeDraft
     {
-        $values=$request->except(['_token','_method','after_save','draft_action']);
+        $values=$request->except(['_token','_method','after_save','draft_action',
+            'status','document_number','access_key','protocol','numeric_code','validated_at',
+            'transmission_attempted_at','authorized_at','cancellation_status']);
         $snapshot=[];
         $totalChars=0;
         if(count($values)>110){
@@ -182,13 +248,11 @@ class NfeDraftController extends Controller
         $company=CompanySetting::current();
 
         return DB::transaction(function()use($request,$existing,$snapshot,$items,$issueDate,$rawType,$rawDestination,$candidateNature,$candidateCustomer,$company){
-            $draft=$existing ? NfeDraft::query()->lockForUpdate()->findOrFail($existing->id) : new NfeDraft();
-            if($draft->exists && $draft->status!=='draft')abort(409,'Esta NF-e não pode mais ser editada.');
+            $draft=$existing ? $this->editableDraft($existing) : new NfeDraft(['status'=>'draft']);
 
             $nature=OperationNature::query()->find($candidateNature);
             $customer=Customer::query()->find($candidateCustomer);
             $changes=[
-                'status'=>'draft',
                 'user_id'=>auth()->id(),
                 'operation_nature_id'=>$nature?->id,
                 'customer_id'=>$customer?->id,
@@ -196,13 +260,13 @@ class NfeDraftController extends Controller
                 'destination'=>in_array($rawDestination,['internal','interstate','foreign'],true)?$rawDestination:'internal',
                 'issue_date'=>$issueDate,
                 'issue_time'=>$this->minuteTime($snapshot['issue_time']??null),
-                'series'=>$draft->series ?? (int)AppSetting::value('nfe','series',1),
-                'environment'=>$draft->environment ?: (string)AppSetting::value('nfe','environment','homologation'),
+                'series'=>$draft->series ?? app(\App\Services\Fiscal\FiscalDocumentSettings::class)->nfeNumbering($draft->environment ?: app(\App\Services\Fiscal\FiscalDocumentSettings::class)->environment('nfe'))['series'],
+                'environment'=>$draft->environment ?: app(\App\Services\Fiscal\FiscalDocumentSettings::class)->environment('nfe'),
                 'validated_at'=>null,
                 'custom_fields'=>array_replace($draft->custom_fields??[],['_editor_form'=>$snapshot]),
             ];
             if(!$draft->exists){
-                $changes['environment']=(string)AppSetting::value('nfe','environment','homologation');
+                $changes['environment']=app(\App\Services\Fiscal\FiscalDocumentSettings::class)->environment('nfe');
                 $changes['emitter_snapshot']=$company->only([
                     'document','legal_name','trade_name','state_registration','state','city',
                     'city_ibge_code','zip_code','address','address_number','district','crt',
@@ -215,9 +279,9 @@ class NfeDraftController extends Controller
             // Um erro não cancela o rascunho: a versão parcial continua salva.
             try {
                 DB::transaction(function()use($request,$draft,$snapshot){
-                    $complete=$this->draftData($request);
+                    $complete=$this->draftData($request,$draft);
                     $complete['custom_fields']=array_replace(
-                        $draft->custom_fields??[],['_editor_form'=>$snapshot]
+                        $draft->custom_fields??[],$complete['custom_fields']??[],['_editor_form'=>$snapshot]
                     );
                     $draft->update($complete+['validated_at'=>null]);
                     $this->replaceItems($draft,$request);
@@ -256,8 +320,9 @@ class NfeDraftController extends Controller
     {
         try {
             DB::transaction(function()use($request,$draft){
-                $draft->update($this->draftData($request)+['validated_at'=>null]);
-                $this->replaceItems($draft,$request);
+                $locked=$this->editableDraft($draft);
+                $locked->update($this->draftData($request,$locked)+['validated_at'=>null]);
+                $this->replaceItems($locked,$request);
             },3);
         }catch(ValidationException $error){
             return redirect()->route('fiscal.nfe.edit',$draft)
@@ -268,29 +333,54 @@ class NfeDraftController extends Controller
 
     public function validateDraft(Request $request,NfeDraft $nfeDraft)
     {
-        abort_unless($nfeDraft->status==='draft',409);
-        $saved=(array)data_get($nfeDraft->custom_fields,'_editor_form',[]);
-        if($saved!==[]){
-            // Valida os mesmos dados que o usuário salvou como rascunho,
-            // nunca campos relacionais antigos que ficaram incompletos.
-            $request->replace($saved);
-            return $this->validateSavedForm($request,$nfeDraft);
-        }
-        return $this->validateAndRedirect($nfeDraft);
+        return DB::transaction(function()use($request,$nfeDraft){
+            $draft=$this->editableDraft($nfeDraft);
+            $saved=(array)data_get($draft->custom_fields,'_editor_form',[]);
+            if($saved!==[]){
+                $request->replace($saved);
+                return $this->validateSavedForm($request,$draft);
+            }
+            return $this->validateAndRedirect($draft);
+        },3);
     }
 
     public function destroy(NfeDraft $nfeDraft)
     {
-        abort_unless($nfeDraft->status==='draft',409);
-        $nfeDraft->delete();
+        DB::transaction(fn()=> $this->editableDraft($nfeDraft)->delete(),3);
         return redirect()->route('fiscal.nfe.drafts.index')->with('success','Rascunho da NF-e excluído.');
     }
 
     private function validateAndRedirect(NfeDraft $draft)
     {
-        abort_unless($draft->status==='draft',409);
+        return DB::transaction(function()use($draft){
+            return $this->validateLockedDraft($this->editableDraft($draft));
+        },3);
+    }
+
+    /** Every draft mutation shares the emission reservation row lock. */
+    private function editableDraft(NfeDraft $draft): NfeDraft
+    {
+        $locked=NfeDraft::query()->lockForUpdate()->findOrFail($draft->id);
+        abort_unless($locked->status==='draft' && $locked->document_number===null
+            && $locked->access_key===null && $locked->transmission_attempted_at===null,
+            409,'Esta NF-e já foi reservada para emissão e não pode mais ser alterada.');
+        return $locked;
+    }
+
+    private function validateLockedDraft(NfeDraft $draft)
+    {
         $draft->load(['items','customer','operationNature']);
         $errors=[];
+        try {
+            app(Nfe55TaxRuleApplicationService::class)->apply($draft,CompanySetting::current());
+            $totals=$this->calculateTotals($draft->items->map(fn($item)=>$item->toArray())->all(),
+                (float)$draft->discount,(float)$draft->surcharge,
+                (float)data_get($draft->transport_data,'freight_value',0),$draft->operation_type,$draft->issue_date?->toDateString(),$draft->purpose);
+            $draft->update(['totals'=>$totals,'invoice_data'=>array_replace($draft->invoice_data??[],[
+                'original_value'=>round($totals['total']+$totals['discount'],2),
+                'discount'=>$totals['discount'],'net_value'=>$totals['total'],
+            ])]);
+        }catch(\RuntimeException $error){$errors[]=\App\Support\UserFacingMessage::fromThrowable($error,'Não foi possível conferir os tributos. Revise os dados da nota.');}
 
         if(!$draft->operationNature) $errors[]='Selecione uma natureza de operação.';
         elseif($draft->operation_type!==$draft->operationNature->operation_type){
@@ -332,10 +422,9 @@ class NfeDraftController extends Controller
         if($draft->inform_exit_datetime && (!$draft->exit_date || !$draft->exit_time)) {
             $errors[]='Informe data e horário de saída ou entrada.';
         }
-        if($draft->operation_type!=='outbound' || $draft->destination!=='internal'
-            || $draft->purpose!=='normal') {
-            $errors[]='Esta combinação de operação, destino e finalidade ainda não está disponível para emissão.';
-        }
+        try {
+            app(\App\Services\Fiscal\Nfe55OperationPolicy::class)->validate($draft,CompanySetting::current());
+        }catch(\RuntimeException $error){$errors[]=\App\Support\UserFacingMessage::fromThrowable($error,'Não foi possível conferir os tributos. Revise os dados da nota.');}
 
         if($draft->items->isEmpty()) $errors[]='Adicione pelo menos um produto.';
 
@@ -370,7 +459,7 @@ class NfeDraftController extends Controller
                 // sem reservar numeração nem transmitir à SEFAZ.
                 app(\App\Services\Fiscal\Nfe55IniBuilder::class)->build(
                     $draft,CompanySetting::current(),
-                    max(1,(int)AppSetting::value('nfe','next_number',1)),
+                    app(\App\Services\Fiscal\FiscalDocumentSettings::class)->nfeNumbering((string)$draft->environment)['next_number'],
                     12345678
                 );
             } catch (\Throwable $error) {
@@ -378,7 +467,8 @@ class NfeDraftController extends Controller
                     'draft_id'=>$draft->id,
                     'type'=>get_class($error),
                 ]);
-                $errors[]='Confira a classificação fiscal e os impostos dos produtos antes de emitir. Esta combinação ainda não está pronta para envio.';
+                $errors[]=\App\Support\UserFacingMessage::fromThrowable($error,
+                    'Confira a classificação fiscal e os impostos dos produtos antes de emitir.');
             }
         }
 
@@ -499,7 +589,7 @@ class NfeDraftController extends Controller
             'paymentTypes'=>self::PAYMENT_TYPES,
             'cardBrands'=>self::CARD_BRANDS,
             'isEditing'=>$draft->exists,
-            'nextNumber'=>(int)AppSetting::value('nfe','next_number',1),
+            'nextNumber'=>(int)AppSetting::value('nfe',$draft->environment==='production'?'production_next_number':'next_number',$draft->environment==='production'?null:1),
         ]);
     }
 
@@ -510,8 +600,10 @@ class NfeDraftController extends Controller
         return $time === null || $time === '' ? null : substr($time,0,5);
     }
 
-    private function draftData(Request $request): array
+    private function draftData(Request $request,?NfeDraft $existing=null): array
     {
+        $environment=$existing?->environment ?: app(\App\Services\Fiscal\FiscalDocumentSettings::class)->environment('nfe');
+        $series=$existing?->series ?? app(\App\Services\Fiscal\FiscalDocumentSettings::class)->nfeNumbering($environment)['series'];
         $data=$request->validate([
             'operation_nature_id'=>['required','integer','exists:operation_natures,id'],
             'customer_id'=>['required','integer','exists:customers,id'],
@@ -519,6 +611,7 @@ class NfeDraftController extends Controller
             'destination'=>['nullable',Rule::in(['internal','interstate','foreign'])],
             'presence'=>['required',Rule::in(['not_applicable','presential','internet','phone','delivery_home','outside_establishment','other'])],
             'purpose'=>['nullable',Rule::in(['normal','complementary','adjustment','return','credit_note','debit_note'])],
+            'fiscal_operation'=>['nullable',Rule::in(['sale','devolution','transfer','bonus','gift','sample','remittance','return_of_remittance','export','import'])],
             'substitute_state_registration'=>['nullable','string','max:30'],
             'has_referenced_document'=>['nullable','boolean'],
             'inform_issue_datetime'=>['nullable','boolean'],
@@ -565,6 +658,11 @@ class NfeDraftController extends Controller
             'card_authorization_code'=>['nullable','string','max:40'],
 
             'additional_info'=>['nullable','string','max:10000'],
+            'tax_authority_info'=>['nullable','string','max:2000'],
+            'export_exit_uf'=>['nullable','string','size:2'],
+            'export_exit_location'=>['nullable','string','max:60'],
+            'export_dispatch_location'=>['nullable','string','max:60'],
+            'final_consumer'=>['nullable','boolean'],
             'duplicates_json'=>['nullable','string'],
             'payments_json'=>['nullable','string'],
             'references_json'=>['nullable','string'],
@@ -585,11 +683,13 @@ class NfeDraftController extends Controller
             ? Customer::query()->find((int)$request->input('carrier_id'))
             : null;
 
-        $items=$this->decodeArray($data['items_json'],'itens');
+        $data['destination']=$data['destination']??$this->resolveDestination($customer,$company);
+        $data['purpose']=$data['purpose']??($nature->purpose?:'normal');
+        $items=$this->resolveFormTaxes($this->decodeArray($data['items_json'],'itens'),$data,$company,$customer);
         $discount=max(0,(float)($data['discount'] ?? 0));
         $surcharge=max(0,(float)($data['surcharge'] ?? 0));
         $freight=max(0,(float)($data['freight_value'] ?? 0));
-        $totals=$this->calculateTotals($items,$discount,$surcharge,$freight);
+        $totals=$this->calculateTotals($items,$discount,$surcharge,$freight,$data['operation_type'],$data['issue_date']??null,$data['purpose']??'normal');
         $payments=$this->validatedPayments($request,$data,$totals);
         $duplicates=$this->validatedDuplicates($data['duplicates_json'] ?? null,$totals);
         $usesMercantileDuplicate=false;
@@ -652,12 +752,11 @@ class NfeDraftController extends Controller
             'operation_nature_id'=>$nature->id,
             'customer_id'=>$customer->id,
             'user_id'=>auth()->id(),
-            'status'=>'draft',
             'operation_type'=>$data['operation_type'],
             'destination'=>$destination,
             'presence'=>$data['presence'],
             'purpose'=>$purpose,
-            'final_consumer'=>(bool)$customer->final_consumer,
+            'final_consumer'=>$request->has('final_consumer')?$request->boolean('final_consumer'):(bool)$customer->final_consumer,
             'substitute_state_registration'=>$data['substitute_state_registration'] ?? null,
             'has_referenced_document'=>$hasReferencedDocument,
             'inform_issue_datetime'=>$informIssueDatetime,
@@ -679,9 +778,8 @@ class NfeDraftController extends Controller
             'card_brand'=>$data['card_brand'] ?? null,
             'card_acquirer_document'=>$data['card_acquirer_document'] ?? null,
             'card_authorization_code'=>$data['card_authorization_code'] ?? null,
-            'series'=>(int)AppSetting::value('nfe','series',1),
-            'document_number'=>null,
-            'environment'=>(string)AppSetting::value('nfe','environment',AppSetting::value('fiscal','default_environment','homologation')),
+            'series'=>$series,
+            'environment'=>$environment,
             'emitter_snapshot'=>$company->only([
                 'document','legal_name','trade_name','state_registration','municipal_registration','cnae_main',
                 'phone','email','zip_code','state','city','city_ibge_code','address','address_number',
@@ -719,9 +817,14 @@ class NfeDraftController extends Controller
             'duplicates'=>$duplicates,
             'payments'=>$payments,
             'references'=>$references,
-            'custom_fields'=>[],
+            'custom_fields'=>['fiscal_operation'=>$data['fiscal_operation']??'sale',
+                'foreign_trade'=>[
+                    'export_exit_uf'=>strtoupper((string)($data['export_exit_uf']??'')),
+                    'export_exit_location'=>$data['export_exit_location']??'',
+                    'export_dispatch_location'=>$data['export_dispatch_location']??'',
+                ]],
             'additional_info'=>$data['additional_info'] ?? $nature->additional_info,
-            'tax_authority_info'=>null,
+            'tax_authority_info'=>$data['tax_authority_info']??null,
             'totals'=>$totals,
         ];
     }
@@ -765,23 +868,29 @@ class NfeDraftController extends Controller
                     ]);
                 }
             }
-            $quantity=max(0,(float)($item['quantity'] ?? 0));
-            $dimensionQuantity=max(0,(float)($item['dimension_quantity'] ?? 1));
-            if($dimensionQuantity<=0) $dimensionQuantity=1;
-            $unitPrice=max(0,(float)($item['unit_price'] ?? 0));
-            $parts=[];
+            try {
+                $quantity=NfeTaxMath::format(NfeTaxMath::scaled($item['quantity']??0,4,'Quantidade'),4);
+                $dimensionQuantity=NfeTaxMath::format(NfeTaxMath::scaled($item['dimension_quantity']??1,4,'Fator dimensional'),4);
+                $unitPrice=NfeTaxMath::format(NfeTaxMath::scaled($item['unit_price']??0,4,'Preço unitário'),4);
+                $line=NfeTaxMath::line($quantity,$dimensionQuantity,$unitPrice);
+            }catch(\RuntimeException $error){
+                throw ValidationException::withMessages(['items_json'=>\App\Support\UserFacingMessage::fromThrowable($error,'Não foi possível conferir os dados fiscais dos produtos. Revise os itens.')]);
+            }
+            $parts=[];$partsCents=[];
             foreach(['freight','insurance','other_expenses','discount'] as $part){
                 $value=$item[$part]??0;
                 if(!is_numeric($value)||(float)$value<0||(float)$value>99999999){
                     throw ValidationException::withMessages(['items_json'=>'Confira os valores adicionais dos itens da NF-e.']);
                 }
-                $parts[$part]=round((float)$value,2);
+                try {$partsCents[$part]=NfeTaxMath::scaled($value,2,'Valor adicional do item');}
+                catch(\RuntimeException $error){throw ValidationException::withMessages(['items_json'=>\App\Support\UserFacingMessage::fromThrowable($error,'Não foi possível conferir os dados fiscais dos produtos. Revise os itens.')]);}
+                $parts[$part]=$partsCents[$part]/100;
             }
-            $gross=round($quantity*$dimensionQuantity*$unitPrice,2);
-            if($parts['discount']>$gross+$parts['freight']+$parts['insurance']+$parts['other_expenses']){
+            $gross=$line['gross_cents']/100;
+            if($partsCents['discount']>$line['gross_cents']+$partsCents['freight']+$partsCents['insurance']+$partsCents['other_expenses']){
                 throw ValidationException::withMessages(['items_json'=>'O desconto do item supera seu valor.']);
             }
-            $lineTotal=max(0,$gross+$parts['freight']+$parts['insurance']+$parts['other_expenses']-$parts['discount']);
+            $lineTotal=($line['gross_cents']+$partsCents['freight']+$partsCents['insurance']+$partsCents['other_expenses']-$partsCents['discount'])/100;
 
             $taxData=array_replace(
                 is_array($product?->tax_defaults) ? $product->tax_defaults : [],
@@ -828,19 +937,26 @@ class NfeDraftController extends Controller
             ]);
         }
 
-        $storedItems=$draft->items()->get()->map(fn($item)=>[
-            'quantity'=>(float)$item->quantity,
-            'dimension_quantity'=>(float)$item->dimension_quantity,
-            'unit_price'=>(float)$item->unit_price,
+        $draft->load('items');
+        try {
+            app(Nfe55TaxRuleApplicationService::class)->apply($draft,$company,true,true);
+        }catch(\RuntimeException $error){
+            throw ValidationException::withMessages(['items_json'=>\App\Support\UserFacingMessage::fromThrowable($error,'Não foi possível conferir os dados fiscais dos produtos. Revise os itens.')]);
+        }
+        $storedItems=$draft->items->map(fn($item)=>[
+            'quantity'=>$item->quantity,
+            'dimension_quantity'=>$item->dimension_quantity,
+            'unit_price'=>$item->unit_price,
             'freight'=>(float)$item->freight,
             'insurance'=>(float)$item->insurance,
             'other_expenses'=>(float)$item->other_expenses,
             'discount'=>(float)$item->discount,
             'tax_data'=>$item->tax_data ?? [],
+            'special_data'=>$item->special_data ?? [],
         ])->all();
 
         $freight=(float)data_get($draft->transport_data,'freight_value',0);
-        $totals=$this->calculateTotals($storedItems,(float)$draft->discount,(float)$draft->surcharge,$freight);
+        $totals=$this->calculateTotals($storedItems,(float)$draft->discount,(float)$draft->surcharge,$freight,$draft->operation_type,$draft->issue_date?->toDateString(),$draft->purpose);
 
         $draft->update([
             'totals'=>$totals,
@@ -851,6 +967,39 @@ class NfeDraftController extends Controller
                 'net_value'=>$totals['total'],
             ],
         ]);
+    }
+
+    private function resolveFormTaxes(array $items,array $data,CompanySetting $company,?Customer $customer): array
+    {
+        $draft=new NfeDraft([
+            'status'=>'draft','operation_type'=>$data['operation_type']??'outbound',
+            'operation_nature_id'=>$data['operation_nature_id']??null,
+            'destination'=>$data['destination']??($customer?$this->resolveDestination($customer,$company):'internal'),
+            'purpose'=>$data['purpose']??'normal','issue_date'=>$data['issue_date']??now()->toDateString(),
+            'recipient_snapshot'=>$customer?->toArray()??[],
+            'final_consumer'=>array_key_exists('final_consumer',$data)?(bool)$data['final_consumer']:(bool)$customer?->final_consumer,
+            'custom_fields'=>['fiscal_operation'=>$data['fiscal_operation']??'sale'],
+        ]);
+        $draft->setRelation('customer',$customer);
+        $nature=isset($data['operation_nature_id'])?OperationNature::query()->find($data['operation_nature_id']):null;
+        $draft->setRelation('operationNature',$nature);
+        $draft->setRelation('items',collect($items)->map(function($item,$index)use($draft,$nature){
+            if(!is_array($item))throw ValidationException::withMessages(['items_json'=>'Confira os produtos da NF-e.']);
+            $product=isset($item['product_id'])?Product::query()->find($item['product_id']):null;
+            $item['tax_data']=array_replace($product?->tax_defaults??[],is_array($item['tax_data']??null)?$item['tax_data']:[]);
+            foreach(['ncm','cest','origin','unit','tax_unit'] as $key){
+                if(!isset($item[$key])||$item[$key]==='')$item[$key]=$product?->{$key};
+            }
+            if(empty($item['cfop']))$item['cfop']=$this->resolveItemCfop($nature,$draft->destination,$draft->operation_type,$item['tax_data']);
+            $item['item_number']=$index+1;
+            return new NfeDraftItem($item);
+        }));
+        try {
+            app(Nfe55TaxRuleApplicationService::class)->apply($draft,$company,false);
+        }catch(\RuntimeException $error){
+            throw ValidationException::withMessages(['items_json'=>\App\Support\UserFacingMessage::fromThrowable($error,'Não foi possível conferir os dados fiscais dos produtos. Revise os itens.')]);
+        }
+        return $draft->items->map(fn($item)=>$item->toArray())->all();
     }
 
     private function resolveItemCfop(
@@ -877,11 +1026,13 @@ class NfeDraftController extends Controller
             }
         }
 
-        $productKey=$operationType==='inbound'
-            ? ($interstate ? 'cfop_inbound_interstate' : 'cfop_inbound_internal')
-            : ($interstate ? 'cfop_outbound_interstate' : 'cfop_outbound_internal');
+        $productKey=$foreign
+            ? ($operationType==='inbound'?'cfop_inbound_foreign':'cfop_outbound_foreign')
+            : ($operationType==='inbound'
+                ? ($interstate ? 'cfop_inbound_interstate' : 'cfop_inbound_internal')
+                : ($interstate ? 'cfop_outbound_interstate' : 'cfop_outbound_internal'));
 
-        $productCfop=trim((string)($taxData[$productKey] ?? $taxData['cfop'] ?? ''));
+        $productCfop=trim((string)($taxData[$productKey] ?? ($foreign?($taxData['cfop_foreign']??null):null) ?? $taxData['cfop'] ?? ''));
 
         if($nature?->override_product_cfop) return $natureCfop ?: ($productCfop ?: null);
         return $productCfop ?: $natureCfop;
@@ -901,54 +1052,19 @@ class NfeDraftController extends Controller
         return $customer->state==='EX' || ($country!=='' && $country!=='1058');
     }
 
-    private function calculateTotals(array $items,float $discount=0,float $surcharge=0,float $freight=0): array
+    private function calculateTotals(array $items,float $discount=0,float $surcharge=0,float $freight=0,string $direction='outbound',?string $issueDate=null,string $purpose='normal'): array
     {
-        $totals=[
-            'products'=>0.0,
-            'freight'=>max(0,$freight),
-            'insurance'=>0.0,
-            'other_expenses'=>0.0,
-            'discount'=>max(0,$discount),
-            'surcharge'=>max(0,$surcharge),
-            'ipi'=>0.0,
-            'total'=>0.0,
-        ];
-
-        foreach($items as $item) {
-            $quantity=max(0,(float)($item['quantity'] ?? 0));
-            $dimension=max(0,(float)($item['dimension_quantity'] ?? 1));
-            if($dimension<=0) $dimension=1;
-            $value=$quantity*$dimension*max(0,(float)($item['unit_price'] ?? 0));
-            $totals['products']+=$value;
-            $itemSubtotal=$value;
-            foreach(['freight','insurance','other_expenses'] as $field){
-                $charge=max(0,(float)($item[$field]??0));
-                $totals[$field]+=$charge;
-                $itemSubtotal+=$charge;
-            }
-            $itemDiscount=max(0,(float)($item['discount']??0));
-            if(round($itemSubtotal-$itemDiscount,2)<0){
-                throw ValidationException::withMessages([
-                    'items_json'=>'O desconto do item supera seu valor.',
-                ]);
-            }
-            $totals['discount']+=$itemDiscount;
-
-            $tax=is_array($item['tax_data'] ?? null) ? $item['tax_data'] : [];
-            $ipiRate=max(0,(float)($tax['ipi_rate'] ?? 0));
-            if($ipiRate>0) $totals['ipi']+=$value*($ipiRate/100);
-        }
-
-        $net=$totals['products']+$totals['freight']+$totals['insurance']+$totals['other_expenses']
-            +$totals['surcharge']+$totals['ipi']-$totals['discount'];
-        if(round($net,2)<0){
-            throw ValidationException::withMessages([
-                'discount'=>'O desconto total não pode superar o valor dos produtos e acréscimos.',
+        try {
+            return app(Nfe55DraftTotalsService::class)->calculate($items,[
+                'discount'=>$discount,'surcharge'=>$surcharge,'freight'=>$freight,
+                'crt'=>(string)CompanySetting::current()->crt,
+                'operation_type'=>$direction,'purpose'=>$purpose,
+                'issue_date'=>$issueDate??now()->toDateString(),
             ]);
+        }catch(\RuntimeException $error){
+            $field=str_contains(mb_strtolower($error->getMessage()),'desconto geral')?'discount':'items_json';
+            throw ValidationException::withMessages([$field=>\App\Support\UserFacingMessage::fromThrowable($error,'Não foi possível conferir os valores da nota. Revise os itens e os descontos.')]);
         }
-        $totals['total']=max(0,$net);
-
-        return array_map(fn($value)=>round($value,2),$totals);
     }
 
     private function validatedPayments(Request $request,array $data,array $totals): array
@@ -1122,7 +1238,8 @@ class NfeDraftController extends Controller
     {
         if($json===null || trim($json)==='') return [];
         $decoded=json_decode($json,true);
-        if(!is_array($decoded)) {
+        $limit=$label==='itens'?80:500;
+        if(!is_array($decoded)||!array_is_list($decoded)||count($decoded)>$limit) {
             throw ValidationException::withMessages([$label=>"Conteúdo inválido em {$label}."]);
         }
         return $decoded;

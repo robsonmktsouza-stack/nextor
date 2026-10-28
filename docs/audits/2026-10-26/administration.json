@@ -1,0 +1,267 @@
+{
+  "area": "administration",
+  "reviewed_files": [
+    "app/Http/Controllers/AuthController.php",
+    "app/Http/Controllers/DashboardController.php",
+    "app/Http/Controllers/PasswordRecoveryController.php",
+    "app/Http/Controllers/SettingsController.php",
+    "app/Http/Middleware/RequireCentralLicense.php",
+    "app/Http/Middleware/RequireCompanyConfigured.php",
+    "app/Http/Middleware/RequirePermission.php",
+    "app/Services/License/CentralLicenseService.php",
+    "app/Services/WebhookService.php",
+    "app/Support/CommercialLicensePolicy.php",
+    "app/Support/CommercialModuleAccess.php",
+    "app/Support/LicenseReminder.php",
+    "app/Support/LoginSubdomain.php",
+    "app/Support/ManagedLicenseConfig.php",
+    "public/js/commercial-readonly.js",
+    "public/js/desktop-polish.js",
+    "public/js/login.js",
+    "resources/views/auth/login.blade.php",
+    "resources/views/auth/password-request.blade.php",
+    "resources/views/auth/password-reset.blade.php",
+    "resources/views/dashboard.blade.php",
+    "resources/views/errors/license-blocked.blade.php",
+    "resources/views/layouts/app.blade.php",
+    "resources/views/layouts/pdv.blade.php",
+    "resources/views/partials/commercial-readonly.blade.php",
+    "resources/views/partials/icon.blade.php",
+    "resources/views/partials/pagination.blade.php",
+    "resources/views/partials/quick-catalog.blade.php",
+    "resources/views/partials/table-footer.blade.php",
+    "resources/views/settings/index.blade.php"
+  ],
+  "findings": [
+    {
+      "id": "ADM-001",
+      "severity": "medium",
+      "file": "resources/views/settings/index.blade.php",
+      "line": 604,
+      "before": "ucfirst($job->status) imprimia Prepared, Pending, Rejected e códigos não reconhecidos; estados de falha recebiam classe positiva.",
+      "after": "Aguardando confirmação",
+      "status": "corrected",
+      "reason": "Tabela agora usa rótulos portugueses, indicação visual coerente e A verificar para estados desconhecidos; tipo fiscal e cancelamento também traduzidos."
+    },
+    {
+      "id": "ADM-002",
+      "severity": "high",
+      "file": "public/js/login.js",
+      "line": 173,
+      "before": "catch exibia error.message de falhas nativas de rede ou leitura JSON.",
+      "after": "notify(friendlyMessage(error,",
+      "status": "corrected",
+      "reason": "Filtro compartilhado preserva erros no mecanismo de diagnóstico sem imprimir SyntaxError, TypeError ou detalhes de implementação. Teste Node cobre falhas reais simuladas."
+    },
+    {
+      "id": "ADM-003",
+      "severity": "high",
+      "file": "public/js/login.js",
+      "line": 158,
+      "before": "Mensagens e arrays de erro arbitrários da resposta API eram apresentados diretamente, inclusive errors de HTTP500.",
+      "after": "if (reply.status < 500)",
+      "status": "corrected",
+      "reason": "Respostas de erro passam pelo filtro compartilhado; falhas do servidor usam orientação segura. Validação de usuário/senha continua específica."
+    },
+    {
+      "id": "ADM-004",
+      "severity": "medium",
+      "file": "app/Http/Controllers/SettingsController.php",
+      "line": 337,
+      "before": "A extensão OpenSSL precisa estar habilitada para validar o certificado A1.",
+      "after": "Não foi possível validar o certificado. Contate o suporte e tente novamente.",
+      "status": "corrected",
+      "reason": "Detalhe da extensão permanece em log interno sem credenciais; formato .pfx/.p12 e conferência de senha continuam nas mensagens de arquivo inválido."
+    },
+    {
+      "id": "ADM-005",
+      "severity": "low",
+      "file": "resources/views/settings/index.blade.php",
+      "line": 56,
+      "before": "Parágrafos genéricos repetiam o objetivo de cada aba (Atualize os dados..., Organize o dinheiro..., Personalize o uso...).",
+      "after": "settings-main-tabs",
+      "status": "corrected",
+      "reason": "Removido o guia genérico; navegação e campos existentes preservados."
+    },
+    {
+      "id": "ADM-006",
+      "severity": "low",
+      "file": "resources/views/auth/login.blade.php",
+      "line": 25,
+      "before": "Entre no ambiente da sua empresa; Acesso exclusivo aos usuários autorizados.",
+      "after": "Acesse seu sistema",
+      "status": "corrected",
+      "reason": "Removidos subtítulo e rodapé genéricos sem instrução operacional."
+    },
+    {
+      "id": "ADM-007",
+      "severity": "low",
+      "file": "resources/views/auth/password-request.blade.php",
+      "line": 20,
+      "before": "A recuperação é individual para esta empresa.",
+      "after": "Enviaremos as instruções para o e-mail cadastrado.",
+      "status": "corrected",
+      "reason": "Retirada explicação de isolamento da instalação; mantida instrução de recuperação de senha."
+    },
+    {
+      "id": "ADM-008",
+      "severity": "low",
+      "file": "resources/views/settings/index.blade.php",
+      "line": 675,
+      "before": "Disponibiliza esta configuração ao emissor; Preferência para integração venda → nota; Disponibiliza os parâmetros ao emissor de serviços.",
+      "after": "NF-e habilitada",
+      "status": "corrected",
+      "reason": "Eliminadas explicações de implementação que apenas repetiam as opções; nenhum campo ou valor removido."
+    },
+    {
+      "id": "ADM-009",
+      "severity": "low",
+      "file": "resources/views/settings/index.blade.php",
+      "line": 1006,
+      "before": "Endereços /api/lumeron/products, /customers e /sales sempre abertos na configuração.",
+      "after": "Endereços para integração",
+      "status": "corrected",
+      "reason": "Detalhe necessário a administradores foi recolhido em consulta sob demanda; endpoints mantidos integralmente."
+    },
+    {
+      "id": "ADM-010",
+      "severity": "medium",
+      "file": "resources/views/settings/index.blade.php",
+      "line": 1035,
+      "before": "Regenerar token executava troca sem confirmação sobre integrações existentes.",
+      "after": "As integrações que usam a chave atual precisarão ser atualizadas.",
+      "status": "corrected",
+      "reason": "Confirmação explica consequência; geração inicial continua direta e credencial só aparece após ação explícita."
+    },
+    {
+      "id": "ADM-011",
+      "severity": "medium",
+      "file": "resources/views/settings/index.blade.php",
+      "line": 575,
+      "before": "Remover o certificado fiscal armazenado?",
+      "after": "A emissão fiscal dependerá do cadastro de um novo certificado.",
+      "status": "corrected",
+      "reason": "Confirmação descreve consequência operacional sem modificar remoção ou política fiscal."
+    },
+    {
+      "id": "ADM-012",
+      "severity": "low",
+      "file": "resources/views/settings/index.blade.php",
+      "line": 1015,
+      "before": "Novo token; Copiar token; ID CSC de homologação/produção.",
+      "after": "Nova chave de acesso — copie agora",
+      "status": "corrected",
+      "reason": "Rótulos em linguagem comercial; identificadores CSC externos exigidos pela SEFAZ e nomes técnicos dos formulários preservados."
+    },
+    {
+      "id": "ADM-013",
+      "severity": "low",
+      "file": "app/Http/Controllers/SettingsController.php",
+      "line": 370,
+      "before": "Certificado A1 armazenado com segurança; Novo token da API gerado.",
+      "after": "Certificado A1 salvo.",
+      "status": "corrected",
+      "reason": "Sucesso informa somente o resultado, sem afirmação genérica sobre implementação ou segurança."
+    },
+    {
+      "id": "ADM-014",
+      "severity": "low",
+      "file": "resources/views/dashboard.blade.php",
+      "line": 12,
+      "before": "Descrição genérica Acompanhe as operações... e contagem venda(s) ativa(s).",
+      "after": "vendas concluídas",
+      "status": "corrected",
+      "reason": "Removida introdução redundante e corrigida concordância da contagem, sem alterar consulta ou cálculo."
+    },
+    {
+      "id": "ADM-015",
+      "severity": "low",
+      "file": "public/js/login.js",
+      "line": 101,
+      "before": "Confira o subdomínio. Este endereço pertence a outra instalação.",
+      "after": "Confira a empresa. Este endereço pertence a outra empresa.",
+      "status": "corrected",
+      "reason": "Mensagens usam o mesmo conceito do campo Empresa; validação de domínio/isolamento permanece igual."
+    },
+    {
+      "id": "ADM-016",
+      "severity": "low",
+      "file": "app/Http/Controllers/SettingsController.php",
+      "line": 35,
+      "before": "'dashboard'=>'Dashboard'",
+      "after": "'dashboard'=>'Visão geral'",
+      "status": "corrected",
+      "reason": "Nome exibido da permissão corresponde ao título português do módulo; chave dashboard preservada."
+    },
+    {
+      "id": "ADM-017",
+      "severity": "low",
+      "file": "resources/views/settings/index.blade.php",
+      "line": 800,
+      "before": "Placeholder ex.: voucher; Vale / voucher; formato atualmente gerado pelo Lumeron.",
+      "after": "arquivo para importação no sistema contábil.",
+      "status": "corrected",
+      "reason": "Exemplos e ajuda de formato descrevem uso; códigos/formatos persistidos não mudam."
+    },
+    {
+      "id": "ADM-018",
+      "severity": "low",
+      "file": "resources/views/errors/license-blocked.blade.php",
+      "line": 4,
+      "before": "Mensagem misturava todas as causas da licença e prometia disponibilidade de toda a área Fiscal.",
+      "after": "As consultas e as regularizações fiscais permitidas continuam disponíveis conforme suas permissões.",
+      "status": "corrected",
+      "reason": "Fallback legado agora orienta contato e descreve acesso permitido sem prometer funcionalidades não autorizadas; modo consulta do middleware intacto."
+    },
+    {
+      "id": "ADM-019",
+      "severity": "low",
+      "file": "resources/views/settings/index.blade.php",
+      "line": 702,
+      "before": "Campos CSC/SMTP/webhook e chave API gerada explicitamente são técnicos.",
+      "after": "Campos administrativos necessários preservados.",
+      "status": "retained",
+      "reason": "São parâmetros essenciais de integração em Configurações, protegidos por permissão. Segredos existentes continuam mascarados; chave nova permanece disponível só na sessão após geração explícita."
+    },
+    {
+      "id": "ADM-020",
+      "severity": "low",
+      "file": "app/Http/Middleware/RequireCentralLicense.php",
+      "line": 46,
+      "before": "code=LUMERON_LICENSE_READ_ONLY e license_status/module nos objetos de resposta.",
+      "after": "Códigos de protocolo mantidos sem exibição textual.",
+      "status": "retained",
+      "reason": "São contrato máquina necessário aos consumidores/controle de acesso. As mensagens visíveis já são em português e nenhuma credencial é enviada."
+    },
+    {
+      "id": "ADM-021",
+      "severity": "low",
+      "file": "app/Services/License/CentralLicenseService.php",
+      "line": 118,
+      "before": "HMAC, instance_id, secret, payload, cache e exceções de validação interna.",
+      "after": "Diagnóstico interno e autenticação preservados.",
+      "status": "retained",
+      "reason": "Não são apresentados nas telas; o serviço captura falhas e retorna estado comercial sem credenciais. Não alterar segurança de licenciamento para simplificar linguagem."
+    }
+  ],
+  "tests": [
+    {
+      "command": "PHPUnit --filter=AdministrationPresentation|SettingsClarity|SettingsModule|LumeronLogin|CommercialReadOnlyLicense|CentralLicenseGuard",
+      "tests": 52,
+      "assertions": 349,
+      "failures": 0,
+      "evidence": "/workspace/scratch/audit-administration-targeted.log"
+    },
+    {
+      "command": "node --test tests/browser/login-messages.test.cjs",
+      "tests": 5,
+      "failures": 0,
+      "evidence": "/workspace/scratch/audit-administration-login-js.log"
+    },
+    {
+      "command": "node --check public/js/login.js",
+      "result": "pass"
+    }
+  ],
+  "pending": []
+}

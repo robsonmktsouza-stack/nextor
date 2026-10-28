@@ -43,7 +43,7 @@ final class FiscalUtilitiesController extends Controller
         }
 
         if (!class_exists(ZipArchive::class)) {
-            return back()->with('error','Não foi possível gerar o ZIP dos XMLs. A extensão PHP ZIP não está habilitada.');
+            return back()->with('error','Não foi possível compactar os XMLs. Solicite a verificação da configuração de arquivos ao responsável pelo sistema.');
         }
 
         $temporary=tempnam(sys_get_temp_dir(),'nextor-fiscal-');

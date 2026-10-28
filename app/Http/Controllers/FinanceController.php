@@ -258,13 +258,13 @@ class FinanceController extends Controller
 
         if($data['action']==='settle') {
             if(empty($data['financial_account_id'])) {
-                throw ValidationException::withMessages(['financial_account_id'=>'Selecione a conta financeira para a baixa em massa.']);
+                throw ValidationException::withMessages(['financial_account_id'=>'Selecione a conta financeira para registrar os pagamentos.']);
             }
             if(empty($data['settled_at'])) {
-                throw ValidationException::withMessages(['settled_at'=>'Informe a data da baixa em massa.']);
+                throw ValidationException::withMessages(['settled_at'=>'Informe a data dos pagamentos.']);
             }
             if(empty($data['payment_method'])) {
-                throw ValidationException::withMessages(['payment_method'=>'Selecione a forma de pagamento da baixa em massa.']);
+                throw ValidationException::withMessages(['payment_method'=>'Selecione a forma de pagamento.']);
             }
 
             $account=FinancialAccount::query()
@@ -292,7 +292,7 @@ class FinanceController extends Controller
                 $applied++;
             }
 
-            $message=$applied.' lançamento(s) baixado(s) integralmente.';
+            $message=$applied.($applied===1?' lançamento baixado integralmente.':' lançamentos baixados integralmente.');
         } elseif($data['action']==='settle_quick') {
             foreach($entries as $entry) {
                 if(
@@ -315,7 +315,7 @@ class FinanceController extends Controller
                 $applied++;
             }
 
-            $message=$applied.' lançamento(s) baixado(s) usando conta e forma já cadastradas.';
+            $message=$applied.($applied===1?' lançamento baixado com a conta e a forma de pagamento cadastradas.':' lançamentos baixados com a conta e a forma de pagamento cadastradas.');
         } elseif($data['action']==='edit_primary') {
             $hasChange=
                 filled($data['description'] ?? null)
@@ -370,7 +370,7 @@ class FinanceController extends Controller
                 }
             }
 
-            $message=$applied.' lançamento(s) atualizado(s).';
+            $message=$applied.($applied===1?' lançamento atualizado.':' lançamentos atualizados.');
         } elseif($data['action']==='edit_aux') {
             $changeKeywords=filled($data['keywords'] ?? null) || $request->boolean('clear_keywords');
             $changePayment=filled($data['payment_method'] ?? null) || $request->boolean('clear_payment_method');
@@ -395,7 +395,7 @@ class FinanceController extends Controller
                 }
             }
 
-            $message=$applied.' lançamento(s) atualizado(s).';
+            $message=$applied.($applied===1?' lançamento atualizado.':' lançamentos atualizados.');
         } elseif($data['action']==='cancel') {
             foreach($entries as $entry) {
                 if(($entry->sale_id!==null || $entry->purchase_id!==null) || $entry->status==='cancelled' || $entry->active_settlements_count>0) {
@@ -407,7 +407,7 @@ class FinanceController extends Controller
                 $applied++;
             }
 
-            $message=$applied.' lançamento(s) cancelado(s).';
+            $message=$applied.($applied===1?' lançamento cancelado.':' lançamentos cancelados.');
         } else {
             foreach($entries as $entry) {
                 if(($entry->sale_id!==null || $entry->purchase_id!==null) || $entry->status!=='cancelled') {
@@ -419,12 +419,12 @@ class FinanceController extends Controller
                 $applied++;
             }
 
-            $message=$applied.' lançamento(s) reaberto(s).';
+            $message=$applied.($applied===1?' lançamento reaberto.':' lançamentos reabertos.');
         }
 
         $redirect=back()->with('success',$message);
         if($skipped>0) {
-            $redirect->with('warning',$skipped.' item(ns) foram ignorados porque não permitem esta ação.');
+            $redirect->with('warning',$skipped.($skipped===1?' item não permite esta ação e foi ignorado.':' itens não permitem esta ação e foram ignorados.'));
         }
 
         return $redirect;

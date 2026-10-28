@@ -1,19 +1,8 @@
 /*
- * Lumeron ERP — tipografia de trabalho.
- * Fonte principal Roboto: carregada por Google Fonts no layout; Arial em
- * contingência/offline. Evite fontes legadas; não mexer em DANFE/impressões.
- * Esta folha deve ser a ÚLTIMA nos layouts administrativos e do PDV.
+ * Lumeron ERP — hierarquia de textos da interface.
+ * Roboto com contingência Arial. Tokens e componentes são definidos em suas
+ * folhas compartilhadas; impressões fiscais mantêm sua própria tipografia.
  */
-:root {
-  --lumeron-font:"Roboto",Arial,Helvetica,sans-serif;
-  --lumeron-text:14px;
-  --lumeron-small:12px;
-  --lumeron-label:13px;
-  --lumeron-list:13px;
-  --lumeron-heading:15px;
-  font-family:var(--lumeron-font);
-}
-
 @media screen {
   html,body {font-family:var(--lumeron-font);font-size:var(--lumeron-text);-webkit-text-size-adjust:100%}
   body,button,input,select,textarea,option {font-family:var(--lumeron-font)}
@@ -22,52 +11,23 @@
   .app-root {font-size:var(--lumeron-text);line-height:1.45}
   .pdv-body {font-size:var(--lumeron-text);line-height:1.4}
 
-  /* Estrutura persistente: pesquisa, perfil e menu lateral. */
+  /* Estrutura persistente: perfil e menu lateral. */
   .app-root .sidebar-link {font-size:13.5px;line-height:1.35;font-weight:550}
   .app-root .sidebar-section-label {font-size:11px;line-height:1.25;letter-spacing:.07em}
-  .app-root .cms-topbar :is(.command-box input,.topbar-pdv-shortcut,.user-label strong) {
-    font-size:13px;
-  }
+  .app-root .cms-topbar :is(.topbar-pdv-shortcut,.user-label strong) {font-size:13px}
   .app-root .cms-topbar .user-label small {font-size:11.5px}
   .app-root .page-heading h1 {font-size:17px;line-height:1.4;font-weight:700}
 
-  /* Navegação e comandos: rótulos legíveis sem perder densidade desktop. */
+  /* Navegação entre módulos, distinta dos controles de edição. */
   .app-root :is(.sales-module-tabs,.finance-module-tabs,.settings-main-tabs) > a {
     font-size:12.5px;
     font-weight:650;
     line-height:1.25;
   }
   .app-root .settings-subtabs a {font-size:12.5px}
-  .app-root :is(.grid-primary-action,.grid-tool,.grid-filter-button,.period-current,.period-arrow,.bulk-apply,.bulk-action-select,.bulk-actions .ui-select-trigger) {
-    font-size:13px;
-    line-height:1.3;
-  }
-  .app-root :is(.grid-actionbar,.grid-filter-panel,.period-label,.finance-periodbar) {
-    font-size:13px;
-  }
-  .app-root :is(.btn,.table-search-group input,.table-search input,.input-filter,.ui-select-trigger,.ui-select-option) {
-    font-size:13.5px;
-    line-height:1.35;
-  }
-  .app-root .grid-primary-action {font-weight:650}
-  .app-root .grid-tool {font-weight:550}
-  .app-root .grid-tool.grid-tool-wide {padding-inline:10px}
+  .app-root .period-label {font-size:13px}
 
-  /* Grade principal: mínimo de 12px nos cabeçalhos e 13px nos dados. */
-  .app-root .table-scroll .cms-table,
-  .app-root .cms-table {font-size:var(--lumeron-list)}
-  .app-root .table-scroll .cms-table thead th {
-    font-size:12px;
-    line-height:1.3;
-    letter-spacing:.015em;
-    font-weight:700;
-    padding-block:9px;
-  }
-  .app-root .table-scroll .cms-table tbody td:not(.empty-cell) {
-    font-size:13px;
-    line-height:1.4;
-    padding-block:9px;
-  }
+  /* Hierarquia dos textos de célula; a densidade da grade é compartilhada. */
   .app-root .cms-table .table-title {font-size:13.5px;line-height:1.35}
   .app-root .cms-table .table-subtitle {font-size:12px;line-height:1.4}
   .app-root :is(.cms-table .code-tag,.cms-table .status,.status,.code-tag) {
@@ -77,25 +37,9 @@
   .app-root .cms-table .empty-cell {font-size:13px;line-height:1.5}
   .app-root .fiscal-empty-state strong {font-size:13.5px}
   .app-root .fiscal-empty-state :is(span,a) {font-size:12.5px}
-  .app-root :is(.table-footerbar,.table-page-size-form .ui-select-trigger,.table-page-size-select,.table-pager-current,.table-pager-button) {
-    font-size:12.5px;
-  }
+  .app-root :is(.table-footerbar,.table-pager-current) {font-size:12.5px}
 
-  /* Formulários de cadastros, financeiro e fiscal. */
-  .app-root .field {font-size:13px;line-height:1.4}
-  .app-root .field > span,
-  .app-root .settings-page .field > span,
-  .app-root .product-editor .field > span,
-  .app-root .customer-editor .field > span {font-size:13px;line-height:1.35;font-weight:600}
-  .app-root .field :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea,.ui-select-trigger),
-  .app-root :is(.settings-page,.product-editor,.customer-editor) .field :is(input,select,textarea,.ui-select-trigger) {
-    font-size:13.5px;
-    line-height:1.45;
-  }
-  .app-root .ui-select.ui-searchable .ui-select-trigger {font-size:13.5px}
-  .app-root .ui-select.ui-searchable .ui-select-option {font-size:13px}
-  .app-root .ui-select .ui-select-option-subtitle {font-size:12px}
-  .app-root .toolbar-filters .ui-select.ui-searchable .ui-select-trigger {font-size:12.5px}
+  /* Títulos e ajuda de cadastros, financeiro e fiscal. */
   .app-root :is(.editor-help,.dialog-header p,.card-header p,.table-toolbar p,.settings-panel-head p) {
     font-size:12.5px;
     line-height:1.45;
@@ -106,11 +50,9 @@
     font-weight:650;
   }
   .app-root :is(.editor-panel h3,.settings-panel h3) {font-size:15px}
-  .app-root .dialog-header h2 {font-size:17px}
   .app-root .minor-link {font-size:12.5px}
 
-  /* Financeiro: cartões e tabelas devem ser legíveis a 100% de zoom. */
-  .app-root .finance-stats .stat-card {gap:0;min-width:0}
+  /* Valores e resumos financeiros. */
   .app-root .finance-stats .stat-label {
     font-size:13px;
     line-height:1.35;
@@ -139,12 +81,8 @@
   .app-root .finance-list-totals {font-size:12.5px}
   .app-root .finance-action-menu button small {font-size:12px}
 
-  /* Componentes do PDV, que utiliza um layout sem a sidebar. */
-  .pdv-body :is(button,input,textarea,select) {font-family:var(--lumeron-font)}
-  .lumeron-pdv-page :is(.pdv-topbar-button,.pdv-topbar-context,.pdv-cash-session-action,.pdv-summary>div) {
-    font-size:12.5px;
-    line-height:1.35;
-  }
+  /* Contexto, indicadores e atalhos do PDV. */
+  .lumeron-pdv-page :is(.pdv-topbar-context,.pdv-summary>div) {font-size:12.5px;line-height:1.35}
   .lumeron-pdv-page .pdv-topbar-status {font-size:12.5px}
   .lumeron-pdv-page .pdv-topbar-status>span:last-child {font-size:12px}
   .lumeron-pdv-page :is(.pdv-eyebrow,.pdv-scan-status,.pdv-cash-session-bar>div small) {font-size:11.5px}
@@ -155,26 +93,12 @@
     line-height:1.3;
   }
   .lumeron-pdv-page .pdv-command-button kbd {font-size:10px}
-  .lumeron-pdv-page .pdv-sales-table {font-size:13px}
-  .lumeron-pdv-page .pdv-sales-table th {font-size:12px}
-  .lumeron-pdv-page .pdv-sales-filters label>span {font-size:12.5px}
-  .lumeron-pdv-page .pdv-sales-filters :is(input,select) {font-size:13px}
-  .lumeron-pdv-page .pdv-sales-filter-actions button {font:650 12px/1.3 var(--lumeron-font)}
-  .lumeron-pdv-page .pdv-sales-status,
-  .lumeron-pdv-page .pdv-sales-row-actions a {font-size:11.5px}
-  .lumeron-pdv-page .pdv-sales-footer,
-  .lumeron-pdv-page .pdv-sales-pages button {font-size:12px}
-  .lumeron-pdv-page #pdvNotesModalInput {font:13px/1.5 var(--lumeron-font)}
+  .lumeron-pdv-page .pdv-sales-status {font-size:11.5px}
+  .lumeron-pdv-page .pdv-sales-footer {font-size:12px}
 
-  /* Nunca ampliar receitas/emitentes fiscais impressos junto com a interface. */
-  @media (max-width:1180px) {
-    .app-root .finance-stats {gap:10px}
-    .app-root .finance-stats .stat-card {padding:15px}
-  }
   @media (max-width:760px) {
     .app-root .cms-table .table-subtitle {font-size:11.5px}
     .app-root .finance-stats .stat-card strong {font-size:22px}
     .app-root .finance-periodbar {font-size:12.5px}
-    .app-root :is(.sales-module-tabs,.finance-module-tabs,.settings-main-tabs) > a {font-size:12.5px}
   }
 }

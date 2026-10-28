@@ -1,5 +1,27 @@
 # Estado do projeto — Lumeron ERP
 
+## Auditoria visual integrada — 26/10/2026
+
+Branch `feature/nfe55-motor-fiscal-completo`, base `5e81321`; commits de aplicação
+`ef6a5e9`, `7a6e5eb`, `d2eb35e` e `8474fda`, publicados sem merge/deploy.
+108 fontes de interface auditadas (85 Blade/23 CSS); 46 grupos de problemas
+corrigidos. Tokens e componentes centralizados; nenhuma duplicata/conflito
+exato de CSS ou estilo local operacional identificado pelo inventário final.
+
+Chromium 154: 684 observações/550 estados únicos/97 variantes de rota em quatro
+resoluções, sem divergências nos papéis medidos; 81/85 views renderizadas.
+Dados sintéticos, somente GET, hashes do banco preservados; foco, teclado,
+Roboto real, densidade e switches comprovados. Suíte integrada em 7a6e5eb:
+1.249 testes/8.616 asserções, zero falhas/erros, dois PDFs ignorados; após ajustes dos
+switches, 13 testes/383 asserções aprovados e regressão visual direcionada.
+Sintaxe em 552 arquivos de aplicação + 8 ferramentas válida. PHP 8.5.12/SQLite.
+
+Não houve modificação de lógica fiscal/financeira, rotas, migrations ou
+integrações. Sem novas dependências. Atualização: pull da branch e
+`php artisan optimize:clear`. Windows/PHP 8.3, ACBr/SEFAZ e PDFs finais não
+revalidados; quatro templates sem prova visual estão identificados no relatório.
+[Relatório e evidências](../audits/visual-2026-10-26/REPORT.md).
+
 **Retrato de referência:** 19/10/2026, inspeção do código remoto da branch `feature/acbr-nfe-bootstrap` no repositório `robsonmktsouza-stack/nextor`. **Não é um atestado de funcionamento em produção**; não foram executados testes locais ou chamadas reais à SEFAZ para elaborar este retrato.
 
 ## Decisão de gestão de releases — 20/10/2026 (não é deploy)
@@ -74,3 +96,55 @@ por opção fiscal batch oneshot; cliente exigindo baixa latência pode habilita
 worker rápido dedicado. A VPS ainda não recebeu esta arquitetura. Estado e
 limites estão em docs/deployment/shared-immutable-releases.md. Consulte a
 CI do último SHA da develop antes de declarar testes plenamente aprovados.
+
+## NF-e 55 — 25/10/2026
+
+A branch `feature/nfe55-motor-fiscal-completo` recebeu motor fiscal integrado, regras versionadas, editor e controles de numeração/eventos. Ver [evidências e limitações](../fiscal/nfe55-delivery-2026-10-25.md). Não há homologação ACBr/SEFAZ nem conclusão integral dos grupos exigidos.
+
+
+## NF-e 55 — caminho de operação e Laragon
+
+Na mesma branch feature, commits cfe8fbb/68bcdae corrigem bloqueios incondicionais
+de produção, completam configuração de série/numeração por ambiente e adicionam
+nfe:verify-flow de homologação usando a fila/ACBr existentes. A configuração
+local informada (Windows/Laragon,PHP 8.3,ACBr1.5.0.490,BA/CRT1,A1) não é acessível
+na nuvem; [procedimento local](../fiscal/nfe55-laragon-real-validation.md).
+Não houve acesso ao Windows, transmissão SEFAZ real ou deploy nesta sessão.
+
+## Catálogo fiscal padrão — 26/10/2026
+
+A branch `feature/nfe55-motor-fiscal-completo` acrescenta referências versionadas,
+modelos inativos e determinação revisada integrada ao emissor existente. Instalação
+explícita; nada ativado em produção. NCM completo do download oficial consultado;
+CFOP e CEST parciais, cBenef BA ausente. Veja
+[catálogo fiscal padrão](../fiscal/catalogo-fiscal-padrao.md) para comandos,
+cobertura, resultados de testes e limites. O proprietário relatou NF-e autorizada
+em homologação no Windows; esta alteração não foi transmitida pela sessão Linux.
+
+## Ampliação nacional de referências — 26/10/2026
+
+Edição `2026.10.26.1`: CFOP com 619 códigos completos da tabela oficial vigente;
+CEST com 1.054 códigos nacionais, períodos e exceções; 3.310 referências cBenef
+estaduais, com cobertura explícita nas 27 UFs. Não declara todos os benefícios
+ou tributações nacionais implementados. Fontes, atualização, testes reais e
+limites em [entrega nacional](../fiscal/catalog-national-delivery-2026-10-26.md).
+
+
+## Retornos SEFAZ com orientação — 26/10/2026
+
+A mesma branch fiscal acrescenta interpretação de 1.025 códigos oficiais em
+86 perfis, integrada aos editores e às inutilizações, com atalhos autorizados
+para cadastros. Não modifica o protocolo fiscal ou libera reenvios. Suíte
+completa: 1.179 testes/8.142 asserções, zero falhas, dois PDFs opcionais ignorados;
+28 testes Python passaram. Sem nova transmissão SEFAZ. Ver
+[operação e evidências](../fiscal/sefaz-rejections-friendly.md).
+
+
+## Auditoria geral de apresentação — 26/10/2026
+
+Revisão integrada de todos os módulos na branch fiscal: 372 arquivos varridos,
+99 problemas corrigidos e seis retenções funcionais documentadas. Suíte final:
+1.249 testes/8.478 asserções, zero falhas/erros, dois PDFs opcionais ignorados.
+Dados fiscais, cálculos, evidências e 42 commits remotos preservados. FPDF/FPDI
+passam a compor a instalação para DANFE cancelado; PDF real da ACBr ainda
+precisa de validação visual. Ver [relatório](../audits/2026-10-26/REPORT.md).

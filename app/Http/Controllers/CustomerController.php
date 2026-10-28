@@ -54,7 +54,7 @@ class CustomerController extends Controller {
                     report($localException);
 
                     return response()->json([
-                        'message'=>'Falha ao acessar a BrasilAPI pelo PHP local: '.$localException->getMessage(),
+                        'message'=>'O serviço de consulta de CNPJ não respondeu. Tente novamente em alguns instantes.',
                     ],503);
                 }
             } else {

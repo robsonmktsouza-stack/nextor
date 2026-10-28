@@ -16,7 +16,13 @@ class Nfe55DanfeService
     public function generate(NfeDraft $draft): string
     {
         $path='fiscal/nfe55/'.$draft->id.'/authorized.xml';
-        if($draft->status!=='authorized'||$draft->xml_path!==$path
+        // Cancelamento é evento posterior: o nfeProc autorizado original permanece
+        // válido para impressão histórica, desde que a prova de autorização confira.
+        $cancelled=$draft->status==='cancelled'
+            && $draft->cancellation_status==='authorized'
+            && $draft->cancelled_at!==null
+            && preg_match('/^\\d{15}$/D',(string)$draft->cancellation_protocol)===1;
+        if(!($draft->status==='authorized'||$cancelled)||$draft->xml_path!==$path
             ||!Storage::disk('local')->exists($path))throw new RuntimeException('NF-e sem XML autorizado para impressão.');
         $xml=Storage::disk('local')->get($path);
         if(strlen($xml)>6291456||preg_match('/<!DOCTYPE|<!ENTITY/i',$xml)){
@@ -32,8 +38,11 @@ class Nfe55DanfeService
         $prot=$xp->query('/n:nfeProc/n:protNFe/n:infProt')->item(0);
         $v=static fn(string $expr,DOMElement $context)=>trim((string)$xp->evaluate('string('.$expr.')',$context));
         if(!$info instanceof DOMElement||!$prot instanceof DOMElement
+            ||!in_array($draft->environment,['homologation','production'],true)
             ||!hash_equals('NFe'.$draft->access_key,$info->getAttribute('Id'))
             ||$v('n:ide/n:mod',$info)!=='55'
+            ||$v('n:ide/n:tpAmb',$info)!==($draft->environment==='production'?'1':'2')
+            ||$v('n:tpAmb',$prot)!==($draft->environment==='production'?'1':'2')
             ||$v('n:chNFe',$prot)!==$draft->access_key
             ||$v('n:nProt',$prot)!==$draft->protocol
             ||!in_array($v('n:cStat',$prot),['100','150'],true)) {
@@ -43,6 +52,9 @@ class Nfe55DanfeService
         if($v('n:emit/n:CNPJ',$info)!==$cnpj)throw new RuntimeException('Emitente do XML não coincide com a empresa.');
         $pdf=$this->render($xml,CompanySetting::current());
         if(!str_starts_with($pdf,'%PDF-')||strlen($pdf)>12582912)throw new RuntimeException('PDF fiscal inválido.');
+        if($cancelled){
+            $pdf=app(Nfe55CancelledDanfeStampService::class)->stamp($pdf,$draft);
+        }
         return $pdf;
     }
 

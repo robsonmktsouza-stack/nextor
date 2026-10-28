@@ -1,0 +1,601 @@
+{
+  "method": "Read-only CSS.supports(property,value) evaluated through Chrome DevTools Protocol. Checks winning declarations syntactically; does not replace visual computed-style/regression validation.",
+  "checks": [
+    {
+      "pass": 2,
+      "browser": "Chrome/154.0.8037.57",
+      "checked": 109,
+      "unsupported": [],
+      "results": [
+        {
+          "property": "background",
+          "value": "var(--page)",
+          "supported": true
+        },
+        {
+          "property": "border-top",
+          "value": "0",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "var(--base-topbar)",
+          "supported": true
+        },
+        {
+          "property": "border-right",
+          "value": "1px solid #d4d8db",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#5a7e8e",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#eef4f8",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#d7dde0",
+          "supported": true
+        },
+        {
+          "property": "border-color",
+          "value": "#b9c1c5",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#f7f7f7",
+          "supported": true
+        },
+        {
+          "property": "border-color",
+          "value": "#8fa8b4",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#fff",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#6a8794",
+          "supported": true
+        },
+        {
+          "property": "border-radius",
+          "value": "5px",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "var(--base-sidebar)",
+          "supported": true
+        },
+        {
+          "property": "padding",
+          "value": "13px 18px 5px",
+          "supported": true
+        },
+        {
+          "property": "border-left",
+          "value": "0",
+          "supported": true
+        },
+        {
+          "property": "padding",
+          "value": "8px 16px 8px 18px",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#314048",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "var(--base-sidebar-active)",
+          "supported": true
+        },
+        {
+          "property": "border-radius",
+          "value": "6px",
+          "supported": true
+        },
+        {
+          "property": "padding",
+          "value": "8px 12px",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#fbfcfd",
+          "supported": true
+        },
+        {
+          "property": "padding",
+          "value": "0 12px",
+          "supported": true
+        },
+        {
+          "property": "border-radius",
+          "value": "4px",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "var(--cms-create)",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "var(--cms-create-dark)",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#eef5fa",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "var(--cms-primary)",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "var(--cms-primary-dark)",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#fafbfc",
+          "supported": true
+        },
+        {
+          "property": "border-color",
+          "value": "var(--cms-primary)",
+          "supported": true
+        },
+        {
+          "property": "border-color",
+          "value": "#c8d2dc",
+          "supported": true
+        },
+        {
+          "property": "border-color",
+          "value": "#aebfcd",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#f0f4f7",
+          "supported": true
+        },
+        {
+          "property": "border-color",
+          "value": "#d9e0e7",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#eaf3f9",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#f2f5f8",
+          "supported": true
+        },
+        {
+          "property": "border-bottom",
+          "value": "1px solid #cdd8e2",
+          "supported": true
+        },
+        {
+          "property": "border-top",
+          "value": "1px solid #dbe3ea",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#eef3f7",
+          "supported": true
+        },
+        {
+          "property": "border-radius",
+          "value": "3px",
+          "supported": true
+        },
+        {
+          "property": "padding",
+          "value": "3px 7px",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#2ea562",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#8895a2",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#3185bd",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#cf5459",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#e8f1f8",
+          "supported": true
+        },
+        {
+          "property": "border-color",
+          "value": "#b5c7d5",
+          "supported": true
+        },
+        {
+          "property": "border-radius",
+          "value": "var(--ui-dialog-radius)",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#0b1928b5",
+          "supported": true
+        },
+        {
+          "property": "padding",
+          "value": "15px 20px",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#ffffff17",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#f3f6f8",
+          "supported": true
+        },
+        {
+          "property": "padding",
+          "value": "0 7px",
+          "supported": true
+        },
+        {
+          "property": "border",
+          "value": "1px solid #ffffff28",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#ffffff13",
+          "supported": true
+        },
+        {
+          "property": "border-top",
+          "value": "1px solid #d6dfe7",
+          "supported": true
+        },
+        {
+          "property": "border-color",
+          "value": "#d8e1e8",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#f6f9fb",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#eaf2f8",
+          "supported": true
+        },
+        {
+          "property": "padding",
+          "value": "5px",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#dce4ea",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#f7f9fb",
+          "supported": true
+        },
+        {
+          "property": "border-color",
+          "value": "var(--cms-create)",
+          "supported": true
+        },
+        {
+          "property": "border-color",
+          "value": "var(--cms-create-dark)",
+          "supported": true
+        },
+        {
+          "property": "border-right",
+          "value": "1px solid var(--ui-divider)",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#f6f7f8",
+          "supported": true
+        },
+        {
+          "property": "padding",
+          "value": "2px 2px 0",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#d89a2b",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#cc5258",
+          "supported": true
+        },
+        {
+          "property": "padding",
+          "value": "0 11px",
+          "supported": true
+        },
+        {
+          "property": "padding",
+          "value": "0 0 18px",
+          "supported": true
+        },
+        {
+          "property": "border-bottom",
+          "value": "1px solid #d9dee4",
+          "supported": true
+        },
+        {
+          "property": "padding",
+          "value": "0",
+          "supported": true
+        },
+        {
+          "property": "border",
+          "value": "1px solid #c9d0d8",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#e8eaec",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#eef1f4",
+          "supported": true
+        },
+        {
+          "property": "padding",
+          "value": "16px 0 0",
+          "supported": true
+        },
+        {
+          "property": "padding",
+          "value": "18px 0",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#f2f6f9",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#dedede",
+          "supported": true
+        },
+        {
+          "property": "border-color",
+          "value": "#c8ced2",
+          "supported": true
+        },
+        {
+          "property": "border-color",
+          "value": "#c4d2dc",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "var(--base-green)",
+          "supported": true
+        },
+        {
+          "property": "padding",
+          "value": "0 18px",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "var(--base-module)",
+          "supported": true
+        },
+        {
+          "property": "border-bottom",
+          "value": "1px solid #587886",
+          "supported": true
+        },
+        {
+          "property": "border-color",
+          "value": "#d8dde0",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "var(--base-tab)",
+          "supported": true
+        },
+        {
+          "property": "border",
+          "value": "1px solid #cbd7e0",
+          "supported": true
+        },
+        {
+          "property": "border-bottom",
+          "value": "0",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "var(--base-tab-hover)",
+          "supported": true
+        },
+        {
+          "property": "border-color",
+          "value": "var(--base-tab-hover)",
+          "supported": true
+        },
+        {
+          "property": "border-color",
+          "value": "var(--base-tab)",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#33434b",
+          "supported": true
+        },
+        {
+          "property": "border-color",
+          "value": "#ffffff2b",
+          "supported": true
+        },
+        {
+          "property": "border-bottom",
+          "value": "1px solid var(--base-green)",
+          "supported": true
+        },
+        {
+          "property": "border-color",
+          "value": "var(--base-green)",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "var(--base-green-dark)",
+          "supported": true
+        },
+        {
+          "property": "border-color",
+          "value": "var(--base-green-dark)",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#2e7eb7",
+          "supported": true
+        },
+        {
+          "property": "border-color",
+          "value": "#2e7eb7",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#256a9a",
+          "supported": true
+        },
+        {
+          "property": "border-color",
+          "value": "#256a9a",
+          "supported": true
+        },
+        {
+          "property": "border-bottom",
+          "value": "1px solid var(--base-topbar-border)",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#e6e6e6",
+          "supported": true
+        },
+        {
+          "property": "border-right",
+          "value": "1px solid #2f3d44",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#2d3b42",
+          "supported": true
+        },
+        {
+          "property": "padding",
+          "value": "7px 9px",
+          "supported": true
+        }
+      ]
+    },
+    {
+      "pass": 3,
+      "browser": "Chrome/154.0.8037.57",
+      "checked": 7,
+      "unsupported": [],
+      "results": [
+        {
+          "property": "background",
+          "value": "#edf5fa",
+          "supported": true
+        },
+        {
+          "property": "background",
+          "value": "#e7f2fa",
+          "supported": true
+        },
+        {
+          "property": "height",
+          "value": "auto",
+          "supported": true
+        },
+        {
+          "property": "border",
+          "value": "0",
+          "supported": true
+        },
+        {
+          "property": "border-radius",
+          "value": "0",
+          "supported": true
+        },
+        {
+          "property": "height",
+          "value": "100%",
+          "supported": true
+        },
+        {
+          "property": "box-shadow",
+          "value": "none",
+          "supported": true
+        }
+      ]
+    }
+  ]
+}

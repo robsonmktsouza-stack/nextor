@@ -2,11 +2,11 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<title>Orçamento {{ str_pad((string)$quote->id,5,'0',STR_PAD_LEFT) }}</title>
+<title>{{ $quote->operation_type === 'sale' ? 'Venda' : 'Orçamento' }} {{ str_pad((string)$quote->id,5,'0',STR_PAD_LEFT) }}</title>
 <style>
 /* Reprodução do modelo A4 aprovado no Excel do proprietário (20/10/2026).
    Não importar CSS do painel: este documento possui identidade de impressão. */
-@page { size:A4; margin:20mm 3mm 14mm; }
+@page { size:A4; margin:9mm 6mm 9mm; }
 * { box-sizing:border-box; }
 html,body { margin:0; padding:0; }
 body { font:11px/1.38 Calibri,Arial,Helvetica,sans-serif; color:#2e373b; background:#fff; }
@@ -29,7 +29,7 @@ strong { font-weight:700; }
 .document-number { font-size:26px; font-weight:700; color:#2e5555;
     line-height:1.05; font-variant-numeric:tabular-nums; }
 .document-dates { margin-top:9px; font-size:11px; color:#617078; white-space:normal; }
-.accent-band { height:11px; background:#477b78; margin:11px 0 5px; }
+.accent-band { height:11px; background:#477b78; margin:7px 0 4px; }
 .proposal-line { padding:1px 0 6px; font-size:9.5px; color:#617078; text-transform:uppercase; }
 .section-title { background:#e9eff0; color:#2e5555; font-size:12px;
     line-height:1.25; font-weight:700; text-transform:uppercase; margin:0;
@@ -47,7 +47,7 @@ strong { font-weight:700; }
 .info .wide { width:47%; }
 .info .medium { width:27%; }
 .info .narrow { width:26%; }
-.items-section { margin-top:10px; }
+.items-section { margin-top:6px; }
 .items { table-layout:fixed; }
 .items thead { display:table-header-group; }
 .items th { background:#477b78; color:#fff; font-size:10.5px; font-weight:700;
@@ -87,12 +87,12 @@ strong { font-weight:700; }
 .notes .section-title { margin-bottom:4px; }
 .notes p { margin:5px 1px; font-size:11px; line-height:1.5;
     white-space:pre-wrap; overflow-wrap:anywhere; }
-.signature-row { display:table; width:100%; table-layout:fixed; margin-top:13mm;
+.signature-row { display:table; width:100%; table-layout:fixed; margin-top:7mm;
     page-break-inside:avoid; break-inside:avoid; }
 .signature { display:table-cell; width:50%; text-align:center; padding:0 15px; }
 .signature-line { width:77%; margin:0 auto 5px; height:1px; border-top:1px solid #8e999a; }
 .signature-label { font-size:11px; color:#617078; }
-.footer { position:static; margin-top:10mm; padding-top:5px; border-top:1px solid #d9dfdf;
+.footer { position:static; margin-top:5mm; padding-top:5px; border-top:1px solid #d9dfdf;
     text-align:center; color:#8a9a9b; font-size:9px; page-break-inside:avoid; break-inside:avoid; }
 @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
 </style>
@@ -120,12 +120,14 @@ $paymentCodes=$quote->payments->pluck('payment_method')->filter()->unique()->val
 $paymentCatalog=$paymentCodes->isNotEmpty()
     ? \App\Models\PaymentMethod::query()->whereIn('code',$paymentCodes->all())->pluck('name','code')
     : collect();
-$paymentTerms=$paymentCodes->map(fn($code)=>$paymentCatalog->get($code) ?? $code)->implode(', ') ?: 'A combinar';
+$paymentTerms=$paymentCodes->map(fn($code)=>$paymentCatalog->get($code) ?? 'Forma de pagamento a confirmar')->unique()->implode(', ') ?: 'A combinar';
 $createdDate=($quote->operation_date ?? $quote->created_at)->format('d/m/Y');
 $expired=$quote->quote_expires_at && $quote->quote_expires_at->copy()->startOfDay()->lt(today());
 $state=match(true) {
     $quote->status==='cancelled'=>'Cancelado',
     $quote->status==='converted'=>'Convertido em venda',
+    $quote->operation_type==='sale' && $quote->status==='completed'=>'Concluída',
+    $quote->operation_type==='sale'=>'Venda',
     $expired=>'Vencido',
     default=>'Aguardando aprovação',
 };
@@ -160,16 +162,16 @@ $serviceSubtotal=$quote->items->where('item_type','service')
     </div>
   </td>
   <td class="document">
-    <div class="document-kind">ORÇAMENTO COMERCIAL</div>
+    <div class="document-kind">{{ $quote->operation_type === 'sale' ? 'COMPROVANTE DE VENDA' : 'ORÇAMENTO COMERCIAL' }}</div>
     <div class="document-number">Nº {{ $number }}</div>
-    <div class="document-dates">Emissão {{ $createdDate }} · Válido até {{ $validDate ?: 'a combinar' }}</div>
+    <div class="document-dates">Emissão {{ $createdDate }}@if($quote->operation_type==='quote') · Válido até {{ $validDate ?: 'a combinar' }}@endif</div>
   </td>
 </tr>
 </table>
 </header>
 
 <div class="accent-band"></div>
-<div class="proposal-line">PROPOSTA DE FORNECIMENTO | PRODUTOS E SERVIÇOS</div>
+<div class="proposal-line">{{ $quote->operation_type === 'sale' ? 'COMPROVANTE COMERCIAL NÃO FISCAL | PRODUTOS E SERVIÇOS' : 'PROPOSTA DE FORNECIMENTO | PRODUTOS E SERVIÇOS' }}</div>
 
 <section class="customer-section no-break">
   <h2 class="section-title">Dados do cliente</h2>
@@ -185,8 +187,8 @@ $serviceSubtotal=$quote->items->where('item_type','service')
     <tr>
       <td colspan="2"><span class="label">Endereço de entrega / atendimento</span>
           <span class="value">{{ $customerAddressFull ?: '—' }}</span></td>
-      <td><span class="label">Validade da proposta</span>
-          <span class="value">{{ $validDate ?: 'A combinar' }}@if($validDate && $validDays!==null && $validDays>=0) ({{ $validDays }} {{ $validDays===1 ? 'dia' : 'dias' }})@endif</span></td>
+      <td><span class="label">{{ $quote->operation_type === 'sale' ? 'Data da venda' : 'Validade da proposta' }}</span>
+          <span class="value">{{ $quote->operation_type === 'sale' ? $createdDate : ($validDate ?: 'A combinar') }}@if($quote->operation_type==='quote' && $validDate && $validDays!==null && $validDays>=0) ({{ $validDays }} {{ $validDays===1 ? 'dia' : 'dias' }})@endif</span></td>
     </tr>
     <tr>
       <td><span class="label">Responsável comercial</span><span class="value">{{ $quote->user?->name ?? '—' }}</span></td>
@@ -225,7 +227,7 @@ $serviceSubtotal=$quote->items->where('item_type','service')
       @endforeach
       {{-- Preserva a altura da grade da folha Excel sem criar itens fictícios.
            Mais de nove itens continuam em páginas adicionais naturalmente. --}}
-      @for($emptyRow=0;$emptyRow<max(0,9-$quote->items->count());$emptyRow++)
+      @for($emptyRow=0;$emptyRow<max(0,4-$quote->items->count());$emptyRow++)
       <tr class="empty-row" aria-hidden="true">
         <td>&nbsp;</td><td></td><td></td><td></td><td></td>
         <td></td><td></td><td></td><td></td>
@@ -241,8 +243,8 @@ $serviceSubtotal=$quote->items->where('item_type','service')
     <div class="conditions">
       <p>Pagamento: {{ $paymentTerms }}.</p>
       <p>Prazo de entrega / execução: a combinar.</p>
-      <p>Disponibilidade sujeita à confirmação.</p>
-      @if($validDate)<p>Preços e condições válidos até {{ $validDate }}.</p>@endif
+      @if($quote->operation_type==='quote')<p>Disponibilidade sujeita à confirmação.</p>@endif
+      @if($quote->operation_type==='quote' && $validDate)<p>Preços e condições válidos até {{ $validDate }}.</p>@endif
     </div>
   </div>
   <div class="tail-right">
@@ -265,7 +267,7 @@ $serviceSubtotal=$quote->items->where('item_type','service')
 
 <section class="signature-row">
   <div class="signature"><div class="signature-line"></div>
-    <div class="signature-label">Responsável pela proposta</div></div>
+    <div class="signature-label">Responsável pela {{ $quote->operation_type === 'sale' ? 'venda' : 'proposta' }}</div></div>
   <div class="signature"><div class="signature-line"></div>
     <div class="signature-label">Aceite do cliente</div></div>
 </section>

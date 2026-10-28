@@ -1,0 +1,705 @@
+{
+  "date": "2026-10-26",
+  "area": "Inspeção visual em navegador real",
+  "branch": "feature/nfe55-motor-fiscal-completo",
+  "source_state": "Árvore de trabalho durante a auditoria, incluindo correções ainda não commitadas.",
+  "browser": "Chromium 154.0.8037.57 Linux, headless via Chrome DevTools Protocol",
+  "server": "PHP 8.5.12 em Docker composer:2, loopback 127.0.0.1:8841, GET somente",
+  "database": "SQLite novo e isolado /workspace/scratch/audit-ui.sqlite com usuário, empresa, produto e cliente sintéticos; catálogo oficial importado no banco temporário.",
+  "credentials": "Nenhuma credencial real, certificado, CSC, A1 ou integração externa utilizada.",
+  "captures": [
+    {
+      "name": "dashboard",
+      "route": "/dashboard",
+      "final_url": "http://127.0.0.1:8841/dashboard",
+      "http_documents": [
+        {
+          "url": "http://127.0.0.1:8841/dashboard",
+          "status": 200
+        }
+      ],
+      "title": "Visão geral — Lumeron",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "document_width": 1440,
+      "horizontal_overflow": false,
+      "js_exceptions": [],
+      "screenshot": "/workspace/scratch/audit-visual/dashboard.png",
+      "screenshot_sha256": "da47cd405a5f811c6573e4d47debd9432a65220ebec58bbb1f4957796ade434d",
+      "dom": "/workspace/scratch/audit-visual/dashboard-dom.html",
+      "visible_technical_matches": [],
+      "source_commit": null,
+      "source_note": "Árvore de trabalho da auditoria anterior à integração dos commits remotos; esta captura não representa o commit integrado fb702b2."
+    },
+    {
+      "name": "products",
+      "route": "/products",
+      "final_url": "http://127.0.0.1:8841/products",
+      "http_documents": [
+        {
+          "url": "http://127.0.0.1:8841/products",
+          "status": 200
+        }
+      ],
+      "title": "Produtos — Lumeron",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "document_width": 1440,
+      "horizontal_overflow": false,
+      "js_exceptions": [],
+      "screenshot": "/workspace/scratch/audit-visual/products.png",
+      "screenshot_sha256": "9f56d17ef102dd8a778febb13d8b14aa8d6dbc85922d59c9d4ce382ed20781ea",
+      "dom": "/workspace/scratch/audit-visual/products-dom.html",
+      "visible_technical_matches": [],
+      "source_commit": null,
+      "source_note": "Árvore de trabalho da auditoria anterior à integração dos commits remotos; esta captura não representa o commit integrado fb702b2."
+    },
+    {
+      "name": "customers",
+      "route": "/customers",
+      "final_url": "http://127.0.0.1:8841/customers",
+      "http_documents": [
+        {
+          "url": "http://127.0.0.1:8841/customers",
+          "status": 200
+        }
+      ],
+      "title": "Clientes — Lumeron",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "document_width": 1440,
+      "horizontal_overflow": false,
+      "js_exceptions": [],
+      "screenshot": "/workspace/scratch/audit-visual/customers.png",
+      "screenshot_sha256": "913bff8b87649374bd162e14cdce7e76124e3b128a896c64e43631c09da654da",
+      "dom": "/workspace/scratch/audit-visual/customers-dom.html",
+      "visible_technical_matches": [],
+      "source_commit": null,
+      "source_note": "Árvore de trabalho da auditoria anterior à integração dos commits remotos; esta captura não representa o commit integrado fb702b2."
+    },
+    {
+      "name": "sales",
+      "route": "/sales",
+      "final_url": "http://127.0.0.1:8841/sales",
+      "http_documents": [
+        {
+          "url": "http://127.0.0.1:8841/sales",
+          "status": 200
+        }
+      ],
+      "title": "Vendas — Lumeron",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "document_width": 1440,
+      "horizontal_overflow": false,
+      "js_exceptions": [],
+      "screenshot": "/workspace/scratch/audit-visual/sales.png",
+      "screenshot_sha256": "95271efb2cf2a9a09f6cfe35ef9e932288522e31ae39fa85c87d2d11adc04200",
+      "dom": "/workspace/scratch/audit-visual/sales-dom.html",
+      "visible_technical_matches": [],
+      "source_commit": null,
+      "source_note": "Árvore de trabalho da auditoria anterior à integração dos commits remotos; esta captura não representa o commit integrado fb702b2."
+    },
+    {
+      "name": "pdv",
+      "route": "/pdv",
+      "final_url": "http://127.0.0.1:8841/pdv",
+      "http_documents": [
+        {
+          "url": "http://127.0.0.1:8841/pdv",
+          "status": 200
+        }
+      ],
+      "title": "PDV — Lumeron",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "document_width": 1440,
+      "horizontal_overflow": false,
+      "js_exceptions": [],
+      "screenshot": "/workspace/scratch/audit-visual/pdv.png",
+      "screenshot_sha256": "0528eb2d686a17b22e83ef821830d75053a2ed26136197d30df1f15d5951869e",
+      "dom": "/workspace/scratch/audit-visual/pdv-dom.html",
+      "visible_technical_matches": [],
+      "source_commit": null,
+      "source_note": "Árvore de trabalho da auditoria anterior à integração dos commits remotos; esta captura não representa o commit integrado fb702b2."
+    },
+    {
+      "name": "purchases",
+      "route": "/purchases",
+      "final_url": "http://127.0.0.1:8841/purchases",
+      "http_documents": [
+        {
+          "url": "http://127.0.0.1:8841/purchases",
+          "status": 200
+        }
+      ],
+      "title": "Compras — Lumeron",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "document_width": 1440,
+      "horizontal_overflow": false,
+      "js_exceptions": [],
+      "screenshot": "/workspace/scratch/audit-visual/purchases.png",
+      "screenshot_sha256": "fb661641b9715ebb7d2b97948cd26faa59423b1c77151b0a07cac7f2478baaa8",
+      "dom": "/workspace/scratch/audit-visual/purchases-dom.html",
+      "visible_technical_matches": [],
+      "source_commit": null,
+      "source_note": "Árvore de trabalho da auditoria anterior à integração dos commits remotos; esta captura não representa o commit integrado fb702b2."
+    },
+    {
+      "name": "finance",
+      "route": "/finance",
+      "final_url": "http://127.0.0.1:8841/finance",
+      "http_documents": [
+        {
+          "url": "http://127.0.0.1:8841/finance",
+          "status": 200
+        }
+      ],
+      "title": "Financeiro — Lumeron",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "document_width": 1440,
+      "horizontal_overflow": false,
+      "js_exceptions": [],
+      "screenshot": "/workspace/scratch/audit-visual/finance.png",
+      "screenshot_sha256": "ddeb0d4566df4d649fc51f9b83ebf43fd126f8af1c0a06c6684c9b79524ab89a",
+      "dom": "/workspace/scratch/audit-visual/finance-dom.html",
+      "visible_technical_matches": [],
+      "source_commit": null,
+      "source_note": "Árvore de trabalho da auditoria anterior à integração dos commits remotos; esta captura não representa o commit integrado fb702b2."
+    },
+    {
+      "name": "fiscal-nfe",
+      "route": "/fiscal?tab=nfe",
+      "final_url": "http://127.0.0.1:8841/fiscal?tab=nfe",
+      "http_documents": [
+        {
+          "url": "http://127.0.0.1:8841/fiscal?tab=nfe",
+          "status": 200
+        }
+      ],
+      "title": "Fiscal — Lumeron",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "document_width": 1440,
+      "horizontal_overflow": false,
+      "js_exceptions": [],
+      "screenshot": "/workspace/scratch/audit-visual/fiscal-nfe.png",
+      "screenshot_sha256": "85e87d95c8b072c2aaa41ea88e2bed4542fc88699d8630d55fbaf669d6253296",
+      "dom": "/workspace/scratch/audit-visual/fiscal-nfe-dom.html",
+      "visible_technical_matches": [],
+      "source_commit": null,
+      "source_note": "Árvore de trabalho da auditoria anterior à integração dos commits remotos; esta captura não representa o commit integrado fb702b2."
+    },
+    {
+      "name": "fiscal-nfce",
+      "route": "/fiscal?tab=nfce",
+      "final_url": "http://127.0.0.1:8841/fiscal?tab=nfce",
+      "http_documents": [
+        {
+          "url": "http://127.0.0.1:8841/fiscal?tab=nfce",
+          "status": 200
+        }
+      ],
+      "title": "Fiscal — Lumeron",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "document_width": 1440,
+      "horizontal_overflow": false,
+      "js_exceptions": [],
+      "screenshot": "/workspace/scratch/audit-visual/fiscal-nfce.png",
+      "screenshot_sha256": "5c82b04508ffff3f21aef7f877043ceb751b2b12ae67141d882176d7b03b976c",
+      "dom": "/workspace/scratch/audit-visual/fiscal-nfce-dom.html",
+      "visible_technical_matches": [],
+      "source_commit": null,
+      "source_note": "Árvore de trabalho da auditoria anterior à integração dos commits remotos; esta captura não representa o commit integrado fb702b2."
+    },
+    {
+      "name": "fiscal-nfse",
+      "route": "/fiscal?tab=nfse",
+      "final_url": "http://127.0.0.1:8841/fiscal?tab=nfse",
+      "http_documents": [
+        {
+          "url": "http://127.0.0.1:8841/fiscal?tab=nfse",
+          "status": 200
+        }
+      ],
+      "title": "Fiscal — Lumeron",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "document_width": 1440,
+      "horizontal_overflow": false,
+      "js_exceptions": [],
+      "screenshot": "/workspace/scratch/audit-visual/fiscal-nfse.png",
+      "screenshot_sha256": "ad19528e48ca73d056348a57481345a919a4b0da96dc5fe556f001c8898c0552",
+      "dom": "/workspace/scratch/audit-visual/fiscal-nfse-dom.html",
+      "visible_technical_matches": [],
+      "source_commit": null,
+      "source_note": "Árvore de trabalho da auditoria anterior à integração dos commits remotos; esta captura não representa o commit integrado fb702b2."
+    },
+    {
+      "name": "fiscal-cte",
+      "route": "/fiscal?tab=cte",
+      "final_url": "http://127.0.0.1:8841/fiscal?tab=cte",
+      "http_documents": [
+        {
+          "url": "http://127.0.0.1:8841/fiscal?tab=cte",
+          "status": 200
+        }
+      ],
+      "title": "Fiscal — Lumeron",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "document_width": 1440,
+      "horizontal_overflow": false,
+      "js_exceptions": [],
+      "screenshot": "/workspace/scratch/audit-visual/fiscal-cte.png",
+      "screenshot_sha256": "5b230c0041d2a4b01b13a984bafbdcfe263ad6896e50359992fdb86155aa5108",
+      "dom": "/workspace/scratch/audit-visual/fiscal-cte-dom.html",
+      "visible_technical_matches": [],
+      "source_commit": null,
+      "source_note": "Árvore de trabalho da auditoria anterior à integração dos commits remotos; esta captura não representa o commit integrado fb702b2."
+    },
+    {
+      "name": "settings",
+      "route": "/settings",
+      "final_url": "http://127.0.0.1:8841/settings",
+      "http_documents": [
+        {
+          "url": "http://127.0.0.1:8841/settings",
+          "status": 200
+        }
+      ],
+      "title": "Configurações — Lumeron",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "document_width": 1440,
+      "horizontal_overflow": false,
+      "js_exceptions": [],
+      "screenshot": "/workspace/scratch/audit-visual/settings.png",
+      "screenshot_sha256": "455710be9265bac89ff733c2ff8bd633481541cde1d6c70f004a70a2d74191ca",
+      "dom": "/workspace/scratch/audit-visual/settings-dom.html",
+      "visible_technical_matches": [],
+      "source_commit": null,
+      "source_note": "Árvore de trabalho da auditoria anterior à integração dos commits remotos; esta captura não representa o commit integrado fb702b2."
+    },
+    {
+      "name": "integrations",
+      "route": "/settings?tab=integrations",
+      "final_url": "http://127.0.0.1:8841/settings?tab=integrations",
+      "http_documents": [
+        {
+          "url": "http://127.0.0.1:8841/settings?tab=integrations",
+          "status": 200
+        }
+      ],
+      "title": "Configurações — Lumeron",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "document_width": 1440,
+      "horizontal_overflow": false,
+      "js_exceptions": [],
+      "screenshot": "/workspace/scratch/audit-visual/integrations.png",
+      "screenshot_sha256": "a79ef94a237c248fb2a0034ab601be4919c8200edae9c9cbba1885c6f7b517c4",
+      "dom": "/workspace/scratch/audit-visual/integrations-dom.html",
+      "visible_technical_matches": [],
+      "source_commit": null,
+      "source_note": "Árvore de trabalho da auditoria anterior à integração dos commits remotos; esta captura não representa o commit integrado fb702b2."
+    },
+    {
+      "name": "nfe-editor",
+      "route": "/fiscal/nfe/create",
+      "final_url": "http://127.0.0.1:8841/fiscal/nfe/create",
+      "http_documents": [
+        {
+          "url": "http://127.0.0.1:8841/fiscal/nfe/create",
+          "status": 200
+        }
+      ],
+      "title": "Fiscal — Lumeron",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "document_width": 1440,
+      "horizontal_overflow": false,
+      "js_exceptions": [],
+      "screenshot": "/workspace/scratch/audit-visual/nfe-editor.png",
+      "screenshot_sha256": "8bf0e870df0ab0ee1348360fab7f3af7afedfe56d07c08c7cbd7fe619602f0b7",
+      "dom": "/workspace/scratch/audit-visual/nfe-editor-dom.html",
+      "visible_technical_matches": [],
+      "source_commit": null,
+      "source_note": "Árvore de trabalho da auditoria anterior à integração dos commits remotos; esta captura não representa o commit integrado fb702b2."
+    },
+    {
+      "name": "catalog-benefits",
+      "route": "/fiscal/catalog?tab=entries&kind=benefit&uf=AC",
+      "final_url": "http://127.0.0.1:8841/fiscal/catalog?tab=entries&kind=benefit&uf=AC",
+      "http_documents": [
+        {
+          "url": "http://127.0.0.1:8841/fiscal/catalog?tab=entries&kind=benefit&uf=AC",
+          "status": 200
+        }
+      ],
+      "title": "Configurações fiscais — Lumeron",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "document_width": 1440,
+      "horizontal_overflow": false,
+      "js_exceptions": [],
+      "screenshot": "/workspace/scratch/audit-visual/catalog-benefits.png",
+      "screenshot_sha256": "64d0b089f739ecf82c848cd5f861cf5285aa3e554bf2de6f672dc5b4f9aee9fe",
+      "dom": "/workspace/scratch/audit-visual/catalog-benefits-dom.html",
+      "visible_technical_matches": [],
+      "source_commit": null,
+      "source_note": "Árvore de trabalho da auditoria anterior à integração dos commits remotos; esta captura não representa o commit integrado fb702b2."
+    },
+    {
+      "name": "dashboard-1366",
+      "route": "/dashboard",
+      "final_url": "http://127.0.0.1:8841/dashboard",
+      "http_documents": [
+        {
+          "url": "http://127.0.0.1:8841/dashboard",
+          "status": 200
+        }
+      ],
+      "title": "Visão geral — Lumeron",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "document_width": 1366,
+      "horizontal_overflow": false,
+      "js_exceptions": [],
+      "screenshot": "/workspace/scratch/audit-visual/dashboard-1366.png",
+      "screenshot_sha256": "517021e1ed266e42914e691cbdccafee14e2904e1044285b644d07a4b012b9c2",
+      "dom": "/workspace/scratch/audit-visual/dashboard-1366-dom.html",
+      "visible_technical_matches": [],
+      "source_commit": null,
+      "source_note": "Árvore de trabalho da auditoria anterior à integração dos commits remotos; esta captura não representa o commit integrado fb702b2."
+    },
+    {
+      "name": "pdv-1366",
+      "route": "/pdv",
+      "final_url": "http://127.0.0.1:8841/pdv",
+      "http_documents": [
+        {
+          "url": "http://127.0.0.1:8841/pdv",
+          "status": 200
+        }
+      ],
+      "title": "PDV — Lumeron",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "document_width": 1366,
+      "horizontal_overflow": false,
+      "js_exceptions": [],
+      "screenshot": "/workspace/scratch/audit-visual/pdv-1366.png",
+      "screenshot_sha256": "1d19cda2d57690ccb08e0ff5ccd77ed04e3b48e7dea36dfb83a01a58dea32af6",
+      "dom": "/workspace/scratch/audit-visual/pdv-1366-dom.html",
+      "visible_technical_matches": [],
+      "source_commit": null,
+      "source_note": "Árvore de trabalho da auditoria anterior à integração dos commits remotos; esta captura não representa o commit integrado fb702b2."
+    },
+    {
+      "name": "catalog-benefits-final",
+      "route": "/fiscal/catalog?tab=entries&kind=benefit&uf=AC",
+      "final_url": "http://127.0.0.1:8841/fiscal/catalog?tab=entries&kind=benefit&uf=AC",
+      "http_documents": [
+        {
+          "url": "http://127.0.0.1:8841/fiscal/catalog?tab=entries&kind=benefit&uf=AC",
+          "status": 200
+        }
+      ],
+      "title": "Configurações fiscais — Lumeron",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "document_width": 1440,
+      "horizontal_overflow": false,
+      "js_exceptions": [],
+      "screenshot": "/workspace/scratch/audit-visual/catalog-benefits-final.png",
+      "screenshot_sha256": "101e72b06f854b0262f45f9cb5915916acf8245c83ca92a0795c6918dd671dab",
+      "dom": "/workspace/scratch/audit-visual/catalog-benefits-final-dom.html",
+      "visible_technical_matches": [],
+      "source_commit": null,
+      "source_note": "Árvore de trabalho da auditoria anterior à integração dos commits remotos; esta captura não representa o commit integrado fb702b2."
+    },
+    {
+      "name": "nfe-editor-final",
+      "route": "/fiscal/nfe/create",
+      "final_url": "http://127.0.0.1:8841/fiscal/nfe/create",
+      "http_documents": [
+        {
+          "url": "http://127.0.0.1:8841/fiscal/nfe/create",
+          "status": 200
+        }
+      ],
+      "title": "Fiscal — Lumeron",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "document_width": 1440,
+      "horizontal_overflow": false,
+      "js_exceptions": [],
+      "screenshot": "/workspace/scratch/audit-visual/nfe-editor-final.png",
+      "screenshot_sha256": "b0ec9ac97b0a9d916a5a94d8d3d1b771969845841f080693f7dd6dd794332898",
+      "dom": "/workspace/scratch/audit-visual/nfe-editor-final-dom.html",
+      "visible_technical_matches": [],
+      "source_commit": null,
+      "source_note": "Árvore de trabalho da auditoria anterior à integração dos commits remotos; esta captura não representa o commit integrado fb702b2."
+    },
+    {
+      "name": "fiscal-nfe-integrated",
+      "route": "/fiscal?tab=nfe",
+      "final_url": "http://127.0.0.1:8841/fiscal?tab=nfe",
+      "source_commit": "fb702b25b7eda1c0dac04c7ebcb35ad4f76531f9",
+      "source_note": "Reteste real depois da integração dos commits remotos, especificamente para estas quatro rotas.",
+      "http_documents": [
+        {
+          "url": "http://127.0.0.1:8841/fiscal?tab=nfe",
+          "status": 200
+        }
+      ],
+      "title": "Fiscal — Lumeron",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "document_width": 1440,
+      "horizontal_overflow": false,
+      "js_exceptions": [],
+      "screenshot": "/workspace/scratch/audit-visual/fiscal-nfe-integrated.png",
+      "screenshot_sha256": "c93eaaafd59f920d91ee1d0822c24022d6c6d14b1f139b2afafd9d1e3ae3595c",
+      "dom": "/workspace/scratch/audit-visual/fiscal-nfe-integrated-dom.html",
+      "visible_technical_matches": []
+    },
+    {
+      "name": "fiscal-nfce-integrated",
+      "route": "/fiscal?tab=nfce",
+      "final_url": "http://127.0.0.1:8841/fiscal?tab=nfce",
+      "source_commit": "fb702b25b7eda1c0dac04c7ebcb35ad4f76531f9",
+      "source_note": "Reteste real depois da integração dos commits remotos, especificamente para estas quatro rotas.",
+      "http_documents": [
+        {
+          "url": "http://127.0.0.1:8841/fiscal?tab=nfce",
+          "status": 200
+        }
+      ],
+      "title": "Fiscal — Lumeron",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "document_width": 1440,
+      "horizontal_overflow": false,
+      "js_exceptions": [],
+      "screenshot": "/workspace/scratch/audit-visual/fiscal-nfce-integrated.png",
+      "screenshot_sha256": "44687fac570b2d75886d8a6c091520356dcd32c9f554054a12eb79838bb2093d",
+      "dom": "/workspace/scratch/audit-visual/fiscal-nfce-integrated-dom.html",
+      "visible_technical_matches": []
+    },
+    {
+      "name": "nfe-editor-integrated",
+      "route": "/fiscal/nfe/create",
+      "final_url": "http://127.0.0.1:8841/fiscal/nfe/create",
+      "source_commit": "fb702b25b7eda1c0dac04c7ebcb35ad4f76531f9",
+      "source_note": "Reteste real depois da integração dos commits remotos, especificamente para estas quatro rotas.",
+      "http_documents": [
+        {
+          "url": "http://127.0.0.1:8841/fiscal/nfe/create",
+          "status": 200
+        }
+      ],
+      "title": "Fiscal — Lumeron",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "document_width": 1440,
+      "horizontal_overflow": false,
+      "js_exceptions": [],
+      "screenshot": "/workspace/scratch/audit-visual/nfe-editor-integrated.png",
+      "screenshot_sha256": "cb8766f449a80232131f7db8f09a1eff2727e430f0f1384cb3869af7fbc6865b",
+      "dom": "/workspace/scratch/audit-visual/nfe-editor-integrated-dom.html",
+      "visible_technical_matches": []
+    },
+    {
+      "name": "catalog-benefits-integrated",
+      "route": "/fiscal/catalog?tab=entries&kind=benefit&uf=AC",
+      "final_url": "http://127.0.0.1:8841/fiscal/catalog?tab=entries&kind=benefit&uf=AC",
+      "source_commit": "fb702b25b7eda1c0dac04c7ebcb35ad4f76531f9",
+      "source_note": "Reteste real depois da integração dos commits remotos, especificamente para estas quatro rotas.",
+      "http_documents": [
+        {
+          "url": "http://127.0.0.1:8841/fiscal/catalog?tab=entries&kind=benefit&uf=AC",
+          "status": 200
+        }
+      ],
+      "title": "Configurações fiscais — Lumeron",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "document_width": 1440,
+      "horizontal_overflow": false,
+      "js_exceptions": [],
+      "screenshot": "/workspace/scratch/audit-visual/catalog-benefits-integrated.png",
+      "screenshot_sha256": "80c197bf898b8bf192fa1edbf16020831e9ef24620f6cf1a7b6f60af45c58474",
+      "dom": "/workspace/scratch/audit-visual/catalog-benefits-integrated-dom.html",
+      "visible_technical_matches": []
+    }
+  ],
+  "capture_count": 23,
+  "manually_inspected_by_agent": [
+    "dashboard",
+    "pdv",
+    "catalog-benefits",
+    "nfe-editor",
+    "dashboard-1366",
+    "pdv-1366",
+    "catalog-benefits-final",
+    "nfe-editor-final",
+    "fiscal-nfe-integrated",
+    "fiscal-nfce-integrated",
+    "nfe-editor-integrated",
+    "catalog-benefits-integrated"
+  ],
+  "observed_results": [
+    "23 capturas: 19 da auditoria anterior (15 rotas, duas resoluções e dois ajustes) e quatro retestes específicos no commit integrado fb702b2; HTTP 200 em todas.",
+    "Nenhum overflow horizontal de documento nos tamanhos amostrados.",
+    "Nenhuma exceção JavaScript capturada.",
+    "Nenhuma ocorrência dos padrões técnicos pesquisados no texto visível.",
+    "Benefício fiscal do AC apresenta indisponibilidade de uso sem expor a justificativa interna do catálogo.",
+    "Após integração: catálogo com filtros compactos e paginação compartilhada; NF-e e NFC-e com listagens legíveis. Nenhum dado fiscal real foi criado."
+  ],
+  "limitations": [
+    "Capturas sem gravação, emissão, cancelamento ou alteração de configurações da aplicação. Não comprovam homologação fiscal.",
+    "Fixture pequena; não exercita todos os dados, erros, modais ou perfis de permissão.",
+    "Fontes externas Google foram bloqueadas; usa as fontes locais alternativas existentes.",
+    "Navegador Linux usa locale en-US nos controles nativos de data/hora. Isso não é prova de alteração das datas da aplicação.",
+    "CLI screenshot do Chromium não concluiu no limite inicial; captura real foi concluída por CDP.",
+    "Somente quatro rotas impactadas pela integração remota foram revalidadas no commit fb702b2; as 19 capturas anteriores estão identificadas como pré-integração."
+  ],
+  "pending": [],
+  "distinct_routes": 15,
+  "findings_visual_retested": [
+    {
+      "id": "VIS-001",
+      "severity": "low",
+      "file": "resources/views/fiscal/nfe/editor.blade.php",
+      "before": "Aba Dados gerais repetida em heading e subtítulo no painel ativo.",
+      "status": "corrected",
+      "reason": "Corrigido pelo agente fiscal e confirmado por nova captura real; não somar outra vez aos achados fiscais.",
+      "after": "Cabeçalhos duplicados removidos; confirmado na captura nfe-editor-final.png.",
+      "counted_in": "FISC-018"
+    },
+    {
+      "id": "VIS-002",
+      "severity": "low",
+      "file": "resources/views/fiscal/catalog/index.blade.php",
+      "before": "Código AC30002 quebra em duas linhas na tabela de benefícios.",
+      "status": "corrected",
+      "reason": "Corrigido pelo agente fiscal e confirmado por nova captura real; não somar outra vez aos achados fiscais.",
+      "after": "Código AC30002 em uma linha; confirmado na captura catalog-benefits-final.png.",
+      "counted_in": "FISC-019"
+    }
+  ],
+  "findings": [],
+  "operation_counts_after_browser_gets": {
+    "sales": 0,
+    "purchases": 0,
+    "financial_entries": 0,
+    "stock_movements": 0,
+    "fiscal_document_jobs": 0,
+    "nfe_drafts": 0,
+    "jobs": 0
+  },
+  "server_cleanup": "Servidor Docker temporário e navegador da auditoria encerrados novamente após os quatro retestes.",
+  "integrated_retest": {
+    "source_commit": "fb702b25b7eda1c0dac04c7ebcb35ad4f76531f9",
+    "routes": [
+      "/fiscal?tab=nfe",
+      "/fiscal?tab=nfce",
+      "/fiscal/nfe/create",
+      "/fiscal/catalog?tab=entries&kind=benefit&uf=AC"
+    ],
+    "count": 4,
+    "manually_inspected": 4,
+    "result": "Quatro respostas HTTP 200; sem exceções JavaScript, overflow global ou padrões técnicos no texto visível. Código de benefício intacto em uma linha e editor sem cabeçalhos redundantes."
+  },
+  "operation_counts_after_integrated_retest": {
+    "sales": 0,
+    "purchases": 0,
+    "financial_entries": 0,
+    "stock_movements": 0,
+    "fiscal_document_jobs": 0,
+    "nfe_drafts": 0,
+    "jobs": 0
+  },
+  "committed_screenshots": [
+    "screenshots/catalog-benefits-final.png",
+    "screenshots/catalog-benefits-integrated.png",
+    "screenshots/catalog-benefits.png",
+    "screenshots/customers.png",
+    "screenshots/dashboard-1366.png",
+    "screenshots/dashboard.png",
+    "screenshots/finance.png",
+    "screenshots/fiscal-cte.png",
+    "screenshots/fiscal-nfce-integrated.png",
+    "screenshots/fiscal-nfce.png",
+    "screenshots/fiscal-nfe-integrated.png",
+    "screenshots/fiscal-nfe.png",
+    "screenshots/fiscal-nfse.png",
+    "screenshots/integrations.png",
+    "screenshots/nfe-editor-final.png",
+    "screenshots/nfe-editor-integrated.png",
+    "screenshots/nfe-editor.png",
+    "screenshots/pdv-1366.png",
+    "screenshots/pdv.png",
+    "screenshots/products.png",
+    "screenshots/purchases.png",
+    "screenshots/sales.png",
+    "screenshots/settings.png"
+  ],
+  "root_image_review": [
+    "catalog-benefits.png",
+    "nfe-editor.png",
+    "dashboard.png"
+  ],
+  "dom_artifacts_note": "DOMs completos mantidos somente no workspace temporário; relatório e PNGs de fixtures sintéticas estão versionados."
+}

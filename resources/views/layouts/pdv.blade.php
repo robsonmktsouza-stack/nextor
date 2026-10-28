@@ -10,15 +10,17 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="{{ asset('css/ui-tokens.css') }}?v={{ filemtime(public_path('css/ui-tokens.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/erp.css') }}?v={{ filemtime(public_path('css/erp.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/pdv.css') }}?v={{ filemtime(public_path('css/pdv.css')) }}">
-<link rel="stylesheet" href="{{ asset('css/ui-refinement.css') }}?v={{ filemtime(public_path('css/ui-refinement.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/branding.css') }}?v={{ filemtime(public_path('css/branding.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/pdv-lumeron.css') }}?v={{ filemtime(public_path('css/pdv-lumeron.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/pdv-cash-report-modal.css') }}?v={{ filemtime(public_path('css/pdv-cash-report-modal.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/desktop-polish.css') }}?v={{ filemtime(public_path('css/desktop-polish.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/erp-typography.css') }}?v={{ filemtime(public_path('css/erp-typography.css')) }}">
+<link rel="stylesheet" href="{{ asset('css/ui-refinement.css') }}?v={{ filemtime(public_path('css/ui-refinement.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/commercial-readonly.css') }}?v={{ filemtime(public_path('css/commercial-readonly.css')) }}">
+<script defer src="{{ asset('js/user-messages.js') }}?v={{ filemtime(public_path('js/user-messages.js')) }}"></script>
 <script defer src="{{ asset('js/commercial-readonly.js') }}?v={{ filemtime(public_path('js/commercial-readonly.js')) }}"></script>
 <script defer src="{{ asset('js/erp.js') }}?v={{ filemtime(public_path('js/erp.js')) }}"></script>
 </head>

@@ -245,12 +245,13 @@ document.addEventListener('DOMContentLoaded',()=>{
           const field=[...fields.querySelectorAll('[name]')].find(node=>node.name===name);
           if(field)field.classList.add('catalog-invalid');
         }
-        const msg=Object.values(invalid).flat().join(' ')||'Confira os dados informados.';
+        const msg=Object.values(invalid).flat().filter(value=>typeof value==='string').join(' ')
+          || data.message || 'Confira os dados informados.';
         throw new Error(msg);
       }
       choose(data.item,!!updateId);
     }catch(e){
-      error.textContent=e.message||'Não foi possível salvar o cadastro.';
+      error.textContent=window.LumeronUserMessage.fromError(e,'Não foi possível salvar o cadastro. Confira a conexão e tente novamente.');
       error.hidden=false;
     }finally{
       save.disabled=false;

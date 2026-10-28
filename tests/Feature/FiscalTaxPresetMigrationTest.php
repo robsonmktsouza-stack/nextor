@@ -13,7 +13,14 @@ use Tests\TestCase;
 final class FiscalTaxPresetMigrationTest extends TestCase
 {
     use RefreshDatabase;
-    use \Tests\Concerns\WithConfiguredCompany;
+    use \Tests\Concerns\WithIsolatedFiscalCatalog;
+    use \Tests\Concerns\WithConfiguredCompany { setUp as protected setUpConfiguredCompany; }
+
+    protected function setUp(): void
+    {
+        $this->setUpConfiguredCompany();
+        $this->isolateFiscalCatalog();
+    }
 
     public function test_migration_creates_all_official_code_based_preset_groups_without_auto_default(): void
     {

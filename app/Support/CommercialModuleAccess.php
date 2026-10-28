@@ -58,7 +58,9 @@ final class CommercialModuleAccess
         return $request->routeIs(
             'fiscal.index', 'fiscal.show', 'fiscal.nfce.xml',
             'fiscal.nfce.danfe', 'fiscal.utilities.auxiliary',
-            'fiscal.nfce.inutilizations', 'pdv.nfce.danfe'
+            'fiscal.nfce.inutilizations', 'pdv.nfce.danfe',
+            'fiscal.nfe.inutilizations.index', 'fiscal.nfe.inutilizations.xml', 'fiscal.nfe.xml', 'fiscal.nfe.danfe',
+            'fiscal.nfe.drafts.index'
         );
     }
 

@@ -7,8 +7,8 @@ use App\Models\NfeDraft;
 use RuntimeException;
 
 /**
- * NF-e model 55: initial, deliberately bounded domestic merchandise scenario.
- * It will refuse unknown taxes rather than turn an editor label into a fiscal value.
+ * NF-e model 55: operation policy, explicit tax calculations and ACBr INI serialization.
+ * Unsupported fiscal groups are rejected before any external transmission.
  */
 final class Nfe55IniBuilder
 {
@@ -18,16 +18,16 @@ final class Nfe55IniBuilder
         'SE'=>'28','BA'=>'29','MG'=>'31','ES'=>'32','RJ'=>'33','SP'=>'35',
         'PR'=>'41','SC'=>'42','RS'=>'43','MS'=>'50','MT'=>'51','GO'=>'52','DF'=>'53',
     ];
-    public function __construct(private readonly NFCeRtcTaxService $rtc) {}
+    public function __construct(private readonly Nfe55RtcTaxAdapter $rtc) {}
 
     public function build(NfeDraft $draft,CompanySetting $company,int $number,int $numericCode): string
     {
         $draft->loadMissing(['items','operationNature']);
-        if($draft->operation_type!=='outbound'
-            ||$draft->destination!=='internal'
-            ||$draft->purpose!=='normal'
-            ||!in_array((string)$company->crt,['1','4'],true)) {
-            throw new RuntimeException('Esta operação de NF-e exige um cenário fiscal específico ainda não homologado.');
+        app(Nfe55TaxRuleApplicationService::class)->assertCurrent($draft,$company);
+        $operation=app(Nfe55OperationPolicy::class)->validate($draft,$company);
+        $foreignTrade=app(Nfe55ForeignTradeService::class)->validate($draft,$company);
+        if(!in_array((string)$company->crt,['1','2','3','4'],true)){
+            throw new RuntimeException('CRT do emitente inválido.');
         }
         if($draft->government_purchase||$draft->advance_payment
             ||$draft->items->isEmpty()||$draft->items->count()>80) {
@@ -47,15 +47,17 @@ final class Nfe55IniBuilder
         }
         $recipient=$draft->recipient_snapshot??[];
         $doc=$this->digits($recipient['document']??'');
-        if(!in_array(strlen($doc),[11,14],true)
-            ||strtoupper((string)($recipient['state']??''))!==$uf
+        $isForeign=$foreignTrade['is_foreign'];
+        if(!($recipient['name']??'') || !($recipient['address']??'')
+            || !($recipient['address_number']??'') || !($recipient['district']??'')
+            || !($recipient['city']??'')){
+            throw new RuntimeException('Nome e endereço do destinatário incompletos para NF-e.');
+        }
+        if(!$isForeign && (!in_array(strlen($doc),[11,14],true)
+            ||!isset(self::UF[strtoupper((string)($recipient['state']??''))])
             ||strlen($this->digits($recipient['city_ibge_code']??''))!==7
-            ||strlen($this->digits($recipient['zip_code']??''))!==8
-            ||!($recipient['name']??'')
-            ||!($recipient['address']??'')
-            ||!($recipient['address_number']??'')
-            ||!($recipient['district']??'')) {
-            throw new RuntimeException('Destinatário incompleto ou fora do cenário interno.');
+            ||strlen($this->digits($recipient['zip_code']??''))!==8)) {
+            throw new RuntimeException('Destinatário nacional incompleto para NF-e.');
         }
         if($number<1||$number>999999999||$numericCode<1||$numericCode>99999999
             ||$draft->series===null||(int)$draft->series<0||(int)$draft->series>999) {
@@ -77,9 +79,9 @@ final class Nfe55IniBuilder
             'cUF'=>self::UF[$uf],'cNF'=>sprintf('%08d',$numericCode),
             'natOp'=>$draft->operationNature?->name,
             'Modelo'=>'55','serie'=>$draft->series,'nNF'=>$number,
-            'dhEmi'=>($draft->issue_date??now())->format('d/m/Y').' '.substr((string)($draft->issue_time?:'12:00'),0,5).':00',
-            'tpNF'=>'1','idDest'=>'1','tpAmb'=>$env,'tpImp'=>'1','tpEmis'=>'1',
-            'finNFe'=>'1','indFinal'=>$draft->final_consumer?'1':'0',
+            'dhEmi'=>$draft->issue_date->format('d/m/Y').' '.substr((string)$draft->issue_time,0,5).':00',
+            'tpNF'=>$operation['tpNF'],'idDest'=>$operation['idDest'],'tpAmb'=>$env,'tpImp'=>'1','tpEmis'=>'1',
+            'finNFe'=>$operation['finNFe'],'indFinal'=>$draft->final_consumer?'1':'0',
             'indPres'=>match($draft->presence){'presential'=>'1','internet'=>'2','phone'=>'3',
                 'delivery_home'=>'4','outside_establishment'=>'5','other'=>'9',default=>'0'},
             'procEmi'=>'0','verProc'=>'LUMERON 1.0','cMunFG'=>$this->digits($company->city_ibge_code),
@@ -94,26 +96,30 @@ final class Nfe55IniBuilder
             'cPais'=>'1058','xPais'=>'BRASIL','Fone'=>$this->digits($company->phone),
         ]);
         $add('Destinatario',[
-            'CNPJCPF'=>$doc,
+            'CNPJCPF'=>$isForeign?null:$doc,'idEstrangeiro'=>$isForeign?$recipient['foreign_id']:null,
             'xNome'=>$env==='2'?'NF-E EMITIDA EM AMBIENTE DE HOMOLOGACAO - SEM VALOR FISCAL':$recipient['name'],
-            'indIEDest'=>match($recipient['ie_indicator']??'non_contributor'){
+            'indIEDest'=>$isForeign?'9':match($recipient['ie_indicator']??'non_contributor'){
                 'contributor'=>'1','exempt'=>'2',default=>'9'},
-            'IE'=>($recipient['ie_indicator']??'non_contributor')==='contributor'
+            'IE'=>!$isForeign && ($recipient['ie_indicator']??'non_contributor')==='contributor'
                 ? $this->digits($recipient['state_registration']??'') : null,
             'xLgr'=>$recipient['address'],'nro'=>$recipient['address_number'],
             'xCpl'=>$recipient['address_complement']??null,'xBairro'=>$recipient['district'],
-            'cMun'=>$this->digits($recipient['city_ibge_code']),'xMun'=>$recipient['city'],
-            'UF'=>$uf,'CEP'=>$this->digits($recipient['zip_code']),
-            'cPais'=>'1058','xPais'=>'BRASIL','Fone'=>$this->digits($recipient['phone']??null),
+            'cMun'=>$isForeign?'9999999':$this->digits($recipient['city_ibge_code']),'xMun'=>$isForeign?'EXTERIOR':$recipient['city'],
+            'UF'=>$isForeign?'EX':strtoupper((string)$recipient['state']),'CEP'=>$isForeign?null:$this->digits($recipient['zip_code']),
+            'cPais'=>$isForeign?$recipient['country_code']:'1058','xPais'=>$isForeign?$recipient['country_name']:'BRASIL','Fone'=>$this->digits($recipient['phone']??null),
             'email'=>$recipient['email']??null,
         ]);
+        foreach(app(Nfe55AuthorizedXmlService::class)->documents($draft,$company) as $index=>$authorizedDocument){
+            $add('autXML'.sprintf('%03d',$index+1),['CNPJCPF'=>$authorizedDocument]);
+        }
         if($draft->different_delivery){
             $delivery=$draft->delivery_snapshot??[];
             if(!$delivery || strlen($this->digits($delivery['zip_code']??''))!==8
                 || strlen($this->digits($delivery['city_ibge_code']??''))!==7
                 || !($delivery['address']??null)||!($delivery['address_number']??null)
                 || !($delivery['district']??null)||!($delivery['city']??null)
-                || !($delivery['state']??null)){
+                || !isset(self::UF[strtoupper((string)($delivery['state']??''))])
+                || !in_array((string)($delivery['country_code']??'1058'),['','1058'],true)){
                 throw new RuntimeException('Local de entrega incompleto.');
             }
             $deliveryDoc=$this->digits($delivery['document']??'');
@@ -132,10 +138,7 @@ final class Nfe55IniBuilder
         // Allocate document-level amounts to the items before emitting the INI.
         // Values are kept in integer cents so the XML item sums always match vNF.
         $items=$draft->items->values();
-        $grossWeights=$items->map(fn($item)=>(int)round(
-            (float)$item->quantity*(float)$item->dimension_quantity*(float)$item->unit_price*100,
-            0,PHP_ROUND_HALF_UP
-        ))->all();
+        $grossWeights=$items->map(fn($item)=>NfeTaxMath::line($item->quantity,$item->dimension_quantity,$item->unit_price)['gross_cents'])->all();
         $globalFreight=$this->cents(data_get($draft->transport_data,'freight_value',0));
         $globalSurcharge=$this->cents($draft->surcharge);
         $globalDiscount=$this->cents($draft->discount);
@@ -160,14 +163,19 @@ final class Nfe55IniBuilder
         $discountShares=$this->proportionalShares($globalDiscount,$discountWeights);
 
         $totalProduct=0;$totalPis=0;$totalCofins=0;$totalIpi=0;
+        $totalFederalStAddition=0;$totalReturnedIpi=0;
+        $totalIcmsBase=0;$totalIcms=0;$totalStBase=0;$totalSt=0;$totalFcp=0;$totalFcpSt=0;
+        $totalDesonerated=0;$totalDesonerationDeduction=0;$totalRetainedFcp=0;
+        $totalDestinationIcms=0;$totalOriginIcms=0;$totalDestinationFcp=0;
         $totalFreight=0;$totalInsurance=0;$totalOther=0;$totalDiscount=0;
-        $rtcTotal=['bc'=>0,'uf'=>0,'mun'=>0,'cbs'=>0];$rtcCount=0;
+        $rtcTotal=array_fill_keys(['bc','uf','mun','cbs','dif_uf','dif_mun','dif_cbs','dev_uf','dev_mun','dev_cbs','presumed_ibs','presumed_cbs','presumed_conditional_ibs','presumed_conditional_cbs'],0);$rtcCount=0;$totalSelective=0;$selectiveCount=0;
         foreach($items as $index=>$item) {
-            $tax=$item->tax_data??[];
+            $tax=Nfe55TaxParameters::forDirection($item->tax_data??[],(string)$draft->operation_type);
+            Nfe55TaxParameters::assertSupported($tax);
             // Normalize legacy editor keys into the RTC engine's canonical fields.
-            $ibsCst=trim((string)($tax['ibs_cst']??''));
-            $cbsCst=trim((string)($tax['cbs_cst']??''));
-            $classification=trim((string)($tax['tax_classification_code']??''));
+            $ibsCst=trim((string)($tax['ibs_cst']??''))?:trim((string)($tax['ibs_cbs_cst']??''));
+            $cbsCst=trim((string)($tax['cbs_cst']??''))?:trim((string)($tax['ibs_cbs_cst']??''));
+            $classification=trim((string)($tax['tax_classification_code']??''))?:trim((string)($tax['ibs_cbs_class']??''));
             if($ibsCst!==''||$cbsCst!==''||$classification!==''){
                 if($ibsCst===''||$cbsCst===''||$ibsCst!==$cbsCst){
                     throw new RuntimeException('CST de IBS e CBS devem corresponder à classificação informada.');
@@ -175,47 +183,61 @@ final class Nfe55IniBuilder
                 $tax['ibs_cbs_cst']=$ibsCst;
                 $tax['ibs_cbs_class']=$classification;
             }
-            $qty=(float)$item->quantity*(float)$item->dimension_quantity;
-            $gross=round($qty*(float)$item->unit_price,2);
+            $line=NfeTaxMath::line($item->quantity,$item->dimension_quantity,$item->unit_price);
+            $qty=$line['quantity_units']/10000;$grossCents=$line['gross_cents'];$gross=$grossCents/100;
             $cfop=(string)$item->cfop;
-            if($qty<=0 || $gross<=0 || !preg_match('/^5\d{3}$/',$cfop)
+            if($qty<=0 || $gross<=0 || !preg_match('/^'.$operation['cfop_prefix'].'\d{3}$/',$cfop)
                 ||!preg_match('/^\d{8}$/',$this->digits($item->ncm))
                 ||!preg_match('/^[0-8]$/',(string)$item->origin)) {
                 throw new RuntimeException('Confira quantidade, NCM, CFOP e origem dos produtos da NF-e.');
             }
-            if($item->special_data && array_filter($item->special_data,static fn($v)=>$v!==null&&$v!==''&&$v!==false&&$v!==0)) {
+            $special=$item->special_data??[];
+            $itemReference=$special['dfe_reference']??null;
+            if($draft->purpose==='return'){
+                $key=is_array($itemReference)?(string)($itemReference['key']??''):'';
+                $originalItem=is_array($itemReference)?($itemReference['n_item']??null):null;
+                $allowed=array_filter($draft->references??[],static fn($ref)=>
+                    strtoupper((string)($ref['type']??'NFE'))==='NFE' && (string)($ref['key']??'')===$key);
+                if(!preg_match('/^\\d{44}$/D',$key) || !filter_var($originalItem,FILTER_VALIDATE_INT)
+                    ||(int)$originalItem<1 ||(int)$originalItem>990 || !$allowed){
+                    throw new RuntimeException('Devolução exige chave e número do item da NF-e original em cada produto.');
+                }
+                unset($special['dfe_reference']);
+            }elseif($itemReference!==null){
+                throw new RuntimeException('Referência de documento por item exige operação de devolução.');
+            }
+            if($isForeign && $foreignTrade['kind']==='import')unset($special['import_declarations'],$special['import_taxes']);
+            if($this->hasFiscalValue($special)) {
                 throw new RuntimeException('Este produto exige grupo fiscal específico ainda não homologado.');
             }
-            $csosn=(string)($tax['icms_csosn']??'');
-            if(!in_array($csosn,['102','103','300','400'],true)) {
-                throw new RuntimeException("CSOSN {$csosn} não homologado para NF-e neste fluxo.");
+            if(trim((string)($tax['ipi_cst']??''))===''){
+                throw new RuntimeException('Informe o CST do IPI para cada item.');
             }
-            $pis=(string)($tax['pis_cst']??'');
-            $cofins=(string)($tax['cofins_cst']??'');
-            $ipi=(string)($tax['ipi_cst']??'');
-            if(!in_array($pis,['49','99'],true)||!in_array($cofins,['49','99'],true)
-                ||!in_array($ipi,['53'],true)) {
-                throw new RuntimeException('Tributação federal deste item requer cálculo específico ainda não homologado.');
+            if(isset($tax['iss_rate']) && $tax['iss_rate']!=='' && NfeTaxMath::rate($tax['iss_rate'],'ISS')!==0){
+                throw new RuntimeException('Serviço sujeito ao ISS exige grupo fiscal específico.');
             }
-            foreach(['ipi_rate','pis_rate','cofins_rate','iss_rate'] as $rateField){
-                if((float)($tax[$rateField]??0)!==0.0){
-                    throw new RuntimeException('Tributação federal deste item exige cálculo ainda não homologado.');
-                }
-            }
-            $freight=($this->cents($item->freight)+$freightShares[$index])/100;
-            $insurance=$this->cents($item->insurance)/100;
-            $other=($this->cents($item->other_expenses)+$otherShares[$index])/100;
-            $discount=($this->cents($item->discount)+$discountShares[$index])/100;
+            $freightCents=$this->cents($item->freight)+$freightShares[$index];
+            $insuranceCents=$this->cents($item->insurance);
+            $otherCents=$this->cents($item->other_expenses)+$otherShares[$index];
+            $discountCents=$this->cents($item->discount)+$discountShares[$index];
+            $freight=$freightCents/100;$insurance=$insuranceCents/100;
+            $other=$otherCents/100;$discount=$discountCents/100;
             if($freight<0||$insurance<0||$other<0||$discount<0
                 ||$discount>$gross+$freight+$insurance+$other){
                 throw new RuntimeException('Valores adicionais de item inconsistentes.');
             }
-            $totalFreight+=(int)round($freight*100);
-            $totalInsurance+=(int)round($insurance*100);
-            $totalOther+=(int)round($other*100);
-            $totalDiscount+=(int)round($discount*100);
+            $totalFreight+=$freightCents;$totalInsurance+=$insuranceCents;
+            $totalOther+=$otherCents;$totalDiscount+=$discountCents;
+            $factor=NfeTaxMath::scaled($tax['tax_quantity_factor']??'1',4,'Fator da quantidade tributável');
+            if($factor<=0)throw new RuntimeException('O fator da unidade tributável deve ser positivo.');
+            $taxQuantity=NfeTaxMath::product($line['quantity_units'],$factor,4);
+            if($taxQuantity<=0)throw new RuntimeException('A quantidade tributável não pode ser arredondada para zero.');
+            $taxPrice=NfeTaxMath::ratio(NfeTaxMath::scaled($item->unit_price,4,'Preço unitário'),10000000000,$factor);
+            if(abs(NfeTaxMath::product($taxQuantity,$taxPrice,12)-$grossCents)>1){
+                throw new RuntimeException('A conversão da unidade tributável não concilia com o valor do produto. Confira o fator e a precisão.');
+            }
             $i=sprintf('%03d',$index+1);
-            $totalProduct+=(int)round($gross*100);
+            $totalProduct+=$grossCents;
             $add('Produto'.$i,[
                 'cProd'=>$item->product_sku?:'ITEM-'.$i,
                 'cEAN'=>$this->digits($item->ean_gtin)?:'SEM GTIN',
@@ -223,67 +245,122 @@ final class Nfe55IniBuilder
                     ? 'NOTA FISCAL EMITIDA EM AMBIENTE DE HOMOLOGACAO - SEM VALOR FISCAL'
                     : $item->product_name,
                 'NCM'=>$this->digits($item->ncm),'CEST'=>$this->digits($item->cest),
+                'cBenef'=>$item->fiscal_benefit_code,
                 'CFOP'=>$cfop,'uCom'=>$item->unit?:'UN',
                 'qCom'=>number_format($qty,4,'.',''),
                 'vUnCom'=>number_format((float)$item->unit_price,4,'.',''),
-                'vProd'=>$this->money($gross),
+                'vProd'=>NfeTaxMath::format($grossCents),
                 'vFrete'=>$freight>0?$this->money($freight):null,
                 'vSeg'=>$insurance>0?$this->money($insurance):null,
                 'vOutro'=>$other>0?$this->money($other):null,
                 'vDesc'=>$discount>0?$this->money($discount):null,
                 'cEANTrib'=>$this->digits($item->ean_gtin)?:'SEM GTIN',
                 'uTrib'=>$item->tax_unit?:$item->unit?:'UN',
-                'qTrib'=>number_format($qty,4,'.',''),
-                'vUnTrib'=>number_format((float)$item->unit_price,4,'.',''),
+                'qTrib'=>NfeTaxMath::format($taxQuantity,4),
+                'vUnTrib'=>NfeTaxMath::format($taxPrice,10),
                 'indTot'=>'1','infAdProd'=>$item->notes,
             ]);
-            $add('ICMS'.$i,['orig'=>$item->origin,'CSOSN'=>$csosn]);
-            $add('PIS'.$i,['CST'=>$pis,'vBC'=>'0.00','pPIS'=>'0.00','vPIS'=>'0.00']);
-            $add('COFINS'.$i,['CST'=>$cofins,'vBC'=>'0.00','pCOFINS'=>'0.00','vCOFINS'=>'0.00']);
-            $add('IPI'.$i,['CST'=>$ipi,'cEnq'=>$tax['ipi_enq']??'999']);
-            // Only tax profiles the RTC calculator can prove; never fabricate IBS/CBS.
-            $rtc=$this->rtc->calculate([
-                'quantity'=>$qty,'unit_price'=>(float)$item->unit_price,
-                'discount'=>0,'tax_defaults'=>$tax,'origin'=>$item->origin,
-            ],(string)$company->crt,$draft->issue_date?->toDateString());
-            if($rtc!==null){
-                if($freight>0||$insurance>0||$other>0||$discount>0){
-                    throw new RuntimeException('IBS/CBS com rateio de valores ainda não homologado.');
+            if($draft->purpose==='return'){
+                $add('DFeReferenciado'.$i,[
+                    'chaveAcesso'=>$itemReference['key'],
+                    'nItem'=>(int)$itemReference['n_item'],
+                ]);
+            }
+            $federalBase=$grossCents+$freightCents+$insuranceCents+$otherCents-$discountCents;
+            $icms=app(NfeIcmsItemTaxCalculator::class)->calculate($tax,$federalBase,(string)$company->crt,number_format($qty,4,'.',''));
+            $federal=app(NfeFederalItemTaxCalculator::class)->calculate($tax,$federalBase);
+            $selective=app(Nfe55SelectiveTaxCalculator::class)->calculate($tax,$draft->issue_date->toDateString());
+            if($selective!==null){$selectiveCount++;$add('IS'.$i,$selective['fields']);$totalSelective+=$selective['amount'];}
+            $federalSt=app(Nfe55FederalStCalculator::class)->calculate($tax);
+            $returnedIpi=app(Nfe55ReturnedIpiCalculator::class)->calculate($tax);
+            $totalFederalStAddition+=$federalSt['total_addition'];
+            $totalReturnedIpi+=$returnedIpi['amount']??0;
+            if($federalSt['pis_st'])$add('PISST'.$i,$federalSt['pis_st']);
+            if($federalSt['cofins_st'])$add('COFINSST'.$i,$federalSt['cofins_st']);
+            if($returnedIpi!==null)$add('impostoDevol'.$i,$returnedIpi['fields']);
+            $difal=app(Nfe55DifalCalculator::class)->calculate($tax,$draft->issue_date->toDateString());
+            if($difal!==null){
+                if($draft->destination!=='interstate' || !$draft->final_consumer
+                    || ($recipient['ie_indicator']??'')!=='non_contributor'
+                    || !in_array((string)$company->crt,['2','3'],true) || $operation['tpNF']!=='1'
+                    || $draft->purpose!=='normal'){
+                    throw new RuntimeException('DIFAL de destino incompatível com a operação ou regime informado.');
                 }
+                $add('ICMSUFDEST'.$i,$difal['fields']);
+                $totalDestinationIcms+=$difal['destination_amount'];
+                $totalOriginIcms+=$difal['origin_amount'];
+                $totalDestinationFcp+=$difal['fcp_destination_amount'];
+            }
+            $add('ICMS'.$i,['orig'=>$item->origin]+$icms['fields']);
+            $totalDesonerated+=$icms['desonerated_amount'];
+            $totalDesonerationDeduction+=$icms['total_deduction'];
+            $totalRetainedFcp+=$icms['fcp_st_retained_amount'];
+            $totalIcmsBase+=$icms['base_cents'];$totalIcms+=$icms['icms_amount'];
+            $totalStBase+=$icms['st_base_cents'];$totalSt+=$icms['st_amount'];
+            $totalFcp+=$icms['fcp_amount'];$totalFcpSt+=$icms['fcp_st_amount'];
+            $totalPis+=$federal['pis_amount'];$totalCofins+=$federal['cofins_amount'];$totalIpi+=$federal['ipi_amount'];
+            $add('PIS'.$i,$federal['pis']);$add('COFINS'.$i,$federal['cofins']);$add('IPI'.$i,$federal['ipi']);
+            // The RTC base includes apportioned ancillary amounts and discounts.
+            // Legacy taxes are the same amounts serialized above, never zero placeholders.
+            $rtc=$this->rtc->calculate($tax,$federalBase-$icms['total_deduction'],(string)$company->crt,
+                $draft->issue_date->toDateString(),[
+                    'icms'=>$icms['icms_amount']+$icms['fcp_amount']
+                        +($difal['destination_amount']??0)+($difal['origin_amount']??0)+($difal['fcp_destination_amount']??0),
+                    'pis'=>$federal['pis_amount'],'cofins'=>$federal['cofins_amount'],
+                ],$isForeign && $foreignTrade['kind']==='import');
+            if($rtc!==null){
                 $rtcCount++;
                 foreach(['ibscbs'=>'IBSCBS','gibscbs'=>'gIBSCBS','gibsuf'=>'gIBSUF',
                     'gibsmun'=>'gIBSMun','gcbs'=>'gCBS'] as $from=>$prefix){
-                    $add($prefix.$i,$rtc[$from]);
+                    if(!empty($rtc[$from]))$add($prefix.$i,$rtc[$from]);
                 }
-                $rtcTotal['bc']+=(int)round((float)$rtc['gibscbs']['vBC']*100);
-                $rtcTotal['uf']+=(int)round((float)$rtc['gibsuf']['vIBSUF']*100);
-                $rtcTotal['mun']+=(int)round((float)$rtc['gibsmun']['vIBSMun']*100);
-                $rtcTotal['cbs']+=(int)round((float)$rtc['gcbs']['vCBS']*100);
+                foreach($rtc['extra_sections']??[] as $prefix=>$fields){
+                    if($prefix==='gAjusteCompet'){
+                        $month=\DateTimeImmutable::createFromFormat('!Y-m',$fields['competApur']);
+                        $fields['competApur']=$month->format('d/m/Y');
+                    }
+                    $add($prefix.$i,$fields);
+                }
+                foreach($rtcTotal as $key=>$unused)$rtcTotal[$key]+=$rtc['totals'][$key]??0;
             }
         }
         if($rtcCount>0 && $rtcCount!==$draft->items->count()){
             throw new RuntimeException('IBS/CBS preenchido somente em alguns itens; confira a classificação fiscal.');
         }
-        $total=$this->money(($totalProduct+$totalFreight+$totalInsurance+$totalOther-$totalDiscount)/100);
+        foreach($foreignTrade['sections'] as $foreignSection)$add($foreignSection['name'],$foreignSection['fields']);
+        $totalCents=$totalProduct+$totalFreight+$totalInsurance+$totalOther+$totalIpi+$totalSt+$totalFcpSt
+            +$foreignTrade['ii_total_cents']+$totalFederalStAddition+$totalReturnedIpi-$totalDiscount-$totalDesonerationDeduction;
+        if($totalCents<0 || $totalCents>999999999999999)throw new RuntimeException('Total da NF-e fora dos limites do documento fiscal.');
+        $legacyTotal=NfeTaxMath::format($totalCents);
+        $modern=$draft->issue_date->toDateString()>='2027-01-01';
+        $total=NfeTaxMath::format($totalCents+($modern?($totalSelective+$rtcTotal['uf']+$rtcTotal['mun']+$rtcTotal['cbs']):0));
         $expected=$this->money(data_get($draft->totals,'total',data_get($draft->totals,'products',0)));
         if($expected!==$total)throw new RuntimeException('Total fiscal não confere com o rascunho.');
         $add('Total',[
-            'vBC'=>'0.00','vICMS'=>'0.00','vBCST'=>'0.00','vST'=>'0.00',
+            'vBC'=>NfeTaxMath::format($totalIcmsBase),'vICMS'=>NfeTaxMath::format($totalIcms),
+            'vBCST'=>NfeTaxMath::format($totalStBase),'vST'=>NfeTaxMath::format($totalSt),
+            'vFCP'=>NfeTaxMath::format($totalFcp),'vFCPST'=>NfeTaxMath::format($totalFcpSt),
+            'vII'=>NfeTaxMath::format($foreignTrade['ii_total_cents']),
+            'vFCPSTRet'=>NfeTaxMath::format($totalRetainedFcp),'vICMSDeson'=>NfeTaxMath::format($totalDesonerated),
+            'vFCPUFDest'=>NfeTaxMath::format($totalDestinationFcp),
+            'vICMSUFDest'=>NfeTaxMath::format($totalDestinationIcms),'vICMSUFRemet'=>NfeTaxMath::format($totalOriginIcms),
             'vProd'=>$this->money($totalProduct/100),
             'vFrete'=>$this->money($totalFreight/100),
             'vSeg'=>$this->money($totalInsurance/100),
             'vOutro'=>$this->money($totalOther/100),
-            'vDesc'=>$this->money($totalDiscount/100),'vIPI'=>'0.00',
+            'vDesc'=>$this->money($totalDiscount/100),'vIPI'=>NfeTaxMath::format($totalIpi),
+            'vIPIDevol'=>NfeTaxMath::format($totalReturnedIpi),
             'vPIS'=>$this->money($totalPis/100),'vCOFINS'=>$this->money($totalCofins/100),
-            'vNF'=>$total,
+            'vNF'=>$legacyTotal,'vNFTot'=>$modern?$total:null,
         ]);
+        if($selectiveCount>0)$add('ISTot',['vIS'=>NfeTaxMath::format($totalSelective)]);
         if($rtcCount>0){
             $m=fn($key)=>$this->money($rtcTotal[$key]/100);
             $add('IBSCBSTot',['vBCIBSCBS'=>$m('bc')]);
-            $add('gIBS',['vIBS'=>$this->money(($rtcTotal['uf']+$rtcTotal['mun'])/100)]);
-            $add('gIBSUFTot',['vIBSUF'=>$m('uf')]);
-            $add('gIBSMunTot',['vIBSMun'=>$m('mun')]);
-            $add('gCBSTot',['vCBS'=>$m('cbs')]);
+            $add('gIBS',['vIBS'=>$this->money(($rtcTotal['uf']+$rtcTotal['mun'])/100),'vCredPres'=>$m('presumed_ibs'),'vCredPresCondSus'=>$m('presumed_conditional_ibs')]);
+            $add('gIBSUFTot',['vIBSUF'=>$m('uf'),'vDif'=>$m('dif_uf'),'vDevTrib'=>$m('dev_uf')]);
+            $add('gIBSMunTot',['vIBSMun'=>$m('mun'),'vDif'=>$m('dif_mun'),'vDevTrib'=>$m('dev_mun')]);
+            $add('gCBSTot',['vCBS'=>$m('cbs'),'vDif'=>$m('dif_cbs'),'vDevTrib'=>$m('dev_cbs'),'vCredPres'=>$m('presumed_cbs'),'vCredPresCondSus'=>$m('presumed_conditional_cbs')]);
         }
         $transport=$draft->transport_data??[];
         $freightMode=(string)($transport['freight_mode']??'9');
@@ -381,7 +458,7 @@ final class Nfe55IniBuilder
             : $totalPaid!==(int)round((float)$total*100)){
             throw new RuntimeException('Os pagamentos não conciliam com o total da NF-e.');
         }
-        if($draft->has_referenced_document){
+        if($draft->has_referenced_document && $draft->purpose!=='return'){
             $refs=$draft->references??[];
             if(!$refs)throw new RuntimeException('Documento referenciado não informado.');
             foreach($refs as $i=>$reference){
@@ -397,7 +474,9 @@ final class Nfe55IniBuilder
                 ]);
             }
         }
-        if($draft->additional_info)$add('DadosAdicionais',['infCpl'=>$draft->additional_info]);
+        if($draft->additional_info || $draft->tax_authority_info){
+            $add('DadosAdicionais',['infCpl'=>$draft->additional_info,'infAdFisco'=>$draft->tax_authority_info]);
+        }
         return implode("\r\n\r\n",$sections)."\r\n";
     }
 
@@ -408,6 +487,15 @@ final class Nfe55IniBuilder
      * @param array<int,int> $weights Nonnegative item weights expressed in cents
      * @return array<int,int>
      */
+    private function hasFiscalValue(mixed $value): bool
+    {
+        if(is_array($value)){
+            foreach($value as $child)if($this->hasFiscalValue($child))return true;
+            return false;
+        }
+        return $value!==null && $value!=='' && $value!==false && $value!==0;
+    }
+
     private function proportionalShares(int $amount,array $weights): array
     {
         $shares=array_fill(0,count($weights),0);
@@ -421,7 +509,7 @@ final class Nfe55IniBuilder
         foreach($weights as $index=>$weight){
             if($weight<0)throw new RuntimeException('Peso de rateio inválido.');
             $cumulativeWeight+=$weight;
-            $next=(int)round($amount*$cumulativeWeight/$totalWeight,0,PHP_ROUND_HALF_UP);
+            $next=NfeTaxMath::ratio($amount,$cumulativeWeight,$totalWeight);
             $shares[$index]=$next-$distributed;
             $distributed=$next;
         }
@@ -430,7 +518,9 @@ final class Nfe55IniBuilder
 
     private function cents(mixed $value): int
     {
-        return (int)round((float)$value*100,0,PHP_ROUND_HALF_UP);
+        $amount=NfeTaxMath::scaled($value??'0',2,'Valor monetário');
+        if($amount>999999999999999)throw new RuntimeException('Valor monetário superior ao limite do documento fiscal.');
+        return $amount;
     }
 
     private function digits(mixed $value): string

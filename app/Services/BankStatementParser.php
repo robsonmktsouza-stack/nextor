@@ -94,7 +94,8 @@ class BankStatementParser
     private function parseXlsx(string $path): array
     {
         if(!class_exists(ZipArchive::class)) {
-            throw ValidationException::withMessages(['file'=>'A extensão ZIP do PHP é necessária para importar XLSX.']);
+            \Illuminate\Support\Facades\Log::warning('Importação XLSX indisponível: extensão ZIP do PHP não carregada.');
+            throw ValidationException::withMessages(['file'=>'A importação de XLSX está indisponível. Exporte o extrato em OFX ou CSV e tente novamente.']);
         }
 
         $zip=new ZipArchive();
