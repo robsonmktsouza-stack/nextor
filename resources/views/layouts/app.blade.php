@@ -14,7 +14,10 @@
 <link rel="stylesheet" href="{{ asset('css/desktop-polish.css') }}?v={{ filemtime(public_path('css/desktop-polish.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/erp-typography.css') }}?v={{ filemtime(public_path('css/erp-typography.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/quick-catalog.css') }}?v={{ filemtime(public_path('css/quick-catalog.css')) }}">
+{{-- O formulário NF-e 55 reconstruído não deve carregar as regras concorrentes da interface anterior. --}}
+@if(!request()->routeIs('fiscal.nfe.create', 'fiscal.nfe.edit'))
 <link rel="stylesheet" href="{{ asset('css/nfe-form-workflow.css') }}?v={{ filemtime(public_path('css/nfe-form-workflow.css')) }}">
+@endif
 <link rel="stylesheet" href="{{ asset('css/fiscal-workspace.css') }}?v={{ filemtime(public_path('css/fiscal-workspace.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/commercial-workspace.css') }}?v={{ filemtime(public_path('css/commercial-workspace.css')) }}">
 @stack('styles')
