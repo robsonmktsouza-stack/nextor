@@ -116,7 +116,7 @@ $origins=[
       <div class="nfe-document-symbol" aria-hidden="true">55</div>
       <div class="nfe-command-text">
         <div class="nfe-command-eyebrow">Fiscal / Documentos eletrônicos / NF-e</div>
-        <h2 id="nfeEditorTitle">{{ $isEditing ? 'Editar NF-e' : 'Nova NF-e' }} <span class="nfe-model-name">Modelo 55</span></h2>
+        <h2 id="nfeEditorTitle">{{ $isEditing ? 'Editar NF-e' : 'Criar nova NF-e' }} <span class="nfe-model-name">Modelo 55</span></h2>
         <div class="nfe-editor-document-meta">
           <span>Série <strong>{{ str_pad((string)($draft->series ?? 1),3,'0',STR_PAD_LEFT) }}</strong></span>
           <span>Número <strong>{{ $draft->document_number ?: 'Automático' }}</strong></span>
