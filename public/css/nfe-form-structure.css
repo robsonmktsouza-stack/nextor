@@ -227,7 +227,7 @@
   border:1px solid #dbe4ea;border-radius:2px;
   background:#f5f7f8;color:#394c5b;font-size:12px;
 }
-#nfeEditorDialog .nfe-structured-grid,#nfeItemDialog .nfe-structured-grid{
+#nfeEditorDialog .editor-grid.cols-12.nfe-structured-grid,#nfeItemDialog .editor-grid.cols-12.nfe-structured-grid{
   display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
   gap:15px!important;align-items:start;
 }
@@ -425,6 +425,8 @@
 }
 #nfeItemDialog .nfe-tax-tab-panel[hidden]{display:none!important}
 #nfeItemDialog .nfe-item-main-panel{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:21px!important}
+/* Cada metade do formulário do item já tem seus próprios grupos fiscais. */
+#nfeItemDialog .nfe-item-main-panel .editor-grid.cols-12.nfe-structured-grid{grid-template-columns:minmax(0,1fr)!important}
 #nfeItemDialog .nfe-item-section{border:0!important;margin:0!important;padding:0!important;background:transparent!important}
 #nfeItemDialog .nfe-tax-tab-host>.nfe-item-section>summary{display:none!important}
 #nfeItemDialog .nfe-item-main-panel>.nfe-item-section>summary{
@@ -460,6 +462,8 @@
 #nfeItemDialog .nfe-item-service-panel{border:1px solid #dce5eb!important;margin:12px 0!important}
 #nfeItemDialog .nfe-rtc-extra-panel>.editor-grid,
 #nfeItemDialog .nfe-item-service-panel>.editor-grid{padding:12px!important}
+#nfeItemDialog .nfe-product-search,#nfeItemDialog .nfe-product-search .sale-item-search{width:100%!important;max-width:100%!important;min-width:0!important}
+#nfeItemDialog .nfe-product-search .sale-item-suggestions{min-width:min(320px,80vw)!important;max-width:min(450px,calc(100vw - 44px))!important;white-space:normal!important;z-index:450!important}
 #nfeItemDialog .nfe-item-inline-caption{padding:10px 0;color:#566f7f;font-size:11px;font-weight:700}
 #nfeItemDialog .nfe-item-additional-federal-grid{display:grid!important;grid-template-columns:repeat(12,minmax(0,1fr))!important;gap:10px}
 #nfeItemDialog .nfe-item-additional-federal-grid>.field.col-2{grid-column:span 3!important}
@@ -484,7 +488,7 @@
   #nfeEditorDialog .nfe-flow-nav>.editor-tab[aria-selected="true"]{border-bottom-color:#28627e!important}
   #nfeEditorDialog .nfe-step-text small{display:none}
   #nfeEditorDialog .nfe-workspace-body{padding:0 14px 15px!important}
-  #nfeEditorDialog .nfe-structured-grid,#nfeItemDialog .nfe-structured-grid{grid-template-columns:1fr!important}
+  #nfeEditorDialog .editor-grid.cols-12.nfe-structured-grid,#nfeItemDialog .editor-grid.cols-12.nfe-structured-grid{grid-template-columns:1fr!important}
   #nfeEditorDialog .nfe-general-fields .nfe-field-group[data-nfe-group="Natureza e operação"]{grid-column:1}
   #nfeEditorDialog .nfe-emitter-summary{flex-wrap:wrap!important}
   #nfeEditorDialog .nfe-document-summary{border-left:0;padding-left:0}
@@ -518,61 +522,3 @@
 /* Precedência explícita: campos opcionais e painéis ocultos não podem reaparecer por estilos globais. */
 #nfeEditorDialog [hidden],#nfeItemDialog [hidden],
 #nfeEditorDialog #nfeGeneralFields[hidden]{display:none!important}
-
-
-/* Regra explícita: a grade dos GRUPOS usa duas colunas, embora a classe
-   .editor-grid.cols-12 continue usando 12 frações dentro de cada grupo. */
-#nfeEditorDialog .editor-grid.cols-12.nfe-structured-grid,
-#nfeItemDialog .editor-grid.cols-12.nfe-structured-grid{
-  display:grid!important;
-  grid-template-columns:repeat(2,minmax(0,1fr))!important;
-  grid-auto-flow:row!important;
-  align-items:start!important;
-  gap:16px 22px!important;
-  width:100%!important;
-  min-width:0!important;
-}
-#nfeEditorDialog .editor-grid.cols-12.nfe-structured-grid > .nfe-field-group,
-#nfeItemDialog .editor-grid.cols-12.nfe-structured-grid > .nfe-field-group{
-  grid-column:span 1!important;
-  min-width:0!important;
-  width:auto!important;
-  max-width:none!important;
-}
-#nfeEditorDialog .nfe-general-fields > .editor-grid.cols-12.nfe-structured-grid
-  > .nfe-field-group[data-nfe-group="Natureza e operação"]{
-  grid-column:1 / -1!important;
-}
-/* Evita subgrades estreitas no modal de cadastro de item. */
-#nfeItemDialog .nfe-item-main-panel .editor-grid.cols-12.nfe-structured-grid{
-  grid-template-columns:minmax(0,1fr)!important;
-  gap:14px!important;
-}
-#nfeItemDialog .nfe-item-main-panel .editor-grid.cols-12.nfe-structured-grid > .nfe-field-group{
-  grid-column:1 / -1!important;
-}
-#nfeItemDialog .nfe-product-search,
-#nfeItemDialog .nfe-product-search .sale-item-search{
-  width:100%!important;
-  min-width:0!important;
-  max-width:100%!important;
-}
-#nfeItemDialog .nfe-product-search .sale-item-suggestions{
-  left:0!important;
-  right:auto!important;
-  width:100%!important;
-  min-width:min(320px,80vw)!important;
-  max-width:min(450px,calc(100vw - 44px))!important;
-  white-space:normal!important;
-  z-index:450!important;
-}
-@media(max-width:820px){
-  #nfeEditorDialog .editor-grid.cols-12.nfe-structured-grid,
-  #nfeItemDialog .editor-grid.cols-12.nfe-structured-grid{
-    grid-template-columns:minmax(0,1fr)!important;
-  }
-  #nfeEditorDialog .editor-grid.cols-12.nfe-structured-grid > .nfe-field-group,
-  #nfeItemDialog .editor-grid.cols-12.nfe-structured-grid > .nfe-field-group{
-    grid-column:1 / -1!important;
-  }
-}
