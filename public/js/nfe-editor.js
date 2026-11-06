@@ -1081,7 +1081,27 @@
     });
     if(resetScroll&&flowBody)flowBody.scrollTop=0;
   };
-  flowButtons.forEach(button=>button.addEventListener('click',()=>activateFlow(button)));
+  flowButtons.forEach((button,index)=>{
+    button.addEventListener('click',()=>activateFlow(button));
+    button.addEventListener('keydown',event=>{
+      if(!['ArrowDown','ArrowUp','ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+      event.preventDefault();
+      const count=flowButtons.length;
+      const next=event.key==='Home'?0:event.key==='End'?count-1:
+        (index+(['ArrowDown','ArrowRight'].includes(event.key)?1:-1)+count)%count;
+      const target=flowButtons[next];
+      activateFlow(target);
+      target.focus();
+    });
+  });
+  // Se o navegador encontrar um campo obrigatório em outra aba,
+  // revele o painel antes da tentativa de foco/validação nativa.
+  byId('nfeDraftForm')?.addEventListener('invalid',event=>{
+    const panel=event.target?.closest?.('.nfe-form-section');
+    if(!panel)return;
+    const target=flowButtons.find(button=>button.dataset.nfeJump===panel.id);
+    if(target)activateFlow(target,false);
+  },true);
   if(flowButtons.length)activateFlow(flowButtons[0],false);
 
   const clearItemDialog=()=>{
