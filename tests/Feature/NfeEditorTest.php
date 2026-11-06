@@ -144,32 +144,31 @@ class NfeEditorTest extends TestCase
 
     public function test_invoice_editor_has_consistent_visual_hierarchy_and_readable_recipient_summary(): void
     {
-        $css=(string)file_get_contents(public_path('css/nfe-form-workflow.css'));
+        $css=(string)file_get_contents(public_path('css/nfe-form-structure.css'));
         $script=(string)file_get_contents(public_path('js/nfe-editor.js'));
 
-        self::assertStringContainsString('width:min(1200px,calc(100vw - 36px))',$css);
-        self::assertStringContainsString('var(--ui-control-height,38px)',$css);
-        self::assertStringContainsString('var(--ui-border,#cbd6df)',$css);
-        self::assertStringNotContainsString('border-left:3px solid #2b8b6a',$css);
-        self::assertStringNotContainsString('border-bottom-color:#28896b',$css);
-        self::assertStringContainsString('nfe-recipient-meta',$css);
-        self::assertStringContainsString('nfe-recipient-address',$css);
+        self::assertStringContainsString('#nfeEditorDialog .nfe-commandbar',$css);
+        self::assertStringContainsString('#nfeEditorDialog .nfe-stage-shell',$css);
+        self::assertStringContainsString('grid-template-columns:216px minmax(0,1fr)',$css);
+        self::assertStringContainsString('#nfeEditorDialog .nfe-flow-nav>.editor-tab',$css);
+        self::assertStringContainsString('.nfe-recipient-meta',$css);
+        self::assertStringContainsString('.nfe-recipient-address',$css);
         self::assertStringContainsString('nfe-recipient-meta',$script);
         self::assertStringContainsString('nfe-recipient-address',$script);
         self::assertStringContainsString('esc(customer.city_ibge_code',$script);
     }
 
-    public function test_scrollable_editor_shell_uses_grid_and_not_absolute_positioning(): void
+    public function test_scrollable_editor_shell_uses_grid_and_reveals_invalid_tab(): void
     {
-        $css=(string)file_get_contents(public_path('css/erp.css'));
+        $css=(string)file_get_contents(public_path('css/nfe-form-structure.css'));
         $script=(string)file_get_contents(public_path('js/nfe-editor.js'));
-        self::assertStringContainsString('grid-template-rows:auto minmax(0,1fr) auto',$css);
-        self::assertStringContainsString('.nfe-modal-layer .nfe-workspace-dialog .nfe-workspace-body',$css);
-        self::assertStringNotContainsString('.nfe-modal-layer .nfe-fixed-shell',$css);
-        self::assertStringContainsString("flowBody.scrollTo({top,behavior:'smooth'})",$script);
-        $layoutCss=(string)file_get_contents(public_path('css/nfe-form-workflow.css'));
-        self::assertStringContainsString('width:min(1200px,calc(100vw - 36px))',$layoutCss);
-        self::assertStringContainsString('width:100vw;',$layoutCss);
+
+        self::assertStringContainsString('grid-template-columns:216px minmax(0,1fr)',$css);
+        self::assertStringContainsString('overflow-y:auto!important;overflow-x:hidden!important',$css);
+        self::assertStringContainsString('#nfeEditorDialog [hidden],#nfeItemDialog [hidden]',$css);
+        self::assertStringContainsString("if(resetScroll&&flowBody)flowBody.scrollTop=0;",$script);
+        self::assertStringContainsString("addEventListener('invalid',event=>",$script);
+        self::assertStringContainsString("['ArrowDown','ArrowUp','ArrowLeft','ArrowRight','Home','End']",$script);
     }
 
     public function test_compact_invoice_layout_keeps_every_essential_field_and_all_sections(): void
@@ -196,9 +195,10 @@ class NfeEditorTest extends TestCase
         self::assertStringContainsString('name="gross_weight"',$html);
         self::assertStringNotContainsString('class="field col-4"></div>',$html);
 
-        $css=(string)file_get_contents(public_path('css/nfe-form-workflow.css'));
+        $css=(string)file_get_contents(public_path('css/nfe-form-structure.css'));
         $js=(string)file_get_contents(public_path('js/nfe-editor.js'));
-        self::assertStringContainsString('grid-template-columns:repeat(5,minmax(0,1fr))',$css);
+        self::assertStringContainsString('flex-direction:column!important',$css);
+        self::assertStringContainsString('nfe-item-taxnav .nfe-tax-review-grid',$css);
         self::assertStringContainsString('const group=input.closest(', $js);
     }
 
