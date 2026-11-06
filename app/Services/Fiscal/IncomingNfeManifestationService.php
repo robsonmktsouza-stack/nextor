@@ -166,25 +166,25 @@ final class IncomingNfeManifestationService
         $message=$error->getMessage();
         if (preg_match('/\\b596\\b/',$message)
             && preg_match('/prazo|rejei[çc][aã]o|10 dias/iu',$message)) {
-            return 'A ACBr informou rejeição 596 (evento fora do prazo), mas não forneceu retorno individual verificável.';
+            return 'A manifestação pode estar fora do prazo permitido. Consulte a situação do documento antes de tentar novamente.';
         }
         if (preg_match('/ACBr (NFE_[A-Za-z]+) falhou \\((-?\\d+)\\)/',$message,$match)) {
-            return 'Falha da ACBr em '.$match[1].' (código '.$match[2].').';
+            return 'Não foi possível concluir a manifestação. Consulte a situação do documento antes de tentar novamente.';
         }
         if(str_contains($message,'Certificado A1 indisponível')) {
             return 'Certificado A1 indisponível ou vencido.';
         }
         if(str_contains($message,'Schemas fiscais não configurados')) {
-            return 'Schemas fiscais não configurados.';
+            return 'Não foi possível validar o documento fiscal. Solicite suporte.';
         }
         if(str_contains($message,'Call to undefined C function')
             || str_contains($message,'symbol not found')) {
-            return 'Biblioteca ACBrLib incompatível com o método solicitado.';
+            return 'O serviço de manifestação está indisponível. Solicite suporte.';
         }
         if(str_contains($message,'Timeout') || str_contains($message,'TimeOut')) {
             return 'A SEFAZ não respondeu dentro do prazo; uma conferência automática será realizada sem reenviar.';
         }
-        return 'Retorno da ACBr inconclusivo; o sistema verificará automaticamente antes de permitir outro envio.';
+        return 'Não foi possível confirmar a manifestação. O sistema verificará a situação antes de permitir outra tentativa.';
     }
 
     public function parseResponse(string $raw,string $key,string $event): array

@@ -106,3 +106,23 @@ A instalação de clientes usa apenas SHAs explicitamente aprovados;
 nenhum git pull publica no servidor. Comandos de aprovação, deploy, atualização
 por CNPJ, rollback de código e limpeza segura:
 [Arquitetura de releases compartilhados](docs/deployment/shared-immutable-releases.md).
+
+### Catálogo fiscal padrão
+
+Referências oficiais versionadas, modelos de natureza/grupo e determinação revisada
+integrada ao emissor: [instalação, cobertura e atualização](docs/fiscal/catalogo-fiscal-padrao.md).
+Instalação explícita: `php artisan fiscal:catalog --install --templates` após as
+migrações. Modelos novos permanecem inativos até revisão fiscal; CFOP/CEST têm
+cobertura parcial declarada. Não modifica configurações de produção automaticamente.
+
+A edição nacional `2026.10.26.1` inclui todos os CFOPs da planilha oficial vigente e
+a classificação nacional CEST consolidada, com períodos e exceções por UF.
+[Conteúdo nacional, fontes estaduais e atualização](docs/fiscal/catalog-national-delivery-2026-10-26.md).
+
+Os editores NF-e/NFC-e e as inutilizações apresentam orientação dos retornos
+SEFAZ a partir de 1.025 códigos oficiais, preservando o motivo e as políticas
+de correção existentes: [uso e atualização](docs/fiscal/sefaz-rejections-friendly.md).
+
+
+A revisão de mensagens e apresentação de todos os módulos, com inventário,
+provas de regressão e limites, está na [auditoria geral](docs/audits/2026-10-26/REPORT.md).

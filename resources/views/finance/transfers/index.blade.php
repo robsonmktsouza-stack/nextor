@@ -54,7 +54,7 @@
           <td class="price-strong nowrap">R$ {{ number_format((float)$transfer->amount,2,',','.') }}</td>
           <td class="action-cell">
             @if(!$transfer->cancelled_at)
-              <form method="post" action="{{ route('finance.transfers.cancel',$transfer) }}" data-confirm="Cancelar esta transferência?">
+              <form method="post" action="{{ route('finance.transfers.cancel',$transfer) }}" data-confirm="Cancelar esta transferência? Os saldos das contas de origem e destino serão recalculados sem esta movimentação.">
                 @csrf
                 <button class="btn-icon row-action-danger" data-tooltip="Cancelar">@include('partials.icon',['name'=>'x','size'=>15])</button>
               </form>

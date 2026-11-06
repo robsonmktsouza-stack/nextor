@@ -31,7 +31,7 @@ final class IncomingNfePurchasePrefill
             throw ValidationException::withMessages(['xml'=>'O XML não corresponde à NF-e selecionada.']);
         }
         $cnpj=fn($value)=>preg_replace('/\D/','',(string)$value);
-        $supplier=Customer::query()->where('is_supplier',true)->get(['id','document'])
+        $supplier=Customer::query()->get(['id','document'])
             ->first(fn($row)=>$cnpj($row->document)!==''&&$cnpj($row->document)===$cnpj($detail['supplier_cnpj']));
         $products=Product::query()->where('is_active',true)->get(['id','sku','ean_gtin']);
         $lines=[];$sumOther=0;$sumDiscount=0;
@@ -55,7 +55,11 @@ final class IncomingNfePurchasePrefill
                 'source_description'=>$item['description'],
                 'source_code'=>$code,
                 'source_unit'=>$item['unit'],
-                'quantity'=>$item['quantity'],
+                'source_ncm'=>$item['ncm'],
+                'source_cfop'=>$item['cfop'],
+                'source_ean'=>$item['ean'],
+                'source_number'=>$item['number'],
+                'quantity'=>$this->purchaseQuantity((string)$item['quantity']),
                 'unit_cost'=>number_format((float)$item['unit_price'],2,'.',''),
                 'discount'=>number_format($discount,2,'.',''),
                 'other_costs'=>number_format($other,2,'.',''),
@@ -69,6 +73,8 @@ final class IncomingNfePurchasePrefill
         $otherExpenses=max(0,$this->amount($summary['other_expenses']??null)-$sumOther);
         return [
             'supplier_id'=>$supplier?->id,
+            'supplier_name'=>$detail['supplier_name'],
+            'supplier_cnpj'=>$detail['supplier_cnpj'],
             'incoming_nfe_id'=>$invoice->id,
             'operation_date'=>substr((string)$detail['issued_at'],0,10),
             'document_number'=>$summary['number']??null,
@@ -77,6 +83,23 @@ final class IncomingNfePurchasePrefill
             'discount'=>number_format($generalDiscount,2,'.',''),
             'items'=>$lines,
         ];
+    }
+
+    private function purchaseQuantity(string $quantity): string
+    {
+        // XML pode trazer 12.0000; compras trabalha com até três decimais.
+        // Remover somente zeros finais, sem arredondar quantidades reais.
+        $quantity=trim($quantity);
+        if(preg_match('/^\\d+(?:\\.\\d+)?$/',$quantity)!==1) {
+            throw ValidationException::withMessages(['items'=>'Quantidade inválida no XML da NF-e.']);
+        }
+        if(str_contains($quantity,'.')) {
+            $quantity=rtrim(rtrim($quantity,'0'),'.');
+        }
+        if(preg_match('/^\\d+(?:\\.\\d{1,3})?$/',$quantity)!==1) {
+            throw ValidationException::withMessages(['items'=>'A quantidade da NF-e possui mais de três casas decimais significativas.']);
+        }
+        return $quantity;
     }
 
     private function amount(mixed $value): float

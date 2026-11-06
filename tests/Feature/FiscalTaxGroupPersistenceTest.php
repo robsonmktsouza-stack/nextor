@@ -42,4 +42,19 @@ final class FiscalTaxGroupPersistenceTest extends TestCase
         self::assertSame('x102',$group->fresh()->cfop_pattern);
         self::assertSame('000001',$group->fresh()->tax_config['ibs_cbs_class']);
     }
+
+    public function test_group_editor_persists_explicit_ipi_enquadramento_and_rejects_malformed_code(): void
+    {
+        $user=\App\Models\User::query()->create(['name'=>'Fiscal teste','email'=>'ipi-group@example.test',
+            'password'=>'password','role'=>'admin','is_active'=>true]);
+        $payload=['name'=>'IPI de teste','kind'=>'products','ipi_cst'=>'50',
+            'tax_config'=>['ipi_enq'=>'999','ipi_rate'=>'10']];
+        $this->actingAs($user)->post(route('fiscal.tax-groups.store'),$payload)->assertSessionHasNoErrors();
+        $group=FiscalTaxGroup::query()->where('name','IPI de teste')->sole();
+        self::assertSame('999',$group->tax_config['ipi_enq']);
+        $this->get(route('fiscal.tax-groups.edit',$group))->assertOk()->assertSee('tax_config[ipi_enq]',false);
+        $payload['tax_config']['ipi_enq']='99';
+        $this->post(route('fiscal.tax-groups.store'),$payload)->assertSessionHasErrors('tax_config.ipi_enq');
+        self::assertSame('999',$group->fresh()->tax_config['ipi_enq']);
+    }
 }

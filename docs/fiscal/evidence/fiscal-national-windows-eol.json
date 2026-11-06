@@ -1,0 +1,22 @@
+[
+  {
+    "path": "resources/fiscal/catalog/2026.10.26.1.json",
+    "sha256": "9cabe5db8c4e7be86406c96d8db08d984d6261fce3bc74369480a87612375ce8",
+    "autocrlf_true_checksum_preserved": true
+  },
+  {
+    "path": "resources/fiscal/catalog/current.json",
+    "sha256": "8db5fdc6b25c9a030485f45738481a590d4d1c8b92403fe2a59f7bfa6a902242",
+    "autocrlf_true_checksum_preserved": true
+  },
+  {
+    "path": "resources/fiscal/sources/confaz-cest-2026-10-26.txt",
+    "sha256": "8adbcc949d12ce29a67fc0b08ce75f93f7e9dee6c6a7def905906296eb7b07f2",
+    "autocrlf_true_checksum_preserved": true
+  },
+  {
+    "path": "resources/fiscal/sources/nfe-cfop-2026-09-04.xlsx",
+    "sha256": "577e05eec452294945d0e9df1f9bb9b21a4af115938e75ec74cf6a541ae4dacf",
+    "autocrlf_true_checksum_preserved": true
+  }
+]

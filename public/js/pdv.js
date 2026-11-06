@@ -1540,7 +1540,7 @@
         resetCurrentSale();
         window.setTimeout(()=>window.location.reload(),350);
       }catch(error){
-        notify(error.message||'Não foi possível suspender a venda.','error');
+        notify(window.LumeronUserMessage?.fromError(error,'Não foi possível suspender a venda. Tente novamente.')||'Não foi possível suspender a venda. Tente novamente.','error');
       }
     };
 
@@ -1622,7 +1622,7 @@
         restoreSnapshot(result.snapshot||{});
         notify('Venda recuperada.','success');
       }catch(error){
-        notify(error.message||'Não foi possível recuperar a venda.','error');
+        notify(window.LumeronUserMessage?.fromError(error,'Não foi possível recuperar a venda. Tente novamente.')||'Não foi possível recuperar a venda. Tente novamente.','error');
       }
     };
 
@@ -1638,7 +1638,7 @@
         suspendedList?.querySelector('[data-suspended-row="'+CSS.escape(String(id))+'"]')?.remove();
         notify('Venda suspensa descartada.','success');
       }catch(error){
-        notify(error.message||'Não foi possível descartar a venda.','error');
+        notify(window.LumeronUserMessage?.fromError(error,'Não foi possível descartar a venda. Tente novamente.')||'Não foi possível descartar a venda. Tente novamente.','error');
       }
     };
 

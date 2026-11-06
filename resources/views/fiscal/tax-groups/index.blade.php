@@ -12,11 +12,10 @@
 <section class="cms-card">
   <div class="card-header">
     <div>
-      <h2>Grupos fiscais</h2>
-      <p>Organize os grupos de tributação dos seus produtos e serviços.</p>
+
     </div>
   </div>
-  <div class="grid-actionbar" style="margin-bottom:12px">
+  <div class="grid-actionbar fiscal-space-after">
     <div class="grid-actions-left">
       <a class="grid-primary-action" href="{{ route('fiscal.tax-groups.create',['kind'=>'products']) }}">@include('partials.icon',['name'=>'plus','size'=>16]) <span>Produtos</span></a>
       <a class="grid-tool grid-tool-wide" href="{{ route('fiscal.tax-groups.create',['kind'=>'services']) }}">@include('partials.icon',['name'=>'plus','size'=>16]) <span>Serviços</span></a>
@@ -25,14 +24,13 @@
   <div class="table-scroll">
     <table class="cms-table">
       <thead><tr>
-        <th>Cód.</th><th>Descrição</th><th>Tipo</th><th>CFOP / Serviço</th><th>ICMS / ISS</th><th>Tributação / Código</th><th>Vínculos</th><th>Situação</th><th class="action-cell">Editar</th>
+        <th>Descrição</th><th>Tipo</th><th>CFOP / Serviço</th><th>ICMS / ISS</th><th>Tributação / Código</th><th>Vínculos</th><th>Situação</th><th class="action-cell">Editar</th>
       </tr></thead>
       <tbody>
       @forelse($groups as $group)
         <tr>
-          <td class="nowrap">{{ $group->id }}</td>
           <td><a class="table-link" href="{{ route('fiscal.tax-groups.edit',$group) }}">{{ $group->name }}</a>
-            <small class="table-subtitle">Revisão {{ $group->revision }} @if($group->is_default) · Padrão para {{ $group->kind==='products' ? 'produtos' : 'serviços' }} @endif</small>
+            @if($group->is_default)<small class="table-subtitle">Padrão para {{ $group->kind==='products' ? 'produtos' : 'serviços' }}</small>@endif
           </td>
           <td><span class="code-tag">{{ $group->kind==='products' ? 'Produtos' : 'Serviços' }}</span></td>
           <td>{{ $group->kind==='services' ? data_get($group->tax_config,'service_list_item','—') : ($group->cfop_pattern ?: '—') }}</td>
@@ -43,7 +41,7 @@
           <td class="action-cell"><a class="btn-icon" href="{{ route('fiscal.tax-groups.edit',$group) }}" data-tooltip="Editar grupo">@include('partials.icon',['name'=>'edit','size'=>16])</a></td>
         </tr>
       @empty
-        <tr><td colspan="9" class="empty-cell">Nenhum grupo tributário cadastrado. Crie um grupo de produtos ou de serviços.</td></tr>
+        <tr><td colspan="8" class="empty-cell">Nenhum grupo tributário cadastrado.</td></tr>
       @endforelse
       </tbody>
     </table>

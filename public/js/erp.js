@@ -64,6 +64,7 @@
   // Notificações próprias do Nextor (substitui alerts nativos do navegador)
   let notifyTimer=null;
   const nextorNotify=(message,{type='info',title='',duration=4200,actionLabel='',onAction=null}={})=>{
+    message=window.LumeronUserMessage.fromError(message,'Não foi possível concluir a operação. Tente novamente.');
     let box=document.getElementById('nextorNotification');
     if(!box){
       box=document.createElement('div');
@@ -1323,7 +1324,7 @@
         await loadCities(uf,data.municipio||'');
       }
     }catch(err){
-      nextorNotify(err.message||'Não foi possível consultar o CNPJ agora.',{type:'error',title:'Consulta de CNPJ'});
+      nextorNotify(window.LumeronUserMessage.fromError(err,'Não foi possível consultar o CNPJ agora. Tente novamente ou preencha os dados manualmente.'),{type:'error',title:'Consulta de CNPJ'});
     }finally{
       button.disabled=false;
       if(button.querySelector('span')) button.querySelector('span').textContent=oldText||'Autopreencher';

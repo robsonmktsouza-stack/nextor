@@ -1,0 +1,166 @@
+{
+  "recorded_at_utc": "2026-10-26T00:51:05.796411+00:00",
+  "branch": "feature/nfe55-motor-fiscal-completo",
+  "tested_source_commit": "ea542a85f59fac2ba95780ca06029b432edaf1dd",
+  "runtime": {
+    "php": "8.5.12",
+    "phpunit": "12.5.40",
+    "database": "SQLite :memory:",
+    "runner": "composer:2 Docker",
+    "windows_php83_mysql_tested": false
+  },
+  "full_suite": {
+    "tests": 989,
+    "assertions": 7060,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 2,
+    "skipped_cases": [
+      {
+        "test": "Tests.Feature.NFCePrintSettingsTest::test_original_danfe_can_render_real_pdf_with_local_chrome_when_installed",
+        "reason": "Chrome/Chromium não instalado no runner Linux (teste opcional de PDF real)."
+      },
+      {
+        "test": "Tests.Feature.QuoteCommercialDocumentTest::test_real_chromium_generates_valid_pdf_when_installed",
+        "reason": "Chrome/Chromium não instalado no runner Linux (teste opcional de PDF real)."
+      }
+    ],
+    "command": "php -d memory_limit=1024M vendor/bin/phpunit --log-junit /evidence/fiscal-catalog-full.xml --colors=never",
+    "log_sha256": "afb47fedd3ade928ecf9d0f0bc04dbcc421dcd1f4dfc96695bac412b34fbe997",
+    "junit_sha256": "96611ce6119a2eb918959ed9726f94cf1f57f669f0290174aa0a1a0835820e01"
+  },
+  "catalog": {
+    "version": "2026.10.26",
+    "manifest_sha256": "8942c3161093b9c2177ed5bdef737257b89f9b252f996855831490b40d5d8b07",
+    "references": 11063,
+    "by_kind": {
+      "ncm": 10516,
+      "cfop": 64,
+      "origin": 9,
+      "csosn": 10,
+      "icms_cst": 15,
+      "pis_cofins_cst": 33,
+      "ipi_cst": 14,
+      "crt": 4,
+      "ibs_cbs_cst": 18,
+      "ibs_cbs_class": 173,
+      "cest": 207
+    },
+    "coverage": {
+      "cfop": {
+        "status": "partial",
+        "count": 64,
+        "note": "64 descrições e notas explicativas oficiais de referência. Consolidação nacional de vigência 2026 indisponível nesta consulta; sem aplicação automática."
+      },
+      "icms_cst": {
+        "status": "complete",
+        "count": 15
+      },
+      "csosn": {
+        "status": "complete",
+        "count": 10
+      },
+      "pis_cofins_cst": {
+        "status": "complete",
+        "count": 33
+      },
+      "ipi_cst": {
+        "status": "complete",
+        "count": 14
+      },
+      "origin": {
+        "status": "complete",
+        "count": 9
+      },
+      "crt": {
+        "status": "complete",
+        "count": 4
+      },
+      "ncm": {
+        "status": "complete",
+        "count": 10516,
+        "note": "Todas as 10.516 folhas de oito dígitos do download Classif/Siscomex vigente em 25/10/2026. Não contém classificação de produtos da empresa. Folhas com descrição Outros/Outras exibem contexto dos cabeçalhos oficiais; texto original preservado.",
+        "snapshot_date": "2026-10-25"
+      },
+      "cest": {
+        "status": "partial",
+        "count": 207,
+        "uf": "SP",
+        "note": "Recorte oficial SP de linhas não tachadas da Portaria CAT68/2019; 207 códigos, não é a tabela nacional completa. CONFAZ retornou HTTP503. Datas individuais não deduzidas; sem aplicação automática de ST. Quatro linhas sem descrição inequívoca foram excluídas."
+      },
+      "ibs_cbs_cst": {
+        "status": "complete",
+        "count": 18
+      },
+      "ibs_cbs_class": {
+        "status": "complete",
+        "count": 173,
+        "note": "Todas as classificações presentes na página oficial consultada em 26/10/2026; anexos NCM/NBS não incorporados, cálculo não habilitado por catálogo."
+      },
+      "benefit": {
+        "status": "not_bundled",
+        "count": 0,
+        "note": "Tabela estadual BA de cBenef não obtida; não inferir benefício de CST, grupo ou NCM."
+      },
+      "operation_nature": {
+        "status": "not_bundled",
+        "count": 0
+      },
+      "tax_group": {
+        "status": "not_bundled",
+        "count": 0
+      },
+      "tax_parameter": {
+        "status": "not_bundled",
+        "count": 0
+      }
+    },
+    "inactive_nature_templates": 16,
+    "inactive_tax_group_templates": 13
+  },
+  "additional_checks": {
+    "javascript_syntax": "node --check public/js/nfe-editor.js and public/js/product-fiscal-catalog.js: passed",
+    "diff_check": "git diff --check: passed",
+    "php_lint_initial": "276 app/database PHP files: passed; later changed PHP files executed by final full suite",
+    "cli_installation": {
+      "database": "Isolated temporary SQLite file in disposable Docker container",
+      "memory_limit": "128M",
+      "migrations": "passed",
+      "real_catalog_install_with_templates": "passed",
+      "second_install": "0 new rows; 16 nature and13group templates preserved",
+      "log_sha256": "18c23766157821d3b89a8be5cd001748f5d7c11929ad2b4b70909f70750d0e9a"
+    }
+  },
+  "resolved_regression": {
+    "first_full_suite": {
+      "tests": 985,
+      "assertions": 7032,
+      "errors": 1,
+      "skipped": 2
+    },
+    "cause": "Fixture antiga de IPI devolvido sem DFeReferenciado por item após os commits remotos de recuperação 321.",
+    "correction": "Fixture usa chave e nItem original e confere ausência de NFRef; nenhuma validação fiscal removida.",
+    "return_regression": {
+      "tests": 30,
+      "assertions": 188,
+      "failures": 0,
+      "errors": 0
+    },
+    "cfop_6107_regression": {
+      "tests": 18,
+      "assertions": 66,
+      "failures": 0,
+      "errors": 0
+    }
+  },
+  "external_validation": {
+    "new_acbr_or_sefaz_transmission": false,
+    "reason": "Sem acesso à instalação Windows/Laragon/A1 do proprietário; preservadas as autorizações de homologação por ele relatadas."
+  },
+  "limitations": [
+    "CFOP documental parcial:64, publicação PE com metadados de2015; exige revisão vigente.",
+    "CEST parcial207escopoSP; não é catálogo nacional completo.",
+    "Sem cBenefBA/MVA/pautas/alíquotas específicas distribuídas.",
+    "MySQL/PHP8.3 e QA visual no Windows não executados; dois testes PDF sem Chromium."
+  ]
+}

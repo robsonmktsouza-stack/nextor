@@ -1,0 +1,258 @@
+{
+  "area": "Vendas, orçamentos, PDV, caixa, devoluções e comprovantes",
+  "method": "Varredura sistemática dos 32 arquivos e revisão manual das mensagens, saídas HTTP e caminhos identificados.",
+  "reviewed_files": [
+    "app/Http/Controllers/PdvCashReportController.php",
+    "app/Http/Controllers/PdvCashWorkflowController.php",
+    "app/Http/Controllers/PdvController.php",
+    "app/Http/Controllers/SaleController.php",
+    "app/Http/Controllers/SaleReturnController.php",
+    "app/Services/PdvActionAuthorization.php",
+    "app/Services/PdvCashService.php",
+    "app/Services/PdvOperatorAuthorization.php",
+    "app/Services/QuotePdfService.php",
+    "app/Services/SaleReceiptPdfService.php",
+    "app/Services/SaleReceiptPresenter.php",
+    "app/Services/SaleReturnService.php",
+    "app/Services/SalesService.php",
+    "public/js/pdv-cash-report-modal.js",
+    "public/js/pdv-receipt-modal.js",
+    "public/js/pdv-sales.js",
+    "public/js/pdv.js",
+    "resources/views/pdv/cash-history.blade.php",
+    "resources/views/pdv/cash-registers.blade.php",
+    "resources/views/pdv/cash-report.blade.php",
+    "resources/views/pdv/index.blade.php",
+    "resources/views/pdv/partials/cash-report-modal.blade.php",
+    "resources/views/pdv/partials/receipt-modal.blade.php",
+    "resources/views/pdv/receipt.blade.php",
+    "resources/views/sales/_nav.blade.php",
+    "resources/views/sales/create.blade.php",
+    "resources/views/sales/index.blade.php",
+    "resources/views/sales/quote-pdf.blade.php",
+    "resources/views/sales/returns/create.blade.php",
+    "resources/views/sales/returns/index.blade.php",
+    "resources/views/sales/returns/show.blade.php",
+    "resources/views/sales/show.blade.php"
+  ],
+  "findings": [
+    {
+      "id": "COM-001",
+      "severity": "high",
+      "file": "app/Http/Controllers/SaleController.php",
+      "line": 149,
+      "before": "abort(503,$e->getMessage()) no comprovante",
+      "after": "Mensagem segura de falha na geração do comprovante, com diagnóstico preservado pelo helper",
+      "status": "corrected",
+      "reason": "Apresentação ao usuário; regras, cálculos e registros originais preservados."
+    },
+    {
+      "id": "COM-002",
+      "severity": "high",
+      "file": "app/Http/Controllers/SaleController.php",
+      "line": 168,
+      "before": "abort(503,$e->getMessage()) no PDF do orçamento",
+      "after": "Mensagem segura de falha na geração do orçamento, com diagnóstico preservado pelo helper",
+      "status": "corrected",
+      "reason": "Apresentação ao usuário; regras, cálculos e registros originais preservados."
+    },
+    {
+      "id": "COM-003",
+      "severity": "high",
+      "file": "app/Http/Controllers/PdvController.php",
+      "line": 1094,
+      "before": "abort(503,$e->getMessage()) no comprovante do PDV",
+      "after": "Mensagem segura de falha na geração do comprovante, com diagnóstico preservado pelo helper",
+      "status": "corrected",
+      "reason": "Apresentação ao usuário; regras, cálculos e registros originais preservados."
+    },
+    {
+      "id": "COM-004",
+      "severity": "medium",
+      "file": "resources/views/pdv/receipt.blade.php",
+      "line": 164,
+      "before": "Status interno NFC-e, como pending/offline_signed, exibido diretamente",
+      "after": "Situação em português sem presumir autorização",
+      "status": "corrected",
+      "reason": "Apresentação ao usuário; regras, cálculos e registros originais preservados."
+    },
+    {
+      "id": "COM-005",
+      "severity": "medium",
+      "file": "resources/views/pdv/cash-report.blade.php",
+      "line": 65,
+      "before": "Código interno de forma de pagamento desconhecida impresso no fechamento",
+      "after": "Forma de pagamento não cadastrada, preservando valores",
+      "status": "corrected",
+      "reason": "Apresentação ao usuário; regras, cálculos e registros originais preservados."
+    },
+    {
+      "id": "COM-006",
+      "severity": "medium",
+      "file": "resources/views/pdv/cash-report.blade.php",
+      "line": 71,
+      "before": "Tipo interno de movimentação desconhecida impresso no fechamento",
+      "after": "Outra movimentação, preservando valor, motivo e responsável",
+      "status": "corrected",
+      "reason": "Apresentação ao usuário; regras, cálculos e registros originais preservados."
+    },
+    {
+      "id": "COM-007",
+      "severity": "medium",
+      "file": "resources/views/sales/show.blade.php",
+      "line": 93,
+      "before": "Código interno de forma de pagamento desconhecida na venda",
+      "after": "Forma de pagamento não cadastrada",
+      "status": "corrected",
+      "reason": "Apresentação ao usuário; regras, cálculos e registros originais preservados."
+    },
+    {
+      "id": "COM-008",
+      "severity": "medium",
+      "file": "resources/views/sales/quote-pdf.blade.php",
+      "line": 123,
+      "before": "Código interno de meio de pagamento desconhecido em orçamento do cliente",
+      "after": "Forma de pagamento a confirmar",
+      "status": "corrected",
+      "reason": "Apresentação ao usuário; regras, cálculos e registros originais preservados."
+    },
+    {
+      "id": "COM-009",
+      "severity": "low",
+      "file": "resources/views/pdv/cash-history.blade.php",
+      "line": 23,
+      "before": "Legado",
+      "after": "Caixa não informado",
+      "status": "corrected",
+      "reason": "Apresentação ao usuário; regras, cálculos e registros originais preservados."
+    },
+    {
+      "id": "COM-010",
+      "severity": "low",
+      "file": "resources/views/pdv/cash-history.blade.php",
+      "line": 35,
+      "before": "Os fechamentos novos preservam o resumo calculado na hora da conferência...",
+      "after": "Cada fechamento registra a apuração do turno correspondente.",
+      "status": "corrected",
+      "reason": "Apresentação ao usuário; regras, cálculos e registros originais preservados."
+    },
+    {
+      "id": "COM-011",
+      "severity": "low",
+      "file": "resources/views/pdv/cash-report.blade.php",
+      "line": 62,
+      "before": "vendas vinculadas ou históricas; valores não somados integralmente ao numerário",
+      "after": "Vendas do turno e explicação direta de que somente dinheiro compõe o saldo",
+      "status": "corrected",
+      "reason": "Apresentação ao usuário; regras, cálculos e registros originais preservados."
+    },
+    {
+      "id": "COM-012",
+      "severity": "medium",
+      "file": "app/Http/Controllers/PdvController.php",
+      "line": 1067,
+      "before": "Consulte o log do Lumeron.",
+      "after": "Confira as pendências fiscais da venda ou solicite suporte.",
+      "status": "corrected",
+      "reason": "Apresentação ao usuário; regras, cálculos e registros originais preservados."
+    },
+    {
+      "id": "COM-013",
+      "severity": "low",
+      "file": "resources/views/pdv/index.blade.php",
+      "line": 258,
+      "before": "XML da contingência assinado, mas o DANFE ainda não está pronto.",
+      "after": "NFC-e em contingência; o DANFE ainda não está disponível. Não refaça a venda.",
+      "status": "corrected",
+      "reason": "Apresentação ao usuário; regras, cálculos e registros originais preservados."
+    },
+    {
+      "id": "COM-014",
+      "severity": "low",
+      "file": "resources/views/sales/show.blade.php",
+      "line": 128,
+      "before": "Subtítulos genéricos Informações de registro e Confirmação da operação",
+      "after": "Removidos subtítulos redundantes; dados e consequência do cancelamento permanecem",
+      "status": "corrected",
+      "reason": "Apresentação ao usuário; regras, cálculos e registros originais preservados."
+    },
+    {
+      "id": "COM-015",
+      "severity": "low",
+      "file": "resources/views/sales/show.blade.php",
+      "line": 139,
+      "before": "Status",
+      "after": "Situação",
+      "status": "corrected",
+      "reason": "Apresentação ao usuário; regras, cálculos e registros originais preservados."
+    },
+    {
+      "id": "COM-016",
+      "severity": "medium",
+      "file": "public/js/pdv.js",
+      "line": 1543,
+      "before": "error.message direto em três erros de operações de venda suspensa",
+      "after": "Helper de mensagens públicas filtra falhas nativas/técnicas; erros de negócio úteis permanecem",
+      "status": "corrected",
+      "reason": "Apresentação ao usuário; regras, cálculos e registros originais preservados."
+    },
+    {
+      "id": "COM-017",
+      "severity": "medium",
+      "file": "public/js/pdv-sales.js",
+      "line": 138,
+      "before": "error.message direto em consulta/cancelamento/prévia de comprovante",
+      "after": "Helper de mensagens públicas filtra falhas nativas/técnicas; erros de negócio úteis permanecem",
+      "status": "corrected",
+      "reason": "Apresentação ao usuário; regras, cálculos e registros originais preservados."
+    },
+    {
+      "id": "COM-018",
+      "severity": "low",
+      "file": "resources/views/pdv/index.blade.php",
+      "line": 951,
+      "before": "Motivo técnico *",
+      "after": "Motivo da contingência *",
+      "status": "corrected",
+      "reason": "Orientação operacional sem expor a fila interna ou alterar validações fiscais."
+    },
+    {
+      "id": "COM-019",
+      "severity": "low",
+      "file": "resources/views/pdv/index.blade.php",
+      "line": 963,
+      "before": "Somente documentos já autorizados podem entrar na fila de cancelamento.",
+      "after": "Selecione uma NFC-e autorizada para solicitar o cancelamento.",
+      "status": "corrected",
+      "reason": "Orientação operacional sem expor a fila interna ou alterar validações fiscais."
+    }
+  ],
+  "retained_internal_diagnostics": [
+    "Mensagens técnicas do QuotePdfService permanecem internas; fronteiras HTTP usam UserFacingMessage.",
+    "Logs de SalesService e falha de preparação fiscal do PDV preservados.",
+    "JSON de restauração de vendas suspensas mantém contrato de integração; não é exibido como texto bruto.",
+    "Números de venda, orçamento, devolução, fechamento e códigos comerciais são necessários para localizar operações.",
+    "Mensagens fiscais, recusas de autorização, segurança de caixa e instruções para evitar duplicidade foram preservadas."
+  ],
+  "tests": {
+    "php": {
+      "selection": "CommercialPresentationTest|SaleReceiptReuseTest|QuoteCommercialDocumentTest|PdvFiscalCheckoutFlowTest|PdvCashReportModalTest|PdvCashReconciliationTest",
+      "tests": 49,
+      "assertions": 465,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "seconds": 11.91932,
+      "runtime": "PHP 8.5.12/PHPUnit 12.5.40/SQLite Docker Linux",
+      "log": "/workspace/scratch/commercial-presentation-tests.log",
+      "junit": "/workspace/scratch/commercial-presentation-tests.xml",
+      "skipped_cases": [
+        "Tests.Feature.QuoteCommercialDocumentTest::test_real_chromium_generates_valid_pdf_when_installed"
+      ]
+    },
+    "new_regression_cases": 7,
+    "javascript": "node --check public/js/pdv.js e public/js/pdv-sales.js passaram.",
+    "diff": "git diff --check passou."
+  },
+  "pending": []
+}

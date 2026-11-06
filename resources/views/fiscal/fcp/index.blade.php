@@ -8,11 +8,11 @@
 @php
 $ufOptions=['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO'];
 @endphp
-<section class="editor-panel settings-panel" style="margin-bottom:14px">
+<section class="editor-panel settings-panel fiscal-section-after">
   <div class="settings-panel-head"><div><h2>Regra FCP por estado e NCM</h2><p>Defina as alíquotas por estado, NCM e período de vigência.</p></div></div>
   <form method="post" action="{{ route('fiscal.fcp.store') }}" class="settings-editor">
     @csrf
-    <div class="editor-grid cols-12 settings-grid" style="margin-top:12px">
+    <div class="editor-grid cols-12 settings-grid fiscal-space-before">
       <label class="field col-2"><span>UF</span><select name="uf" required><option value="">Selecione</option>
         @foreach($ufOptions as $uf)<option value="{{ $uf }}" @selected(old('uf')===$uf)>{{ $uf }}</option>@endforeach
       </select></label>
@@ -45,8 +45,8 @@ $ufOptions=['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA
           <td><a class="table-link" href="#fcp-{{ $item->id }}">Editar</a></td>
         </tr>
         <tr id="fcp-{{ $item->id }}"><td colspan="7">
-          <details><summary class="table-link" style="cursor:pointer">Editar FCP {{ $item->uf }} — #{{ $item->id }}</summary>
-            <form method="post" action="{{ route('fiscal.fcp.update',$item) }}" class="settings-editor" style="padding:12px 0">
+          <details><summary class="table-link fiscal-edit-summary">Editar FCP {{ $item->uf }} — #{{ $item->id }}</summary>
+            <form method="post" action="{{ route('fiscal.fcp.update',$item) }}" class="settings-editor fiscal-edit-form">
               @csrf @method('PUT')
               <div class="editor-grid cols-12 settings-grid">
                 <label class="field col-2"><span>UF</span><select name="uf" required>

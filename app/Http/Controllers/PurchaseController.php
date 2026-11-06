@@ -73,13 +73,44 @@ class PurchaseController extends Controller
                 'month'=>$incomingNfe->issued_at?->format('Y-m')??now()->format('Y-m'),
             ])->withErrors($error->errors());
         } catch (\InvalidArgumentException | \RuntimeException $error) {
+            report($error);
             return redirect()->route('fiscal.purchases.index',[
                 'month'=>$incomingNfe->issued_at?->format('Y-m')??now()->format('Y-m'),
             ])->withErrors(['xml'=>'Não foi possível conferir o XML desta NF-e.']);
         }
+        // A NF-e já foi validada pelo parser. O emitente é localizado por CNPJ,
+        // inclusive quando existe apenas como cliente.
+        $supplierId=$defaults['supplier_id'];
+        $supplierCnpj=preg_replace('/\\D/','',(string)($defaults['supplier_cnpj']??''));
+        $supplierName=trim((string)($defaults['supplier_name']??''));
+        if(!$supplierId && preg_match('/^\\d{14}$/',$supplierCnpj) && $supplierName!=='') {
+            $supplier=\App\Models\Customer::query()->get(['id','document','is_supplier'])
+                ->first(fn($row)=>preg_replace('/\\D/','',(string)$row->document)===$supplierCnpj);
+            if($supplier) {
+                $supplierId=$supplier->id;
+            } else {
+                $supplier=\App\Models\Customer::query()->create([
+                    'name'=>$supplierName,
+                    'document'=>$supplierCnpj,
+                    'is_supplier'=>true,
+                    'is_customer'=>false,
+                    'is_carrier'=>false,
+                    'country_code'=>'1058',
+                    'country_name'=>'BRASIL',
+                ]);
+                $supplierId=$supplier->id;
+            }
+        }
+        if($supplierId) {
+            $supplier=\App\Models\Customer::query()->find($supplierId);
+            if($supplier && !$supplier->is_supplier) {
+                $supplier->update(['is_supplier'=>true]);
+            }
+        }
+        $defaults['supplier_id']=$supplierId;
         $purchase=new Purchase(array_merge([
             'due_date'=>null,'generate_payable'=>false,
-        ],array_diff_key($defaults,['items'=>true])));
+        ],array_diff_key($defaults,['items'=>true,'supplier_name'=>true,'supplier_cnpj'=>true])));
         return view('purchases.form',array_merge(
             $this->formData($purchase,false,$request),
             ['importItems'=>$defaults['items'],'sourceInvoice'=>$incomingNfe],
@@ -126,7 +157,7 @@ class PurchaseController extends Controller
     {
         $purchase=$service->cancel($purchase,(int)$request->user()->id);
         return redirect()->route('purchases.show',$purchase)
-            ->with('success','Compra cancelada. Movimentações e títulos vinculados tratados.');
+            ->with('success','Compra cancelada. Estoque e contas a pagar foram estornados, quando aplicáveis.');
     }
 
     private function formData(Purchase $purchase,bool $editing,Request $request): array
@@ -163,7 +194,14 @@ class PurchaseController extends Controller
             'generate_payable'=>['required','boolean'],
             'notes'=>['nullable','string','max:5000'],
             'items'=>['required','array','min:1','max:80'],
-            'items.*.product_id'=>['required','integer','exists:products,id'],
+            'items.*.product_id'=>['nullable','integer','exists:products,id'],
+            'items.*.source_code'=>['nullable','string','max:80'],
+            'items.*.source_description'=>['nullable','string','max:190'],
+            'items.*.source_unit'=>['nullable','string','max:12'],
+            'items.*.source_ncm'=>['nullable','string','max:10'],
+            'items.*.source_cfop'=>['nullable','string','max:4'],
+            'items.*.source_ean'=>['nullable','string','max:32'],
+            'items.*.source_number'=>['nullable','integer','min:1','max:9999'],
             'items.*.quantity'=>['required','numeric','gt:0','max:999999999','decimal:0,3'],
             'items.*.unit_cost'=>['required','numeric','min:0','max:999999999','decimal:0,2'],
             'items.*.discount'=>['nullable','numeric','min:0','max:999999999','decimal:0,2'],

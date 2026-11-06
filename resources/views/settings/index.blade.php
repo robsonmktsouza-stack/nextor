@@ -7,7 +7,8 @@
 $primaryTabs=[
   'general'=>['label'=>'Minha empresa','icon'=>'settings','members'=>['general','printing','catalog']],
   'operations'=>['label'=>'Vendas e estoque','icon'=>'sales','members'=>['operations','inventory','pdv']],
-  'chart'=>['label'=>'Financeiro','icon'=>'money','members'=>['chart','accounts','payments','billing','accounting']],
+  'chart'=>['label'=>'Financeiro','icon'=>'money','members'=>['chart','accounts','payments','billing']],
+  'accounting'=>['label'=>'Contabilidade','icon'=>'services','members'=>['accounting']],
   'fiscal'=>['label'=>'Notas fiscais','icon'=>'receipt','members'=>['fiscal','nfe','nfce','nfse','cte','tax']],
   'users'=>['label'=>'Equipe e acessos','icon'=>'customers','members'=>['users']],
   'system'=>['label'=>'Outras opções','icon'=>'settings','members'=>['system','integrations']],
@@ -28,7 +29,6 @@ $subTabs=[
     'accounts'=>['Caixa e bancos','money'],
     'payments'=>['Formas de pagamento','receipt'],
     'billing'=>['Cobranças e PIX','money'],
-    'accounting'=>['Contabilidade','services'],
   ],
   'fiscal'=>[
     'fiscal'=>['Informações fiscais','shield'],
@@ -43,15 +43,6 @@ $subTabs=[
     'integrations'=>['Integrações avançadas','layers'],
   ],
 ];
-$sectionGuides=[
-  'general'=>'Atualize os dados da empresa, o logotipo e os padrões dos produtos.',
-  'operations'=>'Defina como funcionam as vendas, o controle de estoque e o caixa.',
-  'chart'=>'Organize o dinheiro da empresa, os pagamentos, as cobranças e a contabilidade.',
-  'fiscal'=>'Configure a emissão de notas e as informações exigidas pelo fisco.',
-  'users'=>'Cadastre quem pode entrar no sistema e escolha o que cada pessoa pode acessar.',
-  'system'=>'Personalize o uso do Lumeron e acesse recursos avançados quando precisar.',
-];
-
 
 $activePrimary='general';
 foreach($primaryTabs as $key=>$item){
@@ -72,7 +63,6 @@ foreach($primaryTabs as $key=>$item){
     </a>
   @endforeach
 </nav>
-<p class="settings-section-guide">{{ $sectionGuides[$activePrimary] }}</p>
 
 @if(isset($subTabs[$activePrimary]))
   <nav class="settings-subtabs" aria-label="Seção de configurações">
@@ -365,8 +355,8 @@ foreach($primaryTabs as $key=>$item){
     <div class="settings-panel-head"><div><h2>Formas de pagamento</h2></div></div>
     <form method="post" action="{{ route('settings.payment-methods.store') }}" class="settings-payment-form">
       @csrf
-      <label class="field"><span>Código</span><input name="code" required placeholder="ex.: voucher"></label>
-      <label class="field"><span>Nome</span><input name="name" required placeholder="Vale / voucher"></label>
+      <label class="field"><span>Código</span><input name="code" required placeholder="Ex.: vale"></label>
+      <label class="field"><span>Nome</span><input name="name" required placeholder="Vale"></label>
       <label class="field"><span>Tipo</span><select name="kind"><option value="cash">Dinheiro</option><option value="pix">PIX</option><option value="credit_card">Cartão de crédito</option><option value="debit_card">Cartão de débito</option><option value="bank_slip">Boleto</option><option value="transfer">Transferência</option><option value="other">Outro</option></select></label>
       <label class="field"><span>Conta padrão</span><select name="financial_account_id"><option value="">Nenhuma</option>@foreach($accounts as $a)<option value="{{ $a->id }}">{{ $a->name }}</option>@endforeach</select></label>
       <label class="field"><span>Taxa percentual (%)</span><input type="number" step="0.0001" min="0" name="fee_percent" value="0"></label>
@@ -581,7 +571,7 @@ foreach($primaryTabs as $key=>$item){
               @endif
             </span>
           </div>
-          <form method="post" action="{{ route('settings.certificate.remove') }}" data-confirm-submit="Remover o certificado fiscal armazenado?">@csrf @method('DELETE')<button class="btn btn-danger-outline">Remover</button></form>
+          <form method="post" action="{{ route('settings.certificate.remove') }}" data-confirm-submit="Remover o certificado A1? A emissão fiscal dependerá do cadastro de um novo certificado.">@csrf @method('DELETE')<button class="btn btn-danger-outline">Remover</button></form>
         </div>
       @else
         <div class="certificate-status"><div><strong>Nenhum certificado A1 configurado</strong><span>Envie um arquivo .pfx ou .p12.</span></div></div>
@@ -594,34 +584,7 @@ foreach($primaryTabs as $key=>$item){
       </form>
     </section>
 
-    <section class="editor-panel settings-panel">
-      <div class="settings-panel-head">
-        <div><h2>Últimos documentos fiscais</h2></div>
-      </div>
-      <div class="table-scroll">
-        <table class="cms-table">
-          <thead><tr><th>Tipo</th><th>Origem</th><th>Ambiente</th><th>Emissão</th><th>Série</th><th>Número</th><th>Status</th><th>Cancelamento</th><th>Preparado em</th></tr></thead>
-          <tbody>
-          @forelse($fiscalJobs as $job)
-            <tr>
-              <td><strong>{{ strtoupper($job->document_type) }}</strong></td>
-              <td>@if($job->sale)<a class="table-link" href="{{ route('sales.show',$job->sale) }}">Venda #{{ str_pad((string)$job->sale_id,5,'0',STR_PAD_LEFT) }}</a>@else—@endif</td>
-              <td>{{ $job->environment==='production'?'Produção':'Homologação' }}</td>
-              <td>{{ $job->emission_mode==='offline'?'Contingência offline':'Normal' }}</td>
-              <td>{{ $job->series ?? '—' }}</td>
-              <td>{{ $job->document_number ?? '—' }}</td>
-              <td><span class="status {{ $job->status==='prepared'?'status-blue':($job->status==='cancelled'?'status-muted':'status-ok') }}">{{ ucfirst($job->status) }}</span></td>
-              <td>{{ $job->cancelled_at ? 'Cancelada' : ($job->cancellation_status==='pending' ? 'Pendente' : '—') }}</td>
-              <td>{{ $job->prepared_at?->format(\App\Models\AppSetting::dateFormat().' H:i') ?? '—' }}</td>
-            </tr>
-          @empty
-            <tr><td colspan="9" class="empty-cell">Nenhum documento fiscal preparado ainda.</td></tr>
-          @endforelse
-          </tbody>
-        </table>
-      </div>
-      
-    </section>
+
   </div>
 
 @elseif($tab==='tax')
@@ -630,7 +593,10 @@ foreach($primaryTabs as $key=>$item){
     <section class="editor-panel settings-panel">
       <div class="settings-panel-head">
         <div><h2>Impostos e códigos fiscais</h2></div>
-        <div class="row" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <div class="settings-panel-actions">
+          <a class="btn btn-secondary" href="{{ route('fiscal.catalog.index') }}">
+            @include('partials.icon',['name'=>'layers','size'=>15]) Catálogo fiscal
+          </a>
           <a class="btn btn-secondary" href="{{ route('fiscal.tax-groups.index') }}">
             @include('partials.icon',['name'=>'layers','size'=>15]) Grupos de tributação
           </a>
@@ -670,17 +636,20 @@ foreach($primaryTabs as $key=>$item){
     @csrf
     <section class="editor-panel settings-panel">
       <div class="settings-panel-head"><div><h2>Nota fiscal de produtos (NF-e)</h2></div></div>
+      <a class="btn btn-secondary" href="{{ route('settings.index',['tab'=>'accounting']) }}">Contador e autorização de acesso ao XML da NF-e</a>
       <div class="editor-grid cols-12 settings-grid">
         <label class="field col-3"><span>Ambiente</span><select name="environment"><option value="homologation" @selected($nfe['environment']==='homologation')>Homologação</option><option value="production" @selected($nfe['environment']==='production')>Produção</option></select></label>
-        <label class="field col-2"><span>Série</span><input type="number" min="0" max="999" name="series" value="{{ $nfe['series'] }}"></label>
-        <label class="field col-3"><span>Próximo número</span><input type="number" min="1" name="next_number" value="{{ $nfe['next_number'] }}"></label>
+        <label class="field col-2"><span>Série de homologação</span><input type="number" min="0" max="999" name="series" value="{{ $nfe['series'] }}"></label>
+        <label class="field col-3"><span>Próximo número de homologação</span><input type="number" min="1" max="999999999" name="next_number" value="{{ $nfe['next_number'] }}"></label>
         <label class="field col-4"><span>CFOP padrão</span><input name="default_cfop" value="{{ $nfe['default_cfop'] }}"></label>
+        <label class="field col-3"><span>Série de produção</span><input type="number" min="0" max="999" name="production_series" value="{{ $nfe['production_series'] }}"></label>
+        <label class="field col-3"><span>Próximo número de produção</span><input type="number" min="1" max="999999999" name="production_next_number" value="{{ $nfe['production_next_number'] }}"></label>
         <label class="field col-12"><span>Tipo de operação usado por padrão</span><input name="default_nature" value="{{ $nfe['default_nature'] }}"></label>
       </div>
       <div class="settings-switch-grid">
-        <label class="settings-switch"><input type="checkbox" name="enabled" value="1" @checked($nfe['enabled'])><span><strong>NF-e habilitada</strong><small>Disponibiliza esta configuração ao emissor.</small></span></label>
+        <label class="settings-switch"><input type="checkbox" name="enabled" value="1" @checked($nfe['enabled'])><span><strong>NF-e habilitada</strong></span></label>
         <label class="settings-switch"><input type="checkbox" name="production_enabled" value="1" @checked($nfe['production_enabled'])><span><strong>Permitir emissão em produção</strong></span></label>
-        <label class="settings-switch"><input type="checkbox" name="auto_from_sale" value="1" @checked($nfe['auto_from_sale'])><span><strong>Preparar NF-e após venda</strong><small>Preferência para integração venda → nota.</small></span></label>
+        <label class="settings-switch"><input type="checkbox" name="auto_from_sale" value="1" @checked($nfe['auto_from_sale'])><span><strong>Preparar NF-e após venda</strong></span></label>
         <label class="settings-switch"><input type="checkbox" name="send_email" value="1" @checked($nfe['send_email'])><span><strong>Enviar ao cliente</strong><small>Preferência de envio do XML/DANFE após autorização.</small></span></label>
         <label class="settings-switch"><input type="checkbox" name="print_danfe" value="1" @checked($nfe['print_danfe'])><span><strong>Imprimir DANFE</strong><small>Preferência padrão após autorização.</small></span></label>
       </div>
@@ -704,7 +673,7 @@ foreach($primaryTabs as $key=>$item){
       <div class="editor-grid cols-12 settings-grid">
         <label class="field col-2"><span>Série de homologação</span><input type="number" min="0" max="999" name="series" value="{{ $nfce['series'] }}"></label>
         <label class="field col-3"><span>Próximo número de homologação</span><input type="number" min="1" max="999999999" name="next_number" value="{{ $nfce['next_number'] }}"></label>
-        <label class="field col-2"><span>ID CSC de homologação</span><input name="csc_id" maxlength="6" value="{{ $nfce['csc_id'] }}"></label>
+        <label class="field col-2"><span>Identificador CSC de homologação</span><input name="csc_id" maxlength="6" value="{{ $nfce['csc_id'] }}"></label>
         <label class="field col-5"><span>Código de segurança (CSC) de homologação</span><input type="password" autocomplete="new-password" name="csc_token" placeholder="{{ $nfce['csc_token'] ? 'CSC de homologação configurado' : 'Informe o CSC de homologação' }}"></label>
       </div>
       <div class="settings-panel-head"><div><h3>Parâmetros de produção</h3>
@@ -712,7 +681,7 @@ foreach($primaryTabs as $key=>$item){
       <div class="editor-grid cols-12 settings-grid">
         <label class="field col-2"><span>Série de produção</span><input type="number" min="0" max="999" name="production_series" value="{{ $nfce['production_series'] ?? '' }}" placeholder="Ex.: 1"></label>
         <label class="field col-3"><span>Próximo número em produção</span><input type="number" min="1" max="999999999" name="production_next_number" value="{{ $nfce['production_next_number'] ?? '' }}" placeholder="Conforme histórico de produção"></label>
-        <label class="field col-2"><span>ID CSC de produção</span><input name="production_csc_id" maxlength="6" value="{{ $nfce['production_csc_id'] ?? '' }}" placeholder="ID fornecido pela SEFAZ"></label>
+        <label class="field col-2"><span>Identificador CSC de produção</span><input name="production_csc_id" maxlength="6" value="{{ $nfce['production_csc_id'] ?? '' }}" placeholder="Identificador fornecido pela SEFAZ"></label>
         <label class="field col-5"><span>CSC de produção</span><input type="password" autocomplete="new-password" name="production_csc_token" placeholder="{{ !empty($nfce['production_csc_token']) ? 'CSC de produção configurado' : 'Informe o CSC de produção' }}"></label>
       </div>
       <div class="settings-switch-grid">
@@ -746,7 +715,7 @@ foreach($primaryTabs as $key=>$item){
         <label class="field col-6"><span>Senha ou chave de acesso da prefeitura</span><input type="password" name="municipal_password" placeholder="{{ $nfse['municipal_password'] ? 'Credencial já configurada' : 'Informe somente quando necessário' }}"></label>
       </div>
       <div class="settings-switch-grid">
-        <label class="settings-switch"><input type="checkbox" name="enabled" value="1" @checked($nfse['enabled'])><span><strong>NFS-e habilitada</strong><small>Disponibiliza os parâmetros ao emissor de serviços.</small></span></label>
+        <label class="settings-switch"><input type="checkbox" name="enabled" value="1" @checked($nfse['enabled'])><span><strong>NFS-e habilitada</strong></span></label>
         <label class="settings-switch"><input type="checkbox" name="production_enabled" value="1" @checked($nfse['production_enabled'])><span><strong>Permitir emissão em produção</strong></span></label>
         <label class="settings-switch"><input type="checkbox" name="auto_from_sale" value="1" @checked($nfse['auto_from_sale'])><span><strong>Integrar com vendas de serviço</strong><small>Preferência para preparar NFS-e a partir da venda.</small></span></label>
         <label class="settings-switch"><input type="checkbox" name="withhold_iss_default" value="1" @checked($nfse['withhold_iss_default'])><span><strong>ISS retido por padrão</strong><small>Preferência inicial; o documento ainda deve respeitar a operação real.</small></span></label>
@@ -792,22 +761,23 @@ foreach($primaryTabs as $key=>$item){
   <form method="post" action="{{ route('settings.group.update','accounting') }}" class="settings-editor">
     @csrf
     <section class="editor-panel settings-panel">
-      <div class="settings-panel-head">
-        <div><h2>Contabilidade</h2></div>
-        
-      </div>
+      <div class="settings-panel-head"><div><h2>Dados e integração contábil</h2></div></div>
       <div class="editor-grid cols-12 settings-grid">
-        <label class="field col-6"><span>Escritório contábil</span><input name="office_name" value="{{ $accounting['office_name'] }}"></label>
-        <label class="field col-6"><span>Contador responsável</span><input name="accountant_name" value="{{ $accounting['accountant_name'] }}"></label>
-        <label class="field col-3"><span>CPF / CNPJ</span><input name="accountant_document" value="{{ $accounting['accountant_document'] }}"></label>
-        <label class="field col-3"><span>CRC</span><input name="crc" value="{{ $accounting['crc'] }}"></label>
-        <label class="field col-3"><span>E-mail</span><input type="email" name="email" value="{{ $accounting['email'] }}"></label>
+        <label class="field col-6"><span>Escritório contábil</span><input name="office_name" value="{{ old('office_name',$accounting['office_name']) }}"></label>
+        <label class="field col-6"><span>Contador responsável</span><input name="accountant_name" value="{{ old('accountant_name',$accounting['accountant_name']) }}"></label>
+        <label class="field col-3"><span>CPF / CNPJ do contador</span><input name="accountant_document" value="{{ old('accountant_document',$accounting['accountant_document']) }}" inputmode="numeric" maxlength="20" aria-describedby="accountantXmlHelp"></label>
+        <label class="field col-3"><span>CRC</span><input name="crc" value="{{ old('crc',$accounting['crc']) }}"></label>
+        <label class="field col-3"><span>E-mail</span><input type="email" name="email" value="{{ old('email',$accounting['email']) }}"></label>
         <label class="field col-3"><span>Telefone</span><input name="phone" value="{{ $accounting['phone'] }}"></label>
         <label class="field col-6"><span>Sistema contábil de destino</span><input name="accounting_system" value="{{ $accounting['accounting_system'] }}" placeholder="Ex.: Domínio, Alterdata, outro"></label>
-        <div class="field col-6"><span>Formato do arquivo</span><div class="inline-note"><strong>CSV</strong> · formato atualmente gerado pelo Lumeron.</div></div>
+        <div class="field col-6"><span>Formato do arquivo</span><div class="inline-note"><strong>CSV</strong> · arquivo para importação no sistema contábil.</div></div>
         <label class="field col-12"><span>Observações</span><textarea name="notes" rows="4">{{ $accounting['notes'] }}</textarea></label>
       </div>
       <div class="settings-switch-grid">
+        <input type="hidden" name="accountant_xml_authorized" value="0">
+        <label class="settings-switch"><input type="checkbox" name="accountant_xml_authorized" value="1" @checked(old('accountant_xml_authorized',$accounting['accountant_xml_authorized']))><span><strong>Autorizar o contador a acessar o XML completo da NF-e</strong><small id="accountantXmlHelp">O CPF/CNPJ informado terá acesso aos dados completos das novas NF-e. Informe um documento válido para autorizar.</small></span></label>
+        <label class="field col-6"><span>CNPJ autorizado pela SEFAZ para acesso ao XML da NF-e</span><input name="sefaz_xml_authorized_cnpj" inputmode="numeric" maxlength="18" value="{{ old('sefaz_xml_authorized_cnpj',$accounting['sefaz_xml_authorized_cnpj'] ?? '') }}" placeholder="Informe o CNPJ indicado pela SEFAZ"></label>
+
         <label class="settings-switch"><input type="checkbox" name="cost_center_enabled" value="1" @checked($accounting['cost_center_enabled'])><span><strong>Usar centros de custo</strong><small>Prepara classificações financeiras para detalhamento contábil.</small></span></label>
         <label class="settings-switch"><input type="checkbox" name="automatic_monthly_export" value="1" @checked($accounting['automatic_monthly_export'])><span><strong>Exportação mensal automática</strong><small>Gera automaticamente o CSV do mês anterior no primeiro dia de cada mês.</small></span></label>
       </div>
@@ -1005,23 +975,26 @@ foreach($primaryTabs as $key=>$item){
       <strong>Status</strong>
       <span class="status {{ $integrations['api_enabled']?'status-ok':'status-muted' }}">{{ $integrations['api_enabled']?'Ativa':'Desativada' }}</span>
     </div>
-    <div><strong>Produtos</strong><code>/api/lumeron/products</code></div>
-    <div><strong>Clientes</strong><code>/api/lumeron/customers</code></div>
-    <div><strong>Vendas</strong><code>/api/lumeron/sales</code></div>
+    <details>
+      <summary>Endereços para integração</summary>
+      <div><strong>Produtos</strong><code>/api/lumeron/products</code></div>
+      <div><strong>Clientes</strong><code>/api/lumeron/customers</code></div>
+      <div><strong>Vendas</strong><code>/api/lumeron/sales</code></div>
+    </details>
   </div>
 
   @if(session('api_token_plain'))
     <label class="field settings-api-token">
-      <span>Novo token — copie agora</span>
+      <span>Nova chave de acesso — copie agora</span>
       <textarea readonly rows="2" data-copy-source="nextor-api-token">{{ session('api_token_plain') }}</textarea>
     </label>
-    <button type="button" class="btn btn-secondary" data-copy-target="nextor-api-token">@include('partials.icon',['name'=>'copy','size'=>15]) Copiar token</button>
+    <button type="button" class="btn btn-secondary" data-copy-target="nextor-api-token">@include('partials.icon',['name'=>'copy','size'=>15]) Copiar chave</button>
   @else
-    <div class="inline-note">{{ $apiTokenConfigured ? 'Há um token configurado. Por segurança ele não é exibido novamente.' : 'Nenhum token foi gerado ainda.' }}</div>
+    <div class="inline-note">{{ $apiTokenConfigured ? 'Há uma chave configurada. Ela não é exibida novamente.' : 'Nenhuma chave de acesso configurada.' }}</div>
   @endif
 
   <div class="settings-api-actions">
-    <button class="btn btn-secondary" type="submit" form="nextor-api-token-form">{{ $apiTokenConfigured ? 'Regenerar token' : 'Gerar token' }}</button>
+    <button class="btn btn-secondary" type="submit" form="nextor-api-token-form">{{ $apiTokenConfigured ? 'Substituir chave' : 'Gerar chave' }}</button>
   </div>
 
   <div class="settings-webhook-stats">
@@ -1031,7 +1004,8 @@ foreach($primaryTabs as $key=>$item){
   </div>
 </section>
 
-<form id="nextor-api-token-form" method="post" action="{{ route('settings.api-token.regenerate') }}" hidden>
+<form id="nextor-api-token-form" method="post" action="{{ route('settings.api-token.regenerate') }}"
+  @if($apiTokenConfigured) data-confirm-submit="Substituir a chave de acesso? As integrações que usam a chave atual precisarão ser atualizadas." @endif hidden>
   @csrf
 </form>
 

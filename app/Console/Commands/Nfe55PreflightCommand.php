@@ -15,7 +15,7 @@ use Throwable;
 final class Nfe55PreflightCommand extends Command
 {
     protected $signature = 'nfe:preflight {id : Identificador do rascunho de NF-e}';
-    protected $description = 'Confere uma NF-e de homologacao localmente sem transmitir a SEFAZ';
+    protected $description = 'Confere XML e assinatura da NF-e no ambiente configurado, sem transmitir a SEFAZ';
 
     public function handle(Nfe55PreflightService $service): int
     {
@@ -30,7 +30,7 @@ final class Nfe55PreflightCommand extends Command
             $this->error('A NF-e informada nao foi encontrada.');
             return self::FAILURE;
         }
-        $this->line('Conferindo NF-e em homologacao. Nenhuma nota sera transmitida.');
+        $this->line('Conferindo NF-e em '.$draft->environment.'. Nenhuma nota sera transmitida.');
         try {
             $result=$service->check($draft);
             $this->info('Verificacao concluida: XML validado e assinatura conferida.');

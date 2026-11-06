@@ -101,6 +101,17 @@ final class FiscalPurchasesTest extends TestCase
         $this->assertDatabaseCount('incoming_nfes',0);
     }
 
+    public function test_received_invoice_search_keeps_a_private_diagnostic_out_of_the_operational_page(): void
+    {
+        $state=app(IncomingNfeSyncService::class)->state();
+        $raw='SQLSTATE legacy-private-diagnostic /workspace/private/file.php';
+        $state->update(['last_error'=>$raw]);
+        $this->actingAs($this->accountant())->get(route('fiscal.purchases.index'))
+            ->assertOk()->assertSee('Não foi possível consultar as notas')
+            ->assertDontSee('SQLSTATE')->assertDontSee('legacy-private-diagnostic');
+        self::assertSame($raw,$state->fresh()->last_error);
+    }
+
 
     public function test_received_invoices_ui_uses_correct_naming_while_keeping_legacy_routes(): void
     {

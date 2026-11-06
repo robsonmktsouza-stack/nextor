@@ -109,3 +109,12 @@ Não implantar em produção, alterar DNS, certificados, infraestrutura, cobran�
 ## D09 — Política de manutenção para agentes
 
 Antes de cada tarefa: ler `AGENTS.md`, `docs/ai/README.md`, `PROJECT_STATE.md`, `HANDOFF.md` e os arquivos afetados. Preferir mudanças mínimas, aderentes ao código e cobrindo regressões. Depois: atualizar o handoff, marcar resultado real de testes e registrar nova decisão neste documento se houver mudança aprovada. Não reivindicar que arquivos de IA têm memória automática entre conversas; eles são referência versionada que cada novo agente precisa carregar.
+
+## D20 — Referência oficial e aprovação tributária separadas — 26/10/2026
+
+O catálogo fiscal versiona referências e modelos; não fornece classificação legal
+universal nem habilita regras por nome/NCM. Modelos novos precisam de revisão
+fundamentada e regras específicas. Naturezas, grupos, regras e vínculos de produto
+existentes são reutilizados; a instalação e o banco continuam exclusivos por CNPJ.
+Atualizações preservam versões anteriores e personalizações; documentos autorizados
+são imutáveis. Nenhuma instalação de catálogo altera flags de emissão em produção.

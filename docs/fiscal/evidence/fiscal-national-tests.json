@@ -1,0 +1,493 @@
+{
+  "recorded_at_utc": "2026-10-26T01:29:46.667697+00:00",
+  "branch": "feature/nfe55-motor-fiscal-completo",
+  "tested_application_commit": "a55be2fc7deefbc6a5c892e773ef213a10bd8ef5",
+  "runtime": {
+    "php": "8.5.12",
+    "phpunit": "12.5.40",
+    "database": "SQLite :memory:",
+    "runner": "composer:2 Docker",
+    "mysql_php83_tested": false
+  },
+  "full_suite": {
+    "tests": 1024,
+    "assertions": 7261,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 2,
+    "log_sha256": "1c26045b81ae4af118c8f489a31d94b5e26c19c26f45ac567ffb548557b52b12",
+    "junit_sha256": "bafeaaff2c7e299921595b026e40e956e20472b605dac9a9c731e21fad1d5f03",
+    "skipped_reason": "Chromium ausente nos dois testes opcionais de PDF real."
+  },
+  "parser_tests": {
+    "tests": 14,
+    "failures": 0,
+    "errors": 0,
+    "command": "python3 -m unittest discover -s tools/fiscal -p 'test_*.py'"
+  },
+  "targeted_tests": {
+    "tests": 47,
+    "assertions": 203,
+    "failures": 0,
+    "errors": 0
+  },
+  "catalog": {
+    "version": "2026.10.26.1",
+    "manifest_sha256": "9cabe5db8c4e7be86406c96d8db08d984d6261fce3bc74369480a87612375ce8",
+    "references": 15986,
+    "by_kind": {
+      "ncm": 10516,
+      "origin": 9,
+      "csosn": 10,
+      "icms_cst": 15,
+      "pis_cofins_cst": 33,
+      "ipi_cst": 14,
+      "crt": 4,
+      "ibs_cbs_cst": 18,
+      "ibs_cbs_class": 173,
+      "cest": 1265,
+      "cfop": 619,
+      "benefit": 3310
+    },
+    "cfop_codes": 619,
+    "nfe_allowed_cfop": 585,
+    "cest_distinct_national_codes": 1054,
+    "cest_current_national_codes_2026_10_26": 1041,
+    "benefit_references": 3310,
+    "benefit_state_coverage": {
+      "AC": {
+        "status": "partial",
+        "count": 1,
+        "required_status": "conditional_unverified_current_effects",
+        "source_ids": [
+          "ac-sefaz-decreto-11045-2022"
+        ],
+        "snapshot_date": "2026-10-26",
+        "note": "Um código textual prescrito no art. 5º do Decreto 11.045/2022; modelo bloqueado por formato e vigência condicionada não verificados integralmente. Não é uma tabela estadual completa."
+      },
+      "AL": {
+        "status": "unavailable",
+        "count": 0,
+        "required_status": "unverified",
+        "note": "Não foi localizada tabela pública oficial de cBenef com códigos e condições validáveis nesta pesquisa. Isso não significa dispensa nem inexistência de benefícios."
+      },
+      "AP": {
+        "status": "unavailable",
+        "count": 0,
+        "required_status": "unverified",
+        "note": "Não foi localizada tabela pública oficial de cBenef com códigos e condições validáveis nesta pesquisa. Isso não significa dispensa nem inexistência de benefícios."
+      },
+      "AM": {
+        "status": "unavailable",
+        "count": 0,
+        "required_status": "unverified",
+        "note": "Não foi localizada tabela pública oficial de cBenef com códigos e condições validáveis nesta pesquisa. Isso não significa dispensa nem inexistência de benefícios."
+      },
+      "BA": {
+        "status": "not_bundled",
+        "count": 0,
+        "consulted_at": "2026-10-26",
+        "note": "Portal oficial retornou503; pesquisas oficiais não localizaram tabela cBenef classificatória para importação. Não se afirma dispensa ou inexistência de obrigação.",
+        "research_url": "https://www.sefaz.ba.gov.br/nfe/"
+      },
+      "CE": {
+        "status": "unavailable",
+        "count": 0,
+        "required_status": "unverified",
+        "note": "Não foi localizada tabela pública oficial de cBenef com códigos e condições validáveis nesta pesquisa. Isso não significa dispensa nem inexistência de benefícios."
+      },
+      "DF": {
+        "status": "partial",
+        "count": 257,
+        "version": "Anexo2/2025+art2Ato1/2026",
+        "consulted_at": "2026-10-26",
+        "note": "257 códigos do Anexo2/2025, com fim de utilização DF814104/DF814151 atualizado pelo art2 do Ato1/2026. Códigos acrescentados pelo Ato1/2026 não importados: anexo consolidado indicado como em atualização e DODF69MB retornou503 no download. Sem inferir descrições/CST.",
+        "sources": [
+          "benefits-df",
+          "benefits-df-amendment-2026"
+        ]
+      },
+      "ES": {
+        "status": "complete",
+        "count": 246,
+        "version": "V6/11-02-2025",
+        "consulted_at": "2026-10-26",
+        "note": "Todos os códigos estruturados da tabela oficial publicada foram extraídos; a cobertura refere-se à versão citada, não ao enquadramento dos produtos ou à concessão automática de benefícios.",
+        "sources": [
+          "benefits-es"
+        ]
+      },
+      "GO": {
+        "status": "complete",
+        "count": 303,
+        "version": "Consolidação IN1518/2022 consultada26/10/2026",
+        "consulted_at": "2026-10-26",
+        "note": "Todos os códigos estruturados da tabela oficial publicada foram extraídos; a cobertura refere-se à versão citada, não ao enquadramento dos produtos ou à concessão automática de benefícios.",
+        "sources": [
+          "benefits-go"
+        ],
+        "extraction_exclusions": [
+          {
+            "location": "table-1",
+            "row": 2,
+            "code": "Redação com vigência de 01.01.23 a 21.06.23 CONFERIDA NOVA REDAÇÃO À LINHA DE TÍTULOS DA TABELA DE CÓDIGOS DE BENEFÍCIOS FISCAIS PELO ANEXO ÚNICO DA INSTRUÇÃO nORMATIVA Nº 1.523/22-GSE, DE 25.05.22 - VIGÊNCIA: 22.06.23 ACRESCIDOS OS CST 02, 15, 53 E 61 PELO ANEXO ÚNICO DA INSTRUÇÃO NORMATIVA Nº 1.563/23, DE 20.06.23 - VIGÊNCIA: 22.06.23"
+          },
+          {
+            "location": "table-1",
+            "row": 5,
+            "code": "Redação sem vigência em função da alteração retroagir seus efeitos à 07.02.22 CONFERIDA NOVA REDAÇÃO CÓDIGO \"NULO\" DA TABELA DE CÓDIGOS DE BENEFÍCIOS FISCAIS PELO ANEXO ÚNICO DA IN Nº 1.523/22-GSE, DE 25.05.22 - VIGÊNCIA: 07.02.22"
+          },
+          {
+            "location": "table-1",
+            "row": 8,
+            "code": "Redação sem vigência em função da alteração retroagir seus efeitos à 07.02.22 CONFERIDA NOVA REDAÇÃO CÓDIGO \"SEM CBENEF\" DA TABELA DE CÓDIGOS DE BENEFÍCIOS FISCAIS PELO ANEXO ÚNICO DA IN Nº 1.523/22-GSE, DE 25.05.22 - VIGÊNCIA: 07.02.22"
+          },
+          {
+            "location": "table-1",
+            "row": 35,
+            "code": "acrescido o CÓDIGO \"go800026\" PELO ANEXO ÚNICO DA IN Nº 1.590/24-GSE, DE 12.09.24 - VIGÊNCIA: 16.09.24"
+          },
+          {
+            "location": "table-1",
+            "row": 61,
+            "code": "Redação com vigência de 01.01.23 a 21.06.23 rEVOGADO O CÓDIGO GO811023 PELO ART. 8º DA INSTRUÇÃO nORMATIVA Nº 1.563/23-GSE, DE 20.06.23 - VIGÊNCIA: 22.06.23"
+          },
+          {
+            "location": "table-1",
+            "row": 70,
+            "code": "Redação com vigência de 01.01.23 a 21.06.23 rEVOGADO O CÓDIGO GO811030 PELO ART. 8º DA INSTRUÇÃO nORMATIVA Nº 1.563/23-GSE, DE 20.0623 - VIGÊNCIA: 22.06.23"
+          },
+          {
+            "location": "table-1",
+            "row": 183,
+            "code": "acrescido o CÓDIGO \"go811142\" PELO ANEXO ÚNICO DA IN Nº 1.590/24-GSE, DE 12.09.24 - VIGÊNCIA: 16.09.24"
+          },
+          {
+            "location": "table-1",
+            "row": 185,
+            "code": "acrescido o CÓDIGO \"go811143\" PELO ANEXO ÚNICO DA IN Nº 1.590/24-GSE, DE 12.09.24 - VIGÊNCIA: 16.09.24"
+          },
+          {
+            "location": "table-1",
+            "row": 187,
+            "code": "acrescido o CÓDIGO \"go811144\" PELO ANEXO ÚNICO DA IN Nº 1.590/24-GSE, DE 12.09.24 - VIGÊNCIA: 16.09.24"
+          },
+          {
+            "location": "table-1",
+            "row": 189,
+            "code": "acrescido o código go811145 pelo anexo único da in nº 1.615/25-gse, de 18.12.25 - VIGÊNCIA: 22.12.25"
+          },
+          {
+            "location": "table-1",
+            "row": 191,
+            "code": "acrescido o código go811145 pelo anexo único da in nº 1.615/25-gse, de 18.12.25 - VIGÊNCIA: 22.12.25"
+          },
+          {
+            "location": "table-1",
+            "row": 242,
+            "code": "acrescido o CÓDIGO \"go812049\" PELO ANEXO ÚNICO DA IN Nº 1.590/24-GSE, DE 12.09.24 - VIGÊNCIA: 16.09.24"
+          },
+          {
+            "location": "table-1",
+            "row": 244,
+            "code": "acrescido o CÓDIGO \"go812050\" PELO ANEXO ÚNICO DA IN Nº 1.590/24-GSE, DE 12.09.24 - VIGÊNCIA: 16.09.24"
+          },
+          {
+            "location": "table-1",
+            "row": 246,
+            "code": "acrescido o código go812051 pelo anexo único da in nº 1.615/25-gse, de 18.12.25 - VIGÊNCIA: 22.12.25"
+          },
+          {
+            "location": "table-1",
+            "row": 248,
+            "code": "acrescido o código go812052 pelo anexo único da in nº 1.615/25-gse, de 18.12.25 - VIGÊNCIA: 22.12.25"
+          },
+          {
+            "location": "table-1",
+            "row": 250,
+            "code": "acrescido o código go812053 pelo anexo único da in nº 1.615/25-gse, de 18.12.25 - VIGÊNCIA: 22.12.25"
+          },
+          {
+            "location": "table-1",
+            "row": 252,
+            "code": "acrescido o código go812054 pelo anexo único da in nº 1.615/25-gse, de 18.12.25 - VIGÊNCIA: 22.12.25"
+          },
+          {
+            "location": "table-1",
+            "row": 254,
+            "code": "acrescido o código go812055 pelo anexo único da in nº 1.615/25-gse, de 18.12.25 - VIGÊNCIA: 22.12.25"
+          },
+          {
+            "location": "table-1",
+            "row": 256,
+            "code": "acrescido o código go812056 pelo anexo único da in nº 1.615/25-gse, de 18.12.25 - VIGÊNCIA: 22.12.25"
+          },
+          {
+            "location": "table-1",
+            "row": 258,
+            "code": "acrescido o código go812057 pelo anexo único da in nº 1.615/25-gse, de 18.12.25 - VIGÊNCIA: 22.12.25"
+          },
+          {
+            "location": "table-1",
+            "row": 260,
+            "code": "acrescido o código go812058 pelo anexo único da in nº 1.615/25-gse, de 18.12.25 - VIGÊNCIA: 22.12.25"
+          },
+          {
+            "location": "table-1",
+            "row": 270,
+            "code": "Redação com vigência de 01.01.23 a 21.06.23 rEVOGADO O CÓDIGO GO821007 PELO ART. 8º DA INSTRUÇÃO nORMATIVA Nº 1.563/23-GSE, DE 20.06.23 - VIGÊNCIA: 22.06.23"
+          },
+          {
+            "location": "table-1",
+            "row": 304,
+            "code": "acrescido o CÓDIGO \"go821040\" PELO ANEXO ÚNICO DA IN Nº 1.590/24-GSE, DE 12.09.24 - VIGÊNCIA: 16.09.24"
+          },
+          {
+            "location": "table-1",
+            "row": 306,
+            "code": "acrescido o CÓDIGO \"go821041\" PELO ANEXO ÚNICO DA IN Nº 1.590/24-GSE, DE 12.09.24 - VIGÊNCIA: 16.09.24"
+          },
+          {
+            "location": "table-1",
+            "row": 308,
+            "code": "ACRESCIDO O CÓDIGO GO821042 PELO ANEXO ÚNICO DA IN Nº 1.615/25-GSE, DE 18.12.25 - VIGÊNCIA: 22.12.25"
+          },
+          {
+            "location": "table-1",
+            "row": 310,
+            "code": "ACRESCIDO O CÓDIGO GO821043 PELO ANEXO ÚNICO DA IN Nº 1.615/25-GSE, DE 18.12.25 - VIGÊNCIA: 22.12.25"
+          },
+          {
+            "location": "table-1",
+            "row": 322,
+            "code": "Redação com vigência de 01.01.23 a 21.06.23 rEVOGADO O CÓDIGO GO822009 PELO ART. 8º DA INSTRUÇÃO nORMATIVA Nº 1.563/23-GSE, DE 20.06.23 - VIGÊNCIA: 22.06.23"
+          },
+          {
+            "location": "table-1",
+            "row": 325,
+            "code": "Redação com vigência de 01.01.23 a 21.06.23 rEVOGADO O CÓDIGO GO822010 PELO ART. 8º DA INSTRUÇÃO nORMATIVA Nº 1.563/23-GSE, DE 20.06.23 - VIGÊNCIA: 22.06.23"
+          },
+          {
+            "location": "table-1",
+            "row": 335,
+            "code": "ACRESCIDO O CÓDIGO GO822019 PELO ANEXO ÚNICO DA IN Nº 1.563/23-GSE, DE 25.05.22 - VIGÊNCIA: 22.06.23"
+          },
+          {
+            "location": "table-1",
+            "row": 337,
+            "code": "ACRESCIDO O CÓDIGO GO822020 PELO ANEXO ÚNICO DA IN Nº 1.615/25-GSE, DE 18.12.25 - VIGÊNCIA: 22.12.25"
+          },
+          {
+            "location": "table-1",
+            "row": 340,
+            "code": "ACRESCIDO O CÓDIGO GO890001 PELO ANEXO ÚNICO DA IN Nº 1.563/23-GSE, DE 25.05.22 - VIGÊNCIA: 22.06.23"
+          },
+          {
+            "location": "table-1",
+            "row": 342,
+            "code": "ACRESCIDO O CÓDIGO GO890002 PELO ANEXO ÚNICO DA IN Nº 1.563/23-GSE, DE 25.05.22 - VIGÊNCIA: 22.06.23"
+          },
+          {
+            "location": "table-1",
+            "row": 344,
+            "code": "Nota: Redação sem vigência em função da alteração retroagir seus efeitos à 22.06.23 REVOGADO O CÓDIGO GO890002 PELO ART. 3º DA INSTRUÇÃO NORMATIVA Nº 1.566/23-GSE, DE 14.07.23 - VIGÊNCIA: 22.06.23"
+          },
+          {
+            "location": "table-1",
+            "row": 346,
+            "code": "ACRESCIDO O CÓDIGO GO890003 PELO ANEXO ÚNICO DA IN Nº 1.563/23-GSE, DE 25.05.22 - VIGÊNCIA: 22.06.23"
+          },
+          {
+            "location": "table-1",
+            "row": 348,
+            "code": "ACRESCIDO O CÓDIGO GO890004 PELO ANEXO ÚNICO DA IN Nº 1.563/23-GSE, DE 25.05.22 - VIGÊNCIA: 22.06.23"
+          },
+          {
+            "location": "table-1",
+            "row": 350,
+            "code": "acrescido o CÓDIGO \"go890005\" PELO ANEXO ÚNICO DA IN Nº 1.590/24-GSE, DE 12.09.24 - VIGÊNCIA: 16.09.24"
+          }
+        ]
+      },
+      "MA": {
+        "status": "unavailable",
+        "count": 0,
+        "required_status": "unverified",
+        "note": "Não foi localizada tabela pública oficial de cBenef com códigos e condições validáveis nesta pesquisa. Isso não significa dispensa nem inexistência de benefícios."
+      },
+      "MT": {
+        "status": "unavailable",
+        "count": 0,
+        "required_status": "unverified",
+        "note": "Não foi localizada tabela pública oficial de cBenef com códigos e condições validáveis nesta pesquisa. Isso não significa dispensa nem inexistência de benefícios."
+      },
+      "MS": {
+        "status": "unavailable",
+        "count": 0,
+        "required_status": "unverified",
+        "note": "Não foi localizada tabela pública oficial de cBenef com códigos e condições validáveis nesta pesquisa. Isso não significa dispensa nem inexistência de benefícios."
+      },
+      "MG": {
+        "status": "not_bundled",
+        "count": 0,
+        "consulted_at": "2026-10-26",
+        "note": "Notícia oficial de2019 aponta tabela SVRS para estados que implementaram; não publica códigos MG nem confirma dispensa atual. Nenhum código MG inferido.",
+        "research_url": "https://portalsped.fazenda.mg.gov.br/spedmg/noticias/23_07_2019-ATENCAO-Publicada-a-tabela-de-codigo-de-beneficio-fiscal-citada-na-regra-de-validacao-N12-94-que-consta-da-NT-2019.001/"
+      },
+      "PA": {
+        "status": "unavailable",
+        "count": 0,
+        "required_status": "unverified",
+        "note": "Não foi localizada tabela pública oficial de cBenef com códigos e condições validáveis nesta pesquisa. Isso não significa dispensa nem inexistência de benefícios."
+      },
+      "PB": {
+        "status": "unavailable",
+        "count": 0,
+        "required_status": "unverified",
+        "note": "Não foi localizada tabela pública oficial de cBenef com códigos e condições validáveis nesta pesquisa. Isso não significa dispensa nem inexistência de benefícios."
+      },
+      "PR": {
+        "status": "complete",
+        "count": 501,
+        "version": "V27/17-07-2026",
+        "consulted_at": "2026-10-26",
+        "note": "Todos os códigos estruturados da tabela oficial publicada foram extraídos; a cobertura refere-se à versão citada, não ao enquadramento dos produtos ou à concessão automática de benefícios.",
+        "sources": [
+          "benefits-pr"
+        ]
+      },
+      "PE": {
+        "status": "unavailable",
+        "count": 0,
+        "required_status": "unverified",
+        "note": "Não foi localizada tabela pública oficial de cBenef com códigos e condições validáveis nesta pesquisa. Isso não significa dispensa nem inexistência de benefícios."
+      },
+      "PI": {
+        "status": "unavailable",
+        "count": 0,
+        "required_status": "unverified",
+        "note": "Não foi localizada tabela pública oficial de cBenef com códigos e condições validáveis nesta pesquisa. Isso não significa dispensa nem inexistência de benefícios."
+      },
+      "RJ": {
+        "status": "partial",
+        "count": 584,
+        "version": "SVRS31-01-2020 histórico",
+        "consulted_at": "2026-10-26",
+        "note": "Somente publicação histórica SVRS31/01/2020; status template e aplicação automática bloqueada. Tabela estadual atual não obtida por bloqueio do servidor; não representa vigência atual.",
+        "sources": [
+          "benefits-rj"
+        ],
+        "extraction_exclusions": [
+          {
+            "code": "RJ818367",
+            "reason": "conflicting code/start date in historical publication; no version inferred"
+          },
+          {
+            "code": "RJ822367",
+            "reason": "conflicting code/start date in historical publication; no version inferred"
+          }
+        ]
+      },
+      "RN": {
+        "status": "partial",
+        "count": 4,
+        "required_status": "conditional",
+        "source_ids": [
+          "rn-doe-portaria-sei-970-2025"
+        ],
+        "snapshot_date": "2026-10-26",
+        "note": "Quatro linhas da Portaria-SEI 970/2025 original, vigente a partir de 01/10/2025 para benefícios nela relacionados. Sem tabela CST/CSOSN nem consolidação de alterações posteriores."
+      },
+      "RS": {
+        "status": "partial",
+        "count": 434,
+        "version": "SVRS31-01-2020 histórico",
+        "consulted_at": "2026-10-26",
+        "note": "Somente publicação histórica SVRS31/01/2020; status template e aplicação automática bloqueada. Tabela estadual atual não obtida por bloqueio do servidor; não representa vigência atual.",
+        "sources": [
+          "benefits-rs"
+        ]
+      },
+      "RO": {
+        "status": "unavailable",
+        "count": 0,
+        "required_status": "unverified",
+        "note": "Não foi localizada tabela pública oficial de cBenef com códigos e condições validáveis nesta pesquisa. Isso não significa dispensa nem inexistência de benefícios."
+      },
+      "RR": {
+        "status": "unavailable",
+        "count": 0,
+        "required_status": "unverified",
+        "note": "Não foi localizada tabela pública oficial de cBenef com códigos e condições validáveis nesta pesquisa. Isso não significa dispensa nem inexistência de benefícios."
+      },
+      "SC": {
+        "status": "complete",
+        "count": 665,
+        "version": "09-10-2026",
+        "consulted_at": "2026-10-26",
+        "note": "Todos os códigos estruturados da tabela oficial publicada foram extraídos; a cobertura refere-se à versão citada, não ao enquadramento dos produtos ou à concessão automática de benefícios.",
+        "sources": [
+          "benefits-sc"
+        ],
+        "extraction_exclusions": [
+          {
+            "location": "page-1-table-1",
+            "row": 2,
+            "code": "Sem preenchimento"
+          }
+        ]
+      },
+      "SP": {
+        "status": "complete",
+        "count": 315,
+        "version": "20260901",
+        "consulted_at": "2026-10-26",
+        "note": "Todos os códigos estruturados da tabela oficial publicada foram extraídos; a cobertura refere-se à versão citada, não ao enquadramento dos produtos ou à concessão automática de benefícios.",
+        "sources": [
+          "benefits-sp"
+        ]
+      },
+      "SE": {
+        "status": "unavailable",
+        "count": 0,
+        "required_status": "unverified",
+        "note": "Não foi localizada tabela pública oficial de cBenef com códigos e condições validáveis nesta pesquisa. Isso não significa dispensa nem inexistência de benefícios."
+      },
+      "TO": {
+        "status": "unavailable",
+        "count": 0,
+        "required_status": "unverified",
+        "note": "Não foi localizada tabela pública oficial de cBenef com códigos e condições validáveis nesta pesquisa. Isso não significa dispensa nem inexistência de benefícios."
+      }
+    }
+  },
+  "installation": {
+    "fresh_catalog_128M": "passed",
+    "old_edition_to_national_128M": "passed",
+    "idempotent_repetition_128M": "passed",
+    "database": "Isolated temporary SQLite, disposable container",
+    "company_rules_automatically_activated": false,
+    "source_frozen_previous_manifest_sha256": "8942c3161093b9c2177ed5bdef737257b89f9b252f996855831490b40d5d8b07",
+    "previous_canonical_digest_compatible": "33d89254c90bda4ff6e0855b374abb85570730c0b729d6fafff6c2f68dfa14ac"
+  },
+  "windows_line_endings": {
+    "core_autocrlf_true_checkout": "passed",
+    "verified_files": 4,
+    "native_windows_execution": false,
+    "attributes": "catalog JSON eol=lf; normative text -text; xlsx binary"
+  },
+  "checks": {
+    "git_diff_check": "passed",
+    "python_compile": "passed"
+  },
+  "external_acbr_sefaz_validation": {
+    "new_transmission": false,
+    "reason": "A instalação Windows/Laragon e o certificado A1 não estão acessíveis pela nuvem."
+  },
+  "limits": [
+    "Cobertura nacional completa de classificação CFOP/CEST, não de todas as regras de incidência tributária.",
+    "cBenef:5 tabelas estaduais completas publicadas; demais recortes/históricos/UFs sem tabela verificada explicitados.",
+    "Quatro vínculos NCM CEST manuais bloqueiam aplicação automática.",
+    "Grupos XML/operações não suportados pelo emissor continuam bloqueados."
+  ]
+}

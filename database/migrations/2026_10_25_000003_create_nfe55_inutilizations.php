@@ -1,0 +1,37 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('nfe55_inutilizations', function (Blueprint $table) {
+            $table->id();
+            $table->string('issuer_document', 14);
+            $table->string('environment', 20);
+            $table->unsignedSmallInteger('year');
+            $table->unsignedSmallInteger('series');
+            $table->unsignedInteger('first_number');
+            $table->unsignedInteger('last_number');
+            $table->string('reason', 255);
+            $table->string('status', 24)->default('pending');
+            $table->string('protocol', 20)->nullable();
+            $table->string('response_path')->nullable();
+            $table->string('xml_path')->nullable();
+            $table->text('error_message')->nullable();
+            $table->foreignId('requested_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('attempted_at')->nullable();
+            $table->timestamp('processed_at')->nullable();
+            $table->timestamps();
+            $table->index(['issuer_document', 'environment', 'year', 'series'], 'nfe55_inut_issuer_environment_year_series');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('nfe55_inutilizations');
+    }
+};

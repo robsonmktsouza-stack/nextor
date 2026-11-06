@@ -1,9 +1,14 @@
-name: NF-e 55 - homologação e segurança
+name: NF-e 55 - testes de código e segurança
 on:
   push:
-    branches: [develop]
+    branches: [develop, feature/nfe55-motor-fiscal-completo]
     paths:
       - 'app/Services/Fiscal/Nfe55*'
+      - 'app/Services/Fiscal/Nfe*Tax*'
+      - 'app/Services/Fiscal/FiscalTaxRuleResolver.php'
+      - 'app/Models/FiscalTaxRule*'
+      - 'app/Http/Controllers/FiscalTaxRuleController.php'
+      - 'app/Http/Controllers/Nfe55InutilizationController.php'
       - 'app/Services/Fiscal/ACBr/ACBrNFeService.php'
       - 'app/Console/Commands/Nfe55PreflightCommand.php'
       - 'app/Http/Controllers/Nfe55EmissionController.php'
@@ -21,7 +26,12 @@ on:
       - 'tests/Feature/Nfe55DanfeTest.php'
       - 'tests/Feature/Nfe55CancellationTest.php'
       - 'tests/Feature/NfeFormCompletenessTest.php'
+      - 'tests/Feature/Nfe55*'
+      - 'tests/Unit/Nfe*'
+      - 'database/migrations/2026_10_25_*'
       - '.github/workflows/nfe55-homologation.yml'
+  pull_request:
+    branches: [develop]
   workflow_dispatch:
 jobs:
   homologation:
@@ -52,4 +62,5 @@ jobs:
           }
       - run: php artisan list --raw | grep -q 'nfe:preflight'
       - run: php artisan route:list --path=fiscal/nfe/drafts
-      - run: php -d memory_limit=1024M vendor/bin/phpunit --filter='Nfe55EmissionFoundationTest|Nfe55DanfeTest|NfeEditorTest|NfeFormCompletenessTest|Nfe55CancellationTest' --display-errors --display-warnings
+      # No certificate or SEFAZ access: a green run is not fiscal homologation.
+      - run: php -d memory_limit=1024M vendor/bin/phpunit --filter='Nfe55|NfeFederal|NfeIcms|NfeTaxMath|NfeEditor|NfeFormCompleteness|FiscalTaxRule|CommercialReadOnlyLicense' --display-errors --display-warnings

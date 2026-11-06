@@ -12,6 +12,7 @@
       <a class="grid-primary-action" href="{{ route('fiscal.nfe.create') }}">@include('partials.icon',['name'=>'plus','size'=>17]) <span>Nova</span></a>
       <div class="grid-tool-group">
         <a class="grid-tool grid-tool-wide" href="{{ route('fiscal.nfe.natures.index') }}" data-tooltip="Naturezas de Operação">@include('partials.icon',['name'=>'tag','size'=>17]) <span>Naturezas</span></a>
+        <a class="grid-tool grid-tool-wide" href="{{ route('fiscal.nfe.inutilizations.index') }}" data-tooltip="Inutilizar numeração">@include('partials.icon',['name'=>'file','size'=>17]) <span>Inutilização</span></a>
       </div>
     </div>
     <div class="grid-actions-right">

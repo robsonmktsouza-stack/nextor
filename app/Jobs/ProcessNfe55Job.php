@@ -13,13 +13,21 @@ final class ProcessNfe55Job implements ShouldQueue
 {
     use Dispatchable,InteractsWithQueue,Queueable,SerializesModels;
 
-    public int $tries=1;
+    // Lock contention may release this job; external work is still claimed once
+    // by the service before any native call and never replayed on exceptions.
+    public int $tries=0;
+    public int $maxExceptions=1;
     public int $timeout=180;
 
     public function __construct(public readonly int $draftId) {}
 
     public function handle(Nfe55EmissionService $service): void
     {
-        $service->process($this->draftId);
+        if (!$service->process($this->draftId)) $this->release(10);
+    }
+
+    public function retryUntil(): \DateTimeInterface
+    {
+        return now()->addMinutes(15);
     }
 }

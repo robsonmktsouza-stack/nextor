@@ -144,7 +144,7 @@ final class FiscalPurchasesController extends Controller
             'not_ready'=>'Configure um certificado digital A1 válido para manifestar.',
             default=>'Não foi possível confirmar o evento fiscal.',
         };
-        return back()->with(in_array($result['status'],['accepted','already'],true)?'success':'error',$message);
+        return back()->with(in_array($result['status'],['accepted','already'],true)?'success':'error',\App\Support\UserFacingMessage::fromText($message));
     }
 
     /** Consulta fiscal somente leitura; não faz uma segunda manifestação. */
@@ -159,7 +159,7 @@ final class FiscalPurchasesController extends Controller
             'busy'=>'Já existe uma operação fiscal em andamento para esta nota.',
             default=>$result['message'] ?? 'Não foi possível confirmar o evento. O reenvio permanece bloqueado.',
         };
-        return back()->with($result['status']==='accepted'?'success':'warning',$message);
+        return back()->with($result['status']==='accepted'?'success':'warning',\App\Support\UserFacingMessage::fromText($message));
     }
 
     public function importXml(Request $request,IncomingNfeSyncService $sync)
@@ -171,7 +171,7 @@ final class FiscalPurchasesController extends Controller
         try {
             $incoming=$sync->importXml((string)file_get_contents($file->getRealPath()));
         } catch(InvalidArgumentException $error) {
-            return back()->withErrors(['xml'=>$error->getMessage()]);
+            return back()->withErrors(['xml'=>\App\Support\UserFacingMessage::fromThrowable($error,'Não foi possível ler o XML. Confira se o arquivo corresponde à NF-e autorizada.')]);
         }
         return redirect()->route('fiscal.purchases.show',$incoming)->with('success','XML importado.');
     }

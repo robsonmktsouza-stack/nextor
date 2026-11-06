@@ -1,0 +1,95 @@
+<?php
+
+namespace App\Services\Fiscal;
+
+use RuntimeException;
+
+final class Nfe55TaxParameters
+{
+    public const RULE_PARAMETERS = [
+        'icms_rate','icms_base','icms_base_mode','icms_base_reduction','icms_deferment_rate','fcp_rate','fcp_base',
+        'icms_credit_rate','icms_st_base','icms_st_rate','icms_st_base_mode','fcp_st_rate',
+        'icms_st_deduction','icms_st_mva','icms_st_base_reduction',
+        'ipi_cst','ipi_enq','ipi_rate','ipi_base','ipi_quantity','ipi_unit_rate',
+        'ipi_calculation_type','pis_calculation_type','cofins_calculation_type',
+        'pis_rate','pis_base','pis_quantity','pis_unit_rate',
+        'cofins_rate','cofins_base','cofins_quantity','cofins_unit_rate',
+        'st_retained_amount_scope','icms_st_retained_base','st_retained_rate',
+        'icms_substitutor_value','icms_st_retained_value','fcp_st_retained_base',
+        'fcp_st_retained_rate','fcp_st_retained_value','icms_effective_base',
+        'icms_effective_rate','icms_effective_value','icms_effective_reduction',
+        'icms_desoneration_amount','icms_desoneration_reason','icms_desoneration_deduct',
+        'difal_base','difal_fcp_base','difal_internal_rate','difal_interstate_rate',
+        'difal_share_rate','difal_fcp_rate',
+        'pis_st_calculation_type','pis_st_base','pis_st_rate','pis_st_quantity','pis_st_unit_rate','pis_st_add_to_total',
+        'cofins_st_calculation_type','cofins_st_base','cofins_st_rate','cofins_st_quantity','cofins_st_unit_rate','cofins_st_add_to_total',
+        'ipi_returned_percentage','ipi_returned_original_amount',
+        'ibs_uf_deferral_rate','ibs_municipal_deferral_rate','cbs_deferral_rate',
+        'rtc_regular_cst','rtc_regular_class','rtc_regular_base','rtc_regular_ibs_uf_rate','rtc_regular_ibs_municipal_rate','rtc_regular_cbs_rate','rtc_regular_legal_source','rtc_regular_legal_reference',
+        'rtc_transfer_ibs','rtc_transfer_cbs','rtc_adjustment_period','rtc_adjustment_ibs','rtc_adjustment_cbs',
+        'is_cst','is_class','is_calculation_type','is_base','is_rate','is_unit_rate','is_quantity','is_unit','is_valid_from','is_valid_until','is_legal_source','is_legal_reference',
+        'ibs_cbs_cst','ibs_cbs_class','ibs_cbs_base','ibs_uf_rate','ibs_municipal_rate','cbs_rate',
+        'ibs_uf_reduction_rate','ibs_municipal_reduction_rate','cbs_reduction_rate',
+    ];
+
+    public static function forDirection(array $tax, string $direction): array
+    {
+        if ($direction === 'inbound') {
+            foreach ($tax as $key => $value) {
+                if (str_ends_with((string) $key, '_inbound') && $value !== null && $value !== '') {
+                    $tax[substr($key, 0, -8)] = $value;
+                }
+            }
+        }
+        foreach ([
+            'mod_bc'=>'icms_base_mode','base_reduction_rate'=>'icms_base_reduction',
+            'simple_credit_rate'=>'icms_credit_rate','mod_bc_st'=>'icms_st_base_mode',
+            'mva_rate'=>'icms_st_mva','icms_deferral_rate'=>'icms_deferment_rate',
+            'cenq_ipi'=>'ipi_enq','pis_calc_type'=>'pis_calculation_type',
+            'cofins_calc_type'=>'cofins_calculation_type',
+            'interstate_icms_rate'=>'difal_interstate_rate','internal_icms_rate'=>'difal_internal_rate',
+            'fcp_interstate_rate'=>'difal_fcp_rate','icms_desonerated_value'=>'icms_desoneration_amount',
+        ] as $legacy=>$canonical) {
+            if ((!isset($tax[$canonical]) || $tax[$canonical] === '') && isset($tax[$legacy]) && $tax[$legacy] !== '') {
+                $tax[$canonical] = $tax[$legacy];
+            }
+        }
+        foreach (['pis','cofins'] as $name) {
+            if (($tax[$name.'_calculation_type'] ?? '') === 'percentage') $tax[$name.'_calculation_type'] = 'percent';
+        }
+        return $tax;
+    }
+
+    /** Refuse supplied groups whose fiscal content would otherwise be silently discarded. */
+    public static function assertSupported(array $tax): void
+    {
+        foreach ($tax as $key=>$value) {
+            if ($value === null || $value === '' || $value === false || $value === []) continue;
+            $name=(string)$key;
+            if (str_ends_with($name,'_inbound') || str_ends_with($name,'_export')) continue;
+            $implemented=['st_retained_amount_scope','icms_st_retained_base','st_retained_rate',
+                'icms_substitutor_value','icms_st_retained_value','fcp_st_retained_base',
+                'fcp_st_retained_rate','fcp_st_retained_value','icms_effective_base',
+                'icms_effective_rate','icms_effective_value','icms_effective_reduction',
+                'icms_desoneration_amount','icms_desoneration_reason','icms_desoneration_deduct',
+                'icms_desonerated_value','difal_base','difal_fcp_base','difal_internal_rate',
+                'difal_interstate_rate','difal_share_rate','difal_fcp_rate',
+                'interstate_icms_rate','internal_icms_rate','fcp_interstate_rate',
+                'ipi_returned_percentage','ipi_returned_original_amount',
+                'ibs_uf_deferral_rate','ibs_municipal_deferral_rate','cbs_deferral_rate',
+                'rtc_regular_cst','rtc_regular_class','rtc_regular_base','rtc_regular_ibs_uf_rate','rtc_regular_ibs_municipal_rate','rtc_regular_cbs_rate','rtc_regular_legal_source','rtc_regular_legal_reference',
+                'rtc_transfer_ibs','rtc_transfer_cbs','rtc_adjustment_period','rtc_adjustment_ibs','rtc_adjustment_cbs',
+                'is_cst','is_class','is_calculation_type','is_base','is_rate','is_unit_rate','is_quantity','is_unit','is_valid_from','is_valid_until','is_legal_source','is_legal_reference'];
+            if (in_array($name,$implemented,true) || preg_match('/^(pis|cofins)_st_(calculation_type|calc_type|base|rate|quantity|unit_rate|add_to_total)$/D',$name)) continue;
+            $groupCode=in_array($name,['is_cst','is_class','is_classification','is_classification_code'],true);
+            $unsupported=(bool)preg_match('/^(?:pis|cofins)_st(?:_|$)|(?:desoner|retained|substitutor|monoph|monofas|presumed_credit|presumido|transfer_credit|credito_presumido|regular_tax|tributacao_regular)/i',$name)
+                || preg_match('/^(?:icms_uf_dest|icms_uf_remet|difal|is_|gIS|ibs_credit|cbs_credit|ibs_mono|cbs_mono)/i',$name)
+                || preg_match('/^(?:ibs|cbs|fcp)_.*(?:deferral|deferment|differ|credit|presum|monoph|regular|adjust|transfer)/i',$name)
+                || in_array($name,['interstate_icms_rate','internal_icms_rate','fcp_interstate_rate'],true);
+            if (!$groupCode && !$unsupported) continue;
+            $codeLike=$groupCode || (bool)preg_match('/(?:_cst|_class|_reason|_mode)$/D',$name);
+            if (!$codeLike && is_numeric($value) && (float)$value === 0.0) continue;
+            throw new RuntimeException('O parâmetro '.$name.' exige grupo fiscal específico ainda não implementado para NF-e.');
+        }
+    }
+}

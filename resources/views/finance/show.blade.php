@@ -112,7 +112,7 @@
   </section>
 
   <aside class="cms-card">
-    <div class="card-header"><div><h2>Dados do lançamento</h2><p>Origem e classificação</p></div></div>
+    <div class="card-header"><div><h2>Dados do lançamento</h2></div></div>
     <div class="detail-meta">
       <div><span>Tipo</span><strong>{{ $entry->type_label }}</strong></div>
       <div><span>Categoria</span><strong>{{ $entry->category?->name ?? '—' }}</strong></div>
@@ -136,7 +136,7 @@
 
     @if($entry->sale_id===null && $entry->status!=='cancelled')
       <div class="finance-side-actions">
-        <form action="{{ route('finance.entries.cancel',$entry) }}" method="post" data-confirm="Cancelar este lançamento financeiro?">
+        <form action="{{ route('finance.entries.cancel',$entry) }}" method="post" data-confirm="Cancelar este lançamento? Ele deixará de compor os valores a pagar ou receber.">
           @csrf
           <button class="btn btn-danger-outline" type="submit">@include('partials.icon',['name'=>'x','size'=>16]) Cancelar lançamento</button>
         </form>

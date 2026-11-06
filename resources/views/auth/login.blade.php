@@ -10,7 +10,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="{{ asset('css/ui-tokens.css') }}?v={{ filemtime(public_path('css/ui-tokens.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/login.css') }}?v={{ filemtime(public_path('css/login.css')) }}">
+  <script defer src="{{ asset('js/user-messages.js') }}?v={{ filemtime(public_path('js/user-messages.js')) }}"></script>
   <script src="{{ asset('js/login.js') }}?v={{ filemtime(public_path('js/login.js')) }}" defer></script>
 </head>
 <body class="lumeron-login">
@@ -22,7 +24,6 @@
     <section class="login-panel" aria-labelledby="loginTitle">
       <header class="login-panel-header">
         <h1 id="loginTitle">Acesse seu sistema</h1>
-        <p>Entre no ambiente da sua empresa.</p>
       </header>
       @if(session('status'))<div class="login-feedback is-success" role="status">{{ session('status') }}</div>@endif
       @if($errors->any())
@@ -72,7 +73,6 @@
       </form>
       <a class="login-forgot" href="{{ route('password.request') }}" id="loginForgot">Esqueci minha senha</a>
     </section>
-    <footer class="login-copyright">Acesso exclusivo aos usuários autorizados.</footer>
   </main>
 </body>
 </html>

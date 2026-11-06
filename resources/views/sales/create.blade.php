@@ -155,11 +155,6 @@
 <script type="application/json" id="sale-old-payments">@json(old('payments',[]))</script>
 <script type="application/json" id="sale-payment-methods">@json($paymentMethods)</script>
 <script type="application/json" id="sale-default-due-days">@json($defaultDueDays)</script>
-@push('styles')
-<style>
-#saleQuoteValidity[hidden],#saveQuotePdf[hidden]{display:none!important}
-</style>
-@endpush
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded',()=>{

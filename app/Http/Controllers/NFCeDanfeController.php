@@ -42,7 +42,7 @@ final class NFCeDanfeController extends Controller
             // antes de preparar o documento auxiliar.
             $danfe->parse($xml,$fiscalDocumentJob);
         } catch (\RuntimeException $e) {
-            abort(409, 'DANFE NFC-e indisponível: '.$e->getMessage());
+            abort(409, \App\Support\UserFacingMessage::fromThrowable($e, 'DANFE NFC-e indisponível. Confira os arquivos da nota ou solicite suporte.'));
         }
 
         $cached=$pdf->existingPath($fiscalDocumentJob,$xml);

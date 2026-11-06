@@ -1,0 +1,191 @@
+[
+  {
+    "nt": "2025.002",
+    "filename": "sefaz-NT_2025.002_v1.52_RTC_NF-e_IBS_CBS_IS.pdf",
+    "url": "https://dfe-portal.svrs.rs.gov.br/NFE/DownloadArquivoEstatico/?sistema=NFE&tipoArquivo=3&nomeArquivo=NT_2025.002_v1.52_RTC_NF-e_IBS_CBS_IS.pdf",
+    "sha256": "54ed893327040a20a4a3c0562d342953542a1dc98e55d73dbe607d6c13d3d416",
+    "bytes": 2102849
+  },
+  {
+    "nt": "2026.002",
+    "filename": "sefaz-NT_2026.002_v1.11_DANFE_Simpl_Tp2_Emi_Offline_Autoriz_Alerta.pdf",
+    "url": "https://dfe-portal.svrs.rs.gov.br/NFE/DownloadArquivoEstatico/?sistema=NFE&tipoArquivo=3&nomeArquivo=NT_2026.002_v1.11_DANFE_Simpl_Tp2_Emi_Offline_Autoriz_Alerta.pdf",
+    "sha256": "72c033b2c7490710f61488a14d0bb3d7bb54e5345aa8d33d6ff2c270c228f046",
+    "bytes": 752233
+  },
+  {
+    "nt": "2026.007",
+    "filename": "sefaz-NT2026.007_v1.10 - Emissão NF-e sem IE e RV LCC.pdf",
+    "url": "https://dfe-portal.svrs.rs.gov.br/NFE/DownloadArquivoEstatico/?sistema=NFE&tipoArquivo=3&nomeArquivo=NT2026.007_v1.10+-+Emiss%C3%A3o+NF-e+sem+IE+e+RV+LCC.pdf",
+    "sha256": "4a9d9de64504f4091c55e3e8a2d499116d4bac1a2009a874a7b9ce26d9fe8b10",
+    "bytes": 775351
+  },
+  {
+    "nt": "2026.008",
+    "filename": "sefaz-NT_2026.008_v1.00_RTC_ValorLiquidoProduto.pdf",
+    "url": "https://dfe-portal.svrs.rs.gov.br/NFE/DownloadArquivoEstatico/?sistema=NFE&tipoArquivo=3&nomeArquivo=NT_2026.008_v1.00_RTC_ValorLiquidoProduto.pdf",
+    "sha256": "bc56e76ae5f3354f7ae636d87908840c5c685284f0f8f32bb29579f8124e44cd",
+    "bytes": 461635
+  },
+  {
+    "nt": "2026.010",
+    "filename": "sefaz-NFe_NT_2026.010_v1_00_DANFE_RTC.pdf",
+    "url": "https://dfe-portal.svrs.rs.gov.br/NFE/DownloadArquivoEstatico/?sistema=NFE&tipoArquivo=3&nomeArquivo=NFe_NT_2026.010_v1_00_DANFE_RTC.pdf",
+    "sha256": "eadc5246235f37a55f8140ddcf84595c8ce77f2d760f111f7b85ddf389b8f484",
+    "bytes": 712823
+  },
+  {
+    "nt": "2021.003",
+    "filename": "sefaz-NT2021.003_v1_50 - Validação GTIN Grupo V.pdf",
+    "url": "https://dfe-portal.svrs.rs.gov.br/NFE/DownloadArquivoEstatico/?sistema=NFE&tipoArquivo=3&nomeArquivo=NT2021.003_v1_50+-+Valida%C3%A7%C3%A3o+GTIN+Grupo+V.pdf",
+    "sha256": "20cede260b75464fe27dc675b396c28c72bb02af3cf39158d2fa85b0177c12e3",
+    "bytes": 1208814
+  },
+  {
+    "nt": "2023.003",
+    "filename": "sefaz-NT_2023.003_v1.40_CFOP_NFCe.pdf",
+    "url": "https://dfe-portal.svrs.rs.gov.br/NFE/DownloadArquivoEstatico/?sistema=NFE&tipoArquivo=3&nomeArquivo=NT_2023.003_v1.40_CFOP_NFCe.pdf",
+    "sha256": "18b8ce0d3f5fdf46b32bce5588f9f7bef88e123b07ac3bb1adf855339971f7f8",
+    "bytes": 685461
+  },
+  {
+    "nt": "2026.009",
+    "filename": "sefaz-NT2026.009_v1.00_Alteracao_RV_CFOP.pdf",
+    "url": "https://dfe-portal.svrs.rs.gov.br/NFE/DownloadArquivoEstatico/?sistema=NFE&tipoArquivo=3&nomeArquivo=NT2026.009_v1.00_Alteracao_RV_CFOP.pdf",
+    "sha256": "50b7dec40bba8928b4d544feb4fdbd8c8bac16e37c99d926ddb2834cf246f15d",
+    "bytes": 310342
+  },
+  {
+    "nt": "2026.006",
+    "filename": "sefaz-NT_2026.006_v1.00_RTC_VinculacaoPagamento.pdf",
+    "url": "https://dfe-portal.svrs.rs.gov.br/NFE/DownloadArquivoEstatico/?sistema=NFE&tipoArquivo=3&nomeArquivo=NT_2026.006_v1.00_RTC_VinculacaoPagamento.pdf",
+    "sha256": "68c22dbc2661a8ef1c55a1e0eaa91174d9457a2546ff86562ebb4e0d1ceed2cb",
+    "bytes": 781122
+  },
+  {
+    "nt": "2026.001",
+    "filename": "sefaz-NT_2026.001_v1.02b - PAA NFe.pdf",
+    "url": "https://dfe-portal.svrs.rs.gov.br/NFE/DownloadArquivoEstatico/?sistema=NFE&tipoArquivo=3&nomeArquivo=NT_2026.001_v1.02b+-+PAA+NFe.pdf",
+    "sha256": "703310f95bff855aad9a4a7004515ce29ffff343334c53f0c45e9b32390296cd",
+    "bytes": 1010960
+  },
+  {
+    "nt": "2026.004",
+    "filename": "sefaz-NT_2026.004_v1.01_AlteraSchemaNFCeNFeCNPJAlfa.pdf",
+    "url": "https://dfe-portal.svrs.rs.gov.br/NFE/DownloadArquivoEstatico/?sistema=NFE&tipoArquivo=3&nomeArquivo=NT_2026.004_v1.01_AlteraSchemaNFCeNFeCNPJAlfa.pdf",
+    "sha256": "5f24a25351e790692754b07bbefac42ac67e70167a62a7806395d880f56675be",
+    "bytes": 516956
+  },
+  {
+    "nt": "2026.003",
+    "filename": "sefaz-NT_2026.003_v1.00 - DANFE Simplificado Tipo 2.pdf",
+    "url": "https://dfe-portal.svrs.rs.gov.br/NFE/DownloadArquivoEstatico/?sistema=NFE&tipoArquivo=3&nomeArquivo=NT_2026.003_v1.00+-+DANFE+Simplificado+Tipo+2.pdf",
+    "sha256": "2ef826027e0e8423ba9dc2f53ee7197f8bfdcc399a30459b72da977528600f13",
+    "bytes": 1666337
+  },
+  {
+    "nt": "2022.002",
+    "filename": "sefaz-NT2022.002v1.30 - Equiparação Exportação e outras alterações (1).pdf",
+    "url": "https://dfe-portal.svrs.rs.gov.br/NFE/DownloadArquivoEstatico/?sistema=NFE&tipoArquivo=3&nomeArquivo=NT2022.002v1.30+-+Equipara%C3%A7%C3%A3o+Exporta%C3%A7%C3%A3o+e+outras+altera%C3%A7%C3%B5es+%281%29.pdf",
+    "sha256": "244b4beea1ee1dded860e5735777a99fec41296e52be6e014f1549f5628c851b",
+    "bytes": 688192
+  },
+  {
+    "nt": "2025.001",
+    "filename": "sefaz-NT2025.001_v1.01 - NFCe_qrCode_3.pdf",
+    "url": "https://dfe-portal.svrs.rs.gov.br/NFE/DownloadArquivoEstatico/?sistema=NFE&tipoArquivo=3&nomeArquivo=NT2025.001_v1.01+-+NFCe_qrCode_3.pdf",
+    "sha256": "99b94e03007cef880a99b3bd36e27abf2b54181e91b3f1d2dd2faf2bfc469e9e",
+    "bytes": 666827
+  },
+  {
+    "nt": "2021.002",
+    "filename": "sefaz-NT2021.002 v1.12 Nota Fiscal Fácil.pdf",
+    "url": "https://dfe-portal.svrs.rs.gov.br/NFE/DownloadArquivoEstatico/?sistema=NFE&tipoArquivo=3&nomeArquivo=NT2021.002+v1.12+Nota+Fiscal+F%C3%A1cil.pdf",
+    "sha256": "a67d9e70cff61bdf6a0913bb5c7ca6b30d82332c0204d443e4671a8dd293d64e",
+    "bytes": 1413784
+  },
+  {
+    "nt": "2024.002",
+    "filename": "sefaz-NT_2024.002_-_NF-e_v1.10_-_IBS,_CBS_e_Imposto_Seletivo - Final.pdf",
+    "url": "https://dfe-portal.svrs.rs.gov.br/NFE/DownloadArquivoEstatico/?sistema=NFE&tipoArquivo=3&nomeArquivo=NT_2024.002_-_NF-e_v1.10_-_IBS%2C_CBS_e_Imposto_Seletivo+-+Final.pdf",
+    "sha256": "48b7b5de92482866d6898ee4842218c436f123af16e78869021aa48f91f15c89",
+    "bytes": 1619264
+  },
+  {
+    "nt": "2024.003",
+    "filename": "sefaz-NT_2024.003- Produtos AGRO NF-e.pdf",
+    "url": "https://dfe-portal.svrs.rs.gov.br/NFE/DownloadArquivoEstatico/?sistema=NFE&tipoArquivo=3&nomeArquivo=NT_2024.003-+Produtos+AGRO+NF-e.pdf",
+    "sha256": "b93ae8a2f1dab349407fc22ebcac7ee9910057b8bed0af0fe3a6a368eb3a1301",
+    "bytes": 225185
+  },
+  {
+    "nt": "2023.005",
+    "filename": "sefaz-NT2023.005_v1.02 - Evento Insucesso Entrega NF-e.pdf",
+    "url": "https://dfe-portal.svrs.rs.gov.br/NFE/DownloadArquivoEstatico/?sistema=NFE&tipoArquivo=3&nomeArquivo=NT2023.005_v1.02+-+Evento+Insucesso+Entrega+NF-e.pdf",
+    "sha256": "ada7c7e3b7bd5e8d7ee5e2fdc4f5b8adb9f11b6d0fe449b6f97dbb366ac72a92",
+    "bytes": 446464
+  },
+  {
+    "nt": "2024.001",
+    "filename": "sefaz-NT2024.001-CRT-MEI.pdf",
+    "url": "https://dfe-portal.svrs.rs.gov.br/NFE/DownloadArquivoEstatico/?sistema=NFE&tipoArquivo=3&nomeArquivo=NT2024.001-CRT-MEI.pdf",
+    "sha256": "4799e31fa79b90b7e417e1c5d4c6c4a4c9228b99568b57dbd0f6469a078524f9",
+    "bytes": 632332
+  },
+  {
+    "nt": "2023.004",
+    "filename": "sefaz-NT2023.004_v1.11 -Campos e Regras.pdf",
+    "url": "https://dfe-portal.svrs.rs.gov.br/NFE/DownloadArquivoEstatico/?sistema=NFE&tipoArquivo=3&nomeArquivo=NT2023.004_v1.11+-Campos+e+Regras.pdf",
+    "sha256": "2f6a2560c974cdc065f5735314cd37bd5b137217f09a829b7af085602398d201",
+    "bytes": 705646
+  },
+  {
+    "nt": "2023.001",
+    "filename": "sefaz-NT2023.001_v1.51_TributaçãoMonofásicaCombustíveis.pdf",
+    "url": "https://dfe-portal.svrs.rs.gov.br/NFE/DownloadArquivoEstatico/?sistema=NFE&tipoArquivo=3&nomeArquivo=NT2023.001_v1.51_Tributa%C3%A7%C3%A3oMonof%C3%A1sicaCombust%C3%ADveis.pdf",
+    "sha256": "c2b1274f1f6e8e124b3b1e73efe0003b2279732f9ba71f58e1353c0d7a3aab30",
+    "bytes": 1058954
+  },
+  {
+    "nt": "2022.003",
+    "filename": "sefaz-NT2022.003v1.10-Referenciamento.pdf",
+    "url": "https://dfe-portal.svrs.rs.gov.br/NFE/DownloadArquivoEstatico/?sistema=NFE&tipoArquivo=3&nomeArquivo=NT2022.003v1.10-Referenciamento.pdf",
+    "sha256": "6dfd37ffb4f7a6c78177f9fdf09b0186fdb6986f7b961d5bf8f6104c99b307be",
+    "bytes": 659933
+  },
+  {
+    "nt": "2022.005",
+    "filename": "sefaz-NT2022.005_v1.00 - DIFAL.pdf",
+    "url": "https://dfe-portal.svrs.rs.gov.br/NFE/DownloadArquivoEstatico/?sistema=NFE&tipoArquivo=3&nomeArquivo=NT2022.005_v1.00+-+DIFAL.pdf",
+    "sha256": "810ebad7defb3993a083ddfb30cb11b7e3d6fbde23e32e0bfda468fd7610d9ce",
+    "bytes": 378683
+  },
+  {
+    "nt": "2022.004",
+    "filename": "sefaz-NT2022_004_v1_00 - Regras de Validação ISSQN.pdf",
+    "url": "https://dfe-portal.svrs.rs.gov.br/NFE/DownloadArquivoEstatico/?sistema=NFE&tipoArquivo=3&nomeArquivo=NT2022_004_v1_00+-+Regras+de+Valida%C3%A7%C3%A3o+ISSQN.pdf",
+    "sha256": "0c9d8a65752ff4790d84baf661351e9becf3fbbb1027386e086e70de601cda42",
+    "bytes": 392228
+  },
+  {
+    "nt": "2021.001",
+    "filename": "sefaz-NT 2021_001_v1.01_Evento_Comprovante_Entrega_NFe.pdf",
+    "url": "https://dfe-portal.svrs.rs.gov.br/NFE/DownloadArquivoEstatico/?sistema=NFE&tipoArquivo=3&nomeArquivo=NT+2021_001_v1.01_Evento_Comprovante_Entrega_NFe.pdf",
+    "sha256": "7a179b6af37e2cde32156ed30edf6d387447182daac2d06fe11687bc9b29be9b",
+    "bytes": 593627
+  },
+  {
+    "nt": "2022.001",
+    "filename": "sefaz-NT2022.001_v1.00 - WS Consulta GTIN.pdf",
+    "url": "https://dfe-portal.svrs.rs.gov.br/NFE/DownloadArquivoEstatico/?sistema=NFE&tipoArquivo=3&nomeArquivo=NT2022.001_v1.00+-+WS+Consulta+GTIN.pdf",
+    "sha256": "de3174af7330d510f8fa4ec6b9f44047086be761f978029c6fbb660376fb1a22",
+    "bytes": 706974
+  },
+  {
+    "nt": "2021.004",
+    "filename": "sefaz-NT2021.004v1.30 - Nova data para entrada em produção.pdf",
+    "url": "https://dfe-portal.svrs.rs.gov.br/NFE/DownloadArquivoEstatico/?sistema=NFE&tipoArquivo=3&nomeArquivo=NT2021.004v1.30+-+Nova+data+para+entrada+em+produ%C3%A7%C3%A3o.pdf",
+    "sha256": "2acbf37dbef5bbdf9d4807498479d9965e246860bc7b215394094cb0f7775137",
+    "bytes": 1168760
+  }
+]

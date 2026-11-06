@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\FiscalTaxGroup;
+use App\Services\Fiscal\FiscalCatalogModelReviewService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Arr;
@@ -28,6 +29,7 @@ final class FiscalTaxGroupController extends Controller
     ];
 
     private const TEXT_FIELDS = [
+        'ipi_enq' => 3,
         'mod_bc' => 1,
         'st_retained_amount_scope' => 4,
         'icms_deferral_legal_basis' => 255,
@@ -90,11 +92,12 @@ final class FiscalTaxGroupController extends Controller
     public function store(Request $request)
     {
         $data=$this->validated($request);
-        DB::transaction(function () use ($data) {
+        DB::transaction(function () use ($data,$request) {
             if ($data['is_default']) {
                 FiscalTaxGroup::query()->where('kind',$data['kind'])->update(['is_default'=>false]);
             }
-            FiscalTaxGroup::query()->create($data);
+            $group=FiscalTaxGroup::query()->create($data);
+            app(FiscalCatalogModelReviewService::class)->record($group,$request->user()?->id);
         });
 
         return redirect()->route('fiscal.tax-groups.index')
@@ -110,8 +113,11 @@ final class FiscalTaxGroupController extends Controller
                 'kind'=>'O tipo do grupo não pode mudar enquanto estiver vinculado a produtos ou serviços.',
             ]);
         }
-        DB::transaction(function () use ($data,$fiscalTaxGroup) {
+        DB::transaction(function () use ($data,$fiscalTaxGroup,$request) {
             $group=FiscalTaxGroup::query()->lockForUpdate()->findOrFail($fiscalTaxGroup->id);
+            $review=app(FiscalCatalogModelReviewService::class);
+            $data=$review->apply($request,$group,$data);
+            $review->record($group,$request->user()?->id);
             if ($data['is_default']) {
                 FiscalTaxGroup::query()
                     ->where('kind',$data['kind'])
@@ -126,6 +132,7 @@ final class FiscalTaxGroupController extends Controller
             }
             $data['revision']=$group->revision+1;
             $group->update($data);
+            $review->record($group,$request->user()?->id);
         });
 
         return redirect()->route('fiscal.tax-groups.index')
@@ -175,6 +182,7 @@ final class FiscalTaxGroupController extends Controller
             $rules['tax_config.'.$key]=['nullable',Rule::in(['none','percentage','quantity'])];
         }
         $rules['tax_config.mod_bc']=['nullable',Rule::in(['0','1','2','3'])];
+        $rules['tax_config.ipi_enq']=['nullable','regex:/^\d{3}$/D'];
         $rules['tax_config.st_retained_amount_scope']=['nullable',Rule::in(['unit','line'])];
         $rules['tax_config.force_interstate_cfop']=['nullable','boolean'];
         $rules['tax_config.iss_incentive']=['nullable','boolean'];

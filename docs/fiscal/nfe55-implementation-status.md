@@ -1,3 +1,5 @@
+> Atualização 25/10/2026: este histórico foi superado pela [entrega atual, testes e limitações](nfe55-delivery-2026-10-25.md) na branch `feature/nfe55-motor-fiscal-completo`. Não seguir instruções antigas de troca para develop.
+
 # NF-e modelo 55 — implantação controlada (24/10/2026)
 
 ## Verificação de emissão em homologação — 24/10/2026

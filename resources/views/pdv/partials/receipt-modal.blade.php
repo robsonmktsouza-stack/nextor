@@ -61,7 +61,7 @@
         </div>
       </div>
       <button type="button" class="pdv-modal-close" id="{{ $receiptCloseId }}" data-pdv-receipt-close aria-label="Fechar comprovante">
-        @include('partials.icon',['name'=>'x','size'=>18])
+        @include('partials.icon',['name'=>'x','size'=>16])
       </button>
     </div>
 
@@ -194,7 +194,7 @@
           <p class="pdv-receipt-note pdv-receipt-custom-footer">{{ $receiptModalCompany->print_footer }}</p>
         @endif
         <p class="pdv-receipt-internal-notice">Comprovante interno de venda. Não substitui documento fiscal.</p>
-      </section>>
+      </section>
     </div>
     {{-- O PDF de 58/80 mm é aberto no leitor nativo do navegador, não em um iframe oculto. --}}
   </dialog>

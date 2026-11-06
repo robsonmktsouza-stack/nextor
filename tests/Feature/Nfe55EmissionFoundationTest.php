@@ -71,7 +71,7 @@ final class Nfe55EmissionFoundationTest extends TestCase
             'item_number'=>1,'product_name'=>'MERCADORIA','product_sku'=>'ITEM-001',
             'quantity'=>'2.0000','dimension_quantity'=>'1.0000','unit_price'=>'50.0000',
             'cfop'=>'5102','origin'=>'0','unit'=>'UN','tax_unit'=>'UN','ncm'=>'61091000',
-            'tax_data'=>['icms_csosn'=>'102','pis_cst'=>'49','cofins_cst'=>'49','ipi_cst'=>'53'],
+            'tax_data'=>['icms_csosn'=>'102','pis_cst'=>'49','pis_rate'=>'0','cofins_cst'=>'49','cofins_rate'=>'0','ipi_cst'=>'53','ipi_enq'=>'999'],
         ]);
         return $draft->refresh();
     }
@@ -96,11 +96,20 @@ final class Nfe55EmissionFoundationTest extends TestCase
     {
         $draft=$this->draft();
         $draft->items()->first()->update(['tax_data'=>[
-            'icms_csosn'=>'500','pis_cst'=>'49','cofins_cst'=>'49','ipi_cst'=>'53',
+            'icms_csosn'=>'999','pis_cst'=>'49','pis_rate'=>'0','cofins_cst'=>'49','cofins_rate'=>'0','ipi_cst'=>'53','ipi_enq'=>'999',
         ]]);
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('CSOSN 500');
+        $this->expectExceptionMessage('CSOSN 999');
         app(Nfe55IniBuilder::class)->build($draft->fresh(),CompanySetting::current(),24,12345678);
+    }
+
+    public function test_production_builder_keeps_the_real_recipient_and_tp_amb_one(): void
+    {
+        $draft=$this->draft();$draft->update(['environment'=>'production']);
+        $ini=app(Nfe55IniBuilder::class)->build($draft->fresh(),CompanySetting::current(),24,12345678);
+        self::assertStringContainsString('tpAmb=1',$ini);
+        self::assertStringContainsString('Comprador local',$ini);
+        self::assertStringNotContainsString('NOTA FISCAL EMITIDA EM AMBIENTE DE HOMOLOGACAO',$ini);
     }
 
     public function test_production_is_not_automatically_enabled_by_the_editor(): void
@@ -174,13 +183,13 @@ final class Nfe55EmissionFoundationTest extends TestCase
         self::assertNull($draft->fresh()->transmission_attempted_at);
     }
 
-    public function test_internal_preflight_will_not_test_production_or_reserve_number(): void
+    public function test_internal_preflight_refuses_unconfigured_production_without_reserving_number(): void
     {
         $draft=$this->draft();
         $draft->update(['environment'=>'production']);
         try {
             app(\App\Services\Fiscal\Nfe55PreflightService::class)->check($draft->fresh());
-            self::fail('Pré-validação de produção não deve ser executada.');
+            self::fail('Produção sem configuração não pode passar na conferência.');
         } catch (ValidationException $exception) {
             self::assertArrayHasKey('nfe',$exception->errors());
         }

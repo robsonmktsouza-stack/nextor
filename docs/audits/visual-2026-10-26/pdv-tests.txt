@@ -1,0 +1,34 @@
+Baseline5e81321; feature/nfe55-motor-fiscal-completo
+
+PDV targeted regression
+PHPUnit 12.5.40 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.5.12
+Configuration: /app/phpunit.xml
+
+.............................................................     61 / 61 (100%)
+
+Time: 00:29.099, Memory: 161.00 MB
+
+OK (61 tests, 497 assertions)
+
+Receipt/printing regression
+PHPUnit 12.5.40 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.5.12
+Configuration: /app/phpunit.xml
+
+......S...........                                                18 / 18 (100%)
+
+Time: 00:05.216, Memory: 153.00 MB
+
+OK, but some tests were skipped!
+Tests: 18, Assertions: 222, Skipped: 1.
+
+Blade compilation and PHP syntax
+{
+    "files": 7,
+    "failures": []
+}
+
+Receipt @page, @media print, .receipt geometry and paper-height calculation: unchanged against baseline.

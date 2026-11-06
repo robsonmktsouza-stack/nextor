@@ -3,7 +3,7 @@
 @section('content')
 @include('finance._nav')
 <form method="post" enctype="multipart/form-data" action="{{ route('finance.reconciliation.store-import') }}" class="finance-reference-form">@csrf
-<section class="finance-entry-banner reconciliation"><strong>Enviar arquivo bancário</strong><span>OFX, CSV ou XLSX</span></section>
+
 <section class="editor-panel finance-entry-panel"><div class="editor-grid cols-12">
 <label class="field col-6"><span>Arquivo bancário</span><input type="file" name="file" accept=".ofx,.csv,.xlsx" required><small>Prefira OFX exportado pelo banco. CSV e XLSX também são aceitos.</small></label>
 <label class="field col-6"><span>Conta relacionada</span><select name="financial_account_id" required><option value="">Selecione a conta</option>@foreach($accounts as $a)<option value="{{ $a->id }}">{{ $a->name }}</option>@endforeach</select></label>

@@ -1,7 +1,11 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Licença do Lumeron</title>
-<style>body{font-family:Roboto,Arial,sans-serif;margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f3f6f8;color:#34515d}.panel{width:min(470px,94vw);background:#fff;border:1px solid #d3e0e8;box-shadow:0 12px 35px #173d5914;padding:30px;border-radius:4px}h1{font-size:20px}p{font-size:14px;line-height:1.6;color:#738795}a{display:inline-block;margin:10px 10px 0 0;padding:9px 12px;color:white;background:#337caa;text-decoration:none;border-radius:3px}a.outline{color:#337caa;background:white;border:1px solid #afccd9}</style></head>
-<body><div class="panel"><h1>Acesso comercial indisponível</h1><p>A licença desta empresa está suspensa, vencida ou não pôde ser confirmada após o período permitido sem comunicação. Entre em contato com o responsável pelo Lumeron para regularizar o acesso.</p><p>Se precisar consultar, cancelar ou regularizar documentos fiscais, a área Fiscal continuará disponível aos usuários autorizados.</p>
+<link rel="icon" href="{{ asset('images/lumeron/elephant.png') }}">
+<link rel="stylesheet" href="{{ asset('css/ui-tokens.css') }}?v={{ filemtime(public_path('css/ui-tokens.css')) }}">
+<link rel="stylesheet" href="{{ asset('css/user-message-page.css') }}?v={{ filemtime(public_path('css/user-message-page.css')) }}"></head>
+<body><main class="user-message-page">
+<img src="{{ asset('images/lumeron/logo.png') }}" alt="Lumeron" width="150"><h1>Operação indisponível</h1><p>Não foi possível liberar esta operação. Entre em contato com o responsável pela assinatura para regularizar o acesso.</p><p>As consultas e as regularizações fiscais permitidas continuam disponíveis conforme suas permissões.</p>
+<nav class="user-message-actions" aria-label="Ações de acesso">
 @if(auth()->user()?->canAccess('fiscal'))<a href="{{ route('fiscal.index') }}">Acessar Fiscal</a>@endif
-<a class="outline" href="{{ route('logout') }}" onclick="event.preventDefault();document.getElementById('logoutForm').submit()">Sair</a><form id="logoutForm" method="post" action="{{ route('logout') }}" style="display:none">@csrf</form>
-</div></body></html>
+<a class="outline" href="{{ route('logout') }}" onclick="event.preventDefault();document.getElementById('logoutForm').submit()">Sair</a></nav><form id="logoutForm" method="post" action="{{ route('logout') }}" hidden>@csrf</form>
+</main></body></html>

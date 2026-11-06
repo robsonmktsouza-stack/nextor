@@ -282,7 +282,7 @@ final class NFCeManualController extends Controller
         $problems=$preflight->validate($job);
         if ($problems) {
             return redirect()->route('fiscal.show',$job)
-                ->with('error','NFC-e salva. '.implode(' | ',$problems));
+                ->with('error','NFC-e salva. '.implode(' | ',array_map(\App\Support\UserFacingMessage::fromText(...),$problems)));
         }
 
         // A requisição de emissão nunca deve executar ACBr/FFI com queue=sync.

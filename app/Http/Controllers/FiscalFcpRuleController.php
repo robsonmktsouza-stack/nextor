@@ -26,7 +26,7 @@ final class FiscalFcpRuleController extends Controller
     {
         $data=$this->validated($request);
         FiscalFcpRule::query()->create($data);
-        return back()->with('success','Regra FCP cadastrada. A cobrança só será aplicada quando o cálculo tributário correspondente estiver implementado.');
+        return back()->with('success','Regra de FCP cadastrada.');
     }
 
     public function update(Request $request,FiscalFcpRule $fiscalFcpRule)

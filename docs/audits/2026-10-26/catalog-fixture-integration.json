@@ -1,0 +1,43 @@
+{
+  "area": "Integração das fixtures fiscais com provisionamento automático",
+  "classification": "Ajuste de infraestrutura de testes; não contabilizar como problema de apresentação do produto.",
+  "reviewed_files": [
+    "tests/Feature/FiscalCatalogDeterminationTest.php",
+    "tests/Feature/FiscalCatalogOfficialDeterminationTest.php",
+    "tests/Feature/FiscalProductClassificationTest.php",
+    "tests/Feature/Nfe55CatalogFormIntegrationTest.php",
+    "tests/Concerns/WithIsolatedFiscalCatalog.php"
+  ],
+  "modified_files": [
+    "tests/Feature/FiscalCatalogDeterminationTest.php",
+    "tests/Feature/FiscalCatalogOfficialDeterminationTest.php",
+    "tests/Feature/FiscalProductClassificationTest.php",
+    "tests/Feature/Nfe55CatalogFormIntegrationTest.php"
+  ],
+  "findings": [],
+  "changes": [
+    {
+      "description": "As quatro classes que importam snapshots sintéticos passam a iniciar explicitamente com o catálogo gerenciado isolado. O setup de identificação da empresa e a viagem de data existentes são preservados.",
+      "scope": "Somente testes SQLite/APP_ENV=testing, pelo trait compartilhado.",
+      "unchanged": [
+        "migrações e comportamento de produção",
+        "asserções e políticas fiscais",
+        "TestCase global",
+        "presets legados"
+      ]
+    }
+  ],
+  "tests": {
+    "command": "vendor/bin/phpunit --filter='FiscalCatalogDeterminationTest|FiscalCatalogOfficialDeterminationTest|FiscalProductClassificationTest|Nfe55CatalogFormIntegrationTest'",
+    "result": {
+      "tests": 61,
+      "assertions": 239,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0
+    },
+    "evidence": "/workspace/scratch/audit-isolated-catalog-determination.log",
+    "evidence_junit": "/workspace/scratch/audit-isolated-catalog-determination.xml",
+    "runtime": "PHP 8.5.12 / PHPUnit 12.5.40 / SQLite em memória / Docker composer:2 Linux"
+  }
+}

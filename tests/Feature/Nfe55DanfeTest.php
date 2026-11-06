@@ -32,9 +32,9 @@ final class Nfe55DanfeTest extends TestCase
         $path='fiscal/nfe55/'.$draft->id.'/authorized.xml';
         $draft->update(['xml_path'=>$path]);
         $xml='<nfeProc xmlns="http://www.portalfiscal.inf.br/nfe" versao="4.00">'
-            .'<NFe><infNFe Id="NFe'.$key.'"><ide><mod>55</mod></ide><emit>'
+            .'<NFe><infNFe Id="NFe'.$key.'"><ide><mod>55</mod><tpAmb>2</tpAmb></ide><emit>'
             .'<CNPJ>12345678000100</CNPJ></emit></infNFe></NFe>'
-            .'<protNFe><infProt><chNFe>'.$key.'</chNFe><nProt>'.$protocol.'</nProt>'
+            .'<protNFe><infProt><tpAmb>2</tpAmb><chNFe>'.$key.'</chNFe><nProt>'.$protocol.'</nProt>'
             .'<cStat>100</cStat></infProt></protNFe></nfeProc>';
         Storage::disk('local')->put($path,$xml);
         app()->instance(Nfe55DanfeService::class,new class extends Nfe55DanfeService {
@@ -47,6 +47,13 @@ final class Nfe55DanfeTest extends TestCase
             ->assertHeader('X-Content-Type-Options','nosniff');
         $this->get(route('fiscal.nfe.xml',$draft))
             ->assertOk()->assertDownload();
+
+        $draft->update(['environment'=>'production']);
+        $this->get(route('fiscal.nfe.danfe',$draft))->assertStatus(409);
+        Storage::disk('local')->put($path,str_replace('<tpAmb>2</tpAmb>','<tpAmb>1</tpAmb>',$xml));
+        $this->get(route('fiscal.nfe.danfe',$draft))->assertOk();
+        $draft->update(['environment'=>'homologation']);
+        Storage::disk('local')->put($path,$xml);
 
         $draft->update(['protocol'=>'129260001234568']);
         $this->get(route('fiscal.nfe.danfe',$draft))->assertStatus(409);

@@ -1,0 +1,79 @@
+{
+  "baseline": "5e81321",
+  "finding_count": 9,
+  "corrected_count": 9,
+  "findings": [
+    {
+      "id": "VC-01",
+      "severity": "medium",
+      "component": "Shared tokens",
+      "problem": "Control/card/dialog radii and core measures were repeated across final overrides.",
+      "correction": "ui-tokens.css now owns common geometry, typography and palette; modules consume these variables.",
+      "status": "implemented; validated by the shared browser matrix and targeted rechecks recorded in this audit"
+    },
+    {
+      "id": "VC-02",
+      "severity": "medium",
+      "component": "Density preference",
+      "problem": "A later duplicate contract reset comfortable 41px fields to38px.",
+      "correction": "Removed the late duplicate contract; comfortable density inherits explicit variable overrides.",
+      "status": "implemented; validated by the shared browser matrix and targeted rechecks recorded in this audit"
+    },
+    {
+      "id": "VC-03",
+      "severity": "high",
+      "component": "Native switch geometry",
+      "problem": "Hidden switch checkboxes inherited viewport-sized input widths and generated horizontal overflow on forms.",
+      "correction": "Confined the native input to1px inside its label, preserving label click, keyboard focus and visible focus ring.",
+      "status": "implemented; validated by the shared browser matrix and targeted rechecks recorded in this audit"
+    },
+    {
+      "id": "VC-04",
+      "severity": "medium",
+      "component": "Compound fields",
+      "problem": "Prefixed and action fields retained39/40px legacy surfaces while plain controls used38px.",
+      "correction": "A single border/radius/height belongs to the compound wrapper; inner controls fill it without duplicate borders.",
+      "status": "implemented; validated by the shared browser matrix and targeted rechecks recorded in this audit"
+    },
+    {
+      "id": "VC-05",
+      "severity": "high",
+      "component": "Toolbar reachability",
+      "problem": "Fiscal toolbar actions extended beyond clipped cards on narrow screens.",
+      "correction": "Tool groups wrap within available width and every individual action consumes the shared corner radius.",
+      "status": "implemented; validated by the shared browser matrix and targeted rechecks recorded in this audit"
+    },
+    {
+      "id": "VC-06",
+      "severity": "medium",
+      "component": "Confirmation dialog",
+      "problem": "The application confirmation retained7px corners and a separate border/header/footer/button skin.",
+      "correction": "Confirmation uses the same shell tokens and action palette as other application dialogs.",
+      "status": "implemented; validated by the shared browser matrix and targeted rechecks recorded in this audit"
+    },
+    {
+      "id": "VC-07",
+      "severity": "medium",
+      "component": "Portal and standalone contexts",
+      "problem": "Quick-registration dialogs and cash documents outside app-root missed shared appearance; PDV loaded shared controls before its local overrides.",
+      "correction": "Shared context selectors and deterministic load order cover portals, screen-only cash documents and PDV.",
+      "status": "implemented; validated by the shared browser matrix and targeted rechecks recorded in this audit"
+    },
+    {
+      "id": "VC-08",
+      "severity": "medium",
+      "component": "Typography cascade",
+      "problem": "Module-specific label and input typography overrode shared component weights and line height.",
+      "correction": "Typography owns semantic hierarchy; component metrics belong to the shared component stylesheet.",
+      "status": "implemented; validated by the shared browser matrix and targeted rechecks recorded in this audit"
+    },
+    {
+      "id": "VC-09",
+      "severity": "medium",
+      "component": "Boolean switches in products, purchases and user permissions",
+      "problem": "Purchase-receipt switch used30x17/11px thumb and green while common switches used34x18/14px thumb and product-specific teal.",
+      "correction": "One token set defines34x18/14px geometry, inset, active/inactive colors, thumb shadow and focus in products, receipt auto-search and user permissions; label typography normalized.",
+      "status": "implemented; validated by the shared browser matrix and targeted rechecks recorded in this audit"
+    }
+  ]
+}

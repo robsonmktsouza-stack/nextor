@@ -8,3 +8,6 @@
 /.phpunit.cache
 /.idea
 /node_modules/
+
+/storage/framework/testing/
+/.phpunit.result.cache

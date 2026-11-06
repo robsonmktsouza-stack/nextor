@@ -35,7 +35,7 @@ final class NFCeInutilizationController extends Controller
         ]);
         $queue=(string)config('queue.default','sync');
         if(in_array($queue,['','sync','null'],true)){
-            throw ValidationException::withMessages(['first_number'=>'A fila fiscal deve estar ativa para inutilização.']);
+            throw ValidationException::withMessages(['first_number'=>'O processamento fiscal está indisponível. Solicite a verificação antes de inutilizar a numeração.']);
         }
         $record=$service->request($data,(int)$request->user()->id);
         try{
@@ -44,7 +44,7 @@ final class NFCeInutilizationController extends Controller
             Log::error('Falha ao enfileirar inutilização NFC-e',[
                 'request_id'=>$record->id,'reason'=>$e->getMessage(),
             ]);
-            return back()->with('error','Pedido registrado, mas não enfileirado. Verifique antes de solicitar novamente.');
+            return back()->with('error','Pedido registrado, mas o processamento não foi iniciado. Consulte a situação antes de solicitar novamente.');
         }
         return redirect()->route('fiscal.nfce.inutilizations')
             ->with('success','Solicitação enviada. A inutilização só será concluída após confirmação da SEFAZ.');

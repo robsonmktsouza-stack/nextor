@@ -32,7 +32,7 @@ final class NFCeFiscalEventsController extends Controller
         }
         $queue=(string)config('queue.default','sync');
         if(in_array($queue,['','sync','null'],true)){
-            throw ValidationException::withMessages(['offline'=>'Fila fiscal indisponível.']);
+            throw ValidationException::withMessages(['offline'=>'O processamento fiscal está indisponível. Solicite a verificação ao responsável pelo sistema.']);
         }
         TransmitOfflineNFCeJob::dispatch($job->id)->onConnection($queue);
         return back()->with('success','Transmissão do XML original iniciada. Acompanhe a autorização pela chave.');
@@ -47,7 +47,7 @@ final class NFCeFiscalEventsController extends Controller
         ]);
         $connection=(string)config('queue.default','sync');
         if (in_array($connection,['','sync','null'],true)) {
-            throw ValidationException::withMessages(['reason'=>'Configure a fila fiscal antes do cancelamento.']);
+            throw ValidationException::withMessages(['reason'=>'O processamento fiscal está indisponível. Solicite a verificação antes de cancelar a nota.']);
         }
         $job=$service->request($fiscalDocumentJob,$data['reason'],$approvedBy,$performedBy);
         try {
@@ -56,7 +56,7 @@ final class NFCeFiscalEventsController extends Controller
             Log::error('Não foi possível enfileirar evento fiscal NFC-e',[
                 'document_id'=>$job->id,'reason'=>$e->getMessage(),
             ]);
-            return back()->with('error','Pedido registrado, mas não foi enfileirado. Consulte o suporte antes de reenviar.');
+            return back()->with('error','Pedido registrado, mas o processamento não foi iniciado. Consulte o suporte antes de solicitar novamente.');
         }
         return back()->with('success','Cancelamento solicitado. A nota só ficará cancelada após confirmação da SEFAZ.');
     }

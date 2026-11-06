@@ -1,0 +1,27 @@
+{
+  "full_suite_code_commit": "277c6b44e548ac4642d140260cd262acfcb90fbf",
+  "full_suite": {
+    "name": "/app/phpunit.xml",
+    "tests": "877",
+    "assertions": "5504",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "2",
+    "time": "116.666881"
+  },
+  "final_targeted": {
+    "name": "/app/phpunit.xml",
+    "tests": "54",
+    "assertions": "334",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "time": "4.537501"
+  },
+  "runtime": "PHP8.5.12/SQLite",
+  "full_junit_sha256": "83e5302983ac69f0ff319ab0f5c1856622f37a9ddb6f9df216e442a82b4e16f7",
+  "targeted_after_change": "Contador autorizado tem precedência sobre alternativa estadual, coerente com opção da tela.",
+  "native_windows_execution_by_session": false,
+  "user_reported_native_preflight": true,
+  "user_reported_sefaz_return": "486"
+}

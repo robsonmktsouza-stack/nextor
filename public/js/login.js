@@ -20,6 +20,7 @@
   let busy = false;
 
   const normalizeSlug = value => String(value || '').trim().toLowerCase();
+  const friendlyMessage = (error, fallback) => window.LumeronUserMessage?.fromError(error, fallback) || fallback;
   const notify = message => {
     feedback.textContent = message;
     feedback.hidden = !message;
@@ -84,7 +85,7 @@
     event.preventDefault();
     const origin = tenantOrigin(slugInput.value);
     if (!origin) {
-      notify('Informe primeiro o subdomínio da empresa para recuperar a senha.');
+      notify('Informe primeiro a empresa para recuperar a senha.');
       slugInput.focus();
       return;
     }
@@ -97,7 +98,7 @@
       const expected = normalizeSlug(form.dataset.defaultSlug);
       if (!slugPattern.test(chosen) || chosen.includes('--') || chosen !== expected) {
         event.preventDefault();
-        notify('Confira o subdomínio. Este endereço pertence a outra instalação.');
+        notify('Confira a empresa. Este endereço pertence a outra empresa.');
         slugInput.focus();
         return;
       }
@@ -112,7 +113,7 @@
     notify('');
     const origin = tenantOrigin(slugInput.value);
     if (!origin) {
-      notify('Informe um subdomínio válido.');
+      notify('Informe uma empresa válida.');
       slugInput.focus();
       return;
     }
@@ -148,14 +149,16 @@
         })
       });
       if (!reply.ok) {
-        let reason = 'Não foi possível entrar. Confira subdomínio, usuário e senha.';
+        let reason = 'Não foi possível entrar. Confira a empresa, o usuário e a senha.';
         if (reply.status === 429) reason = 'Muitas tentativas. Aguarde alguns minutos.';
         else if (reply.status === 419) reason = 'A sessão expirou. Tente entrar novamente.';
         else {
           try {
             const err = await reply.json();
-            reason = err.message && reply.status !== 500 ? err.message : reason;
-            if (err.errors) reason = Object.values(err.errors).flat()[0] || reason;
+            if (reply.status < 500) {
+              const detail = err.errors ? Object.values(err.errors).flat().find(value => typeof value === 'string') : err.message;
+              reason = friendlyMessage({message: detail}, reason);
+            }
           } catch (_) {}
         }
         throw new Error(reason);
@@ -167,9 +170,7 @@
       passwordInput.value = '';
       window.location.assign(redirect.href);
     } catch (error) {
-      notify(error.message === 'Failed to fetch'
-        ? 'Não foi possível conectar à instalação. Confira o subdomínio ou a conexão.'
-        : error.message || 'Não foi possível entrar. Tente novamente.');
+      notify(friendlyMessage(error, 'Não foi possível entrar. Confira a empresa e a conexão, e tente novamente.'));
       setBusy(false);
     }
   });

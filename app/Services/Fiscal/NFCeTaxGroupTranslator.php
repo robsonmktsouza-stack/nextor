@@ -17,6 +17,18 @@ final class NFCeTaxGroupTranslator
         if (!preg_match('/^(?:AC|AL|AP|AM|BA|CE|DF|ES|GO|MA|MT|MS|MG|PA|PB|PR|PE|PI|RJ|RN|RS|RO|RR|SC|SP|SE|TO)$/', $uf)) {
             throw new RuntimeException('Configure uma UF válida para aplicar o grupo tributário na NFC-e.');
         }
+        if ($group->catalog_version && $group->catalog_status !== 'reviewed') {
+            throw new RuntimeException('Modelo de catálogo fiscal pendente de revisão: configure e aprove a tributação antes de aplicar à NFC-e.');
+        }
+        if ($group->catalog_version) {
+            $review=$group->catalog_metadata['review'] ?? [];
+            $today=now()->toDateString();
+            if (empty($review['legal_reference']) || empty($review['source']) || empty($review['valid_from'])
+                || $review['valid_from'] > $today
+                || !empty($review['valid_until']) && $review['valid_until'] < $today) {
+                throw new RuntimeException('Revisão do modelo de catálogo fiscal ausente ou fora da vigência para a NFC-e.');
+            }
+        }
         if (!$group->is_active || $group->kind !== 'products') {
             throw new RuntimeException('Grupo tributário inativo ou não destinado a produtos.');
         }

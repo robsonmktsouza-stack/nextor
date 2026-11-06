@@ -1,0 +1,155 @@
+{
+  "baseline": "bf73a66",
+  "application_commit": "595ca3b",
+  "files_scanned": 372,
+  "lines_scanned": 64797,
+  "candidate_count": 18,
+  "unresolved_unnecessary_exposures": 0,
+  "dispositions": [
+    {
+      "file": "app/Http/Controllers/FiscalController.php",
+      "line": 446,
+      "kind": "exception_sink",
+      "text": "'message'=>$error->getMessage(),",
+      "disposition": "retained_required",
+      "reason": "Registro privado de diagnóstico; a resposta operacional é sanitizada separadamente. Inspeção do contexto confirmou chamada de Log, sem saída ao usuário."
+    },
+    {
+      "file": "app/Http/Controllers/NFCeManualController.php",
+      "line": 266,
+      "kind": "exception_sink",
+      "text": "'sale_id'=>$sale->id,'message'=>$error->getMessage(),",
+      "disposition": "retained_required",
+      "reason": "Registro privado de diagnóstico; a resposta operacional é sanitizada separadamente. Inspeção do contexto confirmou chamada de Log, sem saída ao usuário."
+    },
+    {
+      "file": "app/Http/Controllers/NFCeManualController.php",
+      "line": 298,
+      "kind": "exception_sink",
+      "text": "'fiscal_document_job_id'=>$job->id,'message'=>$error->getMessage(),",
+      "disposition": "retained_required",
+      "reason": "Registro privado de diagnóstico; a resposta operacional é sanitizada separadamente. Inspeção do contexto confirmou chamada de Log, sem saída ao usuário."
+    },
+    {
+      "file": "app/Services/Fiscal/NFCeOfflineService.php",
+      "line": 79,
+      "kind": "exception_sink",
+      "text": "'document_id'=>$id,'message'=>$e->getMessage(),",
+      "disposition": "retained_required",
+      "reason": "Registro privado de diagnóstico; a resposta operacional é sanitizada separadamente. Inspeção do contexto confirmou chamada de Log, sem saída ao usuário."
+    },
+    {
+      "file": "resources/views/fiscal/_catalog-review.blade.php",
+      "line": 29,
+      "kind": "raw_internal_value",
+      "text": "<tr><td>{{ $change->revision }}</td><td>{{ $change->created_at?->format('d/m/Y H:i') }}</td><td>{{ $change->user_id ? (\\App\\Models\\User::query()->find($change->user_id)?->name ?? 'Responsável não informado') : 'Catálogo' }}</td>",
+      "disposition": "retained_required",
+      "reason": "Sequência do histórico de alteração fiscal sob consulta; não é versão de catálogo/modelo, hash ou JSON."
+    },
+    {
+      "file": "resources/views/fiscal/nfce/correct-rejection.blade.php",
+      "line": 13,
+      "kind": "raw_internal_value",
+      "text": "value=\"{{ old('nature',$snapshot['nature'] ?? 'VENDA DE MERCADORIA') }}\">",
+      "disposition": "retained_required",
+      "reason": "Projeção de dado comercial (nome, observação, item, subtotal ou desconto). O objeto interno não é apresentado."
+    },
+    {
+      "file": "resources/views/fiscal/nfce/correct-rejection.blade.php",
+      "line": 16,
+      "kind": "raw_internal_value",
+      "text": "<textarea name=\"notes\" rows=\"3\" maxlength=\"2000\">{{ old('notes',$snapshot['notes'] ?? '') }}</textarea>",
+      "disposition": "retained_required",
+      "reason": "Projeção de dado comercial (nome, observação, item, subtotal ou desconto). O objeto interno não é apresentado."
+    },
+    {
+      "file": "resources/views/fiscal/nfce/correct-rejection.blade.php",
+      "line": 29,
+      "kind": "raw_internal_value",
+      "text": "value=\"{{ old('consumer_document',$snapshot['consumer_document'] ?? '') }}\"></label>",
+      "disposition": "retained_required",
+      "reason": "Projeção de dado comercial (nome, observação, item, subtotal ou desconto). O objeto interno não é apresentado."
+    },
+    {
+      "file": "resources/views/fiscal/nfce/correct-rejection.blade.php",
+      "line": 32,
+      "kind": "raw_internal_value",
+      "text": "value=\"{{ old('consumer_name',$snapshot['consumer_name'] ?? '') }}\"></label>",
+      "disposition": "retained_required",
+      "reason": "Projeção de dado comercial (nome, observação, item, subtotal ou desconto). O objeto interno não é apresentado."
+    },
+    {
+      "file": "resources/views/fiscal/nfce/correct-rejection.blade.php",
+      "line": 41,
+      "kind": "raw_internal_value",
+      "text": "<div class=\"grid-actions-left\"><span class=\"nfce-list-count\">{{ count($snapshot['items'] ?? []) }} {{ count($snapshot['items'] ?? [])===1?'produto':'produtos' }}</span></div>",
+      "disposition": "retained_required",
+      "reason": "Projeção de dado comercial (nome, observação, item, subtotal ou desconto). O objeto interno não é apresentado."
+    },
+    {
+      "file": "resources/views/fiscal/nfce/correct-rejection.blade.php",
+      "line": 199,
+      "kind": "raw_internal_value",
+      "text": "<div><span>Subtotal</span><strong>R$ {{ number_format((float)($snapshot['subtotal'] ?? $total),2,',','.') }}</strong></div>",
+      "disposition": "retained_required",
+      "reason": "Projeção de dado comercial (nome, observação, item, subtotal ou desconto). O objeto interno não é apresentado."
+    },
+    {
+      "file": "resources/views/fiscal/nfce/correct-rejection.blade.php",
+      "line": 200,
+      "kind": "raw_internal_value",
+      "text": "<div><span>Desconto</span><strong>R$ {{ number_format((float)($snapshot['discount_total'] ?? 0),2,',','.') }}</strong></div>",
+      "disposition": "retained_required",
+      "reason": "Projeção de dado comercial (nome, observação, item, subtotal ou desconto). O objeto interno não é apresentado."
+    },
+    {
+      "file": "resources/views/fiscal/nfe/drafts.blade.php",
+      "line": 41,
+      "kind": "raw_internal_value",
+      "text": "<td>{{ $draft->customer?->name ?? data_get($draft->recipient_snapshot,'name','—') }}</td>",
+      "disposition": "retained_required",
+      "reason": "Projeção de dado comercial (nome, observação, item, subtotal ou desconto). O objeto interno não é apresentado."
+    },
+    {
+      "file": "resources/views/fiscal/nfe/editor.blade.php",
+      "line": 463,
+      "kind": "raw_internal_value",
+      "text": "<div>Item {{ $item->item_number }}: {{ data_get($trace,'snapshot.name','Regra fiscal') }}. {{ $trace['legal_reference']??'' }}",
+      "disposition": "retained_required",
+      "reason": "Projeção de dado comercial (nome, observação, item, subtotal ou desconto). O objeto interno não é apresentado."
+    },
+    {
+      "file": "resources/views/fiscal/rules/_fields.blade.php",
+      "line": 81,
+      "kind": "raw_internal_value",
+      "text": "<input type=\"hidden\" name=\"catalog_version\" value=\"{{ $value('catalog_version') }}\">",
+      "disposition": "retained_required",
+      "reason": "Campo invisível necessário ao controle de concorrência/rastreabilidade; não é texto apresentado ao usuário."
+    },
+    {
+      "file": "resources/views/fiscal/rules/index.blade.php",
+      "line": 33,
+      "kind": "raw_internal_value",
+      "text": "<input type=\"hidden\" name=\"revision\" value=\"{{ $rule->revision }}\">",
+      "disposition": "retained_required",
+      "reason": "Campo invisível necessário ao controle de concorrência/rastreabilidade; não é texto apresentado ao usuário."
+    },
+    {
+      "file": "resources/views/fiscal/rules/index.blade.php",
+      "line": 38,
+      "kind": "raw_internal_value",
+      "text": "@forelse($rule->revisions as $revision)<details><summary>Revisão {{ $revision->revision }} · {{ $revision->created_at?->format('d/m/Y H:i') }} · {{ $revision->changed_by ? (\\App\\Models\\User::query()->find($revision->changed_by)?->name ?? 'Responsável não informado') : 'Sistema' }}</summary>@include('fiscal.partials.readable-values',['values'=>$revision->snapshot])</details>@empty<p>Nenhuma alteração registrada.</p>@endforelse",
+      "disposition": "retained_required",
+      "reason": "Sequência do histórico de alteração fiscal sob consulta; não é versão de catálogo/modelo, hash ou JSON."
+    },
+    {
+      "file": "resources/views/products/form.blade.php",
+      "line": 99,
+      "kind": "raw_internal_value",
+      "text": "{{ $fiscalGroup->name }}{{ $fiscalGroup->is_default ? ' · Padrão' : '' }}{{ !$fiscalGroup->is_active ? ' · Inativo' : '' }}{{ $fiscalGroup->catalog_version && $fiscalGroup->catalog_status!=='reviewed' ? ' · Aguardando revisão fiscal' : '' }}",
+      "disposition": "retained_required",
+      "reason": "Condição interna que determina apresentação da situação; a versão não é impressa."
+    }
+  ],
+  "limits": "Scanner não substitui revisão contextual. Dados livres dos usuários não são reescritos; contratos de integração e dados de hidratação invisíveis são preservados."
+}

@@ -1,0 +1,16 @@
+/* Fiscal layout only. Controls, cards and action appearance use the shared UI. */
+.fiscal-space-before{margin-top:var(--ui-gap,12px)}
+.fiscal-space-after{margin-bottom:var(--ui-gap,12px)}
+.fiscal-section-before{margin-top:16px}
+.fiscal-section-after{margin-bottom:14px}
+.fiscal-variation-row{margin-bottom:10px}
+.fiscal-rule-grid{margin-top:10px}
+.fiscal-summary-button{cursor:pointer;display:inline-flex}
+.fiscal-edit-summary{cursor:pointer}
+.fiscal-edit-form{padding:12px 0}
+.fiscal-edit-form-top{padding-top:12px}
+.fiscal-selection-label{display:flex;align-items:center;gap:8px;font-weight:400}
+.catalog-filterbar{display:grid;grid-template-columns:minmax(135px,1.1fr) minmax(200px,2fr) minmax(145px,1fr) 74px minmax(135px,1fr) minmax(135px,1fr) auto;gap:10px;align-items:end;padding:12px;border-bottom:1px solid var(--ui-border,#cbd6df);background:var(--ui-surface,#fff)}
+.catalog-filterbar .field{min-width:0;margin:0}.catalog-filterbar .field input,.catalog-filterbar .field select{width:100%;min-width:0}.catalog-filterbar .field>span{display:block;white-space:nowrap}.catalog-filter-submit{height:var(--ui-control-height,38px);white-space:nowrap}.catalog-filterbar+.table-scroll{margin-top:0}.catalog-filterbar~.erp-help-details{margin:12px}.catalog-row-details{max-width:260px}.catalog-row-details summary{cursor:pointer;white-space:nowrap}.catalog-row-detail-body{max-height:180px;overflow:auto;padding:7px 0;line-height:1.45;overflow-wrap:anywhere}.catalog-row-detail-body p{margin:0 0 7px}.catalog-row-detail-body a{display:inline-block;margin-top:4px}
+@media(max-width:1250px){.catalog-filterbar{grid-template-columns:repeat(3,minmax(0,1fr))}.catalog-filter-search{grid-column:span 2}}
+@media(max-width:700px){.catalog-filterbar{grid-template-columns:repeat(2,minmax(0,1fr))}.catalog-filter-search{grid-column:span 2}}

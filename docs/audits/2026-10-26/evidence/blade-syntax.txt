@@ -1,0 +1,8 @@
+
+
+   INFO  Blade templates cached successfully.  
+
+{
+    "compiled_files": 105,
+    "failures": []
+}

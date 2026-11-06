@@ -126,4 +126,61 @@ final class NFCeSefazResponseParser
             && preg_match('/^\d{44}$/', (string) ($response['key'] ?? '')) === 1
             && preg_match('/^\d{15}$/', (string) ($response['protocol'] ?? '')) === 1;
     }
+
+    /** Strict model-55 recovery proof; deliberately separate from NFC-e policy. */
+    public function definitiveNfe55Rejection486(string $raw, string $key, string $environment): bool
+    {
+        return $this->definitiveNfe55AuthorizationRejection($raw, $key, $environment, ['486']);
+    }
+
+    public function definitiveNfe55AuthorizationRejection(string $raw, string $key, string $environment, array $allowedCodes = ['486', '487']): bool
+    {
+        if (strlen($raw) > 8388608 || preg_match('/<!DOCTYPE|<!ENTITY/i', $raw)
+            || !preg_match('/^\d{44}$/', $key)
+            || !in_array($environment, ['homologation', 'production'], true)) return false;
+        $sections = @parse_ini_string($raw, true, INI_SCANNER_RAW);
+        if (!is_array($sections)) return false;
+        // parse_ini_string collapses duplicate sections/fields. Do not let an
+        // earlier authorization or another document disappear during parsing.
+        $seenSections = [];
+        $seenFields = [];
+        foreach (preg_split('/\r\n|\n|\r/', $raw) as $line) {
+            if (preg_match('/^\s*\[([^\]]+)\]\s*$/', $line, $match)) {
+                $section = strtoupper($match[1]);
+                if (isset($seenSections[$section])) return false;
+                $seenSections[$section] = true;
+                $seenFields = [];
+            } elseif (preg_match('/^\s*([A-Za-z][A-Za-z0-9_]*)\s*=/', $line, $match)) {
+                $field = strtolower($match[1]);
+                if (isset($seenFields[$field])) return false;
+                $seenFields[$field] = true;
+            }
+        }
+        $found = false;
+        $individual = 0;
+        foreach ($sections as $name => $values) {
+            if (!is_array($values)) return false;
+            $name = strtoupper((string) $name);
+            if (!in_array($name, ['ENVIO', 'RETORNO'], true) && !preg_match('/^NFE\d+$/', $name)) return false;
+            $values = array_change_key_case($values, CASE_LOWER);
+            if (str_starts_with($name, 'NFE') && ++$individual > 1) return false;
+            if (str_starts_with($name, 'NFE')
+                && (int) substr($name, 3) !== (int) substr($key, 25, 9)) return false;
+            $code = (string) ($values['cstat'] ?? '');
+            if (!in_array($code, array_merge(['103', '104'], $allowedCodes), true)) return false;
+            if (in_array($code, $allowedCodes, true)) {
+                if (preg_match('/^\s*Rejei(?:c|ç)(?:a|ã)o\b/iu', (string) ($values['xmotivo'] ?? '')) !== 1) return false;
+                $found = true;
+            } elseif (str_starts_with($name, 'NFE')) return false;
+            foreach (['chdfe', 'chnfe'] as $field) {
+                if (isset($values[$field]) && !hash_equals($key, (string) $values[$field])) return false;
+            }
+            if (!empty($values['nprot']) || !empty($values['nrec'])) return false;
+            foreach ($values as $field => $value) {
+                if ((str_contains($field, 'xml') || str_contains($field, 'evento')) && (string) $value !== '') return false;
+            }
+            if (isset($values['tpamb']) && (string) $values['tpamb'] !== ($environment === 'homologation' ? '2' : '1')) return false;
+        }
+        return $found;
+    }
 }

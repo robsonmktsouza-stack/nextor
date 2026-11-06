@@ -7,13 +7,17 @@ use App\Models\CompanySetting;
 use App\Models\FinancialAccount;
 use App\Models\FinancialCategory;
 use App\Models\FiscalDocumentJob;
+use App\Models\NfeDraft;
+use App\Models\Nfe55Inutilization;
 use App\Models\PaymentMethod;
 use App\Models\User;
 use App\Models\WebhookDelivery;
 use App\Services\AccountingExportService;
 use App\Services\FinancialBalanceService;
+use App\Support\BrazilianTaxId;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -28,7 +32,7 @@ class SettingsController extends Controller
     ];
 
     public const PERMISSIONS=[
-        'dashboard'=>'Dashboard',
+        'dashboard'=>'Visão geral',
         'finance'=>'Financeiro',
         'products'=>'Produtos',
         'services'=>'Serviços',
@@ -192,6 +196,39 @@ class SettingsController extends Controller
         [$rules,$booleanKeys,$secretKeys]=$this->groupRules($group);
         $data=$request->validate($rules);
 
+        if ($group==='accounting' && isset($data['sefaz_xml_authorized_cnpj'])) {
+            $data['sefaz_xml_authorized_cnpj']=preg_replace('/\\D/','',(string)$data['sefaz_xml_authorized_cnpj']);
+        }
+
+        if ($group==='accounting' && isset($data['accountant_document'])) {
+            $data['accountant_document']=preg_replace('/\D/','',$data['accountant_document']);
+        }
+
+        if ($group==='nfe') {
+            DB::transaction(function()use($request,$data,$booleanKeys,$rules){
+                // Lock the same sequence rows as the emission/inutilization paths.
+                AppSetting::query()->where('group','nfe')->orderBy('key')->lockForUpdate()->get();
+                $values=$data;
+                if($request->boolean('production_enabled') || ($values['environment']??'')==='production') {
+                    foreach(['production_series','production_next_number'] as $key) {
+                        if(!isset($values[$key]))throw ValidationException::withMessages([$key=>'Informe série e próximo número próprios de produção.']);
+                    }
+                }
+                foreach(['homologation'=>['series','next_number'],'production'=>['production_series','production_next_number']] as $environment=>[$series,$number]) {
+                    if(!isset($values[$series],$values[$number]))continue;
+                    $highest=NfeDraft::query()->where('environment',$environment)->where('series',(int)$values[$series])->max('document_number');
+                    $gap=Nfe55Inutilization::query()->where('environment',$environment)->where('series',(int)$values[$series])->max('last_number');
+                    $highest=max((int)$highest,(int)$gap);
+                    if((int)$values[$number]<=$highest)throw ValidationException::withMessages([$number=>'O próximo número deve ser maior que a numeração já reservada ou inutilizada nesta série e ambiente ('.$highest.').']);
+                }
+                foreach($rules as $key=>$_rules) {
+                    $value=in_array($key,$booleanKeys,true)?$request->boolean($key):($values[$key]??null);
+                    AppSetting::put('nfe',$key,$value,false);
+                }
+            },3);
+            return redirect()->route('settings.index',['tab'=>'nfe'])->with('success','Configurações salvas.');
+        }
+
         if ($group==='nfce') {
             // Produção é um conjunto independente de parâmetros. Jamais
             // usar o CSC ou a numeração do ambiente de homologação.
@@ -271,7 +308,7 @@ class SettingsController extends Controller
 
         return redirect()
             ->route('settings.index',['tab'=>'integrations'])
-            ->with('success','Novo token da API gerado.')
+            ->with('success','Chave de acesso gerada.')
             ->with('api_token_plain',$token);
     }
 
@@ -299,8 +336,9 @@ class SettingsController extends Controller
         $expiresAt=null;
 
         if(!function_exists('openssl_pkcs12_read')) {
+            \Illuminate\Support\Facades\Log::error('Validação de A1 indisponível: extensão OpenSSL não habilitada.');
             throw ValidationException::withMessages([
-                'certificate'=>'A extensão OpenSSL precisa estar habilitada para validar o certificado A1.',
+                'certificate'=>'Não foi possível validar o certificado. Contate o suporte e tente novamente.',
             ]);
         }
 
@@ -308,7 +346,7 @@ class SettingsController extends Controller
             $certs=[];
             if(!@openssl_pkcs12_read($bytes,$certs,$data['certificate_password'])) {
                 throw ValidationException::withMessages([
-                    'certificate'=>'Certificado PKCS#12 inválido ou senha incorreta. Confira o arquivo .pfx/.p12 e a senha.',
+                    'certificate'=>'Certificado inválido ou senha incorreta. Confira o arquivo .pfx/.p12 e a senha.',
                 ]);
             }
 
@@ -333,7 +371,7 @@ class SettingsController extends Controller
             'certificate_expires_at'=>$expiresAt,
         ]);
 
-        return redirect()->route('settings.index',['tab'=>'fiscal'])->with('success','Certificado A1 armazenado com segurança.');
+        return redirect()->route('settings.index',['tab'=>'fiscal'])->with('success','Certificado A1 salvo.');
     }
 
     public function removeCertificate()
@@ -539,6 +577,8 @@ class SettingsController extends Controller
                 'environment'=>['required',Rule::in(['homologation','production'])],
                 'series'=>['required','integer','min:0','max:999'],
                 'next_number'=>['required','integer','min:1','max:999999999'],
+                'production_series'=>['nullable','integer','min:0','max:999'],
+                'production_next_number'=>['nullable','integer','min:1','max:999999999'],
                 'default_nature'=>['nullable','string','max:120'],
                 'default_cfop'=>['nullable','string','max:10'],
                 'auto_from_sale'=>['nullable','boolean'],
@@ -598,7 +638,13 @@ class SettingsController extends Controller
             'accounting'=>[[
                 'office_name'=>['nullable','string','max:190'],
                 'accountant_name'=>['nullable','string','max:190'],
-                'accountant_document'=>['nullable','string','max:20'],
+                'accountant_document'=>['bail','required_if:accountant_xml_authorized,1','nullable','string','max:20',function($attribute,$value,$fail){
+                    if (!BrazilianTaxId::valid((string)$value)) $fail('Informe um CPF ou CNPJ válido para o contador.');
+                }],
+                'accountant_xml_authorized'=>['nullable','boolean'],
+                'sefaz_xml_authorized_cnpj'=>['nullable','string','max:18',function($attribute,$value,$fail){
+                    if (trim((string)$value)!=='' && (!preg_match('/^\\d{14}$/',preg_replace('/\\D/','',(string)$value)) || !BrazilianTaxId::valid((string)$value))) $fail('Informe um CNPJ válido autorizado pela SEFAZ.');
+                }],
                 'crc'=>['nullable','string','max:40'],
                 'email'=>['nullable','email','max:255'],
                 'phone'=>['nullable','string','max:30'],
@@ -606,7 +652,7 @@ class SettingsController extends Controller
                 'cost_center_enabled'=>['nullable','boolean'],
                 'automatic_monthly_export'=>['nullable','boolean'],
                 'notes'=>['nullable','string','max:3000'],
-            ],['cost_center_enabled','automatic_monthly_export'],[]],
+            ],['cost_center_enabled','automatic_monthly_export','accountant_xml_authorized'],[]],
 
             'integrations'=>[[
                 'smtp_enabled'=>['nullable','boolean'],
@@ -673,6 +719,7 @@ class SettingsController extends Controller
             ],
             'nfe'=>[
                 'enabled'=>false,'environment'=>'homologation','series'=>1,'next_number'=>1,
+                'production_series'=>null,'production_next_number'=>null,
                 'default_nature'=>null,'default_cfop'=>null,'auto_from_sale'=>false,'production_enabled'=>false,'send_email'=>true,'print_danfe'=>true,
             ],
             'nfce'=>[
@@ -694,6 +741,7 @@ class SettingsController extends Controller
             'accounting'=>[
                 'office_name'=>null,'accountant_name'=>null,'accountant_document'=>null,'crc'=>null,
                 'email'=>null,'phone'=>null,'accounting_system'=>null,
+                'accountant_xml_authorized'=>false,'nfe_ba_sefaz_xml_authorized'=>false,
                 'cost_center_enabled'=>false,'automatic_monthly_export'=>false,'notes'=>null,
             ],
             'integrations'=>[

@@ -1,0 +1,3402 @@
+{
+  "baseline": "bf73a66",
+  "files_scanned": 372,
+  "lines_scanned": 64797,
+  "files": [
+    {
+      "file": "app/Console/Commands/ACBrNFCeStatus.php",
+      "lines_before": 138,
+      "lines_after": 138,
+      "sha256_before": "3e9449766dfb36728f25b756641b18f6492eb3536e28de75ac8e45dea16fd369",
+      "sha256_after": "3e9449766dfb36728f25b756641b18f6492eb3536e28de75ac8e45dea16fd369",
+      "changed": false
+    },
+    {
+      "file": "app/Console/Commands/ACBrNFeDoctor.php",
+      "lines_before": 60,
+      "lines_after": 60,
+      "sha256_before": "c508ffe5130ddf236011e1f87c367247828e5aea69b9be34515785b175710c70",
+      "sha256_after": "c508ffe5130ddf236011e1f87c367247828e5aea69b9be34515785b175710c70",
+      "changed": false
+    },
+    {
+      "file": "app/Console/Commands/ACBrNFeReadiness.php",
+      "lines_before": 133,
+      "lines_after": 133,
+      "sha256_before": "b6dcd150ecc5d12328cdc7f196e5eeea3944880404a03ae7371dcb14c43e2908",
+      "sha256_after": "b6dcd150ecc5d12328cdc7f196e5eeea3944880404a03ae7371dcb14c43e2908",
+      "changed": false
+    },
+    {
+      "file": "app/Console/Commands/BootstrapManagedAccount.php",
+      "lines_before": 135,
+      "lines_after": 135,
+      "sha256_before": "6102db67eecb04ff1816d424a3aadee4c82b12cc976092097f9bb00d22d12914",
+      "sha256_after": "6102db67eecb04ff1816d424a3aadee4c82b12cc976092097f9bb00d22d12914",
+      "changed": false
+    },
+    {
+      "file": "app/Console/Commands/CentralLicenseIdentity.php",
+      "lines_before": 57,
+      "lines_after": 57,
+      "sha256_before": "5ebb69f0618b2e0f821e7ff3d9a0aa3a65b1033df0910a9aeac8d75b61c583c7",
+      "sha256_after": "5ebb69f0618b2e0f821e7ff3d9a0aa3a65b1033df0910a9aeac8d75b61c583c7",
+      "changed": false
+    },
+    {
+      "file": "app/Console/Commands/CentralLicenseSync.php",
+      "lines_before": 21,
+      "lines_after": 21,
+      "sha256_before": "e263b2e00750d5da1fa60164e0b22771fe7d18587f4ace8df790cce7300e1b64",
+      "sha256_after": "e263b2e00750d5da1fa60164e0b22771fe7d18587f4ace8df790cce7300e1b64",
+      "changed": false
+    },
+    {
+      "file": "app/Console/Commands/DiagnoseRecipientManifestation.php",
+      "lines_before": 75,
+      "lines_after": 75,
+      "sha256_before": "9ffaf473a71d7e4fccd5ea6e6208dc678ea96399a14e6bbfb80bcc82d7741b43",
+      "sha256_after": "9ffaf473a71d7e4fccd5ea6e6208dc678ea96399a14e6bbfb80bcc82d7741b43",
+      "changed": false
+    },
+    {
+      "file": "app/Console/Commands/FiscalCatalogCommand.php",
+      "lines_before": 63,
+      "lines_after": 63,
+      "sha256_before": "a9b7aed29a22073b7da19eb88c3a60ca3675c20d698093226f4a245f6d1b1cf4",
+      "sha256_after": "a9b7aed29a22073b7da19eb88c3a60ca3675c20d698093226f4a245f6d1b1cf4",
+      "changed": false
+    },
+    {
+      "file": "app/Console/Commands/GenerateAccountingExport.php",
+      "lines_before": 34,
+      "lines_after": 34,
+      "sha256_before": "812a78ae94f322831341e9cbc3cfd1392168efbf39cdf3a9d25b8de179420e63",
+      "sha256_after": "812a78ae94f322831341e9cbc3cfd1392168efbf39cdf3a9d25b8de179420e63",
+      "changed": false
+    },
+    {
+      "file": "app/Console/Commands/GenerateFinancialRecurrences.php",
+      "lines_before": 24,
+      "lines_after": 24,
+      "sha256_before": "18b009146681c5424bb8b65a821f1ee71affcdefd9571dda416aa9844ef35b88",
+      "sha256_after": "18b009146681c5424bb8b65a821f1ee71affcdefd9571dda416aa9844ef35b88",
+      "changed": false
+    },
+    {
+      "file": "app/Console/Commands/LumeronInstanceCheck.php",
+      "lines_before": 76,
+      "lines_after": 76,
+      "sha256_before": "bd34315cc662e38d1eedaa86acbf92076f1bd81e02eb4c21a5d984781a256560",
+      "sha256_after": "bd34315cc662e38d1eedaa86acbf92076f1bd81e02eb4c21a5d984781a256560",
+      "changed": false
+    },
+    {
+      "file": "app/Console/Commands/MakeAdmin.php",
+      "lines_before": 41,
+      "lines_after": 41,
+      "sha256_before": "3ece8fcb823483e53d9a5c4f961766d4dec570c95e9beaabaa1c4ad95489727c",
+      "sha256_after": "3ece8fcb823483e53d9a5c4f961766d4dec570c95e9beaabaa1c4ad95489727c",
+      "changed": false
+    },
+    {
+      "file": "app/Console/Commands/Nfe55PreflightCommand.php",
+      "lines_before": 56,
+      "lines_after": 56,
+      "sha256_before": "bbd68c12a5a69e6bd9bf38b641b1b7755b65a481ac2c3219a06e6d05ff8b845e",
+      "sha256_after": "bbd68c12a5a69e6bd9bf38b641b1b7755b65a481ac2c3219a06e6d05ff8b845e",
+      "changed": false
+    },
+    {
+      "file": "app/Console/Commands/Nfe55VerifyFlowCommand.php",
+      "lines_before": 189,
+      "lines_after": 189,
+      "sha256_before": "7cf8a407984ebb7007d681245867ce7171c10b7783b66248b9e8cf5db01e5bec",
+      "sha256_after": "7cf8a407984ebb7007d681245867ce7171c10b7783b66248b9e8cf5db01e5bec",
+      "changed": false
+    },
+    {
+      "file": "app/Console/Commands/ProcessWebhookDeliveries.php",
+      "lines_before": 89,
+      "lines_after": 89,
+      "sha256_before": "fe574bb4a46ffab826dd1b13ae539573fe6f93a7d69343f665b50fcdc0937f6e",
+      "sha256_after": "fe574bb4a46ffab826dd1b13ae539573fe6f93a7d69343f665b50fcdc0937f6e",
+      "changed": false
+    },
+    {
+      "file": "app/Console/Commands/SyncIncomingNfe.php",
+      "lines_before": 27,
+      "lines_after": 27,
+      "sha256_before": "2a940bbd085d22cfc8a075d7d92e170171ace554d255c2bc6a61d85a391b447e",
+      "sha256_after": "2a940bbd085d22cfc8a075d7d92e170171ace554d255c2bc6a61d85a391b447e",
+      "changed": false
+    },
+    {
+      "file": "app/Console/Commands/VerifyIncomingNfeManifestations.php",
+      "lines_before": 65,
+      "lines_after": 65,
+      "sha256_before": "36ca8e7c1b02372764f9c28dadd91b9395c311b9773a460c74a6966728781380",
+      "sha256_after": "36ca8e7c1b02372764f9c28dadd91b9395c311b9773a460c74a6966728781380",
+      "changed": false
+    },
+    {
+      "file": "app/Http/Controllers/ApiController.php",
+      "lines_before": 47,
+      "lines_after": 50,
+      "sha256_before": "9a12e438dac73cdbba7e21a22a5b52a84715ca7d67a1722209aac718c98cee2a",
+      "sha256_after": "ea9d367aefe336aad34226276a64292a75e1d09072d5b7099877ff2b0d787bf7",
+      "changed": true
+    },
+    {
+      "file": "app/Http/Controllers/AuthController.php",
+      "lines_before": 81,
+      "lines_after": 81,
+      "sha256_before": "f4b82842fac5b38a9db6737ff53b6807e2c9f91f8620878ddc8e18f248da13af",
+      "sha256_after": "e25625bc86fee74d5a2f539776abb4034c1806da89b95eb704193b2d7cdaf08c",
+      "changed": true
+    },
+    {
+      "file": "app/Http/Controllers/Controller.php",
+      "lines_before": 4,
+      "lines_after": 4,
+      "sha256_before": "00390c276f1c8d91c6cc84d3ac46d09b31b1264c6df037678bf0bb0427b134a8",
+      "sha256_after": "00390c276f1c8d91c6cc84d3ac46d09b31b1264c6df037678bf0bb0427b134a8",
+      "changed": false
+    },
+    {
+      "file": "app/Http/Controllers/CustomerController.php",
+      "lines_before": 243,
+      "lines_after": 243,
+      "sha256_before": "b0905ce69188b662c4fa532bfbdffc41dc04feb66942936948c3739d374eab54",
+      "sha256_after": "26c3b17b85eb2f99f5d37eebddf6baeb36c1c93f3baac8e97fd366771d631f6a",
+      "changed": true
+    },
+    {
+      "file": "app/Http/Controllers/DashboardController.php",
+      "lines_before": 33,
+      "lines_after": 33,
+      "sha256_before": "70f8cf82550d7663bf01225ec5e250a70256ebde5c91563c434a2eca03cf3ff7",
+      "sha256_after": "70f8cf82550d7663bf01225ec5e250a70256ebde5c91563c434a2eca03cf3ff7",
+      "changed": false
+    },
+    {
+      "file": "app/Http/Controllers/FinanceController.php",
+      "lines_before": 526,
+      "lines_after": 526,
+      "sha256_before": "0675e8ed276521ab4d9059d72994b726c2a136ce838321e82b4669f1775dd75a",
+      "sha256_after": "e8c3cbfb9cd7aaeec3bee4359fd8860e11f57f0db92798f38475eb2f4718e971",
+      "changed": true
+    },
+    {
+      "file": "app/Http/Controllers/FinancialReceiptController.php",
+      "lines_before": 98,
+      "lines_after": 98,
+      "sha256_before": "c30b7199d7cb750ba4b3fdf48f6862073b906a0cace4d6fe722f0a0994b00782",
+      "sha256_after": "c30b7199d7cb750ba4b3fdf48f6862073b906a0cace4d6fe722f0a0994b00782",
+      "changed": false
+    },
+    {
+      "file": "app/Http/Controllers/FinancialReconciliationController.php",
+      "lines_before": 143,
+      "lines_after": 143,
+      "sha256_before": "6deb74014b1ddfb1ee8220dd536ac99e3c8c276358dd27d245d2b448ce20364f",
+      "sha256_after": "959f31fc0d7c1ae95bded9507409b4078dbc5f9d87d984b8afbec3f90219a267",
+      "changed": true
+    },
+    {
+      "file": "app/Http/Controllers/FinancialRecurrenceController.php",
+      "lines_before": 97,
+      "lines_after": 97,
+      "sha256_before": "9dec7625fb54add1066e97e5c1f3607547c55ddfcd3390ca6d7e3e4d29826f00",
+      "sha256_after": "33b97286a2a07e89e6f3d1b18a3ce0302a7aae5b9256ea52461240734c84af15",
+      "changed": true
+    },
+    {
+      "file": "app/Http/Controllers/FinancialTransferController.php",
+      "lines_before": 78,
+      "lines_after": 78,
+      "sha256_before": "e2ad6c57cd5ddc5cc492243215f12cc3eeff4e218808d9464072444b850963ad",
+      "sha256_after": "e2ad6c57cd5ddc5cc492243215f12cc3eeff4e218808d9464072444b850963ad",
+      "changed": false
+    },
+    {
+      "file": "app/Http/Controllers/FiscalCatalogController.php",
+      "lines_before": 105,
+      "lines_after": 105,
+      "sha256_before": "74ffcbf5ce2d793e657fe954176385dfc18a2f693bffdde904872872381c7ff2",
+      "sha256_after": "8ea2f8ae5161b43f565381069129fd5407bb18773fbb28b11b9e3557983136ee",
+      "changed": true
+    },
+    {
+      "file": "app/Http/Controllers/FiscalCodeCatalogController.php",
+      "lines_before": 52,
+      "lines_after": 52,
+      "sha256_before": "05176a843c8e2179c7149502d9718189658828c7fa4f83753b575f89df93fd98",
+      "sha256_after": "05176a843c8e2179c7149502d9718189658828c7fa4f83753b575f89df93fd98",
+      "changed": false
+    },
+    {
+      "file": "app/Http/Controllers/FiscalController.php",
+      "lines_before": 485,
+      "lines_after": 550,
+      "sha256_before": "26fbe34decd093f98fe25047bf82a216c5a7b581c21d6b06c526342f55c155d3",
+      "sha256_after": "8246776e0ca31e6c67b42b26faea76b250c89cb3fbd81cd7f4c27a5ab91c407a",
+      "changed": true
+    },
+    {
+      "file": "app/Http/Controllers/FiscalFcpRuleController.php",
+      "lines_before": 59,
+      "lines_after": 59,
+      "sha256_before": "b0df5a10032f94d31e5afcf44d5d2956e19cbcbfc5564ecd70307fb915ce08fc",
+      "sha256_after": "2891e173685c40ac8b8b2d08c0d3e2bfebaaa988fe4affecfa9e25273fb6c988",
+      "changed": true
+    },
+    {
+      "file": "app/Http/Controllers/FiscalPurchasesController.php",
+      "lines_before": 178,
+      "lines_after": 178,
+      "sha256_before": "cd68093e06b07f62b6279d8b9db01e9769e1d89592113d611040b5d436e30871",
+      "sha256_after": "330f668a3c44e6aa258455d80f07625203cba643b084e1133808d681e37f3b8f",
+      "changed": true
+    },
+    {
+      "file": "app/Http/Controllers/FiscalTaxGroupController.php",
+      "lines_before": 277,
+      "lines_after": 277,
+      "sha256_before": "b40ec5db5e2c5273f321dc2f1aa7ca7b6caca0a0776db7737cabc3f18d9641cc",
+      "sha256_after": "b40ec5db5e2c5273f321dc2f1aa7ca7b6caca0a0776db7737cabc3f18d9641cc",
+      "changed": false
+    },
+    {
+      "file": "app/Http/Controllers/FiscalTaxRuleController.php",
+      "lines_before": 280,
+      "lines_after": 280,
+      "sha256_before": "4c3842afac29598cc31e3740093223833daae59dae27e6b8f076fae23803e014",
+      "sha256_after": "34aef196b559a024985627188f515e58ae8d79f6f47d1856fad8235b93b18e82",
+      "changed": true
+    },
+    {
+      "file": "app/Http/Controllers/FiscalUtilitiesController.php",
+      "lines_before": 99,
+      "lines_after": 99,
+      "sha256_before": "e34c84d97819161fac5ad1cab44d642222bdf120aad69d15fca285eea8912c9a",
+      "sha256_after": "05b70fa9df30db69d1e81f14200c24be3cab204bf50447b9bac9d177b5144c93",
+      "changed": true
+    },
+    {
+      "file": "app/Http/Controllers/NFCeDanfeController.php",
+      "lines_before": 116,
+      "lines_after": 116,
+      "sha256_before": "3ac1e8a315d6c22bf0cad7042565e8a2a7c51a5243bb8899ce4e116c33e8c0ae",
+      "sha256_after": "f6c7d80498d21462c6ed8f0233d995804bc012b25e893b75a94c6d6c934550ff",
+      "changed": true
+    },
+    {
+      "file": "app/Http/Controllers/NFCeFiscalEventsController.php",
+      "lines_before": 63,
+      "lines_after": 63,
+      "sha256_before": "16a10a3c157fb35ee437d70a7ef10a7de255260653c772d2a63ae0675918ffe8",
+      "sha256_after": "78ebdf238aa9bac9fd61823f11c5ea02730f68f5080674da100df2b78f351052",
+      "changed": true
+    },
+    {
+      "file": "app/Http/Controllers/NFCeInutilizationController.php",
+      "lines_before": 52,
+      "lines_after": 52,
+      "sha256_before": "b467f603bc445e8510958da45c1b97c87202e072c447ce6d65c34eef25ea3e60",
+      "sha256_after": "c0b32b48f34d89464f9339d874b64f399fc8a1700992ec5912897354b7d3570f",
+      "changed": true
+    },
+    {
+      "file": "app/Http/Controllers/NFCeManualController.php",
+      "lines_before": 304,
+      "lines_after": 304,
+      "sha256_before": "70ab3a408a56dc67ca5cfc9a6ebbd262e089866dc06b5e311c76cb797c496c85",
+      "sha256_after": "7621a2996438de9d7ec6ea711202cf8003fe4f0a51bed050652afdb8d3865806",
+      "changed": true
+    },
+    {
+      "file": "app/Http/Controllers/Nfe55EmissionController.php",
+      "lines_before": 79,
+      "lines_after": 79,
+      "sha256_before": "b822fd3f7e8084b2f56487dd21ed675dfb6ecff5f649efcbe45fd3599bf7e9d4",
+      "sha256_after": "5ef97b9f40f75e853f4a95b9e3d008f05199843104b791b320876629a75c02ca",
+      "changed": true
+    },
+    {
+      "file": "app/Http/Controllers/Nfe55InutilizationController.php",
+      "lines_before": 71,
+      "lines_after": 73,
+      "sha256_before": "9844fe90f3d03cf7a9d160270470ab04c7976043c246e970302d19921a3066da",
+      "sha256_after": "eb3cc4132b8f485e01a3314c15bbc67cea2b773dccefca6cf46ce87c24d385cd",
+      "changed": true
+    },
+    {
+      "file": "app/Http/Controllers/NfeDraftController.php",
+      "lines_before": 1241,
+      "lines_after": 1247,
+      "sha256_before": "f633430f71eade97509fbbf88086388f8f8f4a0ac41cd7474d8ace7f23d122d4",
+      "sha256_after": "de51892006619c0d646d5629d058b2a6184c12040c71ecc127619dae47c9353b",
+      "changed": true
+    },
+    {
+      "file": "app/Http/Controllers/OperationNatureController.php",
+      "lines_before": 67,
+      "lines_after": 67,
+      "sha256_before": "e8a9a93914cb9b508054f2cbfcb16ddff86929967c94af519275d39fb4dc23c3",
+      "sha256_after": "e8a9a93914cb9b508054f2cbfcb16ddff86929967c94af519275d39fb4dc23c3",
+      "changed": false
+    },
+    {
+      "file": "app/Http/Controllers/PasswordRecoveryController.php",
+      "lines_before": 55,
+      "lines_after": 55,
+      "sha256_before": "bb22e0c65974cb3e4ead3a8713235903516ea44ed82b515be02b05b98f4eee1d",
+      "sha256_after": "bb22e0c65974cb3e4ead3a8713235903516ea44ed82b515be02b05b98f4eee1d",
+      "changed": false
+    },
+    {
+      "file": "app/Http/Controllers/PdvCashReportController.php",
+      "lines_before": 71,
+      "lines_after": 71,
+      "sha256_before": "3a03cd506b15c4e21043655f796651a6018c65a0f83c83e5bcde57e366a60409",
+      "sha256_after": "3a03cd506b15c4e21043655f796651a6018c65a0f83c83e5bcde57e366a60409",
+      "changed": false
+    },
+    {
+      "file": "app/Http/Controllers/PdvCashWorkflowController.php",
+      "lines_before": 133,
+      "lines_after": 133,
+      "sha256_before": "f00e8daa4771703a67b3c0974134cc061ba38162cfc278b832a7118b87a9b0d1",
+      "sha256_after": "f00e8daa4771703a67b3c0974134cc061ba38162cfc278b832a7118b87a9b0d1",
+      "changed": false
+    },
+    {
+      "file": "app/Http/Controllers/PdvController.php",
+      "lines_before": 1250,
+      "lines_after": 1251,
+      "sha256_before": "157cdad09a12da2ded48ddedb4197c11251d46f549f5a2051e041faccc1edd92",
+      "sha256_after": "37593e4605dfd936b2d4d2d67c986ea10727cd26e8a04d9eec8097b91dde6503",
+      "changed": true
+    },
+    {
+      "file": "app/Http/Controllers/ProductController.php",
+      "lines_before": 317,
+      "lines_after": 317,
+      "sha256_before": "b77e82bf4163e086a6169acd32893683894a43c8f330ad3084df069671e64409",
+      "sha256_after": "b77e82bf4163e086a6169acd32893683894a43c8f330ad3084df069671e64409",
+      "changed": false
+    },
+    {
+      "file": "app/Http/Controllers/PurchaseController.php",
+      "lines_before": 191,
+      "lines_after": 192,
+      "sha256_before": "e4d851672e5f8077f9d553ec32614e9e98b7c7a893f01c1202fe0f8ce62e2638",
+      "sha256_after": "96da5e694905c3dbc4bbf818759275c83141216603473ed457be49625250e512",
+      "changed": true
+    },
+    {
+      "file": "app/Http/Controllers/QuickCatalogController.php",
+      "lines_before": 202,
+      "lines_after": 202,
+      "sha256_before": "bd5dc38c071e50d32ba8aed07c2da1ced26d8f0d7704c9493d0851c0ff85abeb",
+      "sha256_after": "bd5dc38c071e50d32ba8aed07c2da1ced26d8f0d7704c9493d0851c0ff85abeb",
+      "changed": false
+    },
+    {
+      "file": "app/Http/Controllers/SaleController.php",
+      "lines_before": 195,
+      "lines_after": 197,
+      "sha256_before": "37b0d860bc2487b4068cd036aef9318850def68e88eb9d883f7d9e3d82e58e74",
+      "sha256_after": "0cac1d5e0476b25fefbfa33ca8e16e178d6d2a9bb526628569028f269ffef485",
+      "changed": true
+    },
+    {
+      "file": "app/Http/Controllers/SaleReturnController.php",
+      "lines_before": 132,
+      "lines_after": 132,
+      "sha256_before": "1b3967fc9d54017321a62299c8a74092899fefbcf532ca54e5dfd1859ff3c91f",
+      "sha256_after": "1b3967fc9d54017321a62299c8a74092899fefbcf532ca54e5dfd1859ff3c91f",
+      "changed": false
+    },
+    {
+      "file": "app/Http/Controllers/ServiceController.php",
+      "lines_before": 196,
+      "lines_after": 196,
+      "sha256_before": "323173ee4ca12770b9a514c2df55aead234cfd7e792df5fde7d22241991b6cb2",
+      "sha256_after": "323173ee4ca12770b9a514c2df55aead234cfd7e792df5fde7d22241991b6cb2",
+      "changed": false
+    },
+    {
+      "file": "app/Http/Controllers/SettingsController.php",
+      "lines_before": 752,
+      "lines_after": 753,
+      "sha256_before": "5bab6628a010ea3484b1385eab09910544698014ed3000d1265bb43c4c85766d",
+      "sha256_after": "c402f89705876cc9dee6c8b151614a36e50d84e1f906849729a8c184e7009440",
+      "changed": true
+    },
+    {
+      "file": "app/Http/Controllers/StockController.php",
+      "lines_before": 83,
+      "lines_after": 83,
+      "sha256_before": "046d3456418f4ad563bf491d28e5be9efd76db820a09cb14d80889fb5d2c8c2e",
+      "sha256_after": "046d3456418f4ad563bf491d28e5be9efd76db820a09cb14d80889fb5d2c8c2e",
+      "changed": false
+    },
+    {
+      "file": "app/Http/Middleware/RequireApiToken.php",
+      "lines_before": 45,
+      "lines_after": 45,
+      "sha256_before": "444bde911124fa0ec6c76d78618a121d3a8b770aa664b528da3f2a336280bb4d",
+      "sha256_after": "444bde911124fa0ec6c76d78618a121d3a8b770aa664b528da3f2a336280bb4d",
+      "changed": false
+    },
+    {
+      "file": "app/Http/Middleware/RequireCentralLicense.php",
+      "lines_before": 77,
+      "lines_after": 77,
+      "sha256_before": "283d7207f55cd8a261f082ccabb4cc492ec2174b1184553cd63ccb23ba9f2b00",
+      "sha256_after": "283d7207f55cd8a261f082ccabb4cc492ec2174b1184553cd63ccb23ba9f2b00",
+      "changed": false
+    },
+    {
+      "file": "app/Http/Middleware/RequireCompanyConfigured.php",
+      "lines_before": 36,
+      "lines_after": 36,
+      "sha256_before": "e4ae7d1824c83779f233eaac1e16e375057eb8551ee5f4127dce47dbd19cb8e1",
+      "sha256_after": "e4ae7d1824c83779f233eaac1e16e375057eb8551ee5f4127dce47dbd19cb8e1",
+      "changed": false
+    },
+    {
+      "file": "app/Http/Middleware/RequirePermission.php",
+      "lines_before": 21,
+      "lines_after": 21,
+      "sha256_before": "f7b08dbb5b74ff00e2ab08f1c536c7df27b5af287dfb5bdb2c1c84379a95e3a5",
+      "sha256_after": "f7b08dbb5b74ff00e2ab08f1c536c7df27b5af287dfb5bdb2c1c84379a95e3a5",
+      "changed": false
+    },
+    {
+      "file": "app/Jobs/CancelNFCeJob.php",
+      "lines_before": 25,
+      "lines_after": 25,
+      "sha256_before": "b144592b871ff811c65082a385672120cc5675fe5d5c5c7af181f0d41383561a",
+      "sha256_after": "b144592b871ff811c65082a385672120cc5675fe5d5c5c7af181f0d41383561a",
+      "changed": false
+    },
+    {
+      "file": "app/Jobs/ConsultNFCeJob.php",
+      "lines_before": 26,
+      "lines_after": 26,
+      "sha256_before": "640ccbcff1ee0011636671864b80d98ad437044251cf8828e6db2dd5a7242bf6",
+      "sha256_after": "640ccbcff1ee0011636671864b80d98ad437044251cf8828e6db2dd5a7242bf6",
+      "changed": false
+    },
+    {
+      "file": "app/Jobs/GenerateNFCeDanfePdfJob.php",
+      "lines_before": 72,
+      "lines_after": 72,
+      "sha256_before": "2cd7873b5a9ee52bca688b215504984241309149b47a2c8df0d31580dce61c3d",
+      "sha256_after": "2cd7873b5a9ee52bca688b215504984241309149b47a2c8df0d31580dce61c3d",
+      "changed": false
+    },
+    {
+      "file": "app/Jobs/InutilizeNFCeNumbersJob.php",
+      "lines_before": 22,
+      "lines_after": 22,
+      "sha256_before": "28c8104f1eb88f162d4384267a3c21475e6e971e0a8f9a8a91462afebe23bdef",
+      "sha256_after": "28c8104f1eb88f162d4384267a3c21475e6e971e0a8f9a8a91462afebe23bdef",
+      "changed": false
+    },
+    {
+      "file": "app/Jobs/ProcessNFCeJob.php",
+      "lines_before": 26,
+      "lines_after": 26,
+      "sha256_before": "f34bfde8a5b826d4f709ee05782c15c61db41914d85d1b85cd565f959447f974",
+      "sha256_after": "f34bfde8a5b826d4f709ee05782c15c61db41914d85d1b85cd565f959447f974",
+      "changed": false
+    },
+    {
+      "file": "app/Jobs/ProcessNfe55CancellationJob.php",
+      "lines_before": 31,
+      "lines_after": 31,
+      "sha256_before": "1ec42049caa15cb4bba652389f244e31cf42622e3468cbda055c3eee0f5abaf1",
+      "sha256_after": "1ec42049caa15cb4bba652389f244e31cf42622e3468cbda055c3eee0f5abaf1",
+      "changed": false
+    },
+    {
+      "file": "app/Jobs/ProcessNfe55InutilizationJob.php",
+      "lines_before": 31,
+      "lines_after": 31,
+      "sha256_before": "8ec370175ad0bf0d901ba73a2b48b6c76b684a398b5f51b8c110163d899fb168",
+      "sha256_after": "8ec370175ad0bf0d901ba73a2b48b6c76b684a398b5f51b8c110163d899fb168",
+      "changed": false
+    },
+    {
+      "file": "app/Jobs/ProcessNfe55Job.php",
+      "lines_before": 33,
+      "lines_after": 33,
+      "sha256_before": "ebb72fbc80a8e4572477455c42836f951a61a4b0cc6fd695fc070471945d44e4",
+      "sha256_after": "ebb72fbc80a8e4572477455c42836f951a61a4b0cc6fd695fc070471945d44e4",
+      "changed": false
+    },
+    {
+      "file": "app/Jobs/TransmitOfflineNFCeJob.php",
+      "lines_before": 22,
+      "lines_after": 22,
+      "sha256_before": "d056ae019a207a04afe0819a0ed041d3d5e6ac3ee2dc70ffb25d837d3984e476",
+      "sha256_after": "d056ae019a207a04afe0819a0ed041d3d5e6ac3ee2dc70ffb25d837d3984e476",
+      "changed": false
+    },
+    {
+      "file": "app/Models/AppSetting.php",
+      "lines_before": 149,
+      "lines_after": 149,
+      "sha256_before": "0ddbd219d5f3be0c70aaee182a5838c76efb6eaeb0fe579f375af3ef112a6271",
+      "sha256_after": "0ddbd219d5f3be0c70aaee182a5838c76efb6eaeb0fe579f375af3ef112a6271",
+      "changed": false
+    },
+    {
+      "file": "app/Models/CompanySetting.php",
+      "lines_before": 34,
+      "lines_after": 34,
+      "sha256_before": "fa19c1a0251b5384ba8990a93b3fc9fabc511c2e19c1cafdca5226b25e3ccee7",
+      "sha256_after": "fa19c1a0251b5384ba8990a93b3fc9fabc511c2e19c1cafdca5226b25e3ccee7",
+      "changed": false
+    },
+    {
+      "file": "app/Models/Customer.php",
+      "lines_before": 26,
+      "lines_after": 26,
+      "sha256_before": "002ca0b8d1956f11645fe6d1a93b17419fe9c5d722e8def2a23d3e9457c9e45f",
+      "sha256_after": "002ca0b8d1956f11645fe6d1a93b17419fe9c5d722e8def2a23d3e9457c9e45f",
+      "changed": false
+    },
+    {
+      "file": "app/Models/CustomerDeliveryAddress.php",
+      "lines_before": 16,
+      "lines_after": 16,
+      "sha256_before": "2d8bcbb55111e3f155bdfdb7a20bae4b377e61352217f5608933335d28d4c332",
+      "sha256_after": "2d8bcbb55111e3f155bdfdb7a20bae4b377e61352217f5608933335d28d4c332",
+      "changed": false
+    },
+    {
+      "file": "app/Models/FinancialAccount.php",
+      "lines_before": 24,
+      "lines_after": 24,
+      "sha256_before": "00b4090d741fd47b1057e809921f59febb164448dbb51e9be4e69a29564848b8",
+      "sha256_after": "00b4090d741fd47b1057e809921f59febb164448dbb51e9be4e69a29564848b8",
+      "changed": false
+    },
+    {
+      "file": "app/Models/FinancialBankImport.php",
+      "lines_before": 24,
+      "lines_after": 24,
+      "sha256_before": "eed6a266d6ac50358a345a1d159e4fc2ef12434d15639bb4f93e16d028fbb1a5",
+      "sha256_after": "eed6a266d6ac50358a345a1d159e4fc2ef12434d15639bb4f93e16d028fbb1a5",
+      "changed": false
+    },
+    {
+      "file": "app/Models/FinancialBankTransaction.php",
+      "lines_before": 23,
+      "lines_after": 23,
+      "sha256_before": "f9f9b07fca3513dfa83f84169dd326aad6e3b017e1ca8c329e931d3856794fd9",
+      "sha256_after": "f9f9b07fca3513dfa83f84169dd326aad6e3b017e1ca8c329e931d3856794fd9",
+      "changed": false
+    },
+    {
+      "file": "app/Models/FinancialCategory.php",
+      "lines_before": 21,
+      "lines_after": 21,
+      "sha256_before": "924305160b0962714c643fd8392c8320c8b0e004c68d6ead4493fa5176942d47",
+      "sha256_after": "924305160b0962714c643fd8392c8320c8b0e004c68d6ead4493fa5176942d47",
+      "changed": false
+    },
+    {
+      "file": "app/Models/FinancialEntry.php",
+      "lines_before": 114,
+      "lines_after": 114,
+      "sha256_before": "890de1bc15ab411d6a65500cb152bd91cf0a71c0e759a7820e29bede0a86c2e4",
+      "sha256_after": "890de1bc15ab411d6a65500cb152bd91cf0a71c0e759a7820e29bede0a86c2e4",
+      "changed": false
+    },
+    {
+      "file": "app/Models/FinancialReceipt.php",
+      "lines_before": 22,
+      "lines_after": 22,
+      "sha256_before": "275e2ff5a53cd277cf70dbbdb877ef74d0bdd01fe9ac846c1c689aa3de7f43cc",
+      "sha256_after": "275e2ff5a53cd277cf70dbbdb877ef74d0bdd01fe9ac846c1c689aa3de7f43cc",
+      "changed": false
+    },
+    {
+      "file": "app/Models/FinancialRecurrence.php",
+      "lines_before": 49,
+      "lines_after": 49,
+      "sha256_before": "dbf384788dcf8d896619b93ce72a62fc19e5f3bb1363410617f54a84fd30fb55",
+      "sha256_after": "dbf384788dcf8d896619b93ce72a62fc19e5f3bb1363410617f54a84fd30fb55",
+      "changed": false
+    },
+    {
+      "file": "app/Models/FinancialSettlement.php",
+      "lines_before": 38,
+      "lines_after": 38,
+      "sha256_before": "7fd1daa9f17611a6a5e8e1aed4f75e20ac93e702e19e7c91248586f971b8b1b6",
+      "sha256_after": "7fd1daa9f17611a6a5e8e1aed4f75e20ac93e702e19e7c91248586f971b8b1b6",
+      "changed": false
+    },
+    {
+      "file": "app/Models/FinancialTransfer.php",
+      "lines_before": 20,
+      "lines_after": 20,
+      "sha256_before": "444cc66d334c7d1e05c66d3b65097e65b4ee432ae7b02026b4282d8b77dc8f99",
+      "sha256_after": "444cc66d334c7d1e05c66d3b65097e65b4ee432ae7b02026b4282d8b77dc8f99",
+      "changed": false
+    },
+    {
+      "file": "app/Models/FiscalCatalogEntry.php",
+      "lines_before": 39,
+      "lines_after": 39,
+      "sha256_before": "96935fe4430c1e7812d3234418e333605afc38e5ccc0b2f689e9b50d0974ef3e",
+      "sha256_after": "96935fe4430c1e7812d3234418e333605afc38e5ccc0b2f689e9b50d0974ef3e",
+      "changed": false
+    },
+    {
+      "file": "app/Models/FiscalCatalogRelease.php",
+      "lines_before": 29,
+      "lines_after": 29,
+      "sha256_before": "ad1bf485930a73171c2ab58caa645d9f93280660020b840a9a16d4ed4042baf4",
+      "sha256_after": "ad1bf485930a73171c2ab58caa645d9f93280660020b840a9a16d4ed4042baf4",
+      "changed": false
+    },
+    {
+      "file": "app/Models/FiscalDocumentJob.php",
+      "lines_before": 36,
+      "lines_after": 36,
+      "sha256_before": "c7544c22c5e4b016aea86fcb45f522500acd20311ee2ff6f2c7c7069a94d18ec",
+      "sha256_after": "c7544c22c5e4b016aea86fcb45f522500acd20311ee2ff6f2c7c7069a94d18ec",
+      "changed": false
+    },
+    {
+      "file": "app/Models/FiscalFcpRule.php",
+      "lines_before": 23,
+      "lines_after": 23,
+      "sha256_before": "03c49a72276cb89c62a34105ff5e6e273d1db3353675bc8697f91d3f02cfbb4b",
+      "sha256_after": "03c49a72276cb89c62a34105ff5e6e273d1db3353675bc8697f91d3f02cfbb4b",
+      "changed": false
+    },
+    {
+      "file": "app/Models/FiscalOperationNatureRevision.php",
+      "lines_before": 17,
+      "lines_after": 17,
+      "sha256_before": "42e06e3237058f01cc0271277712454c99e2a17ff57ee79e9d75504c410b66b2",
+      "sha256_after": "42e06e3237058f01cc0271277712454c99e2a17ff57ee79e9d75504c410b66b2",
+      "changed": false
+    },
+    {
+      "file": "app/Models/FiscalTaxGroup.php",
+      "lines_before": 44,
+      "lines_after": 44,
+      "sha256_before": "2ecb30de8da220c627107ce2b1fec52295fa2dd2cc028eba2f08a228728fae60",
+      "sha256_after": "2ecb30de8da220c627107ce2b1fec52295fa2dd2cc028eba2f08a228728fae60",
+      "changed": false
+    },
+    {
+      "file": "app/Models/FiscalTaxGroupRevision.php",
+      "lines_before": 17,
+      "lines_after": 17,
+      "sha256_before": "2bb2d797f1406b8b57cf499aaa638bdbe1a425a70ce694383b9016fc7d0a583b",
+      "sha256_after": "2bb2d797f1406b8b57cf499aaa638bdbe1a425a70ce694383b9016fc7d0a583b",
+      "changed": false
+    },
+    {
+      "file": "app/Models/FiscalTaxRule.php",
+      "lines_before": 74,
+      "lines_after": 74,
+      "sha256_before": "83b0c0a0a0b9cb54ef36e68db6fc1773c5947d5262b07c046d141939d1d4c6f1",
+      "sha256_after": "83b0c0a0a0b9cb54ef36e68db6fc1773c5947d5262b07c046d141939d1d4c6f1",
+      "changed": false
+    },
+    {
+      "file": "app/Models/FiscalTaxRuleRevision.php",
+      "lines_before": 16,
+      "lines_after": 16,
+      "sha256_before": "8b6eb93e8000aed897adb18962dacba95510000fd40ea13997ef252c23e9a19a",
+      "sha256_after": "8b6eb93e8000aed897adb18962dacba95510000fd40ea13997ef252c23e9a19a",
+      "changed": false
+    },
+    {
+      "file": "app/Models/IncomingNfe.php",
+      "lines_before": 40,
+      "lines_after": 40,
+      "sha256_before": "8a32144d9ce17da129bed0b5b2a3a68f7920c0b2c90d12d88ea5c1fe30579ceb",
+      "sha256_after": "8a32144d9ce17da129bed0b5b2a3a68f7920c0b2c90d12d88ea5c1fe30579ceb",
+      "changed": false
+    },
+    {
+      "file": "app/Models/IncomingNfeManifestationAttempt.php",
+      "lines_before": 24,
+      "lines_after": 24,
+      "sha256_before": "0537ae1549ec14265691d4ac38203b17cffdd740f07b018864f9d280fb3df34f",
+      "sha256_after": "0537ae1549ec14265691d4ac38203b17cffdd740f07b018864f9d280fb3df34f",
+      "changed": false
+    },
+    {
+      "file": "app/Models/IncomingNfeSyncState.php",
+      "lines_before": 19,
+      "lines_after": 19,
+      "sha256_before": "f577c79301d4dc8bc05a2ff193bae3f42acebf5e1bff0d760836c8e36d474b39",
+      "sha256_after": "f577c79301d4dc8bc05a2ff193bae3f42acebf5e1bff0d760836c8e36d474b39",
+      "changed": false
+    },
+    {
+      "file": "app/Models/NFCeInutilization.php",
+      "lines_before": 20,
+      "lines_after": 20,
+      "sha256_before": "0f4a5ec3ee7792a3fca45ffe25af52729f392e6c4d8f7f4726748bc957a7299a",
+      "sha256_after": "0f4a5ec3ee7792a3fca45ffe25af52729f392e6c4d8f7f4726748bc957a7299a",
+      "changed": false
+    },
+    {
+      "file": "app/Models/Nfe55Inutilization.php",
+      "lines_before": 21,
+      "lines_after": 21,
+      "sha256_before": "ff4c237073e47cd53dbf3a29f4f101959e9b456365191a308923630664aa1b0d",
+      "sha256_after": "ff4c237073e47cd53dbf3a29f4f101959e9b456365191a308923630664aa1b0d",
+      "changed": false
+    },
+    {
+      "file": "app/Models/NfeDraft.php",
+      "lines_before": 81,
+      "lines_after": 81,
+      "sha256_before": "e41ceacb091b612cdff2c9233b0a0d4a31b701f8cd0ff290ec28a7fad4235e4b",
+      "sha256_after": "e41ceacb091b612cdff2c9233b0a0d4a31b701f8cd0ff290ec28a7fad4235e4b",
+      "changed": false
+    },
+    {
+      "file": "app/Models/NfeDraftItem.php",
+      "lines_before": 42,
+      "lines_after": 42,
+      "sha256_before": "a5b7ed9412ada934aec166d868ca52780e40cb72678acf4bbc73b1e8d64db283",
+      "sha256_after": "a5b7ed9412ada934aec166d868ca52780e40cb72678acf4bbc73b1e8d64db283",
+      "changed": false
+    },
+    {
+      "file": "app/Models/OperationNature.php",
+      "lines_before": 48,
+      "lines_after": 48,
+      "sha256_before": "b74e7eeca4b86c4e5083a1161d8afcb460e816b1f3bf7a098049753ab31b974a",
+      "sha256_after": "b74e7eeca4b86c4e5083a1161d8afcb460e816b1f3bf7a098049753ab31b974a",
+      "changed": false
+    },
+    {
+      "file": "app/Models/PaymentMethod.php",
+      "lines_before": 64,
+      "lines_after": 64,
+      "sha256_before": "e1d953d9f30148c35da863b4ee0be96bdd8ba40fc043d83e156a358555a8ecce",
+      "sha256_after": "e1d953d9f30148c35da863b4ee0be96bdd8ba40fc043d83e156a358555a8ecce",
+      "changed": false
+    },
+    {
+      "file": "app/Models/PdvCashMovement.php",
+      "lines_before": 34,
+      "lines_after": 34,
+      "sha256_before": "21b75cf02d8482964d51071c033726762d90f1596b8c924dab0a56a0fff052aa",
+      "sha256_after": "21b75cf02d8482964d51071c033726762d90f1596b8c924dab0a56a0fff052aa",
+      "changed": false
+    },
+    {
+      "file": "app/Models/PdvCashRegister.php",
+      "lines_before": 13,
+      "lines_after": 13,
+      "sha256_before": "fac64958290a54df3030c85dc60ae7dac04262ae99e2b10067f8b4760cef0d50",
+      "sha256_after": "fac64958290a54df3030c85dc60ae7dac04262ae99e2b10067f8b4760cef0d50",
+      "changed": false
+    },
+    {
+      "file": "app/Models/PdvCashSession.php",
+      "lines_before": 52,
+      "lines_after": 52,
+      "sha256_before": "97900d49a599596b75b5547d0b95b422e082f367e19c7413c7faf347104b86ac",
+      "sha256_after": "97900d49a599596b75b5547d0b95b422e082f367e19c7413c7faf347104b86ac",
+      "changed": false
+    },
+    {
+      "file": "app/Models/PdvSuspendedSale.php",
+      "lines_before": 28,
+      "lines_after": 28,
+      "sha256_before": "ed3db3a295939fef534a0b25dd1ddb571a26cbd5a814ed0953a6ac4e38dee814",
+      "sha256_after": "ed3db3a295939fef534a0b25dd1ddb571a26cbd5a814ed0953a6ac4e38dee814",
+      "changed": false
+    },
+    {
+      "file": "app/Models/Product.php",
+      "lines_before": 34,
+      "lines_after": 34,
+      "sha256_before": "cd3cf210f09b0a6cec7b60cedf18a25d02a915497ea152d1322b6ccd2e8dad1d",
+      "sha256_after": "cd3cf210f09b0a6cec7b60cedf18a25d02a915497ea152d1322b6ccd2e8dad1d",
+      "changed": false
+    },
+    {
+      "file": "app/Models/Purchase.php",
+      "lines_before": 31,
+      "lines_after": 31,
+      "sha256_before": "0126410faa29a95f8629b6353bf4ee20f35f6ca99c2f3571061953bf9f1caf52",
+      "sha256_after": "0126410faa29a95f8629b6353bf4ee20f35f6ca99c2f3571061953bf9f1caf52",
+      "changed": false
+    },
+    {
+      "file": "app/Models/PurchaseItem.php",
+      "lines_before": 17,
+      "lines_after": 17,
+      "sha256_before": "f50cfaf9200777e415854658eff22a3b920f34947780f799dec6154b204f5e73",
+      "sha256_after": "f50cfaf9200777e415854658eff22a3b920f34947780f799dec6154b204f5e73",
+      "changed": false
+    },
+    {
+      "file": "app/Models/Sale.php",
+      "lines_before": 39,
+      "lines_after": 39,
+      "sha256_before": "85147da7d52d1c1f1afab900eddbd49f8de0132d3be4e17e97f8ae2a0db417d2",
+      "sha256_after": "85147da7d52d1c1f1afab900eddbd49f8de0132d3be4e17e97f8ae2a0db417d2",
+      "changed": false
+    },
+    {
+      "file": "app/Models/SaleItem.php",
+      "lines_before": 28,
+      "lines_after": 28,
+      "sha256_before": "ccc3f9bc94f9bf27d956aeab2efe09a2d71d7e15157099809297d940b67a8904",
+      "sha256_after": "ccc3f9bc94f9bf27d956aeab2efe09a2d71d7e15157099809297d940b67a8904",
+      "changed": false
+    },
+    {
+      "file": "app/Models/SalePayment.php",
+      "lines_before": 45,
+      "lines_after": 45,
+      "sha256_before": "1269f82f7782792849e8fffc1ce129f9a454f3ff960bd124a6caa16425d128c6",
+      "sha256_after": "1269f82f7782792849e8fffc1ce129f9a454f3ff960bd124a6caa16425d128c6",
+      "changed": false
+    },
+    {
+      "file": "app/Models/SaleReturn.php",
+      "lines_before": 28,
+      "lines_after": 28,
+      "sha256_before": "fc5cababf0a9ff15de3b2f19d2057fd4c2d7e85fab13acd56a4e928bc7a12a92",
+      "sha256_after": "fc5cababf0a9ff15de3b2f19d2057fd4c2d7e85fab13acd56a4e928bc7a12a92",
+      "changed": false
+    },
+    {
+      "file": "app/Models/SaleReturnItem.php",
+      "lines_before": 30,
+      "lines_after": 30,
+      "sha256_before": "0a0e347849e49e6a75c80372e8684f577c9d52cf13cf7d72d50b884d6b8ed35c",
+      "sha256_after": "0a0e347849e49e6a75c80372e8684f577c9d52cf13cf7d72d50b884d6b8ed35c",
+      "changed": false
+    },
+    {
+      "file": "app/Models/Service.php",
+      "lines_before": 33,
+      "lines_after": 33,
+      "sha256_before": "7c8e8bd298d5d5ee8a32a134c2341f7c52ab901563f9e0cec3f5cf1f99552372",
+      "sha256_after": "7c8e8bd298d5d5ee8a32a134c2341f7c52ab901563f9e0cec3f5cf1f99552372",
+      "changed": false
+    },
+    {
+      "file": "app/Models/StockMovement.php",
+      "lines_before": 11,
+      "lines_after": 11,
+      "sha256_before": "88290cc2a30e4e81617306a060b37bed584f76152dbb4a686599bf0f49ab981c",
+      "sha256_after": "88290cc2a30e4e81617306a060b37bed584f76152dbb4a686599bf0f49ab981c",
+      "changed": false
+    },
+    {
+      "file": "app/Models/User.php",
+      "lines_before": 95,
+      "lines_after": 95,
+      "sha256_before": "b8dc9e0fd1797cdf2b6b93da25584c1a6f17f30874155ca197c115b55ae3cb46",
+      "sha256_after": "b8dc9e0fd1797cdf2b6b93da25584c1a6f17f30874155ca197c115b55ae3cb46",
+      "changed": false
+    },
+    {
+      "file": "app/Models/WebhookDelivery.php",
+      "lines_before": 22,
+      "lines_after": 22,
+      "sha256_before": "99e501bc02a1a572dc8687ceb35a93275cacc3cf480f1c4c92e5c70a03c05eb9",
+      "sha256_after": "99e501bc02a1a572dc8687ceb35a93275cacc3cf480f1c4c92e5c70a03c05eb9",
+      "changed": false
+    },
+    {
+      "file": "app/Providers/AppServiceProvider.php",
+      "lines_before": 61,
+      "lines_after": 69,
+      "sha256_before": "3cc73682aab149e9f7834acdd122c0e6ee5a51a17f6d240eb07cdf6ced49ae78",
+      "sha256_after": "19710cc41730f6bb3f849c622226cc26b8b1eef7e501b8d9b4c79823678433c6",
+      "changed": true
+    },
+    {
+      "file": "app/Services/AccountingExportService.php",
+      "lines_before": 116,
+      "lines_after": 116,
+      "sha256_before": "0d0d980df9b9e994a160493da973699736637e4c699059a942fdd230425f1fdd",
+      "sha256_after": "0d0d980df9b9e994a160493da973699736637e4c699059a942fdd230425f1fdd",
+      "changed": false
+    },
+    {
+      "file": "app/Services/BankStatementParser.php",
+      "lines_before": 251,
+      "lines_after": 252,
+      "sha256_before": "55478a3a96556f9a93b115eaa16a57e0a5223751d0ec62634d66860ca1c45e8a",
+      "sha256_after": "fc81bc3333e6af5601eddfce6200226cdc18b38ec138b7e8a63d44baf27a97db",
+      "changed": true
+    },
+    {
+      "file": "app/Services/BillingService.php",
+      "lines_before": 109,
+      "lines_after": 109,
+      "sha256_before": "5888ec37a704bd9b3117a8e831bed02427bf23879ff1a097ac8891a09ce87fc1",
+      "sha256_after": "5888ec37a704bd9b3117a8e831bed02427bf23879ff1a097ac8891a09ce87fc1",
+      "changed": false
+    },
+    {
+      "file": "app/Services/FinancialBalanceService.php",
+      "lines_before": 39,
+      "lines_after": 39,
+      "sha256_before": "b01eb72fdf8758c99ae1c8f80dc929aebabfa1dd7fc4ad7777b3449d63f1a2a5",
+      "sha256_after": "b01eb72fdf8758c99ae1c8f80dc929aebabfa1dd7fc4ad7777b3449d63f1a2a5",
+      "changed": false
+    },
+    {
+      "file": "app/Services/FinancialRecurrenceService.php",
+      "lines_before": 93,
+      "lines_after": 93,
+      "sha256_before": "54b75ec40780b41560f6bb6c89ee1a146304ae792a9e8693c572b3af4e2a1382",
+      "sha256_after": "54b75ec40780b41560f6bb6c89ee1a146304ae792a9e8693c572b3af4e2a1382",
+      "changed": false
+    },
+    {
+      "file": "app/Services/FinancialService.php",
+      "lines_before": 399,
+      "lines_after": 399,
+      "sha256_before": "5362055d14248ef5735e46b8029e004349b14f5a554bd7688212a04717bbbbee",
+      "sha256_after": "cdc32dbffecd5271d10da5d1948c7252aa9c515d9784b2c5da85a77480c6499c",
+      "changed": true
+    },
+    {
+      "file": "app/Services/Fiscal/ACBr/ACBrNFeService.php",
+      "lines_before": 485,
+      "lines_after": 485,
+      "sha256_before": "37083e4b62ec3d4fb3b0368b5f176409f332f4003bec7dae1d09ea71215ada67",
+      "sha256_after": "37083e4b62ec3d4fb3b0368b5f176409f332f4003bec7dae1d09ea71215ada67",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/ACBr/RecipientEventPreparationException.php",
+      "lines_before": 10,
+      "lines_after": 10,
+      "sha256_before": "bed2fb05f89991f573085cc566ebebcf8e31670708c0b94fc29a06dc53a67e95",
+      "sha256_after": "bed2fb05f89991f573085cc566ebebcf8e31670708c0b94fc29a06dc53a67e95",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/FiscalAdValoremCalculator.php",
+      "lines_before": 45,
+      "lines_after": 45,
+      "sha256_before": "d1ad1ef2ff88760f759743a1b39b337d3a5417a9045acff0e17fc377af4e34f2",
+      "sha256_after": "d1ad1ef2ff88760f759743a1b39b337d3a5417a9045acff0e17fc377af4e34f2",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/FiscalCatalogCoverage.php",
+      "lines_before": 67,
+      "lines_after": 67,
+      "sha256_before": "a77712c5edd8fe8f9d497c96049457d2fa02ef75d28c88dea6855ea3571ef957",
+      "sha256_after": "a77712c5edd8fe8f9d497c96049457d2fa02ef75d28c88dea6855ea3571ef957",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/FiscalCatalogModelReviewService.php",
+      "lines_before": 54,
+      "lines_after": 54,
+      "sha256_before": "f14fc02c3c112f1b5562c7485839d28f720688dcb47a206e67c272dbe39d53e9",
+      "sha256_after": "f14fc02c3c112f1b5562c7485839d28f720688dcb47a206e67c272dbe39d53e9",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/FiscalCatalogService.php",
+      "lines_before": 486,
+      "lines_after": 486,
+      "sha256_before": "01e17b68731da39bf5e1cb596dce6b37b50663b0a3b983e814c2758aa846e7ed",
+      "sha256_after": "01e17b68731da39bf5e1cb596dce6b37b50663b0a3b983e814c2758aa846e7ed",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/FiscalCatalogTemplateService.php",
+      "lines_before": 191,
+      "lines_after": 191,
+      "sha256_before": "e9fbb65a24f6d5a3f58c2345b6ea2cb2db2e8e88cee3e06f770f7f248dce69fa",
+      "sha256_after": "e9fbb65a24f6d5a3f58c2345b6ea2cb2db2e8e88cee3e06f770f7f248dce69fa",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/FiscalDocumentSettings.php",
+      "lines_before": 104,
+      "lines_after": 104,
+      "sha256_before": "48a7bcc0b13ad1ec516f3a2771a600dab6940429cd11d5a61fd876a08ad33fe9",
+      "sha256_after": "48a7bcc0b13ad1ec516f3a2771a600dab6940429cd11d5a61fd876a08ad33fe9",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/FiscalDocumentUtilityService.php",
+      "lines_before": 80,
+      "lines_after": 80,
+      "sha256_before": "8cf0b4c67eca9605d02260be7c76744d678b5bc480eaebaa0929159d5e658ebc",
+      "sha256_after": "8cf0b4c67eca9605d02260be7c76744d678b5bc480eaebaa0929159d5e658ebc",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/FiscalNormativeSources.php",
+      "lines_before": 63,
+      "lines_after": 63,
+      "sha256_before": "7b2560c5a8e8dd1e227880c94af10c9b71ddf0a57c3158b4cb3b1f1eafcb0061",
+      "sha256_after": "7b2560c5a8e8dd1e227880c94af10c9b71ddf0a57c3158b4cb3b1f1eafcb0061",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/FiscalProductClassificationService.php",
+      "lines_before": 227,
+      "lines_after": 227,
+      "sha256_before": "ded524621b95b9a932dca51d2c4c3635a67fcb6faadd43b0e49356131c424c59",
+      "sha256_after": "ded524621b95b9a932dca51d2c4c3635a67fcb6faadd43b0e49356131c424c59",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/FiscalTaxRuleResolver.php",
+      "lines_before": 122,
+      "lines_after": 122,
+      "sha256_before": "db5f63dab26ed8cd7adf116e4cf652b8533b0d2892e0b58f7dda025304a7cb95",
+      "sha256_after": "db5f63dab26ed8cd7adf116e4cf652b8533b0d2892e0b58f7dda025304a7cb95",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/IncomingNfeAcbrGateway.php",
+      "lines_before": 83,
+      "lines_after": 83,
+      "sha256_before": "418586459fa94a4ed61215658dbe66b29f3bb13e29bc425e6a490c642a96b6e1",
+      "sha256_after": "418586459fa94a4ed61215658dbe66b29f3bb13e29bc425e6a490c642a96b6e1",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/IncomingNfeDanfeService.php",
+      "lines_before": 115,
+      "lines_after": 115,
+      "sha256_before": "616bed877c0fbe8bc94576f5ebe3cc60f0959fe09cb3fc6299348452f0f0233a",
+      "sha256_after": "616bed877c0fbe8bc94576f5ebe3cc60f0959fe09cb3fc6299348452f0f0233a",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/IncomingNfeManifestationEvidence.php",
+      "lines_before": 142,
+      "lines_after": 142,
+      "sha256_before": "0e601355853ee05b58eb1c37ff159130f1e7941bd1c4853a92ffd68b39b085df",
+      "sha256_after": "0e601355853ee05b58eb1c37ff159130f1e7941bd1c4853a92ffd68b39b085df",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/IncomingNfeManifestationGateway.php",
+      "lines_before": 114,
+      "lines_after": 114,
+      "sha256_before": "07385ecb19eab09c6c8fcaa724ed2f7c77ef6836dd702b9c1f790ae3e977da34",
+      "sha256_after": "07385ecb19eab09c6c8fcaa724ed2f7c77ef6836dd702b9c1f790ae3e977da34",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/IncomingNfeManifestationService.php",
+      "lines_before": 194,
+      "lines_after": 194,
+      "sha256_before": "d22c3b2aea45ba7b783f2a53c813d69ea8fa1f31f3ef4c472362339d0186ec28",
+      "sha256_after": "346074cb453932e4e2bd681326881b769aeb5a74152e4652d6201a862f88400e",
+      "changed": true
+    },
+    {
+      "file": "app/Services/Fiscal/IncomingNfeParser.php",
+      "lines_before": 153,
+      "lines_after": 153,
+      "sha256_before": "d9e0f4199d20ee867cc4846be0221f1580fdd744c74176f683c8c74cb5488cbe",
+      "sha256_after": "d9e0f4199d20ee867cc4846be0221f1580fdd744c74176f683c8c74cb5488cbe",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/IncomingNfePurchasePrefill.php",
+      "lines_before": 86,
+      "lines_after": 86,
+      "sha256_before": "b317fd1b509a648bc1bf2f089ece2441af38128177ce0965b3b73ff8f315fe09",
+      "sha256_after": "b317fd1b509a648bc1bf2f089ece2441af38128177ce0965b3b73ff8f315fe09",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/IncomingNfeSyncService.php",
+      "lines_before": 226,
+      "lines_after": 226,
+      "sha256_before": "144dd08bc9b2b76c85fb71681513e1b646813dae000d8381acf26154b4399e0d",
+      "sha256_after": "144dd08bc9b2b76c85fb71681513e1b646813dae000d8381acf26154b4399e0d",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/NFCeAuthorizedXmlRecoveryService.php",
+      "lines_before": 81,
+      "lines_after": 81,
+      "sha256_before": "fc9bc2b92c0c9fe49b537265e5de09b8e698c1cf1f0af163521fd462defed6c9",
+      "sha256_after": "fc9bc2b92c0c9fe49b537265e5de09b8e698c1cf1f0af163521fd462defed6c9",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/NFCeCancellationService.php",
+      "lines_before": 126,
+      "lines_after": 126,
+      "sha256_before": "01e66cac70a6019dca301e7a5161b2b12ea148de25ce94c4ed992afec0eecc62",
+      "sha256_after": "01e66cac70a6019dca301e7a5161b2b12ea148de25ce94c4ed992afec0eecc62",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/NFCeCatalogAuditService.php",
+      "lines_before": 82,
+      "lines_after": 82,
+      "sha256_before": "a5a6964fc5e4db82249e0c7b5cff6a65bf3a6595f9aecdd04b1669056bfe7809",
+      "sha256_after": "a5a6964fc5e4db82249e0c7b5cff6a65bf3a6595f9aecdd04b1669056bfe7809",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/NFCeDanfeService.php",
+      "lines_before": 211,
+      "lines_after": 211,
+      "sha256_before": "e89cc3d1233639f7918756e45f38e92d44964371e62ab3c48f60b8ecbbf8d397",
+      "sha256_after": "e89cc3d1233639f7918756e45f38e92d44964371e62ab3c48f60b8ecbbf8d397",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/NFCeDuplicationService.php",
+      "lines_before": 172,
+      "lines_after": 172,
+      "sha256_before": "a7159b9aea6412a4a63a83b54003c2b1f9c4764b3f90a5c0a0163464b452805e",
+      "sha256_after": "a7159b9aea6412a4a63a83b54003c2b1f9c4764b3f90a5c0a0163464b452805e",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/NFCeEnvironmentParameters.php",
+      "lines_before": 68,
+      "lines_after": 68,
+      "sha256_before": "3cf25d1593f2de96a2813a78816aa8448dbbf54ab78274d3e1605889467dec8a",
+      "sha256_after": "3cf25d1593f2de96a2813a78816aa8448dbbf54ab78274d3e1605889467dec8a",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/NFCeFiscalDataRefreshService.php",
+      "lines_before": 95,
+      "lines_after": 95,
+      "sha256_before": "8ca3051eeea7080a2746c5667f37d70b16037630e3192bd0de2980bc12c2ffac",
+      "sha256_after": "8ca3051eeea7080a2746c5667f37d70b16037630e3192bd0de2980bc12c2ffac",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/NFCeFiscalEventResponse.php",
+      "lines_before": 137,
+      "lines_after": 137,
+      "sha256_before": "8bf8ec47ef80277e5d95d20990ff72adb1e0f4bc434e503833a6c003c270eb42",
+      "sha256_after": "8bf8ec47ef80277e5d95d20990ff72adb1e0f4bc434e503833a6c003c270eb42",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/NFCeFiscalProfileService.php",
+      "lines_before": 179,
+      "lines_after": 179,
+      "sha256_before": "23b8f31ba2ba103c5c9394153b49a92a4ba8b5e8db446b47f04df9c9e3e15534",
+      "sha256_after": "23b8f31ba2ba103c5c9394153b49a92a4ba8b5e8db446b47f04df9c9e3e15534",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/NFCeIniBuilder.php",
+      "lines_before": 274,
+      "lines_after": 274,
+      "sha256_before": "d40812f26a42158c3b4707ed31aaa7d3863fadb7e742e90b8d10a560b76ae578",
+      "sha256_after": "d40812f26a42158c3b4707ed31aaa7d3863fadb7e742e90b8d10a560b76ae578",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/NFCeInutilizationService.php",
+      "lines_before": 144,
+      "lines_after": 144,
+      "sha256_before": "8f395bd193e6197f046502da5c4bb9ba42ec759daa4508522f687a6223f20aba",
+      "sha256_after": "8f395bd193e6197f046502da5c4bb9ba42ec759daa4508522f687a6223f20aba",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/NFCeItemValueGuard.php",
+      "lines_before": 64,
+      "lines_after": 64,
+      "sha256_before": "c00d33e4b1f669a6f02791b427ad40d18dcb7eb4011876f747700cf601f1cbb6",
+      "sha256_after": "c00d33e4b1f669a6f02791b427ad40d18dcb7eb4011876f747700cf601f1cbb6",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/NFCeManualTaxPreviewService.php",
+      "lines_before": 77,
+      "lines_after": 77,
+      "sha256_before": "cf559c65ac9c667ba0079186b53a7c9eebc7f376af1784802ed8cb9449be1c13",
+      "sha256_after": "cf559c65ac9c667ba0079186b53a7c9eebc7f376af1784802ed8cb9449be1c13",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/NFCeOfflineService.php",
+      "lines_before": 160,
+      "lines_after": 160,
+      "sha256_before": "3e2485da5c2fe6831a9ce7c871f468b99f825ec0f905b4523fe9358160963147",
+      "sha256_after": "3e2485da5c2fe6831a9ce7c871f468b99f825ec0f905b4523fe9358160963147",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/NFCePdfService.php",
+      "lines_before": 248,
+      "lines_after": 248,
+      "sha256_before": "e9fbcbdc74adb7a8b83e4d359b7a182855f5479b79f19ccd45bc21f5955c69f8",
+      "sha256_after": "e9fbcbdc74adb7a8b83e4d359b7a182855f5479b79f19ccd45bc21f5955c69f8",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/NFCePendingRejectionReconciler.php",
+      "lines_before": 93,
+      "lines_after": 93,
+      "sha256_before": "d3be1d114b31dbbe3daffd4e0270684487d19ecfdf35c09c1adec0e914683b6b",
+      "sha256_after": "d3be1d114b31dbbe3daffd4e0270684487d19ecfdf35c09c1adec0e914683b6b",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/NFCePreflightService.php",
+      "lines_before": 222,
+      "lines_after": 222,
+      "sha256_before": "6feb586912ef4368334e8a41f7edee819abe76d8fd14523e46148f015f84908d",
+      "sha256_after": "6feb586912ef4368334e8a41f7edee819abe76d8fd14523e46148f015f84908d",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/NFCeProductionGate.php",
+      "lines_before": 24,
+      "lines_after": 24,
+      "sha256_before": "a3ba2e05e009104d9ac0c57233a861a649c975cfacb41912501dd3405d55ca1c",
+      "sha256_after": "a3ba2e05e009104d9ac0c57233a861a649c975cfacb41912501dd3405d55ca1c",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/NFCeProtocolXmlService.php",
+      "lines_before": 173,
+      "lines_after": 173,
+      "sha256_before": "dca473dcca7adc65705df14cdc117ead9fff9242bb7acc39c08d61ed9b3c5302",
+      "sha256_after": "dca473dcca7adc65705df14cdc117ead9fff9242bb7acc39c08d61ed9b3c5302",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/NFCeReadonlyViewData.php",
+      "lines_before": 195,
+      "lines_after": 195,
+      "sha256_before": "ba2e4585ad116438d80f1e9fa66a172948d20d907706e31af95140c37d5253f9",
+      "sha256_after": "ba2e4585ad116438d80f1e9fa66a172948d20d907706e31af95140c37d5253f9",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/NFCeRejectionCorrectionService.php",
+      "lines_before": 488,
+      "lines_after": 488,
+      "sha256_before": "c93dc2b0dca0d658749b6eca561c66a958c0e77546b06fdbd7f52be0f063b1c4",
+      "sha256_after": "c93dc2b0dca0d658749b6eca561c66a958c0e77546b06fdbd7f52be0f063b1c4",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/NFCeRtcTaxService.php",
+      "lines_before": 198,
+      "lines_after": 198,
+      "sha256_before": "5177cdaee06f18dcfdd44f593a94e34e988bc7b6e974ffd7c633fdbca1d532b7",
+      "sha256_after": "5177cdaee06f18dcfdd44f593a94e34e988bc7b6e974ffd7c633fdbca1d532b7",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/NFCeSefazResponseParser.php",
+      "lines_before": 186,
+      "lines_after": 186,
+      "sha256_before": "7fac38cb65f0d77298c6f24971d1d2f241af905b2335fc991ee1662cd1fbf2c6",
+      "sha256_after": "7fac38cb65f0d77298c6f24971d1d2f241af905b2335fc991ee1662cd1fbf2c6",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/NFCeTaxCalculationService.php",
+      "lines_before": 322,
+      "lines_after": 322,
+      "sha256_before": "3c8f5db50299fc3358a7324b67d5ce579c25889951debe3ee502080130e76bae",
+      "sha256_after": "3c8f5db50299fc3358a7324b67d5ce579c25889951debe3ee502080130e76bae",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/NFCeTaxGroupTranslator.php",
+      "lines_before": 185,
+      "lines_after": 185,
+      "sha256_before": "8a10aa9f5a552243c918c14190a65b51655ec6b5839adcb3cf79ea1509d76fa0",
+      "sha256_after": "8a10aa9f5a552243c918c14190a65b51655ec6b5839adcb3cf79ea1509d76fa0",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/NFCeTaxRuleApplicationService.php",
+      "lines_before": 72,
+      "lines_after": 72,
+      "sha256_before": "bf5e559464c0b40bcf6b78c4246916ca2d6382d1cee526d9b8696c1179803c08",
+      "sha256_after": "bf5e559464c0b40bcf6b78c4246916ca2d6382d1cee526d9b8696c1179803c08",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/NFCeTransmissionService.php",
+      "lines_before": 373,
+      "lines_after": 373,
+      "sha256_before": "2c3da0e21a0048acd960d35b1a5d0ed3abb0a60b8dc052f2f73c48d04877bbcf",
+      "sha256_after": "2c3da0e21a0048acd960d35b1a5d0ed3abb0a60b8dc052f2f73c48d04877bbcf",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/NFSeTaxRuleApplicationService.php",
+      "lines_before": 87,
+      "lines_after": 87,
+      "sha256_before": "50f29e0da02d7bd272a472abccf61763aa1d2a93ef23281cfd3939c1d90b51f8",
+      "sha256_after": "50f29e0da02d7bd272a472abccf61763aa1d2a93ef23281cfd3939c1d90b51f8",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/Nfe55AuthorizedXmlService.php",
+      "lines_before": 41,
+      "lines_after": 41,
+      "sha256_before": "4d06712beb51734f3a7b627dfbac4b61bbb0cb0197e9ad0d0f9d80a54f9355ca",
+      "sha256_after": "4d06712beb51734f3a7b627dfbac4b61bbb0cb0197e9ad0d0f9d80a54f9355ca",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/Nfe55CancellationReconciliationService.php",
+      "lines_before": 93,
+      "lines_after": 93,
+      "sha256_before": "e4dd8795c0a18984e4f550e759537fb14a9725d79ab85d7653c3eefb2f10c426",
+      "sha256_after": "e4dd8795c0a18984e4f550e759537fb14a9725d79ab85d7653c3eefb2f10c426",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/Nfe55CancellationService.php",
+      "lines_before": 184,
+      "lines_after": 184,
+      "sha256_before": "a89c10c1abf2b46266a0cca1f19704f478bc9c02e71e689d8d5747c3d76ea118",
+      "sha256_after": "a89c10c1abf2b46266a0cca1f19704f478bc9c02e71e689d8d5747c3d76ea118",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/Nfe55CancelledDanfeStampService.php",
+      "lines_before": 0,
+      "lines_after": 106,
+      "sha256_before": null,
+      "sha256_after": "b487ab4c2dfeaedad0577f35fea4e6c91545e221f71edef7812996ff821cc1f1",
+      "changed": true
+    },
+    {
+      "file": "app/Services/Fiscal/Nfe55DanfeService.php",
+      "lines_before": 82,
+      "lines_after": 91,
+      "sha256_before": "fcaf398b061916b7533a5ba07d81483309335eb7027d9eb0ea31d0b8fdc216a0",
+      "sha256_after": "e9506511d55b9caffdfb72a53b10080da878e3be6f9c65793685097f7fd22b34",
+      "changed": true
+    },
+    {
+      "file": "app/Services/Fiscal/Nfe55DifalCalculator.php",
+      "lines_before": 41,
+      "lines_after": 41,
+      "sha256_before": "0e1d8e67a5a02ad0c69b59a77be1477e9fcb1514b3cc89b854e549770046d913",
+      "sha256_after": "0e1d8e67a5a02ad0c69b59a77be1477e9fcb1514b3cc89b854e549770046d913",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/Nfe55DocumentSnapshot.php",
+      "lines_before": 94,
+      "lines_after": 94,
+      "sha256_before": "a0f42b0543df72594f127c50f735ee996813ed967d7ff01a160b435f74bce543",
+      "sha256_after": "a0f42b0543df72594f127c50f735ee996813ed967d7ff01a160b435f74bce543",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/Nfe55DraftTotalsService.php",
+      "lines_before": 186,
+      "lines_after": 186,
+      "sha256_before": "338d00e738a851eb68e950c04d9fc23fd5c2f57027b1416253f75c8b56fd2664",
+      "sha256_after": "338d00e738a851eb68e950c04d9fc23fd5c2f57027b1416253f75c8b56fd2664",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/Nfe55EmissionService.php",
+      "lines_before": 489,
+      "lines_after": 489,
+      "sha256_before": "44a3a5be05f46d96e09f0041c92fdaadeb15c61ebc789bef354b98291abf6ebd",
+      "sha256_after": "44a3a5be05f46d96e09f0041c92fdaadeb15c61ebc789bef354b98291abf6ebd",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/Nfe55FederalStCalculator.php",
+      "lines_before": 119,
+      "lines_after": 119,
+      "sha256_before": "16104cd5ccfe3e78fd5d4e5d9ed2b928a9833d8c57ec49b20963f93323a22376",
+      "sha256_after": "16104cd5ccfe3e78fd5d4e5d9ed2b928a9833d8c57ec49b20963f93323a22376",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/Nfe55ForeignTradeService.php",
+      "lines_before": 234,
+      "lines_after": 234,
+      "sha256_before": "467e2f6ad076d69b75222b15f22149a2dbfb9b36eecc2fc4a2f27bf481325cf1",
+      "sha256_after": "467e2f6ad076d69b75222b15f22149a2dbfb9b36eecc2fc4a2f27bf481325cf1",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/Nfe55IniBuilder.php",
+      "lines_before": 535,
+      "lines_after": 535,
+      "sha256_before": "7c5178d59b0778dc479dfa474bb9bada2b601f1e64bcc191a9550ee407cfb3b8",
+      "sha256_after": "7c5178d59b0778dc479dfa474bb9bada2b601f1e64bcc191a9550ee407cfb3b8",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/Nfe55InutilizationService.php",
+      "lines_before": 237,
+      "lines_after": 237,
+      "sha256_before": "8deb46cfb137322e1222bb351f71caf8269764114e123d06d6516595b59887ca",
+      "sha256_after": "8deb46cfb137322e1222bb351f71caf8269764114e123d06d6516595b59887ca",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/Nfe55NumberReservationService.php",
+      "lines_before": 73,
+      "lines_after": 73,
+      "sha256_before": "a3ea9a41733fc32ac0f702fd00e8dc0433a47d4dcc30d4f8145443ed9d8a9adf",
+      "sha256_after": "a3ea9a41733fc32ac0f702fd00e8dc0433a47d4dcc30d4f8145443ed9d8a9adf",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/Nfe55OperationPolicy.php",
+      "lines_before": 254,
+      "lines_after": 254,
+      "sha256_before": "e1a59954af337429ead1cfdf057b7b9954391f108d42bdb6662fa94a1c8ef831",
+      "sha256_after": "e1a59954af337429ead1cfdf057b7b9954391f108d42bdb6662fa94a1c8ef831",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/Nfe55PreflightService.php",
+      "lines_before": 69,
+      "lines_after": 69,
+      "sha256_before": "9fb87e1f933955c5da2b8e7090290192668f5eba60e27b0b5446c64f4109c6c2",
+      "sha256_after": "9fb87e1f933955c5da2b8e7090290192668f5eba60e27b0b5446c64f4109c6c2",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/Nfe55RejectionRecoveryService.php",
+      "lines_before": 198,
+      "lines_after": 198,
+      "sha256_before": "4e790f5b31fcc284c662e00eace8f89758c57a639a98358fa2cb7e65ddb59092",
+      "sha256_after": "4e790f5b31fcc284c662e00eace8f89758c57a639a98358fa2cb7e65ddb59092",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/Nfe55ReturnedIpiCalculator.php",
+      "lines_before": 38,
+      "lines_after": 38,
+      "sha256_before": "29ad1ab7493bd1b51763c06acfdc752e5f8b4b91c70d493e6a4142e16267b0e8",
+      "sha256_after": "29ad1ab7493bd1b51763c06acfdc752e5f8b4b91c70d493e6a4142e16267b0e8",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/Nfe55RtcClassificationCatalog.php",
+      "lines_before": 243,
+      "lines_after": 243,
+      "sha256_before": "53c4e09bf7a137e1b2aa9f2f7f39ab1b4a6a59995c38f492931a1ae42b7afdea",
+      "sha256_after": "53c4e09bf7a137e1b2aa9f2f7f39ab1b4a6a59995c38f492931a1ae42b7afdea",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/Nfe55RtcConfiguredCalculator.php",
+      "lines_before": 231,
+      "lines_after": 231,
+      "sha256_before": "adfcd4445469e6c552abd20d7db2da1f553a6d8116b608c28d7939ee5bc82dd7",
+      "sha256_after": "adfcd4445469e6c552abd20d7db2da1f553a6d8116b608c28d7939ee5bc82dd7",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/Nfe55RtcTaxAdapter.php",
+      "lines_before": 51,
+      "lines_after": 51,
+      "sha256_before": "2c3433132e7776f5d7776053ff0b24346c869d7ceeca9ef09d8a52195dd4adbb",
+      "sha256_after": "2c3433132e7776f5d7776053ff0b24346c869d7ceeca9ef09d8a52195dd4adbb",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/Nfe55SelectiveTaxCalculator.php",
+      "lines_before": 134,
+      "lines_after": 134,
+      "sha256_before": "ab69a249133e99a6436699cb5d4e445034fdb0550bfcd0b4ba860950bbe510fa",
+      "sha256_after": "ab69a249133e99a6436699cb5d4e445034fdb0550bfcd0b4ba860950bbe510fa",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/Nfe55TaxParameters.php",
+      "lines_before": 95,
+      "lines_after": 95,
+      "sha256_before": "60c73abac77b8c22f2eff9a8747fc2aa307218364b7b8b6d344c2f976a39b457",
+      "sha256_after": "60c73abac77b8c22f2eff9a8747fc2aa307218364b7b8b6d344c2f976a39b457",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/Nfe55TaxRuleApplicationService.php",
+      "lines_before": 409,
+      "lines_after": 409,
+      "sha256_before": "17c2de52458fe75934d68cf55919d711ee8eac3e36db243d8b3fbbaee72acc81",
+      "sha256_after": "17c2de52458fe75934d68cf55919d711ee8eac3e36db243d8b3fbbaee72acc81",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/Nfe55XmlTaxConsistency.php",
+      "lines_before": 129,
+      "lines_after": 129,
+      "sha256_before": "75a0264d76bca450c36f70b8083afb73e70c053c87f5ca43b5993e9729cb175d",
+      "sha256_after": "75a0264d76bca450c36f70b8083afb73e70c053c87f5ca43b5993e9729cb175d",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/NfeFederalItemTaxCalculator.php",
+      "lines_before": 160,
+      "lines_after": 160,
+      "sha256_before": "5e7530bedb76d28861d2baefe8b8c1310884c1f28619f0c96016d2fcc95f137f",
+      "sha256_after": "5e7530bedb76d28861d2baefe8b8c1310884c1f28619f0c96016d2fcc95f137f",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/NfeIcmsItemTaxCalculator.php",
+      "lines_before": 249,
+      "lines_after": 249,
+      "sha256_before": "4aed0de933aba42e988c700973ef8a56ae20eefceaf2be2ce231c7be604dfce2",
+      "sha256_after": "4aed0de933aba42e988c700973ef8a56ae20eefceaf2be2ce231c7be604dfce2",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/NfeTaxMath.php",
+      "lines_before": 113,
+      "lines_after": 113,
+      "sha256_before": "2ee0fefe638179230c47e430d45e5387391cfe09fe4cc21ee8f92a1f1fb11bb1",
+      "sha256_after": "2ee0fefe638179230c47e430d45e5387391cfe09fe4cc21ee8f92a1f1fb11bb1",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/SefazRejectionActions.php",
+      "lines_before": 466,
+      "lines_after": 466,
+      "sha256_before": "90666aacedd3d0e96f16d56e36eea7a3a8888701c5b09858aa8ffb114ad03064",
+      "sha256_after": "90666aacedd3d0e96f16d56e36eea7a3a8888701c5b09858aa8ffb114ad03064",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Fiscal/SefazRejectionGuidance.php",
+      "lines_before": 222,
+      "lines_after": 226,
+      "sha256_before": "ab177d2f054c1a9e4027e7685e7b7d881a768f66a3cf66ff999d82e1ee773603",
+      "sha256_after": "416d6688b7c88617f4466a231254b5f45c5178f73f0a9c732431d90546c54f07",
+      "changed": true
+    },
+    {
+      "file": "app/Services/Fiscal/TaxRuleResolution.php",
+      "lines_before": 74,
+      "lines_after": 74,
+      "sha256_before": "a924e920ffb5b2f110f11dc6d04253d8da4148a003e730dd6d65cf8c17541ea5",
+      "sha256_after": "a924e920ffb5b2f110f11dc6d04253d8da4148a003e730dd6d65cf8c17541ea5",
+      "changed": false
+    },
+    {
+      "file": "app/Services/FiscalPreparationService.php",
+      "lines_before": 270,
+      "lines_after": 270,
+      "sha256_before": "2de8ffeb833a6db3f6377b1057bb570eb765627cf998f16da74c27665959efdc",
+      "sha256_after": "2de8ffeb833a6db3f6377b1057bb570eb765627cf998f16da74c27665959efdc",
+      "changed": false
+    },
+    {
+      "file": "app/Services/InventoryService.php",
+      "lines_before": 65,
+      "lines_after": 65,
+      "sha256_before": "54a4d14a202a689a50ecfbef9c166f081e8de68ffc1d51ece34abea5ff4f5832",
+      "sha256_after": "54a4d14a202a689a50ecfbef9c166f081e8de68ffc1d51ece34abea5ff4f5832",
+      "changed": false
+    },
+    {
+      "file": "app/Services/License/CentralLicenseService.php",
+      "lines_before": 148,
+      "lines_after": 148,
+      "sha256_before": "d2719de624b14d2f8a3192a48d3943b35237f51e1cfac34c0c4f2c1791ea3fda",
+      "sha256_after": "d2719de624b14d2f8a3192a48d3943b35237f51e1cfac34c0c4f2c1791ea3fda",
+      "changed": false
+    },
+    {
+      "file": "app/Services/PdvActionAuthorization.php",
+      "lines_before": 49,
+      "lines_after": 49,
+      "sha256_before": "9755440a9ae4de2bc410d99cbd6b3fc77fb132a49d76f8b8ae6ab530c5c0c0f7",
+      "sha256_after": "9755440a9ae4de2bc410d99cbd6b3fc77fb132a49d76f8b8ae6ab530c5c0c0f7",
+      "changed": false
+    },
+    {
+      "file": "app/Services/PdvCashService.php",
+      "lines_before": 381,
+      "lines_after": 381,
+      "sha256_before": "ae0e5b93d3c7cccc5ce8d198c74a6a40d495b75c444aa5e8cf9e9e895512c4fe",
+      "sha256_after": "ae0e5b93d3c7cccc5ce8d198c74a6a40d495b75c444aa5e8cf9e9e895512c4fe",
+      "changed": false
+    },
+    {
+      "file": "app/Services/PdvOperatorAuthorization.php",
+      "lines_before": 60,
+      "lines_after": 60,
+      "sha256_before": "28556789808e739d5954f2cadd725c17cc37500acfc891fd4ef632df4997b102",
+      "sha256_after": "28556789808e739d5954f2cadd725c17cc37500acfc891fd4ef632df4997b102",
+      "changed": false
+    },
+    {
+      "file": "app/Services/PurchaseService.php",
+      "lines_before": 229,
+      "lines_after": 229,
+      "sha256_before": "8d804cf6d0871944b022180680023712888e4fffeba92b387d15dab7a12ee37c",
+      "sha256_after": "8d804cf6d0871944b022180680023712888e4fffeba92b387d15dab7a12ee37c",
+      "changed": false
+    },
+    {
+      "file": "app/Services/QuotePdfService.php",
+      "lines_before": 153,
+      "lines_after": 153,
+      "sha256_before": "20202d0703301f7b4501d64b1ada90a0d51b0883d4f111e045eaac67f5aa60d4",
+      "sha256_after": "20202d0703301f7b4501d64b1ada90a0d51b0883d4f111e045eaac67f5aa60d4",
+      "changed": false
+    },
+    {
+      "file": "app/Services/Receipts/ThermalReceiptPdfWriter.php",
+      "lines_before": 432,
+      "lines_after": 432,
+      "sha256_before": "a16d8cc39f71f4a32605db674e891dc111e67be151eec85f52c05972249fc6a6",
+      "sha256_after": "a16d8cc39f71f4a32605db674e891dc111e67be151eec85f52c05972249fc6a6",
+      "changed": false
+    },
+    {
+      "file": "app/Services/SaleReceiptPdfService.php",
+      "lines_before": 181,
+      "lines_after": 181,
+      "sha256_before": "fd4acf215ba6d084d899ad15388fe05902218ba38f29b0d06567d6c0e8da78d5",
+      "sha256_after": "fd4acf215ba6d084d899ad15388fe05902218ba38f29b0d06567d6c0e8da78d5",
+      "changed": false
+    },
+    {
+      "file": "app/Services/SaleReceiptPresenter.php",
+      "lines_before": 59,
+      "lines_after": 59,
+      "sha256_before": "e402847e3fd01d4040492eed331bb2c1b388a61fb5292ea93e0914d52c0940b6",
+      "sha256_after": "e402847e3fd01d4040492eed331bb2c1b388a61fb5292ea93e0914d52c0940b6",
+      "changed": false
+    },
+    {
+      "file": "app/Services/SaleReturnService.php",
+      "lines_before": 201,
+      "lines_after": 201,
+      "sha256_before": "9f05ddfcf2505a843db39d98098ea13235d72275a80d0cbc09166ace16202973",
+      "sha256_after": "9f05ddfcf2505a843db39d98098ea13235d72275a80d0cbc09166ace16202973",
+      "changed": false
+    },
+    {
+      "file": "app/Services/SalesService.php",
+      "lines_before": 503,
+      "lines_after": 503,
+      "sha256_before": "c92834e894d22fa3f7e5fa9ff87a93da3d9cf3f0eb3d265e8f679e4e1b545cc7",
+      "sha256_after": "c92834e894d22fa3f7e5fa9ff87a93da3d9cf3f0eb3d265e8f679e4e1b545cc7",
+      "changed": false
+    },
+    {
+      "file": "app/Services/WebhookService.php",
+      "lines_before": 26,
+      "lines_after": 26,
+      "sha256_before": "c60b28febf869d8a92f5813d6e1bcd90e17a9919f5971400ea2a8fb4772b34a4",
+      "sha256_after": "c60b28febf869d8a92f5813d6e1bcd90e17a9919f5971400ea2a8fb4772b34a4",
+      "changed": false
+    },
+    {
+      "file": "app/Support/BrazilianTaxId.php",
+      "lines_before": 63,
+      "lines_after": 63,
+      "sha256_before": "3f59dbad4ab737b27f59fede9f3828b2f0804af4afe36478aa54d9ba582792c3",
+      "sha256_after": "3f59dbad4ab737b27f59fede9f3828b2f0804af4afe36478aa54d9ba582792c3",
+      "changed": false
+    },
+    {
+      "file": "app/Support/CommercialBackgroundAccess.php",
+      "lines_before": 25,
+      "lines_after": 25,
+      "sha256_before": "adb891b210a5f4ad65126c639871fecb85b76f4dacb419f36e66e133e92a432a",
+      "sha256_after": "adb891b210a5f4ad65126c639871fecb85b76f4dacb419f36e66e133e92a432a",
+      "changed": false
+    },
+    {
+      "file": "app/Support/CommercialLicensePolicy.php",
+      "lines_before": 75,
+      "lines_after": 75,
+      "sha256_before": "f97b1e3149aa1ccecebf8d227f7e6b94dde6e5214b8ebd62b0bab3ee2b2fedf1",
+      "sha256_after": "f97b1e3149aa1ccecebf8d227f7e6b94dde6e5214b8ebd62b0bab3ee2b2fedf1",
+      "changed": false
+    },
+    {
+      "file": "app/Support/CommercialModuleAccess.php",
+      "lines_before": 77,
+      "lines_after": 77,
+      "sha256_before": "8b46f0678c65424329d0e67cf71ad404c57c8cc7ecd0257d974f5dc425bb3113",
+      "sha256_after": "8b46f0678c65424329d0e67cf71ad404c57c8cc7ecd0257d974f5dc425bb3113",
+      "changed": false
+    },
+    {
+      "file": "app/Support/CompanyReadiness.php",
+      "lines_before": 31,
+      "lines_after": 31,
+      "sha256_before": "bdbc5618e86b4fdae1b61b4439c5159e77e4724e16194f0b82b28975e49889c3",
+      "sha256_after": "bdbc5618e86b4fdae1b61b4439c5159e77e4724e16194f0b82b28975e49889c3",
+      "changed": false
+    },
+    {
+      "file": "app/Support/FiscalCodeCatalog.php",
+      "lines_before": 231,
+      "lines_after": 231,
+      "sha256_before": "ba5ee5c5677104df0b443aaf901938beeca8b4286976fd0a9163f2317e08beab",
+      "sha256_after": "ba5ee5c5677104df0b443aaf901938beeca8b4286976fd0a9163f2317e08beab",
+      "changed": false
+    },
+    {
+      "file": "app/Support/FiscalPresentation.php",
+      "lines_before": 0,
+      "lines_after": 107,
+      "sha256_before": null,
+      "sha256_after": "d988d88ba8efa137869ac782b3ebc0905b3012ed76a2ddb897d81ba9566cbdb6",
+      "changed": true
+    },
+    {
+      "file": "app/Support/FiscalServicePresetCatalog.php",
+      "lines_before": 60,
+      "lines_after": 60,
+      "sha256_before": "8ae045ab9dc0784c7750c976e1507406af60086f90fb5e993205ea844c93e36a",
+      "sha256_after": "8ae045ab9dc0784c7750c976e1507406af60086f90fb5e993205ea844c93e36a",
+      "changed": false
+    },
+    {
+      "file": "app/Support/FiscalTaxPresetCatalog.php",
+      "lines_before": 152,
+      "lines_after": 152,
+      "sha256_before": "08159ff70fd88ce81ba9c1ee5f5c664c1e8eca1c179362549be9a4671fb17019",
+      "sha256_after": "08159ff70fd88ce81ba9c1ee5f5c664c1e8eca1c179362549be9a4671fb17019",
+      "changed": false
+    },
+    {
+      "file": "app/Support/FiscalUserMessage.php",
+      "lines_before": 0,
+      "lines_after": 81,
+      "sha256_before": null,
+      "sha256_after": "e2114d37411964cdff2699674444431fc99d03f66b58dcc516ab4bb633703027",
+      "changed": true
+    },
+    {
+      "file": "app/Support/InstanceIdentity.php",
+      "lines_before": 34,
+      "lines_after": 34,
+      "sha256_before": "79c4499c22c116fd1c6773a0cd604591e0d4cfbae5c5eaf0222f952bf15b63fe",
+      "sha256_after": "79c4499c22c116fd1c6773a0cd604591e0d4cfbae5c5eaf0222f952bf15b63fe",
+      "changed": false
+    },
+    {
+      "file": "app/Support/LicenseReminder.php",
+      "lines_before": 37,
+      "lines_after": 37,
+      "sha256_before": "26a33f58f0abc2f6fc9fbbdf80c735fe44c3812a8f305669c2dac7a69d0cd405",
+      "sha256_after": "26a33f58f0abc2f6fc9fbbdf80c735fe44c3812a8f305669c2dac7a69d0cd405",
+      "changed": false
+    },
+    {
+      "file": "app/Support/LoginSubdomain.php",
+      "lines_before": 68,
+      "lines_after": 68,
+      "sha256_before": "4120e45b90a9835e60d1f13540a5ae259b9db3011fa69b72c05867fca6553229",
+      "sha256_after": "4120e45b90a9835e60d1f13540a5ae259b9db3011fa69b72c05867fca6553229",
+      "changed": false
+    },
+    {
+      "file": "app/Support/ManagedLicenseConfig.php",
+      "lines_before": 89,
+      "lines_after": 89,
+      "sha256_before": "6652d80e75f56759643a75159f99694ae4e4c2331f13e470f102b3027e0cec34",
+      "sha256_after": "6652d80e75f56759643a75159f99694ae4e4c2331f13e470f102b3027e0cec34",
+      "changed": false
+    },
+    {
+      "file": "app/Support/NFCeCardBrands.php",
+      "lines_before": 28,
+      "lines_after": 28,
+      "sha256_before": "4180cdecb32d71bfbaf81fc011c6d4720c2ea5db8a56f89b2f96665cf8fb59a6",
+      "sha256_after": "4180cdecb32d71bfbaf81fc011c6d4720c2ea5db8a56f89b2f96665cf8fb59a6",
+      "changed": false
+    },
+    {
+      "file": "app/Support/UserFacingMessage.php",
+      "lines_before": 0,
+      "lines_after": 46,
+      "sha256_before": null,
+      "sha256_after": "48132961b55c5ff6d31f9446e1a5c8dc914d1e8bc24d4c0aa2cbb47c88058fdd",
+      "changed": true
+    },
+    {
+      "file": "app/Support/ValidationFieldNames.php",
+      "lines_before": 0,
+      "lines_after": 622,
+      "sha256_before": null,
+      "sha256_after": "92050a30c02a4227411d329753b57e4152ba498d840d44d131e11643a373e25f",
+      "changed": true
+    },
+    {
+      "file": "app/helpers.php",
+      "lines_before": 2,
+      "lines_after": 2,
+      "sha256_before": "e2d10e15d181d56a46cd12fe4476b271dcf6648dce5fc1a29ca0f9ace99c464c",
+      "sha256_after": "e2d10e15d181d56a46cd12fe4476b271dcf6648dce5fc1a29ca0f9ace99c464c",
+      "changed": false
+    },
+    {
+      "file": "bootstrap/app.php",
+      "lines_before": 29,
+      "lines_after": 76,
+      "sha256_before": "f45835e9572f52b6670be341e7b9a41b04027f56edc1318ee9f3e5b9006f54ad",
+      "sha256_after": "6c350892a26adc471eee92b1b754e52bc2b79b1455fb557824444b3a9406ae72",
+      "changed": true
+    },
+    {
+      "file": "bootstrap/providers.php",
+      "lines_before": 2,
+      "lines_after": 2,
+      "sha256_before": "c90862112ce4cfa0c182349cb9ae647127023504ecab453a4de63c1560d7b923",
+      "sha256_after": "c90862112ce4cfa0c182349cb9ae647127023504ecab453a4de63c1560d7b923",
+      "changed": false
+    },
+    {
+      "file": "config/app.php",
+      "lines_before": 14,
+      "lines_after": 14,
+      "sha256_before": "7556831b5ed62bbe3057f51063992bbd44248273a3e5dd7c8a91a42d7cbc861f",
+      "sha256_after": "7556831b5ed62bbe3057f51063992bbd44248273a3e5dd7c8a91a42d7cbc861f",
+      "changed": false
+    },
+    {
+      "file": "config/auth.php",
+      "lines_before": 8,
+      "lines_after": 8,
+      "sha256_before": "abfb72c71b1c761aaf49d7adb0f7dd40b1c51c0271c7867294d79bfcf4f84a8f",
+      "sha256_after": "abfb72c71b1c761aaf49d7adb0f7dd40b1c51c0271c7867294d79bfcf4f84a8f",
+      "changed": false
+    },
+    {
+      "file": "config/cache.php",
+      "lines_before": 14,
+      "lines_after": 14,
+      "sha256_before": "3167a9de816428611a0e8e6093b7d072a4ecbf2ab00e27a0da45dddc2f863855",
+      "sha256_after": "3167a9de816428611a0e8e6093b7d072a4ecbf2ab00e27a0da45dddc2f863855",
+      "changed": false
+    },
+    {
+      "file": "config/central_license.php",
+      "lines_before": 12,
+      "lines_after": 12,
+      "sha256_before": "9f6ed604d6cd884f8f0e8772ba467f5c64a4b823bc8736ad84212a2ab9585b53",
+      "sha256_after": "9f6ed604d6cd884f8f0e8772ba467f5c64a4b823bc8736ad84212a2ab9585b53",
+      "changed": false
+    },
+    {
+      "file": "config/cors.php",
+      "lines_before": 13,
+      "lines_after": 13,
+      "sha256_before": "8840c47f44f3fcc03e639c17b3b52d844e67433b7d9182ffd9b76afd2881e1d1",
+      "sha256_after": "8840c47f44f3fcc03e639c17b3b52d844e67433b7d9182ffd9b76afd2881e1d1",
+      "changed": false
+    },
+    {
+      "file": "config/database.php",
+      "lines_before": 65,
+      "lines_after": 65,
+      "sha256_before": "13b99c794d0fd194015d6df3dba03b5de76d33d5ae083d3b9d503fc378e29c3d",
+      "sha256_after": "13b99c794d0fd194015d6df3dba03b5de76d33d5ae083d3b9d503fc378e29c3d",
+      "changed": false
+    },
+    {
+      "file": "config/filesystems.php",
+      "lines_before": 11,
+      "lines_after": 11,
+      "sha256_before": "7d5e2244d3d594f7bd1c17e37bd1315a75ccccd411f9b3a9d34994d334b2faf1",
+      "sha256_after": "7d5e2244d3d594f7bd1c17e37bd1315a75ccccd411f9b3a9d34994d334b2faf1",
+      "changed": false
+    },
+    {
+      "file": "config/instance.php",
+      "lines_before": 12,
+      "lines_after": 12,
+      "sha256_before": "c3ef10fc7908992e2d8dbb8866c9ccc07989743c4dbf079809212a69ce408d90",
+      "sha256_after": "c3ef10fc7908992e2d8dbb8866c9ccc07989743c4dbf079809212a69ce408d90",
+      "changed": false
+    },
+    {
+      "file": "config/logging.php",
+      "lines_before": 20,
+      "lines_after": 20,
+      "sha256_before": "038a5094ca8628d08b338c8933c1190f5673f8537c9b7a9db171e3dbbab6018c",
+      "sha256_after": "038a5094ca8628d08b338c8933c1190f5673f8537c9b7a9db171e3dbbab6018c",
+      "changed": false
+    },
+    {
+      "file": "config/mail.php",
+      "lines_before": 16,
+      "lines_after": 16,
+      "sha256_before": "9169e8c421512b01771855f37e91655a5b5e8a1dbfb8a987ea9fea56d5c44377",
+      "sha256_after": "9169e8c421512b01771855f37e91655a5b5e8a1dbfb8a987ea9fea56d5c44377",
+      "changed": false
+    },
+    {
+      "file": "config/queue.php",
+      "lines_before": 12,
+      "lines_after": 12,
+      "sha256_before": "a025cfa488cba2d0cdf07cf4341da44e5d7028b4ac8319f4079da0df96d5df36",
+      "sha256_after": "a025cfa488cba2d0cdf07cf4341da44e5d7028b4ac8319f4079da0df96d5df36",
+      "changed": false
+    },
+    {
+      "file": "config/services.php",
+      "lines_before": 13,
+      "lines_after": 13,
+      "sha256_before": "958b8ff49ccfbe7defa586f118d5fb227d939f9f72e2ce4b44891990600b1fb7",
+      "sha256_after": "958b8ff49ccfbe7defa586f118d5fb227d939f9f72e2ce4b44891990600b1fb7",
+      "changed": false
+    },
+    {
+      "file": "config/session.php",
+      "lines_before": 31,
+      "lines_after": 31,
+      "sha256_before": "2c390e7d2af8e704f34109d42bb312e72d5581e8c031e361bf0d0b22ac693606",
+      "sha256_after": "2c390e7d2af8e704f34109d42bb312e72d5581e8c031e361bf0d0b22ac693606",
+      "changed": false
+    },
+    {
+      "file": "lang/pt_BR/auth.php",
+      "lines_before": 7,
+      "lines_after": 7,
+      "sha256_before": "19e5b25e4b20e9de29c03bd59cc6de8d2605c5b35c1b7f54b01b7d8d0f22156a",
+      "sha256_after": "19e5b25e4b20e9de29c03bd59cc6de8d2605c5b35c1b7f54b01b7d8d0f22156a",
+      "changed": false
+    },
+    {
+      "file": "lang/pt_BR/pagination.php",
+      "lines_before": 6,
+      "lines_after": 6,
+      "sha256_before": "df4fb6651d2c2b3efd75e902c74f8d82c5a346e42b09eacff9a104babb95d4bb",
+      "sha256_after": "df4fb6651d2c2b3efd75e902c74f8d82c5a346e42b09eacff9a104babb95d4bb",
+      "changed": false
+    },
+    {
+      "file": "lang/pt_BR/passwords.php",
+      "lines_before": 9,
+      "lines_after": 9,
+      "sha256_before": "e76bdfd8324393ec858d06669b1acf8330d8bdb2ad0dc38bbf4516d37f7dd0d8",
+      "sha256_after": "e76bdfd8324393ec858d06669b1acf8330d8bdb2ad0dc38bbf4516d37f7dd0d8",
+      "changed": false
+    },
+    {
+      "file": "lang/pt_BR/validation.php",
+      "lines_before": 236,
+      "lines_after": 248,
+      "sha256_before": "842d43ab844bcc838d29e367c9aaab31de15c49a9435e6662154d46b8f50f46c",
+      "sha256_after": "8c1e5ce2f0eed72d36a525889c92d2360b5144dc70c0667d089140d7e1f8162d",
+      "changed": true
+    },
+    {
+      "file": "public/css/branding.css",
+      "lines_before": 44,
+      "lines_after": 44,
+      "sha256_before": "b24b42472f0b1e8d051d8c6b669936c02a246c764f330a64b4760e7d85185ca7",
+      "sha256_after": "b24b42472f0b1e8d051d8c6b669936c02a246c764f330a64b4760e7d85185ca7",
+      "changed": false
+    },
+    {
+      "file": "public/css/commercial-readonly.css",
+      "lines_before": 108,
+      "lines_after": 108,
+      "sha256_before": "d039a514f99b1a54cd37bfce104cafe2a7a30fed668aaae4a971da74e6be95af",
+      "sha256_after": "d039a514f99b1a54cd37bfce104cafe2a7a30fed668aaae4a971da74e6be95af",
+      "changed": false
+    },
+    {
+      "file": "public/css/desktop-polish.css",
+      "lines_before": 668,
+      "lines_after": 668,
+      "sha256_before": "e2ee4f651753c98c057d60def00f68f7383c11ffb0ae50ca8dbbc59b540e0901",
+      "sha256_after": "e2ee4f651753c98c057d60def00f68f7383c11ffb0ae50ca8dbbc59b540e0901",
+      "changed": false
+    },
+    {
+      "file": "public/css/erp-typography.css",
+      "lines_before": 180,
+      "lines_after": 180,
+      "sha256_before": "9e7ce3071cd5bc9017a0409d34d69556526b7462dc5c85dab5b398017b7f2cf0",
+      "sha256_after": "9e7ce3071cd5bc9017a0409d34d69556526b7462dc5c85dab5b398017b7f2cf0",
+      "changed": false
+    },
+    {
+      "file": "public/css/erp.css",
+      "lines_before": 3977,
+      "lines_after": 3977,
+      "sha256_before": "39cc364fa78acdaeff0fc9a82923fc9c6dfe94a468b3e0792d1ec83dd7f1df95",
+      "sha256_after": "39cc364fa78acdaeff0fc9a82923fc9c6dfe94a468b3e0792d1ec83dd7f1df95",
+      "changed": false
+    },
+    {
+      "file": "public/css/fiscal-purchases.css",
+      "lines_before": 101,
+      "lines_after": 101,
+      "sha256_before": "d9fb20106a67bd3ff2bd574d8e0af3261247797106906cf15016c01d8ae694f0",
+      "sha256_after": "d9fb20106a67bd3ff2bd574d8e0af3261247797106906cf15016c01d8ae694f0",
+      "changed": false
+    },
+    {
+      "file": "public/css/login.css",
+      "lines_before": 48,
+      "lines_after": 48,
+      "sha256_before": "7cfd3a64602218eae75638b3bdf6acbaeb6e0747ed6c6cae292dd788adeb2821",
+      "sha256_after": "7cfd3a64602218eae75638b3bdf6acbaeb6e0747ed6c6cae292dd788adeb2821",
+      "changed": false
+    },
+    {
+      "file": "public/css/nfce-danfe.css",
+      "lines_before": 53,
+      "lines_after": 53,
+      "sha256_before": "fd5ebfed29d3dfb316cb46df7614cb76f3226f1f7fb38dfca7c7a6681bafc36c",
+      "sha256_after": "fd5ebfed29d3dfb316cb46df7614cb76f3226f1f7fb38dfca7c7a6681bafc36c",
+      "changed": false
+    },
+    {
+      "file": "public/css/nfe-form-workflow.css",
+      "lines_before": 1028,
+      "lines_after": 1028,
+      "sha256_before": "8707343b62dc5ff0527d5a5b50e77b4dcdbaa08e36c2acc9c8bcc3a0d3baa74f",
+      "sha256_after": "8707343b62dc5ff0527d5a5b50e77b4dcdbaa08e36c2acc9c8bcc3a0d3baa74f",
+      "changed": false
+    },
+    {
+      "file": "public/css/pdv-cash-report-modal.css",
+      "lines_before": 110,
+      "lines_after": 110,
+      "sha256_before": "977ffb48642fd8918f4a549602125482438f5323039e27c8763407c0589a7d39",
+      "sha256_after": "977ffb48642fd8918f4a549602125482438f5323039e27c8763407c0589a7d39",
+      "changed": false
+    },
+    {
+      "file": "public/css/pdv-lumeron.css",
+      "lines_before": 1528,
+      "lines_after": 1528,
+      "sha256_before": "8a21c749e742ce6c146b2c24f637a0d592beb03f03daa4ef0b39b314e855d56d",
+      "sha256_after": "8a21c749e742ce6c146b2c24f637a0d592beb03f03daa4ef0b39b314e855d56d",
+      "changed": false
+    },
+    {
+      "file": "public/css/pdv-settings.css",
+      "lines_before": 138,
+      "lines_after": 138,
+      "sha256_before": "d03d2a781c8b107e58a4564c1026990972152f3bc59c80262141d57cda0ccb05",
+      "sha256_after": "d03d2a781c8b107e58a4564c1026990972152f3bc59c80262141d57cda0ccb05",
+      "changed": false
+    },
+    {
+      "file": "public/css/pdv.css",
+      "lines_before": 2533,
+      "lines_after": 2533,
+      "sha256_before": "d20a6cc0af960b2c69932bc61acc946b5d359705842276bb599834c67c7ae7ab",
+      "sha256_after": "d20a6cc0af960b2c69932bc61acc946b5d359705842276bb599834c67c7ae7ab",
+      "changed": false
+    },
+    {
+      "file": "public/css/purchases.css",
+      "lines_before": 125,
+      "lines_after": 125,
+      "sha256_before": "205883edbcafa932be89f57dbb86372f53f2da5e1ad88bdb9305acdd1dc36083",
+      "sha256_after": "205883edbcafa932be89f57dbb86372f53f2da5e1ad88bdb9305acdd1dc36083",
+      "changed": false
+    },
+    {
+      "file": "public/css/quick-catalog.css",
+      "lines_before": 457,
+      "lines_after": 457,
+      "sha256_before": "1f9fda73951c9051a8542464dd82da33c8c7462fea98c5fe688ebfe7ae5ade3a",
+      "sha256_after": "1f9fda73951c9051a8542464dd82da33c8c7462fea98c5fe688ebfe7ae5ade3a",
+      "changed": false
+    },
+    {
+      "file": "public/css/ui-refinement.css",
+      "lines_before": 809,
+      "lines_after": 809,
+      "sha256_before": "73d666c3d8363522151f4a0770c85d5d431cf10fea2465f347b57ddee12cf49f",
+      "sha256_after": "73d666c3d8363522151f4a0770c85d5d431cf10fea2465f347b57ddee12cf49f",
+      "changed": false
+    },
+    {
+      "file": "public/css/user-message-page.css",
+      "lines_before": 0,
+      "lines_after": 6,
+      "sha256_before": null,
+      "sha256_after": "c84cefb73539f3115f476b00ede68809000ab60fbdb65998e28d28b37f434a7d",
+      "changed": true
+    },
+    {
+      "file": "public/js/commercial-readonly.js",
+      "lines_before": 256,
+      "lines_after": 256,
+      "sha256_before": "7aca4e7ae94a55ba5fbbc76bb56e6b0133344fa768e1c5b3b8dbd2bdc8019ab6",
+      "sha256_after": "7aca4e7ae94a55ba5fbbc76bb56e6b0133344fa768e1c5b3b8dbd2bdc8019ab6",
+      "changed": false
+    },
+    {
+      "file": "public/js/desktop-polish.js",
+      "lines_before": 61,
+      "lines_after": 61,
+      "sha256_before": "db9c63ec1444d4fbc05132c16fe8b77ae43931c92a94c329875040c3c2f8baa8",
+      "sha256_after": "db9c63ec1444d4fbc05132c16fe8b77ae43931c92a94c329875040c3c2f8baa8",
+      "changed": false
+    },
+    {
+      "file": "public/js/erp.js",
+      "lines_before": 2417,
+      "lines_after": 2418,
+      "sha256_before": "7e482624c7f545a54f15c85947f28e4a9f61cffba03572b392c0b9f45a37e9ca",
+      "sha256_after": "86d7134f2194e21345ff7e59efe8142315a4e83be788ff6414ad5ec58fad95fe",
+      "changed": true
+    },
+    {
+      "file": "public/js/fiscal-codes.js",
+      "lines_before": 415,
+      "lines_after": 415,
+      "sha256_before": "2406ed0cf04eb87c4edeae1b99d2754173462631717f7d38b2be4506df6b2970",
+      "sha256_after": "2406ed0cf04eb87c4edeae1b99d2754173462631717f7d38b2be4506df6b2970",
+      "changed": false
+    },
+    {
+      "file": "public/js/fiscal-purchases-manifest.js",
+      "lines_before": 57,
+      "lines_after": 57,
+      "sha256_before": "c6c492ec5a8c5b56034eded3f0aa6775730adc8c65ea7be0b53b199e574d3f8f",
+      "sha256_after": "c6c492ec5a8c5b56034eded3f0aa6775730adc8c65ea7be0b53b199e574d3f8f",
+      "changed": false
+    },
+    {
+      "file": "public/js/login.js",
+      "lines_before": 176,
+      "lines_after": 177,
+      "sha256_before": "f5b0d5754ed30afa43f49621ceec72c11faa09d42a43e3e95e23559219eee5b6",
+      "sha256_after": "09aa201ca92e495e9856d229b17a0299261b8e44b7cae5536ae040e71bd2ab42",
+      "changed": true
+    },
+    {
+      "file": "public/js/nfce-editor.js",
+      "lines_before": 715,
+      "lines_after": 715,
+      "sha256_before": "0724a42544ac7bd94f67177f0597c9e6e24aacfcb603dc123f7480f36043a62e",
+      "sha256_after": "0724a42544ac7bd94f67177f0597c9e6e24aacfcb603dc123f7480f36043a62e",
+      "changed": false
+    },
+    {
+      "file": "public/js/nfe-editor.js",
+      "lines_before": 1489,
+      "lines_after": 1488,
+      "sha256_before": "e14106e10dbe69a6181db31f130b5c7bb07467993bfd8fa69837c778cd5ccd3d",
+      "sha256_after": "524ab393d8d7def35ae8d40ebde588f6805cfbd1b2c6e172c0cfe2cf77321b09",
+      "changed": true
+    },
+    {
+      "file": "public/js/pdv-cash-report-modal.js",
+      "lines_before": 74,
+      "lines_after": 74,
+      "sha256_before": "bab864452871005c55135f3beba97040dfaec876e103041e5886760d2e8d8248",
+      "sha256_after": "bab864452871005c55135f3beba97040dfaec876e103041e5886760d2e8d8248",
+      "changed": false
+    },
+    {
+      "file": "public/js/pdv-receipt-modal.js",
+      "lines_before": 33,
+      "lines_after": 33,
+      "sha256_before": "1da27b5b0f3e2e7c6ef9ea18c2282afdeb26750c7abf667774955318afec9ef3",
+      "sha256_after": "1da27b5b0f3e2e7c6ef9ea18c2282afdeb26750c7abf667774955318afec9ef3",
+      "changed": false
+    },
+    {
+      "file": "public/js/pdv-sales.js",
+      "lines_before": 395,
+      "lines_after": 395,
+      "sha256_before": "4e603db9260d3e9e5642b91d3a0df2996ae0121e522d70c0d394f19a9203b536",
+      "sha256_after": "5bfb7a4236b527832440d6b4d7e038808a7ed0c800c972eb0166f22d2b74db83",
+      "changed": true
+    },
+    {
+      "file": "public/js/pdv.js",
+      "lines_before": 2259,
+      "lines_after": 2259,
+      "sha256_before": "51f89d2dc0b95a0814196cf083e88a45016d346e5ba9577c036584193829dd1d",
+      "sha256_after": "a60d402acf461d20a22e69df3426e9a1a2661c47533bb66ceb15cedbe7200dd2",
+      "changed": true
+    },
+    {
+      "file": "public/js/product-fiscal-catalog.js",
+      "lines_before": 39,
+      "lines_after": 39,
+      "sha256_before": "de89c8c8b2eb04fe3814623c1ed48b331b9e54afcb4d218289f8f3bfc586f30e",
+      "sha256_after": "de89c8c8b2eb04fe3814623c1ed48b331b9e54afcb4d218289f8f3bfc586f30e",
+      "changed": false
+    },
+    {
+      "file": "public/js/purchases.js",
+      "lines_before": 220,
+      "lines_after": 220,
+      "sha256_before": "327eec9df4ddd3fb57aab8001e2a0c157c2568383dcb95bd48a059c4804b2757",
+      "sha256_after": "327eec9df4ddd3fb57aab8001e2a0c157c2568383dcb95bd48a059c4804b2757",
+      "changed": false
+    },
+    {
+      "file": "public/js/quick-catalog.js",
+      "lines_before": 273,
+      "lines_after": 274,
+      "sha256_before": "1d78b75a3d241e525bc4b142bca5f8c332e56062457333c3319cf66b45dc4447",
+      "sha256_after": "e3f9a065c82de1c0292ad1da9475fdd3935fba5d0c254aa3ae8c379cd0356536",
+      "changed": true
+    },
+    {
+      "file": "public/js/user-messages.js",
+      "lines_before": 0,
+      "lines_after": 26,
+      "sha256_before": null,
+      "sha256_after": "b74d881940ff1637148126e084493a48a87a6ad1441047ec41d9083d64893da9",
+      "changed": true
+    },
+    {
+      "file": "resources/views/auth/login.blade.php",
+      "lines_before": 78,
+      "lines_after": 77,
+      "sha256_before": "21d6c2bed10d5d273ef64f8449de72bc836cffe806e5f54275493bec902992f0",
+      "sha256_after": "ab79b0f1f09e4578c6dd40239f1d7496a2dcf273204a2857c5cd7ca5ee9089b2",
+      "changed": true
+    },
+    {
+      "file": "resources/views/auth/password-request.blade.php",
+      "lines_before": 35,
+      "lines_after": 35,
+      "sha256_before": "cee05755e53fe25cc997978f7644f508ed5492f6aa0a7a9f32a02614eca99f7f",
+      "sha256_after": "c472eab1cb7d196e0d834b7b88fb982304df14f330fb100ac4e695d67d76d776",
+      "changed": true
+    },
+    {
+      "file": "resources/views/auth/password-reset.blade.php",
+      "lines_before": 38,
+      "lines_after": 39,
+      "sha256_before": "4892830b0c06206c0d40bc410fa7c5520e1e1a0ea1f8be9f86282ce90fadf69c",
+      "sha256_after": "7e225c2bb6586b6ef0ecd87b3d2b36dfae435d65366766e604b466e057e884c4",
+      "changed": true
+    },
+    {
+      "file": "resources/views/customers/form.blade.php",
+      "lines_before": 220,
+      "lines_after": 220,
+      "sha256_before": "52ecf2db55dece545484dc1718c4b2b52acc93870a3c8b6cd49b169c215c5f78",
+      "sha256_after": "52ecf2db55dece545484dc1718c4b2b52acc93870a3c8b6cd49b169c215c5f78",
+      "changed": false
+    },
+    {
+      "file": "resources/views/customers/index.blade.php",
+      "lines_before": 50,
+      "lines_after": 50,
+      "sha256_before": "0cadb3b58d8185236027f145175b0245984756552a11ecadc8145b1e433ae2d1",
+      "sha256_after": "0cadb3b58d8185236027f145175b0245984756552a11ecadc8145b1e433ae2d1",
+      "changed": false
+    },
+    {
+      "file": "resources/views/dashboard.blade.php",
+      "lines_before": 45,
+      "lines_after": 44,
+      "sha256_before": "1fabdf93be3df078a3c2b982c08a3a43a9ba8733278428ffd06656eabeeeb309",
+      "sha256_after": "5360e1d655069b30c89f9104122961b669180b524512efe38a7a48dd377dd4ef",
+      "changed": true
+    },
+    {
+      "file": "resources/views/errors/license-blocked.blade.php",
+      "lines_before": 7,
+      "lines_after": 7,
+      "sha256_before": "5ec9f2a712e58237e1b0cafc1eb5da9979defd405e1c265268040bb23f76f20f",
+      "sha256_after": "2c21f47e36fa2b7443e73add1e08826de3d32e15ab8cdc17bae8717bbcb0f263",
+      "changed": true
+    },
+    {
+      "file": "resources/views/errors/message.blade.php",
+      "lines_before": 0,
+      "lines_after": 18,
+      "sha256_before": null,
+      "sha256_after": "59bb7a3f3df7a22d83e20f1209f27de4fb3910f1fe5885865d4f8ea0802beaf7",
+      "changed": true
+    },
+    {
+      "file": "resources/views/finance/_nav.blade.php",
+      "lines_before": 12,
+      "lines_after": 12,
+      "sha256_before": "1e379f04ec1c722c78db57fc67de7919b122d08799fad155cf8f742a345af840",
+      "sha256_after": "1e379f04ec1c722c78db57fc67de7919b122d08799fad155cf8f742a345af840",
+      "changed": false
+    },
+    {
+      "file": "resources/views/finance/dashboard.blade.php",
+      "lines_before": 143,
+      "lines_after": 143,
+      "sha256_before": "044a8f0e8cb24aa096a33c2eb7d9426a5957f95b80d425643bc8dafcb46c239f",
+      "sha256_after": "044a8f0e8cb24aa096a33c2eb7d9426a5957f95b80d425643bc8dafcb46c239f",
+      "changed": false
+    },
+    {
+      "file": "resources/views/finance/form.blade.php",
+      "lines_before": 105,
+      "lines_after": 104,
+      "sha256_before": "0a4d502b461a60368acfe0a207f6e9522d7af786bc628083d0b97646fd9b5a12",
+      "sha256_after": "e122c2a2ace7067f6ecf7977ced308b2144f74cc079259fe36a216dfd0004b8a",
+      "changed": true
+    },
+    {
+      "file": "resources/views/finance/index.blade.php",
+      "lines_before": 357,
+      "lines_after": 357,
+      "sha256_before": "3d32de3efac42b4f4297e2bf47bb4348d4ef314ee5dd7551b2d86939b5a36c16",
+      "sha256_after": "3d32de3efac42b4f4297e2bf47bb4348d4ef314ee5dd7551b2d86939b5a36c16",
+      "changed": false
+    },
+    {
+      "file": "resources/views/finance/receipts/form.blade.php",
+      "lines_before": 33,
+      "lines_after": 33,
+      "sha256_before": "34b672c72d3d970777f1d49bff546d65aaf7dc60374e99bb88b9e05ab2230ff2",
+      "sha256_after": "34b672c72d3d970777f1d49bff546d65aaf7dc60374e99bb88b9e05ab2230ff2",
+      "changed": false
+    },
+    {
+      "file": "resources/views/finance/receipts/index.blade.php",
+      "lines_before": 62,
+      "lines_after": 62,
+      "sha256_before": "9fc1631cab7f2380642b8e274fd5b18102d136a479da3c4e37e61b39f01206ff",
+      "sha256_after": "9fc1631cab7f2380642b8e274fd5b18102d136a479da3c4e37e61b39f01206ff",
+      "changed": false
+    },
+    {
+      "file": "resources/views/finance/receipts/print.blade.php",
+      "lines_before": 67,
+      "lines_after": 67,
+      "sha256_before": "8ff0fcd15b05ce323fda11aa46e8210477a13d6e53cf5b5fe1eace510728e26e",
+      "sha256_after": "8ff0fcd15b05ce323fda11aa46e8210477a13d6e53cf5b5fe1eace510728e26e",
+      "changed": false
+    },
+    {
+      "file": "resources/views/finance/reconciliation/import.blade.php",
+      "lines_before": 11,
+      "lines_after": 11,
+      "sha256_before": "c9c7bfd1de2f17cd92bbce5b0101e24dfa73ea69b9ba36b4494ac484ad240a66",
+      "sha256_after": "d146f05e32e32e78512141c58b84994be87ba7314e84cf2ece2e09c58de903b4",
+      "changed": true
+    },
+    {
+      "file": "resources/views/finance/reconciliation/index.blade.php",
+      "lines_before": 89,
+      "lines_after": 89,
+      "sha256_before": "d713c2fe5788892db3015e9f8ddc01b85a092dd05791676d69feb25a04f14288",
+      "sha256_after": "d713c2fe5788892db3015e9f8ddc01b85a092dd05791676d69feb25a04f14288",
+      "changed": false
+    },
+    {
+      "file": "resources/views/finance/recurrences/form.blade.php",
+      "lines_before": 27,
+      "lines_after": 27,
+      "sha256_before": "b60ca2eb6cb09df0d82366e337a98130834d4b88766e08e396ff79687dfb0c81",
+      "sha256_after": "b60ca2eb6cb09df0d82366e337a98130834d4b88766e08e396ff79687dfb0c81",
+      "changed": false
+    },
+    {
+      "file": "resources/views/finance/recurrences/index.blade.php",
+      "lines_before": 72,
+      "lines_after": 72,
+      "sha256_before": "744e891c8d26c3313b96945df83d0a4ebb783c4bf44385c66eee77c05c7b9dc9",
+      "sha256_after": "744e891c8d26c3313b96945df83d0a4ebb783c4bf44385c66eee77c05c7b9dc9",
+      "changed": false
+    },
+    {
+      "file": "resources/views/finance/settings.blade.php",
+      "lines_before": 81,
+      "lines_after": 81,
+      "sha256_before": "d7dd217b701e9505c90334ed5cefd30953c2fb2f58bf8b548a042abd5a3afe40",
+      "sha256_after": "d7dd217b701e9505c90334ed5cefd30953c2fb2f58bf8b548a042abd5a3afe40",
+      "changed": false
+    },
+    {
+      "file": "resources/views/finance/show.blade.php",
+      "lines_before": 190,
+      "lines_after": 190,
+      "sha256_before": "6e30dd6fa0d1dc6e6213cbe1f399be29fe0a52a2fd7015199d03cdc06cb1fede",
+      "sha256_after": "d8c1b1ad21b68a7d0d50e8f2c7e646f076b4c3d127d4e315b088b69fad0d2036",
+      "changed": true
+    },
+    {
+      "file": "resources/views/finance/transfers/form.blade.php",
+      "lines_before": 17,
+      "lines_after": 17,
+      "sha256_before": "bdb2159b9badcc7d75c9201dfa23c4db6fc90dac11f917f3cbb58373c869a90a",
+      "sha256_after": "bdb2159b9badcc7d75c9201dfa23c4db6fc90dac11f917f3cbb58373c869a90a",
+      "changed": false
+    },
+    {
+      "file": "resources/views/finance/transfers/index.blade.php",
+      "lines_before": 74,
+      "lines_after": 74,
+      "sha256_before": "2e3743d4d1dd711aebbdec135599223dbc9e139c71d07af3031facf676826357",
+      "sha256_after": "65e0827fb97ab01237afdfb3501d6ff76eb75f0cfb43291273cfef19c2553892",
+      "changed": true
+    },
+    {
+      "file": "resources/views/fiscal/_catalog-review.blade.php",
+      "lines_before": 34,
+      "lines_after": 34,
+      "sha256_before": "eff30db24114f3fd29f1d7a2466defb597886ebb4231af177e22e11380ec2f16",
+      "sha256_after": "cead98c1acd0f661815ed3764e385c732fb55839d6cca0dd96a23b849fb038bd",
+      "changed": true
+    },
+    {
+      "file": "resources/views/fiscal/_nav.blade.php",
+      "lines_before": 13,
+      "lines_after": 13,
+      "sha256_before": "3cb72712899be57b41a5dc289b3f982ca45b2a9187858ea4986fea76cac88fb1",
+      "sha256_after": "3cb72712899be57b41a5dc289b3f982ca45b2a9187858ea4986fea76cac88fb1",
+      "changed": false
+    },
+    {
+      "file": "resources/views/fiscal/catalog/index.blade.php",
+      "lines_before": 112,
+      "lines_after": 101,
+      "sha256_before": "d48f6e54a0a18164f0f443610ea001285971f439dfb4b38bf25acf0669452520",
+      "sha256_after": "b7f3134c00f345dc7062595a5c72041557913e07cc2303d39c84616ae8e1d169",
+      "changed": true
+    },
+    {
+      "file": "resources/views/fiscal/fcp/index.blade.php",
+      "lines_before": 74,
+      "lines_after": 74,
+      "sha256_before": "43363b9525503bd8eb6d05e4de2051dbb42f819db8d923c922da7017acc41209",
+      "sha256_after": "43363b9525503bd8eb6d05e4de2051dbb42f819db8d923c922da7017acc41209",
+      "changed": false
+    },
+    {
+      "file": "resources/views/fiscal/index.blade.php",
+      "lines_before": 330,
+      "lines_after": 346,
+      "sha256_before": "7fe0fff0634a54773202dd423716afdf1d17d9ec6cf194c7118c7841a1df0aec",
+      "sha256_after": "8db8518c526fd5c2dc972e20d82525a6ef9f0269b67bc4bf128ea18575759230",
+      "changed": true
+    },
+    {
+      "file": "resources/views/fiscal/nfce-danfe-wait.blade.php",
+      "lines_before": 60,
+      "lines_after": 60,
+      "sha256_before": "017c14c3c8f80523ba89a22da60469faf26e5f710a7451292380c807785448b9",
+      "sha256_after": "017c14c3c8f80523ba89a22da60469faf26e5f710a7451292380c807785448b9",
+      "changed": false
+    },
+    {
+      "file": "resources/views/fiscal/nfce-danfe.blade.php",
+      "lines_before": 204,
+      "lines_after": 204,
+      "sha256_before": "72705eab0daed4870a9d90a295ae5978757d210c34db1cbc299d3140d53cee66",
+      "sha256_after": "72705eab0daed4870a9d90a295ae5978757d210c34db1cbc299d3140d53cee66",
+      "changed": false
+    },
+    {
+      "file": "resources/views/fiscal/nfce/_readonly_panels.blade.php",
+      "lines_before": 99,
+      "lines_after": 99,
+      "sha256_before": "6f81f6fe2e2fe2ead00b0bd2feb5598a92c522ff16af89bb1053e5c910cec48e",
+      "sha256_after": "6f81f6fe2e2fe2ead00b0bd2feb5598a92c522ff16af89bb1053e5c910cec48e",
+      "changed": false
+    },
+    {
+      "file": "resources/views/fiscal/nfce/correct-rejection.blade.php",
+      "lines_before": 204,
+      "lines_after": 204,
+      "sha256_before": "b9f39ebc87d9f6a836714de820af344ec5ad4c562c042bbf97f8997d3c1d1521",
+      "sha256_after": "b9f39ebc87d9f6a836714de820af344ec5ad4c562c042bbf97f8997d3c1d1521",
+      "changed": false
+    },
+    {
+      "file": "resources/views/fiscal/nfce/create.blade.php",
+      "lines_before": 412,
+      "lines_after": 412,
+      "sha256_before": "946a8617a1cb6f40d3918748b226e1796159cf2fd0b136d01b25a3da161471bd",
+      "sha256_after": "946a8617a1cb6f40d3918748b226e1796159cf2fd0b136d01b25a3da161471bd",
+      "changed": false
+    },
+    {
+      "file": "resources/views/fiscal/nfce/inutilizations.blade.php",
+      "lines_before": 58,
+      "lines_after": 58,
+      "sha256_before": "2f616bfeafbdb34359406885975fb725cad3fa3440b0f846d53697c45185ffe6",
+      "sha256_after": "2f616bfeafbdb34359406885975fb725cad3fa3440b0f846d53697c45185ffe6",
+      "changed": false
+    },
+    {
+      "file": "resources/views/fiscal/nfe/_additional-federal-taxes.blade.php",
+      "lines_before": 42,
+      "lines_after": 42,
+      "sha256_before": "92d69bbcfd55a7d9ce5c662aa0b10c30ab37e726a4ca7df4ab4ec239d78c5061",
+      "sha256_after": "92d69bbcfd55a7d9ce5c662aa0b10c30ab37e726a4ca7df4ab4ec239d78c5061",
+      "changed": false
+    },
+    {
+      "file": "resources/views/fiscal/nfe/_document_rows.blade.php",
+      "lines_before": 0,
+      "lines_after": 60,
+      "sha256_before": null,
+      "sha256_after": "fbd7cd97b7b8dc75eb5207fdbed287ba761bc9dee3bfdea47a5ef5a8ed11f4e2",
+      "changed": true
+    },
+    {
+      "file": "resources/views/fiscal/nfe/_foreign-trade-header.blade.php",
+      "lines_before": 8,
+      "lines_after": 8,
+      "sha256_before": "a76fc98232af53ca09f7888c2b23282e2e98b8be5641b7943f2f2e76d41137f3",
+      "sha256_after": "a76fc98232af53ca09f7888c2b23282e2e98b8be5641b7943f2f2e76d41137f3",
+      "changed": false
+    },
+    {
+      "file": "resources/views/fiscal/nfe/_foreign-trade-item.blade.php",
+      "lines_before": 15,
+      "lines_after": 15,
+      "sha256_before": "44f5cf8f19547497bdcd28ce30c758f569f219ed83d480cbf5a76098e73c86e7",
+      "sha256_after": "44f5cf8f19547497bdcd28ce30c758f569f219ed83d480cbf5a76098e73c86e7",
+      "changed": false
+    },
+    {
+      "file": "resources/views/fiscal/nfe/_nature_form.blade.php",
+      "lines_before": 86,
+      "lines_after": 86,
+      "sha256_before": "5321aa909f7f41606e2210dccd5e80592a770aa9b5177436549f7dc5fd42d9f2",
+      "sha256_after": "5321aa909f7f41606e2210dccd5e80592a770aa9b5177436549f7dc5fd42d9f2",
+      "changed": false
+    },
+    {
+      "file": "resources/views/fiscal/nfe/_rtc-extra-fields.blade.php",
+      "lines_before": 84,
+      "lines_after": 84,
+      "sha256_before": "b2b992a696c71a528fd8ba656ca1317f495de4ac3d49b0ed591b76a258adf65e",
+      "sha256_after": "b2b992a696c71a528fd8ba656ca1317f495de4ac3d49b0ed591b76a258adf65e",
+      "changed": false
+    },
+    {
+      "file": "resources/views/fiscal/nfe/drafts.blade.php",
+      "lines_before": 77,
+      "lines_after": 77,
+      "sha256_before": "17e9ebfee87e213ea346eaeb49c9ff1ffe284cc6ef14456f28bdeb6537e45ac4",
+      "sha256_after": "17e9ebfee87e213ea346eaeb49c9ff1ffe284cc6ef14456f28bdeb6537e45ac4",
+      "changed": false
+    },
+    {
+      "file": "resources/views/fiscal/nfe/editor.blade.php",
+      "lines_before": 1122,
+      "lines_after": 1119,
+      "sha256_before": "8379dafe5a3f56ee095f2a36c6a6059f919db75b31aeb46f40dda3ba27d91824",
+      "sha256_after": "5cfe2da3aa200d23882422cb71b58bbbcc6ba44bd6733df38b698b7b85700d88",
+      "changed": true
+    },
+    {
+      "file": "resources/views/fiscal/nfe/inutilizations.blade.php",
+      "lines_before": 69,
+      "lines_after": 69,
+      "sha256_before": "bd8ff3bfbcb3bd4cc75363f5a9d2341ee9b1df1e11d6611ca2651db1c42e5acf",
+      "sha256_after": "badd40fee825ec565f81c30243ef7f6bdb5414c65d7b510e876e448da73c4557",
+      "changed": true
+    },
+    {
+      "file": "resources/views/fiscal/nfe/natures.blade.php",
+      "lines_before": 101,
+      "lines_after": 100,
+      "sha256_before": "980e4dfd5abc2c0d69da54ede0701ac46654e07c89fc652da42dd6667ec3e49d",
+      "sha256_after": "1b33f1f44914b3e5d0d1c831b161e2b02aabe69a32d4d8c1c8a67f4ce788deb6",
+      "changed": true
+    },
+    {
+      "file": "resources/views/fiscal/partials/readable-values.blade.php",
+      "lines_before": 0,
+      "lines_after": 10,
+      "sha256_before": null,
+      "sha256_after": "f3f4a929f4e5e33a23263bd2f7b610fba46a120d5f40d544e9e80746293137da",
+      "changed": true
+    },
+    {
+      "file": "resources/views/fiscal/partials/sefaz-guidance.blade.php",
+      "lines_before": 91,
+      "lines_after": 94,
+      "sha256_before": "e3c7420fe7b91fe5ef7d3ed8e269495f47addb8876c75af298c3486c0f62ddf4",
+      "sha256_after": "5a2d2de3b4bb795401bbc62b3290f6619ff84293d1d4ca0ee060d94f08627764",
+      "changed": true
+    },
+    {
+      "file": "resources/views/fiscal/purchases/index.blade.php",
+      "lines_before": 241,
+      "lines_after": 241,
+      "sha256_before": "7f2fbc1678159a367b331cfb704f89ddb62c0b40efe4566e2a7eb00d56f787eb",
+      "sha256_after": "4464cb9e3bba0a88cc6eb4c7ae9f6873fe8e72c8a337675bc4eab2959235f45f",
+      "changed": true
+    },
+    {
+      "file": "resources/views/fiscal/purchases/show.blade.php",
+      "lines_before": 101,
+      "lines_after": 101,
+      "sha256_before": "cdd34a5ca079ef8a65d00571777bf5ac7013ffa3beee08041d7648fb2ccda035",
+      "sha256_after": "cdd34a5ca079ef8a65d00571777bf5ac7013ffa3beee08041d7648fb2ccda035",
+      "changed": false
+    },
+    {
+      "file": "resources/views/fiscal/rules/_fields.blade.php",
+      "lines_before": 91,
+      "lines_after": 91,
+      "sha256_before": "e5cedc1b4044bb6de0098abfd9c9d57777c1135fb33b600befaf80cfdf958179",
+      "sha256_after": "df4df92977acec5e44e79f1b12227c463f3575ebaeb9e5978cab9dc8865e86f2",
+      "changed": true
+    },
+    {
+      "file": "resources/views/fiscal/rules/index.blade.php",
+      "lines_before": 44,
+      "lines_after": 44,
+      "sha256_before": "b51ce27cb386fdf712dd633176bb6c2e3ab1caeb44a359179ef1e4e4e9992327",
+      "sha256_after": "1cf54d5df77fa6085c810a92d2b8917f0c5ef5d5baa28d03b89eee97ef29333d",
+      "changed": true
+    },
+    {
+      "file": "resources/views/fiscal/show.blade.php",
+      "lines_before": 341,
+      "lines_after": 341,
+      "sha256_before": "2b238c0d3056450f80000151bb465810061368ce5b6f5a5190d5ac5e7bf538d2",
+      "sha256_after": "b265b4aee420be6bc25adabb516db2e5aac1642b66079e0f237f16aaf4ccb5ae",
+      "changed": true
+    },
+    {
+      "file": "resources/views/fiscal/tax-groups/_advanced.blade.php",
+      "lines_before": 191,
+      "lines_after": 191,
+      "sha256_before": "706f8cc74cc8f17d848074d94dfddd5fa493412dc914c67f44741883bfe1ee81",
+      "sha256_after": "706f8cc74cc8f17d848074d94dfddd5fa493412dc914c67f44741883bfe1ee81",
+      "changed": false
+    },
+    {
+      "file": "resources/views/fiscal/tax-groups/form.blade.php",
+      "lines_before": 236,
+      "lines_after": 232,
+      "sha256_before": "34b9d69e2a58bcadf6da229856cd967358b3a8c8dcb4897d4e9a4b0961f834d7",
+      "sha256_after": "d5490545358df9aa6848db1e3c95248096ab19a9e12ecb72722b449fad03e024",
+      "changed": true
+    },
+    {
+      "file": "resources/views/fiscal/tax-groups/index.blade.php",
+      "lines_before": 53,
+      "lines_after": 50,
+      "sha256_before": "5eeaf6fe48b30e95579c73ee579c98348470d94098a06a0dd82f266b002d5eb1",
+      "sha256_after": "141cbdc635150c14280b3a71df07f003e3fd1b9703679c9cc9a0eee0143b6227",
+      "changed": true
+    },
+    {
+      "file": "resources/views/layouts/app.blade.php",
+      "lines_before": 201,
+      "lines_after": 202,
+      "sha256_before": "433a5831aa0cc51f1843537c1ad916765d89aa77a5946a6983ad0460d168ce44",
+      "sha256_after": "1cf3a9ca21855561980a4cff624b1f14401cc12ebbfdcb1cd84fe3d84366d36e",
+      "changed": true
+    },
+    {
+      "file": "resources/views/layouts/pdv.blade.php",
+      "lines_before": 93,
+      "lines_after": 94,
+      "sha256_before": "6ad6d502de24fd03e450c92f54aa55f9557f80bd1708a4194723a532d2f3c676",
+      "sha256_after": "00222d46d320cff5fb3cdd0e4e59ba8ff46d19fe1600fcba1920babd3d4bd8b3",
+      "changed": true
+    },
+    {
+      "file": "resources/views/partials/commercial-readonly.blade.php",
+      "lines_before": 54,
+      "lines_after": 54,
+      "sha256_before": "3656016d416c273a239a523f513549e58e62382a189f77fd57164909d152243d",
+      "sha256_after": "3656016d416c273a239a523f513549e58e62382a189f77fd57164909d152243d",
+      "changed": false
+    },
+    {
+      "file": "resources/views/partials/icon.blade.php",
+      "lines_before": 45,
+      "lines_after": 45,
+      "sha256_before": "16f89fedc6464fc9fd340142784cc76a21a5b5a3a31f28dba44f46e00c8d2fe8",
+      "sha256_after": "16f89fedc6464fc9fd340142784cc76a21a5b5a3a31f28dba44f46e00c8d2fe8",
+      "changed": false
+    },
+    {
+      "file": "resources/views/partials/pagination.blade.php",
+      "lines_before": 12,
+      "lines_after": 12,
+      "sha256_before": "72bae5e97ee91908b6d8697b204e4a0c7e34e0afcec5c3360376d797add1ce9c",
+      "sha256_after": "72bae5e97ee91908b6d8697b204e4a0c7e34e0afcec5c3360376d797add1ce9c",
+      "changed": false
+    },
+    {
+      "file": "resources/views/partials/quick-catalog.blade.php",
+      "lines_before": 41,
+      "lines_after": 41,
+      "sha256_before": "1df13dd3d365c7b904eb695d4a1b393e704b1a73316b93c1c00e92e6ef27421a",
+      "sha256_after": "1df13dd3d365c7b904eb695d4a1b393e704b1a73316b93c1c00e92e6ef27421a",
+      "changed": false
+    },
+    {
+      "file": "resources/views/partials/table-footer.blade.php",
+      "lines_before": 49,
+      "lines_after": 49,
+      "sha256_before": "ff26209443afd3a5fca4dc730402c82de5b38e45d1394afe6ae4005d6ac23062",
+      "sha256_after": "ff26209443afd3a5fca4dc730402c82de5b38e45d1394afe6ae4005d6ac23062",
+      "changed": false
+    },
+    {
+      "file": "resources/views/pdv/cash-history.blade.php",
+      "lines_before": 42,
+      "lines_after": 42,
+      "sha256_before": "dd5efc157572637e7bf7358a517ba2ff84c36275fdf5e339559c7b65f34ae565",
+      "sha256_after": "2f274aef6ecd04990d74265c32e481a09d7ab4ac28a6daef4196b0147ebaa73a",
+      "changed": true
+    },
+    {
+      "file": "resources/views/pdv/cash-registers.blade.php",
+      "lines_before": 51,
+      "lines_after": 51,
+      "sha256_before": "d1ce9afea8dc7c8d4bec4640d06a9b47a9af6b0076c5dce4884bcef15a9410e9",
+      "sha256_after": "d1ce9afea8dc7c8d4bec4640d06a9b47a9af6b0076c5dce4884bcef15a9410e9",
+      "changed": false
+    },
+    {
+      "file": "resources/views/pdv/cash-report.blade.php",
+      "lines_before": 95,
+      "lines_after": 95,
+      "sha256_before": "4f71184c9dc9939c03b5d98bd108bbe47c8b7434d1c9857920a1539c28326a1a",
+      "sha256_after": "31c7114f6fdff525427a76021032b2b85f7b006ceb34b96de2898f063c6181f4",
+      "changed": true
+    },
+    {
+      "file": "resources/views/pdv/index.blade.php",
+      "lines_before": 1007,
+      "lines_after": 1007,
+      "sha256_before": "434a33a377a7e46c4ea168863d680e062c3939dbe125e46e40fd8c2953b8764a",
+      "sha256_after": "2373f83ffd5d0b71ed6e75343c20b495d837584d583856473989f84f048b74e8",
+      "changed": true
+    },
+    {
+      "file": "resources/views/pdv/partials/cash-report-modal.blade.php",
+      "lines_before": 24,
+      "lines_after": 24,
+      "sha256_before": "0147dc604b1e07a4b652797093984fb926bede1cd0169c280d957df15111f842",
+      "sha256_after": "0147dc604b1e07a4b652797093984fb926bede1cd0169c280d957df15111f842",
+      "changed": false
+    },
+    {
+      "file": "resources/views/pdv/partials/receipt-modal.blade.php",
+      "lines_before": 201,
+      "lines_after": 201,
+      "sha256_before": "5bcaf1fd4bb0dfe9969926e71142e720945b228791585510b3fed25a7ca7088a",
+      "sha256_after": "5bcaf1fd4bb0dfe9969926e71142e720945b228791585510b3fed25a7ca7088a",
+      "changed": false
+    },
+    {
+      "file": "resources/views/pdv/receipt.blade.php",
+      "lines_before": 344,
+      "lines_after": 351,
+      "sha256_before": "09dd102b822d405c441ff232906cf0710a2ed31494bf6e5be2ca8ba5e5a73669",
+      "sha256_after": "a8a080ea8bf13fcdb56ded09d0f5c06f3fb1cc4c2e7136df4ba3387d308b04a7",
+      "changed": true
+    },
+    {
+      "file": "resources/views/products/form.blade.php",
+      "lines_before": 315,
+      "lines_after": 313,
+      "sha256_before": "550fc1d2065128a6b998a15c95ecae0f108ccae763538945a1732e7ac9387464",
+      "sha256_after": "89fb766cc7e5bb1331fa350024cb9b2f86c24ac96568f28324520705ede18a0a",
+      "changed": true
+    },
+    {
+      "file": "resources/views/products/index.blade.php",
+      "lines_before": 63,
+      "lines_after": 63,
+      "sha256_before": "e73c60b9dab616f8f5ec38f97c703951d9245d5a9b9b981bd3961353e66311d5",
+      "sha256_after": "e73c60b9dab616f8f5ec38f97c703951d9245d5a9b9b981bd3961353e66311d5",
+      "changed": false
+    },
+    {
+      "file": "resources/views/purchases/form.blade.php",
+      "lines_before": 110,
+      "lines_after": 110,
+      "sha256_before": "56f52560bdb4958e200c12fbbc8e7aa681eb1113227e6f95a8d118d178eaec70",
+      "sha256_after": "56f52560bdb4958e200c12fbbc8e7aa681eb1113227e6f95a8d118d178eaec70",
+      "changed": false
+    },
+    {
+      "file": "resources/views/purchases/index.blade.php",
+      "lines_before": 77,
+      "lines_after": 77,
+      "sha256_before": "db9d3bf5bf448c946640370e933c170974d66568dfc8f885ce72ddf9bc21d7bd",
+      "sha256_after": "db9d3bf5bf448c946640370e933c170974d66568dfc8f885ce72ddf9bc21d7bd",
+      "changed": false
+    },
+    {
+      "file": "resources/views/purchases/show.blade.php",
+      "lines_before": 100,
+      "lines_after": 100,
+      "sha256_before": "c8fa098752e26900a9dd3e7840e15265c873809012e39973a1a9348c9561ba23",
+      "sha256_after": "c8fa098752e26900a9dd3e7840e15265c873809012e39973a1a9348c9561ba23",
+      "changed": false
+    },
+    {
+      "file": "resources/views/sales/_nav.blade.php",
+      "lines_before": 14,
+      "lines_after": 14,
+      "sha256_before": "55ee8f5cfd13d69f98a87dd934ee97748e31006a855fc2f2a8612b01ec8d3882",
+      "sha256_after": "55ee8f5cfd13d69f98a87dd934ee97748e31006a855fc2f2a8612b01ec8d3882",
+      "changed": false
+    },
+    {
+      "file": "resources/views/sales/create.blade.php",
+      "lines_before": 181,
+      "lines_after": 181,
+      "sha256_before": "a4175c6c1462f5714db4a208e42dc84cb55c7499eb107e5e609965cbf16797b3",
+      "sha256_after": "a4175c6c1462f5714db4a208e42dc84cb55c7499eb107e5e609965cbf16797b3",
+      "changed": false
+    },
+    {
+      "file": "resources/views/sales/index.blade.php",
+      "lines_before": 57,
+      "lines_after": 57,
+      "sha256_before": "c97600edccfad738645a75ebdd1af7ba8037dd4e59ceabcd6fb0e554f7068c12",
+      "sha256_after": "c97600edccfad738645a75ebdd1af7ba8037dd4e59ceabcd6fb0e554f7068c12",
+      "changed": false
+    },
+    {
+      "file": "resources/views/sales/quote-pdf.blade.php",
+      "lines_before": 275,
+      "lines_after": 275,
+      "sha256_before": "0dd40562fb22fbf31624e820fcae08650e3d55038901d029dfd1a3f196178787",
+      "sha256_after": "391b11adb19001b589b12ba1e97600d7371a338d9116513b0251a5b4da261ef9",
+      "changed": true
+    },
+    {
+      "file": "resources/views/sales/returns/create.blade.php",
+      "lines_before": 124,
+      "lines_after": 124,
+      "sha256_before": "35d906f0c9c5fba485ae685ee6a09062f47756e8446275b957fe651ddf5fd6a7",
+      "sha256_after": "35d906f0c9c5fba485ae685ee6a09062f47756e8446275b957fe651ddf5fd6a7",
+      "changed": false
+    },
+    {
+      "file": "resources/views/sales/returns/index.blade.php",
+      "lines_before": 84,
+      "lines_after": 84,
+      "sha256_before": "c201784cec31263f21c9c5bbedc888f79e6f45649c458f0df3bd003cbedf570e",
+      "sha256_after": "c201784cec31263f21c9c5bbedc888f79e6f45649c458f0df3bd003cbedf570e",
+      "changed": false
+    },
+    {
+      "file": "resources/views/sales/returns/show.blade.php",
+      "lines_before": 73,
+      "lines_after": 73,
+      "sha256_before": "53e342b4c6a74ea6c2199c6514ace35d321d38d69055c53e1aeb14e51ae4099f",
+      "sha256_after": "53e342b4c6a74ea6c2199c6514ace35d321d38d69055c53e1aeb14e51ae4099f",
+      "changed": false
+    },
+    {
+      "file": "resources/views/sales/show.blade.php",
+      "lines_before": 190,
+      "lines_after": 190,
+      "sha256_before": "f170fa9ad295da5962a312715a2f82de82687a95a1d991c9e9333cf4d6feb103",
+      "sha256_after": "909a41aa067ade9ffd7b7f68e138ee78dc757d629d378c15c3422fed1e4f9869",
+      "changed": true
+    },
+    {
+      "file": "resources/views/services/form.blade.php",
+      "lines_before": 133,
+      "lines_after": 133,
+      "sha256_before": "b5ffcf63298a6999e151bc800cdd4894340fc64a41bcc142d55ece1523180139",
+      "sha256_after": "b5ffcf63298a6999e151bc800cdd4894340fc64a41bcc142d55ece1523180139",
+      "changed": false
+    },
+    {
+      "file": "resources/views/services/index.blade.php",
+      "lines_before": 134,
+      "lines_after": 134,
+      "sha256_before": "e25b9071fefe9f3e8daaebab7d172f25e58939145d9370ffc4091cc30bbf3b07",
+      "sha256_after": "e25b9071fefe9f3e8daaebab7d172f25e58939145d9370ffc4091cc30bbf3b07",
+      "changed": false
+    },
+    {
+      "file": "resources/views/settings/index.blade.php",
+      "lines_before": 1068,
+      "lines_after": 1065,
+      "sha256_before": "654df9ee15e4fa14a3209a49c386ddd9b2b52815d65cc8ade34b7b0fa94a4d37",
+      "sha256_after": "e2fc98218a8f951395918a472c8ca6fdbe5e5a375bc4b77c6c52aecf7e7a0ce8",
+      "changed": true
+    },
+    {
+      "file": "resources/views/stock/index.blade.php",
+      "lines_before": 67,
+      "lines_after": 67,
+      "sha256_before": "3d5cdeb428b058ebb98692aa78b25c4f62511cd07c4bb0f9cb89754e1676bae4",
+      "sha256_after": "5f8fbbbcae23c7b5708c4fb3f78d351bc384cf6a75ae0937f599108c9f7e23d1",
+      "changed": true
+    },
+    {
+      "file": "routes/console.php",
+      "lines_before": 118,
+      "lines_after": 118,
+      "sha256_before": "2ac644fb2e7d0f8a2eed824da3573ecd5757405f81c0f70e3cec03b47d8e8cf8",
+      "sha256_after": "2ac644fb2e7d0f8a2eed824da3573ecd5757405f81c0f70e3cec03b47d8e8cf8",
+      "changed": false
+    },
+    {
+      "file": "routes/web.php",
+      "lines_before": 306,
+      "lines_after": 306,
+      "sha256_before": "3d556c3f8cb5708e720bceb57298e8f34e062fa509cc77c17a59f6565f97d2e0",
+      "sha256_after": "3d556c3f8cb5708e720bceb57298e8f34e062fa509cc77c17a59f6565f97d2e0",
+      "changed": false
+    }
+  ],
+  "candidates_before": [
+    {
+      "file": "app/Http/Controllers/CustomerController.php",
+      "line": 57,
+      "kind": "exception_sink",
+      "text": "'message'=>'Falha ao acessar a BrasilAPI pelo PHP local: '.$localException->getMessage(),"
+    },
+    {
+      "file": "app/Http/Controllers/FiscalController.php",
+      "line": 381,
+      "kind": "exception_sink",
+      "text": "'message'=>$error->getMessage(),"
+    },
+    {
+      "file": "app/Http/Controllers/NFCeDanfeController.php",
+      "line": 45,
+      "kind": "exception_sink",
+      "text": "abort(409, 'DANFE NFC-e indisponível: '.$e->getMessage());"
+    },
+    {
+      "file": "app/Http/Controllers/NFCeManualController.php",
+      "line": 266,
+      "kind": "exception_sink",
+      "text": "'sale_id'=>$sale->id,'message'=>$error->getMessage(),"
+    },
+    {
+      "file": "app/Http/Controllers/NFCeManualController.php",
+      "line": 298,
+      "kind": "exception_sink",
+      "text": "'fiscal_document_job_id'=>$job->id,'message'=>$error->getMessage(),"
+    },
+    {
+      "file": "app/Http/Controllers/PdvController.php",
+      "line": 1093,
+      "kind": "exception_sink",
+      "text": "abort(503,$e->getMessage());"
+    },
+    {
+      "file": "app/Http/Controllers/SaleController.php",
+      "line": 148,
+      "kind": "exception_sink",
+      "text": "abort(503,$e->getMessage());"
+    },
+    {
+      "file": "app/Http/Controllers/SaleController.php",
+      "line": 166,
+      "kind": "exception_sink",
+      "text": "abort(503,$e->getMessage());"
+    },
+    {
+      "file": "app/Services/Fiscal/NFCeOfflineService.php",
+      "line": 79,
+      "kind": "exception_sink",
+      "text": "'document_id'=>$id,'message'=>$e->getMessage(),"
+    },
+    {
+      "file": "public/js/erp.js",
+      "line": 1326,
+      "kind": "native_js_error_sink",
+      "text": "nextorNotify(err.message||'Não foi possível consultar o CNPJ agora.',{type:'error',title:'Consulta de CNPJ'});"
+    },
+    {
+      "file": "public/js/login.js",
+      "line": 170,
+      "kind": "native_js_error_sink",
+      "text": "notify(error.message === 'Failed to fetch'"
+    },
+    {
+      "file": "public/js/nfe-editor.js",
+      "line": 444,
+      "kind": "native_js_error_sink",
+      "text": "status.textContent='Cálculo pendente: '+error.message;"
+    },
+    {
+      "file": "public/js/pdv-sales.js",
+      "line": 346,
+      "kind": "native_js_error_sink",
+      "text": "cancelError.textContent=error.message||'Não foi possível cancelar a venda.';"
+    },
+    {
+      "file": "public/js/pdv.js",
+      "line": 1543,
+      "kind": "native_js_error_sink",
+      "text": "notify(error.message||'Não foi possível suspender a venda.','error');"
+    },
+    {
+      "file": "public/js/pdv.js",
+      "line": 1625,
+      "kind": "native_js_error_sink",
+      "text": "notify(error.message||'Não foi possível recuperar a venda.','error');"
+    },
+    {
+      "file": "public/js/pdv.js",
+      "line": 1641,
+      "kind": "native_js_error_sink",
+      "text": "notify(error.message||'Não foi possível descartar a venda.','error');"
+    },
+    {
+      "file": "public/js/quick-catalog.js",
+      "line": 253,
+      "kind": "native_js_error_sink",
+      "text": "error.textContent=e.message||'Não foi possível salvar o cadastro.';"
+    },
+    {
+      "file": "resources/views/fiscal/_catalog-review.blade.php",
+      "line": 4,
+      "kind": "raw_internal_value",
+      "text": "<span>Catálogo {{ $catalogModel->catalog_version }} · {{ $catalogModel->catalog_status==='reviewed' ? 'Revisado' : 'Modelo pendente de revisão' }}</span>"
+    },
+    {
+      "file": "resources/views/fiscal/_catalog-review.blade.php",
+      "line": 29,
+      "kind": "raw_internal_value",
+      "text": "<tr><td>{{ $change->revision }}</td><td>{{ $change->created_at?->format('d/m/Y H:i') }}</td><td>{{ $change->user_id ?: 'Catálogo' }}</td>"
+    },
+    {
+      "file": "resources/views/fiscal/_catalog-review.blade.php",
+      "line": 30,
+      "kind": "raw_json_display",
+      "text": "<td><details><summary>Consultar</summary><pre>{{ json_encode($change->snapshot, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) }}</pre></details></td></tr>"
+    },
+    {
+      "file": "resources/views/fiscal/_catalog-review.blade.php",
+      "line": 30,
+      "kind": "raw_internal_value",
+      "text": "<td><details><summary>Consultar</summary><pre>{{ json_encode($change->snapshot, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) }}</pre></details></td></tr>"
+    },
+    {
+      "file": "resources/views/fiscal/catalog/index.blade.php",
+      "line": 48,
+      "kind": "raw_json_display",
+      "text": "@if($entry->parameters)<pre style=\"white-space:pre-wrap\">{{ json_encode($entry->parameters,JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) }}</pre>@endif"
+    },
+    {
+      "file": "resources/views/fiscal/catalog/index.blade.php",
+      "line": 56,
+      "kind": "raw_json_display",
+      "text": "<pre style=\"white-space:pre-wrap\">{{ json_encode($release?->coverage ?? [],JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) }}</pre>"
+    },
+    {
+      "file": "resources/views/fiscal/catalog/index.blade.php",
+      "line": 93,
+      "kind": "raw_internal_value",
+      "text": "<small class=\"table-subtitle\">SHA-256 do conteúdo canônico {{ $item->sha256 }}</small>"
+    },
+    {
+      "file": "resources/views/fiscal/catalog/index.blade.php",
+      "line": 95,
+      "kind": "raw_json_display",
+      "text": "<pre style=\"white-space:pre-wrap\">{{ json_encode($item->coverage,JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) }}</pre>"
+    },
+    {
+      "file": "resources/views/fiscal/catalog/index.blade.php",
+      "line": 105,
+      "kind": "raw_internal_value",
+      "text": "<label class=\"field col-5\"><span>SHA-256 do arquivo aprovado</span><input name=\"sha256\" maxlength=\"64\" minlength=\"64\" pattern=\"[a-fA-F0-9]{64}\" required value=\"{{ old('sha256') }}\"></label>"
+    },
+    {
+      "file": "resources/views/fiscal/nfce/correct-rejection.blade.php",
+      "line": 13,
+      "kind": "raw_internal_value",
+      "text": "value=\"{{ old('nature',$snapshot['nature'] ?? 'VENDA DE MERCADORIA') }}\">"
+    },
+    {
+      "file": "resources/views/fiscal/nfce/correct-rejection.blade.php",
+      "line": 16,
+      "kind": "raw_internal_value",
+      "text": "<textarea name=\"notes\" rows=\"3\" maxlength=\"2000\">{{ old('notes',$snapshot['notes'] ?? '') }}</textarea>"
+    },
+    {
+      "file": "resources/views/fiscal/nfce/correct-rejection.blade.php",
+      "line": 29,
+      "kind": "raw_internal_value",
+      "text": "value=\"{{ old('consumer_document',$snapshot['consumer_document'] ?? '') }}\"></label>"
+    },
+    {
+      "file": "resources/views/fiscal/nfce/correct-rejection.blade.php",
+      "line": 32,
+      "kind": "raw_internal_value",
+      "text": "value=\"{{ old('consumer_name',$snapshot['consumer_name'] ?? '') }}\"></label>"
+    },
+    {
+      "file": "resources/views/fiscal/nfce/correct-rejection.blade.php",
+      "line": 41,
+      "kind": "raw_internal_value",
+      "text": "<div class=\"grid-actions-left\"><span class=\"nfce-list-count\">{{ count($snapshot['items'] ?? []) }} {{ count($snapshot['items'] ?? [])===1?'produto':'produtos' }}</span></div>"
+    },
+    {
+      "file": "resources/views/fiscal/nfce/correct-rejection.blade.php",
+      "line": 199,
+      "kind": "raw_internal_value",
+      "text": "<div><span>Subtotal</span><strong>R$ {{ number_format((float)($snapshot['subtotal'] ?? $total),2,',','.') }}</strong></div>"
+    },
+    {
+      "file": "resources/views/fiscal/nfce/correct-rejection.blade.php",
+      "line": 200,
+      "kind": "raw_internal_value",
+      "text": "<div><span>Desconto</span><strong>R$ {{ number_format((float)($snapshot['discount_total'] ?? 0),2,',','.') }}</strong></div>"
+    },
+    {
+      "file": "resources/views/fiscal/nfe/drafts.blade.php",
+      "line": 41,
+      "kind": "raw_internal_value",
+      "text": "<td>{{ $draft->customer?->name ?? data_get($draft->recipient_snapshot,'name','—') }}</td>"
+    },
+    {
+      "file": "resources/views/fiscal/nfe/editor.blade.php",
+      "line": 460,
+      "kind": "raw_internal_value",
+      "text": "<div>Item {{ $item->item_number }}: {{ data_get($trace,'snapshot.name','Regra fiscal') }} (revisão {{ $trace['revision']??'—' }}). {{ $trace['legal_reference']??'' }}"
+    },
+    {
+      "file": "resources/views/fiscal/nfe/editor.blade.php",
+      "line": 462,
+      "kind": "raw_internal_value",
+      "text": "Catálogo {{ data_get($trace,'snapshot.catalog_version') }}."
+    },
+    {
+      "file": "resources/views/fiscal/nfe/natures.blade.php",
+      "line": 41,
+      "kind": "raw_internal_value",
+      "text": "@if($nature->catalog_version)<small class=\"table-subtitle\">Catálogo {{ $nature->catalog_version }} · {{ $nature->catalog_status==='reviewed' ? 'Revisada' : 'Modelo' }}</small>@endif"
+    },
+    {
+      "file": "resources/views/fiscal/partials/sefaz-guidance.blade.php",
+      "line": 75,
+      "kind": "raw_internal_value",
+      "text": "@if($guidance['catalog_version'])<p>Catálogo {{ $guidance['catalog_version'] }}</p>@endif"
+    },
+    {
+      "file": "resources/views/fiscal/rules/_fields.blade.php",
+      "line": 81,
+      "kind": "raw_internal_value",
+      "text": "<label class=\"field col-3\"><span>Versão do catálogo</span><input name=\"catalog_version\" maxlength=\"32\" value=\"{{ $value('catalog_version') }}\"></label>"
+    },
+    {
+      "file": "resources/views/fiscal/rules/index.blade.php",
+      "line": 21,
+      "kind": "raw_internal_value",
+      "text": "<td><strong>{{ $rule->name }}</strong><small class=\"table-subtitle\">{{ strtoupper($rule->document_type) }} · revisão {{ $rule->revision }} · #{{ $rule->id }}</small></td>"
+    },
+    {
+      "file": "resources/views/fiscal/rules/index.blade.php",
+      "line": 21,
+      "kind": "status_fallback",
+      "text": "<td><strong>{{ $rule->name }}</strong><small class=\"table-subtitle\">{{ strtoupper($rule->document_type) }} · revisão {{ $rule->revision }} · #{{ $rule->id }}</small></td>"
+    },
+    {
+      "file": "resources/views/fiscal/rules/index.blade.php",
+      "line": 27,
+      "kind": "raw_internal_value",
+      "text": "<td>{{ $rule->is_active ? 'Ativa' : 'Inativa' }}@if($rule->catalog_version)<small class=\"table-subtitle\">Catálogo {{ $rule->catalog_version }} · {{ $rule->catalog_status }}</small>@endif</td><td><a class=\"table-link\" href=\"#regra-{{ $rule->id }}\">Editar / histórico</a></td>"
+    },
+    {
+      "file": "resources/views/fiscal/rules/index.blade.php",
+      "line": 33,
+      "kind": "raw_internal_value",
+      "text": "<input type=\"hidden\" name=\"revision\" value=\"{{ $rule->revision }}\">"
+    },
+    {
+      "file": "resources/views/fiscal/rules/index.blade.php",
+      "line": 38,
+      "kind": "raw_json_display",
+      "text": "@forelse($rule->revisions as $revision)<details><summary>Revisão {{ $revision->revision }} · {{ $revision->created_at?->format('d/m/Y H:i') }} · usuário #{{ $revision->changed_by ?? 'sistema' }}</summary><pre style=\"white-space:pre-wrap\">{{ json_encode($revision->snapshot, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE) }}</pre><small>SHA-256 {{ $revision->snapshot_hash }}</small></details>@empty<p>Regra legada: o cadastro inicial será preservado no próximo salvamento.</p>@endforelse"
+    },
+    {
+      "file": "resources/views/fiscal/rules/index.blade.php",
+      "line": 38,
+      "kind": "raw_internal_value",
+      "text": "@forelse($rule->revisions as $revision)<details><summary>Revisão {{ $revision->revision }} · {{ $revision->created_at?->format('d/m/Y H:i') }} · usuário #{{ $revision->changed_by ?? 'sistema' }}</summary><pre style=\"white-space:pre-wrap\">{{ json_encode($revision->snapshot, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE) }}</pre><small>SHA-256 {{ $revision->snapshot_hash }}</small></details>@empty<p>Regra legada: o cadastro inicial será preservado no próximo salvamento.</p>@endforelse"
+    },
+    {
+      "file": "resources/views/fiscal/tax-groups/form.blade.php",
+      "line": 39,
+      "kind": "raw_internal_value",
+      "text": "@if($editing)<span class=\"status status-blue\">Revisão {{ $group->revision }}</span>@endif"
+    },
+    {
+      "file": "resources/views/fiscal/tax-groups/index.blade.php",
+      "line": 35,
+      "kind": "raw_internal_value",
+      "text": "@if($group->catalog_version)<small class=\"table-subtitle\">Catálogo {{ $group->catalog_version }} · {{ $group->catalog_status==='reviewed' ? 'Revisado' : 'Modelo' }}</small>@endif"
+    },
+    {
+      "file": "resources/views/fiscal/tax-groups/index.blade.php",
+      "line": 36,
+      "kind": "raw_internal_value",
+      "text": "<small class=\"table-subtitle\">Revisão {{ $group->revision }} @if($group->is_default) · Padrão para {{ $group->kind==='products' ? 'produtos' : 'serviços' }} @endif</small>"
+    },
+    {
+      "file": "resources/views/products/form.blade.php",
+      "line": 99,
+      "kind": "raw_internal_value",
+      "text": "{{ $fiscalGroup->name }}{{ $fiscalGroup->is_default ? ' · Padrão' : '' }}{{ !$fiscalGroup->is_active ? ' · Inativo' : '' }}{{ $fiscalGroup->catalog_version && $fiscalGroup->catalog_status!=='reviewed' ? ' · Modelo pendente de revisão' : '' }}"
+    },
+    {
+      "file": "resources/views/settings/index.blade.php",
+      "line": 608,
+      "kind": "status_fallback",
+      "text": "<td><strong>{{ strtoupper($job->document_type) }}</strong></td>"
+    },
+    {
+      "file": "resources/views/settings/index.blade.php",
+      "line": 614,
+      "kind": "status_fallback",
+      "text": "<td><span class=\"status {{ $job->status==='prepared'?'status-blue':($job->status==='cancelled'?'status-muted':'status-ok') }}\">{{ ucfirst($job->status) }}</span></td>"
+    }
+  ],
+  "candidates_after": [
+    {
+      "file": "app/Http/Controllers/FiscalController.php",
+      "line": 446,
+      "kind": "exception_sink",
+      "text": "'message'=>$error->getMessage(),"
+    },
+    {
+      "file": "app/Http/Controllers/NFCeManualController.php",
+      "line": 266,
+      "kind": "exception_sink",
+      "text": "'sale_id'=>$sale->id,'message'=>$error->getMessage(),"
+    },
+    {
+      "file": "app/Http/Controllers/NFCeManualController.php",
+      "line": 298,
+      "kind": "exception_sink",
+      "text": "'fiscal_document_job_id'=>$job->id,'message'=>$error->getMessage(),"
+    },
+    {
+      "file": "app/Services/Fiscal/NFCeOfflineService.php",
+      "line": 79,
+      "kind": "exception_sink",
+      "text": "'document_id'=>$id,'message'=>$e->getMessage(),"
+    },
+    {
+      "file": "resources/views/fiscal/_catalog-review.blade.php",
+      "line": 29,
+      "kind": "raw_internal_value",
+      "text": "<tr><td>{{ $change->revision }}</td><td>{{ $change->created_at?->format('d/m/Y H:i') }}</td><td>{{ $change->user_id ? (\\App\\Models\\User::query()->find($change->user_id)?->name ?? 'Responsável não informado') : 'Catálogo' }}</td>"
+    },
+    {
+      "file": "resources/views/fiscal/nfce/correct-rejection.blade.php",
+      "line": 13,
+      "kind": "raw_internal_value",
+      "text": "value=\"{{ old('nature',$snapshot['nature'] ?? 'VENDA DE MERCADORIA') }}\">"
+    },
+    {
+      "file": "resources/views/fiscal/nfce/correct-rejection.blade.php",
+      "line": 16,
+      "kind": "raw_internal_value",
+      "text": "<textarea name=\"notes\" rows=\"3\" maxlength=\"2000\">{{ old('notes',$snapshot['notes'] ?? '') }}</textarea>"
+    },
+    {
+      "file": "resources/views/fiscal/nfce/correct-rejection.blade.php",
+      "line": 29,
+      "kind": "raw_internal_value",
+      "text": "value=\"{{ old('consumer_document',$snapshot['consumer_document'] ?? '') }}\"></label>"
+    },
+    {
+      "file": "resources/views/fiscal/nfce/correct-rejection.blade.php",
+      "line": 32,
+      "kind": "raw_internal_value",
+      "text": "value=\"{{ old('consumer_name',$snapshot['consumer_name'] ?? '') }}\"></label>"
+    },
+    {
+      "file": "resources/views/fiscal/nfce/correct-rejection.blade.php",
+      "line": 41,
+      "kind": "raw_internal_value",
+      "text": "<div class=\"grid-actions-left\"><span class=\"nfce-list-count\">{{ count($snapshot['items'] ?? []) }} {{ count($snapshot['items'] ?? [])===1?'produto':'produtos' }}</span></div>"
+    },
+    {
+      "file": "resources/views/fiscal/nfce/correct-rejection.blade.php",
+      "line": 199,
+      "kind": "raw_internal_value",
+      "text": "<div><span>Subtotal</span><strong>R$ {{ number_format((float)($snapshot['subtotal'] ?? $total),2,',','.') }}</strong></div>"
+    },
+    {
+      "file": "resources/views/fiscal/nfce/correct-rejection.blade.php",
+      "line": 200,
+      "kind": "raw_internal_value",
+      "text": "<div><span>Desconto</span><strong>R$ {{ number_format((float)($snapshot['discount_total'] ?? 0),2,',','.') }}</strong></div>"
+    },
+    {
+      "file": "resources/views/fiscal/nfe/drafts.blade.php",
+      "line": 41,
+      "kind": "raw_internal_value",
+      "text": "<td>{{ $draft->customer?->name ?? data_get($draft->recipient_snapshot,'name','—') }}</td>"
+    },
+    {
+      "file": "resources/views/fiscal/nfe/editor.blade.php",
+      "line": 463,
+      "kind": "raw_internal_value",
+      "text": "<div>Item {{ $item->item_number }}: {{ data_get($trace,'snapshot.name','Regra fiscal') }}. {{ $trace['legal_reference']??'' }}"
+    },
+    {
+      "file": "resources/views/fiscal/rules/_fields.blade.php",
+      "line": 81,
+      "kind": "raw_internal_value",
+      "text": "<input type=\"hidden\" name=\"catalog_version\" value=\"{{ $value('catalog_version') }}\">"
+    },
+    {
+      "file": "resources/views/fiscal/rules/index.blade.php",
+      "line": 33,
+      "kind": "raw_internal_value",
+      "text": "<input type=\"hidden\" name=\"revision\" value=\"{{ $rule->revision }}\">"
+    },
+    {
+      "file": "resources/views/fiscal/rules/index.blade.php",
+      "line": 38,
+      "kind": "raw_internal_value",
+      "text": "@forelse($rule->revisions as $revision)<details><summary>Revisão {{ $revision->revision }} · {{ $revision->created_at?->format('d/m/Y H:i') }} · {{ $revision->changed_by ? (\\App\\Models\\User::query()->find($revision->changed_by)?->name ?? 'Responsável não informado') : 'Sistema' }}</summary>@include('fiscal.partials.readable-values',['values'=>$revision->snapshot])</details>@empty<p>Nenhuma alteração registrada.</p>@endforelse"
+    },
+    {
+      "file": "resources/views/products/form.blade.php",
+      "line": 99,
+      "kind": "raw_internal_value",
+      "text": "{{ $fiscalGroup->name }}{{ $fiscalGroup->is_default ? ' · Padrão' : '' }}{{ !$fiscalGroup->is_active ? ' · Inativo' : '' }}{{ $fiscalGroup->catalog_version && $fiscalGroup->catalog_status!=='reviewed' ? ' · Aguardando revisão fiscal' : '' }}"
+    }
+  ],
+  "method": "Whole-source static scan plus module-specific manual review; candidates require contextual disposition."
+}

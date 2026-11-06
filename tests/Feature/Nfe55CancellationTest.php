@@ -125,7 +125,7 @@ final class Nfe55CancellationTest extends TestCase
             ->assertSee('data-nfe-allow-readonly',false)
             ->assertSee('name="current_password"',false);
         $view=file_get_contents(resource_path('views/fiscal/nfe/editor.blade.php'));
-        self::assertStringContainsString("node.matches('[data-nfe-allow-readonly]')",$view);
+        self::assertStringContainsString("node.matches('[data-nfe-allow-readonly],[form=\"nfeRetryForm\"],[form=\"nfeConsultForm\"]')",$view);
         $this->put(route('fiscal.nfe.update',$draft),[])->assertStatus(409);
     }
 

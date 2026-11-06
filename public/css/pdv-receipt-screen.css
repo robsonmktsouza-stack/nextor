@@ -1,0 +1,7 @@
+/* The receipt body, paper dimensions and print styles belong to receipt.blade.php. */
+.pdv-receipt-document .screen-actions{width:min(760px,calc(100vw - 24px));flex-wrap:wrap;align-items:stretch}
+.pdv-receipt-document .screen-actions>.btn{flex:1 1 150px;white-space:normal;text-align:center;height:auto}
+.pdv-receipt-document .post-sale-status{border-color:var(--ui-card-border);border-radius:var(--ui-card-radius);font:var(--lumeron-text)/1.5 var(--lumeron-font)}
+.pdv-receipt-document .post-sale-status strong{font-size:var(--lumeron-label)}
+.pdv-receipt-document .post-sale-status :is(button,a.action){max-width:100%;white-space:normal;text-align:center;height:auto}
+@media(max-width:480px){.pdv-receipt-document .post-sale-status{margin-right:12px;margin-left:12px}}

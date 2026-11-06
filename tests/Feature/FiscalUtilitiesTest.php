@@ -47,11 +47,12 @@ final class FiscalUtilitiesTest extends TestCase
         Storage::fake('local');
         $this->actingAs($this->admin());
         foreach (['nfe','nfce','nfse','cte','mdfe'] as $tab) {
-            $this->get(route('fiscal.index',['tab'=>$tab]))
-                ->assertOk()
-                ->assertSee('Utilitários')
-                ->assertSee('Baixar XML')
-                ->assertSee('data-fiscal-download-auxiliary',false);
+            $response=$this->get(route('fiscal.index',['tab'=>$tab]))->assertOk()->assertSee('Utilitários');
+            if ($tab==='nfe') {
+                $response->assertSee('Inutilização de numeração')->assertSee('Naturezas de operação');
+            } else {
+                $response->assertSee('Baixar XML')->assertSee('data-fiscal-download-auxiliary',false);
+            }
         }
     }
 

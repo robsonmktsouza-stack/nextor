@@ -11,7 +11,7 @@ class ApiController extends Controller
 {
     public function products(Request $request)
     {
-        $updatedAfter=$request->query('updated_after');
+        $updatedAfter=$request->validate(['updated_after'=>['nullable','date']])['updated_after']??null;
 
         return response()->json(Product::query()
             ->when($updatedAfter,fn($q)=>$q->where('updated_at','>=',$updatedAfter))
@@ -24,7 +24,7 @@ class ApiController extends Controller
 
     public function customers(Request $request)
     {
-        $updatedAfter=$request->query('updated_after');
+        $updatedAfter=$request->validate(['updated_after'=>['nullable','date']])['updated_after']??null;
 
         return response()->json(Customer::query()
             ->when($updatedAfter,fn($q)=>$q->where('updated_at','>=',$updatedAfter))
@@ -36,12 +36,15 @@ class ApiController extends Controller
 
     public function sales(Request $request)
     {
-        $updatedAfter=$request->query('updated_after');
+        $updatedAfter=$request->validate(['updated_after'=>['nullable','date']])['updated_after']??null;
 
-        return response()->json(Sale::query()
+        $page=Sale::query()
             ->with(['customer:id,name,document','items','payments'])
             ->when($updatedAfter,fn($q)=>$q->where('updated_at','>=',$updatedAfter))
             ->orderByDesc('id')
-            ->paginate(min(100,max(1,$request->integer('per_page',50)))));
+            ->paginate(min(100,max(1,$request->integer('per_page',50))));
+        // Checkout evidence remains private and unchanged in the sale record.
+        $page->getCollection()->each->makeHidden(['pdv_checkout_hash','pdv_checkout_key']);
+        return response()->json($page);
     }
 }

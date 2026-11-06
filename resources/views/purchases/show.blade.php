@@ -6,10 +6,10 @@
     <div class="grid-actions-left">
       <a class="grid-tool grid-tool-wide" href="{{ route('purchases.index') }}">@include('partials.icon',['name'=>'arrow-left','size'=>17]) Voltar às compras</a>
       @if($purchase->status==='draft')
-      <a class="grid-primary-action" href="{{ route('purchases.edit',$purchase) }}">@include('partials.icon',['name'=>'edit','size'=>17]) Editar</a>
-      <button class="grid-tool grid-tool-wide" type="button" data-dialog-open="purchase-receive">@include('partials.icon',['name'=>'check','size'=>17]) Confirmar recebimento</button>
+      <a class="grid-tool grid-tool-wide purchase-action-edit" href="{{ route('purchases.edit',$purchase) }}">@include('partials.icon',['name'=>'edit','size'=>17]) Editar</a>
+      <button class="grid-tool grid-tool-wide purchase-action-receive" type="button" data-dialog-open="purchase-receive">@include('partials.icon',['name'=>'check','size'=>17]) Confirmar recebimento</button>
       @endif
-      @if($purchase->status!=='cancelled')<button class="grid-tool grid-tool-wide" type="button" data-dialog-open="purchase-cancel">@include('partials.icon',['name'=>'x','size'=>16]) Cancelar compra</button>@endif
+      @if($purchase->status!=='cancelled')<button class="grid-tool grid-tool-wide purchase-action-cancel" type="button" data-dialog-open="purchase-cancel">@include('partials.icon',['name'=>'x','size'=>16]) Cancelar compra</button>@endif
       <button class="grid-tool" type="button" data-print-page data-tooltip="Imprimir" aria-label="Imprimir">@include('partials.icon',['name'=>'print','size'=>17])</button>
     </div>
     <div class="grid-actions-right">
@@ -36,37 +36,51 @@
       </strong></div>
     </div>
     <div class="purchase-section-heading"><h2>Produtos ({{ $purchase->items->count() }})</h2></div>
-    <div class="purchase-items purchase-readonly-items">
-      @foreach($purchase->items as $item)
-      <div class="purchase-item-line">
-        <div class="purchase-item-primary purchase-readonly-primary">
-          <div class="purchase-readonly-data purchase-product-field">
-            <span>Produto</span>
-            <strong>{{ $item->product_name }}</strong>
-            <small>{{ $item->product_sku }} · {{ $item->unit }}</small>
-          </div>
-          <div class="purchase-readonly-data">
-            <span>Quantidade</span>
-            <strong>{{ number_format((float)$item->quantity,3,',','.') }}</strong>
-          </div>
-          <div class="purchase-readonly-data">
-            <span>Custo unitário</span>
-            <strong>R$ {{ number_format((float)$item->unit_cost,2,',','.') }}</strong>
-          </div>
-          <div class="purchase-item-amount">
-            <span>Total do item</span>
-            <strong>R$ {{ number_format((float)$item->line_total,2,',','.') }}</strong>
-          </div>
-        </div>
-        <div class="purchase-item-charges purchase-readonly-charges">
-          <div class="purchase-readonly-data"><span>Desconto</span><strong>R$ {{ number_format((float)$item->discount,2,',','.') }}</strong></div>
-          <div class="purchase-readonly-data"><span>Outros custos</span><strong>R$ {{ number_format((float)$item->other_costs,2,',','.') }}</strong></div>
-          <div class="purchase-readonly-data"><span>Custos externos</span><strong>R$ {{ number_format((float)$item->external_costs,2,',','.') }}</strong></div>
-          <div class="purchase-readonly-data"><span>IPI</span><strong>R$ {{ number_format((float)$item->ipi,2,',','.') }}</strong></div>
-          <div class="purchase-readonly-data"><span>ICMS-ST</span><strong>R$ {{ number_format((float)$item->icms_st,2,',','.') }}</strong></div>
-        </div>
-      </div>
-      @endforeach
+    <div class="table-scroll purchase-show-table-wrap">
+      <table class="cms-table purchase-show-table">
+        <thead><tr><th>Produto</th><th class="purchase-show-num">Qtd.</th><th class="purchase-show-num">Unitário</th><th class="purchase-show-num">Total</th><th class="purchase-show-center">Detalhes</th></tr></thead>
+        <tbody>
+          @foreach($purchase->items as $item)
+          @php
+            $hasCharges = (float)$item->discount != 0 || (float)$item->other_costs != 0 || (float)$item->external_costs != 0 || (float)$item->ipi != 0 || (float)$item->icms_st != 0;
+          @endphp
+          <tr>
+            <td class="purchase-show-product">
+              <strong>{{ $item->source_description ?: $item->product_name }}</strong>
+              <div class="purchase-show-meta">
+                @if($item->source_code)<span>Cód. {{ $item->source_code }}</span>@endif
+                @if($item->product_id)
+                  <span class="purchase-show-linked">Vinculado ao estoque</span>
+                @else
+                  <span class="purchase-show-pending">Não vinculado ao estoque</span>
+                @endif
+              </div>
+            </td>
+            <td class="purchase-show-num">{{ number_format((float)$item->quantity,3,',','.') }} <small>{{ $item->product_id ? $item->unit : ($item->source_unit ?: 'UN') }}</small></td>
+            <td class="purchase-show-num">R$ {{ number_format((float)$item->unit_cost,2,',','.') }}</td>
+            <td class="purchase-show-num purchase-show-amount">R$ {{ number_format((float)$item->line_total,2,',','.') }}</td>
+            <td class="purchase-show-center">
+              @if($hasCharges)
+                <button type="button" class="btn btn-secondary btn-sm purchase-show-detail-btn" aria-label="Ver custos do produto" aria-expanded="false" onclick="const row=this.closest('tr').nextElementSibling;row.hidden=!row.hidden;this.setAttribute('aria-expanded',String(!row.hidden));this.textContent=row.hidden?'Ver':'Ocultar'">Ver</button>
+              @else
+                <span class="purchase-show-nocharge">—</span>
+              @endif
+            </td>
+          </tr>
+          @if($hasCharges)
+          <tr class="purchase-show-charge-row" hidden><td colspan="5">
+            <div class="purchase-show-charges">
+              <span>Desconto <strong>R$ {{ number_format((float)$item->discount,2,',','.') }}</strong></span>
+              <span>Outros custos <strong>R$ {{ number_format((float)$item->other_costs,2,',','.') }}</strong></span>
+              <span>Custos externos <strong>R$ {{ number_format((float)$item->external_costs,2,',','.') }}</strong></span>
+              <span>IPI <strong>R$ {{ number_format((float)$item->ipi,2,',','.') }}</strong></span>
+              <span>ICMS-ST <strong>R$ {{ number_format((float)$item->icms_st,2,',','.') }}</strong></span>
+            </div>
+          </td></tr>
+          @endif
+          @endforeach
+        </tbody>
+      </table>
     </div>
     <div class="purchase-detail-totals">
       <span>Itens: R$ {{ number_format((float)$purchase->subtotal,2,',','.') }}</span>

@@ -3,6 +3,7 @@
   $readOnly=isset($readOnlyDocument);
   $correctionMode=isset($correctionDocument);
   $editorDocument=$correctionDocument ?? $readOnlyDocument ?? null;
+  $sefazGuidance=$editorDocument ? app(\App\Services\Fiscal\SefazRejectionGuidance::class)->forDocument($editorDocument) : null;
   $startTab='general';
   $total=$correctionMode ? (float)($snapshot['total'] ?? 0) : null;
   $canCancelArchived=$readOnly
@@ -74,11 +75,11 @@
           </div>
         </div>
 
-        @if($correctionMode)
-          <div class="nfce-sefaz-rejection" role="alert" data-nfce-rejection>
-            <strong>{{ $rejection['code'] }} — {{ preg_replace('/^(?:\d+\s*[-—:]\s*)?Rejei(?:c|ç)(?:a|ã)o\s*:\s*/iu', 'Rejeição: ', (string)$rejection['reason']) }}</strong>
-          </div>
-        @endif
+        @include('fiscal.partials.sefaz-guidance',[
+          'guidance'=>$sefazGuidance,'nfce'=>true,
+          'originalRejection'=>$correctionMode ? $rejection : null,
+          'originalStoredError'=>$editorDocument?->error_message,
+        ])
         @if($editorDocument && isset($nfceHistory) && $nfceHistory->count()>1)
           <details class="fiscal-info-card">
             <summary>Histórico fiscal ({{ $nfceHistory->count() }} tentativas)</summary>
@@ -133,17 +134,6 @@
               {{ $nfceAuthorizedSibling->series }}/{{ $nfceAuthorizedSibling->document_number }}
             </a> autorizada.
           </div>
-        @endif
-        @if($readOnly && $readOnlyDocument->error_message)
-          @if($readOnlyDocument->status==='rejected')
-            <div class="nfce-sefaz-rejection" role="alert" data-nfce-rejection>
-              <strong>{{ preg_replace('/^Retorno SEFAZ:\s*/iu', '', (string)$readOnlyDocument->error_message) }}</strong>
-            </div>
-          @else
-            <div class="alert alert-danger" role="alert">
-              <strong>Retorno fiscal:</strong> {{ $readOnlyDocument->error_message }}
-            </div>
-          @endif
         @endif
         @if($readOnly && count($nfcePreflightErrors ?? []))
           <div class="alert alert-danger" role="alert">

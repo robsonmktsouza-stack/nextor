@@ -25,7 +25,7 @@
     <button class="btn btn-primary" type="submit">Solicitar inutilização à SEFAZ</button>
   </form>
 </section>
-<section class="cms-card" style="margin-top:16px">
+<section class="cms-card fiscal-section-before">
   <div class="card-header"><h2>Solicitações</h2></div>
   <div class="table-scroll">
     <table class="cms-table">
@@ -36,7 +36,14 @@
         <td>{{ $row->environment==='production'?'Produção':'Homologação' }}</td>
         <td>{{ $row->year }} / {{ $row->series }}</td>
         <td>{{ $row->first_number }}–{{ $row->last_number }}</td>
-        <td><span class="status {{ $row->status==='authorized'?'status-ok':($row->status==='uncertain'?'status-danger':'status-blue') }}">{{ match($row->status){'authorized'=>'Inutilizado pela SEFAZ','rejected'=>'Rejeitado','uncertain'=>'Verificar na SEFAZ',default=>'Em processamento'} }}</span></td>
+        <td><span class="status {{ $row->status==='authorized'?'status-ok':($row->status==='uncertain'?'status-danger':'status-blue') }}">{{ match($row->status){'authorized'=>'Inutilizado pela SEFAZ','rejected'=>'Rejeitado','uncertain'=>'Verificar na SEFAZ',default=>'Em processamento'} }}</span>
+          @php($inutilizationGuidance=app(\App\Services\Fiscal\SefazRejectionGuidance::class)->forInutilization($row))
+          @if($inutilizationGuidance)
+            <details class="sefaz-inutilization-guidance"><summary>Ver orientação</summary>
+              @include('fiscal.partials.sefaz-guidance',['guidance'=>$inutilizationGuidance,'nfce'=>true])
+            </details>
+          @endif
+        </td>
         <td>{{ $row->protocol ?: '—' }}</td>
         <td>{{ $row->created_at->format('d/m/Y H:i') }}</td>
       </tr>

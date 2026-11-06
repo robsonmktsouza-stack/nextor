@@ -157,7 +157,7 @@ class FinancialService
 
             if($locked->sale_id!==null || $locked->purchase_id!==null) {
                 throw ValidationException::withMessages([
-                    'entry'=>'Lançamentos originados de venda devem ser tratados pelo cancelamento da própria venda.'
+                    'entry'=>'Cancele a venda ou a compra de origem para cancelar este lançamento.'
                 ]);
             }
 
@@ -186,7 +186,7 @@ class FinancialService
 
             if($locked->sale_id!==null || $locked->purchase_id!==null) {
                 throw ValidationException::withMessages([
-                    'entry'=>'Lançamentos originados de venda não podem ser reabertos diretamente.'
+                    'entry'=>'Lançamentos vinculados a vendas ou compras não podem ser reabertos diretamente. Consulte o documento de origem.'
                 ]);
             }
 

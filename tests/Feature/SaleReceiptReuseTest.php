@@ -175,7 +175,7 @@ final class SaleReceiptReuseTest extends TestCase
             ->assertViewIs('pdv.receipt')
             ->assertSee('Voltar ao PDV')
             ->assertSee('let automatic=true;',false)
-            ->assertSee('NFC-e ainda não preparada')
+            ->assertSee('NFC-e pendente')
             ->assertSee('SEM VALOR FISCAL');
 
         $this->fakePdfRenderer();
@@ -190,7 +190,7 @@ final class SaleReceiptReuseTest extends TestCase
         $this->get(route('pdv.receipt',['sale'=>$sale,'print'=>0,'status'=>1]))
             ->assertOk()->assertViewIs('pdv.receipt')
             ->assertSee('let automatic=false;',false)
-            ->assertSee('NFC-e ainda não preparada');
+            ->assertSee('NFC-e pendente');
     }
 
     public function test_checkout_receipt_opens_inside_pdv_and_printing_requires_operator_action(): void

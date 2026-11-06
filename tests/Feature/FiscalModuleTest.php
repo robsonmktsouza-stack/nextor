@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\FiscalDocumentJob;
+use App\Models\NfeDraft;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
@@ -55,13 +56,12 @@ class FiscalModuleTest extends TestCase
 
     public function test_fiscal_tab_only_lists_selected_document_type(): void
     {
-        $nfe=FiscalDocumentJob::query()->create([
-            'document_type'=>'nfe',
-            'status'=>'prepared',
+        $nfe=NfeDraft::query()->create([
+            'status'=>'pending',
             'environment'=>'homologation',
             'series'=>1,
             'document_number'=>15,
-            'prepared_at'=>now(),
+            'issue_date'=>now()->toDateString(),
         ]);
 
         $nfce=FiscalDocumentJob::query()->create([
@@ -76,28 +76,26 @@ class FiscalModuleTest extends TestCase
         $this->actingAs($this->admin())
             ->get(route('fiscal.index',['tab'=>'nfe']))
             ->assertOk()
-            ->assertSee('<a class="table-link" href="'.route('fiscal.show',$nfe).'">15</a>',false)
+            ->assertSee('<a class="table-link" href="'.route('fiscal.nfe.edit',$nfe).'">15</a>',false)
             ->assertDontSee('<a class="table-link" href="'.route('fiscal.show',$nfce).'">99</a>',false);
     }
 
     public function test_fiscal_month_navigation_filters_documents(): void
     {
-        $october=FiscalDocumentJob::query()->create([
-            'document_type'=>'nfe',
+        $october=NfeDraft::query()->create([
             'status'=>'authorized',
             'environment'=>'production',
             'series'=>1,
             'document_number'=>101,
-            'prepared_at'=>'2026-10-03 10:00:00',
+            'issue_date'=>'2026-10-03',
         ]);
 
-        $september=FiscalDocumentJob::query()->create([
-            'document_type'=>'nfe',
+        $september=NfeDraft::query()->create([
             'status'=>'authorized',
             'environment'=>'production',
             'series'=>1,
             'document_number'=>88,
-            'prepared_at'=>'2026-09-15 10:00:00',
+            'issue_date'=>'2026-09-15',
         ]);
 
         $admin=$this->admin();
@@ -106,8 +104,8 @@ class FiscalModuleTest extends TestCase
             ->get(route('fiscal.index',['tab'=>'nfe','month'=>'2026-10']))
             ->assertOk()
             ->assertSee('Outubro 2026')
-            ->assertSee('<a class="table-link" href="'.route('fiscal.show',$october).'">101</a>',false)
-            ->assertDontSee('<a class="table-link" href="'.route('fiscal.show',$september).'">88</a>',false)
+            ->assertSee('<a class="table-link" href="'.route('fiscal.nfe.edit',$october).'">101</a>',false)
+            ->assertDontSee('<a class="table-link" href="'.route('fiscal.nfe.edit',$september).'">88</a>',false)
             ->assertSee('Autorizada')
             ->assertSee('status-ok',false);
 
@@ -115,8 +113,8 @@ class FiscalModuleTest extends TestCase
             ->get(route('fiscal.index',['tab'=>'nfe','month'=>'2026-09']))
             ->assertOk()
             ->assertSee('Setembro 2026')
-            ->assertSee('<a class="table-link" href="'.route('fiscal.show',$september).'">88</a>',false)
-            ->assertDontSee('<a class="table-link" href="'.route('fiscal.show',$october).'">101</a>',false);
+            ->assertSee('<a class="table-link" href="'.route('fiscal.nfe.edit',$september).'">88</a>',false)
+            ->assertDontSee('<a class="table-link" href="'.route('fiscal.nfe.edit',$october).'">101</a>',false);
     }
 
     public function test_fiscal_document_has_detail_page(): void

@@ -1,0 +1,786 @@
+{
+  "date": "2026-10-26",
+  "baseline": "bf73a66",
+  "remote_changes_preserved_through": "b3159d4",
+  "application_commit": "595ca3b",
+  "branch": "feature/nfe55-motor-fiscal-completo",
+  "source_files_scanned": 372,
+  "source_lines_scanned": 64797,
+  "contextually_reviewed_sources": 255,
+  "contextually_reviewed_files_total": 265,
+  "finding_groups": 105,
+  "findings_by_status": {
+    "corrected": 99,
+    "retained": 6
+  },
+  "findings_by_severity": {
+    "medium": 48,
+    "low": 44,
+    "high": 13
+  },
+  "unresolved_unnecessary_exposures": 0,
+  "full_tests": {
+    "tests": 1249,
+    "assertions": 8478,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 2
+  },
+  "seconds": 170.558253,
+  "runtime": {
+    "php": "8.5.12",
+    "phpunit": "12.5.40",
+    "database": "SQLite in memory",
+    "host_visual_browser": "Chromium 154.0.8037.57",
+    "node": "v24.19.0"
+  },
+  "syntax": {
+    "php_files": 453,
+    "compiled_blade_files": 105,
+    "first_party_js_files": 16,
+    "failures": 0
+  },
+  "client_js_tests": {
+    "passed": 5,
+    "failed": 0
+  },
+  "validation_fields": 530,
+  "explicit_validation_labels": 585,
+  "normative_files_unchanged": 10,
+  "modified_files_since_baseline": [
+    {
+      "status": "M",
+      "file": "README.md"
+    },
+    {
+      "status": "M",
+      "file": "app/Http/Controllers/ApiController.php"
+    },
+    {
+      "status": "M",
+      "file": "app/Http/Controllers/AuthController.php"
+    },
+    {
+      "status": "M",
+      "file": "app/Http/Controllers/CustomerController.php"
+    },
+    {
+      "status": "M",
+      "file": "app/Http/Controllers/FinanceController.php"
+    },
+    {
+      "status": "M",
+      "file": "app/Http/Controllers/FinancialReconciliationController.php"
+    },
+    {
+      "status": "M",
+      "file": "app/Http/Controllers/FinancialRecurrenceController.php"
+    },
+    {
+      "status": "M",
+      "file": "app/Http/Controllers/FiscalCatalogController.php"
+    },
+    {
+      "status": "M",
+      "file": "app/Http/Controllers/FiscalController.php"
+    },
+    {
+      "status": "M",
+      "file": "app/Http/Controllers/FiscalFcpRuleController.php"
+    },
+    {
+      "status": "M",
+      "file": "app/Http/Controllers/FiscalPurchasesController.php"
+    },
+    {
+      "status": "M",
+      "file": "app/Http/Controllers/FiscalTaxRuleController.php"
+    },
+    {
+      "status": "M",
+      "file": "app/Http/Controllers/FiscalUtilitiesController.php"
+    },
+    {
+      "status": "M",
+      "file": "app/Http/Controllers/NFCeDanfeController.php"
+    },
+    {
+      "status": "M",
+      "file": "app/Http/Controllers/NFCeFiscalEventsController.php"
+    },
+    {
+      "status": "M",
+      "file": "app/Http/Controllers/NFCeInutilizationController.php"
+    },
+    {
+      "status": "M",
+      "file": "app/Http/Controllers/NFCeManualController.php"
+    },
+    {
+      "status": "M",
+      "file": "app/Http/Controllers/Nfe55EmissionController.php"
+    },
+    {
+      "status": "M",
+      "file": "app/Http/Controllers/Nfe55InutilizationController.php"
+    },
+    {
+      "status": "M",
+      "file": "app/Http/Controllers/NfeDraftController.php"
+    },
+    {
+      "status": "M",
+      "file": "app/Http/Controllers/PdvController.php"
+    },
+    {
+      "status": "M",
+      "file": "app/Http/Controllers/PurchaseController.php"
+    },
+    {
+      "status": "M",
+      "file": "app/Http/Controllers/SaleController.php"
+    },
+    {
+      "status": "M",
+      "file": "app/Http/Controllers/SettingsController.php"
+    },
+    {
+      "status": "M",
+      "file": "app/Providers/AppServiceProvider.php"
+    },
+    {
+      "status": "M",
+      "file": "app/Services/BankStatementParser.php"
+    },
+    {
+      "status": "M",
+      "file": "app/Services/FinancialService.php"
+    },
+    {
+      "status": "M",
+      "file": "app/Services/Fiscal/IncomingNfeManifestationService.php"
+    },
+    {
+      "status": "A",
+      "file": "app/Services/Fiscal/Nfe55CancelledDanfeStampService.php"
+    },
+    {
+      "status": "M",
+      "file": "app/Services/Fiscal/Nfe55DanfeService.php"
+    },
+    {
+      "status": "M",
+      "file": "app/Services/Fiscal/SefazRejectionGuidance.php"
+    },
+    {
+      "status": "A",
+      "file": "app/Support/FiscalPresentation.php"
+    },
+    {
+      "status": "A",
+      "file": "app/Support/FiscalUserMessage.php"
+    },
+    {
+      "status": "A",
+      "file": "app/Support/UserFacingMessage.php"
+    },
+    {
+      "status": "A",
+      "file": "app/Support/ValidationFieldNames.php"
+    },
+    {
+      "status": "M",
+      "file": "bootstrap/app.php"
+    },
+    {
+      "status": "M",
+      "file": "composer.json"
+    },
+    {
+      "status": "M",
+      "file": "composer.lock"
+    },
+    {
+      "status": "A",
+      "file": "database/migrations/2026_10_26_235959_install_bundled_fiscal_catalog_automatically.php"
+    },
+    {
+      "status": "M",
+      "file": "docs/ai/HANDOFF.md"
+    },
+    {
+      "status": "M",
+      "file": "docs/ai/PROJECT_STATE.md"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/REPORT.md"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/administration.json"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/catalog-fixture-integration.json"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/catalogs-finance.json"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/commercial.json"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/evidence/audit-administration-targeted.txt"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/evidence/audit-catalogs-finance-tests.txt"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/evidence/audit-validation-field-names.txt"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/evidence/automatic-catalog-provisioning.txt"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/evidence/blade-syntax.txt"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/evidence/cancelled-danfe-tests.txt"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/evidence/catalog-determination-fixtures.txt"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/evidence/catalog-service-fixtures.txt"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/evidence/commercial-fiscal-presentation-final.txt"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/evidence/commercial-presentation-tests.txt"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/evidence/composer-validation.txt"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/evidence/full-tests.txt"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/evidence/global-targeted.txt"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/evidence/javascript-syntax.json"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/evidence/login-browser-tests.txt"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/evidence/pdf-dependencies.txt"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/evidence/php-syntax.json"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/files-examined.csv"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/files-modified.csv"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/final-scan.json"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/fiscal-data-integrity.json"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/fiscal-messages.json"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/fiscal.json"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/global.json"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/inventory.json"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/remote-integration.json"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/screenshots/catalog-benefits-final.png"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/screenshots/catalog-benefits-integrated.png"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/screenshots/catalog-benefits.png"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/screenshots/customers.png"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/screenshots/dashboard-1366.png"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/screenshots/dashboard.png"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/screenshots/finance.png"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/screenshots/fiscal-cte.png"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/screenshots/fiscal-nfce-integrated.png"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/screenshots/fiscal-nfce.png"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/screenshots/fiscal-nfe-integrated.png"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/screenshots/fiscal-nfe.png"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/screenshots/fiscal-nfse.png"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/screenshots/integrations.png"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/screenshots/nfe-editor-final.png"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/screenshots/nfe-editor-integrated.png"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/screenshots/nfe-editor.png"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/screenshots/pdv-1366.png"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/screenshots/pdv.png"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/screenshots/products.png"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/screenshots/purchases.png"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/screenshots/sales.png"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/screenshots/settings.png"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/summary.json"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/validation.json"
+    },
+    {
+      "status": "A",
+      "file": "docs/audits/2026-10-26/visual.json"
+    },
+    {
+      "status": "M",
+      "file": "lang/pt_BR/validation.php"
+    },
+    {
+      "status": "A",
+      "file": "public/css/user-message-page.css"
+    },
+    {
+      "status": "M",
+      "file": "public/js/erp.js"
+    },
+    {
+      "status": "M",
+      "file": "public/js/login.js"
+    },
+    {
+      "status": "M",
+      "file": "public/js/nfe-editor.js"
+    },
+    {
+      "status": "M",
+      "file": "public/js/pdv-sales.js"
+    },
+    {
+      "status": "M",
+      "file": "public/js/pdv.js"
+    },
+    {
+      "status": "M",
+      "file": "public/js/quick-catalog.js"
+    },
+    {
+      "status": "A",
+      "file": "public/js/user-messages.js"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/auth/login.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/auth/password-request.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/auth/password-reset.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/dashboard.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/errors/license-blocked.blade.php"
+    },
+    {
+      "status": "A",
+      "file": "resources/views/errors/message.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/finance/form.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/finance/reconciliation/import.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/finance/show.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/finance/transfers/index.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/fiscal/_catalog-review.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/fiscal/catalog/index.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/fiscal/index.blade.php"
+    },
+    {
+      "status": "A",
+      "file": "resources/views/fiscal/nfe/_document_rows.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/fiscal/nfe/editor.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/fiscal/nfe/inutilizations.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/fiscal/nfe/natures.blade.php"
+    },
+    {
+      "status": "A",
+      "file": "resources/views/fiscal/partials/readable-values.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/fiscal/partials/sefaz-guidance.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/fiscal/purchases/index.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/fiscal/rules/_fields.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/fiscal/rules/index.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/fiscal/show.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/fiscal/tax-groups/form.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/fiscal/tax-groups/index.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/layouts/app.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/layouts/pdv.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/pdv/cash-history.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/pdv/cash-report.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/pdv/index.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/pdv/receipt.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/products/form.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/sales/quote-pdf.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/sales/show.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/settings/index.blade.php"
+    },
+    {
+      "status": "M",
+      "file": "resources/views/stock/index.blade.php"
+    },
+    {
+      "status": "A",
+      "file": "tests/Concerns/WithIsolatedFiscalCatalog.php"
+    },
+    {
+      "status": "A",
+      "file": "tests/Feature/AdministrationPresentationTest.php"
+    },
+    {
+      "status": "A",
+      "file": "tests/Feature/CatalogFinancePresentationTest.php"
+    },
+    {
+      "status": "A",
+      "file": "tests/Feature/CommercialFiscalPresentationTest.php"
+    },
+    {
+      "status": "A",
+      "file": "tests/Feature/CommercialPresentationTest.php"
+    },
+    {
+      "status": "M",
+      "file": "tests/Feature/FiscalCatalogAdministrationTest.php"
+    },
+    {
+      "status": "M",
+      "file": "tests/Feature/FiscalCatalogDeterminationTest.php"
+    },
+    {
+      "status": "M",
+      "file": "tests/Feature/FiscalCatalogNationalScopeTest.php"
+    },
+    {
+      "status": "M",
+      "file": "tests/Feature/FiscalCatalogOfficialDeterminationTest.php"
+    },
+    {
+      "status": "M",
+      "file": "tests/Feature/FiscalCatalogRtcIntegrationTest.php"
+    },
+    {
+      "status": "M",
+      "file": "tests/Feature/FiscalCatalogServiceTest.php"
+    },
+    {
+      "status": "M",
+      "file": "tests/Feature/FiscalCatalogTemplateTest.php"
+    },
+    {
+      "status": "M",
+      "file": "tests/Feature/FiscalConciseLayoutTest.php"
+    },
+    {
+      "status": "M",
+      "file": "tests/Feature/FiscalModuleTest.php"
+    },
+    {
+      "status": "M",
+      "file": "tests/Feature/FiscalNationalCoverageViewTest.php"
+    },
+    {
+      "status": "M",
+      "file": "tests/Feature/FiscalProductClassificationTest.php"
+    },
+    {
+      "status": "M",
+      "file": "tests/Feature/FiscalPurchasesManifestationTest.php"
+    },
+    {
+      "status": "M",
+      "file": "tests/Feature/FiscalPurchasesTest.php"
+    },
+    {
+      "status": "M",
+      "file": "tests/Feature/FiscalTaxPresetMigrationTest.php"
+    },
+    {
+      "status": "M",
+      "file": "tests/Feature/FiscalUtilitiesTest.php"
+    },
+    {
+      "status": "M",
+      "file": "tests/Feature/Nfe55CatalogFormIntegrationTest.php"
+    },
+    {
+      "status": "M",
+      "file": "tests/Feature/Nfe55TaxPreviewTest.php"
+    },
+    {
+      "status": "M",
+      "file": "tests/Feature/NfeEditorTest.php"
+    },
+    {
+      "status": "M",
+      "file": "tests/Feature/SaleReceiptReuseTest.php"
+    },
+    {
+      "status": "M",
+      "file": "tests/Feature/SefazRejectionGuidanceViewTest.php"
+    },
+    {
+      "status": "M",
+      "file": "tests/Feature/SettingsClarityTest.php"
+    },
+    {
+      "status": "A",
+      "file": "tests/Feature/UserFacingErrorsTest.php"
+    },
+    {
+      "status": "A",
+      "file": "tests/Unit/FiscalUserMessageTest.php"
+    },
+    {
+      "status": "A",
+      "file": "tests/Unit/Nfe55CancelledDanfeStampTest.php"
+    },
+    {
+      "status": "A",
+      "file": "tests/Unit/ValidationFieldNamesTest.php"
+    },
+    {
+      "status": "A",
+      "file": "tests/browser/login-messages.test.cjs"
+    },
+    {
+      "status": "A",
+      "file": "tools/audit_user_presentation.py"
+    }
+  ],
+  "skipped_tests": [
+    "NFCePrintSettingsTest::test_original_danfe_can_render_real_pdf_with_local_chrome_when_installed",
+    "QuoteCommercialDocumentTest::test_real_chromium_generates_valid_pdf_when_installed"
+  ],
+  "remaining_verification": [
+    "PHP 8.3/MySQL and Windows/Laragon not executed in this cloud session",
+    "Real ACBr cancelled DANFE appearance/compression/overlay still requires local validation; synthetic two-page PDF tests passed",
+    "Chromium host locale en-US affects native date/time controls; no fiscal date values changed"
+  ],
+  "production_deploy": false,
+  "automatic_merge": false,
+  "corrected_by_severity": {
+    "medium": 48,
+    "low": 38,
+    "high": 13
+  },
+  "commits": [
+    "e137508",
+    "7109255",
+    "fb702b2",
+    "fe69811",
+    "595ca3b"
+  ],
+  "visual": {
+    "routes": 15,
+    "captures": 23,
+    "directly_reviewed_images": 12,
+    "post_remote_retested_routes": 4,
+    "viewports": [
+      "1440x1000",
+      "1366x768"
+    ]
+  },
+  "implementation_and_test_files_changed": 115
+}

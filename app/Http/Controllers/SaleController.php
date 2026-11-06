@@ -137,15 +137,31 @@ class SaleController extends Controller
         return view('sales.show',compact('sale','saleReturns','paymentLabels','nfceDocument'));
     }
 
-    public function receipt(Request $request, Sale $sale, \App\Services\SaleReceiptPdfService $pdf)
+    public function receipt(Request $request, Sale $sale, \App\Services\SaleReceiptPdfService $pdf, QuotePdfService $a4Pdf)
     {
         // Comprovante comercial: o Chrome recebe um PDF inline, como no orçamento.
         // Não preparar NFC-e nem movimentar venda, caixa, estoque ou financeiro.
         abort_unless($sale->operation_type==='sale',404);
+        if ($request->query('format') === 'a4') {
+            try {
+                $bytes = $a4Pdf->render($sale);
+            } catch (RuntimeException $e) {
+                abort(503, \App\Support\UserFacingMessage::fromThrowable($e,
+                    'Não foi possível gerar o comprovante A4.'));
+            }
+            $name = 'Venda-'.str_pad((string)$sale->id,5,'0',STR_PAD_LEFT).'.pdf';
+            return response($bytes,200,[
+                'Content-Type'=>'application/pdf',
+                'Content-Disposition'=>'inline; filename="'.$name.'"',
+                'Cache-Control'=>'private, no-store, max-age=0',
+                'X-Content-Type-Options'=>'nosniff',
+            ]);
+        }
         try {
             $bytes=$pdf->render($sale);
         } catch (RuntimeException $e) {
-            abort(503,$e->getMessage());
+            abort(503,\App\Support\UserFacingMessage::fromThrowable($e,
+                'Não foi possível gerar o comprovante. Tente novamente ou solicite suporte.'));
         }
         $name='Comprovante-Venda-'.str_pad((string)$sale->id,5,'0',STR_PAD_LEFT).'.pdf';
         $mode=$request->boolean('download')?'attachment':'inline';
@@ -163,7 +179,8 @@ class SaleController extends Controller
         try {
             $bytes=$pdf->render($sale);
         } catch (RuntimeException $e) {
-            abort(503,$e->getMessage());
+            abort(503,\App\Support\UserFacingMessage::fromThrowable($e,
+                'Não foi possível gerar o PDF do orçamento. Tente novamente ou solicite suporte.'));
         }
         $name='Orcamento-'.str_pad((string)$sale->id,5,'0',STR_PAD_LEFT).'.pdf';
         $mode=$request->boolean('download')?'attachment':'inline';

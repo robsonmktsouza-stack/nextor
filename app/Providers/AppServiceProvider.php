@@ -12,6 +12,14 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        \Illuminate\Support\Facades\Validator::resolver(static function ($translator, $data, $rules, $messages, $attributes) {
+            $names = [];
+            foreach (array_keys($rules) as $field) {
+                $names[$field] = \App\Support\ValidationFieldNames::for((string) $field);
+            }
+            return new \Illuminate\Validation\Validator($translator, $data, $rules, $messages,
+                array_replace($names, $attributes));
+        });
         try {
             if(Schema::hasTable('company_settings')) {
                 $company=CompanySetting::query()->first();

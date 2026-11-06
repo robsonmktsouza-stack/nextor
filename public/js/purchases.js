@@ -58,21 +58,23 @@ document.addEventListener('DOMContentLoaded',()=>{
   function addItem(data={}){
     const index=rowId++;
     const line=document.createElement('div');
-    line.className='purchase-item-line';
+    line.className='purchase-item-line purchase-grid-row';
     line.dataset.purchaseItem='1';
-    if(data.source_description)line.dataset.importedSource='1';
+    if(data.source_description){line.dataset.importedSource='1';line.classList.add('purchase-imported-row');}
     line.innerHTML=
       '<div class="purchase-item-primary">'+
-        '<label class="purchase-line-field purchase-product-field"><span>Produto *</span>'+
-          '<select required name="items['+index+'][product_id]" data-quick-create="products" data-product><option value="">Selecione um produto</option></select></label>'+
-        '<label class="purchase-line-field"><span>Quantidade *</span>'+
+        '<div class="purchase-product-cell"><div class="purchase-item-source" data-purchase-source hidden></div>'+
+          '<label class="purchase-line-field purchase-product-field"><span class="purchase-mobile-label">Produto do estoque *</span>'+
+          '<select name="items['+index+'][product_id]" data-quick-create="products" data-product><option value="">Selecione um produto</option></select></label></div>'+
+        '<label class="purchase-line-field"><span class="purchase-mobile-label">Quantidade *</span>'+
           '<input type="number" name="items['+index+'][quantity]" min="0.001" step="0.001" required data-qty value="1"></label>'+
-        '<label class="purchase-line-field"><span>Custo unitário *</span>'+
+        '<label class="purchase-line-field"><span class="purchase-mobile-label">Custo unitário *</span>'+
           '<input type="number" name="items['+index+'][unit_cost]" data-number-kind="money" min="0" step="0.01" required data-cost value="0.00"></label>'+
-        '<div class="purchase-item-amount"><span>Total do produto</span><strong data-line-total>R$ 0,00</strong></div>'+
+        '<div class="purchase-item-amount"><span class="purchase-mobile-label">Total do produto</span><strong data-line-total>R$ 0,00</strong></div>'+
         '<button type="button" class="btn-icon purchase-remove" data-purchase-remove aria-label="Remover item" data-tooltip="Remover produto"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg></button>'+
       '</div>'+
-      '<div class="purchase-item-charges">'+        field(index,'discount','Desconto',data.discount)+
+      '<div class="purchase-item-options"><button type="button" class="purchase-details-toggle" data-purchase-toggle aria-expanded="false">▸ Custos e tributos <span data-purchase-charge-hint></span></button><span class="purchase-link-status" data-purchase-link-status></span></div>'+
+      '<div class="purchase-item-charges" data-purchase-charges hidden>'+        field(index,'discount','Desconto',data.discount)+
         field(index,'other_costs','Outros custos',data.other_costs)+
         field(index,'external_costs','Custos externos',data.external_costs)+
         field(index,'ipi','IPI',data.ipi)+
@@ -80,18 +82,54 @@ document.addEventListener('DOMContentLoaded',()=>{
       '</div>';
 
     const select=line.querySelector('[data-product]');
+    for(const key of ['source_code','source_description','source_unit','source_ncm','source_cfop','source_ean','source_number']){
+      if(data[key]===undefined||data[key]===null)continue;
+      const input=document.createElement('input');
+      input.type='hidden';input.name='items['+index+']['+key+']';input.value=String(data[key]);
+      line.appendChild(input);
+    }
     const productLabel=line.querySelector('.purchase-product-field');
+    const sourceBar=line.querySelector('[data-purchase-source]');
     if(data.source_description){
-      const source=document.createElement('small');
+      sourceBar.hidden=false;
+      const source=document.createElement('span');
       source.className='purchase-import-product';
-      source.textContent='NF-e: '+(data.source_code?data.source_code+' — ':'')+data.source_description;
-      productLabel.appendChild(source);
+      source.textContent=(data.source_code?data.source_code+' — ':'')+data.source_description;
+      const badge=document.createElement('strong');
+      badge.textContent='Item da NF-e';
+      sourceBar.append(badge,source);
+      const linked=document.createElement('small');linked.className='purchase-product-link';sourceBar.appendChild(linked);
     }
     const mapButton=document.createElement('button');
     mapButton.type='button';mapButton.className='purchase-map-button';
-    mapButton.textContent='Selecionar / cadastrar';
-    mapButton.setAttribute('aria-label','Selecionar ou cadastrar produto');
-    productLabel.appendChild(mapButton);
+    mapButton.textContent=data.source_description?'Vincular ao estoque':'Selecionar / cadastrar';
+    mapButton.setAttribute('aria-label','Vincular ou cadastrar produto do estoque');
+    if(data.source_description){
+      const actions=document.createElement('div');actions.className='purchase-product-actions';
+      actions.appendChild(mapButton);line.querySelector('.purchase-product-cell').appendChild(actions);
+      const showSelector=document.createElement('button');showSelector.type='button';showSelector.className='purchase-choose-existing';showSelector.textContent='Escolher existente';
+      showSelector.addEventListener('click',()=>{productLabel.classList.toggle('purchase-select-open');select.focus();});
+      actions.appendChild(showSelector);
+    }else{productLabel.appendChild(mapButton);}
+    const chargesPanel=line.querySelector('[data-purchase-charges]');
+    const toggle=line.querySelector('[data-purchase-toggle]');
+    toggle.addEventListener('click',()=>{
+      const expanded=toggle.getAttribute('aria-expanded')!=='true';
+      toggle.setAttribute('aria-expanded',String(expanded));
+      toggle.firstChild.textContent=(expanded?'▾':'▸')+' Custos e tributos ';
+      chargesPanel.hidden=!expanded;
+    });
+    const updateLinkStatus=()=>{
+      const status=line.querySelector('[data-purchase-link-status]');
+      status.textContent=select.value?'Vinculado ao estoque':(data.source_description?'':'Selecione um produto');
+      status.hidden=!status.textContent;
+      if(data.source_description){
+        const product=productMap.get(select.value);
+        const badge=line.querySelector('.purchase-product-link');
+        if(badge)badge.textContent=product?'Estoque: '+product.name:'';
+      }
+      status.classList.toggle('is-pending',!select.value);
+    };
     const selectProduct=product=>{
       if(!productMap.has(String(product.id)))products.push(product);
       productMap.set(String(product.id),product);
@@ -110,10 +148,12 @@ document.addEventListener('DOMContentLoaded',()=>{
     });
     for(const p of products)select.add(new Option(p.sku+' — '+p.name+' ('+p.unit+')',p.id));
     select.value=String(data.product_id??'');
+    updateLinkStatus();
     line.querySelector('[data-qty]').value=data.quantity??'1';
     line.querySelector('[data-cost]').value=data.unit_cost??(productMap.get(select.value)?.cost_price??'0.00');
 
     select.addEventListener('change',()=>{
+      updateLinkStatus();
       if(!line.dataset.importedSource)
         moneyAssign(line.querySelector('[data-cost]'),productMap.get(select.value)?.cost_price??0);
       calculate();
@@ -138,6 +178,10 @@ document.addEventListener('DOMContentLoaded',()=>{
       subtotal+=amount;
       qtyTotal+=quantity;
       line.querySelector('[data-line-total]').textContent=display(amount);
+      const extra=charges.other_costs+charges.external_costs+charges.ipi+charges.icms_st-charges.discount;
+      const hint=line.querySelector('[data-purchase-charge-hint]');
+      if(hint)hint.textContent=extra!==0?' · '+(extra>0?'+':'−')+display(Math.abs(extra)):'';
+
     });
     const freight=cents(form.querySelector('[name="freight"],[data-money-name="freight"]'));
     const otherExpenses=cents(form.querySelector('[name="other_expenses"],[data-money-name="other_expenses"]'));
@@ -190,10 +234,36 @@ document.addEventListener('DOMContentLoaded',()=>{
     node.addEventListener('change',()=>requestAnimationFrame(calculate));
   });
   const payable=form.querySelector('[data-purchase-payable]');
-  const due=form.querySelector('[data-purchase-due]');
-  payable?.addEventListener('change',()=>{
-    if(payable.checked && !due.value)due.focus();
-  });
+  if(payable){
+    // O editor tem rolagem interna. Alterar o switch não deve deslocar o
+    // formulário para fora da área central, inclusive com scroll anchoring.
+    const scroller=form.closest('.main-content');
+    let previousPosition=null;
+    const rememberPosition=()=>{
+      previousPosition={
+        pageX:window.scrollX,pageY:window.scrollY,
+        mainX:scroller?.scrollLeft??0,mainY:scroller?.scrollTop??0
+      };
+    };
+    const restorePosition=()=>{
+      if(!previousPosition)return;
+      const position=previousPosition;
+      if(scroller)scroller.scrollTo(position.mainX,position.mainY);
+      window.scrollTo(position.pageX,position.pageY);
+    };
+    payable.addEventListener('pointerdown',rememberPosition,{passive:true});
+    payable.addEventListener('keydown',event=>{
+      if(event.key===' '||event.key==='Enter')rememberPosition();
+    });
+    payable.addEventListener('change',()=>{
+      const label=payable.closest('.switch-field')?.querySelector('[data-switch-label]');
+      if(label)label.textContent=payable.checked?'Sim':'Não';
+      if(!previousPosition)rememberPosition();
+      restorePosition();
+      requestAnimationFrame(restorePosition);
+      setTimeout(()=>{restorePosition();previousPosition=null;},60);
+    });
+  }
 
   // Delegação especial para inputs monetários aprimorados pelo erp.js.
   // Os campos ficam nomeados no hidden; o input visível continua atualizando o resumo.
@@ -206,8 +276,12 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(!rows.length){
       event.preventDefault();notify('Inclua pelo menos um produto.');return;
     }
-    if(ids.some(id=>!id)||ids.length!==new Set(ids).size){
-      event.preventDefault();notify('Selecione um produto diferente em cada linha.');return;
+    if(rows.some((row,index)=>!ids[index]&&!row.dataset.importedSource)){
+      event.preventDefault();notify('Selecione um produto para os itens adicionados manualmente.');return;
+    }
+    const linked=ids.filter(Boolean);
+    if(linked.length!==new Set(linked).size){
+      event.preventDefault();notify('Selecione um produto diferente em cada linha vinculada.');return;
     }
     const invalid=rows.some(row=>mills(row.querySelector('[data-qty]'))<=0);
     if(invalid){

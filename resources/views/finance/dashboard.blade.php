@@ -3,6 +3,26 @@
 @section('actions')
 <a class="btn btn-success" href="{{ route('finance.entries.create',['type'=>'receivable']) }}">@include('partials.icon',['name'=>'plus','size'=>16]) Conta a receber</a>
 <a class="btn btn-secondary" href="{{ route('finance.entries.create',['type'=>'payable']) }}">@include('partials.icon',['name'=>'plus','size'=>16]) Conta a pagar</a>
+@push('styles')
+<style>
+.finance-chart-card{margin:0 0 16px;border:1px solid #d5dfe8;border-radius:4px;background:#fff;overflow:hidden}
+.finance-chart-card .card-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px;border-bottom:1px solid #e3eaf0}
+.finance-chart-card .card-header h2{font-size:14px;margin:0}
+.finance-chart-card .card-header p{font-size:11px;color:#708398;margin:3px 0 0}
+.finance-chart-legend{display:flex;gap:16px;font-size:11px;color:#597085;white-space:nowrap}
+.finance-chart-legend span:before{content:"";display:inline-block;width:9px;height:9px;margin-right:5px;border-radius:2px;background:#2b9c72}
+.finance-chart-legend .expense:before{background:#d58b56}
+.finance-chart-content{padding:14px 18px;max-height:280px;overflow-y:auto}
+.finance-chart-row{display:grid;grid-template-columns:46px minmax(0,1fr) 116px;gap:12px;align-items:center;min-height:31px}
+.finance-chart-date{font-size:11px;color:#526d82}
+.finance-chart-bars{display:flex;flex-direction:column;justify-content:center;gap:3px;min-height:24px}
+.finance-chart-bar{height:8px;border-radius:2px;min-width:0}
+.finance-chart-bar.income{background:#2b9c72}
+.finance-chart-bar.expense{background:#d58b56}
+.finance-chart-value{text-align:right;font-size:11px;color:#3a5268;font-weight:600}
+@media(max-width:600px){.finance-chart-card .card-header{align-items:flex-start;flex-direction:column}.finance-chart-row{grid-template-columns:37px minmax(0,1fr) 90px;gap:7px}.finance-chart-content{padding:12px}}
+</style>
+@endpush
 @endsection
 
 @section('content')
@@ -45,6 +65,26 @@
   </a>
 </div>
 
+@php
+  $flowMax = max(1, (float) $cashFlow->max(fn ($row) => max((float)$row->income,(float)$row->expense)));
+@endphp
+<section class="cms-card finance-chart-card" aria-label="Gráfico do fluxo de caixa realizado">
+  <div class="card-header"><div><h2>Entradas e saídas realizadas</h2><p>Comparação diária das baixas no período selecionado</p></div><div class="finance-chart-legend"><span class="income">Entradas</span><span class="expense">Saídas</span></div></div>
+  <div class="finance-chart-content">
+    @forelse($cashFlow as $row)
+      <div class="finance-chart-row">
+        <span class="finance-chart-date">{{ date('d/m',strtotime((string)$row->day)) }}</span>
+        <div class="finance-chart-bars">
+          <div class="finance-chart-bar income" style="width:{{ round(((float)$row->income/$flowMax)*100,2) }}%" title="Entradas: R$ {{ number_format((float)$row->income,2,',','.') }}"></div>
+          <div class="finance-chart-bar expense" style="width:{{ round(((float)$row->expense/$flowMax)*100,2) }}%" title="Saídas: R$ {{ number_format((float)$row->expense,2,',','.') }}"></div>
+        </div>
+        <span class="finance-chart-value">R$ {{ number_format((float)$row->income-(float)$row->expense,2,',','.') }}</span>
+      </div>
+    @empty
+      <div class="empty-cell">Nenhuma entrada ou saída realizada no período.</div>
+    @endforelse
+  </div>
+</section>
 <div class="finance-dashboard-grid">
   <section class="cms-card">
     <div class="card-header">

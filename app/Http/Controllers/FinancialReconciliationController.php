@@ -97,7 +97,7 @@ class FinancialReconciliationController extends Controller
             return $import;
         });
 
-        return redirect()->route('finance.reconciliation.index',['import'=>$import->id])->with('success','Extrato importado com '.count($parsed['rows']).' movimentação(ões).');
+        return redirect()->route('finance.reconciliation.index',['import'=>$import->id])->with('success','Extrato importado com '.count($parsed['rows']).(count($parsed['rows'])===1?' movimentação.':' movimentações.'));
     }
 
     public function match(Request $request, FinancialBankTransaction $transaction, FinancialService $financial)

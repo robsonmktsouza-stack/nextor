@@ -144,31 +144,50 @@ class NfeEditorTest extends TestCase
 
     public function test_invoice_editor_has_consistent_visual_hierarchy_and_readable_recipient_summary(): void
     {
-        $css=(string)file_get_contents(public_path('css/nfe-form-workflow.css'));
+        $css=(string)file_get_contents(public_path('css/nfe-form-structure.css'));
         $script=(string)file_get_contents(public_path('js/nfe-editor.js'));
 
-        self::assertStringContainsString('width:min(1200px,calc(100vw - 36px))',$css);
-        self::assertStringContainsString('border-left:3px solid #2b8b6a',$css);
-        self::assertStringContainsString('border-bottom-color:#28896b',$css);
-        self::assertStringContainsString('background:#f1f8f4',$css);
-        self::assertStringContainsString('nfe-recipient-meta',$css);
-        self::assertStringContainsString('nfe-recipient-address',$css);
+        self::assertStringContainsString('#nfeEditorDialog .nfe-commandbar',$css);
+        self::assertStringContainsString('#nfeEditorDialog .nfe-stage-shell',$css);
+        self::assertStringContainsString('grid-template-columns:216px minmax(0,1fr)',$css);
+        self::assertStringContainsString('#nfeEditorDialog .nfe-flow-nav>.editor-tab',$css);
+        self::assertStringContainsString('.nfe-recipient-meta',$css);
+        self::assertStringContainsString('.nfe-recipient-address',$css);
         self::assertStringContainsString('nfe-recipient-meta',$script);
         self::assertStringContainsString('nfe-recipient-address',$script);
         self::assertStringContainsString('esc(customer.city_ibge_code',$script);
     }
 
-    public function test_scrollable_editor_shell_uses_grid_and_not_absolute_positioning(): void
+    public function test_nfe_55_editor_uses_only_new_styles_and_group_grid_overrides_twelve_columns(): void
     {
-        $css=(string)file_get_contents(public_path('css/erp.css'));
+        $this->actingAs($this->admin());
+        $this->company();
+
+        $this->get(route('fiscal.nfe.create'))->assertOk()
+            ->assertSee('css/nfe-form-structure.css', false)
+            ->assertDontSee('css/nfe-form-workflow.css', false);
+
+        $layout=(string)file_get_contents(resource_path('views/layouts/app.blade.php'));
+        self::assertStringContainsString("request()->routeIs('fiscal.nfe.create', 'fiscal.nfe.edit')", $layout);
+
+        $css=(string)file_get_contents(public_path('css/nfe-form-structure.css'));
+        self::assertStringContainsString('#nfeEditorDialog .editor-grid.cols-12.nfe-structured-grid', $css);
+        self::assertStringContainsString('#nfeItemDialog .editor-grid.cols-12.nfe-structured-grid', $css);
+        self::assertStringContainsString('grid-template-columns:repeat(2,minmax(0,1fr))!important', $css);
+        self::assertStringContainsString('#nfeItemDialog .nfe-item-main-panel .editor-grid.cols-12.nfe-structured-grid', $css);
+    }
+
+    public function test_scrollable_editor_shell_uses_grid_and_reveals_invalid_tab(): void
+    {
+        $css=(string)file_get_contents(public_path('css/nfe-form-structure.css'));
         $script=(string)file_get_contents(public_path('js/nfe-editor.js'));
-        self::assertStringContainsString('grid-template-rows:auto minmax(0,1fr) auto',$css);
-        self::assertStringContainsString('.nfe-modal-layer .nfe-workspace-dialog .nfe-workspace-body',$css);
-        self::assertStringNotContainsString('.nfe-modal-layer .nfe-fixed-shell',$css);
-        self::assertStringContainsString("flowBody.scrollTo({top,behavior:'smooth'})",$script);
-        $layoutCss=(string)file_get_contents(public_path('css/nfe-form-workflow.css'));
-        self::assertStringContainsString('width:min(1200px,calc(100vw - 36px))',$layoutCss);
-        self::assertStringContainsString('width:100vw;',$layoutCss);
+
+        self::assertStringContainsString('grid-template-columns:216px minmax(0,1fr)',$css);
+        self::assertStringContainsString('overflow-y:auto!important;overflow-x:hidden!important',$css);
+        self::assertStringContainsString('#nfeEditorDialog [hidden],#nfeItemDialog [hidden]',$css);
+        self::assertStringContainsString("if(resetScroll&&flowBody)flowBody.scrollTop=0;",$script);
+        self::assertStringContainsString("addEventListener('invalid',event=>",$script);
+        self::assertStringContainsString("['ArrowDown','ArrowUp','ArrowLeft','ArrowRight','Home','End']",$script);
     }
 
     public function test_compact_invoice_layout_keeps_every_essential_field_and_all_sections(): void
@@ -195,9 +214,10 @@ class NfeEditorTest extends TestCase
         self::assertStringContainsString('name="gross_weight"',$html);
         self::assertStringNotContainsString('class="field col-4"></div>',$html);
 
-        $css=(string)file_get_contents(public_path('css/nfe-form-workflow.css'));
+        $css=(string)file_get_contents(public_path('css/nfe-form-structure.css'));
         $js=(string)file_get_contents(public_path('js/nfe-editor.js'));
-        self::assertStringContainsString('grid-template-columns:repeat(5,minmax(0,1fr))',$css);
+        self::assertStringContainsString('flex-direction:column!important',$css);
+        self::assertStringContainsString('nfe-item-taxnav .nfe-tax-review-grid',$css);
         self::assertStringContainsString('const group=input.closest(', $js);
     }
 
@@ -247,7 +267,7 @@ class NfeEditorTest extends TestCase
             ->assertSee('dialog-header',false)
             ->assertSee('editor-tabs nfe-flow-nav',false)
             ->assertSee('nfe-form-section cms-card',false)
-            ->assertSee('card-header nfe-flow-heading',false)
+            ->assertDontSee('card-header nfe-flow-heading',false)
             ->assertSee('nfe-item-section',false)
             ->assertSee('nfe-tax-review-grid',false)
             ->assertDontSee('data-nfe-item-tab',false)
@@ -276,15 +296,15 @@ class NfeEditorTest extends TestCase
             ->assertSee('Informar previsão de entrega')
             ->assertSee('Compra governamental')
             ->assertSee('Pagamento antecipado')
-            ->assertSee('Data emissão NF (atual)')
-            ->assertSee('Hora emissão NF (atual)')
-            ->assertSee('Data saída/entrada (atual)')
-            ->assertSee('Hora saída/entrada (atual)')
+            ->assertSee('Data de emissão')
+            ->assertSee('id="nfeIssueTime"',false)
+            ->assertSee('Data de saída/entrada')
+            ->assertSee('id="nfeExitTime"',false)
             ->assertSee('Limpar campo')
-            ->assertSee('Ocultar campos')
-            ->assertSee('<h2>Dados gerais</h2>',false)
+            ->assertSee('Ocultar detalhes')
+            ->assertDontSee('<h2>Dados gerais</h2>',false)
             ->assertSee('Dados do destinatário')
-            ->assertSee('Produtos e valores')
+            ->assertSee('data-nfe-jump="nfe-section-items"',false)
             ->assertSee('Transporte')
             ->assertSee('Pagamento')
             ->assertSee('Informações adicionais')
@@ -301,8 +321,8 @@ class NfeEditorTest extends TestCase
             ->assertSee('Acréscimo da nota')
             ->assertSee('Modalidade do frete')
             ->assertSee('Tipo de pagamento')
-            ->assertSee('Duplicatas')
-            ->assertSee('NF-e referenciadas')
+            ->assertSee('Adicionar duplicata')
+            ->assertSee('Documentos referenciados')
             ->assertSee('Código benefício (cBenef)')
             ->assertSee('CSOSN exportação')
             ->assertSee('CSOSN entrada')
@@ -766,7 +786,7 @@ class NfeEditorTest extends TestCase
             ->assertSee('CST PIS entrada')
             ->assertSee('CST COFINS entrada')
             ->assertSee('CST IPI entrada')
-            ->assertSee('DIFAL e FCP')
+            ->assertSee('DIFAL / FCP')
             ->assertSee('Combustível / ANP')
             ->assertSee('IBS / CBS');
     }

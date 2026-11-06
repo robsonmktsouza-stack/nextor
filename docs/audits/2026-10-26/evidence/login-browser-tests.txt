@@ -1,0 +1,13 @@
+✔ login does not display native JSON parser errors (5.494554ms)
+✔ login does not display technical API validation payloads (1.391903ms)
+✔ login preserves useful credential validation messages (2.191726ms)
+✔ login does not display network implementation errors (0.8972ms)
+✔ a successful login still navigates to the chosen company and clears the password (1.323821ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 124.393131

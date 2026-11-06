@@ -60,7 +60,7 @@ final class NfeFormCompletenessTest extends TestCase
                 'freight'=>10,'insurance'=>3,'other_expenses'=>2,'discount'=>5,
                 'cfop'=>'5102','origin'=>'0','unit'=>'UN','tax_unit'=>'UN',
                 'ncm'=>'61091000','tax_data'=>[
-                    'icms_csosn'=>'102','pis_cst'=>'49','cofins_cst'=>'49','ipi_cst'=>'53',
+                    'icms_csosn'=>'102','pis_cst'=>'49','pis_rate'=>'0','cofins_cst'=>'49','cofins_rate'=>'0','ipi_cst'=>'53','ipi_enq'=>'999',
                 ],
             ]],JSON_THROW_ON_ERROR),
             'payments_json'=>json_encode([[
@@ -327,7 +327,7 @@ final class NfeFormCompletenessTest extends TestCase
             'quantity'=>1,'dimension_quantity'=>1,'unit_price'=>100,
             'cfop'=>'5102','origin'=>'0','unit'=>'UN','tax_unit'=>'UN','ncm'=>'61091000',
             'tax_data'=>[
-                'icms_csosn'=>'102','pis_cst'=>'49','cofins_cst'=>'49','ipi_cst'=>'53',
+                'icms_csosn'=>'102','pis_cst'=>'49','pis_rate'=>'0','cofins_cst'=>'49','cofins_rate'=>'0','ipi_cst'=>'53','ipi_enq'=>'999',
             ],
         ];
         $data['items_json']=json_encode($items,JSON_THROW_ON_ERROR);

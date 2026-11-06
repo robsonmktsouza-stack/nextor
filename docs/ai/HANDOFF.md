@@ -1,3 +1,199 @@
+## Auditoria visual integrada — 26/10/2026
+
+Branch `feature/nfe55-motor-fiscal-completo`, base `5e81321`; commits de aplicação
+`ef6a5e9`, `7a6e5eb`, `d2eb35e` e `8474fda`, publicados sem merge/deploy.
+108 fontes de interface auditadas (85 Blade/23 CSS); 46 grupos de problemas
+corrigidos. Tokens e componentes centralizados; nenhuma duplicata/conflito
+exato de CSS ou estilo local operacional identificado pelo inventário final.
+
+Chromium 154: 684 observações/550 estados únicos/97 variantes de rota em quatro
+resoluções, sem divergências nos papéis medidos; 81/85 views renderizadas.
+Dados sintéticos, somente GET, hashes do banco preservados; foco, teclado,
+Roboto real, densidade e switches comprovados. Suíte integrada em 7a6e5eb:
+1.249 testes/8.616 asserções, zero falhas/erros, dois PDFs ignorados; após ajustes dos
+switches, 13 testes/383 asserções aprovados e regressão visual direcionada.
+Sintaxe em 552 arquivos de aplicação + 8 ferramentas válida. PHP 8.5.12/SQLite.
+
+Não houve modificação de lógica fiscal/financeira, rotas, migrations ou
+integrações. Sem novas dependências. Atualização: pull da branch e
+`php artisan optimize:clear`. Windows/PHP 8.3, ACBr/SEFAZ e PDFs finais não
+revalidados; quatro templates sem prova visual estão identificados no relatório.
+[Relatório e evidências](../audits/visual-2026-10-26/REPORT.md).
+
+## Auditoria geral de apresentação — 26/10/2026
+
+Branch `feature/nfe55-motor-fiscal-completo`; base `bf73a66`, 42 commits
+remotos até `b3159d4` integrados e preservados sem force-push. Commits locais:
+`e137508`, `7109255`, `fb702b2`, `fe69811`, `595ca3b`.
+
+372 arquivos/64.797 linhas varridos; 99 problemas corrigidos e seis retenções
+funcionais justificadas. Nenhuma exposição desnecessária pendente identificada
+na varredura final. Fonte fiscal/histórico e cálculos preservados. Erros comuns,
+validações, mensagens de módulos e componentes foram padronizados.
+
+Suíte final em `595ca3b`: 1.249 testes/8.478 asserções, zero falhas/erros,
+dois PDFs com navegador ignorados no container. PHP 8.5.12/SQLite; sintaxe de
+453 PHP, 105 Blade compilados, 16 JS válida. Cinco testes JS de login passaram.
+Chromium real: 23 capturas/15 rotas, quatro retestes integrados, sem dados reais.
+
+Composer agora declara FPDF/FPDI exigidos pelo DANFE cancelado remoto e previne
+falha fatal de carregamento. Verificar PDF real ACBr localmente: compressão e
+posição do carimbo/rodapé; não foi homologado aqui. A migration automática
+remota do catálogo foi mantida e testada; fixtures pequenas se isolam só nos
+testes, sem desativar provisionamento. Atualização local: composer install,
+artisan migrate, optimize:clear após pull da branch. Sem merge/deploy.
+
+Relatório completo, arquivos, métricas, limites e provas:
+[docs/audits/2026-10-26/REPORT.md](../audits/2026-10-26/REPORT.md).
+
+## Tratamento amigável dos retornos SEFAZ — 26/10/2026
+
+Branch `feature/nfe55-motor-fiscal-completo`; commits `ae6acdf`, `21eef04` e
+`3b262d4`, sem merge/deploy. Catálogo com 1.025 cStat/27 fontes oficiais,
+86 perfis de orientação e tratamento explícito para códigos desconhecidos.
+Integrado aos editores NF-e/NFC-e, cancelamento e duas telas de inutilização;
+atalhos GET respeitam permissões. Não altera decisão fiscal, numeração ou filas.
+Distingue autorização, lote, evento, EPEC, duplicidade e denegação histórica.
+
+Suíte completa no código `3b262d4`: 1.179 testes/8.142 asserções, zero falhas,
+dois testes opcionais Chrome/Chromium ignorados. PHP 8.5.12/PHPUnit 12.5.40/
+SQLite Docker Linux; 28 testes Python passaram. Não houve nova transmissão
+ACBr/SEFAZ ou acesso ao Laragon. Sem novas migrations/seeds.
+Ver [operação, atualização e limites](../fiscal/sefaz-rejections-friendly.md)
+e `docs/fiscal/evidence/sefaz-rejections-*` para fontes, cobertura e provas.
+Atualização: pull da branch e `php artisan optimize:clear`.
+
+## Ampliação nacional do catálogo — 26/10/2026
+
+Branch `feature/nfe55-motor-fiscal-completo`; commits de implementação `c539f16`
+(fontes/dados) e `a55be2f` (integração), publicados sem merge ou deploy.
+Edição `2026.10.26.1`, selecionada por `current.json` com SHA-256:
+15.986 referências. CFOP: 619 códigos completos da planilha oficial vigente,
+585 permitidos para NF-e e 34 vedados. CEST: 1.054 códigos em 25 anexos,
+1.041 atuais, 10 revogados e três inclusões futuras. Convênio 107/2026 com
+efeitos em 01/11/2026 e exclusão expressa de SP. Quatro vínculos NCM manuais
+bloqueiam aplicação automática.
+
+Benefícios: 3.310 registros estaduais; cinco tabelas completas publicadas,
+recortes DF/RN, históricos RS/RJ/AC bloqueados e 17 UFs sem tabela verificada,
+explicitados no painel. Não equivale a catálogo completo de todas as
+legislações, benefícios ou MVA do país.
+
+Consulta por UF, regras e emissão verificam referência territorial, vigência
+CST/CSOSN e CRT, sem conversões presumidas. Edição anterior preservada integralmente;
+modelos revisados/personalizados e documentos autorizados não são alterados.
+Hash canônico calculado incrementalmente, compatível com a edição antiga.
+Instalação, atualização e repetição do pacote com 128 MB passaram. Atributos Git
+preservam SHA-256 no checkout com `core.autocrlf=true`; quatro arquivos conferidos.
+
+Validação final: 1.024 testes, 7.261 assertions, zero falhas/erros, dois testes
+PDF ignorados por falta de Chromium; 14 testes Python aprovados. PHP 8.5.12/SQLite;
+MySQL/PHP 8.3, nova transmissão ACBr/SEFAZ e QA nativo Windows não executados.
+Logs, hashes e cobertura em `docs/fiscal/evidence/fiscal-national-*`.
+Instalação, fontes e limites: `docs/fiscal/catalog-national-delivery-2026-10-26.md`.
+
+## Catálogo fiscal padrão — 26/10/2026
+
+Branch `feature/nfe55-motor-fiscal-completo`; base remota atualizada por fast-forward
+até `1117bc6`, preservando as correções 487/321, CFOP 6108 e DFeReferenciado por item.
+Não houve merge em main/develop nem deploy.
+
+Catálogo `2026.10.26`: 11.063 referências com proveniência oficial e cobertura
+explícita; NCM 10.516 completo do download Siscomex, CFOP 64 documental/parcial,
+CEST 207 parcial de SP, domínios CST/CSOSN e RTC 18/173. Não há benefício BA,
+MVA, pauta ou alíquota presumida. 16 naturezas e 13 grupos novos, inativos;
+instalação/atualização preserva legados, personalizados e revisados.
+
+Migrações 2026_10_26_000001/2/3: releases e códigos, mutex por banco,
+metadados/histórico de natureza/grupo e contexto adicional de regra. Reutilizados
+models, vínculos de produto e emissor existentes. Administração Fiscal →
+Configurações fiscais, CLI fiscal:catalog, seeder explícito e contrato JSON.
+Motor gerenciado exige revisão/vigência e prova dos códigos; contexto considera
+natureza, grupo, município, indicador ICMS e critérios existentes. Prévia e
+rascunhos integrados; documento incompleto fica salvo e bloqueado para emitir.
+Não reinterpreta documentos autorizados nem força migração fiscal dos legados.
+
+Commits de implementação: `721fe1b`, `38c9c9e`, `ea542a8`, publicados na branch.
+Validação final: **989 testes/7060 assertions, zero falhas/erros, dois ignorados**
+por falta de Chromium (PDF); PHP 8.5.12/SQLite. Fixture antiga de IPI devolvido
+atualizada ao DFeReferenciado por item já exigido pela branch; nenhuma
+validação removida. CFOP 6107 integrado para produção própria/não contribuinte.
+Resultado final e evidências: `docs/fiscal/evidence/fiscal-catalog-*`.
+Instruções, arquivos, limites e cobertura: `docs/fiscal/catalogo-fiscal-padrao.md`;
+fontes oficiais/hashes: `docs/fiscal/catalog-sources.md`.
+Proprietário relatou autorização real em homologação anterior. Esta entrega não
+realizou nova transmissão ACBr/SEFAZ: Windows/Laragon/A1 não acessíveis da nuvem.
+
+## Contador integrado e rejeição 486 — 25/10/2026
+
+Código integrado publicado em `277c6b4`: cadastro Contabilidade ligado ao INI/XML
+55, autorização explícita de acesso, CPF/CNPJ validado, contador prioritário e
+alternativa BA selecionada pelo operador. Contador autorizado prevalece sobre a
+alternativa estadual. Atalhos em Configurações → Notas fiscais e NF-e.
+BA sem grupo bloqueado no preflight; XML retornado pela ACBr confere autorizados
+e ordem. Política NFC-e preservada.
+
+Rejeição 486 de envio reconhecida como negativa comprovada. A recuperação
+arquiva originais e preserva chave/número/cNF; `--correct-486` permite corrigir
+a mesma nota após cadastro. Estado pending com `--consult` consulta imediatamente.
+Migration 000005 adiciona failed_jobs, ausente no Windows e na árvore original.
+
+Testes: suíte com 877 testes/5504 assertions, zero falhas/erros, dois ignorados
+por falta de Chromium. O ajuste final de precedência autXML também passou em
+54 testes/334 assertions direcionados. PHP 8.5.12/SQLite; logs/hash em
+`docs/fiscal/evidence/nfe55-accountant-*`. Relato Windows do usuário: preflight 4
+aprovado e SEFAZ 486 na transmissão. A nova correção não foi transmitida pela
+nuvem. [Cadastro, comando local e fontes](../fiscal/nfe55-accountant-autxml.md).
+
+## NF-e 4 — conferência em um terminal
+
+Na branch feature/nfe55-motor-fiscal-completo, nfe:verify-flow ganhou --process:
+executa somente o ID em estado queued pelo Nfe55EmissionService existente,
+com lock/claim atômico. Consulta e verificação do XML/protocolo/DANFE continuam
+iguais. Não consome outros jobs; job original posterior é no-op após o claim.
+Teste com fila real preserva outra nota de produção e comprova falha preparada
+sem tentativa externa; outro teste preserva pending sem retransmissão.
+Validação: 26 testes, 149 assertions, aprovados em PHP 8.5.12/SQLite (comando e
+concorrência). Suíte completa anterior:850/5330; não repetida nesta mudança
+restrita. Evidência: docs/fiscal/evidence/nfe55-single-terminal-tests.txt.
+Usuário relatou sucesso nativo do preflight da nota4 no Laragon, com XML e
+assinatura conferidos, sem reserva/transmissão. Esse relato não foi executado
+pela sessão Linux. Comando local: php -d ffi.enable=true artisan
+nfe:verify-flow 4 --enqueue --process --wait=180 --consult.
+
+## Laragon e fluxo de produção — continuação de 25/10/2026
+
+`cfe8fbb`: produção ligada à configuração existente, numeração/série isoladas,
+preflight em ambos ambientes, regularizações com prova tpAmb correta, preservação
+de ambiente de rascunho e validação de DANFE por ambiente. `68bcdae`: comando
+nfe:verify-flow para emitir/acompanhar/consultar uma nota de homologação na fila
+existente e conferir XML/protocolo/DANFE com resumo privado. Não inicia worker.
+Testes direcionados aprovados: 105/730 e 8/72. Suíte final: 850 testes,
+5330 assertions, zero falhas/erros, dois ignorados por falta de Chromium.
+Runtime PHP 8.5.12/SQLite; evidências em docs/fiscal/evidence/.
+Windows real não acessível daqui; usuário informou Laragon/ACBr1.5.0.490/PHP 8.3/A1
+existentes. [Comandos locais](../fiscal/nfe55-laragon-real-validation.md).
+Nenhuma homologação real ou implantação foi realizada pela sessão Linux.
+
+## Ampliação RTC/DIFAL/IS — 25/10/2026
+
+Código publicado em `899ba66`: catálogo SVRS com flags/vigência, grupos RTC
+configurados, DIFAL delimitado por MOC, CST 90/CSOSN 900, IS explícito futuro,
+conferência XML/INI e novos campos de formulário/regras. Ver
+[entrega e limites atuais](../fiscal/nfe55-delivery-2026-10-25.md).
+Sem homologação ACBr/SEFAZ; módulo integral ainda incompleto. Suíte final: 824 testes, 5181 assertions, zero falhas/erros, dois ignorados
+por Chromium ausente (PDF real). PHP 8.5.12/SQLite; não comprova PHP 8.3/MySQL.
+
+## Continuação de 25/10/2026 — PIS/COFINS-ST e IPI devolvido
+
+Calculadores ligados ao builder, totais, formulário e cadastro de regras.
+Fontes ACBr/XSD verificadas. Testes: 58/209 e 40/323 aprovados; sem transmissão
+real. Ampliação RTC e IS ainda em desenvolvimento, sem alegação de conclusão.
+
+## 25/10/2026 — NF-e 55, branch feature/nfe55-motor-fiscal-completo
+
+Implementação integrada e testes publicados para revisão, sem merge/deploy. Ver [entrega e limitações](../fiscal/nfe55-delivery-2026-10-25.md). Suíte completa executada: 737 testes, 4695 assertions, 1 expectativa antiga de interface remanescente e 2 ignorados; expectativa corrigida e reteste direcionado aprovado (1 teste, 87 assertions). Lint PHP, compilação Blade e sintaxe JavaScript aprovados. Suíte completa não repetida após a última correção textual de teste. Sem ACBr/SEFAZ real. Produção permanece bloqueada; IS, grupos RTC avançados, contingência e finalidades especiais ainda não estão completos.
+
 ## 23/10/2026 — NF-e 55: cancelamento auditável e CT-e referenciado (develop)
 
 - Pedido do proprietário: concluir integralmente NF-e, não somente campos da interface. **Esta entrega é incremental e NÃO representa NF-e 100% pronta ou produção homologada.**

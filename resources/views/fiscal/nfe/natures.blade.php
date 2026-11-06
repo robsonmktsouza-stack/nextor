@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('title','Naturezas de Operação')
-@section('titleMeta')NF-e
+@section('titleMeta','NF-e')
 @section('content')
 @include('fiscal._nav',['tab'=>'nfe','tabs'=>[
   'nfe'=>['label'=>'NF-e'],'nfse'=>['label'=>'NFS-e'],'cte'=>['label'=>'CT-e'],'nfce'=>['label'=>'NFC-e']

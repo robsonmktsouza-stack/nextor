@@ -23,7 +23,7 @@ $quickCanCustomers=$quickCanWrite && auth()->user()->canAccess('customers');
       </label>
       <div id="erpCatalogResults" class="erp-catalog-results" role="listbox" aria-label="Resultados"></div>
       <div class="erp-catalog-picker-actions">
-        <button type="button" class="erp-catalog-new" id="erpCatalogNew">
+        <button type="button" class="btn btn-secondary erp-catalog-new" id="erpCatalogNew">
           @include('partials.icon',['name'=>'plus','size'=>15]) <span id="erpCatalogNewLabel">Novo cadastro</span>
         </button>
       </div>
