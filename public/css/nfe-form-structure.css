@@ -515,3 +515,6 @@
   #nfeEditorDialog .nfe-footer-actions .btn{flex:1}
   #nfeEditorDialog .nfe-steps{max-height:62px}
 }
+/* Precedência explícita: campos opcionais e painéis ocultos não podem reaparecer por estilos globais. */
+#nfeEditorDialog [hidden],#nfeItemDialog [hidden],
+#nfeEditorDialog #nfeGeneralFields[hidden]{display:none!important}
