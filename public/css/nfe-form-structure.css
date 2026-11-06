@@ -1,693 +1,517 @@
 /*
- * Lumeron ERP / NF-e — interface desktop unificada.
- * Sem cartões aninhados, cores de imposto ou regras visuais em cascata no Blade.
- * Os controles e a lógica fiscal permanecem nos componentes originais.
+ * Lumeron ERP / NF-e modelo 55
+ * Formulário desktop reconstruído: janela de trabalho, etapas laterais,
+ * formulário compacto e tributação de cada item em abas.
+ * Os IDs fiscais, contratos de dados e eventos pertencem ao motor existente.
  */
 #nfeEditorDialog,#nfeItemDialog{
-  --nf-accent:#176a9e;
-  --nf-accent-soft:#eaf4fb;
-  --nf-ink:#243746;
-  --nf-label:#536576;
-  --nf-muted:#748391;
-  --nf-rule:#dce4ea;
-  --nf-border:#c6d1da;
-  --nf-background:#fff;
-  --nf-neutral:#f6f8fa;
-  --nf-header:#edf2f6;
-  --nf-control-height:34px;
-  font-family:Roboto,Arial,sans-serif;
+  --nfe-ui-text:#24323e;
+  --nfe-ui-muted:#647581;
+  --nfe-ui-border:#cfd8df;
+  --nfe-ui-grid:#e5eaee;
+  --nfe-ui-light:#f3f6f8;
+  --nfe-ui-rail:#f0f4f6;
+  --nfe-ui-accent:#28627e;
+  --nfe-ui-accent-soft:#e5f0f6;
+  --nfe-ui-focus:#fff1bf;
+  --nfe-ui-height:32px;
+  font-family:Roboto,Arial,Helvetica,sans-serif;
+  color:var(--nfe-ui-text);
+  font-size:12.5px;
 }
-/* Janela de trabalho: cabeçalho e ações fixos; apenas o formulário rola. */
+#nfeEditorDialog [hidden],#nfeItemDialog [hidden]{display:none!important}
 #nfeEditorDialog .nfe-workspace-dialog{
-  width:min(1420px,calc(100vw - 28px))!important;
+  width:min(1560px,calc(100vw - 18px))!important;
   max-width:none!important;
-  height:calc(100dvh - 28px)!important;
-  max-height:calc(100dvh - 28px)!important;
+  height:calc(100dvh - 18px)!important;
+  max-height:calc(100dvh - 18px)!important;
   min-height:0!important;
   overflow:hidden!important;
   display:flex!important;
   flex-direction:column!important;
-  background:var(--nf-background)!important;
-  border:1px solid var(--nf-border)!important;
-  border-radius:4px!important;
-  box-shadow:0 10px 25px #172b3a25!important;
+  border:1px solid #b9c6d0!important;
+  border-radius:3px!important;
+  background:#fff!important;
+  box-shadow:0 12px 28px #1c304021!important;
 }
 #nfeEditorDialog #nfeDraftForm{
+  display:flex!important;
+  flex:1 1 auto!important;
+  flex-direction:column!important;
   height:100%!important;
   min-height:0!important;
-  flex:1 1 auto!important;
-  display:flex!important;
-  flex-direction:column!important;
   overflow:hidden!important;
 }
 #nfeEditorDialog #nfeDraftForm>.dialog-header,
 #nfeEditorDialog #nfeDraftForm>.nfe-dialog-footer{flex:0 0 auto!important}
-#nfeEditorDialog #nfeDraftForm>.nfe-workspace-body{
-  min-height:0!important;
-  flex:1 1 auto!important;
-  overflow-y:auto!important;
-  overflow-x:hidden!important;
-  scrollbar-gutter:stable;
-  background:#fff!important;
-  padding:0 22px 19px!important;
-}
-#nfeEditorDialog .dialog-header,
-#nfeItemDialog .dialog-header{
-  background:#fff!important;
-  color:var(--nf-ink)!important;
-  border:0!important;
-  border-bottom:1px solid var(--nf-rule)!important;
-  box-shadow:none!important;
-  min-height:57px!important;
+#nfeEditorDialog .nfe-commandbar{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+  min-height:72px!important;
   padding:10px 20px!important;
-}
-#nfeEditorDialog .dialog-header h2,
-#nfeItemDialog .dialog-header h2{
   margin:0!important;
-  font-size:16px!important;
-  font-weight:700!important;
-  letter-spacing:0!important;
-  color:var(--nf-ink)!important;
-  line-height:1.25!important;
-}
-#nfeEditorDialog .nfe-editor-document-meta{
-  display:flex;align-items:center;flex-wrap:wrap;gap:5px 11px;
-  margin-top:5px;font-size:11px;color:var(--nf-muted);
-}
-#nfeEditorDialog .nfe-editor-status{
-  padding:2px 7px;
-  border:1px solid var(--nf-rule);
-  color:#536b7a;
-  background:var(--nf-neutral);
-  border-radius:2px;
-  font-weight:700;
-}
-#nfeEditorDialog .dialog-footer,
-#nfeItemDialog .dialog-footer{
-  min-height:56px!important;
-  background:var(--nf-neutral)!important;
-  border-top:1px solid var(--nf-rule)!important;
-  padding:9px 18px!important;
+  border:0!important;
+  border-bottom:1px solid #d5dfe5!important;
+  background:linear-gradient(#f9fafb,#f1f5f7)!important;
+  color:var(--nfe-ui-text)!important;
   box-shadow:none!important;
-  gap:8px!important;
 }
-#nfeEditorDialog .dialog-footer .btn,
-#nfeItemDialog .dialog-footer .btn{border-radius:3px!important;box-shadow:none!important;font-weight:600!important}
-#nfeEditorDialog .dialog-footer .btn-primary,
-#nfeItemDialog .dialog-footer .btn-success{
-  background:var(--nf-accent)!important;
-  border-color:var(--nf-accent)!important;
-  color:#fff!important;
+#nfeEditorDialog .nfe-command-identity,
+#nfeEditorDialog .nfe-command-right{display:flex;align-items:center;gap:13px;min-width:0}
+#nfeEditorDialog .nfe-document-symbol{
+  display:grid;place-items:center;
+  width:37px;height:42px;flex:0 0 37px;
+  border:1px solid #89a6b6;
+  border-top:4px solid #28627e;
+  color:#1f536e;background:#fff;
+  font-size:16px;font-weight:800;letter-spacing:-.04em;
+  border-radius:2px;
 }
-/* Navegação principal em linha, sem botões coloridos, efeitos ou cartões. */
+#nfeEditorDialog .nfe-command-text{min-width:0}
+#nfeEditorDialog .nfe-command-eyebrow{
+  margin-bottom:2px;color:#637581;font-size:10.5px;letter-spacing:.01em;
+}
+#nfeEditorDialog .dialog-header h2{
+  display:flex;align-items:center;gap:9px;
+  margin:0!important;font-size:18px!important;line-height:1.2!important;
+  color:#273743!important;font-weight:700!important;letter-spacing:0!important;
+}
+#nfeEditorDialog .nfe-model-name{
+  padding:3px 6px;border:1px solid #cdd9e2;border-radius:2px;
+  font-size:10px;font-weight:600;color:#567180;background:#fff;
+}
+#nfeEditorDialog .nfe-editor-document-meta{display:flex;flex-wrap:wrap;gap:13px;margin-top:6px;color:#536876;font-size:11px}
+#nfeEditorDialog .nfe-editor-document-meta strong{color:#334c5c;font-weight:700}
+#nfeEditorDialog .nfe-editor-status{
+  display:inline-flex;align-items:center;min-height:26px;padding:3px 10px;
+  border:1px solid #bfced7;background:#e9f0f5;color:#2a536a;
+  font-size:11px;font-weight:700;border-radius:2px;
+}
+#nfeEditorDialog .nfe-command-right .close-dialog{
+  display:grid;place-items:center;width:28px;height:28px;
+  border:1px solid transparent;border-radius:2px;color:#5c6d7a;
+}
+#nfeEditorDialog .nfe-command-right .close-dialog:hover{border-color:#d0dce4;background:#fff;color:#253744}
+#nfeEditorDialog .nfe-stage-shell{
+  display:grid!important;
+  grid-template-columns:216px minmax(0,1fr)!important;
+  flex:1 1 auto!important;
+  min-height:0!important;
+  overflow:hidden!important;
+  background:#fff;
+}
+#nfeEditorDialog .nfe-steps{
+  display:flex;flex-direction:column;min-height:0;overflow-y:auto;
+  background:var(--nfe-ui-rail);
+  border-right:1px solid #ccd9e2;
+}
+#nfeEditorDialog .nfe-steps-heading{display:flex;flex-direction:column;gap:3px;padding:20px 16px 12px;border-bottom:1px solid #d8e1e7}
+#nfeEditorDialog .nfe-steps-heading strong{font-size:12.5px;color:#263d4b}
+#nfeEditorDialog .nfe-steps-heading span{font-size:10.5px;color:#738592;text-transform:uppercase;letter-spacing:.045em}
 #nfeEditorDialog .nfe-flow-nav{
-  position:sticky!important;top:0!important;z-index:25!important;
-  display:flex!important;flex-wrap:nowrap!important;align-items:stretch!important;
-  gap:1px!important;overflow:auto hidden!important;
-  min-height:44px!important;
-  padding:0 5px!important;
-  margin:0 -22px 20px!important;
-  border:0!important;border-bottom:1px solid var(--nf-rule)!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  gap:0!important;
+  overflow:visible!important;
+  position:static!important;
+  margin:0!important;
+  padding:9px 0!important;
+  border:0!important;
   border-radius:0!important;
-  background:var(--nf-neutral)!important;box-shadow:none!important;
+  background:transparent!important;
+  box-shadow:none!important;
 }
 #nfeEditorDialog .nfe-flow-nav>.editor-tab{
-  flex:0 0 auto!important;
-  min-height:44px!important;height:44px!important;
-  white-space:nowrap!important;
-  margin:0!important;padding:0 15px!important;
-  background:transparent!important;
-  border:0!important;border-bottom:3px solid transparent!important;
-  border-radius:0!important;
-  box-shadow:none!important;
-  color:#607484!important;
-  font-size:12px!important;font-weight:600!important;letter-spacing:0!important;
-  transform:none!important;
+  display:flex!important;align-items:flex-start!important;
+  gap:10px!important;min-height:59px!important;
+  width:100%!important;margin:0!important;padding:10px 13px!important;
+  color:#506574!important;border:0!important;
+  border-left:3px solid transparent!important;border-radius:0!important;
+  background:transparent!important;box-shadow:none!important;
+  text-align:left!important;text-transform:none!important;
+  flex:none!important;white-space:normal!important;
 }
-#nfeEditorDialog .nfe-flow-nav>.editor-tab:hover{color:#205f88!important;background:#edf4f8!important}
+#nfeEditorDialog .nfe-flow-nav>.editor-tab:hover{background:#e5edf2!important;color:#24465d!important}
 #nfeEditorDialog .nfe-flow-nav>.editor-tab.active,
-#nfeEditorDialog .nfe-flow-nav>.editor-tab[aria-selected=true]{
-  color:#0e669c!important;background:#fff!important;
-  border-bottom-color:var(--nf-accent)!important;
-  box-shadow:none!important;
-}
-/* Tipografia e campos — uma única densidade no editor inteiro. */
-#nfeEditorDialog .nfe-workspace-body .field,
-#nfeItemDialog .nfe-item-body .field{min-width:0;max-width:100%;margin:0}
-#nfeEditorDialog .nfe-workspace-body .field>span,
-#nfeItemDialog .nfe-item-body .field>span{
-  display:block;
-  margin:0 0 5px!important;
-  padding:0!important;
-  color:var(--nf-label)!important;
-  font-size:11px!important;
+#nfeEditorDialog .nfe-flow-nav>.editor-tab[aria-selected="true"]{
+  background:#fff!important;
+  border-left-color:var(--nfe-ui-accent)!important;
+  color:#224f66!important;
   font-weight:600!important;
-  line-height:1.35!important;
-  min-height:0!important;
-  white-space:normal;
 }
-#nfeEditorDialog .nfe-workspace-body .field :is(input:not([type=checkbox]):not([type=radio]):not([type=hidden]),select,textarea,.ui-select-trigger),
-#nfeItemDialog .nfe-item-body .field :is(input:not([type=checkbox]):not([type=radio]):not([type=hidden]),select,textarea,.ui-select-trigger){
-  box-sizing:border-box!important;max-width:100%;min-width:0;
-  min-height:var(--nf-control-height)!important;
-  border:1px solid var(--nf-border)!important;
-  border-radius:3px!important;
-  background:#fff!important;color:var(--nf-ink)!important;
-  box-shadow:none!important;
-  font-size:12px!important;
+#nfeEditorDialog .nfe-step-number{
+  display:grid;place-items:center;
+  min-width:25px;height:25px;
+  background:#e3e9ed;border:1px solid #d1dce3;
+  border-radius:2px;font-size:11px;color:#6b7c87;font-weight:700;
 }
-#nfeEditorDialog .nfe-workspace-body .field :is(input,select,textarea,.ui-select-trigger):focus,
-#nfeItemDialog .nfe-item-body .field :is(input,select,textarea,.ui-select-trigger):focus{
-  border-color:var(--nf-accent)!important;
-  outline:2px solid #d7ebf8!important;
-  outline-offset:0!important;
-  box-shadow:none!important;
+#nfeEditorDialog .editor-tab.active .nfe-step-number{background:#dcecf5;color:#215a7b;border-color:#afcadb}
+#nfeEditorDialog .nfe-step-text{display:flex;flex-direction:column;gap:3px;min-width:0;line-height:1.3}
+#nfeEditorDialog .nfe-step-text strong{font-size:12px;line-height:1.35;font-weight:600}
+#nfeEditorDialog .nfe-step-text small{font-size:10px;font-weight:400;color:#738594}
+#nfeEditorDialog .nfe-steps-help{margin-top:auto;padding:15px 14px 19px;border-top:1px solid #dce4e9;color:#71818d;font-size:10.5px}
+#nfeEditorDialog .nfe-steps-help>span{display:block;font-weight:700;color:#445d6b;margin-bottom:7px}
+#nfeEditorDialog .nfe-steps-help p{margin:5px 0}
+#nfeEditorDialog .nfe-steps-help kbd{font-family:inherit;margin-right:2px;border:1px solid #d4dfe5;border-radius:2px;background:#fff;padding:2px 4px;color:#516876}
+#nfeEditorDialog .nfe-workspace-body{
+  min-width:0!important;min-height:0!important;
+  display:block!important;overflow-y:auto!important;overflow-x:hidden!important;
+  padding:0 24px 26px!important;
+  margin:0!important;
+  scrollbar-gutter:stable;
+  background:#fff!important;
 }
-#nfeEditorDialog .nfe-workspace-body :is(.readonly-field,input[readonly]),
-#nfeItemDialog .nfe-item-body :is(.readonly-field,input[readonly]){
-  background:#f4f7f9!important;color:#526776!important;
-  border-color:#dfe5eb!important;box-shadow:none!important;
-}
-#nfeEditorDialog .nfe-form-section,
 #nfeEditorDialog .nfe-form-section.cms-card{
-  display:block;min-width:0;overflow:visible!important;
-  margin:0!important;padding:0!important;
-  border:0!important;box-shadow:none!important;
+  display:block;min-width:0;margin:0!important;
+  padding:0!important;border:0!important;
+  border-radius:0!important;box-shadow:none!important;
   background:transparent!important;
 }
 #nfeEditorDialog .nfe-form-section[hidden]{display:none!important}
-#nfeEditorDialog .nfe-form-section>:is(.editor-panel,.cms-card,.nfe-general-card,.nfe-emitter-summary),
-#nfeEditorDialog .nfe-form-section .notes-panel{
-  background:transparent!important;
-  border:0!important;
-  border-radius:0!important;
+#nfeEditorDialog .nfe-pane-heading{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:17px 0 12px;margin:0 0 14px;
+  border-bottom:1px solid #dbe3e8;
+}
+#nfeEditorDialog .nfe-pane-eyebrow{font-size:10px;color:#6d8391;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+#nfeEditorDialog .nfe-pane-heading h3{margin:0;font-size:16px;color:#2b3c48;font-weight:700}
+#nfeEditorDialog .nfe-pane-heading p{margin:4px 0 0;color:#71808c;font-size:11px}
+#nfeEditorDialog .editor-panel,#nfeItemDialog .editor-panel{
+  border:0!important;box-shadow:none!important;
+  border-radius:0!important;background:transparent!important;
+}
+#nfeEditorDialog .nfe-form-section>.editor-panel{
+  margin:12px 0!important;padding:0 0 16px!important;
+  border-bottom:1px solid #e3e9ed!important;
+}
+#nfeEditorDialog .nfe-form-section>.editor-panel h3{margin:0 0 11px;font-size:12.5px;color:#3c515f;font-weight:700}
+#nfeEditorDialog .editor-grid.cols-12,
+#nfeItemDialog .editor-grid.cols-12{
+  display:grid!important;grid-template-columns:repeat(12,minmax(0,1fr))!important;
+  gap:9px 11px!important;min-width:0;
+}
+#nfeEditorDialog .editor-grid>.col-2,#nfeItemDialog .editor-grid>.col-2{grid-column:span 2}
+#nfeEditorDialog .editor-grid>.col-3,#nfeItemDialog .editor-grid>.col-3{grid-column:span 3}
+#nfeEditorDialog .editor-grid>.col-4,#nfeItemDialog .editor-grid>.col-4{grid-column:span 4}
+#nfeEditorDialog .editor-grid>.col-6,#nfeItemDialog .editor-grid>.col-6{grid-column:span 6}
+#nfeEditorDialog .editor-grid>.col-8,#nfeItemDialog .editor-grid>.col-8{grid-column:span 8}
+#nfeEditorDialog .editor-grid>.col-12,#nfeItemDialog .editor-grid>.col-12{grid-column:span 12}
+#nfeEditorDialog .field,#nfeItemDialog .field{display:flex;flex-direction:column;gap:4px;min-width:0;margin:0!important;max-width:100%}
+#nfeEditorDialog .field>span,#nfeItemDialog .field>span,
+#nfeEditorDialog .field>.nfe-field-title{font-size:10.5px;color:#516674;font-weight:600;line-height:1.3}
+#nfeEditorDialog .field input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+#nfeEditorDialog .field select,#nfeEditorDialog .field textarea,
+#nfeItemDialog .field input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+#nfeItemDialog .field select,#nfeItemDialog .field textarea{
+  width:100%;min-width:0;max-width:100%;
+  height:var(--nfe-ui-height)!important;min-height:var(--nfe-ui-height)!important;
+  padding:5px 9px!important;background:#fff!important;
+  color:#293d4b!important;font:400 12px/1.4 Roboto,Arial,sans-serif!important;
+  border:1px solid #cbd6dd!important;border-radius:2px!important;
   box-shadow:none!important;
-  padding:0 0 16px!important;
-  margin:0 0 17px!important;
-  min-width:0;
-  width:100%;
-  border-bottom:1px solid var(--nf-rule)!important;
 }
-#nfeEditorDialog .nfe-form-section>:last-child{border-bottom:0!important}
-#nfeEditorDialog .nfe-emitter-summary{
-  display:flex!important;
-  align-items:center!important;
-  gap:14px!important;
-  border:1px solid var(--nf-rule)!important;
-  background:#f9fbfc!important;
-  border-radius:3px!important;
-  padding:10px 13px!important;
-  margin-bottom:18px!important;
+#nfeEditorDialog .field textarea,#nfeItemDialog .field textarea{
+  min-height:77px!important;height:auto!important;resize:vertical!important;line-height:1.45!important;
 }
-#nfeEditorDialog .nfe-emitter-logo{width:50px!important;min-width:50px!important}
-#nfeEditorDialog .nfe-emitter-logo img{max-height:45px!important;max-width:50px!important;object-fit:contain}
-#nfeEditorDialog .nfe-emitter-identity{min-width:0}
-#nfeEditorDialog .nfe-emitter-name strong{font-size:13px!important;color:var(--nf-ink)}
-#nfeEditorDialog .nfe-emitter-docs,
-#nfeEditorDialog .nfe-emitter-address{font-size:11px!important;line-height:1.4!important;color:var(--nf-muted)}
-#nfeEditorDialog .nfe-document-summary{
-  min-width:145px!important;max-width:165px!important;
-  padding:8px 10px!important;margin-left:auto!important;
-  border:1px solid var(--nf-rule)!important;
-  background:#fff!important;border-radius:3px!important;box-shadow:none!important;
+#nfeEditorDialog .field :is(input,select,textarea):focus,
+#nfeItemDialog .field :is(input,select,textarea):focus{
+  background:var(--nfe-ui-focus)!important;border-color:#b88d2f!important;
+  outline:1px solid #b88d2f!important;box-shadow:none!important;
 }
-#nfeEditorDialog .nfe-document-summary>strong{font-size:13px!important;color:var(--nf-ink)!important}
-/* Opções e datas ficam dentro do mesmo formulário, não em painéis coloridos. */
-#nfeEditorDialog .nfe-general-card{overflow:visible!important}
-#nfeEditorDialog .nfe-general-actions{min-height:23px!important;margin:0 0 6px!important}
-#nfeEditorDialog .nfe-general-layout{
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr) 245px!important;
-  gap:20px!important;
-  border:0!important;align-items:start!important;
+#nfeEditorDialog .field .readonly-field,
+#nfeItemDialog .field .readonly-field{
+  min-height:var(--nfe-ui-height);padding:7px 9px;
+  border:1px solid #dbe4ea;border-radius:2px;
+  background:#f5f7f8;color:#394c5b;font-size:12px;
 }
-#nfeEditorDialog .nfe-general-fields{min-width:0!important;padding:0!important}
-#nfeEditorDialog .nfe-general-dates{
-  align-self:start!important;
-  background:#f7f9fb!important;
-  border:1px solid var(--nf-rule)!important;
-  padding:12px!important;
-  border-radius:3px!important;
+#nfeEditorDialog .nfe-structured-grid,#nfeItemDialog .nfe-structured-grid{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:15px!important;align-items:start;
 }
-#nfeEditorDialog .nfe-general-dates .nfe-standalone-title{margin-bottom:10px!important}
-#nfeEditorDialog .nfe-general-dates>.field{margin-bottom:10px!important}
-#nfeEditorDialog .nfe-general-dates>.field:last-child{margin-bottom:0!important}
-/* Combobox de natureza: select nativo segue sendo a origem do dado. */
-#nfeEditorDialog .input-action-group:has(.nfe-nature-combobox){
-  display:flex!important;align-items:stretch!important;gap:0!important;width:100%!important;
-}
-#nfeEditorDialog .nfe-nature-combobox{
-  position:relative!important;display:block!important;
-  flex:1 1 0!important;min-width:0!important;max-width:none!important;
-}
-#nfeEditorDialog select#nfeNature{
-  display:none!important;position:absolute!important;width:1px!important;
-  height:1px!important;opacity:0!important;pointer-events:none!important;
-}
-#nfeEditorDialog .nfe-nature-combobox input#nfeNatureSearch{
-  display:block!important;width:100%!important;height:34px!important;min-height:34px!important;
-  padding:0 9px!important;margin:0!important;background:#fff!important;
-  border:1px solid var(--nf-border)!important;border-radius:3px 0 0 3px!important;
-}
-#nfeEditorDialog .input-action-group:has(.nfe-nature-combobox)>.input-action-button{
-  width:36px!important;min-width:36px!important;height:34px!important;
-  min-height:34px!important;flex:0 0 36px!important;
-  border:1px solid var(--nf-border)!important;border-left:0!important;
-  border-radius:0 3px 3px 0!important;background:#f8fafb!important;
-}
-#nfeEditorDialog .nfe-nature-options{
-  position:absolute!important;z-index:200!important;
-  left:0;right:0;top:calc(100% + 2px);
-  max-height:220px;overflow:auto;
-  background:#fff;border:1px solid var(--nf-border);
-  border-radius:3px;box-shadow:0 8px 20px #1d34451f;
-}
-#nfeEditorDialog .nfe-nature-options[hidden]{display:none!important}
-#nfeEditorDialog .nfe-nature-option{
-  display:block;width:100%;text-align:left;border:0;
-  padding:9px 11px;background:#fff;color:var(--nf-ink);
-  font-size:12px;cursor:pointer;
-}
-#nfeEditorDialog .nfe-nature-option:hover,
-#nfeEditorDialog .nfe-nature-option[aria-selected=true]{
-  background:var(--nf-accent-soft);color:#105c8e;
-}
-#nfeEditorDialog .nfe-nature-empty{padding:12px;color:var(--nf-muted)}
-/* Grupos: linhas e colunas, sem bloco desenhado em volta de cada assunto. */
-#nfeEditorDialog .nfe-structured-grid,
-#nfeItemDialog .nfe-structured-grid{
-  display:grid!important;
-  grid-template-columns:repeat(2,minmax(0,1fr))!important;
-  column-gap:23px!important;row-gap:12px!important;align-items:start!important;
-}
-#nfeEditorDialog .nfe-structured-grid>.nfe-field-group,
-#nfeItemDialog .nfe-structured-grid>.nfe-field-group{
-  grid-column:auto!important;
-  min-width:0!important;
-  margin:0!important;
-}
-#nfeEditorDialog .nfe-field-group,
-#nfeItemDialog .nfe-field-group{
-  min-width:0;
-  border:0!important;border-bottom:1px solid #e5eaee!important;
-  border-radius:0!important;
+#nfeEditorDialog .nfe-field-group,#nfeItemDialog .nfe-field-group{
+  min-width:0;margin:0!important;padding:0!important;
+  border:0!important;border-radius:0!important;
   background:transparent!important;box-shadow:none!important;
-  padding:0 0 11px!important;
 }
 #nfeEditorDialog .nfe-field-group-heading,
 #nfeItemDialog .nfe-field-group-heading{
-  display:flex;align-items:baseline;flex-wrap:wrap;gap:5px 10px;
-  min-height:26px!important;
-  margin:0 0 5px!important;padding:0 0 8px!important;
-  border:0!important;border-bottom:1px solid var(--nf-rule)!important;
-  background:transparent!important;
-  color:#31556f!important;
+  display:flex;align-items:baseline;justify-content:space-between;gap:8px;
+  margin:0 0 9px!important;padding:0 0 6px!important;
+  border-bottom:1px solid #e2e9ed!important;
 }
-#nfeEditorDialog .nfe-field-group-heading strong,
-#nfeItemDialog .nfe-field-group-heading strong{
-  color:#31556f!important;font-weight:700!important;font-size:12px!important;line-height:1.3!important;
+#nfeEditorDialog .nfe-field-group-heading strong,#nfeItemDialog .nfe-field-group-heading strong{
+  color:#344e60;font-size:11px;font-weight:700;
 }
-#nfeEditorDialog .nfe-field-group-heading small,
-#nfeItemDialog .nfe-field-group-heading small{
-  color:var(--nf-muted)!important;font-size:10.5px!important;line-height:1.3!important;font-weight:400!important;
+#nfeEditorDialog .nfe-field-group-heading small,#nfeItemDialog .nfe-field-group-heading small{
+  color:#7c8b94;font-size:9.5px;font-weight:400;
 }
-/* Indicador discreto para blocos fiscais realmente expansíveis. */
-#nfeEditorDialog details.nfe-field-group>.nfe-field-group-heading,
-#nfeItemDialog details.nfe-field-group>.nfe-field-group-heading{
-  position:relative;cursor:pointer;
-  padding-right:22px!important;list-style:none;
+#nfeEditorDialog .nfe-field-group-fields,#nfeItemDialog .nfe-field-group-fields{
+  display:grid!important;grid-template-columns:repeat(12,minmax(0,1fr))!important;
+  gap:9px!important;
 }
-#nfeEditorDialog details.nfe-field-group>.nfe-field-group-heading::-webkit-details-marker,
-#nfeItemDialog details.nfe-field-group>.nfe-field-group-heading::-webkit-details-marker{display:none}
-#nfeEditorDialog details.nfe-field-group>.nfe-field-group-heading:after,
-#nfeItemDialog details.nfe-field-group>.nfe-field-group-heading:after{
-  content:"";position:absolute;right:5px;top:6px;width:7px;height:7px;
-  border-right:1.5px solid #697e8b;border-bottom:1.5px solid #697e8b;
-  transform:rotate(45deg);
-}
-#nfeEditorDialog details.nfe-field-group[open]>.nfe-field-group-heading:after,
-#nfeItemDialog details.nfe-field-group[open]>.nfe-field-group-heading:after{
-  top:11px;transform:rotate(225deg);
-}
-#nfeItemDialog .nfe-retained-heading{
-  display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;
-}
-#nfeItemDialog .nfe-retained-chevron{
-  flex:0 0 7px;width:7px;height:7px;margin-right:4px;
-  border-right:1.5px solid #697e8b;border-bottom:1.5px solid #697e8b;
-  transform:rotate(45deg);
-}
-#nfeItemDialog .nfe-retained-details[open] .nfe-retained-chevron{transform:rotate(225deg)}
-#nfeEditorDialog .nfe-field-group-fields,
-#nfeItemDialog .nfe-field-group-fields{
-  display:grid!important;
-  grid-template-columns:repeat(12,minmax(0,1fr))!important;
-  gap:11px 12px!important;
-  margin:0!important;padding:7px 0 5px!important;
-  border:0!important;background:transparent!important;
-  min-width:0!important;box-shadow:none!important;
-}
-#nfeEditorDialog .nfe-field-group-fields>.field,
-#nfeItemDialog .nfe-field-group-fields>.field{min-width:0!important}
-#nfeEditorDialog .nfe-field-group-fields>.field.col-2,
-#nfeItemDialog .nfe-field-group-fields>.field.col-2{grid-column:span 4!important}
-#nfeEditorDialog .nfe-field-group-fields>.field.col-3,
-#nfeItemDialog .nfe-field-group-fields>.field.col-3{grid-column:span 6!important}
-#nfeEditorDialog .nfe-field-group-fields>.field.col-4,
-#nfeItemDialog .nfe-field-group-fields>.field.col-4{grid-column:span 6!important}
-#nfeEditorDialog .nfe-field-group-fields>.field.col-6,
-#nfeItemDialog .nfe-field-group-fields>.field.col-6{grid-column:span 12!important}
-#nfeEditorDialog .nfe-field-group-fields>.field.col-8,
-#nfeItemDialog .nfe-field-group-fields>.field.col-8{grid-column:span 12!important}
-#nfeEditorDialog .nfe-field-group-fields>.field.col-12,
-#nfeItemDialog .nfe-field-group-fields>.field.col-12{grid-column:span 12!important}
-#nfeEditorDialog .nfe-field-group[hidden],
-#nfeItemDialog .nfe-field-group[hidden],
+#nfeEditorDialog .nfe-field-group-fields>.field.col-2,#nfeItemDialog .nfe-field-group-fields>.field.col-2{grid-column:span 4!important}
+#nfeEditorDialog .nfe-field-group-fields>.field.col-3,#nfeItemDialog .nfe-field-group-fields>.field.col-3{grid-column:span 6!important}
+#nfeEditorDialog .nfe-field-group-fields>.field.col-4,#nfeItemDialog .nfe-field-group-fields>.field.col-4{grid-column:span 6!important}
+#nfeEditorDialog .nfe-field-group-fields>.field.col-6,#nfeItemDialog .nfe-field-group-fields>.field.col-6{grid-column:span 12!important}
+#nfeEditorDialog .nfe-field-group-fields>.field.col-8,#nfeItemDialog .nfe-field-group-fields>.field.col-8{grid-column:span 12!important}
+#nfeEditorDialog .nfe-field-group-fields>.field.col-12,#nfeItemDialog .nfe-field-group-fields>.field.col-12{grid-column:span 12!important}
 #nfeEditorDialog .nfe-field-group-fields>.field[hidden],
 #nfeItemDialog .nfe-field-group-fields>.field[hidden]{display:none!important}
-/* Operação tem largura integral; grupos auxiliares dividem a segunda linha. */
-#nfeEditorDialog #nfe-section-general .nfe-general-fields .nfe-field-group[data-nfe-group="Natureza e operação"]{
-  grid-column:1/-1!important;
+#nfeEditorDialog .nfe-general-layout{display:grid!important;grid-template-columns:minmax(0,1fr) 205px;gap:20px!important;align-items:start}
+#nfeEditorDialog .nfe-general-fields{min-width:0!important;padding:0!important}
+#nfeEditorDialog .nfe-general-fields .nfe-field-group[data-nfe-group="Natureza e operação"]{grid-column:span 2}
+#nfeEditorDialog .nfe-general-fields .nfe-field-group[data-nfe-group="Natureza e operação"] .field.col-6{grid-column:span 6!important}
+#nfeEditorDialog .nfe-general-fields .nfe-field-group[data-nfe-group="Natureza e operação"] .field.col-3{grid-column:span 3!important}
+#nfeEditorDialog .nfe-general-dates{
+  display:flex!important;flex-direction:column!important;gap:9px!important;
+  padding:12px!important;margin:0!important;
+  border:1px solid #dce5ea!important;background:#f5f8fa!important;
 }
-#nfeEditorDialog #nfe-section-general .nfe-general-fields .nfe-field-group[data-nfe-group="Controle de datas"]{
-  grid-column:1/-1!important;
+#nfeEditorDialog .nfe-general-dates>.nfe-standalone-title{font-size:11px;font-weight:700;color:#435c6e;margin-bottom:2px}
+#nfeEditorDialog .nfe-general-actions{display:flex;justify-content:flex-end;min-height:23px;margin-bottom:6px}
+#nfeEditorDialog .nfe-general-actions .nfe-section-toggle{padding:2px 5px;background:none;border:0;color:#527b95;font-size:10.5px;text-decoration:underline;cursor:pointer}
+#nfeEditorDialog .nfe-emitter-summary{
+  display:flex!important;align-items:center!important;gap:14px!important;
+  padding:11px 14px!important;margin:0 0 18px!important;
+  background:#f7f9fa!important;border:1px solid #d7e1e8!important;
+  border-radius:2px!important;box-shadow:none!important;
 }
-#nfeEditorDialog #nfe-section-general .nfe-general-fields .nfe-field-group[data-nfe-group="Natureza e operação"] .field.col-6{
-  grid-column:span 6!important;
+#nfeEditorDialog .nfe-emitter-logo{width:48px;min-width:48px;display:grid;place-items:center}
+#nfeEditorDialog .nfe-emitter-logo img{max-width:46px;max-height:44px;object-fit:contain}
+#nfeEditorDialog .nfe-emitter-identity{flex:1;min-width:0}
+#nfeEditorDialog .nfe-emitter-name{display:flex;gap:9px;flex-wrap:wrap}
+#nfeEditorDialog .nfe-emitter-name strong{font-size:12.5px;color:#2d404d}
+#nfeEditorDialog .nfe-emitter-name span{font-size:11px;color:#5e7886}
+#nfeEditorDialog .nfe-emitter-address{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0;color:#70818c;font-size:10.5px}
+#nfeEditorDialog .nfe-emitter-docs{display:flex;gap:12px;flex-wrap:wrap;color:#546b78;font-size:10.5px}
+#nfeEditorDialog .nfe-emitter-docs b{font-weight:600}
+#nfeEditorDialog .nfe-emitter-edit{display:inline-block;margin-top:5px;font-size:10.5px;color:#28627e}
+#nfeEditorDialog .nfe-document-summary{min-width:175px;padding-left:15px;border-left:1px solid #d7e1e8;display:flex;flex-direction:column;gap:5px}
+#nfeEditorDialog .nfe-document-summary>span{font-size:10px;color:#758896}
+#nfeEditorDialog .nfe-document-summary>strong{font-size:13px;color:#34566a}
+#nfeEditorDialog .nfe-document-summary>div{display:flex;gap:12px;font-size:10px;color:#748896}
+#nfeEditorDialog .nfe-document-summary>div span b{display:block;color:#40586a;font-size:11px;margin-top:2px}
+#nfeEditorDialog .nfe-recipient-panel{padding:13px 0 17px!important;margin:17px 0 0!important;border-top:1px solid #d8e2e8!important}
+#nfeEditorDialog .nfe-recipient-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+#nfeEditorDialog .nfe-recipient-heading h3{font-size:12.5px;margin:0;color:#314d5b}
+#nfeEditorDialog .nfe-recipient-meta{font-size:11px;color:#536e7e}
+#nfeEditorDialog .nfe-recipient-address{font-size:10.5px;color:#778895}
+#nfeEditorDialog .nfe-delivery-panel{margin:0!important;padding-top:12px!important}
+#nfeEditorDialog .nfe-delivery-panel .nfe-standalone-title{margin:5px 0 10px;color:#3b5568;font-size:11px;font-weight:700}
+#nfeEditorDialog .switch-field{display:flex;align-items:center;gap:7px;min-height:30px}
+#nfeEditorDialog .switch-field strong{font-size:11px!important;font-weight:500}
+#nfeEditorDialog .nfe-flag-field .switch-field{height:32px}
+#nfeEditorDialog .input-action-group:has(.nfe-nature-combobox){display:flex;min-width:0;position:relative}
+#nfeEditorDialog .nfe-nature-combobox{position:relative;flex:1;min-width:0}
+#nfeEditorDialog .input-action-group>.input-action-button{display:grid;place-items:center;flex:0 0 33px;border:1px solid #cbd6dd;background:#f7fafb;color:#37627b}
+#nfeEditorDialog .nfe-nature-options{
+  position:absolute;left:0;right:0;top:100%;z-index:80;
+  max-height:220px;overflow:auto;border:1px solid #aebfc9;
+  background:#fff;box-shadow:0 7px 16px #344c5a1f;
 }
-#nfeEditorDialog #nfe-section-general .nfe-general-fields .nfe-field-group[data-nfe-group="Natureza e operação"] .field.col-3{
-  grid-column:span 3!important;
-}
-#nfeEditorDialog #nfe-section-general .nfe-general-fields .nfe-field-group[data-nfe-group="Controle de datas"] .field{
-  grid-column:span 2!important;
-}
-#nfeEditorDialog .nfe-flag-field .switch-field{height:34px;min-height:34px}
-#nfeEditorDialog :is(.nfe-recipient-panel,.nfe-delivery-panel,.nfe-totals-panel) h3,
-#nfeEditorDialog .nfe-standalone-title,
-#nfeEditorDialog .nfe-recipient-heading h3{
-  margin:0 0 12px!important;
-  padding:0 0 9px!important;
-  border:0!important;border-bottom:1px solid var(--nf-rule)!important;
-  background:transparent!important;
-  color:#31556f!important;font-size:12px!important;font-weight:700!important;
-}
-#nfeEditorDialog .nfe-recipient-heading{margin:0 0 12px!important;padding:0!important;border:0!important}
-#nfeEditorDialog .nfe-recipient-heading h3{margin:0!important;flex:1}
-#nfeEditorDialog .nfe-delivery-panel .nfe-standalone-title{margin-bottom:9px!important}
-/* Grade de produtos: foco no conteúdo, não no contorno da tabela. */
-#nfeEditorDialog #nfe-section-items>.cms-card{
-  padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;margin:0 0 17px!important;
-}
-#nfeEditorDialog #nfe-section-items .grid-actionbar{margin:0 0 11px!important;min-height:32px}
-#nfeEditorDialog #nfe-section-items .grid-primary-action{
-  height:33px!important;min-height:33px!important;
-  padding:0 12px!important;border-radius:3px!important;
-  border:1px solid var(--nf-accent)!important;background:var(--nf-accent)!important;
-  color:#fff!important;font-size:12px!important;box-shadow:none!important;
-}
-#nfeEditorDialog #nfe-section-items .table-scroll{
-  border:1px solid var(--nf-rule)!important;border-radius:2px!important;
-  overflow-x:auto;box-shadow:none!important;
-}
-#nfeEditorDialog #nfe-section-items .cms-table{border-collapse:collapse!important;font-size:11.5px!important}
-#nfeEditorDialog #nfe-section-items .cms-table thead th{
-  color:#52697a!important;background:var(--nf-header)!important;
-  border-bottom:1px solid var(--nf-border)!important;
-  padding:9px 10px!important;
-  font-size:11px!important;font-weight:700!important;white-space:nowrap;
-}
-#nfeEditorDialog #nfe-section-items .cms-table tbody td{
-  padding:9px 10px!important;border-bottom:1px solid #e8edf0!important;
-  color:var(--nf-ink)!important;
-}
-#nfeEditorDialog #nfe-section-items .cms-table tbody tr:hover td{background:#e9f3fb!important}
-/* Totais da NF-e — faixa de indicadores, detalhes tributários expansíveis. */
-#nfeEditorDialog .nfe-totals-panel{border:0!important;margin:0!important;padding:0!important}
-#nfeEditorDialog .nfe-invoice-summary{
-  display:grid!important;
-  grid-template-columns:repeat(4,minmax(0,1fr))!important;
-  margin:12px 0!important;
-  border:1px solid var(--nf-rule)!important;
-  background:#f9fbfc!important;
-}
-#nfeEditorDialog .nfe-invoice-metric{
-  min-width:0;grid-column:auto!important;
-  padding:10px 12px!important;
-  border:0!important;border-right:1px solid var(--nf-rule)!important;
-  background:transparent!important;
-}
+#nfeEditorDialog .nfe-nature-option{display:block;width:100%;padding:7px 9px;text-align:left;background:#fff;border:0;color:#344b59;font-size:11px}
+#nfeEditorDialog .nfe-nature-option:hover,
+#nfeEditorDialog .nfe-nature-option[aria-selected="true"]{background:#e7f1f7}
+#nfeEditorDialog .nfe-nature-empty{padding:9px;color:#778993}
+#nfeEditorDialog .nfe-general-card{overflow:visible!important}
+#nfeEditorDialog #nfe-section-items>.cms-card{margin:0 0 19px!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important}
+#nfeEditorDialog .grid-actionbar{display:flex;align-items:center;justify-content:flex-start;margin-bottom:11px}
+#nfeEditorDialog .grid-primary-action{border-radius:2px!important;background:#276783!important;border-color:#276783!important;color:#fff!important}
+#nfeEditorDialog .table-scroll{max-width:100%;overflow-x:auto;border:1px solid #dbe4ea}
+#nfeEditorDialog .cms-table{width:100%;border-collapse:collapse!important;font-size:11px!important}
+#nfeEditorDialog .cms-table th{padding:8px 9px!important;text-align:left;background:#eef3f6!important;color:#4b6170!important;border-bottom:1px solid #d2dde4!important;font-weight:700!important}
+#nfeEditorDialog .cms-table td{padding:7px 9px!important;border-bottom:1px solid #e4ebef!important}
+#nfeEditorDialog .cms-table tbody tr:hover td{background:#e9f3fa!important}
+#nfeEditorDialog .nfe-totals-panel{padding-top:13px!important;margin:12px 0 0!important;border-top:1px solid #dbe5eb!important}
+#nfeEditorDialog .nfe-totals-panel>h3{margin:0 0 12px!important;font-size:12px;color:#3b5565}
+#nfeEditorDialog .nfe-invoice-summary{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;border:1px solid #d5e0e6!important;background:#f7f9fa!important}
+#nfeEditorDialog .nfe-invoice-metric{padding:12px!important;border-right:1px solid #dce5eb!important;min-width:0}
 #nfeEditorDialog .nfe-invoice-metric:last-child{border-right:0!important}
-#nfeEditorDialog .nfe-invoice-metric>span{
-  display:block;color:var(--nf-muted)!important;font-size:10.5px!important;margin-bottom:4px!important;
-}
-#nfeEditorDialog .nfe-invoice-metric>.readonly-field{
-  background:transparent!important;border:0!important;box-shadow:none!important;
-  padding:0!important;min-height:0!important;font-size:15px!important;font-weight:700!important;
-  color:var(--nf-ink)!important;
-}
-#nfeEditorDialog .nfe-invoice-final{background:var(--nf-accent-soft)!important}
-#nfeEditorDialog .nfe-invoice-final strong{font-size:17px!important;color:#145e90!important}
-#nfeEditorDialog .nfe-invoice-adjustments{
-  display:grid!important;grid-template-columns:repeat(12,minmax(0,1fr))!important;
-  gap:12px!important;max-width:480px;margin:0 0 12px!important;
-}
-#nfeEditorDialog .nfe-invoice-adjustments>.field{grid-column:span 6!important}
-#nfeEditorDialog .nfe-invoice-details{
-  margin:0 0 14px!important;border:1px solid var(--nf-rule)!important;border-radius:3px!important;overflow:hidden;
-}
-#nfeEditorDialog .nfe-invoice-details>summary{
-  background:#f7f9fb!important;color:#385a71!important;
-  padding:10px 12px!important;font-size:11.5px!important;font-weight:700!important;cursor:pointer;
-}
-#nfeEditorDialog .nfe-invoice-details>.nfe-totals-grid{padding:12px!important}
-#nfeEditorDialog .nfe-totals-grid .nfe-structured-grid{gap:12px!important}
-#nfeEditorDialog .nfe-totals-grid .nfe-field-group{grid-column:auto!important}
+#nfeEditorDialog .nfe-invoice-metric>span{display:block;font-size:10px;color:#6a7d8a;margin-bottom:5px}
+#nfeEditorDialog .nfe-invoice-metric>.readonly-field{padding:0!important;border:0!important;background:transparent!important;color:#344c5c;font-size:13px;font-weight:600}
+#nfeEditorDialog .nfe-invoice-final{background:#e3f0f8!important}
+#nfeEditorDialog .nfe-invoice-final strong{color:#1a5c82;font-size:18px}
+#nfeEditorDialog .nfe-invoice-adjustments{margin-top:11px!important}
+#nfeEditorDialog .nfe-invoice-adjustments>.field{grid-column:span 6}
+#nfeEditorDialog .nfe-invoice-details{margin:14px 0;border:1px solid #dce5ea;background:#fff}
+#nfeEditorDialog .nfe-invoice-details>summary{padding:11px 13px;cursor:pointer;background:#f5f8fa;color:#3b6279;font-size:11px;font-weight:600}
+#nfeEditorDialog .nfe-invoice-details>.nfe-totals-grid{padding:14px!important}
+#nfeEditorDialog .nfe-totals-grid .nfe-field-group{grid-column:auto}
 #nfeEditorDialog .nfe-totals-grid .nfe-field-group-fields>.field.col-2{grid-column:span 6!important}
-/* Pagamento, transporte e adicionais: seções operacionais sem cartões. */
-#nfeEditorDialog #nfe-section-payment>.editor-panel{
-  padding:0 0 16px!important;margin:0 0 16px!important;
-  border:0!important;border-bottom:1px solid var(--nf-rule)!important;
-  background:transparent!important;box-shadow:none!important;
+#nfeEditorDialog .nfe-form-section .nfe-payment-optional{padding:0!important;border:0!important}
+#nfeEditorDialog .nfe-payment-disclosure{margin:12px 0;border:1px solid #d8e4ea;background:#fff}
+#nfeEditorDialog .nfe-payment-disclosure>summary{cursor:pointer;padding:12px!important;background:#f3f7f9;color:#3e596c}
+#nfeEditorDialog .nfe-payment-disclosure-content{padding:12px 13px!important}
+#nfeEditorDialog #nfe-section-transport .nfe-structured-grid{row-gap:17px!important}
+#nfeEditorDialog #nfe-section-other .notes-panel{display:grid!important;gap:12px!important}
+#nfeEditorDialog #nfe-section-other .notes-panel .nfe-field-group-fields>.field{grid-column:span 12!important}
+#nfeEditorDialog .dialog-footer.nfe-dialog-footer{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  gap:12px!important;min-height:59px!important;flex-wrap:wrap;
+  margin:0!important;padding:9px 17px!important;
+  border:0!important;border-top:1px solid #d2dee6!important;
+  background:#f4f7f9!important;box-shadow:none!important;
 }
-#nfeEditorDialog #nfe-section-payment .nfe-payment-optional{border:0!important;padding:0!important}
-#nfeEditorDialog #nfe-section-payment .nfe-payment-disclosure{
-  border:1px solid var(--nf-rule)!important;border-radius:3px!important;
-  margin:0 0 12px!important;background:#fff!important;box-shadow:none!important;
+#nfeEditorDialog .nfe-dialog-status{display:flex;align-items:center;gap:13px;font-size:11px;color:#657b89}
+#nfeEditorDialog .nfe-dialog-status strong{font-size:16px;color:#2b5269}
+#nfeEditorDialog .nfe-footer-actions{display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap}
+#nfeEditorDialog .nfe-footer-actions .btn,
+#nfeItemDialog .dialog-footer .btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:33px!important;padding:6px 11px!important;
+  border-radius:2px!important;border-width:1px!important;
+  font-size:11.5px!important;font-weight:600!important;
+  box-shadow:none!important;transform:none!important;
 }
-#nfeEditorDialog #nfe-section-payment .nfe-payment-disclosure>summary{
-  background:#f7f9fb!important;color:#355971!important;min-height:39px!important;
-  padding:10px 12px!important;
-}
-#nfeEditorDialog #nfe-section-payment .nfe-payment-disclosure-content{padding:13px!important;background:#fff}
-#nfeEditorDialog #nfe-section-transport .nfe-structured-grid{row-gap:18px!important}
-#nfeEditorDialog #nfe-section-other .notes-panel{display:grid!important;gap:14px!important}
-#nfeEditorDialog #nfe-section-other .notes-panel>.nfe-field-group{width:100%}
-#nfeEditorDialog #nfe-section-other .notes-panel .nfe-field-group-fields>.field{grid-column:1/-1!important}
-/* Modal do item: sete abas textuais e conteúdo alinhado abaixo. */
+#nfeEditorDialog .nfe-footer-actions .btn-primary{background:#fff!important;border-color:#a8bfcc!important;color:#2b5871!important}
+#nfeEditorDialog .nfe-footer-actions .btn-success,
+#nfeItemDialog .dialog-footer .btn-success{background:#286784!important;border-color:#286784!important;color:#fff!important}
+#nfeEditorDialog .nfe-footer-actions .btn-secondary{background:#fff!important;border-color:#d2dde4!important;color:#49606e!important}
+#nfeEditorDialog .nfe-footer-actions .btn:disabled{opacity:.5!important;cursor:not-allowed!important}
+#nfeEditorDialog .inline-note[role="alert"]{margin:10px 0;padding:10px;border-left:3px solid #a77b2c;background:#fff5da;color:#6b522c}
+#nfeEditorDialog #nfeTaxPreviewStatus{padding:6px 0;color:#557085;font-size:11px}
+
+/* Item da NF-e: lista fiscal lateral e painel de edição à direita. */
 #nfeItemDialog .nfe-item-dialog{
-  width:min(1160px,calc(100vw - 44px))!important;
-  max-width:none!important;
-  height:min(850px,calc(100dvh - 36px))!important;
-  max-height:calc(100dvh - 36px)!important;
-  display:flex!important;flex-direction:column!important;min-height:0!important;
-  border:1px solid var(--nf-border)!important;
-  border-radius:4px!important;overflow:hidden!important;
-  background:#fff!important;
-  box-shadow:0 12px 30px #1d344531!important;
+  width:min(1320px,calc(100vw - 22px))!important;
+  max-width:none!important;height:calc(100dvh - 34px)!important;
+  max-height:calc(100dvh - 34px)!important;
+  min-height:0!important;display:flex!important;flex-direction:column!important;
+  overflow:hidden!important;border:1px solid #bbcbd5!important;border-radius:3px!important;
+  background:#fff!important;box-shadow:0 12px 27px #10283826!important;
 }
-#nfeItemDialog .dialog-header{flex:0 0 auto!important}
-#nfeItemDialog .dialog-footer{flex:0 0 auto!important;margin-top:auto!important}
+#nfeItemDialog .dialog-header{display:flex!important;align-items:center!important;justify-content:space-between!important;min-height:57px!important;padding:10px 18px!important;border-bottom:1px solid #d9e3e9!important;background:#f5f8fa!important;color:#344b5a!important;box-shadow:none!important}
+#nfeItemDialog .dialog-header h2{margin:0!important;color:#253f51!important;font-size:16px!important}
+#nfeItemDialog .nfe-item-header-actions{display:flex;align-items:center;gap:10px;color:#687e8d;font-size:11px}
+#nfeItemDialog .nfe-item-header-actions strong{font-size:16px;color:#215a78}
 #nfeItemDialog .nfe-item-body{
-  min-height:0!important;flex:1 1 auto!important;
-  overflow:auto!important;padding:0!important;
-  background:#fff!important;scrollbar-gutter:stable;
+  flex:1 1 auto!important;min-height:0!important;
+  display:grid!important;grid-template-columns:170px minmax(0,1fr)!important;
+  grid-template-rows:minmax(0,1fr)!important;
+  padding:0!important;background:#fff!important;overflow:hidden!important;
 }
 #nfeItemDialog .nfe-item-taxnav{
-  position:sticky!important;top:0!important;z-index:20!important;
-  display:block!important;
-  padding:0 14px!important;margin:0!important;
-  border:0!important;border-bottom:1px solid var(--nf-rule)!important;
-  background:var(--nf-neutral)!important;
-  border-radius:0!important;box-shadow:none!important;
+  position:sticky;top:0;grid-column:1;grid-row:1;
+  min-height:0;overflow-y:auto;
+  margin:0!important;padding:14px 0!important;
+  border:0!important;border-right:1px solid #d9e4eb!important;
+  background:#f1f5f7!important;
 }
-#nfeItemDialog .nfe-item-taxnav>.nfe-tax-review-grid{
-  display:flex!important;grid-template-columns:none!important;
-  gap:1px!important;overflow:auto hidden!important;
-  flex-wrap:nowrap!important;background:transparent!important;
+#nfeItemDialog .nfe-item-taxnav .nfe-tax-review-grid{display:flex!important;flex-direction:column!important;gap:0!important;min-width:0;margin:0!important;padding:0!important}
+#nfeItemDialog .nfe-item-taxnav .nfe-tax-review-grid>button{
+  display:flex!important;flex-direction:column!important;align-items:flex-start!important;
+  justify-content:center!important;gap:3px!important;
+  width:100%!important;min-height:48px!important;
+  padding:9px 14px!important;margin:0!important;
+  border:0!important;border-left:3px solid transparent!important;
+  border-radius:0!important;background:transparent!important;
+  font-size:11.5px!important;color:#506a79!important;text-align:left!important;
+  box-shadow:none!important;
 }
-#nfeItemDialog .nfe-item-taxnav .nfe-tax-review-grid>button,
-#nfeItemDialog .nfe-item-taxnav .nfe-tax-review-grid>button:nth-child(n){
-  display:flex!important;flex:0 0 auto!important;
-  align-items:center!important;justify-content:center!important;
-  height:43px!important;min-height:43px!important;
-  width:auto!important;margin:0!important;padding:0 14px!important;
-  border:0!important;border-bottom:3px solid transparent!important;
-  border-radius:0!important;box-shadow:none!important;
-  background:transparent!important;color:#607484!important;
-  outline:0!important;transform:none!important;
-  font-size:12px!important;font-weight:600!important;
-  text-align:center!important;white-space:nowrap!important;
-}
-#nfeItemDialog .nfe-item-taxnav .nfe-tax-review-grid>button:hover{
-  background:#edf4f9!important;color:#206a9b!important;
-}
+#nfeItemDialog .nfe-item-taxnav .nfe-tax-review-grid>button:hover{background:#e1ebf1!important}
 #nfeItemDialog .nfe-item-taxnav .nfe-tax-review-grid>button.nfe-tax-tab-active,
-#nfeItemDialog .nfe-item-taxnav .nfe-tax-review-grid>button.nfe-tax-tab-active:nth-child(n){
-  background:#fff!important;color:#12699d!important;
-  border-bottom-color:var(--nf-accent)!important;box-shadow:none!important;
+#nfeItemDialog .nfe-item-taxnav .nfe-tax-review-grid>button[aria-selected="true"]{
+  background:#fff!important;border-left-color:#267393!important;color:#224f69!important;
 }
-#nfeItemDialog .nfe-item-taxnav .nfe-tax-review-grid>button:focus-visible{
-  outline:2px solid #a4cbe5!important;outline-offset:-3px!important;
-}
-#nfeItemDialog .nfe-item-taxnav .nfe-tax-code{
-  position:absolute!important;width:1px!important;height:1px!important;
-  margin:-1px!important;padding:0!important;overflow:hidden!important;
-  clip:rect(0,0,0,0)!important;white-space:nowrap!important;
-}
-#nfeItemDialog .nfe-enterprise-item-host{
-  min-height:240px!important;margin:0!important;
-  border:0!important;border-radius:0!important;background:#fff!important;
-  padding:20px 21px 23px!important;
-}
-#nfeItemDialog .nfe-enterprise-item-host>.nfe-item-section,
-#nfeItemDialog .nfe-enterprise-item-host .nfe-tab-content>.nfe-item-section{
-  padding:0!important;margin:0 0 12px!important;
-  border:0!important;border-radius:0!important;
-  background:transparent!important;box-shadow:none!important;overflow:visible!important;
-}
-#nfeItemDialog .nfe-enterprise-item-host>.nfe-item-section>summary{display:none!important}
-#nfeItemDialog .nfe-enterprise-item-host .nfe-tab-content>.nfe-item-section>summary{
-  display:flex!important;
-  align-items:center!important;gap:8px!important;
-  min-height:30px!important;padding:0 0 9px!important;margin:0 0 12px!important;
-  border:0!important;border-bottom:1px solid var(--nf-rule)!important;
-  border-radius:0!important;background:transparent!important;box-shadow:none!important;
-}
-#nfeItemDialog .nfe-enterprise-item-host .nfe-tab-content .nfe-section-index{display:none!important}
-#nfeItemDialog .nfe-enterprise-item-host .nfe-tab-content .nfe-section-label strong{
-  font-size:12px!important;font-weight:700!important;color:#31556f!important;
-}
-#nfeItemDialog .nfe-enterprise-item-host .nfe-tab-content .nfe-section-label small,
-#nfeItemDialog .nfe-enterprise-item-host .nfe-tab-content .nfe-section-caret{
-  display:none!important;
-}
-#nfeItemDialog .nfe-enterprise-item-host .nfe-item-section-content{
-  padding:0!important;margin:0!important;background:transparent!important;
-}
-#nfeItemDialog .nfe-enterprise-item-host .nfe-item-section-content>.editor-panel{
-  padding:0!important;margin:0!important;border:0!important;
-  background:transparent!important;box-shadow:none!important;
-}
-#nfeItemDialog .nfe-item-main-panel{
-  display:grid!important;
-  grid-template-columns:repeat(2,minmax(0,1fr))!important;
-  gap:24px!important;align-items:start;
-}
-#nfeItemDialog .nfe-item-main-panel>.nfe-item-section{min-width:0}
-#nfeItemDialog .nfe-item-main-panel .nfe-structured-grid{
-  grid-template-columns:minmax(0,1fr)!important;
-  gap:10px!important;
-}
-#nfeItemDialog .nfe-enterprise-item-host>.nfe-item-section .nfe-structured-grid{
-  grid-template-columns:repeat(2,minmax(0,1fr))!important;
-  gap:13px 25px!important;
-}
-#nfeItemDialog .nfe-item-other-panel{
-  display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:11px!important;
-}
-#nfeItemDialog .nfe-item-other-panel>.nfe-item-section{
-  padding:0!important;margin:0!important;
-  border:1px solid var(--nf-rule)!important;border-radius:3px!important;
-}
-#nfeItemDialog .nfe-item-other-panel>.nfe-item-section>summary{
-  margin:0!important;padding:10px 12px!important;
-  border:0!important;background:#f7f9fb!important;
-}
-#nfeItemDialog .nfe-item-other-panel>.nfe-item-section[open]>.nfe-item-section-content{
-  padding:13px!important;
-}
-#nfeItemDialog .nfe-enterprise-item-host .nfe-retained-details,
-#nfeItemDialog .nfe-enterprise-item-host .nfe-item-service-panel,
-#nfeItemDialog .nfe-enterprise-item-host .nfe-rtc-extra-panel{
-  display:block;
-  margin:12px 0!important;
-  padding:0!important;
-  border:1px solid var(--nf-rule)!important;
-  border-radius:3px!important;
+#nfeItemDialog .nfe-tax-code{font-size:9.5px!important;color:#718795!important;font-weight:400!important}
+#nfeItemDialog .nfe-tax-tab-host{
+  grid-column:2;grid-row:1;
+  min-width:0!important;min-height:0!important;
+  overflow-y:auto!important;padding:19px 22px 28px!important;
   background:#fff!important;
-  overflow:visible!important;
 }
-#nfeItemDialog .nfe-enterprise-item-host :is(.nfe-retained-heading,.nfe-item-service-panel>summary,.nfe-rtc-extra-panel>summary){
-  padding:10px 12px!important;margin:0!important;
-  background:#f7f9fb!important;
-  color:#345b74!important;font-size:11.5px!important;
-  cursor:pointer!important;
+#nfeItemDialog .nfe-tax-tab-panel[hidden]{display:none!important}
+#nfeItemDialog .nfe-item-main-panel{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:21px!important}
+#nfeItemDialog .nfe-item-section{border:0!important;margin:0!important;padding:0!important;background:transparent!important}
+#nfeItemDialog .nfe-tax-tab-host>.nfe-item-section>summary{display:none!important}
+#nfeItemDialog .nfe-item-main-panel>.nfe-item-section>summary{
+  display:flex!important;align-items:center!important;
+  padding:0 0 9px!important;margin:0 0 12px!important;
+  border-bottom:1px solid #d7e2e8;cursor:default;
 }
-#nfeItemDialog .nfe-enterprise-item-host .nfe-retained-details>.editor-grid,
-#nfeItemDialog .nfe-enterprise-item-host .nfe-rtc-extra-panel>.editor-grid,
-#nfeItemDialog .nfe-enterprise-item-host .nfe-item-service-panel>.editor-grid{
-  padding:12px!important;
+#nfeItemDialog .nfe-item-section-heading .nfe-section-index{
+  display:inline-flex;width:22px;height:22px;align-items:center;justify-content:center;
+  background:#e8f1f6;color:#286a86;font-size:10px;border-radius:2px;margin-right:8px;
 }
-#nfeItemDialog .nfe-item-inline-caption{
-  padding:0 0 8px!important;margin:13px 0 10px!important;
-  font-size:11.5px!important;font-weight:700!important;
-  color:#45677c!important;border-bottom:1px solid var(--nf-rule)!important;
+#nfeItemDialog .nfe-item-section-heading .nfe-section-label{display:flex;flex-direction:column}
+#nfeItemDialog .nfe-item-section-heading .nfe-section-label strong{color:#355366;font-size:12px}
+#nfeItemDialog .nfe-item-section-heading .nfe-section-label small{color:#82939e;font-size:10px;font-weight:400}
+#nfeItemDialog .nfe-item-section-heading .nfe-section-caret{display:none!important}
+#nfeItemDialog .nfe-item-section-content{display:block!important;padding:0!important}
+#nfeItemDialog .nfe-item-section-content>.editor-panel{padding:0!important;margin:0 0 15px!important}
+#nfeItemDialog .nfe-field-group{margin-bottom:12px!important}
+#nfeItemDialog .nfe-structured-grid{align-items:start}
+#nfeItemDialog .nfe-structured-grid>.nfe-field-group{grid-column:auto!important}
+#nfeItemDialog .nfe-item-other-panel{display:flex;flex-direction:column;gap:10px}
+#nfeItemDialog .nfe-item-other-panel>.nfe-item-section{border:1px solid #dae4eb!important}
+#nfeItemDialog .nfe-item-other-panel>.nfe-item-section>summary{display:flex!important;cursor:pointer;padding:10px 12px!important;background:#f4f7f9}
+#nfeItemDialog .nfe-item-other-panel>.nfe-item-section>.nfe-item-section-content{padding:12px!important}
+#nfeItemDialog details.nfe-field-group>.nfe-field-group-heading{cursor:pointer}
+#nfeItemDialog details.nfe-field-group>.nfe-field-group-heading::after{content:'▾';font-size:11px;color:#608095}
+#nfeItemDialog details.nfe-field-group:not([open])>.nfe-field-group-heading::after{content:'▸'}
+#nfeItemDialog details.nfe-field-group>.nfe-field-group-heading::-webkit-details-marker{display:none}
+#nfeItemDialog .nfe-retained-heading,
+#nfeItemDialog .nfe-rtc-extra-panel>summary,
+#nfeItemDialog .nfe-item-service-panel>summary{cursor:pointer;padding:11px!important;background:#f4f8fa!important;color:#3e5c6b!important}
+#nfeItemDialog .nfe-rtc-extra-panel,
+#nfeItemDialog .nfe-item-service-panel{border:1px solid #dce5eb!important;margin:12px 0!important}
+#nfeItemDialog .nfe-rtc-extra-panel>.editor-grid,
+#nfeItemDialog .nfe-item-service-panel>.editor-grid{padding:12px!important}
+#nfeItemDialog .nfe-item-inline-caption{padding:10px 0;color:#566f7f;font-size:11px;font-weight:700}
+#nfeItemDialog .nfe-item-additional-federal-grid{display:grid!important;grid-template-columns:repeat(12,minmax(0,1fr))!important;gap:10px}
+#nfeItemDialog .nfe-item-additional-federal-grid>.field.col-2{grid-column:span 3!important}
+#nfeItemDialog .nfe-item-additional-federal-grid>.field.col-3{grid-column:span 4!important}
+#nfeItemDialog .nfe-item-dialog>.dialog-footer{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:10px!important;flex:0 0 auto!important;padding:10px 17px!important;min-height:54px!important;border-top:1px solid #d6e2e9!important;background:#f5f8fa!important;box-shadow:none!important}
+
+/* Menores telas mantêm acesso aos cinco passos e aos campos fiscais. */
+@media(max-width:1180px){
+  #nfeEditorDialog .nfe-stage-shell{grid-template-columns:188px minmax(0,1fr)!important}
+  #nfeEditorDialog .nfe-general-layout{grid-template-columns:minmax(0,1fr)!important}
+  #nfeEditorDialog .nfe-general-dates{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  #nfeEditorDialog .nfe-general-dates>.nfe-standalone-title{grid-column:1/-1}
+  #nfeItemDialog .nfe-item-main-panel{grid-template-columns:1fr!important}
 }
-#nfeItemDialog .nfe-item-additional-federal-grid{
-  display:grid!important;
-  grid-template-columns:repeat(12,minmax(0,1fr))!important;
-  gap:11px 12px!important;padding:13px 0!important;
-  margin:12px 0!important;
-  border:0!important;border-top:1px solid var(--nf-rule)!important;
-  background:transparent!important;
+@media(max-width:820px){
+  #nfeEditorDialog .nfe-commandbar{padding:8px 12px!important;min-height:62px!important}
+  #nfeEditorDialog .nfe-stage-shell{grid-template-columns:1fr!important;grid-template-rows:auto minmax(0,1fr)!important}
+  #nfeEditorDialog .nfe-steps{border:0;border-bottom:1px solid #d9e3e8;overflow:auto}
+  #nfeEditorDialog .nfe-steps-heading,#nfeEditorDialog .nfe-steps-help{display:none}
+  #nfeEditorDialog .nfe-flow-nav{flex-direction:row!important;overflow-x:auto!important;white-space:nowrap!important;padding:0!important}
+  #nfeEditorDialog .nfe-flow-nav>.editor-tab{min-width:max-content!important;width:auto!important;min-height:51px!important;padding:9px 13px!important;border-left:0!important;border-bottom:3px solid transparent!important}
+  #nfeEditorDialog .nfe-flow-nav>.editor-tab[aria-selected="true"]{border-bottom-color:#28627e!important}
+  #nfeEditorDialog .nfe-step-text small{display:none}
+  #nfeEditorDialog .nfe-workspace-body{padding:0 14px 15px!important}
+  #nfeEditorDialog .nfe-structured-grid,#nfeItemDialog .nfe-structured-grid{grid-template-columns:1fr!important}
+  #nfeEditorDialog .nfe-general-fields .nfe-field-group[data-nfe-group="Natureza e operação"]{grid-column:1}
+  #nfeEditorDialog .nfe-emitter-summary{flex-wrap:wrap!important}
+  #nfeEditorDialog .nfe-document-summary{border-left:0;padding-left:0}
+  #nfeEditorDialog .nfe-invoice-summary{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #nfeEditorDialog .nfe-invoice-metric:nth-child(2){border-right:0!important}
+  #nfeEditorDialog .nfe-invoice-metric:nth-child(-n+2){border-bottom:1px solid #dce5eb}
+  #nfeItemDialog .nfe-item-body{grid-template-columns:1fr!important;grid-template-rows:auto minmax(0,1fr)!important}
+  #nfeItemDialog .nfe-item-taxnav{position:static;grid-column:1;grid-row:1;overflow-x:auto!important;border-right:0!important;border-bottom:1px solid #d9e4eb!important;padding:0!important}
+  #nfeItemDialog .nfe-item-taxnav .nfe-tax-review-grid{flex-direction:row!important;overflow-x:auto!important}
+  #nfeItemDialog .nfe-item-taxnav .nfe-tax-review-grid>button{width:auto!important;min-width:105px!important;border-left:0!important;border-bottom:3px solid transparent!important}
+  #nfeItemDialog .nfe-item-taxnav .nfe-tax-review-grid>button.nfe-tax-tab-active{border-bottom-color:#267393!important}
+  #nfeItemDialog .nfe-tax-tab-host{grid-column:1;grid-row:2;padding:15px!important}
 }
-#nfeItemDialog .nfe-item-additional-federal-grid>.field.col-2,
-#nfeItemDialog .nfe-item-additional-federal-grid>.field.col-3{
-  grid-column:span 4!important;
-}
-#nfeItemDialog .nfe-rtc-extra-panel>.editor-grid .field.col-3{grid-column:span 3!important}
-#nfeItemDialog .nfe-enterprise-item-host .nfe-field-group[hidden],
-#nfeItemDialog .nfe-enterprise-item-host .field[hidden],
-#nfeItemDialog .nfe-enterprise-item-host [hidden]{display:none!important}
-/* Atributos hidden sempre são respeitados, inclusive nos painéis movidos pelo JS. */
-#nfeEditorDialog [hidden],
-#nfeItemDialog [hidden]{display:none!important}
-/* Layout responsivo sem barras horizontais dentro de formulários. */
-@media(max-width:1100px){
- #nfeEditorDialog .nfe-general-layout{grid-template-columns:minmax(0,1fr)!important}
- #nfeEditorDialog .nfe-general-dates{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 12px}
- #nfeEditorDialog .nfe-general-dates>.nfe-standalone-title{grid-column:1/-1}
- #nfeEditorDialog .nfe-general-dates>.field{margin:0!important}
-}
-@media(max-width:800px){
- #nfeEditorDialog .nfe-structured-grid,
- #nfeItemDialog .nfe-structured-grid,
- #nfeItemDialog .nfe-enterprise-item-host>.nfe-item-section .nfe-structured-grid,
- #nfeItemDialog .nfe-item-main-panel{grid-template-columns:minmax(0,1fr)!important}
- #nfeEditorDialog .nfe-invoice-summary{grid-template-columns:repeat(2,minmax(0,1fr))!important}
- #nfeEditorDialog .nfe-invoice-metric:nth-child(2){border-right:0!important}
- #nfeEditorDialog .nfe-invoice-metric:nth-child(-n+2){border-bottom:1px solid var(--nf-rule)!important}
- #nfeEditorDialog .nfe-general-dates{grid-template-columns:repeat(2,minmax(0,1fr))}
- #nfeEditorDialog #nfeDraftForm>.nfe-workspace-body{padding:0 13px 15px!important}
- #nfeEditorDialog .nfe-flow-nav{margin:0 -13px 14px!important}
- #nfeItemDialog .nfe-enterprise-item-host{padding:14px!important}
-}
-@media(max-width:550px){
- #nfeEditorDialog .nfe-workspace-dialog,
- #nfeItemDialog .nfe-item-dialog{width:100vw!important;height:100dvh!important;max-height:100dvh!important;border-radius:0!important}
- #nfeEditorDialog .nfe-emitter-summary{gap:7px!important;flex-wrap:wrap}
- #nfeEditorDialog .nfe-document-summary{margin-left:0!important}
- #nfeEditorDialog .nfe-invoice-summary{gap:0}
- #nfeEditorDialog .nfe-invoice-metric{padding:8px!important}
- #nfeEditorDialog .nfe-invoice-metric>.readonly-field{font-size:12px!important}
- #nfeEditorDialog .nfe-invoice-adjustments>.field{grid-column:span 12!important}
- #nfeEditorDialog .nfe-general-dates{grid-template-columns:minmax(0,1fr)}
- #nfeEditorDialog .nfe-field-group-fields>.field,
- #nfeItemDialog .nfe-field-group-fields>.field{grid-column:span 12!important}
- #nfeEditorDialog .nfe-general-fields .nfe-field-group[data-nfe-group="Natureza e operação"] .field{grid-column:span 12!important}
- #nfeEditorDialog .nfe-general-fields .nfe-field-group[data-nfe-group="Controle de datas"] .field{grid-column:span 6!important}
- #nfeItemDialog .nfe-item-additional-federal-grid>.field.col-2,
- #nfeItemDialog .nfe-item-additional-federal-grid>.field.col-3{grid-column:span 6!important}
- #nfeItemDialog .nfe-item-taxnav{padding:0 6px!important}
- #nfeItemDialog .nfe-item-taxnav .nfe-tax-review-grid>button{padding:0 11px!important;font-size:11px!important}
+@media(max-width:530px){
+  #nfeEditorDialog .nfe-workspace-dialog,#nfeItemDialog .nfe-item-dialog{width:100vw!important;height:100dvh!important;max-height:100dvh!important;border-radius:0!important}
+  #nfeEditorDialog .nfe-command-eyebrow,#nfeEditorDialog .nfe-editor-document-meta{display:none}
+  #nfeEditorDialog .dialog-header h2{font-size:15px!important}
+  #nfeEditorDialog .nfe-model-name{display:none}
+  #nfeEditorDialog .nfe-document-symbol{width:28px;height:31px;flex-basis:28px;font-size:12px}
+  #nfeEditorDialog .nfe-command-right .nfe-editor-status{max-width:90px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #nfeEditorDialog .nfe-general-dates{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #nfeEditorDialog .nfe-field-group-fields>.field,
+  #nfeItemDialog .nfe-field-group-fields>.field,
+  #nfeEditorDialog .nfe-form-section .editor-grid>.field,
+  #nfeItemDialog .nfe-item-section-content .editor-grid>.field{grid-column:span 12!important}
+  #nfeEditorDialog .nfe-dialog-footer{justify-content:center!important}
+  #nfeEditorDialog .nfe-footer-actions{justify-content:center}
+  #nfeEditorDialog .nfe-footer-actions .btn{flex:1}
+  #nfeEditorDialog .nfe-steps{max-height:62px}
 }
