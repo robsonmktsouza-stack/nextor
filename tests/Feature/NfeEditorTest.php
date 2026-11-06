@@ -158,6 +158,25 @@ class NfeEditorTest extends TestCase
         self::assertStringContainsString('esc(customer.city_ibge_code',$script);
     }
 
+    public function test_nfe_55_editor_uses_only_new_styles_and_group_grid_overrides_twelve_columns(): void
+    {
+        $this->actingAs($this->admin());
+        $this->company();
+
+        $this->get(route('fiscal.nfe.create'))->assertOk()
+            ->assertSee('css/nfe-form-structure.css', false)
+            ->assertDontSee('css/nfe-form-workflow.css', false);
+
+        $layout=(string)file_get_contents(resource_path('views/layouts/app.blade.php'));
+        self::assertStringContainsString("request()->routeIs('fiscal.nfe.create', 'fiscal.nfe.edit')", $layout);
+
+        $css=(string)file_get_contents(public_path('css/nfe-form-structure.css'));
+        self::assertStringContainsString('#nfeEditorDialog .editor-grid.cols-12.nfe-structured-grid', $css);
+        self::assertStringContainsString('#nfeItemDialog .editor-grid.cols-12.nfe-structured-grid', $css);
+        self::assertStringContainsString('grid-template-columns:repeat(2,minmax(0,1fr))!important', $css);
+        self::assertStringContainsString('#nfeItemDialog .nfe-item-main-panel .editor-grid.cols-12.nfe-structured-grid', $css);
+    }
+
     public function test_scrollable_editor_shell_uses_grid_and_reveals_invalid_tab(): void
     {
         $css=(string)file_get_contents(public_path('css/nfe-form-structure.css'));
