@@ -37,7 +37,7 @@ return [
                 // configurado para este site. Isso evita que uma variável
                 // MYSQL_ATTR_SSL_CA herdada do Windows/HUB quebre a conexão
                 // local do Laragon com o erro SQLSTATE[HY000] [2002].
-                PDO::MYSQL_ATTR_SSL_CA => (($sslCa = env('MYSQL_ATTR_SSL_CA')) && is_file($sslCa)) ? $sslCa : null,
+                (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_CA : \PDO::MYSQL_ATTR_SSL_CA) => (($sslCa = env('MYSQL_ATTR_SSL_CA')) && is_file($sslCa)) ? $sslCa : null,
             ]) : [],
         ],
         'pgsql' => [
