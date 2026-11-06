@@ -111,17 +111,44 @@ $origins=[
   <input type="hidden" name="payments_json" id="nfePaymentsJson" value="{{ $nfeOld('payments_json',json_encode(array_slice($draft->payments ?? [],1),JSON_UNESCAPED_UNICODE)) }}">
   <input type="hidden" name="references_json" id="nfeReferencesJson" value="{{ $nfeOld('references_json',json_encode($existingReferences,JSON_UNESCAPED_UNICODE)) }}">
 
-  <div class="dialog-header">
-    <div>
-      <h2 id="nfeEditorTitle">{{ $isEditing ? 'Editar nota fiscal eletrônica' : 'Nova nota fiscal eletrônica' }}</h2>
-      <div class="nfe-editor-document-meta"><span>NF-e modelo 55</span><span>Série {{ str_pad((string)($draft->series ?? 1),3,'0',STR_PAD_LEFT) }}</span><span>Número {{ $draft->document_number ?: 'automático' }}</span><span class="nfe-editor-status">{{ match($draft->status){'authorized'=>'Autorizada','cancelled'=>'Cancelada','pending'=>'Aguardando confirmação','queued'=>'Aguardando envio','processing'=>'Enviando','prepared'=>'Não enviada','rejected'=>'Não autorizada',default=>'Rascunho'} }}</span></div>
+  <header class="dialog-header nfe-commandbar">
+    <div class="nfe-command-identity">
+      <div class="nfe-document-symbol" aria-hidden="true">55</div>
+      <div class="nfe-command-text">
+        <div class="nfe-command-eyebrow">Fiscal / Documentos eletrônicos / NF-e</div>
+        <h2 id="nfeEditorTitle">{{ $isEditing ? 'Editar NF-e' : 'Nova NF-e' }} <span class="nfe-model-name">Modelo 55</span></h2>
+        <div class="nfe-editor-document-meta">
+          <span>Série <strong>{{ str_pad((string)($draft->series ?? 1),3,'0',STR_PAD_LEFT) }}</strong></span>
+          <span>Número <strong>{{ $draft->document_number ?: 'Automático' }}</strong></span>
+          <span>{{ ($draft->environment ?? 'homologation')==='production' ? 'Produção' : 'Homologação' }}</span>
+        </div>
+      </div>
     </div>
-    <a class="close-dialog" href="{{ route('fiscal.index',['tab'=>'nfe']) }}" aria-label="Fechar">
-      @include('partials.icon',['name'=>'x','size'=>18])
-    </a>
-  </div>
+    <div class="nfe-command-right">
+      <span class="nfe-editor-status">{{ match($draft->status){'authorized'=>'Autorizada','cancelled'=>'Cancelada','pending'=>'Aguardando confirmação','queued'=>'Aguardando envio','processing'=>'Enviando','prepared'=>'Não enviada','rejected'=>'Não autorizada',default=>$draft->validated_at?'Validada':'Rascunho'} }}</span>
+      <a class="close-dialog" href="{{ route('fiscal.index',['tab'=>'nfe']) }}" aria-label="Fechar o editor da NF-e">
+        @include('partials.icon',['name'=>'x','size'=>18])
+      </a>
+    </div>
+  </header>
+  <div class="nfe-stage-shell">
+    <aside class="nfe-steps" aria-label="Etapas de preenchimento">
+      <div class="nfe-steps-heading"><strong>Emissão de NF-e</strong><span>Preenchimento</span></div>
+      <nav class="editor-tabs nfe-flow-nav" role="tablist" aria-orientation="vertical" aria-label="Etapas da nota">
+        <button type="button" role="tab" class="editor-tab active" data-nfe-jump="nfe-section-general" aria-controls="nfe-section-general" aria-selected="true"><span class="nfe-step-number">01</span><span class="nfe-step-text"><strong>Dados gerais</strong><small>Operação e destinatário</small></span></button>
+        <button type="button" role="tab" class="editor-tab" data-nfe-jump="nfe-section-items" aria-controls="nfe-section-items" aria-selected="false"><span class="nfe-step-number">02</span><span class="nfe-step-text"><strong>Produtos e impostos</strong><small>Itens e valores</small></span></button>
+        <button type="button" role="tab" class="editor-tab" data-nfe-jump="nfe-section-payment" aria-controls="nfe-section-payment" aria-selected="false"><span class="nfe-step-number">03</span><span class="nfe-step-text"><strong>Pagamento</strong><small>Cobrança e parcelas</small></span></button>
+        <button type="button" role="tab" class="editor-tab" data-nfe-jump="nfe-section-transport" aria-controls="nfe-section-transport" aria-selected="false"><span class="nfe-step-number">04</span><span class="nfe-step-text"><strong>Transporte</strong><small>Frete e volumes</small></span></button>
+        <button type="button" role="tab" class="editor-tab" data-nfe-jump="nfe-section-other" aria-controls="nfe-section-other" aria-selected="false"><span class="nfe-step-number">05</span><span class="nfe-step-text"><strong>Complementares</strong><small>Referências e observações</small></span></button>
+      </nav>
+      <div class="nfe-steps-help">
+        <span>Atalhos</span>
+        <p><kbd>F4</kbd> Cliente <kbd>F6</kbd> Produto</p>
+        <p><kbd>F8</kbd> Validar <kbd>Ctrl+S</kbd> Salvar</p>
+      </div>
+    </aside>
+      <div class="dialog-body nfe-workspace-body" id="nfeScrollRegion" tabindex="0" aria-label="Conteúdo da NF-e">
 
-  <div class="dialog-body nfe-workspace-body" id="nfeScrollRegion" tabindex="0" aria-label="Conteúdo da NF-e">
     @include('fiscal.partials.sefaz-guidance',[
       'guidance'=>app(\App\Services\Fiscal\SefazRejectionGuidance::class)->forDocument($draft),
       'originalStoredError'=>$draft->error_message,
@@ -129,15 +156,11 @@ $origins=[
     @if($isEditing && $draft->validated_at && !$draftCanEmit)
       <p class="inline-note" role="alert">Confira a natureza da operação, o tipo de movimentação e o destino. Salve e valide novamente antes de emitir.</p>
     @endif
-    <nav class="editor-tabs nfe-flow-nav" aria-label="Seções da nota">
-      <button type="button" class="editor-tab active" data-nfe-jump="nfe-section-general" aria-current="location">Dados gerais</button>
-      <button type="button" class="editor-tab" data-nfe-jump="nfe-section-items">Produtos e impostos</button>
-      <button type="button" class="editor-tab" data-nfe-jump="nfe-section-payment">Pagamento</button>
-      <button type="button" class="editor-tab" data-nfe-jump="nfe-section-transport">Transporte</button>
-      <button type="button" class="editor-tab" data-nfe-jump="nfe-section-other">Informações adicionais</button>
-    </nav>
+
+
 
     <section class="editor-tab-panel nfe-form-section cms-card" id="nfe-section-general" aria-label="Dados gerais">
+      <div class="nfe-pane-heading"><div><div class="nfe-pane-eyebrow">NF-e / Dados da operação</div><h3>Dados da operação</h3><p>Emitente, natureza fiscal, datas e destinatário</p></div></div>
       <div class="nfe-emitter-summary">
         <div class="nfe-emitter-logo">
           @if($company->logo_path)
@@ -413,6 +436,7 @@ $origins=[
     </section>
 
     <section class="editor-tab-panel nfe-form-section cms-card" id="nfe-section-items" aria-label="Produtos e valores">
+      <div class="nfe-pane-heading"><div><div class="nfe-pane-eyebrow">NF-e / Produtos e tributação</div><h3>Produtos e tributação</h3><p>Itens da nota, impostos e totais</p></div></div>
       <div class="cms-card">
         <div class="grid-actionbar">
           <div class="grid-actions-left">
@@ -492,6 +516,7 @@ $origins=[
     </section>
 
     <section class="editor-tab-panel nfe-form-section cms-card" id="nfe-section-payment" aria-label="Pagamento">
+      <div class="nfe-pane-heading"><div><div class="nfe-pane-eyebrow">NF-e / Pagamento e cobrança</div><h3>Pagamento e cobrança</h3><p>Meios de pagamento, cartões e vencimentos</p></div></div>
       <div class="editor-panel">
         <div class="editor-grid cols-12">
           <label class="field col-4"><span>Tipo de pagamento *</span>
@@ -604,6 +629,7 @@ $origins=[
     </section>
 
     <section class="editor-tab-panel nfe-form-section cms-card" id="nfe-section-transport" aria-label="Transporte">
+      <div class="nfe-pane-heading"><div><div class="nfe-pane-eyebrow">NF-e / Transporte</div><h3>Transporte</h3><p>Transportadora, frete e volumes</p></div></div>
       @include('fiscal.nfe._foreign-trade-header')
       <div class="editor-panel">
         <h3>Transportadora e volumes</h3>
@@ -645,6 +671,7 @@ $origins=[
     </section>
 
     <section class="editor-tab-panel nfe-form-section cms-card" id="nfe-section-other" aria-label="Informações adicionais">
+      <div class="nfe-pane-heading"><div><div class="nfe-pane-eyebrow">NF-e / Informações adicionais</div><h3>Informações adicionais</h3><p>Documentos vinculados e observações fiscais</p></div></div>
       <div class="editor-panel" id="nfeReferencedDocumentsPanel" @if(!$nfeOld('has_referenced_document',$draft->has_referenced_document || !empty($draft->references))) hidden @endif>
         <div class="delivery-card-title">
           <div><h3>Documentos referenciados</h3></div>
@@ -670,6 +697,7 @@ $origins=[
 
       </div>
     </section>
+    </div>
   </div>
 
   <div class="dialog-footer nfe-dialog-footer">
@@ -680,8 +708,8 @@ $origins=[
       </span>
       <strong id="nfeFooterTotal">R$ 0,00</strong>
     </div>
-    <div>
-      <a class="btn btn-secondary" href="{{ route('fiscal.index',['tab'=>'nfe']) }}">Cancelar <kbd data-tutorial>Esc</kbd></a>
+    <div class="nfe-footer-actions">
+      <a class="btn btn-secondary" href="{{ route('fiscal.index',['tab'=>'nfe']) }}">Voltar <kbd data-tutorial>Esc</kbd></a>
       <button class="btn btn-primary" type="submit" id="nfeSaveDraft" formnovalidate>Salvar rascunho <kbd data-tutorial>Ctrl+S</kbd></button>
       <button class="btn btn-secondary" type="submit" name="after_save" value="validate" id="nfeValidateCurrent">Validar <kbd data-tutorial>F8</kbd></button>
       @if($isEditing && $draft->status==='draft')
