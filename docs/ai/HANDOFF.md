@@ -1,3 +1,15 @@
+## Consolidação de branches — 22/11/2026
+
+**Pedido do proprietário:** deixar o repositório com uma linha única de desenvolvimento.
+
+- `develop` avançou por **fast-forward** (sem merge, sem force) de `2918672` para `d9d2d24`, o mesmo commit de `feature/nfe55-motor-fiscal-completo`. A partir de agora, o trabalho da NF-e 55 e todo o resto continuam na `develop`.
+- `main` permanece na linha estável da tag `v1.0.0` (o fix/revert de SSL do PDO de 06/11 tem efeito líquido zero).
+- As branches antigas de 03–05/10 (`fix/nfe-*`, `style/*`, `ui/fiscal-base-layout`, `feature/fiscal-module`, `feature/nfe-editor`, `fix/operational-settings`, `fix/fiscal-*`) **não foram mescladas**: conflitavam com o editor NF-e reconstruído depois e foram descartadas por decisão do proprietário. `feature/acbr-nfe-bootstrap` e `feature/nfe55-motor-fiscal-completo` já estão contidas na `develop`.
+- O **Lumeron Control** saiu da branch `control-center` e passou a viver no repositório próprio `robsonmktsouza-stack/lumeron-control` (branch `main`).
+- Estrutura final pretendida: somente `main` (estável) e `develop` (desenvolvimento). Novas features podem usar `feature/*` curtas a partir da `develop`. Referências a `feature/acbr-nfe-bootstrap` em documentos e workflows são históricas.
+
+Sem alteração de código, banco, migrations, deploy ou SEFAZ. Nenhum teste executado (mudança só de branches e documentação).
+
 ## Auditoria visual integrada — 26/10/2026
 
 Branch `feature/nfe55-motor-fiscal-completo`, base `5e81321`; commits de aplicação
